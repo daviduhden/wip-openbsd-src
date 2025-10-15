@@ -1,0 +1,25 @@
+xephyr-proxy
+
+Launch a command inside a temporary Xephyr X server and tear it down automatically on exit.
+
+Requirements:
+	- Xephyr in PATH
+	- Optional: xdpyinfo for faster readiness testing
+
+Usage:
+	xephyr-proxy -- <command> [args]
+
+Examples:
+	xephyr-proxy -- xterm
+	xephyr-proxy -- firefox
+
+With fvwm Exec proxying:
+	Enable proxying in your fvwm2rc:
+		GlobalOpts EXECPROXY=XEPHYR
+
+	Then any Exec command will run via xephyr-proxy:
+		Key F1 A N Exec xterm
+
+Notes:
+	- This script picks a free display :100..:199, starts Xephyr, sets DISPLAY, and execs your command.
+	- For clipboard/selection forwarding between Xephyr and your main server, consider using Xpra (GlobalOpts EXECPROXY=XPRA) which provides built-in forwarding.

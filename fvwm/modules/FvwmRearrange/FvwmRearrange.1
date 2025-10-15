@@ -1,0 +1,181 @@
+.\" $OpenBSD: FvwmRearrange.1,v 2.0 2025/10/10 18:00:00 daviduhden Exp $
+.\" t
+.\" Manual page rewritten for clarity and to avoid XConsortium-licensed text.
+.de EX      \" Begin example block
+.ne 5
+.if n .sp 1
+.if t .sp .5
+.nf
+.in +.5i
+..
+.de EE      \" End example block
+.fi
+.in -.5i
+.if n .sp 1
+.if t .sp .5
+..
+.TH FvwmRearrange 1 "October 10, 2025" "FvwmRearrange 2.0" "FVWM Modules"
+.UC
+.SH NAME
+FvwmRearrange \- tile or cascade FVWM-managed windows
+.SH SYNOPSIS
+The module is started by
+.BR fvwm (1)
+and is not intended to be launched directly from the shell.
+.SH DESCRIPTION
+.B FvwmRearrange
+arranges the windows on the current screen either as a non\-overlapping
+grid (tiling) or as a stepped stack (cascading).  The operation can be
+constrained by several options and by up to four numeric parameters
+that define offsets and bounds.
+
+In
+.I tile
+mode,
+.B FvwmRearrange
+divides a rectangular area of the screen into cells and places one
+window per cell.  By default, windows are resized to fit their cells
+(rounded to the nearest size increment), which may leave small gaps.
+
+In
+.I cascade
+mode, windows are positioned so that each successive window is shifted
+by a constant offset, keeping title bars visible beneath the previous
+one.  Resizing is optional when cascading.
+.SH INVOCATION
+Typically, this module is bound to a menu item, popup, button, or key
+binding within your fvwm configuration.  The same binary can operate in
+tile or cascade mode.  Mode is chosen either via the
+.BR \-tile
+or
+.BR \-cascade
+option, or by invoking the module under the legacy names
+.BR FvwmTile
+or
+.BR FvwmCascade
+(compatibility only).
+
+Example invocations:
+.EX
+FvwmRearrange -tile -h 10 10 90 90
+.EE
+.EX
+FvwmRearrange -cascade -resize 10 2 80 70
+.EE
+
+The first example tiles horizontally within a box that starts at 10%/10%
+of the screen and ends at 90%/90%.  The second example cascades windows
+starting 10% from the left and 2% from the top, resizing windows to a
+maximum of 80% by 70% of the screen when necessary.
+.SH OPTIONS
+Unless stated otherwise, options apply to both tiling and cascading.
+
+.IP \-a
+Affect all windows, including those with the
+.B WindowListSkip
+style.  Implies
+.BR \-u ,
+.BR \-t ,
+and
+.BR \-m .
+.IP \-cascade
+Select cascade mode.  This option must appear before other options if used.
+This is the default mode when no explicit mode is given.
+.IP \-desk
+Operate on all windows on the current desk, not just those visible on
+the current screen viewport.
+.IP \-flatx
+Do not add the frame border width to the horizontal step while cascading.
+(Has no effect when tiling.)
+.IP \-flaty
+Do not add the frame title and border height to the vertical step while
+cascading.  (Has no effect when tiling.)
+.IP \-h
+Tile by filling rows first (horizontal packing).  Without this option,
+tiling fills columns first (vertical packing).  Tiling only.
+.IP "\-incx \fIarg\fP"
+Set the horizontal cascade increment added to each successive window.
+The value is a percentage of screen width, unless suffixed by a letter
+(e.g. \fBp\fP) to indicate pixels.  Default: 0.  Cascading only.
+.IP "\-incy \fIarg\fP"
+Set the vertical cascade increment added to each successive window.
+The value is a percentage of screen height, unless suffixed by a letter
+(e.g. \fBp\fP) to indicate pixels.  Default: 0.  Cascading only.
+.IP \-m
+Also act on maximized windows.  (Implied by
+.BR \-a .)
+.IP "\-mn \fIarg\fP"
+When tiling, place up to \fIarg\fP windows along the primary tiling axis
+(rows with
+.BR \-h ,
+columns otherwise).  Excess windows continue on a new row or column,
+forming a grid.  Tiling only.
+.IP \-noraise
+Do not raise windows; leave their stacking order unchanged.
+.IP \-noresize
+Do not change window sizes.  This is the default in cascade mode.
+.IP \-nostretch
+In tile mode: never enlarge windows to fill a tile; windows may shrink
+to fit but will not grow.
+
+In cascade mode (with
+.BR \-resize ):
+restrict resizing to shrink only; windows larger than the maxima are
+reduced, smaller windows are left as is.
+.IP \-r
+Reverse the order in which windows are processed.
+.IP \-resize
+Force resizing to the constrained size where applicable.  This is the
+default in tile mode.
+.IP \-s
+Include sticky windows.  (Implied by
+.BR \-a .)
+.IP \-t
+Include transient windows.  (Implied by
+.BR \-a .)
+.IP \-tile
+Select tile mode.  This option must appear before other options if used.
+.IP \-u
+Include windows without title bars.  (Implied by
+.BR \-a .)
+.SH OPERANDS
+Up to four non\-option numeric arguments may follow the options.  Values
+are interpreted as percentages of the screen size unless suffixed with a
+letter (e.g. \fBp\fP) to indicate pixels.  A value of 0 is treated as if
+unspecified.
+
+The first two numbers specify the starting
+.I x
+and
+.I y
+offsets where the initial window is placed (default: 0,0).
+
+The meaning of the third and fourth numbers depends on mode:
+.TP
+.I Tile mode
+They specify the lower\-right corner of the tiling bounding box
+(absolute reference point).  Tiling is confined to the rectangle from
+the starting offsets to this point.
+.TP
+.I Cascade mode
+They specify the maximum width and maximum height for affected windows.
+Windows larger than either limit may be resized to fit those maxima
+(subject to
+.BR \-noresize
+and
+.BR \-nostretch ).
+.SH BUGS
+Rearranging while windows are being created or destroyed can produce
+surprising results and is best avoided.
+.SH AUTHORS
+.PP
+Original tiling and cascading modules:
+.B Andrew T. Veliath
+.br
+Merge into
+.B FvwmRearrange
+and subsequent maintenance:
+.B Dominik Vogt
+.br
+Complete rewrite and modernization:
+.B David Uhden Collado
