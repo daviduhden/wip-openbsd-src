@@ -1,0 +1,78 @@
+FVWMButtons To-Do List
+
+FOR THE NEXT RELEASE
+
+* Finish free setting of relief and shadow colors; bring back background pixmaps.
+
+  * Optional extra Frame arguments:
+
+    * Frame f1 f2 → normal/depressed relief width
+    * Frame f1 f2 f3 f4 → normal x / normal y / depressed x / depressed y relief widths
+* Implement padding between buttons (the Buttons geometry patch allows this).
+* Allow a pixmap as the background of FvwmButtons (e.g., marble). Shading for frames can be done by interleaving black/white pixels; can emulate an OpenStep toolbar.
+
+  * Status: previously implemented but lost in a crash; to be redone properly.
+  * Update: background pixmaps work at least for simple buttons, not with swallowed apps.
+* Center icons even when space is tight; do not fall back to NW gravity.
+* General bugfixing.
+
+WHEN THERE IS LOTS OF TIME
+
+* Provide an interactive way to build the button bar (design is sketched; earliest ETA was late April in the original note).
+
+SHOULD BE DONE FOR FVWMButtons (someday)
+
+* Receive events from reparented windows to enable actions on swallowed windows (see BUGS; prior attempt failed).
+* Proper ICCCM compliance: check children’s WM_DELETE_WINDOW to decide
+  whether to delete or kill; assess if more is needed. [done]
+* Create size hints that only allow scaling to “proper” sizes (all buttons correctly sized). Currently only the number of buttons in the UberButton is considered, so a single outer container grants free resizing.
+* Expand the Mouse command to differentiate Click, Move, DoubleClick; add a Key command.
+* Investigate transparent buttons.
+* Allow buttons that remain engaged (hang) until the window they launched is closed.
+
+COULD BE DONE FOR FVWMButtons
+
+* Make it possible to keep FvwmButtons invisible (unmapped) until the pointer enters a specified InputOnly window; show it while the pointer remains inside.
+* Allow linefeeds in titles and/or optional word wrap; prefer clipping over hard chopping of titles; handle very low heights more gracefully.
+* Let containers have titles and icons (can also be emulated with extra buttons).
+* Option to use a limited colormap (e.g., “*FvwmButtonsColorMax 16”); prepare a dummy colormap for XPM.
+* Activate Popup menus and Functions from FvwmButtons.
+
+  * Update: Popup menus now work via a simple fvwm hack; Functions still do not.
+* Commands for interactive swallow and unswallow, e.g.:
+
+  * *FvwmButtons(Title Swallow,Action Swallow) → pop up a crosshair to select a window to swallow.
+* Swallow iconified windows and unswallow on deiconify (turn FvwmButtons into a new IconBox).
+
+  * Example: Swallow(AsIcon) ".." `....`
+* Rewrite the parser in a lex/yacc (BNF) style. Current parser is large relative to the object size.
+* Resize icons on the fly; if a button has Resize specified, make the icon fill it. Decide whether Resize should automatically imply NoSize.
+* Use it as an xbiff substitute with stateful icons and watchers, e.g.:
+
+  * *FvwmButtons(Icons nomail.xpm mail.xpm 
+    Watch 10 "/usr/spool/mail/luser" 
+    Action "Exec "exmh" (exec exmh)) )
+  * “Icons” takes normal/active icons; “Watch” polls a file and changes state when it grows.
+  * Consider extending to run arbitrary commands, change state by return code/output, or use a pipe to receive actions (Beep, Exec) and icon updates (e.g., mail-from-fvwm-list.xpm).
+  * Pros: most users already run xbiff-like tools inside FvwmButtons. Cons: must be feature-complete enough to be useful.
+* Misc idea bucket: add “favorite hack” (e.g., VT100 compatibility, Emacs-like editing, import Quake .PAKs).
+
+KNOWN BUGS (unfixed)
+
+* AIX resize redraw: does not redraw correctly on resizes; requires a full expose. Might be an X server issue.
+
+Known bugs as of FvwmButtons-080396:
+
+* Swallowing the same window from two FvwmButtons: only one succeeds. Buttons have been reported to hang forever after being pressed; possibly related. See DEBUG_HANGON in FvwmButtons.c for diagnostics.
+* Extremely small button box (interior < 1×1 pixel): FvwmButtons exits; should fail gracefully instead.
+
+  * Update: this is actually a problem with some swallowed windows that crash at 1×1; the rest is fixed.
+
+Known bugs as of FvwmButtons-070396:
+
+* Action commands should work on swallowed windows, but after reparenting, even with XSelectInput including ButtonPressMask|ButtonReleaseMask, no button presses are received (e.g., xload). Potential approach: use SubstructureRedirectMask and forward events. Seek a better solution if possible.
+
+Known bugs as of FvwmButtons-040396:
+
+* Intermittent swallowed-window issues likely due to a race: window is created and mapped before being swallowed, leading to BadWindow during reparent.
+* Crash when killing many swallowed windows quickly: after removing one child gracefully, FvwmButtons tries to redraw another before processing additional destroy_requests.

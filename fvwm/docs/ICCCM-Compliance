@@ -1,0 +1,73 @@
+ICCCM 2.1 Compliance Checklist
+
+This document resumes ICCCM 2.1 requirements and current status for this fvwm codebase, with concrete references and open items.
+
+Implemented behaviors (with references)
+
+- WM_PROTOCOLS
+  - WM_TAKE_FOCUS: detected in fvwm/add_window.c (FetchWmProtocols) and sent to the client toplevel window (fvwm/focus.c) on focus changes.
+  - WM_DELETE_WINDOW: detected and used for Delete/Close in fvwm/builtins.c.
+  - WM_SAVE_YOURSELF: atom interned and sent to all managed clients on Quit/Restart (fvwm/fvwm.c: Done, InternUsefulAtoms) so clients can save state.
+- Focus policy control (ICCCM focus semantics)
+  - New Style NeverFocus/AcceptFocus: a per-window policy that either forbids focus (never set input focus nor send WM_TAKE_FOCUS) or explicitly allows it. Parsing in fvwm/style.c; applied in fvwm/add_window.c; enforced in fvwm/focus.c.
+- WM_HINTS / WM_NORMAL_HINTS
+  - Read and applied (fvwm/add_window.c: GetWindowSizeHints). InputHint respected. initial_state honored in map (fvwm/events.c: HandleMapRequestKeepRaised).
+- WM_STATE and WM_CHANGE_STATE
+  - WM_STATE property maintained across transitions (fvwm/icons.c: SetMapStateProp; fvwm/events.c Unmap/Map handlers).
+  - WM_CHANGE_STATE triggers iconify (fvwm/events.c: HandleClientMessage).
+- Withdrawn handling and reparent
+  - Synthetic Unmap and reparent back to root on withdraw; selection masks cleared; saveset removal (fvwm/events.c: HandleUnmapNotify; fvwm/builtins.c withdraw fallback).
+- Configure/Map handling
+  - ConfigureNotify synthetic to the client with correct client geometry (fvwm/borders.c: SetupFrame sends ConfigureNotify). MapRequest logic honors hints.
+- Colormaps
+  - WM_COLORMAP_WINDOWS observed; colormap focus modes supported (fvwm/colormaps.c, fvwm/builtins.c, fvwm/screen.h).
+- Override-redirect
+  - Not managed; MapNotify path treats them specially and tracks temporary focus where needed (fvwm/events.c: HandleMapNotify).
+- Transient windows
+  - WM_TRANSIENT_FOR read and used for placement/stacking and optional decorations (fvwm/add_window.c, fvwm/placement.c, fvwm/decorations.c, fvwm/misc.c).
+
+Runtime configuration summary
+
+- Per-window style
+  - Style <pattern> NeverFocus
+    - Never set input focus to matching windows; do not send WM_TAKE_FOCUS.
+  - Style <pattern> AcceptFocus
+    - Explicitly allow focus (subject to ICCCM hints like InputHint and WM_TAKE_FOCUS).
+
+- Global options (rc-level)
+  - GlobalOpts FORWARDCLIENTMESSAGES=0|1
+  - GlobalOpts SAVEYOURSELFDELAYMS=<milliseconds>
+
+- Environment variables (startup)
+  - FVWM_FORWARD_CLIENT_MESSAGES=0|1
+  - FVWM_SAVEYOURSELF_DELAY_MS=<milliseconds>
+
+Deeper validation: transients and override-redirect
+
+- Transients (WM_TRANSIENT_FOR)
+  - Placement: Transients track their parent’s desk and placement. See fvwm/placement.c: rules around transients (Look for comments at lines ~440, ~510–730) and fvwm/add_window.c setting TRANSIENT based on XGetTransientForHint().
+  - Stacking: When raising a parent, transients are raised appropriately (fvwm/misc.c near the “now raise transients” loop). Iconification/deiconification also handles transients-of-parent first (fvwm/icons.c: iconify/deiconify loops).
+  - Decoration control: Style DecorateTransient/NakedTransient influences whether transients are decorated (fvwm/style.c, fvwm/decorations.c checks DECORATE_TRANSIENT_FLAG and TRANSIENT flag).
+  - Focus: Transients should generally follow parent focus policy; NeverFocus will apply per-window if set. WM_TAKE_FOCUS continues to be sent only when the transient advertises it and is not NeverFocus.
+
+- Override-redirect windows
+  - Not managed as normal clients (fvwm/events.c checks Event.xmap.override_redirect == True; fvwm.c checks wa.override_redirect).
+  - Synthetic ConfigureNotify messages from the frame set override_redirect = False (fvwm/borders.c) as required when notifying clients; for true override-redirect clients, fvwm does not reparent/manage them.
+  - Colormap handling for override-redirect colormap windows is guarded (fvwm/colormaps.c) to avoid interfering with apps that bypass the window manager.
+
+Validation suggestions
+  - Transients: Open a parent app and spawn WM_TRANSIENT_FOR dialogs; verify stacking, placement on same desk, focus handoff, and decoration toggles via DecorateTransient/NakedTransient.
+  - Override-redirect: Launch a tool that sets override_redirect (e.g., popdown menus or test clients) and confirm fvwm does not manage/reparent them; ensure no spurious Configure/Map handling beyond standard event observation.
+  - Focus: With Style NeverFocus set on a target, confirm that no input focus or WM_TAKE_FOCUS is delivered to that window; AcceptFocus re-enables normal ICCCM focus behavior.
+- Add a quick validation script set (Xephyr/Xvfb) to test:
+  - WM_TAKE_FOCUS delivery to clients with InputHint=False.
+  - WM_STATE transitions Normal/Iconic/Withdrawn and Withdraw fallback on Close/Destroy without WM_DELETE_WINDOW.
+  - ConfigureNotify geometry correctness.
+
+Validation notes
+
+- Key paths:
+  - MapRequest: honors initial_state; sets WM_STATE; may focus respecting InputHint.
+  - UnmapNotify: Withdrawn processing with reparent and cleanup.
+  - ConfigureRequest: synthetic ConfigureNotify to client geometry.
+  - SaveYourself: broadcast on shutdown/restart.

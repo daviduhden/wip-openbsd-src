@@ -1,0 +1,131 @@
+TO-DO LIST
+
+KNOWN BUGS TO FIX (done)
+
+* Allow geometry to be specified for FvwmButtons panels.
+* Update FvwmSave and FvwmSaveDesk.
+* Update the fvwm_convert script.
+* Ensure xscreensaver can allocate a private colormap.
+* Prevent FvwmButtons (and other modules) from surviving X server shutdown.
+* Fix AutoHide in FvwmTaskBar (see EdgeThickness in the manpage).
+* Prevent core dump when DestroyMenu/DestroyFunc destroys itself.
+* Make Maximize work correctly when applied to a window not on the current page.
+* Prevent a piperead command from hanging in .fvwm2rc when the pipe is never closed.
+* Review and document StartsOnPage behavior (ensure it meets expectations).
+
+NOTES → TURN INTO QUALITY/DOC TASKS
+
+* Adjust configure so it doesn’t overremember optional libraries/options; document removing config.cache before reconfiguring.
+* Document that binding a key to window decorations (but not the window) yields SYNTHETIC events that many apps ignore.
+* Document that DESTROY should be a last resort; prefer DELETE/CLOSE to close apps.
+* Investigate intermittent startup lockups; detect missing .fvwm2rc and provide a clear message.
+* Document ICCCM/Xnest limitations for keyboard/mouse bindings (conflicts with app keystroke delivery).
+
+CLEANUPS (CODE/BUILD)
+
+* Reindent codebase and enforce minimal coding conventions.
+* Install modules with install-exec (switch moduledir → moduleexecdir where needed).
+* Evaluate making fvwmlib a shared library.
+
+DOCUMENTATION
+
+* Expand the FAQ with the above behavioral notes and workarounds.
+
+OLD PATCHES
+
+* Review/apply a safer config file reading patch.
+
+BUGFIXES (FROM TODO)
+
+* Rewrite Style flags to allow easier addition of styles (GSFR).
+* Redefine VISIBLE/RAISED flags for clear, consistent behavior.
+* Fix Restart so it doesn’t pass fvwm-specific options to other WMs.
+* Profile FVWM and improve performance.
+* Reduce memory usage.
+* Remove code duplication (especially in modules); move common parts into libfvwm2.a and/or a second module library.
+* Compute Motion vs Click vs DoubleClick via MotionThreshold and ClickTime:
+  • If MotionThreshold exceeded → Motion
+  • If not exceeded and ClickTime exceeded → Click
+  • If neither exceeded → DoubleClick
+* Make transient FvwmWinList reposition itself and the pointer when it pops off-screen (like built-in menus).
+* Fix: Maximize an xterm, change font, UnMaximize → wrong window size.
+* Correct colormap interaction with xlock -install -mode blank/swirl.
+* Restore TogglePage.
+* Make Key changes via FvwmTalk/Read take effect without Recapture.
+* Ensure system-modal dialogs disallow popup menus (verify current behavior).
+* Fix FvwmDeskTopScale size calculation.
+* Ensure correct behavior on 24-bit (TrueColor) displays.
+* Prevent Esc during move/resize from “losing” windows off the desktop.
+* Provide an easy way to recover windows moved off the desktop.
+* Ensure transients-of-transients raise correctly.
+
+NEW FEATURES
+
+* Add official theme support.
+* Allow resizing that preserves the x/y aspect ratio.
+* Add tear-off (pinned) menus.
+* Add multi-column or scrolling menus for long lists.
+* Add a private colormap option for menus.
+* Add Recapture for a single window.
+* Expose certain window attributes to .fvwm2rc functions and add simple if/else (or a helper module).
+* Add simple static variables for .fvwm2rc functions (toggles, etc.).
+* Add StayOnBottom style.
+* Add ClickToFocusDontPassClick style (initial click focuses but is not passed to the app).
+* Add ClickToFocusNoInitialFocus (or convert to parameters of ClickToFocus).
+* Add NeverFocus style; fully support all four ICCCM focus states. [done]
+* Resurrect StubbornPlacement style.
+* Add StickyOnDesk <n> or StaysOnDesk <n> (support multiple desk values).
+* Indicate sticky icons/windows visually (e.g., different decor or color), including for windows without titlebars.
+* Provide a function to simulate button presses (if feasible given SYNTHETIC event handling).
+* Allow easy renaming of module names from .fvwm2rc.
+* Improve FvwmPager: add/rename desktops on the fly.
+* Add a desktop switcher module with buttons for active desktops (dtwm-like); consider folding into FvwmPager.
+* Investigate dropping windows onto the pager (olvwm-style); add options to hide sticky windows and filter by name/class/resource.
+* Add “captive” fvwm mode (ctwm-like).
+* Allow size geometry specs for FvwmButtons and possibly Pager.
+* Extend FvwmAuto with AutoLower and per-window configuration (keywords).
+* Add a module to X Select window Name/Class/Resource/ID, etc.
+* Add FvwmMsgLog module to display fvwm error messages.
+* Add password fields to FvwmForm.
+* Add cut/paste (at least paste) to FvwmForm text fields.
+* Add simple history to FvwmForm text fields.
+* Give FvwmForm Resource and Class values.
+* Fix FvwmForm line spacing for text-only lines so it can serve as a Help form.
+* Extend module communications to pass titlebar and button window IDs (for animation/other effects).
+* Support mouse button chording.
+* Improve icon handling: optional global free icon placement grid.
+* Provide more control over icon appearance (non-3D, fg/bg colors, fixed size, gradients, etc.).
+* Investigate dynamic loading of functions/modules with hook functions; support both dynamic and socket modules simultaneously if possible.
+* Improve the modules communications interface (centralize code, make it more intuitive, provide a generic API).
+* Add a WindowGravity option to influence SmartPlacement/RandomPlacement (possibly as a Style option).
+* Add a wrap option for Prev/Next.
+* Resurrect OpaqueResize (as a Style option).
+* Add twm SqueezeTitle functionality to TitleStyle and possibly merge into Style.
+* Allow negative values for Maximize to size from bottom/right.
+* Allow negative values for Move to position from bottom/right.
+* Provide per-window key/value attributes (e.g., via Atoms) for module communication via Style commands.
+* Make GetConfigLine smarter: filter by module prefix; allow requesting PixmapPath, etc. (leverage libs/Parse.c).
+* Consolidate to a single IconPath (instead of PixmapPath too).
+* Allow Resize units in terms of the app’s resize increment.
+* Fix composite function bug:
+  AddToFunc resize-and-move
+  "I" resize 100 100
+  "I" move 100 300
+* Add ToggleButtonStyle to keep a button visually “pressed”.
+* Allow defining buttons via bitmap/mask files or an alternate shape syntax (e.g., hl(x1,y1,x2,y2), sh(x1,y1,x2,y2)).
+* Make the Restart parameter optional (default: restart current WM).
+* Add WaitForExec/ExecAndWait (blocking), possibly named System.
+* Respect window gravity when reparenting/moving so windows with negative offsets stay correctly anchored with borders.
+* Investigate internationalization (compound text handling, message catalogs).
+* Support an env var for an additional read directory (e.g., $FVWMRCDIR or $FVWMHOME).
+* Create a new “FvwmGUI” module that combines FvwmButtons, FvwmScript, FvwmForm, and Wharf.
+* Report filename and line number in error messages (including for commands originating from modules/pipes).
+
+GSFR (GREAT STYLE FLAG REWRITE)
+
+* Replace shifted bit masks with bitfields in FvwmWindow.flags (union of unsigned int array and a bitfield struct).
+
+OTHER TASKS
+
+* Reimplement the 2.0.46 Animated Windowshade patch using the module interface (like FvwmAnimate for iconification).
+* Preserve icon positions across Restart.
