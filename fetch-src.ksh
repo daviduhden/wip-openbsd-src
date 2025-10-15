@@ -75,7 +75,19 @@ checkout_selected_repository() {
     esac
 }
 
-# Function to change directory to the wip-openbsd-src directory (mandatory)
+# Function to ask if user wants to copy from wip-openbsd-src (optional)
+ask_copy_from_wip() {
+    print "Do you want to copy a directory from 'wip-openbsd-src' into the checked-out tree?"
+    select ANSWER in "Yes" "No"; do
+        case "$ANSWER" in
+            Yes) DO_COPY=1; break ;;
+            No)  DO_COPY=0; break ;;
+            *)   print "Invalid selection. Please try again." ;;
+        esac
+    done
+}
+
+# Function to change directory to the wip-openbsd-src directory
 move_to_wip_openbsd_src() {
     wip_openbsd_src_dir=$(find / -type d -name "wip-openbsd-src" 2>/dev/null | head -n 1)
     if [ -z "$wip_openbsd_src_dir" ]; then
@@ -99,18 +111,16 @@ list_directories() {
     done
 }
 
-# Function to choose between /usr/src or /usr/xenocara as target tree.
-# Only offers trees that exist (i.e., the one you cloned).
+# Function to choose between /usr/src or /usr/xenocara as target tree
+# Only offers trees that exist (i.e., the one you cloned, or both if present)
 choose_target_tree() {
     options=""
     [ -d /usr/src ] && options="$options /usr/src"
     [ -d /usr/xenocara ] && options="$options /usr/xenocara"
-
     if [ -z "$options" ]; then
         print "No destination trees available under /usr."
         exit 1
     fi
-
     print "Select the target tree for the copy:"
     select TARGET_TREE in $options; do
         if [ -n "$TARGET_TREE" ]; then
@@ -177,11 +187,16 @@ main() {
     set_cvsroot
     select_repository_to_checkout
     checkout_selected_repository
-    move_to_wip_openbsd_src
-    list_directories
-    choose_target_tree
-    list_tree_subdirectories
-    copy_directory
+    ask_copy_from_wip
+    if [ "${DO_COPY:-0}" -eq 1 ]; then
+        move_to_wip_openbsd_src
+        list_directories
+        choose_target_tree
+        list_tree_subdirectories
+        copy_directory
+    else
+        print "Skipping copy from wip-openbsd-src."
+    fi
     create_user_with_random_password
     configure_doas
 }
