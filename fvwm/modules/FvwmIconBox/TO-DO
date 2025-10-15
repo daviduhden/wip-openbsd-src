@@ -1,7 +1,0 @@
-FVWMButtons To-Do List
-
-- If an icon file is not specified, look for a file named xx.icon in the pixmap/bitmap directory, where xx is the resource, class, or window name (for example, 4Dwm). Decide whether this should be implemented in FVWM or in this module.
-- Add a "Page" option to *FvwmIconBoxResolution.
-- Allow icons to be movable, similar to mwm.
-- Improve the English wording throughout. 
-
