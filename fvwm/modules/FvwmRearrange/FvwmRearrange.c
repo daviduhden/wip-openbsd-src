@@ -1,27 +1,21 @@
 /*
- * FvwmRearrange.c -- fvwm module to arrange windows
+ * FvwmRearrange: fvwm module to tile or cascade windows in a region.
  *
- * Copyright (C) 1996, 1997, 1998, 1999 Andrew T. Veliath
+ * Copyright (c) 2025 David Uhden Collado <david@uhden.dev>
  *
- * Version 1.0
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Combined FvwmTile and FvwmCascade to FvwmRearrange module.
- * 9-Nov-1998 Dominik Vogt
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+
 #include "config.h"
 
 #include <stdio.h>
@@ -47,583 +41,681 @@
 #include "../../fvwm/module.h"
 #include "../../fvwm/fvwm.h"
 
-typedef struct window_item {
-    Window frame;
-    int th, bw;
-    unsigned long width, height;
-    struct window_item *prev, *next;
-} window_item, *window_list;
+typedef struct ClientNode {
+	Window frame;
+	int title_height;
+	int border_width;
+	unsigned long width;
+	unsigned long height;
+	struct ClientNode *prev;
+	struct ClientNode *next;
+} ClientNode;
 
-/* vars */
-Display *dpy;
-int dwidth, dheight;
-char *argv0;
-int fd[2], fd_width;
-window_list wins = NULL, wins_tail = NULL;
-int wins_count = 0;
-FILE *console;
+typedef struct ModuleState {
+	Display *display;
+	int screen_width;
+	int screen_height;
+	char *program_name;
+	int pipe_fd[2];
+	int fd_width;
+	ClientNode *head;
+	ClientNode *tail;
+	int client_count;
+	FILE *log;
+	int offset_x;
+	int offset_y;
+	int limit_width;
+	int limit_height;
+	int bound_x;
+	int bound_y;
+	int include_untitled;
+	int include_transients;
+	int include_maximized;
+	int include_sticky;
+	int include_all;
+	int entire_desk;
+	int reverse_order;
+	int raise_clients;
+	int resize_clients;
+	int avoid_stretch;
+	int flat_x;
+	int flat_y;
+	int step_x;
+	int step_y;
+	int tile_horizontal;
+	int tile_limit;
+	char run_tile;
+	char run_cascade;
+} ModuleState;
 
-/* switches */
-int ofsx = 0, ofsy = 0;
-int maxw = 0, maxh = 0;
-int maxx, maxy;
-int untitled = 0, transients = 0;
-int maximized = 0;
-int all = 0;
-int desk = 0;
-int reversed = 0, raise_window = 1;
-int resize = 0;
-int nostretch = 0;
-int sticky = 0;
-int flatx = 0, flaty = 0;
-int incx = 0, incy = 0;
-int horizontal = 0;
-int maxnum = 0;
+static ModuleState g_state = {
+	.raise_clients = 1
+};
 
-char FvwmTile;
-char FvwmCascade;
-
-void insert_window_list(window_list *wl, window_item *i)
+static void
+prepend_client(ModuleState *state, ClientNode *node)
 {
-    if (*wl) {
-	if ((i->prev = (*wl)->prev))
-	    i->prev->next = i;
-	i->next = *wl;
-	(*wl)->prev = i;
-    } else
-	i->next = i->prev = NULL;
-    *wl = i;
-}
-
-void free_window_list(window_list *wl)
-{
-    window_item *q;
-    while (*wl) {
-	q = *wl;
-	*wl = (*wl)->next;
-	free(q);
-    }
-}
-
-int is_suitable_window(unsigned long *body)
-{
-    XWindowAttributes xwa;
-    unsigned long flags = body[8];
-
-    if ((flags&WINDOWLISTSKIP) && !all)
-	return 0;
-
-    if ((flags&MAXIMIZED) && !maximized)
-	return 0;
-    
-    if ((flags&STICKY) && !sticky)
-	return 0;
-    
-    if (!XGetWindowAttributes(dpy, (Window)body[1], &xwa))
-	return 0;
-    
-    if (xwa.map_state != IsViewable)
-	return 0;
-
-    if (!(flags&MAPPED))
-	return 0;
-
-    if (flags&ICONIFIED)
-	return 0;
-
-    if (!desk) {
-	int x = (int)body[3], y = (int)body[4];
-	int w = (int)body[5], h = (int)body[6];
-	if (!((x < dwidth) && (y < dheight)
-	      && (x + w > 0) && (y + h > 0)))
-	    return 0;
-    }
-	    
-    if (!(flags&TITLE) && !untitled)
-	return 0;
-
-    if ((flags&TRANSIENT) && !transients)
-	return 0;
-
-    return 1;
-}
-
-int get_window(void)
-{
-    unsigned long header[HEADER_SIZE], *body;
-    int count, last = 0;
-    fd_set infds;
-    FD_ZERO(&infds);
-    FD_SET(fd[1], &infds);
-    select(fd_width,&infds, 0, 0, NULL);
-    if ((count = ReadFvwmPacket(fd[1],header,&body)) > 0) {
-	switch (header[1])
-	{
-	case M_CONFIGURE_WINDOW:
-	    if (is_suitable_window(body)) {
-		window_item *wi =
-		    (window_item*)safemalloc(sizeof( window_item ));
-		wi->frame = (Window)body[1];
-		wi->th = (int)body[9];
-		wi->bw = (int)body[10];
-		wi->width = body[5];
-		wi->height = body[6];
-		if (!wins_tail) wins_tail = wi;
-		insert_window_list(&wins, wi);
-		++wins_count;
-	    }
-	    last = 1;
-	    break;
-	    
-	case M_END_WINDOWLIST:
-	    break;
-	    
-	default:
-	    fprintf(console, 
-		    "%s: internal inconsistency: unknown message\n",
-		    argv0);
-	    break;
-	}
-	free(body);
-    }
-    return last;
-}
-
-void wait_configure(window_item *wi)
-{
-    int found = 0;
-    unsigned long header[HEADER_SIZE], *body;
-    int count;
-    fd_set infds;
-    FD_ZERO(&infds);
-    FD_SET(fd[1], &infds);
-    select(fd_width,&infds, 0, 0, NULL);
-    while (!found)	
-	if ((count = ReadFvwmPacket(fd[1],header,&body)) > 0) {
-	    if  ((header[1] == M_CONFIGURE_WINDOW)
-		 && (Window)body[1] == wi->frame)
-		found = 1;
-	    free(body);
-	}
-}
-
-int atopixel(char *s, unsigned long f)
-{
-    int l = strlen(s);
-    if (l < 1) return 0;
-    if (isalpha(s[l - 1])) {
-	char s2[24];
-	strcpy(s2,s);
-	s2[strlen(s2) - 1] = 0;	
-	return atoi(s2);
-    }
-    return (atoi(s) * f) / 100;
-}
-
-void tile_windows(void)
-{
-    char msg[128];
-    int cur_x = ofsx, cur_y = ofsy;
-    int wdiv, hdiv, i, j, count = 1;
-    window_item *w = reversed ? wins_tail : wins;    
-
-    if (horizontal) {
-	if ((maxnum > 0) && (maxnum < wins_count)) {
-	    count = wins_count / maxnum;
-	    if (wins_count % maxnum) ++count;
-	    hdiv = (maxy - ofsy + 1) / maxnum;
+	node->prev = NULL;
+	node->next = state->head;
+	if (state->head) {
+		state->head->prev = node;
 	} else {
-	    maxnum = wins_count;
-	    hdiv = (maxy - ofsy + 1) / wins_count;
+		state->tail = node;
 	}
-	wdiv = (maxx - ofsx + 1) / count;
+	state->head = node;
+	++state->client_count;
+}
 
-	for (i = 0; w && (i < count); ++i)  {
-	    for (j = 0; w && (j < maxnum); ++j) {
-		int nw = wdiv - w->bw * 2;
-		int nh = hdiv - w->bw * 2 - w->th;
-		
-		if (resize) {
-		    if (nostretch) {
-			if (nw > w->width)
-			    nw = w->width;
-			if (nh > w->height)
-			    nh = w->height;
-		    }
-		    sprintf(msg, "Resize %lup %lup",
-			    (nw > 0) ? nw : w->width,
-			    (nh > 0) ? nh : w->height);	
-		    SendInfo(fd,msg,w->frame);
-		}
-		sprintf(msg, "Move %up %up", cur_x, cur_y);
-		SendInfo(fd,msg,w->frame);
-		if (raise_window)
-		    SendInfo(fd,"Raise",w->frame);
-		cur_y += hdiv;
-		wait_configure(w);
-		w = reversed ? w->prev : w->next;
-	    }
-	    cur_x += wdiv;
-	    cur_y = ofsy;
+static void
+release_clients(ModuleState *state)
+{
+	ClientNode *cursor = state->head;
+	while (cursor) {
+		ClientNode *next = cursor->next;
+		free(cursor);
+		cursor = next;
 	}
-    } else  {
-	if ((maxnum > 0) && (maxnum < wins_count)) {
-	    count = wins_count / maxnum;
-	    if (wins_count % maxnum) ++count;
-	    wdiv = (maxx - ofsx + 1) / maxnum;
+	state->head = NULL;
+	state->tail = NULL;
+	state->client_count = 0;
+}
+
+static int
+window_matches(ModuleState *state, unsigned long *body)
+{
+	unsigned long flags = body[8];
+	XWindowAttributes xwa;
+
+	if ((flags & WINDOWLISTSKIP) && !state->include_all) {
+		return 0;
+	}
+	if ((flags & MAXIMIZED) && !state->include_maximized) {
+		return 0;
+	}
+	if ((flags & STICKY) && !state->include_sticky) {
+		return 0;
+	}
+	if (!XGetWindowAttributes(state->display, (Window)body[1], &xwa)) {
+		return 0;
+	}
+	if (xwa.map_state != IsViewable) {
+		return 0;
+	}
+	if (!(flags & MAPPED)) {
+		return 0;
+	}
+	if (flags & ICONIFIED) {
+		return 0;
+	}
+	if (!state->entire_desk) {
+		int x = (int)body[3];
+		int y = (int)body[4];
+		int w = (int)body[5];
+		int h = (int)body[6];
+		if (!((x < state->screen_width) && (y < state->screen_height) &&
+			  (x + w > 0) && (y + h > 0))) {
+			return 0;
+		}
+	}
+	if (!(flags & TITLE) && !state->include_untitled) {
+		return 0;
+	}
+	if ((flags & TRANSIENT) && !state->include_transients) {
+		return 0;
+	}
+	return 1;
+}
+
+static int
+collect_client(ModuleState *state)
+{
+	unsigned long header[HEADER_SIZE];
+	unsigned long *body;
+	fd_set infds;
+	int last = 0;
+
+	FD_ZERO(&infds);
+	FD_SET(state->pipe_fd[1], &infds);
+	select(state->fd_width, &infds, NULL, NULL, NULL);
+
+	if (ReadFvwmPacket(state->pipe_fd[1], header, &body) > 0) {
+		switch (header[1]) {
+		case M_CONFIGURE_WINDOW:
+			if (window_matches(state, body)) {
+				ClientNode *node = (ClientNode *)safemalloc(sizeof(ClientNode));
+				node->frame = (Window)body[1];
+				node->title_height = (int)body[9];
+				node->border_width = (int)body[10];
+				node->width = body[5];
+				node->height = body[6];
+				prepend_client(state, node);
+			}
+			last = 1;
+			break;
+		case M_END_WINDOWLIST:
+			break;
+		default:
+			fprintf(state->log,
+					"%s: internal inconsistency: unknown message\n",
+					state->program_name);
+			break;
+		}
+		free(body);
+	}
+
+	return last;
+}
+
+static void
+await_configure(ModuleState *state, ClientNode *node)
+{
+	int satisfied = 0;
+
+	while (!satisfied) {
+		unsigned long header[HEADER_SIZE];
+		unsigned long *body;
+		fd_set infds;
+
+		FD_ZERO(&infds);
+		FD_SET(state->pipe_fd[1], &infds);
+		select(state->fd_width, &infds, NULL, NULL, NULL);
+
+		if (ReadFvwmPacket(state->pipe_fd[1], header, &body) > 0) {
+			if ((header[1] == M_CONFIGURE_WINDOW) &&
+				((Window)body[1] == node->frame)) {
+				satisfied = 1;
+			}
+			free(body);
+		}
+	}
+}
+
+static int
+parse_metric(const char *token, unsigned long reference)
+{
+	char *endptr;
+	long value;
+
+	if (!token || !*token) {
+		return 0;
+	}
+
+	value = strtol(token, &endptr, 10);
+	if (endptr && *endptr && isalpha((unsigned char)*endptr)) {
+		return (int)value;
+	}
+	return (int)((value * (long)reference) / 100);
+}
+
+static void
+send_resize(ModuleState *state, const ClientNode *node,
+			unsigned long width, unsigned long height)
+{
+	char command[128];
+
+	snprintf(command, sizeof(command), "Resize %lup %lup",
+			 width, height);
+	SendInfo(state->pipe_fd, command, node->frame);
+}
+
+static void
+send_move(ModuleState *state, const ClientNode *node, int x, int y)
+{
+	char command[128];
+
+	snprintf(command, sizeof(command), "Move %up %up", x, y);
+	SendInfo(state->pipe_fd, command, node->frame);
+}
+
+static void
+tile_clients(ModuleState *state)
+{
+	ClientNode *cursor = state->reverse_order ? state->tail : state->head;
+	int stripes = 1;
+	int slots_per_stripe;
+	int wdiv;
+	int hdiv;
+	int current_x = state->offset_x;
+	int current_y = state->offset_y;
+	int limit = state->tile_limit;
+
+	if (state->tile_horizontal) {
+		if ((limit > 0) && (limit < state->client_count)) {
+			stripes = state->client_count / limit;
+			if (state->client_count % limit) {
+				++stripes;
+			}
+			hdiv = (state->bound_y - state->offset_y + 1) / limit;
+		} else {
+			limit = state->client_count;
+			state->tile_limit = limit;
+			hdiv = (state->bound_y - state->offset_y + 1) / state->client_count;
+		}
+		slots_per_stripe = limit;
+		wdiv = (state->bound_x - state->offset_x + 1) / stripes;
+
+		for (int s = 0; cursor && (s < stripes); ++s) {
+			for (int slot = 0; cursor && (slot < slots_per_stripe); ++slot) {
+				int new_width = wdiv - cursor->border_width * 2;
+				int new_height = hdiv - cursor->border_width * 2 - cursor->title_height;
+
+				if (state->resize_clients) {
+					if (state->avoid_stretch) {
+						if (new_width > (int)cursor->width) {
+							new_width = (int)cursor->width;
+						}
+						if (new_height > (int)cursor->height) {
+							new_height = (int)cursor->height;
+						}
+					}
+					send_resize(state, cursor,
+								(new_width > 0) ? (unsigned long)new_width : cursor->width,
+								(new_height > 0) ? (unsigned long)new_height : cursor->height);
+				}
+
+				send_move(state, cursor, current_x, current_y);
+				if (state->raise_clients) {
+					SendInfo(state->pipe_fd, "Raise", cursor->frame);
+				}
+
+				current_y += hdiv;
+				await_configure(state, cursor);
+				cursor = state->reverse_order ? cursor->prev : cursor->next;
+			}
+			current_x += wdiv;
+			current_y = state->offset_y;
+		}
 	} else {
-	    maxnum = wins_count;
-	    wdiv = (maxx - ofsx + 1) / wins_count;
-	}
-	hdiv = (maxy - ofsy + 1) / count;
-
-	for (i = 0; w && (i < count); ++i)  {
-	    for (j = 0; w && (j < maxnum); ++j) {
-		int nw = wdiv - w->bw * 2;
-		int nh = hdiv - w->bw * 2 - w->th;
-		
-		if (resize) {
-		    if (nostretch) {
-			if (nw > w->width)
-			    nw = w->width;
-			if (nh > w->height)
-			    nh = w->height;
-		    }
-		    sprintf(msg, "Resize %lup %lup",
-			    (nw > 0) ? nw : w->width,
-			    (nh > 0) ? nh : w->height);
-		    SendInfo(fd,msg,w->frame);
+		if ((limit > 0) && (limit < state->client_count)) {
+			stripes = state->client_count / limit;
+			if (state->client_count % limit) {
+				++stripes;
+			}
+			wdiv = (state->bound_x - state->offset_x + 1) / limit;
+		} else {
+			limit = state->client_count;
+			state->tile_limit = limit;
+			wdiv = (state->bound_x - state->offset_x + 1) / state->client_count;
 		}
-		sprintf(msg, "Move %up %up", cur_x, cur_y);
-		SendInfo(fd,msg,w->frame);
-		if (raise_window)
-		    SendInfo(fd,"Raise",w->frame);
-		cur_x += wdiv;
-		wait_configure(w);
-		w = reversed ? w->prev : w->next;
-	    }
-	    cur_x = ofsx;
-	    cur_y += hdiv;
+		slots_per_stripe = limit;
+		hdiv = (state->bound_y - state->offset_y + 1) / stripes;
+
+		for (int s = 0; cursor && (s < stripes); ++s) {
+			for (int slot = 0; cursor && (slot < slots_per_stripe); ++slot) {
+				int new_width = wdiv - cursor->border_width * 2;
+				int new_height = hdiv - cursor->border_width * 2 - cursor->title_height;
+
+				if (state->resize_clients) {
+					if (state->avoid_stretch) {
+						if (new_width > (int)cursor->width) {
+							new_width = (int)cursor->width;
+						}
+						if (new_height > (int)cursor->height) {
+							new_height = (int)cursor->height;
+						}
+					}
+					send_resize(state, cursor,
+								(new_width > 0) ? (unsigned long)new_width : cursor->width,
+								(new_height > 0) ? (unsigned long)new_height : cursor->height);
+				}
+
+				send_move(state, cursor, current_x, current_y);
+				if (state->raise_clients) {
+					SendInfo(state->pipe_fd, "Raise", cursor->frame);
+				}
+
+				current_x += wdiv;
+				await_configure(state, cursor);
+				cursor = state->reverse_order ? cursor->prev : cursor->next;
+			}
+			current_x = state->offset_x;
+			current_y += hdiv;
+		}
 	}
-    }    
 }
 
-void cascade_windows(void)
+static void
+cascade_clients(ModuleState *state)
 {
-    char msg[128];
-    int cur_x = ofsx, cur_y = ofsy;
-    window_item *w = reversed ? wins_tail : wins;
-    while (w)
-    {
-	unsigned long nw = 0, nh = 0;
-	if (raise_window)
-	    SendInfo(fd,"Raise",w->frame);
-	sprintf(msg, "Move %up %up", cur_x, cur_y);
-	SendInfo(fd,msg,w->frame);
-	if (resize) {
-	    if (nostretch) {		
-		if (maxw
-		    && (w->width > maxw))
-		    nw = maxw;
-		if (maxh
-		    && (w->height > maxh))
-		    nh = maxh;
-	    } else {
-		nw = maxw; 
-		nh = maxh;
-	    }
-	    if (nw || nh) {
-		sprintf(msg, "Resize %lup %lup", 
-			nw ? nw : w->width, 
-			nh ? nh : w->height);
-		SendInfo(fd,msg,w->frame);
-	    }
+	ClientNode *cursor = state->reverse_order ? state->tail : state->head;
+	int current_x = state->offset_x;
+	int current_y = state->offset_y;
+
+	while (cursor) {
+		unsigned long target_width = 0;
+		unsigned long target_height = 0;
+
+		if (state->raise_clients) {
+			SendInfo(state->pipe_fd, "Raise", cursor->frame);
+		}
+
+		send_move(state, cursor, current_x, current_y);
+
+		if (state->resize_clients) {
+			if (state->avoid_stretch) {
+				if (state->limit_width && cursor->width > (unsigned long)state->limit_width) {
+					target_width = (unsigned long)state->limit_width;
+				}
+				if (state->limit_height && cursor->height > (unsigned long)state->limit_height) {
+					target_height = (unsigned long)state->limit_height;
+				}
+			} else {
+				target_width = state->limit_width;
+				target_height = state->limit_height;
+			}
+
+			if (target_width || target_height) {
+				send_resize(state, cursor,
+							target_width ? target_width : cursor->width,
+							target_height ? target_height : cursor->height);
+			}
+		}
+
+		await_configure(state, cursor);
+
+		if (!state->flat_x) {
+			current_x += cursor->border_width;
+		}
+		current_x += state->step_x;
+
+		if (!state->flat_y) {
+			current_y += cursor->border_width + cursor->title_height;
+		}
+		current_y += state->step_y;
+
+		cursor = state->reverse_order ? cursor->prev : cursor->next;
 	}
-	wait_configure(w);
-	if (!flatx)
-	    cur_x += w->bw;
-	cur_x += incx;
-	if (!flaty)
-	    cur_y += w->bw + w->th;
-	cur_y += incy;
-	w = reversed ? w->prev : w->next;
-    }
 }
 
-void parse_args(char *s, int argc, char *argv[], int argi)
+static void
+parse_arguments(ModuleState *state, const char *source, int argc,
+				char *argv[], int start_index)
 {
-    int nsargc = 0;
-    /* parse args */
-    for (; argi < argc; ++argi)
-    {
-	if (!strcmp(argv[argi],"-tile") || !strcmp(argv[argi],"-cascade")) {
-	  /* ignore */
+	int positional = 0;
+
+	for (int i = start_index; i < argc; ++i) {
+		const char *arg = argv[i];
+
+		if (!strcmp(arg, "-tile") || !strcmp(arg, "-cascade")) {
+			continue;
+		} else if (!strcmp(arg, "-u")) {
+			state->include_untitled = 1;
+		} else if (!strcmp(arg, "-t")) {
+			state->include_transients = 1;
+		} else if (!strcmp(arg, "-a")) {
+			state->include_all = 1;
+			state->include_untitled = 1;
+			state->include_transients = 1;
+			state->include_maximized = 1;
+			if (state->run_cascade) {
+				state->include_sticky = 1;
+			}
+		} else if (!strcmp(arg, "-r")) {
+			state->reverse_order = 1;
+		} else if (!strcmp(arg, "-noraise")) {
+			state->raise_clients = 0;
+		} else if (!strcmp(arg, "-noresize")) {
+			state->resize_clients = 0;
+		} else if (!strcmp(arg, "-nostretch")) {
+			state->avoid_stretch = 1;
+		} else if (!strcmp(arg, "-desk")) {
+			state->entire_desk = 1;
+		} else if (!strcmp(arg, "-flatx")) {
+			state->flat_x = 1;
+		} else if (!strcmp(arg, "-flaty")) {
+			state->flat_y = 1;
+		} else if (!strcmp(arg, "-h")) {
+			state->tile_horizontal = 1;
+		} else if (!strcmp(arg, "-m")) {
+			state->include_maximized = 1;
+		} else if (!strcmp(arg, "-s")) {
+			state->include_sticky = 1;
+		} else if (!strcmp(arg, "-mn") && ((i + 1) < argc)) {
+			state->tile_limit = atoi(argv[++i]);
+		} else if (!strcmp(arg, "-resize")) {
+			state->resize_clients = 1;
+		} else if (!strcmp(arg, "-incx") && ((i + 1) < argc)) {
+			state->step_x = parse_metric(argv[++i], state->screen_width);
+		} else if (!strcmp(arg, "-incy") && ((i + 1) < argc)) {
+			state->step_y = parse_metric(argv[++i], state->screen_height);
+		} else {
+			++positional;
+			if (positional > 4) {
+				fprintf(state->log,
+						"%s: %s: ignoring unknown arg %s\n",
+						state->program_name, source, arg);
+				continue;
+			}
+
+			if (positional == 1) {
+				state->offset_x = parse_metric(arg, state->screen_width);
+			} else if (positional == 2) {
+				state->offset_y = parse_metric(arg, state->screen_height);
+			} else if (positional == 3) {
+				if (state->run_cascade) {
+					state->limit_width = parse_metric(arg, state->screen_width);
+				} else {
+					state->bound_x = parse_metric(arg, state->screen_width);
+				}
+			} else if (positional == 4) {
+				if (state->run_cascade) {
+					state->limit_height = parse_metric(arg, state->screen_height);
+				} else {
+					state->bound_y = parse_metric(arg, state->screen_height);
+				}
+			}
+		}
 	}
-	else if (!strcmp(argv[argi],"-u")) {
-	    untitled = 1;
-	}
-	else if (!strcmp(argv[argi],"-t")) {
-	    transients = 1;
-	}
-	else if (!strcmp(argv[argi], "-a")) {
-	    all = untitled = transients = maximized = 1;
-	    if (FvwmCascade)
-	      sticky = 1;
-	}
-	else if (!strcmp(argv[argi], "-r")) {
-	    reversed = 1;
-	}
-	else if (!strcmp(argv[argi], "-noraise")) {
-	    raise_window = 0;
-	}
-	else if (!strcmp(argv[argi], "-noresize")) {
-	    resize = 0;
-	}
-	else if (!strcmp(argv[argi], "-nostretch")) {
-	    nostretch = 1;
-	}
-	else if (!strcmp(argv[argi], "-desk")) {
-	    desk = 1;
-	}
-	else if (!strcmp(argv[argi], "-flatx")) {
-	    flatx = 1;
-	}
-	else if (!strcmp(argv[argi], "-flaty")) {
-	    flaty = 1;
-	}
-	else if (!strcmp(argv[argi], "-r")) {
-	    reversed = 1;
-	}
-	else if (!strcmp(argv[argi], "-h")) {
-	    horizontal = 1;
-	}
-	else if (!strcmp(argv[argi], "-m")) {
-	    maximized = 1;
-	}
-	else if (!strcmp(argv[argi], "-s")) {
-	    sticky = 1;
-	}
-	else if (!strcmp(argv[argi], "-mn") && ((argi + 1) < argc)) {
-	    maxnum = atoi(argv[++argi]);
-	}
-	else if (!strcmp(argv[argi], "-resize")) {
-	    resize = 1;
-	}
-	else if (!strcmp(argv[argi], "-nostretch")) {
-	    nostretch = 1;
-	}
-	else if (!strcmp(argv[argi], "-incx") && ((argi + 1) < argc)) {
-	    incx = atopixel(argv[++argi], dwidth);
-	}
-	else if (!strcmp(argv[argi], "-incy") && ((argi + 1) < argc)) {
-	    incy = atopixel(argv[++argi], dheight);
-	}
-	else {
-	    if (++nsargc > 4) {
-		fprintf(console,
-			"%s: %s: ignoring unknown arg %s\n",
-			argv0, s, argv[argi]);
-		continue;
-	    }
-	    if (nsargc == 1) {
-		ofsx = atopixel(argv[argi], dwidth);
-	    } else if (nsargc == 2) {
-		ofsy = atopixel(argv[argi], dheight);
-	    } else if (nsargc == 3) {
-	        if (FvwmCascade)
-		  maxw = atopixel(argv[argi], dwidth);
-		else /* FvwmTile */
-		  maxx = atopixel(argv[argi], dwidth);
-	    } else if (nsargc == 4) {
-	        if (FvwmCascade)
-		  maxh = atopixel(argv[argi], dheight);
-		else /* FvwmTile */
-		  maxy = atopixel(argv[argi], dheight);
-	    }
-	}
-    }
 }
 
 #ifdef USERC
-int parse_line(char *s, char ***args)
+static int
+tokenise_config(char *line, char ***argv_out)
 {
-    int count = 0, i = 0;
-    char *arg_save[48];
-    strtok(s, " ");
-    while ((s = strtok(NULL, " ")))
-	arg_save[count++] = s;
-    *args = (char **)safemalloc(sizeof( char * ) * count);
-    for (; i < count; ++i)
-	(*args)[i] = arg_save[i];
-    return count;
+	char *tokens[48];
+	int count = 0;
+	char *cursor = strtok(line, " \t");
+
+	while (cursor && count < 48) {
+		cursor = strtok(NULL, " \t");
+		if (!cursor) {
+			break;
+		}
+		tokens[count++] = cursor;
+	}
+
+	if (count > 0) {
+		*argv_out = (char **)safemalloc(sizeof(char *) * count);
+		for (int i = 0; i < count; ++i) {
+			(*argv_out)[i] = tokens[i];
+		}
+	} else {
+		*argv_out = NULL;
+	}
+
+	return count;
 }
 
 #ifdef FVWM1
-char *GetConfigLine(char *filename, char *match)
+static char *
+LoadConfigLine(const char *filename, const char *match)
 {
-    FILE *f = fopen(filename, "r");
-    if (f) {
-	int l = strlen(match), found = 0;
-	char line[256], *s = line;
-	line[0] = 0;
-	s = fgets(line, 256, f);
-	while (s && !found) {
-	    if (strncmp(line, match, l) == 0) {
-		found = 1;
-		break;
-	    }
-	    s = fgets(line, 256, f);
+	FILE *f = fopen(filename, "r");
+	if (f) {
+		char line[256];
+		size_t match_len = strlen(match);
+
+		while (fgets(line, sizeof(line), f)) {
+			if (strncmp(line, match, match_len) == 0) {
+				size_t len = strlen(line);
+				char *copy = (char *)safemalloc(len + 1);
+
+				strcpy(copy, line);
+				if (len && copy[len - 1] == '\n') {
+					copy[len - 1] = '\0';
+				}
+				fclose(f);
+				return copy;
+			}
+		}
+		fclose(f);
 	}
-	fclose(f);
-	if (found) {
-	    char *ret;
-	    int l2 = strlen(line);
-	    ret = (char *)safemalloc(sizeof(char) * l2);
-	    strcpy(ret, line);
-	    if (ret[l2 - 1] == '\n')
-		ret[l2 - 1] = 0;
-	    return ret;
-	} else
-	    return NULL;
-    } else
 	return NULL;
 }
 #endif /* FVWM1 */
 #endif /* USERC */
 
-void DeadPipe(int sig) { exit(0); }
-
-int main(int argc, char *argv[])
+static void
+handle_sigpipe(int sig)
 {
+	(void)sig;
+	exit(0);
+}
+
+int
+main(int argc, char *argv[])
+{
+	ModuleState *state = &g_state;
+
 #ifdef USERC
-    char match[128];
-    int config_line_count, len;
-    char *config_line;
+	char match[128];
+	char *config_line;
 #endif
 
-    console = fopen("/dev/console","w");
-    if (!console) console = stderr;
-
-    if (!(argv0 = strrchr(argv[0],'/')))
-	argv0 = argv[0];
-    else 
-	++argv0;
-
-    if (argc < 6) {
-	fprintf(stderr,
-#ifdef FVWM1
-		"%s: module should be executed by fvwm only\n",
-#else
-		"%s: module should be executed by fvwm2 only\n",
-#endif
-		argv0);
-	exit(-1);
-    }
-
-    fd[0] = atoi(argv[1]);
-    fd[1] = atoi(argv[2]);
-
-    if (!(dpy = XOpenDisplay(NULL))) {
-	fprintf(console, "%s: couldn't open display %s\n",
-		argv0,
-		XDisplayName(NULL));
-	exit(-1);
-    }
-    signal (SIGPIPE, DeadPipe);
-
-    {
-	int s = DefaultScreen(dpy);
-	dwidth = DisplayWidth(dpy, s);
-	dheight = DisplayHeight(dpy, s);
-    }
-
-    fd_width = GetFdWidth();
-    
-#ifdef USERC
-    strcpy(match, "*");
-    strcat(match, argv0);
-    len = strlen(match);
-#ifdef FVWM1
-    if ((config_line = GetConfigLine(argv[3], match))) {
-	char **args = NULL;
-	config_line_count = parse_line(config_line, &args);
-	parse_args("config args", 
-		   config_line_count, args, 0);
-	free(config_line);
-	free(args);
-    }
-#else
-    GetConfigLine(fd, &config_line);
-    while (config_line != NULL) {
-	if (strncmp(match,config_line,len)==0) {
-	    char **args = NULL;
-	    int cllen = strlen(config_line);
-	    if (config_line[cllen - 1] == '\n')
-		config_line[cllen - 1] = 0;
-	    config_line_count = parse_line(config_line, &args);
-	    parse_args("config args", 
-		       config_line_count, args, 0);
-	    free(args);
+	state->log = fopen("/dev/console", "w");
+	if (!state->log) {
+		state->log = stderr;
 	}
-	GetConfigLine(fd, &config_line);
-    }
+
+	state->program_name = strrchr(argv[0], '/');
+	state->program_name = state->program_name ? state->program_name + 1 : argv[0];
+
+	if (argc < 6) {
+#ifdef FVWM1
+		fprintf(stderr, "%s: module should be executed by fvwm only\n",
+				state->program_name);
+#else
+		fprintf(stderr, "%s: module should be executed by fvwm2 only\n",
+				state->program_name);
+#endif
+		exit(-1);
+	}
+
+	state->pipe_fd[0] = atoi(argv[1]);
+	state->pipe_fd[1] = atoi(argv[2]);
+
+	state->display = XOpenDisplay(NULL);
+	if (!state->display) {
+		fprintf(state->log, "%s: couldn't open display %s\n",
+				state->program_name, XDisplayName(NULL));
+		exit(-1);
+	}
+
+	signal(SIGPIPE, handle_sigpipe);
+
+	{
+		int screen = DefaultScreen(state->display);
+		state->screen_width = DisplayWidth(state->display, screen);
+		state->screen_height = DisplayHeight(state->display, screen);
+	}
+
+	state->fd_width = GetFdWidth();
+
+#ifdef USERC
+	strcpy(match, "*");
+	strcat(match, state->program_name);
+
+#ifdef FVWM1
+	config_line = LoadConfigLine(argv[3], match);
+	if (config_line) {
+		char **args = NULL;
+		int arg_count = tokenise_config(config_line, &args);
+
+		parse_arguments(state, "config args", arg_count, args, 0);
+		free(args);
+		free(config_line);
+	}
+#else
+	GetConfigLine(state->pipe_fd, &config_line);
+	while (config_line) {
+		if (strncmp(match, config_line, strlen(match)) == 0) {
+			char **args = NULL;
+			int len = strlen(config_line);
+			if (len && config_line[len - 1] == '\n') {
+				config_line[len - 1] = '\0';
+			}
+			{
+				int arg_count = tokenise_config(config_line, &args);
+				parse_arguments(state, "config args", arg_count, args, 0);
+				free(args);
+			}
+		}
+		GetConfigLine(state->pipe_fd, &config_line);
+	}
 #endif /* FVWM1 */
 #endif /* USERC */
 
-    if (strcmp(argv0, "FvwmCascade") && (!strcmp(argv0, "FvwmTile") ||
-	(argc >= 7 && !strcmp(argv[6], "-tile"))))
-      {
-	FvwmTile = 1;
-	FvwmCascade = 0;
-	resize = 1;
-      }
-    else
-      {
-	FvwmCascade = 1;
-	FvwmTile = 0;
-	resize = 0;
-      }
-    parse_args("module args", argc, argv, 6);
+	if (strcmp(state->program_name, "FvwmCascade") &&
+		(!strcmp(state->program_name, "FvwmTile") ||
+		 (argc >= 7 && !strcmp(argv[6], "-tile")))) {
+		state->run_tile = 1;
+		state->run_cascade = 0;
+		state->resize_clients = 1;
+	} else {
+		state->run_cascade = 1;
+		state->run_tile = 0;
+		state->resize_clients = 0;
+	}
+
+	parse_arguments(state, "module args", argc, argv, 6);
 
 #ifdef FVWM1
-    {
-	char msg[256];
-	sprintf(msg, "SET_MASK %lu\n",(unsigned long)(
-	    M_CONFIGURE_WINDOW|
-	    M_END_WINDOWLIST
-	    ));
-	SendInfo(fd,msg,0);
-	
+	{
+		char msg[256];
+		snprintf(msg, sizeof(msg), "SET_MASK %lu\n",
+				 (unsigned long)(M_CONFIGURE_WINDOW | M_END_WINDOWLIST));
+		SendInfo(state->pipe_fd, msg, 0);
+
 #ifdef FVWM1_MOVENULL
-	/* avoid interactive placement in fvwm version 1 */
-	if (!ofsx) ++ofsx;
-	if (!ofsy) ++ofsy;
+		if (!state->offset_x) {
+			++state->offset_x;
+		}
+		if (!state->offset_y) {
+			++state->offset_y;
+		}
 #endif
-    }
+	}
 #else
-    SetMessageMask(fd,
-		   M_CONFIGURE_WINDOW 
-		   | M_END_WINDOWLIST
-	);
+	SetMessageMask(state->pipe_fd, M_CONFIGURE_WINDOW | M_END_WINDOWLIST);
 #endif
 
-    if (FvwmTile)
-    {
-      if (!maxx) maxx = dwidth;
-      if (!maxy) maxy = dheight;
-    }
+	if (state->run_tile) {
+		if (!state->bound_x) {
+			state->bound_x = state->screen_width;
+		}
+		if (!state->bound_y) {
+			state->bound_y = state->screen_height;
+		}
+	}
 
-    SendInfo(fd,"Send_WindowList",0);
-    while (get_window());
-    if (wins_count)
-    {
-      if (FvwmCascade)
-	cascade_windows();
-      else /* FvwmTile */
-	tile_windows();
-    }
-    free_window_list(&wins);
-    if (console != stderr)
-	fclose(console);
-    return 0;
+	SendInfo(state->pipe_fd, "Send_WindowList", 0);
+	while (collect_client(state)) {
+		/* keep reading until the end marker arrives */
+	}
+
+	if (state->client_count) {
+		if (state->run_cascade) {
+			cascade_clients(state);
+		} else {
+			tile_clients(state);
+		}
+	}
+
+	release_clients(state);
+
+	if (state->log != stderr) {
+		fclose(state->log);
+	}
+
+	return 0;
 }

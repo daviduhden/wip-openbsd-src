@@ -1,261 +1,134 @@
 /*
- * The following GPL code from scwm  implements a good, fast 3D-shadowing
- * algorithm. It   converts  the color  from  RGB   to  HLS  space,  then
- * multiplies both the  luminosity   and the saturation by  a   specified
- * factor (clipping at the  extremes). Then it  converts back to  RGB and
- * creates a color. The guts of it, i.e.  the `color_mult' routine, looks
- * a bit longish, but this  is only because  there are 6-way conditionals
- * at the begining and end; it actually runs quite fast. The algorithm is
- * the same  as Gtk's,  but  the  implemenation  is independent and  more
- * streamlined.
+ * Copyright (c) 2025 David Uhden Collado <david@uhden.dev>
  *
- * Calling `adjust_pixel_brightness' with  a `factor' of 1.3 for hilights
- * and 0.7 for  shadows exactly emulates  Gtk's shadowing, which is,  IMO
- * the most visually pleasing shadowing of any widget  set; using 1.2 and
- * 0.5  respectively gives something closer to  the "classic" fvwm effect
- * with deeper shadows and more subtle hilights, but still (IMO) smoother
- * and more attractive than fvwm.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * The only color these  routines do not  usefully handle is black; black
- * will be returned even  for a factor  greater than 1.0, when  optimally
- * one  would like  to  see a  very dark  gray.  This could   possibly be
- * addressed by  adding   a  small   additive factor  when    brightening
- * colors. If anyone adds that feature, please feed it upstream to me.
- *
- * Feel free to use this code in fvwm2, of course.
- *
- * - Maciej Stachowiak
- *
- * And, of course, history shows, we took him up on the offer.
- * Integrated into fvwm2 by Dan Espen, 11/13/98.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-/*
- * Copyright (C) 1997, 1998, Maciej Stachowiak and Greg J. Badros
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this software; see the file COPYING.GPL.  If not, write to
- * the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307 USA
- *
- */
-
-#include "config.h"                     /* must be first */
+#include "config.h"
 
 #include <stdio.h>
-#include <X11/Xproto.h>                 /* for X functions in general */
-#include "fvwmlib.h"                    /* prototype GetShadow GetHilit */
+#include <X11/Xproto.h>
+#include "fvwmlib.h"
 
 #define SCALE 65535.0
-#define HALF_SCALE (SCALE / 2)
-typedef enum {
-  R_MAX_G_MIN, R_MAX_B_MIN, 
-  G_MAX_B_MIN, G_MAX_R_MIN, 
-  B_MAX_R_MIN, B_MAX_G_MIN 
-} MinMaxState;
+#define HALF_SCALE (SCALE * 0.5)
 
+enum ColorChannel {
+  CHANNEL_RED = 0,
+  CHANNEL_GREEN = 1,
+  CHANNEL_BLUE = 2
+};
 
-/* Multiply the HLS-space lightness and saturation of the color by the
-   given multiple, k - based on the way gtk does shading, but independently
-   coded. Should give better relief colors for many cases than the old
-   fvwm algorithm. */
-
-/* FIXMS: This can probably be optimized more, examine later. */
-
-static void 
-color_mult (unsigned short *red, 
-	    unsigned short *green, 
-	    unsigned short *blue, double k)
+static void
+color_mult(unsigned short *red, unsigned short *green,
+           unsigned short *blue, double factor)
 {
-  if (*red == *green && *red == *blue) {
-    double temp;
-    /* A shade of gray */
-    temp = k * (double) (*red);
-    if (temp > SCALE) {
-      temp = SCALE;
+  double components[3];
+  components[CHANNEL_RED] = (double)*red;
+  components[CHANNEL_GREEN] = (double)*green;
+  components[CHANNEL_BLUE] = (double)*blue;
+
+  if (components[CHANNEL_RED] == components[CHANNEL_GREEN] &&
+      components[CHANNEL_RED] == components[CHANNEL_BLUE]) {
+    double level = components[CHANNEL_RED] * factor;
+    if (level > SCALE) {
+      level = SCALE;
     }
-    *red = (unsigned short)(temp);
+    *red = (unsigned short)level;
     *green = *red;
     *blue = *red;
-  } else {
-    /* Non-zero saturation */
-    double r, g, b;
-    double min, max;
-    double a, l, s;
-    double delta;
-    double middle;
-    MinMaxState min_max_state;
-
-    r = (double) *red;
-    g = (double) *green;
-    b = (double) *blue;
-
-    if (r > g) {
-      if (r > b) {
-	max = r;
-	if (g < b) {
-	  min = g;
-	  min_max_state = R_MAX_G_MIN;
-	  a = b - g;
-	} else {
-	  min = b;
-	  min_max_state = R_MAX_B_MIN;
-	  a = g - b;
-	}
-      } else {
-	max = b;
-	min = g;
-	min_max_state = B_MAX_G_MIN;
-	a = r - g;
-      }
-    } else {
-      if (g > b) {
-	max = g;
-	if (b < r) {
-	  min = b;
-	  min_max_state = G_MAX_B_MIN;
-	  a = r - b;
-	} else {
-	  min = r;
-	  min_max_state = G_MAX_R_MIN;
-	  a = b - r; 
-	}
-      } else {
-	max = b;
-	min = r;
-	min_max_state = B_MAX_R_MIN;
-	a = g - r;
-      }
-    }
-    
-    delta = max - min;
-    a = a / delta;
-
-    l = (max + min) / 2;
-    if (l <= HALF_SCALE) {
-      s = max + min;
-    } else {
-      s = 2.0 * SCALE - (max + min);
-    }
-    s = delta/s;
-    
-    l *= k;
-    if (l > SCALE) {
-      l = SCALE;
-    }
-    s *= k;
-    if (s > 1.0) {
-      s = 1.0;
-    }
-
-    if (l <= HALF_SCALE) {
-      max = l * (1 + s);
-    } else {
-      max = s * SCALE + l - s * l; 
-    }
-
-    min = 2 * l - max;
-    delta = max - min;
-    middle = min + delta * a;
-
-    switch (min_max_state) {
-    case R_MAX_G_MIN:
-      r = max;
-      g = min;
-      b = middle;
-      break;
-    case R_MAX_B_MIN:
-      r = max;
-      g = middle;
-      b = min;
-      break;
-    case G_MAX_B_MIN:
-      r = middle;
-      g = max;
-      b = min;
-      break;
-    case G_MAX_R_MIN:
-      r = min;
-      g = max;
-      b = middle;
-      break;
-    case B_MAX_G_MIN:
-      r = middle;
-      g = min;
-      b = max;
-      break;
-    case B_MAX_R_MIN:
-      r = min;
-      g = middle;
-      b = max;
-      break;
-    }
-
-    *red = (unsigned short) r;
-    *green = (unsigned short) g;
-    *blue = (unsigned short) b;    
+    return;
   }
+
+  int max_index = CHANNEL_RED;
+  int min_index = CHANNEL_RED;
+  for (int idx = CHANNEL_GREEN; idx <= CHANNEL_BLUE; ++idx) {
+    if (components[idx] > components[max_index]) {
+      max_index = idx;
+    }
+    if (components[idx] < components[min_index]) {
+      min_index = idx;
+    }
+  }
+
+  int mid_index = CHANNEL_RED + CHANNEL_GREEN + CHANNEL_BLUE - max_index - min_index;
+  double max_value = components[max_index];
+  double min_value = components[min_index];
+  double span = max_value - min_value;
+  double ratio = (components[mid_index] - min_value) / span;
+
+  double lightness = 0.5 * (max_value + min_value);
+  double extrema_sum = max_value + min_value;
+  double saturation_denominator = (lightness <= HALF_SCALE)
+    ? extrema_sum
+    : (2.0 * SCALE - extrema_sum);
+  double saturation = span / saturation_denominator;
+
+  lightness *= factor;
+  if (lightness > SCALE) {
+    lightness = SCALE;
+  }
+  saturation *= factor;
+  if (saturation > 1.0) {
+    saturation = 1.0;
+  }
+
+  double new_max;
+  if (lightness <= HALF_SCALE) {
+    new_max = lightness * (1.0 + saturation);
+  } else {
+    new_max = saturation * SCALE + lightness - saturation * lightness;
+  }
+
+  double new_min = 2.0 * lightness - new_max;
+  double new_span = new_max - new_min;
+  double new_mid = new_min + new_span * ratio;
+
+  double updated[3];
+  updated[max_index] = new_max;
+  updated[min_index] = new_min;
+  updated[mid_index] = new_mid;
+
+  *red = (unsigned short)updated[CHANNEL_RED];
+  *green = (unsigned short)updated[CHANNEL_GREEN];
+  *blue = (unsigned short)updated[CHANNEL_BLUE];
 }
 
-/*
- * This  routine  uses PictureSaveDisplay  and PictureCMap  which must be
- * created by InitPictureCMAP in Picture.c.
- *
- * If you  attempt to use GetShadow  and GetHilit, make  sure your module
- * calls InitPictureCMAP first.
- */
 static Pixel
 adjust_pixel_brightness(Pixel pixel, double factor)
 {
   extern Colormap PictureCMap;
   extern Display *PictureSaveDisplay;
-  XColor c;
-  c.pixel = pixel;
-  XQueryColor (PictureSaveDisplay, PictureCMap, &c);
-  color_mult(&c.red, &c.green, &c.blue, factor);
-  XAllocColor (PictureSaveDisplay, PictureCMap, &c);
+  XColor color_spec;
 
-  return c.pixel;
+  color_spec.pixel = pixel;
+  XQueryColor(PictureSaveDisplay, PictureCMap, &color_spec);
+  color_mult(&color_spec.red, &color_spec.green, &color_spec.blue, factor);
+  XAllocColor(PictureSaveDisplay, PictureCMap, &color_spec);
+
+  return color_spec.pixel;
 }
 
-/*
- * These  are  the original fvwm2  APIs, one  for highlights  and one for
- * shadows.   Together, if  used  in a frame    around a rectangle,  they
- * produce a 3d appearance.
- *
- * The  input  pixel,   is normally  the  background   color used in  the
- * rectangle.  One would  hope, when the  user selects to color something
- * with a multi-color pixmap, they will have the insight to also assign a
- * background color to the pixmaped  area  that approximates the  average
- * color of the pixmap.
- *
- * Currently callers handle monochrome before calling  this routine.  The
- * next logical enhancement is for that logic to be moved here.  Probably
- * a  new   API   that  deals   with  foreground/background/hilite/shadow
- * allocation all in 1 call is the next logical extenstion.
- *
- * Color  allocation  is also a  good   candidate for becoming  a library
- * routine.  The color   allocation  logic in FvwmButtons using   the XPM
- * library closeness stuff may be the ideal model.
- * (dje 11/15/98)
- */
 #define DARKNESS_FACTOR 0.5
-Pixel GetShadow(Pixel background) {
+Pixel
+GetShadow(Pixel background)
+{
   return adjust_pixel_brightness(background, DARKNESS_FACTOR);
 }
 
 #define BRIGHTNESS_FACTOR 1.4
-Pixel GetHilite(Pixel background) {
+Pixel
+GetHilite(Pixel background)
+{
   return adjust_pixel_brightness(background, BRIGHTNESS_FACTOR);
 }
