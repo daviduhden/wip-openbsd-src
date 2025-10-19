@@ -1,19 +1,17 @@
-/* Rewrite of this file by Dominik Vogt on Nov-1-1998 to remove the
- * Xconsortium copyright.
+/*
+ * Copyright (c) 2025 David Uhden Collado <david@uhden.dev>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <X11/Xlib.h>
@@ -24,22 +22,22 @@ extern Display *dpy;
 extern int screen;
 extern char *Module;
 
-unsigned long GetColor(char *name)
+unsigned long
+GetColor(char *name)
 {
-  XColor color;
+  Colormap cmap = DefaultColormap(dpy, screen);
+  XColor spec = {0};
 
-  color.pixel = 0;
-  if (!XParseColor (dpy, DefaultColormap(dpy,screen), name, &color))
-    {
-      fprintf(stderr,"%s:  unknown color \"%s\"\n",Module,name);
-      exit(1);
-    }
-  else if(!XAllocColor (dpy, DefaultColormap(dpy,screen), &color))
-    {
-      fprintf(stderr, "%s:  unable to allocate color for \"%s\"\n",
-	      Module, name);
-      exit(1);
-    }
+  if (!XParseColor(dpy, cmap, name, &spec)) {
+    fprintf(stderr, "%s: unknown color \"%s\"\n", Module, name);
+    exit(1);
+  }
 
-  return color.pixel;
+  if (!XAllocColor(dpy, cmap, &spec)) {
+    fprintf(stderr, "%s: unable to allocate color for \"%s\"\n",
+            Module, name);
+    exit(1);
+  }
+
+  return spec.pixel;
 }
