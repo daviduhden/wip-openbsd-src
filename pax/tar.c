@@ -98,6 +98,7 @@ static int needs_hdrcharset_binary(const char *);
 static int xheader_contains(const struct xheader *, const char *);
 #endif
 static int pax_store_kv(PAXKEY **, const char *, const char *);
+static int pax_component_too_long(const char *);
 static void pax_apply_global(ARCHD *);
 static void pax_global_free(void);
 static int pax_keyword_deleted(const char *);
@@ -447,8 +448,14 @@ tar_rd(ARCHD *arcn, char *buf)
 	if (hd->linkflag != LONGLINKTYPE && hd->linkflag != LONGNAMETYPE) {
 		arcn->nlen = expandname(arcn->name, sizeof(arcn->name),
 		    &gnu_name_string, hd->name, sizeof(hd->name));
+		if (pax_component_too_long(arcn->name))
+			(void)pax_handle_invalid_path(arcn, "path",
+			    arcn->name);
 		arcn->ln_nlen = expandname(arcn->ln_name, sizeof(arcn->ln_name),
 		    &gnu_link_string, hd->linkname, sizeof(hd->linkname));
+		if (pax_component_too_long(arcn->ln_name))
+			(void)pax_handle_invalid_link(arcn, "linkpath",
+			    arcn->ln_name);
 	}
 	arcn->sb.st_mode = (mode_t)(asc_ul(hd->mode,sizeof(hd->mode),OCT) &
 	    0xfff);
@@ -815,6 +822,9 @@ reset:
 			arcn->nlen = cnt + expandname(dest,
 			    sizeof(arcn->name) - cnt, &gnu_name_string,
 			    hd->name, sizeof(hd->name));
+			if (pax_component_too_long(arcn->name))
+				(void)pax_handle_invalid_path(arcn, "path",
+				    arcn->name);
 		}
 	}
 
@@ -1297,6 +1307,33 @@ static void
 pax_global_free(void)
 {
 	pax_kv_free(&pax_global_xattr);
+}
+
+/* Return non-zero when any pathname component exceeds NAME_MAX bytes. */
+static int
+pax_component_too_long(const char *path)
+{
+	const char *start, *slash;
+	size_t len;
+
+	if (path == NULL || *path == '\0')
+		return 0;
+
+	start = path;
+	do {
+		slash = strchr(start, '/');
+		if (slash != NULL)
+			len = slash - start;
+		else
+			len = strlen(start);
+		if (len > NAME_MAX)
+			return 1;
+		if (slash == NULL)
+			break;
+		start = slash + 1;
+	} while (*start != '\0');
+
+	return 0;
 }
 
 static int
@@ -2428,7 +2465,8 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 				size_t copied = strlcpy(arcn->name, p,
 				    sizeof(arcn->name));
 				arcn->nlen = MINIMUM(copied, sizeof(arcn->name) - 1);
-				if (copied >= sizeof(arcn->name))
+				if (copied >= sizeof(arcn->name) ||
+				    pax_component_too_long(arcn->name))
 					(void)pax_handle_invalid_path(arcn,
 					    keyword, p);
 			} else if (!strcmp(keyword, "linkpath")) {
@@ -2436,7 +2474,8 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 				    sizeof(arcn->ln_name));
 				arcn->ln_nlen = MINIMUM(copied,
 				    sizeof(arcn->ln_name) - 1);
-				if (copied >= sizeof(arcn->ln_name))
+				if (copied >= sizeof(arcn->ln_name) ||
+				    pax_component_too_long(arcn->ln_name))
 					(void)pax_handle_invalid_link(arcn,
 					    keyword, p);
 			} else if (!strcmp(keyword, "mtime")) {
