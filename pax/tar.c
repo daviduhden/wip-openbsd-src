@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <wchar.h>
 #include <unistd.h>
 
 #include "pax.h"
@@ -93,6 +94,8 @@ static int rd_xheader(ARCHD *, int, off_t);
 #ifndef SMALL
 static int wr_xheader(const char *, HD_USTAR *, struct xheader *, int,
     const char *, unsigned int);
+static int needs_hdrcharset_binary(const char *);
+static int xheader_contains(const struct xheader *, const char *);
 #endif
 static int pax_store_kv(PAXKEY **, const char *, const char *);
 static void pax_apply_global(ARCHD *);
@@ -952,6 +955,58 @@ reset:
 
 #ifndef SMALL
 static int
+needs_hdrcharset_binary(const char *str)
+{
+	mbstate_t st;
+	const char *p;
+	size_t len;
+
+	if (str == NULL)
+		return 0;
+	memset(&st, 0, sizeof(st));
+	for (p = str; *p != '\0'; ) {
+		len = mbrtowc(NULL, p, MB_CUR_MAX, &st);
+		if (len == (size_t)-1 || len == (size_t)-2) {
+			memset(&st, 0, sizeof(st));
+			return 1;
+		}
+		if (len == 0) {
+			p++;
+			memset(&st, 0, sizeof(st));
+			continue;
+		}
+		p += len;
+	}
+	return 0;
+}
+
+static int
+xheader_contains(const struct xheader *xhdr, const char *keyword)
+{
+	const struct xheader_record *rec;
+	size_t klen;
+
+	if (xhdr == NULL || keyword == NULL)
+		return 0;
+	klen = strlen(keyword);
+	SLIST_FOREACH(rec, xhdr, entry) {
+		const char *space = strchr(rec->record, ' ');
+		const char *eq;
+
+		if (space == NULL)
+			continue;
+		space++;
+		eq = strchr(space, '=');
+		if (eq == NULL || eq <= space)
+			continue;
+		if ((size_t)(eq - space) == klen &&
+		    strncmp(space, keyword, klen) == 0)
+			return 1;
+	}
+	return 0;
+}
+
+static int
 xheader_add(struct xheader *xhdr, const char *keyword,
     const char *value)
 {
@@ -1775,6 +1830,16 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	fieldcpy(hd->name, sizeof(hd->name), pt,
 	    sizeof(arcn->name) - (pt - arcn->name));
 
+#ifndef SMALL
+	int need_hdrcharset_binary = 0;
+	if (!ustar && pax_option_invalid() == PAX_INVALID_BINARY) {
+		if (needs_hdrcharset_binary(arcn->name) ||
+		    (PAX_IS_LINK(arcn->type) &&
+		    needs_hdrcharset_binary(arcn->ln_name)))
+			need_hdrcharset_binary = 1;
+	}
+#endif
+
 	/*
 	 * set the fields in the header that are type dependent
 	 */
@@ -1935,6 +2000,15 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 
 #ifndef SMALL
 	pax_option_apply_local_xhdr(&xhdr);
+	if (need_hdrcharset_binary &&
+	    !xheader_contains(&xhdr, "hdrcharset")) {
+		if (xheader_add(&xhdr, "hdrcharset", "BINARY") == -1) {
+			paxwarn(1, "Unable to mark hdrcharset for %s",
+			    arcn->org_name);
+			xheader_free(&xhdr);
+			return(1);
+		}
+	}
 
 	/* write out a pax extended header if needed */
 	if (!SLIST_EMPTY(&xhdr)) {
