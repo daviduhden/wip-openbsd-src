@@ -46,6 +46,7 @@
 .Op Fl E Ar limit
 .Op Fl f Ar archive
 .Op Fl G Ar group
+.Op Fl o Ar options
 .Op Fl s Ar replstr
 .Op Fl T Ar range
 .Op Fl U Ar user
@@ -448,8 +449,8 @@ will not prompt for a new volume.
 This option can be useful for
 automated tasks where error recovery cannot be performed by a human.
 .It Fl o Ar options
-Information to modify the algorithm for extracting or writing archive files
-which is specific to the archive format specified by
+Information to modify the algorithm for listing, extracting, or writing
+archive files which is specific to the archive format specified by
 .Fl x .
 In general,
 .Ar options
@@ -503,7 +504,7 @@ and
 .Ql %% .
 .It Cm invalid Ns = Ns Ar action
 Choose how pathnames that cannot be represented locally are handled when
-reading archives.
+reading archives, and how non-representable pathnames are written.
 The
 .Ar action
 may be one of
@@ -513,6 +514,15 @@ may be one of
 .Cm UTF-8 ,
 or
 .Cm binary .
+When
+.Cm binary
+is selected and a pathname or link target contains bytes that are not valid in
+the current locale,
+.Nm
+will emit a
+.Ql hdrcharset=BINARY
+extended header while writing to indicate that the character data is encoded
+outside the portable character set.
 .It Cm linkdata
 Always store the file data for hard links instead of sharing the contents
 with another archive member.
