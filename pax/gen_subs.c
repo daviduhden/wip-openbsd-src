@@ -38,10 +38,12 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <grp.h>
+#include <libgen.h>
 #include <limits.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -76,6 +78,8 @@ struct listopt_spec {
 	char subfmt[128];
 	char conv;
 };
+
+static void listopt_output(ARCHD *, FILE *);
 
 static void
 listopt_ctx_init(struct listopt_ctx *ctx)
