@@ -71,7 +71,7 @@ list(void)
 {
 	ARCHD *arcn;
 	int res;
-	ARCHD archd;
+	ARCHD archd = {0};
 	time_t now;
 
 	arcn = &archd;
@@ -220,7 +220,7 @@ extract(void)
 	ARCHD *arcn;
 	int res;
 	off_t cnt;
-	ARCHD archd;
+	ARCHD archd = {0};
 	int fd;
 	time_t now;
 
@@ -634,7 +634,7 @@ append(void)
 {
 	ARCHD *arcn;
 	int res;
-	ARCHD archd;
+	ARCHD archd = {0};
 	FSUB *orgfrmt;
 	int udev;
 	off_t tlen;
@@ -774,7 +774,7 @@ append(void)
 void
 archive(void)
 {
-	ARCHD archd;
+	ARCHD archd = {0};
 
 	/*
 	 * if we only are adding members that are newer, we need to save the
@@ -808,7 +808,7 @@ copy(void)
 	size_t drem;
 	int fdsrc = -1;
 	struct stat sb;
-	ARCHD archd;
+	ARCHD archd = {0};
 	char dirbuf[PAXPATHLEN+1];
 
 	sltab_start();
