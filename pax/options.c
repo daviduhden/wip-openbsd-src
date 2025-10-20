@@ -125,7 +125,7 @@ static char *opt_parse_value(const char **, int);
 
 #define	BDEXTR	(AF|BF|LF|TF|WF|XF|CBF|CHF|CLF|CPF|CXF)
 #define	BDARCH	(CF|KF|LF|NF|PF|RF|CDF|CEF|CYF|CZF)
-#define	BDCOPY	(AF|BF|FF|OF|XF|CBF|CEF)
+#define	BDCOPY	(AF|BF|FF|XF|CBF|CEF)
 #define	BDLIST (AF|BF|IF|KF|LF|PF|RF|TF|UF|WF|XF|CBF|CDF|CHF|CLF|CPF|CXF|CYF|CZF)
 
 
@@ -1838,8 +1838,8 @@ pax_usage(void)
 	    "       pax -w [-0adHijLOPtuvXz] [-B bytes] [-b blocksize] [-f archive]\n"
 	    "           [-G group] [-o options] [-s replstr] [-T range] [-U user]\n"
 	    "           [-x format] [file ...]\n"
-	    "       pax -rw [-0DdHikLlnOPtuvXYZ] [-G group] [-p string] [-s replstr]\n"
-	    "           [-T range] [-U user] [file ...] directory\n",
+		"       pax -rw [-0DdHikLlnOPtuvXYZ] [-G group] [-o options] [-p string]\n"
+		"           [-s replstr] [-T range] [-U user] [file ...] directory\n",
 	    stderr);
 	exit(1);
 }
