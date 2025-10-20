@@ -1617,9 +1617,9 @@ toolong:
 int
 pax_handle_invalid_path(ARCHD *arcn, const char *keyword, const char *value)
 {
-	enum pax_invalid_action act = pax_option_invalid();
+	enum pax_invalid_action action = pax_option_invalid();
 
-	switch (act) {
+	switch (action) {
 	case PAX_INVALID_BYPASS:
 		paxwarn(1, "Skipping entry with invalid %s \"%s\"",
 		    keyword, value);
@@ -1642,9 +1642,9 @@ pax_handle_invalid_path(ARCHD *arcn, const char *keyword, const char *value)
 int
 pax_handle_invalid_link(ARCHD *arcn, const char *keyword, const char *value)
 {
-	enum pax_invalid_action act = pax_option_invalid();
+	enum pax_invalid_action action = pax_option_invalid();
 
-	switch (act) {
+	switch (action) {
 	case PAX_INVALID_BYPASS:
 		paxwarn(1, "Skipping link with invalid %s \"%s\"", keyword,
 		    value);
@@ -2351,18 +2351,18 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 		}
 		if (!global) {
 			if (!strcmp(keyword, "path")) {
-				size_t len = strlcpy(arcn->name, p,
+				size_t copied = strlcpy(arcn->name, p,
 				    sizeof(arcn->name));
-				arcn->nlen = MINIMUM(len, sizeof(arcn->name) - 1);
-				if (len >= sizeof(arcn->name))
+				arcn->nlen = MINIMUM(copied, sizeof(arcn->name) - 1);
+				if (copied >= sizeof(arcn->name))
 					(void)pax_handle_invalid_path(arcn,
 					    keyword, p);
 			} else if (!strcmp(keyword, "linkpath")) {
-				size_t len = strlcpy(arcn->ln_name, p,
+				size_t copied = strlcpy(arcn->ln_name, p,
 				    sizeof(arcn->ln_name));
-				arcn->ln_nlen = MINIMUM(len,
+				arcn->ln_nlen = MINIMUM(copied,
 				    sizeof(arcn->ln_name) - 1);
-				if (len >= sizeof(arcn->ln_name))
+				if (copied >= sizeof(arcn->ln_name))
 					(void)pax_handle_invalid_link(arcn,
 					    keyword, p);
 			} else if (!strcmp(keyword, "mtime")) {
