@@ -205,7 +205,7 @@ listopt_parse_spec(const char *fmt, struct listopt_spec *spec,
 			state = PARSE_LENGTH;
 			continue;
 		case PARSE_LENGTH:
-			if (strchr("hljztL", *p) != NULL) {
+			if (strchr("hljzt", *p) != NULL) {
 				size_t ll = strlen(spec->length);
 				if (ll + 1 < sizeof(spec->length)) {
 					spec->length[ll] = *p;
