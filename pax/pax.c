@@ -90,6 +90,8 @@ int	pids;			/* preserve file uid/gid */
 int	rmleadslash = 0;	/* remove leading '/' from pathnames */
 int	exit_val;		/* exit value */
 int	docrc;			/* check/create file crc */
+int	swapbytes;		/* swap bytes when extracting */
+int	swaphalf;		/* swap halfwords when extracting */
 char	*dirptr;		/* destination dir in a copy */
 char	*argv0;			/* root of argv[0] */
 enum op_mode op_mode;		/* what program are we acting as? */

@@ -50,6 +50,9 @@
 
 static int buf_fill(void);
 static int buf_flush(int);
+static void apply_swaps(char *, size_t, int);
+static void swap_bytes(char *, size_t);
+static void swap_halfwords(char *, size_t);
 
 #define MINFBSZ		512		/* default block size for hole detect */
 #define MAXFLT		10		/* default media read error limit */
@@ -670,6 +673,7 @@ rd_wrfile(ARCHD *arcn, int ofd, off_t *left)
 	int sz = MINFBSZ;
 	struct stat sb;
 	u_int32_t crc = 0;
+	int need_swap = swapbytes || swaphalf;
 
 	/*
 	 * pass the blocksize of the file being written to the write routine,
@@ -700,20 +704,26 @@ rd_wrfile(ARCHD *arcn, int ofd, off_t *left)
 		if ((cnt <= 0) && ((cnt = buf_fill()) <= 0))
 			break;
 		cnt = MINIMUM(cnt, size);
-		if ((res = file_write(ofd,bufpt,cnt,&rem,&isem,sz,fnm)) <= 0) {
+		if (need_swap)
+			/* convert archive data into requested byte order */
+			apply_swaps(bufpt, cnt, 0);
+		if ((res = file_write(ofd, bufpt, cnt, &rem, &isem, sz, fnm)) <= 0) {
+			if (need_swap)
+				apply_swaps(bufpt, cnt, 1);
 			*left = size;
 			break;
 		}
+		if (need_swap)
+			/* restore buffer so CRC logic sees original stream */
+			apply_swaps(bufpt, cnt, 1);
 
 		if (docrc) {
-			/*
-			 * update the actual crc value
-			 */
-			cnt = res;
-			while (--cnt >= 0)
-				crc += *bufpt++ & 0xff;
-		} else
-			bufpt += res;
+			int i = res;
+			unsigned char *bp = (unsigned char *)bufpt;
+			while (--i >= 0)
+				crc += *bp++;
+		}
+		bufpt += res;
 		size -= res;
 	}
 
@@ -739,6 +749,49 @@ rd_wrfile(ARCHD *arcn, int ofd, off_t *left)
 	if (docrc && (size == 0) && (arcn->crc != crc))
 		paxwarn(1,"Actual crc does not match expected crc %s",arcn->name);
 	return(0);
+}
+
+static void
+apply_swaps(char *buf, size_t len, int reverse)
+{
+	if (!reverse) {
+		if (swapbytes)
+			swap_bytes(buf, len);
+		if (swaphalf)
+			swap_halfwords(buf, len);
+	} else {
+		if (swaphalf)
+			swap_halfwords(buf, len);
+		if (swapbytes)
+			swap_bytes(buf, len);
+	}
+}
+
+static void
+swap_bytes(char *buf, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i + 1 < len; i += 2) {
+		char tmp = buf[i];
+		buf[i] = buf[i + 1];
+		buf[i + 1] = tmp;
+	}
+}
+
+static void
+swap_halfwords(char *buf, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i + 3 < len; i += 4) {
+		char tmp0 = buf[i];
+		char tmp1 = buf[i + 1];
+		buf[i] = buf[i + 2];
+		buf[i + 1] = buf[i + 3];
+		buf[i + 2] = tmp0;
+		buf[i + 3] = tmp1;
+	}
 }
 
 /*

@@ -239,6 +239,8 @@ extern int pids;
 extern int rmleadslash;
 extern int exit_val;
 extern int docrc;
+extern int swapbytes;
+extern int swaphalf;
 extern char *dirptr;
 extern char *argv0;
 extern enum op_mode { OP_PAX, OP_TAR, OP_CPIO } op_mode;

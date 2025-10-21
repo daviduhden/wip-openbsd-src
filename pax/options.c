@@ -1202,6 +1202,8 @@ cpio_options(int argc, char **argv)
 	dflag = 1;
 	act = -1;
 	nodirs = 1;
+	swapbytes = 0;
+	swaphalf = 0;
 	while ((c=getopt(argc,argv,"abcdfijklmoprstuvzABC:E:F:H:I:LO:SZ6")) != -1)
 		switch (c) {
 			case 'a':
@@ -1214,6 +1216,8 @@ cpio_options(int argc, char **argv)
 				/*
 				 * swap bytes and half-words when reading data
 				 */
+				swapbytes = 1;
+				swaphalf = 1;
 				break;
 			case 'c':
 				/*
@@ -1283,6 +1287,7 @@ cpio_options(int argc, char **argv)
 				/*
 				 * swap bytes after reading data
 				 */
+				swapbytes = 1;
 				break;
 			case 't':
 				/*
@@ -1396,6 +1401,7 @@ cpio_options(int argc, char **argv)
 				/*
 				 * swap halfwords after reading data
 				 */
+				swaphalf = 1;
 				break;
 			case 'Z':
 				/*
