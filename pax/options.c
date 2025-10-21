@@ -1838,8 +1838,8 @@ pax_usage(void)
 	    "       pax -w [-0adHijLOPtuvXz] [-B bytes] [-b blocksize] [-f archive]\n"
 	    "           [-G group] [-o options] [-s replstr] [-T range] [-U user]\n"
 	    "           [-x format] [file ...]\n"
-		"       pax -rw [-0DdHikLlnOPtuvXYZ] [-G group] [-o options] [-p string]\n"
-		"           [-s replstr] [-T range] [-U user] [file ...] directory\n",
+	    "       pax -rw [-0DdHikLlnOPtuvXYZ] [-G group] [-o options] [-p string]\n"
+	    "           [-s replstr] [-T range] [-U user] [file ...] directory\n",
 	    stderr);
 	exit(1);
 }
