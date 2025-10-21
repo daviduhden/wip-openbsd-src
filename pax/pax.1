@@ -873,7 +873,8 @@ as soon as processing begins on that file or
 archive member.
 The trailing newline
 is not buffered and is written only after the file has been read or written.
-.Ss List Output Formatting
+.Pp
+.Sy List Output Formatting
 The
 .Fl o Cm listopt Ns = Ns Ar format
 keyword alters the verbose list produced with
@@ -893,11 +894,11 @@ options.
 The following conversions extend the behaviour of
 .Xr printf 3 :
 .Bl -tag -width Ds
-.It %s , %c , %d , %i , %o , %u , %x , %X
+.It Li %s , %c , %d , %i , %o , %u , %x , %X
 Use the selected keyword (defaulting to
 .Ql path )
 and print it with the requested conversion.
-.It %T
+.It Li %T
 Formats a time value.
 If the keyword is omitted
 .Ql mtime
@@ -908,19 +909,19 @@ selects the time field and the
 .Xr strftime 3
 format string to apply (default:
 .Ql %b %e %H:%M %Y ) .
-.It %M
+.It Li %M
 Prints the symbolic file mode string as produced by
 .Fn strmode
-.It %D
+.It Li %D
 Prints the device numbers for block or character special files
 as two comma-separated integers.
 If a keyword is supplied the numeric value associated with that keyword
 is printed instead.
-.It %F
+.It Li %F
 Prints a pathname composed from a comma-separated list of keywords.
 Missing components are skipped.
 When no list is supplied the stored pathname is used.
-.It %L
+.It Li %L
 Prints a symbolic link in the form
 .Dq path -> target .
 Non-links fall back to
