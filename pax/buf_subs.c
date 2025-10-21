@@ -752,45 +752,45 @@ rd_wrfile(ARCHD *arcn, int ofd, off_t *left)
 }
 
 static void
-apply_swaps(char *buf, size_t len, int reverse)
+apply_swaps(char *data, size_t len, int reverse)
 {
 	if (!reverse) {
 		if (swapbytes)
-			swap_bytes(buf, len);
+			swap_bytes(data, len);
 		if (swaphalf)
-			swap_halfwords(buf, len);
+			swap_halfwords(data, len);
 	} else {
 		if (swaphalf)
-			swap_halfwords(buf, len);
+			swap_halfwords(data, len);
 		if (swapbytes)
-			swap_bytes(buf, len);
+			swap_bytes(data, len);
 	}
 }
 
 static void
-swap_bytes(char *buf, size_t len)
+swap_bytes(char *data, size_t len)
 {
 	size_t i;
 
 	for (i = 0; i + 1 < len; i += 2) {
-		char tmp = buf[i];
-		buf[i] = buf[i + 1];
-		buf[i + 1] = tmp;
+		char tmp = data[i];
+		data[i] = data[i + 1];
+		data[i + 1] = tmp;
 	}
 }
 
 static void
-swap_halfwords(char *buf, size_t len)
+swap_halfwords(char *data, size_t len)
 {
 	size_t i;
 
 	for (i = 0; i + 3 < len; i += 4) {
-		char tmp0 = buf[i];
-		char tmp1 = buf[i + 1];
-		buf[i] = buf[i + 2];
-		buf[i + 1] = buf[i + 3];
-		buf[i + 2] = tmp0;
-		buf[i + 3] = tmp1;
+		char tmp0 = data[i];
+		char tmp1 = data[i + 1];
+		data[i] = data[i + 2];
+		data[i + 1] = data[i + 3];
+		data[i + 2] = tmp0;
+		data[i + 3] = tmp1;
 	}
 }
 
