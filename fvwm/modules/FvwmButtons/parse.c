@@ -65,6 +65,36 @@ char *seekright(char **s)
   return token;
 }
 
+static char *seekright_command(char **s)
+{
+	char *command = seekright(s);
+
+	if (command == NULL)
+		return NULL;
+
+	while (terminator != '\0' && terminator != ')' && terminator != ',')
+		{
+			char *next = seekright(s);
+
+			if (next == NULL)
+				break;
+
+			size_t len_command = strlen(command);
+			size_t len_next = strlen(next);
+			char *combined = mymalloc(len_command + len_next + 2);
+
+			memcpy(combined, command, len_command);
+			combined[len_command] = ' ';
+			memcpy(combined + len_command + 1, next, len_next + 1);
+
+			free(command);
+			free(next);
+			command = combined;
+		}
+
+	return command;
+}
+
 /**
 *** ParseBack()
 *** Parses the options possible to Back
@@ -588,7 +618,7 @@ void match_string(button_info **uberb,char *s)
 	      if(*s=='(' && s++)
 		ParseSwallow(&s,&b->swallow,&b->swallow_mask);
 	      t=seekright(&s);
-	      o=seekright(&s);
+	      o=seekright_command(&s);
 	      if(t)
 		{
 		  if (b->hangon)

@@ -54,7 +54,10 @@ int Mscreen;
 long Vx, Vy;
 static char *MkDef(char *name, char *def);
 static char *MkNum(char *name,int def);
-static char *cpp_defs(Display *display, const char *host, char *m4_options, char *config_file);
+static int cpp_process(Display *display, const char *host, char *options,
+  const char *config_file, int keep_output);
+static int is_cpp_linemarker(const char *line);
+static void *xrealloc(void *ptr, size_t size);
 #define MAXHOSTNAME 255
 #define EXTRA 20
 
@@ -76,8 +79,7 @@ int main(int argc, char **argv)
   char *temp, *s;
   char *display_name = NULL;
   char *filename = NULL;
-  char *tmp_file, read_string[80],delete_string[80];
-  int i,cpp_debug = 0;
+  int i, cpp_debug = 0;
 
   strcpy(cpp_options,"");
 
@@ -161,198 +163,356 @@ int main(int argc, char **argv)
 	filename[i] = 0;
       }
 
-  if (!(dpy = XOpenDisplay(display_name)))
+  if (filename == NULL)
     {
-      fprintf(stderr,"%s: can't open display %s",
-	      MyName, XDisplayName(display_name));
-      exit (1);
+      fprintf(stderr, "%s: no configuration file specified\n", MyName);
+      exit(1);
     }
 
-  tmp_file = cpp_defs(dpy, display_name,cpp_options, filename);
+  if (cpp_process(dpy, display_name, cpp_options, filename, cpp_debug) != 0)
+    exit(1);
 
-  snprintf(read_string,sizeof(read_string),"read %s\n",tmp_file);
-  SendInfo(fd,read_string,0);
-
-  /* For a debugging version, we may wish to omit this part. */
-  /* I'll let some cpp advocates clean this up */
-  if(!cpp_debug)
-    {
-      snprintf(delete_string,sizeof(delete_string),"exec rm %s\n",tmp_file);
-      SendInfo(fd,delete_string,0);
-    }
   return 0;
 }
 
 
 
-static char *cpp_defs(Display *display, const char *host, char *cpp_options, char *config_file)
+static int
+cpp_process(Display *display, const char *host, char *cpp_opts,
+    const char *config_file, int keep_output)
 {
   Screen *screen;
   Visual *visual;
   char client[MAXHOSTNAME], server[MAXHOSTNAME], *colon;
   char ostype[BUFSIZ];
-  char options[BUFSIZ];
-  static char tmp_name[BUFSIZ];
+  char feature_opts[BUFSIZ];
   struct hostent *hostname;
-  char *vc;			/* Visual Class */
-  FILE *tmpf;
+  char *vc;
   struct passwd *pwent;
-  int fd;
-  /* Generate a temporary filename.  Honor the TMPDIR environment variable,
-     if set. Hope nobody deletes this file! */
+  FILE *cpp_in = NULL;
+  FILE *cpp_out = NULL;
+  FILE *mirror = NULL;
+  int to_child[2];
+  int from_child[2];
+  pid_t pid;
+  int status;
+  char command[2 * BUFSIZ];
+  char tmp_name[BUFSIZ];
+  int created_temp = 0;
+  char kept_path[BUFSIZ];
+  size_t line_cap = 1024;
+  char *linebuf = NULL;
+  size_t line_len = 0;
+  unsigned char chunk[BUFSIZ];
+  size_t nread;
+  int appended_newline = 0;
 
-  if (strlen(cpp_outfile) == 0) {
-    if ((vc=getenv("TMPDIR"))) {
-      strlcpy(tmp_name, vc, sizeof(tmp_name));
-    } else {
-      strlcpy(tmp_name, "/tmp", sizeof(tmp_name));
-    }
-    strlcat(tmp_name, "/fvwmrcXXXXXXXXXX", sizeof(tmp_name));
-    mktemp(tmp_name);
-  } else {
-    strlcpy(tmp_name,cpp_outfile, sizeof(tmp_name));
-  }
+  kept_path[0] = '\0';
 
-  if (*tmp_name == '\0')
+  if (cpp_outfile[0] != '\0') {
+    mirror = fopen(cpp_outfile, "w");
+    if (mirror == NULL)
+      fprintf(stderr, "%s: unable to open %s for writing\n", MyName,
+          cpp_outfile);
+  } else if (keep_output) {
+    const char *tmpdir = getenv("TMPDIR");
+    if (tmpdir == NULL)
+      tmpdir = "/tmp";
+    strlcpy(tmp_name, tmpdir, sizeof(tmp_name));
+    strlcat(tmp_name, "/fvwmcppXXXXXXXXXX", sizeof(tmp_name));
     {
-      perror("mktemp failed in cpp_defs");
-      exit(0377);
+      int fd_tmp = mkstemp(tmp_name);
+      if (fd_tmp >= 0) {
+        mirror = fdopen(fd_tmp, "w");
+        if (mirror != NULL) {
+          strlcpy(kept_path, tmp_name, sizeof(kept_path));
+          created_temp = 1;
+        } else {
+          close(fd_tmp);
+        }
+      } else {
+        perror("mkstemp failed in cpp_process");
+      }
     }
+  }
 
-  /*
-  ** check to make sure it doesn't exist already, to prevent security hole
-  */
-  if ((fd = open(tmp_name, O_WRONLY|O_EXCL|O_CREAT, 0600)) < 0)
+  if (pipe(to_child) == -1 || pipe(from_child) == -1) {
+    perror("pipe in cpp_process");
+    if (mirror)
+      fclose(mirror);
+    return -1;
+  }
+
+  static int
+  is_cpp_linemarker(const char *line)
   {
-    perror("exclusive open for output file failed in cpp_defs");
-    exit(0377);
+    const unsigned char *p;
+
+    if (line == NULL)
+      return 0;
+
+    p = (const unsigned char *)line;
+    while (*p == ' ' || *p == '\t')
+      p++;
+    if (*p != '#')
+      return 0;
+    p++;
+    while (*p == ' ' || *p == '\t')
+      p++;
+    if (*p == '\0' || *p == '\n')
+      return 1;
+    if (isdigit(*p)) {
+      while (isdigit(*p))
+        p++;
+      while (*p == ' ' || *p == '\t')
+        p++;
+      if (*p == '\0' || *p == '\n' || *p == '"')
+        return 1;
+    }
+    if (strncmp((const char *)p, "line", 4) == 0)
+      return 1;
+    return 0;
   }
-  close(fd);
 
-    /*
-     * Create the appropriate command line to run cpp, and
-     * open a pipe to the command.
-     */
+  static void *
+  xrealloc(void *ptr, size_t size)
+  {
+    void *tmp = realloc(ptr, size);
 
-  strlcpy(options, cpp_prog, sizeof(options));
-  strlcat(options, " ", sizeof(options));
-  strlcat(options, cpp_options, sizeof(options));
-  strlcat(options, " >", sizeof(options));
-  strlcat(options, tmp_name, sizeof(options));
-
-  tmpf = popen(options, "w");
-  if (tmpf == NULL) {
-    perror("Cannot open pipe to cpp");
-    exit(0377);
+    if (tmp == NULL) {
+      fprintf(stderr, "%s: unable to allocate %zu bytes\n", MyName, size);
+      exit(1);
+    }
+    return tmp;
   }
 
-  gethostname(client,MAXHOSTNAME);
+  snprintf(command, sizeof(command), "%s %s", cpp_prog,
+      (cpp_opts != NULL) ? cpp_opts : "");
 
-  getostype  (ostype, sizeof ostype);
+  pid = fork();
+  if (pid == -1) {
+    perror("fork in cpp_process");
+    close(to_child[0]);
+    close(to_child[1]);
+    close(from_child[0]);
+    close(from_child[1]);
+    if (mirror)
+      fclose(mirror);
+    return -1;
+  }
+
+  if (pid == 0) {
+    dup2(to_child[0], STDIN_FILENO);
+    dup2(from_child[1], STDOUT_FILENO);
+    close(to_child[0]);
+    close(to_child[1]);
+    close(from_child[0]);
+    close(from_child[1]);
+    execl("/bin/sh", "sh", "-c", command, (char *)NULL);
+    _exit(127);
+  }
+
+  close(to_child[0]);
+  close(from_child[1]);
+
+  cpp_in = fdopen(to_child[1], "w");
+  cpp_out = fdopen(from_child[0], "r");
+  if (cpp_in == NULL || cpp_out == NULL) {
+    perror("fdopen in cpp_process");
+    if (cpp_in)
+      fclose(cpp_in);
+    else
+      close(to_child[1]);
+    if (cpp_out)
+      fclose(cpp_out);
+    else
+      close(from_child[0]);
+    if (mirror)
+      fclose(mirror);
+    waitpid(pid, NULL, 0);
+    return -1;
+  }
+
+#define WRITE_DEF(name, value)                              \
+  do {                                                      \
+    char *tmp__ = MkDef((name), (value));                   \
+    fputs(tmp__, cpp_in);                                  \
+    free(tmp__);                                           \
+  } while (0)
+#define WRITE_NUM(name, value)                              \
+  do {                                                      \
+    char *tmp__ = MkNum((name), (value));                   \
+    fputs(tmp__, cpp_in);                                  \
+    free(tmp__);                                           \
+  } while (0)
+
+  gethostname(client, MAXHOSTNAME);
+  getostype(ostype, sizeof ostype);
 
   hostname = gethostbyname(client);
   strlcpy(server, XDisplayName(host), sizeof(server));
   colon = strchr(server, ':');
-  if (colon != NULL) *colon = '\0';
+  if (colon != NULL)
+    *colon = '\0';
   if ((server[0] == '\0') || (!strcmp(server, "unix")))
-    strlcpy(server, client, sizeof(server));	/* must be connected to :0 or unix:0 */
+    strlcpy(server, client, sizeof(server));
 
-  /* TWM_TYPE is fvwm, for completeness */
-
-  fputs(MkDef("TWM_TYPE", "fvwm"), tmpf);
-
-  /* The machine running the X server */
-  fputs(MkDef("SERVERHOST", server), tmpf);
-  /* The machine running the window manager process */
-  fputs(MkDef("CLIENTHOST", client), tmpf);
+  WRITE_DEF("TWM_TYPE", "fvwm");
+  WRITE_DEF("SERVERHOST", server);
+  WRITE_DEF("CLIENTHOST", client);
   if (hostname)
-    fputs(MkDef("HOSTNAME", (char *)hostname->h_name), tmpf);
+    WRITE_DEF("HOSTNAME", (char *)hostname->h_name);
   else
-    fputs(MkDef("HOSTNAME", (char *)client), tmpf);
+    WRITE_DEF("HOSTNAME", client);
+  WRITE_DEF("OSTYPE", ostype);
 
-  fputs(MkDef("OSTYPE", ostype), tmpf);
+  pwent = getpwuid(geteuid());
+  if (pwent && pwent->pw_name)
+    WRITE_DEF("USER", pwent->pw_name);
+  else
+    WRITE_DEF("USER", "");
 
-  pwent=getpwuid(geteuid());
-  fputs(MkDef("USER", pwent->pw_name), tmpf);
+  {
+    const char *home = getenv("HOME");
+    WRITE_DEF("HOME", (home != NULL) ? home : "");
+  }
 
-  fputs(MkDef("HOME", getenv("HOME")), tmpf);
-  fputs(MkNum("VERSION", ProtocolVersion(display)), tmpf);
-  fputs(MkNum("REVISION", ProtocolRevision(display)), tmpf);
-  fputs(MkDef("VENDOR", ServerVendor(display)), tmpf);
-  fputs(MkNum("RELEASE", VendorRelease(display)), tmpf);
+  WRITE_NUM("VERSION", ProtocolVersion(display));
+  WRITE_NUM("REVISION", ProtocolRevision(display));
+  WRITE_DEF("VENDOR", ServerVendor(display));
+  WRITE_NUM("RELEASE", VendorRelease(display));
+
   screen = ScreenOfDisplay(display, Mscreen);
   visual = DefaultVisualOfScreen(screen);
-  fputs(MkNum("WIDTH", DisplayWidth(display,Mscreen)), tmpf);
-  fputs(MkNum("HEIGHT", DisplayHeight(display,Mscreen)), tmpf);
+  WRITE_NUM("WIDTH", DisplayWidth(display, Mscreen));
+  WRITE_NUM("HEIGHT", DisplayHeight(display, Mscreen));
+  WRITE_NUM("X_RESOLUTION", Resolution(screen->width, screen->mwidth));
+  WRITE_NUM("Y_RESOLUTION", Resolution(screen->height, screen->mheight));
+  WRITE_NUM("PLANES", DisplayPlanes(display, Mscreen));
+  WRITE_NUM("BITS_PER_RGB", visual->bits_per_rgb);
+  WRITE_NUM("SCREEN", Mscreen);
 
-  fputs(MkNum("X_RESOLUTION",Resolution(screen->width,screen->mwidth)),tmpf);
-  fputs(MkNum("Y_RESOLUTION",Resolution(screen->height,screen->mheight)),tmpf);
-  fputs(MkNum("PLANES",DisplayPlanes(display, Mscreen)), tmpf);
+  switch (visual->class) {
+  case StaticGray:
+    vc = "StaticGray";
+    break;
+  case GrayScale:
+    vc = "GrayScale";
+    break;
+  case StaticColor:
+    vc = "StaticColor";
+    break;
+  case PseudoColor:
+    vc = "PseudoColor";
+    break;
+  case TrueColor:
+    vc = "TrueColor";
+    break;
+  case DirectColor:
+    vc = "DirectColor";
+    break;
+  default:
+    vc = "NonStandard";
+    break;
+  }
 
-  fputs(MkNum("BITS_PER_RGB", visual->bits_per_rgb), tmpf);
-  fputs(MkNum("SCREEN", Mscreen), tmpf);
+  WRITE_DEF("CLASS", vc);
+  if (visual->class != StaticGray && visual->class != GrayScale)
+    WRITE_DEF("COLOR", "Yes");
+  else
+    WRITE_DEF("COLOR", "No");
+  WRITE_DEF("FVWM_VERSION", VERSION);
 
-  switch(visual->class)
-    {
-    case(StaticGray):
-	  vc = "StaticGray";
-	break;
-	case(GrayScale):
-	  vc = "GrayScale";
-	break;
-	case(StaticColor):
-	  vc = "StaticColor";
-	break;
-	case(PseudoColor):
-	  vc = "PseudoColor";
-	break;
-	case(TrueColor):
-	  vc = "TrueColor";
-	break;
-	case(DirectColor):
-	  vc = "DirectColor";
-	break;
-      default:
-	vc = "NonStandard";
-	break;
+  feature_opts[0] = '\0';
+#ifdef SHAPE
+  strlcat(feature_opts, "SHAPE ", sizeof(feature_opts));
+#endif
+#ifdef XPM
+  strlcat(feature_opts, "XPM ", sizeof(feature_opts));
+#endif
+  strlcat(feature_opts, "Cpp ", sizeof(feature_opts));
+#ifdef NO_SAVEUNDERS
+  strlcat(feature_opts, "NO_SAVEUNDERS ", sizeof(feature_opts));
+#endif
+  WRITE_DEF("OPTIONS", feature_opts);
+  WRITE_DEF("FVWM_MODULEDIR", FVWM_MODULEDIR);
+  WRITE_DEF("FVWM_CONFIGDIR", FVWM_CONFIGDIR);
+
+  fprintf(cpp_in, "#include \"%s\"\n", config_file);
+  fflush(cpp_in);
+  fclose(cpp_in);
+
+#undef WRITE_DEF
+#undef WRITE_NUM
+
+  linebuf = safemalloc(line_cap);
+  while ((nread = fread(chunk, 1, sizeof(chunk), cpp_out)) > 0) {
+    if (mirror)
+      fwrite(chunk, 1, nread, mirror);
+    for (size_t i = 0; i < nread; i++) {
+      if (line_len + 1 >= line_cap) {
+        line_cap *= 2;
+        linebuf = xrealloc(linebuf, line_cap);
       }
+      linebuf[line_len++] = chunk[i];
+      if (chunk[i] == '\n') {
+        if (line_len >= 2 && linebuf[line_len - 2] == '\\') {
+          /* Preserve fvwm's "\" line continuation semantics. */
+          line_len -= 2;
+          continue;
+        }
+        linebuf[line_len] = '\0';
+        if (!is_cpp_linemarker(linebuf))
+          SendInfo(fd, linebuf, 0);
+        line_len = 0;
+      }
+    }
+  }
 
-    fputs(MkDef("CLASS", vc), tmpf);
-    if (visual->class != StaticGray && visual->class != GrayScale)
-      fputs(MkDef("COLOR", "Yes"), tmpf);
-    else
-      fputs(MkDef("COLOR", "No"), tmpf);
-    fputs(MkDef("FVWM_VERSION", VERSION), tmpf);
+  if (ferror(cpp_out))
+    perror("cpp output read");
 
-    /* Add options together */
-    *options = '\0';
-#ifdef	SHAPE
-    strcat(options, "SHAPE ");
-#endif
-#ifdef	XPM
-    strcat(options, "XPM ");
-#endif
+  if (line_len > 0) {
+    if (line_len + 2 >= line_cap) {
+      line_cap *= 2;
+      linebuf = xrealloc(linebuf, line_cap);
+    }
+    if (linebuf[line_len - 1] != '\n') {
+      linebuf[line_len++] = '\n';
+      appended_newline = 1;
+    }
+    linebuf[line_len] = '\0';
+    if (mirror && appended_newline)
+      fputc('\n', mirror);
+    if (!is_cpp_linemarker(linebuf))
+      SendInfo(fd, linebuf, 0);
+  }
 
-    strcat(options, "Cpp ");
+  free(linebuf);
+  fclose(cpp_out);
 
-#ifdef	NO_SAVEUNDERS
-    strcat(options, "NO_SAVEUNDERS ");
-#endif
+  if (mirror)
+    fclose(mirror);
 
-    fputs(MkDef("OPTIONS", options), tmpf);
+  if (waitpid(pid, &status, 0) == -1) {
+    perror("waitpid for cpp");
+    status = 1;
+  }
 
-    fputs(MkDef("FVWM_MODULEDIR", FVWM_MODULEDIR), tmpf);
-    fputs(MkDef("FVWM_CONFIGDIR", FVWM_CONFIGDIR), tmpf);
+  if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+    fprintf(stderr, "%s: cpp exited with status %d\n", MyName,
+        WEXITSTATUS(status));
+    return -1;
+  }
 
-    /*
-     * At this point, we've sent the definitions to cpp.  Just include
-     * the fvwmrc file now.
-     */
+  if (created_temp && kept_path[0] != '\0') {
+    char msg[BUFSIZ];
+    snprintf(msg, sizeof(msg), "Echo %s: preprocessor output kept in %s\n",
+        MyName, kept_path);
+    SendInfo(fd, msg, 0);
+  }
 
-    fprintf(tmpf, "#include \"%s\"\n", config_file);
-
-    pclose(tmpf);
-    return(tmp_name);
+  return 0;
 }
 
 
