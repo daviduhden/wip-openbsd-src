@@ -72,11 +72,8 @@ To do: (in no particular order)
      (ie.  You make it wider you get 2 columns of buttons, etc.)
 
  - Fix the following:
-   - The function saferealloc, based on safemalloc by Rob Nation still doesn't
-     work correctly, I left it in the Mallocs.c file but I use the normal
-     realloc now.  (Being lazy on this one)
-   - Make compile compatability for all systems
-   - Tune FvwmWinList to be more efficient  (Low priority, right now)
+      - Make compile compatability for all systems
+      - Tune FvwmWinList to be more efficient  (Low priority, right now)
 
 I am open to, actually I am trolling for, suggestions/improvments/ideas/rags
 on this.

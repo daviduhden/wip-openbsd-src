@@ -29,22 +29,22 @@
 
 extern char *Module;
 
-/******************************************************************************
-  saferealloc - safely reallocate memory or exit if fails. (Doesn't work right)
-  (No kidding! Try it now ...)
-******************************************************************************/
 char *saferealloc(char *ptr, size_t length)
 {
-char *newptr;
+  char *newptr;
+  const char *name;
 
-  if(length <=0) length=1;
+  if (length == 0) {
+    length = 1;
+  }
 
-  /* If ptr is NULL then realloc does a malloc */
-  newptr=realloc(ptr,length);
-    if (newptr == (char *)0) {
-      fprintf(stderr,"%s:realloc failed",Module);
-      exit(1);
-    }
+  newptr = realloc(ptr, length);
+  if (newptr == NULL) {
+    name = (Module && *Module) ? Module : "FvwmWinList";
+    fprintf(stderr, "%s: realloc failed for %zu bytes\n", name, length);
+    exit(1);
+  }
+
   return newptr;
 }
 
