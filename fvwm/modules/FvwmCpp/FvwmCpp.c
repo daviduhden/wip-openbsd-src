@@ -52,8 +52,8 @@ int ScreenWidth, ScreenHeight;
 int Mscreen;
 
 long Vx, Vy;
-static char *MkDef(char *name, char *def);
-static char *MkNum(char *name,int def);
+static char *MkDef(const char *name, const char *def);
+static char *MkNum(const char *name,int def);
 static int cpp_process(Display *display, const char *host, char *options,
   const char *config_file, int keep_output);
 static int is_cpp_linemarker(const char *line);
@@ -245,51 +245,6 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 
   snprintf(command, sizeof(command), "%s %s", cpp_prog,
       (cpp_opts != NULL) ? cpp_opts : "");
-
-
-  static int
-  is_cpp_linemarker(const char *line)
-  {
-    const unsigned char *p;
-
-    if (line == NULL)
-      return 0;
-
-    p = (const unsigned char *)line;
-    while (*p == ' ' || *p == '\t')
-      p++;
-    if (*p != '#')
-      return 0;
-    p++;
-    while (*p == ' ' || *p == '\t')
-      p++;
-    if (*p == '\0' || *p == '\n')
-      return 1;
-    if (isdigit(*p)) {
-      while (isdigit(*p))
-        p++;
-      while (*p == ' ' || *p == '\t')
-        p++;
-      if (*p == '\0' || *p == '\n' || *p == '"')
-        return 1;
-    }
-    if (strncmp((const char *)p, "line", 4) == 0)
-      return 1;
-    return 0;
-  }
-
-
-  static void *
-  xrealloc(void *ptr, size_t size)
-  {
-    void *tmp = realloc(ptr, size);
-
-    if (tmp == NULL) {
-      fprintf(stderr, "%s: unable to allocate %zu bytes\n", MyName, size);
-      exit(1);
-    }
-    return tmp;
-  }
 
 
   pid = fork();
@@ -522,6 +477,52 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 
 
 
+
+static int
+is_cpp_linemarker(const char *line)
+{
+  const unsigned char *p;
+
+  if (line == NULL)
+    return 0;
+
+  p = (const unsigned char *)line;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  if (*p != '#')
+    return 0;
+  p++;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  if (*p == '\0' || *p == '\n')
+    return 1;
+  if (isdigit(*p)) {
+    while (isdigit(*p))
+      p++;
+    while (*p == ' ' || *p == '\t')
+      p++;
+    if (*p == '\0' || *p == '\n' || *p == '"')
+      return 1;
+  }
+  if (strncmp((const char *)p, "line", 4) == 0)
+    return 1;
+  return 0;
+}
+
+
+static void *
+xrealloc(void *ptr, size_t size)
+{
+  void *tmp = realloc(ptr, size);
+
+  if (tmp == NULL) {
+    fprintf(stderr, "%s: unable to allocate %zu bytes\n", MyName, size);
+    exit(1);
+  }
+  return tmp;
+}
+
+
 /***********************************************************************
  *
  *  Procedure:
@@ -533,7 +534,7 @@ void DeadPipe(int nonsense)
   exit(0);
 }
 
-static char *MkDef(char *name, char *def)
+static char *MkDef(const char *name, const char *def)
 {
   char *cp = NULL;
   int n;
@@ -548,7 +549,7 @@ static char *MkDef(char *name, char *def)
   return(cp);
 }
 
-static char *MkNum(char *name,int def)
+static char *MkNum(const char *name,int def)
 {
   char num[20];
 
