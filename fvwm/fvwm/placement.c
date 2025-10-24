@@ -550,26 +550,33 @@ Bool PlaceWindow(FvwmWindow *tmp_win, unsigned long tflag,int Desk, int PageX, i
 */
     if (!(tflag & STICKY_FLAG) && (tflag & STARTSONDESK_FLAG))
       {
-        if (PageX && PageY)
+        if (PageX || PageY)
         {
-          px  =  PageX - 1;
-          py  =  PageY -1 ;
-          px  *= Scr.MyDisplayWidth;
-          py  *= Scr.MyDisplayHeight;
-          if ( (!PPosOverride) && (!(tmp_win->flags & SHOW_ON_MAP)) )
+          int current_px = (Scr.MyDisplayWidth != 0)
+            ? Scr.Vx / Scr.MyDisplayWidth : 0;
+          int current_py = (Scr.MyDisplayHeight != 0)
+            ? Scr.Vy / Scr.MyDisplayHeight : 0;
+
+          px = (PageX != 0)
+            ? ((PageX > 0) ? PageX - 1 : PageX)
+            : current_px;
+          py = (PageY != 0)
+            ? ((PageY > 0) ? PageY - 1 : PageY)
+            : current_py;
+
+          px *= Scr.MyDisplayWidth;
+          py *= Scr.MyDisplayHeight;
+
+          if ((!PPosOverride) && (!(tmp_win->flags & SHOW_ON_MAP)))
             {
               MoveViewport(px,py,True);
             }
-          else
+          else if (HonorStartsOnPage)
             {
-              if (HonorStartsOnPage)
-                {
-                  /*  Save the delta from current page */
-                  pdeltax       =  Scr.Vx - px;
-                  pdeltay       =  Scr.Vy - py;
-                  PageRight    -=  pdeltax;
-                  PageBottom   -=  pdeltay;
-                }
+              pdeltax       =  Scr.Vx - px;
+              pdeltay       =  Scr.Vy - py;
+              PageRight    -=  pdeltax;
+              PageBottom   -=  pdeltay;
             }
         }
       }

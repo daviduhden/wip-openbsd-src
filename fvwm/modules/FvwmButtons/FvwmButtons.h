@@ -153,8 +153,11 @@ struct button_info_struct
 };
 
 struct panel_info_struct
-{ button_info  *uber;      /* panel */
+{
+  button_info  *uber;      /* panel */
   panel_info   *next;
+  int           geom_w;    /* requested width, -1 if unset */
+  int           geom_h;    /* requested height, -1 if unset */
 };
 
 #include "button.h"

@@ -878,12 +878,24 @@ void ParseConfigLine(button_info **ubb,char *s)
 	if(i==1)
 	  {
 	    flags=XParseGeometry(geom,&g_x,&g_y,&width,&height);
+	    w = -1;
+	    h = -1;
+	    CurrentPanel->geom_w = -1;
+	    CurrentPanel->geom_h = -1;
 	    UberButton->w = 0;
 	    UberButton->h = 0;
+	    UberButton->x = -30000;
+	    UberButton->y = -30000;
 	    if(flags&WidthValue)
-	      w=width;
+	      {
+	        w = (int)width;
+	        CurrentPanel->geom_w = (int)width;
+	      }
 	    if(flags&HeightValue)
-	      h=height;
+	      {
+	        h = (int)height;
+	        CurrentPanel->geom_h = (int)height;
+	      }
 	    if(flags&XValue)
 	      UberButton->x = g_x;
 	    if(flags&YValue)
@@ -928,31 +940,35 @@ void ParseConfigLine(button_info **ubb,char *s)
       config_file=seekright(&s);
       break;
     case 9:/* Pixmap */
-      s = trimleft(s);
-      if (strncasecmp(s,"none",4)==0)
-	ub->c->flags|=b_TransBack;
-      else
-        CopyString(&(ub->c->back_file),s);
-      ub->c->flags|=b_IconBack;
-      break;
+				s = trimleft(s);
+				if (strncasecmp(s,"none",4)==0)
+		ub->c->flags|=b_TransBack;
+				else
+					CopyString(&(ub->c->back_file),s);
+				ub->c->flags|=b_IconBack;
+				break;
     case 10:/* Panel */
-      s = trimleft(s);
-      CurrentPanel->next = (panel_info *) mymalloc(sizeof(panel_info));
-      CurrentPanel = CurrentPanel->next;
-      CurrentPanel->next = NULL;
-      CurrentPanel->uber = UberButton
-                         = (button_info *) mymalloc(sizeof(button_info));
-      if (UberButton->title)
-	free(UberButton->title);
-      UberButton->title = seekright(&s);
-      UberButton->flags = 0;
-      UberButton->parent = NULL;
-      UberButton->BWidth = 1;
-      UberButton->BHeight = 1;
-      UberButton->swallow = 0; /* subpanel is hidden initially */
-      MakeContainer(UberButton);
-      ub = *ubb = UberButton;
-      break;
+				s = trimleft(s);
+				CurrentPanel->next = (panel_info *)mymalloc(sizeof(panel_info));
+				CurrentPanel = CurrentPanel->next;
+				memset(CurrentPanel, 0, sizeof(panel_info));
+				CurrentPanel->geom_w = -1;
+				CurrentPanel->geom_h = -1;
+				CurrentPanel->next = NULL;
+				CurrentPanel->uber = UberButton
+					= (button_info *)mymalloc(sizeof(button_info));
+				memset(UberButton, 0, sizeof(button_info));
+				UberButton->title = seekright(&s);
+				UberButton->flags = 0;
+				UberButton->parent = NULL;
+				UberButton->BWidth = 1;
+				UberButton->BHeight = 1;
+				UberButton->swallow = 0; /* subpanel is hidden initially */
+				UberButton->x = -30000;
+				UberButton->y = -30000;
+				MakeContainer(UberButton);
+				ub = *ubb = UberButton;
+				break;
     case 11: /* BoxSize */
       ParseBoxSize(&s, &ub->c->flags);
       break;

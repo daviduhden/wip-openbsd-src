@@ -314,6 +314,22 @@ void WarpOn(FvwmWindow *t,int warp_x, int x_unit, int warp_y, int y_unit)
  *	(Un)Maximize a window.
  *
  ***********************************************************************/
+static int
+virtual_page_origin(int coordinate, int span)
+{
+  int base;
+
+  if (span <= 0)
+    return 0;
+  if (coordinate >= 0)
+    return (coordinate / span) * span;
+
+  base = -((-coordinate) / span) * span;
+  if ((-coordinate) % span != 0)
+    base -= span;
+  return base;
+}
+
 void Maximize(XEvent *eventp,Window w,FvwmWindow *tmp_win,
 	      unsigned long context, char *action, int *Module)
 {
@@ -357,20 +373,31 @@ void Maximize(XEvent *eventp,Window w,FvwmWindow *tmp_win,
     new_height = tmp_win->frame_height;
     new_x = tmp_win->frame_x;
     new_y = tmp_win->frame_y;
+#ifndef NON_VIRTUAL
+    {
+      const int page_x = virtual_page_origin(tmp_win->frame_x,
+                                             Scr.MyDisplayWidth);
+      const int page_y = virtual_page_origin(tmp_win->frame_y,
+                                             Scr.MyDisplayHeight);
+#else
+    {
+      const int page_x = 0;
+      const int page_y = 0;
+#endif
     if(val1 >0)
     {
       new_width = val1*val1_unit/100-2;
-      new_x = 0;
+      new_x = page_x;
     }
     if(val2 >0)
     {
       new_height = val2*val2_unit/100-2;
-      new_y = 0;
+      new_y = page_y;
     }
     if((val1==0)&&(val2==0))
     {
-      new_x = 0;
-      new_y = 0;
+      new_x = page_x;
+      new_y = page_y;
       new_height = Scr.MyDisplayHeight-2;
       new_width = Scr.MyDisplayWidth-2;
     }
@@ -378,6 +405,7 @@ void Maximize(XEvent *eventp,Window w,FvwmWindow *tmp_win,
     ConstrainSize (tmp_win, &new_width, &new_height, False, 0, 0);
     SetupFrame(tmp_win,new_x,new_y,new_width,new_height,TRUE);
     SetBorder(tmp_win,Scr.Hilite == tmp_win,True,True,None);
+    }
   }
 }
 
@@ -560,6 +588,8 @@ void destroy_menu(XEvent *eventp,Window w,FvwmWindow *tmp_win,
   free(token);
   while (mr)
   {
+    if (mr == last_menu)
+      last_menu = NULL;
     mrContinuation = mr->continuation; /* save continuation before destroy */
     DestroyMenu(mr);
     mr = mrContinuation;

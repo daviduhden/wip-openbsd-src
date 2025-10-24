@@ -10,6 +10,7 @@
 #include "../../libs/fvwmlib.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 #include <sys/types.h>
@@ -42,11 +43,11 @@ void dummy (FILE *f, const char *fmt, ...) {
 #define ITEM_HSPC   10
 #define ITEM_VSPC   5
 
-/* tba: use dynamic buffer expanding */
-#define MAX_LINES 50
-#define MAX_ITEMS 100
-#define ITEMS_PER_LINE 64
-#define CHOICES_PER_SEL 64
+/* initial allocation sizes, structures grow dynamically as needed */
+#define INITIAL_LINE_CAPACITY 8
+#define INITIAL_LINE_ITEMS_CAPACITY 8
+#define INITIAL_ITEMS_CAPACITY 128
+#define INITIAL_CHOICES_CAPACITY 8
 
 #define I_TEXT          1
 #define I_INPUT         2
@@ -125,21 +126,23 @@ typedef struct _line {
   int n;                   /* number of items on the line */
   int justify;             /* justification */
   int size_x, size_y;      /* size of bounding rectangle */
-  Item **items;             /* list of items */
+  Item **items;            /* list of items */
+  int items_cap;           /* capacity of items array */
 } Line;
 
-
-/* global variables */
-char *prog_name;           /* program name, e.g. FvwmForm */
+  item->button.n = 0;
+  item->button.commands = (char **)malloc(sizeof(char *) * 8);
+  item->button.commands_cap = 8;
 
 int fd_in;                 /* fd for Fvwm->Module packets */
 int fd_out;                /* fd for Module->Fvwm packets */
-int fd[2]; /* pipe pair */
-int fd_err;
+  + XTextWidth(xfs[f_button], item->button.text, item->button.len);
+  append_item_to_line(cur_line, item);
 FILE *fp_err;
 
-Line lines[MAX_LINES];
+Line *lines = NULL;
 int n_lines;
+int lines_capacity = 0;
 Item *items = NULL;
 int n_items;
 int items_capacity = 0;
@@ -184,6 +187,69 @@ int rel_cursor;
 
 static char *buf;
 static int N = 8;
+
+static void
+ensure_line_capacity(int count)
+{
+  if (lines_capacity >= count) {
+    return;
+  }
+  int new_cap = lines_capacity ? lines_capacity : INITIAL_LINE_CAPACITY;
+  while (new_cap < count) {
+    new_cap *= 2;
+  }
+  lines = (Line *)realloc(lines, sizeof(Line) * new_cap);
+  for (int i = lines_capacity; i < new_cap; ++i) {
+    lines[i].n = 0;
+    lines[i].justify = L_CENTER;
+    lines[i].size_x = 0;
+    lines[i].size_y = 0;
+    lines[i].items = NULL;
+    lines[i].items_cap = 0;
+  }
+  lines_capacity = new_cap;
+}
+
+static void
+ensure_line_item_capacity(Line *line, int count)
+{
+  if (line->items_cap >= count) {
+    return;
+  }
+  int new_cap = line->items_cap ? line->items_cap : INITIAL_LINE_ITEMS_CAPACITY;
+  while (new_cap < count) {
+    new_cap *= 2;
+  }
+  line->items = (Item **)realloc(line->items, sizeof(Item *) * new_cap);
+  line->items_cap = new_cap;
+}
+
+static Line *
+add_line(int justify)
+{
+  ensure_line_capacity(n_lines + 1);
+  Line *line = &lines[n_lines++];
+  line->n = 0;
+  line->justify = justify;
+  line->size_x = 0;
+  line->size_y = 0;
+  if (!line->items) {
+    line->items_cap = 0;
+  }
+  ensure_line_item_capacity(line, 1);
+  return line;
+}
+
+static void
+append_item_to_line(Line *line, Item *item)
+{
+  ensure_line_item_capacity(line, line->n + 1);
+  line->items[line->n++] = item;
+  line->size_x += item->header.size_x;
+  if (line->size_y < item->header.size_y) {
+    line->size_y = item->header.size_y;
+  }
+}
 
 /* copy a string until '\0', or up to n chars, and delete trailing spaces */
 char *CopyNString (char *cp, int n)
@@ -264,27 +330,24 @@ void ReadConfig ()
 
   /* ensure items array capacity (dynamic) */
   if (!items) {
-    items_capacity = 128;
+    items_capacity = INITIAL_ITEMS_CAPACITY;
     items = (Item *)malloc(sizeof(Item) * items_capacity);
   }
 
-#define AddToLine(item) { cur_line->items[cur_line->n++] = item; cur_line->size_x += item->header.size_x; if (cur_line->size_y < item->header.size_y) cur_line->size_y = item->header.size_y; }
-
   n_items = 0;
-  n_lines = 0;
 
   /* default line in case the first *FFLine is missing */
-  lines[0].n = 0;
-  lines[0].justify = L_CENTER;
-  lines[0].size_x = lines[0].size_y = 0;
-  lines[0].items = (Item **)malloc(sizeof(Item *) * ITEMS_PER_LINE);
-  cur_line = lines;
+  ensure_line_capacity(1);
+  n_lines = 0;
+  cur_line = add_line(L_CENTER);
 
   /* default button is for initial functions */
   cur_button = &def_button;
   def_button.button.n = 0;
-  def_button.button.commands = (char **)malloc(sizeof(char *) * 8);
-  def_button.button.commands_cap = 8;
+  if (!def_button.button.commands) {
+    def_button.button.commands = (char **)malloc(sizeof(char *) * 8);
+    def_button.button.commands_cap = 8;
+  }
   def_button.button.key = IB_CONTINUE;
 
   /* default fonts in case the *FFFont's are missing */
@@ -369,7 +432,16 @@ void ReadConfig ()
       continue;
     } else if (strncmp(cp, "Line", 4) == 0) {
       cp += 4;
-      cur_line = lines + n_lines++;
+      if (n_lines == 0) {
+        cur_line = add_line(L_CENTER);
+      } else if (n_lines == 1 && lines[0].n == 0) {
+        cur_line = &lines[0];
+        cur_line->n = 0;
+        cur_line->size_x = 0;
+        cur_line->size_y = 0;
+      } else {
+        cur_line = add_line(L_CENTER);
+      }
       while (isspace(*cp)) cp++;
       if (strncmp(cp, "left", 4) == 0)
 	cur_line->justify = L_LEFT;
@@ -380,13 +452,13 @@ void ReadConfig ()
       else
 	cur_line->justify = L_LEFTRIGHT;
       cur_line->n = 0;
-      cur_line->items = (Item **)malloc(sizeof(Item *) * ITEMS_PER_LINE);
+      cur_line->size_x = cur_line->size_y = 0;
       continue;
     } else if (strncmp(cp, "Text", 4) == 0) {
 /* syntax: *FFText "<text>" */
       cp += 4;
       if (n_items + 1 > items_capacity) {
-        items_capacity = items_capacity ? items_capacity * 2 : 128;
+        items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
         items = (Item *)realloc(items, sizeof(Item) * items_capacity);
       }
       item = &items[n_items++];
@@ -403,14 +475,14 @@ void ReadConfig ()
       item->header.size_y = FontHeight(xfs[f_text]) + 2 * TEXT_SPC;
       fprintf(fp_err, "Text \"%s\" [%d, %d]\n", item->text.value,
 	     item->header.size_x, item->header.size_y);
-      AddToLine(item);
+      append_item_to_line(cur_line, item);
       continue;
     }
     else if (strncmp(cp, "Input", 5) == 0) {
 /* syntax: *FFInput <name> <size> "<init_value>" */
       cp += 5;
       if (n_items + 1 > items_capacity) {
-        items_capacity = items_capacity ? items_capacity * 2 : 128;
+        items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
         items = (Item *)realloc(items, sizeof(Item) * items_capacity);
       }
       item = &items[n_items++];
@@ -437,13 +509,13 @@ void ReadConfig ()
 	+ 2 * BOX_SPC;
       fprintf(fp_err, "Input, %s, [%d], \"%s\"\n", item->header.name,
 	      item->input.size, item->input.init_value);
-      AddToLine(item);
+      append_item_to_line(cur_line, item);
     }
     else if (strncmp(cp, "Selection", 9) == 0) {
 /* syntax: *FFSelection <name> single | multiple */
       cp += 9;
       if (n_items + 1 > items_capacity) {
-        items_capacity = items_capacity ? items_capacity * 2 : 128;
+        items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
         items = (Item *)realloc(items, sizeof(Item) * items_capacity);
       }
       cur_sel = &items[n_items++];
@@ -452,47 +524,48 @@ void ReadConfig ()
       cur_sel->header.name = CopySolidString(cp);
       cp += strlen(cur_sel->header.name);
       while (isspace(*cp)) cp++;
-      if (strncmp(cp, "multiple", 8) == 0)
-	cur_sel->select.key = IS_MULTIPLE;
-      else
-	cur_sel->select.key = IS_SINGLE;
-      cur_sel->select.n = 0;
-      cur_sel->select.choices =
-    (Item **)malloc(sizeof(Item *) * CHOICES_PER_SEL);
-      cur_sel->select.choices_cap = CHOICES_PER_SEL;
-      continue;
-    } else if (strncmp(cp, "Choice", 6) == 0) {
-/* syntax: *FFChoice <name> <value> [on | _off_] ["<text>"] */
-      cp += 6;
-      if (n_items + 1 > items_capacity) {
-        items_capacity = items_capacity ? items_capacity * 2 : 128;
-        items = (Item *)realloc(items, sizeof(Item) * items_capacity);
-      }
-      item = &items[n_items++];
-      item->type = I_CHOICE;
-      while (isspace(*cp)) cp++;
-      item->header.name = CopySolidString(cp);
-      cp += strlen(item->header.name);
-      while (isspace(*cp)) cp++;
-      item->choice.value = CopySolidString(cp);
-      cp += strlen(item->choice.value);
-      while (isspace(*cp)) cp++;
-      if (strncmp(cp, "on", 2) == 0)
-	item->choice.init_on = 1;
-      else
-	item->choice.init_on = 0;
-      while (!isspace(*cp)) cp++;
-      while (isspace(*cp)) cp++;
-      if (*cp == '\"')
-	item->choice.text = CopyQuotedString(++cp);
-      else
-	item->choice.text = "";
-      item->choice.n = strlen(item->choice.text);
-      item->choice.sel = cur_sel;
-      if (cur_sel->select.n + 1 > cur_sel->select.choices_cap) {
-        cur_sel->select.choices_cap *= 2;
-        cur_sel->select.choices = (Item **)realloc(cur_sel->select.choices,
-                  sizeof(Item *) * cur_sel->select.choices_cap);
+      else if (strncmp(cp, "Button", 6) == 0) {
+    /* syntax: *FFButton continue | restart | quit "<text>" */
+        cp += 6;
+        if (n_items + 1 > items_capacity) {
+          items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
+          items = (Item *)realloc(items, sizeof(Item) * items_capacity);
+        }
+        item = &items[n_items++];
+        item->type = I_BUTTON;
+        item->header.name = "";
+        while (isspace(*cp)) cp++;
+        if (strncmp(cp, "restart", 7) == 0)
+          item->button.key = IB_RESTART;
+        else if (strncmp(cp, "quit", 4) == 0)
+          item->button.key = IB_QUIT;
+        else
+          item->button.key = IB_CONTINUE;
+        while (!isspace(*cp)) cp++;
+        while (isspace(*cp)) cp++;
+        if (*cp == '"') {
+          item->button.text = CopyQuotedString(++cp);
+          cp += strlen(item->button.text) + 1;
+          while (isspace(*cp)) cp++;
+        } else
+          item->button.text = "";
+        if (*cp == '^')
+          item->button.keypress = *(++cp) - '@';
+        else if (*cp == 'F')
+          item->button.keypress = 256 + atoi(++cp);
+        else
+          item->button.keypress = -1;
+          item->button.len = strlen(item->button.text);
+          item->button.n = 0;
+          item->button.commands = (char **)malloc(sizeof(char *) * 8);
+          item->button.commands_cap = 8;
+          item->header.size_y = FontHeight(xfs[f_button]) + 2 * TEXT_SPC
+          + 2 * BOX_SPC;
+          item->header.size_x = 2 * TEXT_SPC + 2 * BOX_SPC
+          + XTextWidth(xfs[f_button], item->button.text, item->button.len);
+          append_item_to_line(cur_line, item);
+        cur_button = item;
+        continue;
       }
       cur_sel->select.choices[cur_sel->select.n++] = item;
       item->header.size_y = FontHeight(xfs[f_text]) + 2 * TEXT_SPC;
@@ -500,13 +573,13 @@ void ReadConfig ()
 	XTextWidth(xfs[f_text], item->choice.text, item->choice.n);
       fprintf(fp_err, "Choice %s, \"%s\", [%d, %d]\n", item->header.name,
 	     item->choice.text, item->header.size_x, item->header.size_y);
-      AddToLine(item);
+      append_item_to_line(cur_line, item);
       continue;
     } else if (strncmp(cp, "Button", 6) == 0) {
 /* syntax: *FFButton continue | restart | quit "<text>" */
       cp += 6;
       if (n_items + 1 > items_capacity) {
-        items_capacity = items_capacity ? items_capacity * 2 : 128;
+        items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
         items = (Item *)realloc(items, sizeof(Item) * items_capacity);
       }
       item = &items[n_items++];
@@ -533,15 +606,15 @@ void ReadConfig ()
 	item->button.keypress = 256 + atoi(++cp);
       else
 	item->button.keypress = -1;
-      item->button.len = strlen(item->button.text);
+  item->button.len = strlen(item->button.text);
   item->button.n = 0;
   item->button.commands = (char **)malloc(sizeof(char *) * 8);
   item->button.commands_cap = 8;
-      item->header.size_y = FontHeight(xfs[f_button]) + 2 * TEXT_SPC
+  item->header.size_y = FontHeight(xfs[f_button]) + 2 * TEXT_SPC
 	+ 2 * BOX_SPC;
-      item->header.size_x = 2 * TEXT_SPC + 2 * BOX_SPC
+  item->header.size_x = 2 * TEXT_SPC + 2 * BOX_SPC
 	+ XTextWidth(xfs[f_button], item->button.text, item->button.len);
-      AddToLine(item);
+  append_item_to_line(cur_line, item);
       cur_button = item;
       continue;
     } else if (strncmp(cp, "Command", 7) == 0) {
@@ -549,12 +622,12 @@ void ReadConfig ()
       cp += 7;
       while (isspace(*cp)) cp++;
       if (cur_button->button.n + 1 > cur_button->button.commands_cap) {
-    cur_button->button.commands_cap *= 2;
-    cur_button->button.commands = (char **)realloc(cur_button->button.commands,
-                  sizeof(char *) * cur_button->button.commands_cap);
+        cur_button->button.commands_cap *= 2;
+        cur_button->button.commands = (char **)realloc(cur_button->button.commands,
+	      sizeof(char *) * cur_button->button.commands_cap);
       }
       cur_button->button.commands[cur_button->button.n++] =
-    CopyNString(cp, 0);
+      CopyNString(cp, 0);
     }
   }  /* end of switch() */
   /* get the geometry right */
