@@ -2179,6 +2179,17 @@ void DestroyMenu(MenuRoot *mr)
   if(mr == NULL)
     return;
 
+  if (mr->in_use)
+    {
+      PopDownMenu(mr);
+      mr->in_use = 0;
+      if (mr->mrDynamicPrev && mr->mrDynamicPrev->selected &&
+          MrPopupForMi(mr->mrDynamicPrev->selected) == mr)
+        {
+          mr->mrDynamicPrev->selected = NULL;
+        }
+    }
+
   tmp = Scr.menus.all;
   prev = NULL;
   while((tmp != NULL)&&(tmp != mr))

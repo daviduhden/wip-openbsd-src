@@ -19,6 +19,11 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/select.h>
+#include <sys/wait.h>
 
 #include "fvwm.h"
 #include "menus.h"
@@ -37,6 +42,118 @@ static int last_read_failed=0;
 
 static const char *read_system_rc_cmd="Read system"FVWMRC;
 
+typedef struct
+{
+  FILE *stream;
+  pid_t pid;
+  int fd;
+} PipeChild;
+
+#define PIPE_READ_INTERVAL_SEC 1
+#define PIPE_READ_MAX_IDLE_LOOPS 10
+#define PIPE_REAP_WAIT_USEC 100000
+#define PIPE_REAP_ATTEMPTS 20
+
+static int
+start_pipe_process(const char *command, PipeChild *child)
+{
+  int pipe_fd[2];
+  pid_t pid;
+
+  if (pipe(pipe_fd) < 0)
+    return -1;
+
+  pid = fork();
+  if (pid < 0)
+    {
+      close(pipe_fd[0]);
+      close(pipe_fd[1]);
+      return -1;
+    }
+
+  if (pid == 0)
+    {
+      close(pipe_fd[0]);
+      if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+        _exit(127);
+      close(pipe_fd[1]);
+      execl("/bin/sh", "sh", "-c", command, (char *)NULL);
+      _exit(127);
+    }
+
+  close(pipe_fd[1]);
+  child->fd = pipe_fd[0];
+  child->stream = fdopen(child->fd, "r");
+  if (child->stream == NULL)
+    {
+      close(child->fd);
+      kill(pid, SIGTERM);
+      (void)waitpid(pid, NULL, 0);
+      child->fd = -1;
+      return -1;
+    }
+  fcntl(child->fd, F_SETFD, 1);
+  child->pid = pid;
+  return 0;
+}
+
+static void
+stop_pipe_process(PipeChild *child, int timed_out,
+                  const char *cmdname, const char *command)
+{
+  int status;
+  int attempt;
+  pid_t waited = -1;
+
+  if (child->stream)
+    {
+      fclose(child->stream);
+      child->stream = NULL;
+    }
+
+  if (child->fd >= 0)
+    child->fd = -1;
+
+  if (child->pid <= 0)
+    return;
+
+  if (timed_out)
+    {
+      fvwm_msg(WARN, cmdname,
+               "command '%s' did not close pipe, terminating it", command);
+      kill(child->pid, SIGTERM);
+    }
+
+  for (attempt = 0; attempt < PIPE_REAP_ATTEMPTS; ++attempt)
+    {
+      waited = waitpid(child->pid, &status, timed_out ? WNOHANG : 0);
+      if (waited == child->pid)
+        break;
+      if (waited == -1)
+        {
+          if (errno == EINTR)
+            continue;
+          if (errno != ECHILD)
+            fvwm_msg(ERR, cmdname,
+                     "waitpid failed for '%s': %s",
+                     command, strerror(errno));
+          break;
+        }
+      if (waited == 0)
+        usleep(PIPE_REAP_WAIT_USEC);
+    }
+
+  if (timed_out && waited != child->pid)
+    {
+      kill(child->pid, SIGKILL);
+      while ((waited = waitpid(child->pid, &status, 0)) == -1 &&
+             errno == EINTR)
+        ;
+    }
+
+  child->pid = -1;
+}
+
 
 extern void StartupStuff(void);
 
@@ -52,11 +169,14 @@ static void ReadSubFunc(XEvent *eventp,Window junk,FvwmWindow *tmp_win,
   char *filename= NULL,*Home, *home_file, *ofilename = NULL;
   char *option;                         /* optional arg to read */
   char *rest,*tline,line[1024];
-  FILE *fd;
+  FILE *stream = NULL;
+  PipeChild child = { NULL, -1, -1 };
   int thisfileno;
   char missing_quiet;                   /* missing file msg control */
   char *cmdname;
   size_t len;
+  int timed_out = 0;
+  int idle_loops = 0;
 
   /* domivogt (30-Dec-1998: I tried using conditional evaluation instead
    * of the cmdname variable ( piperead?"PipeRead":"Read" ), but gcc seems
@@ -89,93 +209,141 @@ static void ReadSubFunc(XEvent *eventp,Window junk,FvwmWindow *tmp_win,
     free(option);                       /* arg not needed after this */
   } /* end there is a second arg */
 
-  filename = ofilename;
-/*  fvwm_msg(INFO, cmdname,"trying '%s'",filename); */
-
   if (piperead)
-    fd = popen(filename,"r");
-  else if (ofilename[0] != '/')
-  {
-    /* find the home directory to look in */
-    Home = getenv("HOME");
-    if (Home != NULL)
     {
-      len = strlen(Home) + strlen(ofilename) + 3;
-      home_file = safemalloc(len);
-      strlcpy(home_file,Home,len);
-      strlcat(home_file,"/",len);
-      strlcat(home_file,ofilename,len);
-      filename = home_file;
-      fd = fopen(filename,"r");
+      child.pid = -1;
+      child.fd = -1;
+      child.stream = NULL;
+      if (start_pipe_process(ofilename, &child) == 0)
+        stream = child.stream;
     }
-    else
-    {
-      fd = 0;
-    }
-    if (fd == 0)
-    {
-      if((filename != NULL)&&(filename!= ofilename))
-	free(filename);
-      /* find the home directory to look in */
-      Home = FVWM_CONFIGDIR;
-      len = strlen(Home) + strlen(ofilename) + 3;
-      home_file = safemalloc(len);
-      strlcpy(home_file,Home,len);
-      strlcat(home_file,"/",len);
-      strlcat(home_file,ofilename,len);
-      filename = home_file;
-      fd = fopen(filename,"r");
-    }
-  }
   else
-  {
-    /* open file with absolute path */
-    fd = fopen(filename,"r");
-  }
-
-  if(fd == NULL)
-  {
-    if (missing_quiet == 'n') {         /* if quiet option not on */
-      if (piperead)
-	fvwm_msg(ERR, cmdname, "command '%s' not run", ofilename);
+    {
+      filename = ofilename;
+      if (ofilename[0] != '/')
+        {
+          Home = getenv("HOME");
+          if (Home != NULL)
+            {
+              len = strlen(Home) + strlen(ofilename) + 3;
+              home_file = safemalloc(len);
+              strlcpy(home_file,Home,len);
+              strlcat(home_file,"/",len);
+              strlcat(home_file,ofilename,len);
+              filename = home_file;
+              stream = fopen(filename,"r");
+            }
+          else
+            {
+              stream = NULL;
+            }
+          if (stream == NULL)
+            {
+              if((filename != NULL)&&(filename!= ofilename))
+                free(filename);
+              Home = FVWM_CONFIGDIR;
+              len = strlen(Home) + strlen(ofilename) + 3;
+              home_file = safemalloc(len);
+              strlcpy(home_file,Home,len);
+              strlcat(home_file,"/",len);
+              strlcat(home_file,ofilename,len);
+              filename = home_file;
+              stream = fopen(filename,"r");
+            }
+        }
       else
-	fvwm_msg(ERR, cmdname,
-		 "file '%s' not found in $HOME or "FVWM_CONFIGDIR, ofilename);
-    } /* end quiet option not on */
-    if((ofilename != filename)&&(filename != NULL))
+        {
+          stream = fopen(filename,"r");
+        }
+    }
+
+  if(stream == NULL)
+  {
+    if (missing_quiet == 'n')
     {
+      if (piperead)
+        fvwm_msg(ERR, cmdname, "command '%s' not run", ofilename);
+      else
+        fvwm_msg(ERR, cmdname,
+                 "file '%s' not found in $HOME or "FVWM_CONFIGDIR, ofilename);
+    }
+    if (!piperead && filename && filename != ofilename)
       free(filename);
-    }
-    if(ofilename != NULL)
-    {
+    if (piperead && child.pid > 0)
+      stop_pipe_process(&child, 1, cmdname, ofilename);
+    if (piperead || (filename != ofilename))
       free(ofilename);
-    }
     last_read_failed = 1;
     return;
   }
-  if((ofilename != NULL)&&(filename!= ofilename))
-    free(ofilename);
-  fcntl(fileno(fd), F_SETFD, 1);
+
   if (!piperead)
   {
+    if (filename != ofilename && ofilename != NULL)
+      {
+        free(ofilename);
+        ofilename = NULL;
+      }
+    fcntl(fileno(stream), F_SETFD, 1);
     if(fvwm_file != NULL)
       free(fvwm_file);
     fvwm_file = filename;
   }
-  else
-  {
-    if (filename)
-      free(filename);
-  }
 
-  tline = fgets(line,(sizeof line)-1,fd);
-  while(tline)
+  while(stream && !timed_out)
   {
-    int l;
-    while(tline && (l = strlen(line)) < sizeof(line) && l >= 2 &&
-          line[l-2]=='\\' && line[l-1]=='\n')
+    if (piperead)
     {
-      tline = fgets(line+l-2,sizeof(line)-l+1,fd);
+      fd_set readfds;
+      struct timeval tv;
+      int ready;
+
+      FD_ZERO(&readfds);
+      FD_SET(child.fd, &readfds);
+      tv.tv_sec = PIPE_READ_INTERVAL_SEC;
+      tv.tv_usec = 0;
+
+      ready = select(child.fd + 1, &readfds, NULL, NULL, &tv);
+      if (ready < 0)
+        {
+          if (errno == EINTR)
+            continue;
+          timed_out = 1;
+          break;
+        }
+      if (ready == 0)
+        {
+          if (++idle_loops >= PIPE_READ_MAX_IDLE_LOOPS)
+            {
+              timed_out = 1;
+              break;
+            }
+          continue;
+        }
+      idle_loops = 0;
+    }
+
+    tline = fgets(line,(sizeof line)-1,stream);
+    if(tline == NULL)
+    {
+      if (!piperead || feof(stream))
+        break;
+      if (ferror(stream))
+        {
+          clearerr(stream);
+          continue;
+        }
+      break;
+    }
+    {
+      int l;
+      while((l = strlen(line)) < sizeof(line) && l >= 2 &&
+            line[l-2]=='\\' && line[l-1]=='\n')
+        {
+          char *cont = fgets(line+l-2,sizeof(line)-l+1,stream);
+          if (cont == NULL)
+            break;
+        }
     }
     tline=line;
     while(isspace(*tline))
@@ -185,14 +353,15 @@ static void ReadSubFunc(XEvent *eventp,Window junk,FvwmWindow *tmp_win,
       fvwm_msg(DBG,"ReadSubFunc","about to exec: '%s'",tline);
     }
     ExecuteFunction(tline,tmp_win,eventp,context,*Module);
-    tline = fgets(line,(sizeof line)-1,fd);
   }
 
   if (piperead)
-    pclose(fd);
+    stop_pipe_process(&child, timed_out, cmdname, ofilename);
   else
-    fclose(fd);
-  last_read_failed = 0;
+    fclose(stream);
+  if (piperead && ofilename)
+    free(ofilename);
+  last_read_failed = timed_out;
 }
 
 void ReadFile(XEvent *eventp,Window junk,FvwmWindow *tmp_win,

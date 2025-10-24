@@ -103,6 +103,7 @@ void DebugEvents(XEvent*);
 
 panel_info *seekpanel(button_info *);
 void Slide(panel_info *, button_info *);
+static int IOErrorHandler(Display *dpy);
 
 /* -------------------------------- globals ---------------------------------*/
 
@@ -466,6 +467,13 @@ int myErrorHandler(Display *dpy, XErrorEvent *event)
   return 0;
 }
 
+static int IOErrorHandler(Display *dpy)
+{
+  (void)dpy;
+  DeadPipe(0);
+  return 0;
+}
+
 /* ---------------------------------- main ----------------------------------*/
 
 /**
@@ -539,6 +547,7 @@ int main(int argc, char **argv)
 	      XDisplayName(display_name));
       exit (1);
     }
+  XSetIOErrorHandler(IOErrorHandler);
   x_fd=XConnectionNumber(Dpy);
   fd_width=GetFdWidth();
 
@@ -561,6 +570,8 @@ int main(int argc, char **argv)
   UberButton->BHeight=1;
   UberButton->font = NULL;
   UberButton->font_string = NULL;
+  UberButton->x = -30000;
+  UberButton->y = -30000;
   MakeContainer(UberButton);
 
   dpw = DisplayWidth(Dpy,screen);
@@ -572,8 +583,11 @@ int main(int argc, char **argv)
 
   CurrentPanel = MainPanel
                = (panel_info *) mymalloc(sizeof(panel_info));
+  memset(MainPanel, 0, sizeof(panel_info));
   MainPanel->next = NULL;
   MainPanel->uber = UberButton;
+  MainPanel->geom_w = -1;
+  MainPanel->geom_h = -1;
   UberButton->title   = MyName;
   UberButton->swallow = 1; /* the panel is shown */
 
@@ -1219,11 +1233,22 @@ void CreateWindow(button_info *ub,int maxx,int maxy)
   XGCValues gcv;
   unsigned long gcm;
   XClassHint myclasshints;
+  int req_w = -1;
+  int req_h = -1;
 
   x = CurrentPanel->uber->x; /* Geometry x where to put the panel */
   y = CurrentPanel->uber->y; /* Geometry y where to put the panel */
   xneg = CurrentPanel->uber->w;
   yneg = CurrentPanel->uber->h;
+  gravity = NorthWestGravity;
+
+  if (CurrentPanel)
+    {
+      req_w = CurrentPanel->geom_w;
+      req_h = CurrentPanel->geom_h;
+    }
+  w = (req_w > -1) ? req_w : -1;
+  h = (req_h > -1) ? req_h : -1;
 
   if(maxx<16)
     maxx=16;
@@ -1263,15 +1288,32 @@ void CreateWindow(button_info *ub,int maxx,int maxy)
   mysizehints.base_height+=ub->c->num_rows*2;
   mysizehints.base_width+=ub->c->num_columns*2;
 
-  if(w>-1) /* from geometry */
+  if(req_w > -1 || req_h > -1) /* from geometry */
     {
 # ifdef DEBUG_INIT
-  fprintf(stderr,"constraining (w=%i)...",w);
+  fprintf(stderr,"constraining (w=%i,h=%i)...",req_w,req_h);
 # endif
-      ConstrainSize(&mysizehints,&w,&h);
-      mysizehints.width = w;
-      mysizehints.height = h;
+      {
+        int tmp_w = (req_w > -1) ? req_w : mysizehints.width;
+        int tmp_h = (req_h > -1) ? req_h : mysizehints.height;
+        ConstrainSize(&mysizehints,&tmp_w,&tmp_h);
+        if (req_w > -1)
+          w = tmp_w;
+        else
+          w = -1;
+        if (req_h > -1)
+          h = tmp_h;
+        else
+          h = -1;
+        mysizehints.width = tmp_w;
+        mysizehints.height = tmp_h;
+      }
       mysizehints.flags |= USSize;
+    }
+  else
+    {
+      w = -1;
+      h = -1;
     }
 
 # ifdef DEBUG_INIT
