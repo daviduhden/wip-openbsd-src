@@ -41,6 +41,8 @@
 #include "../../fvwm/module.h"
 #include "../../fvwm/fvwm.h"
 
+static void DeadPipe(int sig);
+
 typedef struct ClientNode {
 	Window frame;
 	int title_height;
@@ -801,4 +803,11 @@ main(int argc, char *argv[])
 	}
 
 	return 0;
+}
+
+static void
+DeadPipe(int sig)
+{
+	(void)sig;
+	exit(0);
 }
