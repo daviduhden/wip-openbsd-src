@@ -96,9 +96,10 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName,"*");
-  strcat(MyName, temp);
+  size_t name_len = strlen(temp);
+  MyName = safemalloc(name_len + 2);
+  strlcpy(MyName, "*", name_len + 2);
+  strlcat(MyName, temp, name_len + 2);
   Clength = strlen(MyName);
 
   if((argc != 6)&&(argc != 7))
@@ -590,13 +591,13 @@ void MakeList(void)
   width = target.frame_w - bw;
   height = target.frame_h - target.title_h - bw;
 
-  sprintf(desktop, "%ld",  target.desktop);
-  sprintf(id,      "0x%x", (unsigned int)target.id);
-  sprintf(swidth,  "%d",   width);
-  sprintf(sheight, "%d",   height);
-  sprintf(borderw, "%ld",  target.border_w);
-  sprintf(xstr,    "%ld",  target.frame_x);
-  sprintf(ystr,    "%ld",  target.frame_y);
+  snprintf(desktop, sizeof(desktop), "%ld", target.desktop);
+  snprintf(id, sizeof(id), "0x%x", (unsigned int)target.id);
+  snprintf(swidth, sizeof(swidth), "%d", width);
+  snprintf(sheight, sizeof(sheight), "%d", height);
+  snprintf(borderw, sizeof(borderw), "%ld", target.border_w);
+  snprintf(xstr, sizeof(xstr), "%ld", target.frame_x);
+  snprintf(ystr, sizeof(ystr), "%ld", target.frame_y);
 
   AddToList("Name:",          target.name);
   AddToList("Icon Name:",     target.icon_name);
@@ -669,22 +670,22 @@ void MakeList(void)
   width = (width - target.base_w)/target.width_inc;
   height = (height - target.base_h)/target.height_inc;
 
-  sprintf(loc,"%dx%d",width,height);
-  strcpy(geometry, loc);
+  snprintf(loc, sizeof(loc), "%dx%d", width, height);
+  strlcpy(geometry, loc, sizeof(geometry));
 
   if ((target.gravity == EastGravity) ||(target.gravity == NorthEastGravity)||
       (target.gravity == SouthEastGravity))
-    sprintf(loc,"-%d",x2);
+    snprintf(loc, sizeof(loc), "-%d", x2);
   else
-    sprintf(loc,"+%d",x1);
-  strcat(geometry, loc);
+    snprintf(loc, sizeof(loc), "+%d", x1);
+  strlcat(geometry, loc, sizeof(geometry));
 
   if((target.gravity == SouthGravity)||(target.gravity == SouthEastGravity)||
      (target.gravity == SouthWestGravity))
-    sprintf(loc,"-%d",y2);
+    snprintf(loc, sizeof(loc), "-%d", y2);
   else
-    sprintf(loc,"+%d",y1);
-  strcat(geometry, loc);
+    snprintf(loc, sizeof(loc), "+%d", y1);
+  strlcat(geometry, loc, sizeof(geometry));
   AddToList("Geometry:", geometry);
 
 #if 0

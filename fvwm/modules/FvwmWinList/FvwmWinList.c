@@ -154,9 +154,10 @@ int main(int argc, char **argv)
     temp = s + 1;
 
   /* Setup my name */
-  Module = safemalloc(strlen(temp)+2);
-  strcpy(Module,"*");
-  strcat(Module, temp);
+  size_t name_len = strlen(temp);
+  Module = safemalloc(name_len + 2);
+  strlcpy(Module, "*", name_len + 2);
+  strlcat(Module, temp, name_len + 2);
   Clength = strlen(Module);
 
   /* Open the console for messages */

@@ -180,8 +180,11 @@ int main(int argc, char **argv)
     temp = s + 1;
 
 
-  MyName = safemalloc(strlen(temp)+1);
-  strlcpy(MyName, temp, strlen(temp)+1);
+  {
+    size_t name_len = strlen(temp) + 1;
+    MyName = safemalloc(name_len);
+    strlcpy(MyName, temp, name_len);
+  }
 
   signal (SIGPIPE, DeadPipe);
 
@@ -2236,8 +2239,9 @@ struct icon_info *UpdateItem(unsigned long type, unsigned long id, char *item)
   tmp = Head;
   while (tmp != NULL){
     if (tmp->id == id){
-  str = (char *)safemalloc(strlen(item)+1);
-  strlcpy(str, item, strlen(item) + 1);
+  size_t item_len = strlen(item) + 1;
+  str = (char *)safemalloc(item_len);
+  strlcpy(str, item, item_len);
 
       switch (type){
       case M_ICON_NAME:

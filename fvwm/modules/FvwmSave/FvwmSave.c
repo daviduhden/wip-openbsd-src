@@ -58,9 +58,10 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName,"*");
-  strcat(MyName, temp);
+  size_t name_len = strlen(temp);
+  MyName = safemalloc(name_len + 2);
+  strlcpy(MyName, "*", name_len + 2);
+  strlcat(MyName, temp, name_len + 2);
 
   if((argc != 6)&&(argc != 7))
     {
@@ -287,7 +288,7 @@ void do_save(void)
   int x1,x2,y1,y2,i,command_count;
   long tVx, tVy;
 
-  sprintf(tname, "%s/new.xinitrc", getenv( "HOME" ) );
+  snprintf(tname, sizeof(tname), "%s/new.xinitrc", getenv("HOME"));
   out = fopen( tname, "w+" );
   for (t = list_root; t != NULL; t = t->next)
     {
@@ -318,22 +319,22 @@ void do_save(void)
 	  tVx = Vx;
 	  tVy = Vy;
 	}
-      sprintf(tname,"%dx%d",dwidth,dheight);
+      snprintf(tname, sizeof(tname), "%dx%d", dwidth, dheight);
       if ((t->gravity == EastGravity) ||
 	  (t->gravity == NorthEastGravity) ||
 	  (t->gravity == SouthEastGravity))
-	sprintf(loc,"-%d",x2);
+  snprintf(loc, sizeof(loc), "-%d", x2);
       else
-	sprintf(loc,"+%d",x1+(int)tVx);
-      strcat(tname, loc);
+  snprintf(loc, sizeof(loc), "+%d", x1 + (int)tVx);
+      strlcat(tname, loc, sizeof(tname));
 
       if((t->gravity == SouthGravity)||
 	 (t->gravity == SouthEastGravity)||
 	 (t->gravity == SouthWestGravity))
-	sprintf(loc,"-%d",y2);
+  snprintf(loc, sizeof(loc), "-%d", y2);
       else
-	sprintf(loc,"+%d",y1+(int)tVy);
-      strcat(tname, loc);
+  snprintf(loc, sizeof(loc), "+%d", y1 + (int)tVy);
+      strlcat(tname, loc, sizeof(tname));
 
       if ( XGetCommand( dpy, t->id, &command_list, &command_count ) )
 	{

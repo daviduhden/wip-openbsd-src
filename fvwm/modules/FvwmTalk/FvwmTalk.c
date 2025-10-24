@@ -111,9 +111,10 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName,"*");
-  strcat(MyName, temp);
+  size_t name_len = strlen(temp);
+  MyName = safemalloc(name_len + 2);
+  strlcpy(MyName, "*", name_len + 2);
+  strlcat(MyName, temp, name_len + 2);
 
   if((argc != 6)&&(argc != 7))
     {

@@ -74,9 +74,10 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName,"*");
-  strcat(MyName, temp);
+  size_t name_len = strlen(temp);
+  MyName = safemalloc(name_len + 2);
+  strlcpy(MyName, "*", name_len + 2);
+  strlcat(MyName, temp, name_len + 2);
 
   if((argc != 6)&&(argc != 7))
     {
@@ -155,8 +156,9 @@ void process_message(unsigned long type,unsigned long *body)
       {
 	struct list *l;
 	if ((l = find_window(body[0])) != 0) {
-	   l->name = (char *)safemalloc(strlen((char *)&body[3])+1);
-	   strcpy(l->name,(char *)&body[3]);
+     size_t name_len = strlen((char *)&body[3]);
+     l->name = (char *)safemalloc(name_len + 1);
+     strlcpy(l->name, (char *)&body[3], name_len + 1);
 	}
       }
       break;
@@ -300,7 +302,7 @@ void write_string(FILE *out, char *line)
 void do_save_command(FILE *out, struct list *t, int *curdesk,
                                 int emit_wait, int *isfirstline)
 {
-   char tname[200],loc[30];
+  char tname[200],loc[30];
    char **command_list;
    int dwidth,dheight,xtermline = 0;
    int x1,x2,y1,y2,i,command_count;
@@ -333,22 +335,22 @@ void do_save_command(FILE *out, struct list *t, int *curdesk,
        tVx = Vx;
        tVy = Vy;
      }
-   sprintf(tname,"%dx%d",dwidth,dheight);
+   snprintf(tname, sizeof(tname), "%dx%d", dwidth, dheight);
    if ((t->gravity == EastGravity) ||
        (t->gravity == NorthEastGravity) ||
        (t->gravity == SouthEastGravity))
-     sprintf(loc,"-%d",x2);
+     snprintf(loc, sizeof(loc), "-%d", x2);
    else
-     sprintf(loc,"+%d",x1+(int)tVx);
-   strcat(tname, loc);
+     snprintf(loc, sizeof(loc), "+%d", x1 + (int)tVx);
+   strlcat(tname, loc, sizeof(tname));
 
    if((t->gravity == SouthGravity)||
       (t->gravity == SouthEastGravity)||
       (t->gravity == SouthWestGravity))
-     sprintf(loc,"-%d",y2);
+     snprintf(loc, sizeof(loc), "-%d", y2);
    else
-     sprintf(loc,"+%d",y1+(int)tVy);
-   strcat(tname, loc);
+     snprintf(loc, sizeof(loc), "+%d", y1 + (int)tVy);
+   strlcat(tname, loc, sizeof(tname));
 
    if ( XGetCommand( dpy, t->id, &command_list, &command_count ) )
      {
@@ -434,7 +436,7 @@ void do_save(void)
      if (t->desk > maxdesk)
 	maxdesk = t->desk;
 
-  sprintf(fnbuf, "%s/.fvwm2desk", getenv( "HOME" ) );
+  snprintf(fnbuf, sizeof(fnbuf), "%s/.fvwm2desk", getenv("HOME"));
   out = fopen( fnbuf, "w" );
 
   fprintf( out, "AddToFunc InitFunction");

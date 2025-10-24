@@ -81,7 +81,7 @@ int main(int argc, char **argv)
   char *filename = NULL;
   int i, cpp_debug = 0;
 
-  strcpy(cpp_options,"");
+  cpp_options[0] = '\0';
 
   /* Record the program name for error messages */
   temp = argv[0];
@@ -90,9 +90,10 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName,"*");
-  strcat(MyName, temp);
+  size_t name_len = strlen(temp);
+  MyName = safemalloc(name_len + 2);
+  strlcpy(MyName, "*", name_len + 2);
+  strlcat(MyName, temp, name_len + 2);
 
   if(argc < 6)
     {

@@ -306,7 +306,7 @@ void ParseConfig()
   char line2[40];
   char *tline;
 
-  sprintf(line2,"*%sDesk",Module);
+  snprintf(line2, sizeof(line2), "*%sDesk", Module);
 
   GetConfigLine(Fvwm_fd,&tline);
 
@@ -379,8 +379,9 @@ int num;
 		fflush(logFile);
 #endif
 		commands[num].type = 0;
-		commands[num].cmdStr = (char *)safemalloc(strlen(temp)+1);
-		strcpy(commands[num].cmdStr,temp);
+    size_t cmd_len = strlen(temp);
+    commands[num].cmdStr = (char *)safemalloc(cmd_len + 1);
+    strlcpy(commands[num].cmdStr, temp, cmd_len + 1);
 	}
 
 }
