@@ -821,8 +821,9 @@ void Restart ()
     case I_INPUT:
       if (!cur_text)
 	cur_text = item;
-      item->input.n = strlen(item->input.init_value);
-      strcpy(item->input.value, item->input.init_value);
+  size_t init_len = strlen(item->input.init_value);
+  item->input.n = init_len;
+  strlcpy(item->input.value, item->input.init_value, item->input.buf);
       item->input.left = 0;
       item->input.o_cursor = 0;
       break;

@@ -791,11 +791,15 @@ void AdjustWindow(void)
 char *makename(const char *string,long flags)
 {
 char *ptr;
-  ptr=safemalloc(strlen(string)+3);
-  *ptr = '\0';
-  if (flags&ICONIFIED) strcpy(ptr,"(");
-  strcat(ptr,string);
-  if (flags&ICONIFIED) strcat(ptr,")");
+  size_t name_len = strlen(string);
+  size_t extra = (flags & ICONIFIED) ? 2 : 1;
+  ptr = safemalloc(name_len + extra);
+  ptr[0] = '\0';
+  if (flags & ICONIFIED)
+    strlcpy(ptr, "(", name_len + extra);
+  strlcat(ptr, string, name_len + extra);
+  if (flags & ICONIFIED)
+    strlcat(ptr, ")", name_len + extra);
   return ptr;
 }
 

@@ -260,11 +260,11 @@ void Loop(int *fd)
 		}
 	      else
 		{
-		  if(pos + count < 255)
-		    {
-		      strcat(Text,kbuf);
-		      pos += count;
-		    }
+          if(pos + count < 255)
+            {
+              strlcat(Text, kbuf, sizeof(Text));
+              pos += count;
+            }
 		  else
 		    XBell(dpy,0);
 		}

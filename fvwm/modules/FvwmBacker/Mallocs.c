@@ -45,11 +45,16 @@ char *newptr;
   return ptr;
 }
 
-void UpdateString(char **string,char *value)
+void UpdateString(char **string, char *value)
 {
-  if (value==NULL) return;
-  if (*string==NULL) *string=safemalloc(strlen(value)+1);
-  else *string=(char *)realloc(*string,strlen(value)+1);
-  strcpy(*string,value);
+  if (value == NULL)
+    return;
+
+  size_t value_len = strlen(value);
+  if (*string == NULL)
+    *string = safemalloc(value_len + 1);
+  else
+    *string = saferealloc(*string, value_len + 1);
+  strlcpy(*string, value, value_len + 1);
 }
 

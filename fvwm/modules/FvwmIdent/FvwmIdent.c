@@ -691,16 +691,16 @@ void MakeList(void)
 #if 0
   {
     char tmp[20], *foo;
-    sprintf(tmp,"%d", target.base_w);
+  snprintf(tmp, sizeof(tmp), "%d", target.base_w);
     foo = strdup(tmp);
     AddToList("  - base_w:", foo);
-    sprintf(tmp,"%d", target.width_inc);
+  snprintf(tmp, sizeof(tmp), "%d", target.width_inc);
     foo = strdup(tmp);
     AddToList("  - width_inc:", foo);
-    sprintf(tmp,"%d", target.base_h);
+  snprintf(tmp, sizeof(tmp), "%d", target.base_h);
     foo = strdup(tmp);
     AddToList("  - base_h:", foo);
-    sprintf(tmp,"%d", target.height_inc);
+  snprintf(tmp, sizeof(tmp), "%d", target.height_inc);
     foo = strdup(tmp);
     AddToList("  - height_inc:", foo);
   }
@@ -772,10 +772,10 @@ void MakeList(void)
                           &supplied_return,
                           XA_WM_ZOOM_HINTS))) {
         if (supplied_return & PAspect) { /* if window has a aspect ratio */
-          sprintf(mymin_aspect, "%d/%d", size_hints->min_aspect.x,
+          snprintf(mymin_aspect, sizeof(mymin_aspect), "%d/%d", size_hints->min_aspect.x,
                   size_hints->min_aspect.y);
           AddToList("Minimum aspect ratio:",mymin_aspect);
-          sprintf(max_aspect, "%d/%d", size_hints->max_aspect.x,
+          snprintf(max_aspect, sizeof(max_aspect), "%d/%d", size_hints->max_aspect.x,
                   size_hints->max_aspect.y);
           AddToList("Maximum aspect ratio:",max_aspect);
         } /* end aspect ratio */

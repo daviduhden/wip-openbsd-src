@@ -545,7 +545,7 @@ static char *MkDef(const char *name, const char *def)
   n = EXTRA + strlen(name) + strlen(def);
   cp = safemalloc(n);
 
-  sprintf(cp, "#define %s %s\n",name,def);
+  snprintf(cp, n, "#define %s %s\n", name, def);
 
   return(cp);
 }
@@ -554,7 +554,7 @@ static char *MkNum(const char *name,int def)
 {
   char num[20];
 
-  sprintf(num, "%d", def);
+  snprintf(num, sizeof(num), "%d", def);
 
   return(MkDef(name, num));
 }
