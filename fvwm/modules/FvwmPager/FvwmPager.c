@@ -122,8 +122,11 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName, temp);
+  {
+    size_t name_len = strlen(temp) + 1;
+    MyName = safemalloc(name_len);
+    strlcpy(MyName, temp, name_len);
+  }
 
   if(argc  < 6)
     {
@@ -199,7 +202,7 @@ int main(int argc, char **argv)
   Desks = (DeskInfo *)safemalloc(ndesks*sizeof(DeskInfo));
   for(i=0;i<ndesks;i++)
     {
-      sprintf(line,"Desk %d",i+desk1);
+  snprintf(line, sizeof(line), "Desk %d", i + desk1);
       CopyString(&Desks[i].label,line);
       CopyString(&Desks[i].Dcolor,PagerBack);
 #ifdef DEBUG

@@ -41,7 +41,7 @@
 #include "../../fvwm/module.h"
 #include "../../fvwm/fvwm.h"
 
-static void DeadPipe(int sig);
+void DeadPipe(int sig);
 
 typedef struct ClientNode {
 	Window frame;
@@ -805,7 +805,7 @@ main(int argc, char *argv[])
 	return 0;
 }
 
-static void
+void
 DeadPipe(int sig)
 {
 	(void)sig;

@@ -1399,10 +1399,10 @@ void InitVariables(void)
   Scr.StipledTitles = False;
 
   /*  RBW - 11/02/1998    */
-  Scr.go.ModifyUSP                          =  True;
-  Scr.go.CaptureHonorsStartsOnPage          =  True;
-  Scr.go.RecaptureHonorsStartsOnPage        =  False;
-  Scr.go.ActivePlacementHonorsStartsOnPage  =  False;
+  Scr.go.ModifyUSP                          =  1U;
+  Scr.go.CaptureHonorsStartsOnPage          =  1U;
+  Scr.go.RecaptureHonorsStartsOnPage        =  0U;
+  Scr.go.ActivePlacementHonorsStartsOnPage  =  0U;
 
   Scr.gs.EmulateMWM = False;
   Scr.gs.EmulateWIN = False;

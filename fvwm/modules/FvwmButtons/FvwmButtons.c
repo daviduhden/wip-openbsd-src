@@ -171,7 +171,6 @@ Bool DestroyedWindow(Display *d,XEvent *e,char *a)
 int IsThereADestroyEvent(button_info *b)
 {
   XEvent event;
-  Bool DestroyedWindow();
   return XCheckIfEvent(Dpy,&event,DestroyedWindow,(char*)b->IconWin);
 }
 
@@ -491,8 +490,11 @@ int main(int argc, char **argv)
   temp=argv[0];
   s=strrchr(argv[0],'/');
   if(s) temp=s+1;
-  MyName=mymalloc(strlen(temp)+1);
-  strcpy(MyName,temp);
+  {
+    size_t name_len = strlen(temp) + 1;
+    MyName = mymalloc((int)name_len);
+    strlcpy(MyName, temp, name_len);
+  }
 
 #ifdef HAVE_SIGACTION
   {
@@ -888,13 +890,16 @@ void Loop(void)
 		    else
 		      i2=i;
 
-		    tmp=mymalloc(strlen(act)+1);
-		    strcpy(tmp,"Exec ");
+            {
+              size_t tmp_len = strlen(act) + 1;
+              tmp = mymalloc((int)tmp_len);
+              strlcpy(tmp, "Exec ", tmp_len);
 		    while(act[i2]!=0 && isspace(act[i2]))
 		      i2++;
-		    strcat(tmp,&act[i2]);
+              strlcat(tmp, &act[i2], tmp_len);
 		    MySendText(fd,tmp,0);
 		    free(tmp);
+            }
 		  }
 		else if(strncasecmp(act,"DumpButtons",11)==0)
 		  DumpButtons(UberButton);
@@ -1395,9 +1400,10 @@ void CreateWindow(button_info *ub,int maxx,int maxy)
   }
   else
   {
-    myclasshints.res_name=(char *)malloc(strlen(MyName)+6);
-    strcpy(myclasshints.res_name,MyName);
-    strcat(myclasshints.res_name,"Panel");
+    size_t total_len = strlen(MyName) + sizeof("Panel");
+    myclasshints.res_name=(char *)safemalloc(total_len);
+    strlcpy(myclasshints.res_name,MyName,total_len);
+    strlcat(myclasshints.res_name,"Panel",total_len);
   }
 #endif
   myclasshints.res_class=strdup((CurrentPanel == MainPanel)
@@ -1457,7 +1463,7 @@ int PleaseAllocColor(XColor *color)
   XImage *dummy1=None,*dummy2=None;
   static char buf[20];
 
-  sprintf(buf,"x c #%04x%04x%04x",color->red,color->green,color->blue);
+  snprintf(buf,sizeof(buf),"x c #%04x%04x%04x",color->red,color->green,color->blue);
   xpm[1]=buf;
   attr.valuemask=XpmCloseness;
   attr.closeness=40000; /* value used by fvwm and fvwmlib */

@@ -40,7 +40,7 @@ int MatchArgument(const char *pstr,char *tok);
 				 sizeof(struct_entry),			\
 				 XCmpToken)
 
-int XCmpToken();    /* (char *s, char **t); but avoid compiler warning */
+int XCmpToken(const void *s, const void *t);
                                              /* needed by (L)FindToken */
 
 #if 0
