@@ -48,11 +48,17 @@ char *saferealloc(char *ptr, size_t length)
   return newptr;
 }
 
-void UpdateString(char **string,const char *value)
+void UpdateString(char **string, const char *value)
 {
-  if (value==NULL) return;
-  *string = saferealloc(*string,strlen(value)+1);
-  strcpy(*string,value);
+  if (value == NULL)
+    return;
+
+  size_t value_len = strlen(value);
+  if (*string == NULL)
+    *string = safemalloc(value_len + 1);
+  else
+    *string = saferealloc(*string, value_len + 1);
+  strlcpy(*string, value, value_len + 1);
 }
 
 
