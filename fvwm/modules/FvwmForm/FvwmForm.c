@@ -149,6 +149,9 @@ int warp_pointer = 0;
 
 Display *dpy;
 int fd_x;                  /* fd for X connection */
+char *prog_name;
+int fd[2];
+int fd_err;
 
 Window root, frame, ref;
 Colormap d_cmap;
@@ -316,7 +319,6 @@ int FontWidth (XFontStruct *xfs)
 /* read the configuration file */
 void ReadConfig ()
 {
-  FILE *fopen();
   int prog_name_len, i, j, l, extra;
   char *line_buf;
   char *cp;
@@ -1626,7 +1628,6 @@ void MainLoop ()
 /* main procedure */
 int main (int argc, char **argv)
 {
-  FILE *fdopen();
   int i;
 
   buf = (char *)malloc(N);  /* some kludge */
