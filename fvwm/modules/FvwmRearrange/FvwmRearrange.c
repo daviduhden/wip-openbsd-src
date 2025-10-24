@@ -120,6 +120,37 @@ release_clients(ModuleState *state)
 	state->client_count = 0;
 }
 
+static ClientNode *
+find_client(ModuleState *state, Window frame)
+{
+	for (ClientNode *cursor = state->head; cursor; cursor = cursor->next) {
+		if (cursor->frame == frame) {
+			return cursor;
+		}
+	}
+	return NULL;
+}
+
+static void
+detach_client(ModuleState *state, ClientNode *node)
+{
+	if (!node) {
+		return;
+	}
+	if (node->prev) {
+		node->prev->next = node->next;
+	} else {
+		state->head = node->next;
+	}
+	if (node->next) {
+		node->next->prev = node->prev;
+	} else {
+		state->tail = node->prev;
+	}
+	free(node);
+	--state->client_count;
+}
+
 static int
 window_matches(ModuleState *state, unsigned long *body)
 {
@@ -172,7 +203,7 @@ collect_client(ModuleState *state)
 	unsigned long header[HEADER_SIZE];
 	unsigned long *body;
 	fd_set infds;
-	int last = 0;
+	int keep_running = 1;
 
 	FD_ZERO(&infds);
 	FD_SET(state->pipe_fd[1], &infds);
@@ -190,9 +221,17 @@ collect_client(ModuleState *state)
 				node->height = body[6];
 				prepend_client(state, node);
 			}
-			last = 1;
+			break;
+		case M_DESTROY_WINDOW:
+			if (body) {
+				ClientNode *node = find_client(state, (Window)body[1]);
+				if (node) {
+					detach_client(state, node);
+				}
+			}
 			break;
 		case M_END_WINDOWLIST:
+			keep_running = 0;
 			break;
 		default:
 			fprintf(state->log,
@@ -201,17 +240,17 @@ collect_client(ModuleState *state)
 			break;
 		}
 		free(body);
+	} else {
+		keep_running = 0;
 	}
 
-	return last;
+	return keep_running;
 }
 
-static void
+static int
 await_configure(ModuleState *state, ClientNode *node)
 {
-	int satisfied = 0;
-
-	while (!satisfied) {
+	for (;;) {
 		unsigned long header[HEADER_SIZE];
 		unsigned long *body;
 		fd_set infds;
@@ -221,11 +260,34 @@ await_configure(ModuleState *state, ClientNode *node)
 		select(state->fd_width, &infds, NULL, NULL, NULL);
 
 		if (ReadFvwmPacket(state->pipe_fd[1], header, &body) > 0) {
-			if ((header[1] == M_CONFIGURE_WINDOW) &&
-				((Window)body[1] == node->frame)) {
-				satisfied = 1;
+			switch (header[1]) {
+			case M_CONFIGURE_WINDOW:
+				if (body && (Window)body[1] == node->frame) {
+					free(body);
+					return 1;
+				}
+				break;
+			case M_DESTROY_WINDOW:
+				if (body) {
+					Window frame = (Window)body[1];
+					if (frame == node->frame) {
+						free(body);
+						return 0;
+					}
+					ClientNode *other = find_client(state, frame);
+					if (other) {
+						detach_client(state, other);
+					}
+				}
+				break;
+			case M_END_WINDOWLIST:
+				break;
+			default:
+				break;
 			}
 			free(body);
+		} else {
+			return 0;
 		}
 	}
 }
@@ -319,8 +381,14 @@ tile_clients(ModuleState *state)
 				}
 
 				current_y += hdiv;
-				await_configure(state, cursor);
-				cursor = state->reverse_order ? cursor->prev : cursor->next;
+				{
+					int alive = await_configure(state, cursor);
+					ClientNode *next = state->reverse_order ? cursor->prev : cursor->next;
+					if (!alive) {
+						detach_client(state, cursor);
+					}
+					cursor = next;
+				}
 			}
 			current_x += wdiv;
 			current_y = state->offset_y;
@@ -365,8 +433,14 @@ tile_clients(ModuleState *state)
 				}
 
 				current_x += wdiv;
-				await_configure(state, cursor);
-				cursor = state->reverse_order ? cursor->prev : cursor->next;
+				{
+					int alive = await_configure(state, cursor);
+					ClientNode *next = state->reverse_order ? cursor->prev : cursor->next;
+					if (!alive) {
+						detach_client(state, cursor);
+					}
+					cursor = next;
+				}
 			}
 			current_x = state->offset_x;
 			current_y += hdiv;
@@ -384,6 +458,8 @@ cascade_clients(ModuleState *state)
 	while (cursor) {
 		unsigned long target_width = 0;
 		unsigned long target_height = 0;
+		int advance_x = state->step_x;
+		int advance_y = state->step_y;
 
 		if (state->raise_clients) {
 			SendInfo(state->pipe_fd, "Raise", cursor->frame);
@@ -411,19 +487,24 @@ cascade_clients(ModuleState *state)
 			}
 		}
 
-		await_configure(state, cursor);
-
 		if (!state->flat_x) {
-			current_x += cursor->border_width;
+			advance_x += cursor->border_width;
 		}
-		current_x += state->step_x;
-
 		if (!state->flat_y) {
-			current_y += cursor->border_width + cursor->title_height;
+			advance_y += cursor->border_width + cursor->title_height;
 		}
-		current_y += state->step_y;
 
-		cursor = state->reverse_order ? cursor->prev : cursor->next;
+		{
+			int alive = await_configure(state, cursor);
+			ClientNode *next = state->reverse_order ? cursor->prev : cursor->next;
+			if (!alive) {
+				detach_client(state, cursor);
+			}
+			cursor = next;
+		}
+
+		current_x += advance_x;
+		current_y += advance_y;
 	}
 }
 
@@ -673,7 +754,8 @@ main(int argc, char *argv[])
 	{
 		char msg[256];
 		snprintf(msg, sizeof(msg), "SET_MASK %lu\n",
-				 (unsigned long)(M_CONFIGURE_WINDOW | M_END_WINDOWLIST));
+				 (unsigned long)(M_CONFIGURE_WINDOW | M_DESTROY_WINDOW |
+				 M_END_WINDOWLIST));
 		SendInfo(state->pipe_fd, msg, 0);
 
 #ifdef FVWM1_MOVENULL
@@ -686,7 +768,8 @@ main(int argc, char *argv[])
 #endif
 	}
 #else
-	SetMessageMask(state->pipe_fd, M_CONFIGURE_WINDOW | M_END_WINDOWLIST);
+	SetMessageMask(state->pipe_fd,
+				   M_CONFIGURE_WINDOW | M_DESTROY_WINDOW | M_END_WINDOWLIST);
 #endif
 
 	if (state->run_tile) {

@@ -353,7 +353,16 @@ void Loop(Window target)
 	     (motion==QUIT))
 	    {
 	      XUnmapWindow(dpy,main_win);
-	      XReparentWindow(dpy,target,Root,x,y);
+	      {
+		int root_x, root_y;
+		Window dummy;
+		if (XTranslateCoordinates(dpy, main_win, Root, 0, 0,
+					    &root_x, &root_y, &dummy)) {
+		  XReparentWindow(dpy,target,Root,root_x,root_y);
+		} else {
+		  XReparentWindow(dpy,target,Root,x,y);
+		}
+	      }
 	      XSync(dpy,0);
 	      exit(0);
 	    }
