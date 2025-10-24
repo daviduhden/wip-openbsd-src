@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
 #include <sys/types.h>
@@ -129,15 +130,9 @@ typedef struct _line {
   Item **items;            /* list of items */
   int items_cap;           /* capacity of items array */
 } Line;
-
-  item->button.n = 0;
-  item->button.commands = (char **)malloc(sizeof(char *) * 8);
-  item->button.commands_cap = 8;
-
+ 
 int fd_in;                 /* fd for Fvwm->Module packets */
 int fd_out;                /* fd for Module->Fvwm packets */
-  + XTextWidth(xfs[f_button], item->button.text, item->button.len);
-  append_item_to_line(cur_line, item);
 FILE *fp_err;
 
 Line *lines = NULL;
@@ -349,6 +344,7 @@ void ReadConfig ()
     def_button.button.commands_cap = 8;
   }
   def_button.button.key = IB_CONTINUE;
+  cur_sel = NULL;
 
   /* default fonts in case the *FFFont's are missing */
   xfs[f_text] = xfs[f_input] = xfs[f_button] =
@@ -524,49 +520,60 @@ void ReadConfig ()
       cur_sel->header.name = CopySolidString(cp);
       cp += strlen(cur_sel->header.name);
       while (isspace(*cp)) cp++;
-      else if (strncmp(cp, "Button", 6) == 0) {
-    /* syntax: *FFButton continue | restart | quit "<text>" */
-        cp += 6;
-        if (n_items + 1 > items_capacity) {
-          items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
-          items = (Item *)realloc(items, sizeof(Item) * items_capacity);
-        }
-        item = &items[n_items++];
-        item->type = I_BUTTON;
-        item->header.name = "";
-        while (isspace(*cp)) cp++;
-        if (strncmp(cp, "restart", 7) == 0)
-          item->button.key = IB_RESTART;
-        else if (strncmp(cp, "quit", 4) == 0)
-          item->button.key = IB_QUIT;
-        else
-          item->button.key = IB_CONTINUE;
-        while (!isspace(*cp)) cp++;
-        while (isspace(*cp)) cp++;
-        if (*cp == '"') {
-          item->button.text = CopyQuotedString(++cp);
-          cp += strlen(item->button.text) + 1;
-          while (isspace(*cp)) cp++;
-        } else
-          item->button.text = "";
-        if (*cp == '^')
-          item->button.keypress = *(++cp) - '@';
-        else if (*cp == 'F')
-          item->button.keypress = 256 + atoi(++cp);
-        else
-          item->button.keypress = -1;
-          item->button.len = strlen(item->button.text);
-          item->button.n = 0;
-          item->button.commands = (char **)malloc(sizeof(char *) * 8);
-          item->button.commands_cap = 8;
-          item->header.size_y = FontHeight(xfs[f_button]) + 2 * TEXT_SPC
-          + 2 * BOX_SPC;
-          item->header.size_x = 2 * TEXT_SPC + 2 * BOX_SPC
-          + XTextWidth(xfs[f_button], item->button.text, item->button.len);
-          append_item_to_line(cur_line, item);
-        cur_button = item;
+      if (strncmp(cp, "multiple", 8) == 0)
+        cur_sel->select.key = IS_MULTIPLE;
+      else
+        cur_sel->select.key = IS_SINGLE;
+      cur_sel->select.n = 0;
+      cur_sel->select.choices_cap = INITIAL_CHOICES_CAPACITY;
+      cur_sel->select.choices = (Item **)malloc(sizeof(Item *) * cur_sel->select.choices_cap);
+      cur_sel->header.size_x = 0;
+      cur_sel->header.size_y = 0;
+      fprintf(fp_err, "Selection %s (%s)\n", cur_sel->header.name,
+              (cur_sel->select.key == IS_MULTIPLE) ? "multiple" : "single");
+      continue;
+    }
+    else if (strncmp(cp, "Choice", 6) == 0) {
+/* syntax: *FFChoice <name> <value> on|off "<text>" */
+      cp += 6;
+      while (isspace(*cp)) cp++;
+      if (cur_sel == NULL) {
+        fprintf(fp_err, "Choice specified before Selection, skipping\n");
         continue;
       }
+      if (cur_sel->select.n + 1 > cur_sel->select.choices_cap) {
+        cur_sel->select.choices_cap *= 2;
+        cur_sel->select.choices = (Item **)realloc(cur_sel->select.choices,
+            sizeof(Item *) * cur_sel->select.choices_cap);
+      }
+      if (n_items + 1 > items_capacity) {
+        items_capacity = items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
+        items = (Item *)realloc(items, sizeof(Item) * items_capacity);
+      }
+      item = &items[n_items++];
+      item->type = I_CHOICE;
+      item->choice.sel = cur_sel;
+      item->header.name = CopySolidString(cp);
+      cp += strlen(item->header.name);
+      while (isspace(*cp)) cp++;
+      item->choice.value = CopySolidString(cp);
+      cp += strlen(item->choice.value);
+      while (isspace(*cp)) cp++;
+      if (strncmp(cp, "on", 2) == 0) {
+        item->choice.on = 1;
+        item->choice.init_on = 1;
+      } else {
+        item->choice.on = 0;
+        item->choice.init_on = 0;
+      }
+      while (!isspace(*cp) && *cp != '\0')
+        cp++;
+      while (isspace(*cp)) cp++;
+      if (*cp == '"')
+        item->choice.text = CopyQuotedString(++cp);
+      else
+        item->choice.text = "";
+      item->choice.n = strlen(item->choice.text);
       cur_sel->select.choices[cur_sel->select.n++] = item;
       item->header.size_y = FontHeight(xfs[f_text]) + 2 * TEXT_SPC;
       item->header.size_x = FontHeight(xfs[f_text]) + 4 * TEXT_SPC +
@@ -575,7 +582,8 @@ void ReadConfig ()
 	     item->choice.text, item->header.size_x, item->header.size_y);
       append_item_to_line(cur_line, item);
       continue;
-    } else if (strncmp(cp, "Button", 6) == 0) {
+    }
+    else if (strncmp(cp, "Button", 6) == 0) {
 /* syntax: *FFButton continue | restart | quit "<text>" */
       cp += 6;
       if (n_items + 1 > items_capacity) {
