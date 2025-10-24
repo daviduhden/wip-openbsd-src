@@ -640,14 +640,14 @@ void list_new_desk(unsigned long *body)
 	  Desks[0].label = NULL;
 	}
       if (item->next != NULL && item->next->label != NULL)
-	{
-	  CopyString(&Desks[0].label, item->next->label);
-	}
+  {
+    CopyString(&Desks[0].label, item->next->label);
+  }
       else
-	{
-	  sprintf(line, "Desk %d", desk1);
-	  CopyString(&Desks[0].label, line);
-	}
+  {
+    snprintf(line, sizeof(line), "Desk %d", desk1);
+    CopyString(&Desks[0].label, line);
+  }
       XStoreName(dpy, Scr.Pager_w, Desks[0].label);
       XSetIconName(dpy, Scr.Pager_w, Desks[0].label);
       if (Desks[0].Dcolor != NULL)
