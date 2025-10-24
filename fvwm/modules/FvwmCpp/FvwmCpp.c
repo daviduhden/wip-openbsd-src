@@ -243,6 +243,10 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
     return -1;
   }
 
+  snprintf(command, sizeof(command), "%s %s", cpp_prog,
+      (cpp_opts != NULL) ? cpp_opts : "");
+
+
   static int
   is_cpp_linemarker(const char *line)
   {
@@ -274,6 +278,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
     return 0;
   }
 
+
   static void *
   xrealloc(void *ptr, size_t size)
   {
@@ -286,8 +291,6 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
     return tmp;
   }
 
-  snprintf(command, sizeof(command), "%s %s", cpp_prog,
-      (cpp_opts != NULL) ? cpp_opts : "");
 
   pid = fork();
   if (pid == -1) {
