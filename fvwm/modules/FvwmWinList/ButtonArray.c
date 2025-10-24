@@ -51,8 +51,9 @@ Button *ButtonNew(char *title, FvwmPicture *p, int up)
   Button *new;
 
   new = (Button *)safemalloc(sizeof(Button));
-  new->title = safemalloc(strlen(title)+1);
-  strcpy(new->title, title);
+  size_t title_len = strlen(title);
+  new->title = safemalloc(title_len + 1);
+  strlcpy(new->title, title, title_len + 1);
   if (p != NULL)
   {
     new->p.picture = p->picture;
@@ -142,8 +143,9 @@ int UpdateButton(ButtonArray *array, int butnum, char *title, int up)
   {
     if (title!=NULL)
     {
-      temp->title=(char *)saferealloc(temp->title,strlen(title)+1);
-      strcpy(temp->title,title);
+  size_t title_len = strlen(title);
+  temp->title = (char *)saferealloc(temp->title, title_len + 1);
+  strlcpy(temp->title, title, title_len + 1);
       temp->tw=XTextWidth(ButtonFont,title,strlen(title));
       temp->truncatewidth = 0;
     }

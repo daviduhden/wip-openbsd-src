@@ -797,12 +797,12 @@ void MovePage(void)
       icon_desk_shown = Scr.CurrentDesk;
 
       if((Scr.CurrentDesk >= desk1)&&(Scr.CurrentDesk <=desk2))
-	sptr = Desks[Scr.CurrentDesk -desk1].label;
+  sptr = Desks[Scr.CurrentDesk -desk1].label;
       else
-	{
-	  sprintf(str,"Desk %d",Scr.CurrentDesk);
-	  sptr = &str[0];
-	}
+  {
+    snprintf(str, sizeof(str), "Desk %d", Scr.CurrentDesk);
+    sptr = &str[0];
+  }
       if (XStringListToTextProperty(&sptr,1,&name) == 0)
 	{
 	  fprintf(stderr,"%s: cannot allocate window name",MyName);
@@ -913,7 +913,7 @@ void DrawGrid(int i, int erase)
   w=XTextWidth(font,ptr,strlen(ptr));
   if( w > desk_w)
     {
-      sprintf(str,"%d",d);
+  snprintf(str, sizeof(str), "%d", d);
       ptr = str;
       w=XTextWidth(font,ptr,strlen(ptr));
     }
@@ -979,7 +979,7 @@ void SwitchToDesk(int Desk)
 {
   char command[256];
 
-  sprintf(command,"Desk 0 %d\n",Desk+desk1);
+  snprintf(command, sizeof(command), "Desk 0 %d\n", Desk + desk1);
 
   SendInfo(fd,command,0);
 }
@@ -1001,15 +1001,15 @@ void SwitchToDeskAndPage(int Desk, XEvent *Event)
 	(desk_h*Scr.MyDisplayHeight);
       Scr.Vx = vx * Scr.MyDisplayWidth;
       Scr.Vy = vy * Scr.MyDisplayHeight;
-      sprintf(command,"GotoPage %d %d\n", vx, vy);
+      snprintf(command, sizeof(command), "GotoPage %d %d\n", vx, vy);
       SendInfo(fd,command,0);
-      sprintf(command,"Desk 0 %d\n",Desk+desk1);
+      snprintf(command, sizeof(command), "Desk 0 %d\n", Desk + desk1);
       SendInfo(fd,command,0);
 
     }
   else
     {
-      sprintf(command,"GotoPage %d %d\n",
+      snprintf(command, sizeof(command), "GotoPage %d %d\n",
 	      Event->xbutton.x*(Scr.VxMax+Scr.MyDisplayWidth)/
 	      (desk_w*Scr.MyDisplayWidth),
 	      Event->xbutton.y*(Scr.VyMax+Scr.MyDisplayHeight)/
@@ -1025,7 +1025,7 @@ void IconSwitchPage(XEvent *Event)
 #ifndef NON_VIRTUAL
   char command[256];
 
-  sprintf(command,"GotoPage %d %d\n",
+  snprintf(command, sizeof(command), "GotoPage %d %d\n",
 	  Event->xbutton.x*(Scr.VxMax+Scr.MyDisplayWidth)/
 	  (icon_w*Scr.MyDisplayWidth),
 	  Event->xbutton.y*(Scr.VyMax+Scr.MyDisplayHeight)/
@@ -1344,7 +1344,7 @@ void Scroll(int window_w, int window_h, int x, int y, int Desk)
       if(sx == 0 && x == 0 && Scr.Vx != 0) sx = -1;
       if(sy == 0 && y == 0 && Scr.Vy != 0) sy = -1;
 
-      sprintf(command,"Scroll %d %d\n",sx,sy);
+  snprintf(command, sizeof(command), "Scroll %d %d\n", sx, sy);
       SendInfo(fd,command,0);
       Wait = 1;
     }
@@ -1453,7 +1453,7 @@ void MoveWindow(XEvent *Event)
 	  XMoveWindow(dpy,t->w,Scr.MyDisplayWidth+Scr.VxMax,
 		      Scr.MyDisplayHeight+Scr.VyMax);
 	  XSync(dpy,0);
-	  sprintf(command,"MoveToDesk 0 %d", NewDesk);
+          snprintf(command, sizeof(command), "MoveToDesk 0 %d", NewDesk);
 	  SendInfo(fd,command,t->w);
 	  t->desk = NewDesk;
 	}
@@ -1468,7 +1468,7 @@ void MoveWindow(XEvent *Event)
 			    x, y, &x1, &y1, &dumwin);
       XUngrabPointer(dpy,CurrentTime);
       XSync(dpy,0);
-      sprintf(command, "Move %dp %dp", x, y);
+  snprintf(command, sizeof(command), "Move %dp %dp", x, y);
       SendInfo(fd,command,t->w);
       SendInfo(fd,"Raise",t->w);
       SendInfo(fd,"Move",t->w);
@@ -1527,7 +1527,7 @@ void MoveWindow(XEvent *Event)
 	    }
 	  else
 	    {
-	      sprintf(command,"MoveToDesk 0 %d", NewDesk + desk1);
+      snprintf(command, sizeof(command), "MoveToDesk 0 %d", NewDesk + desk1);
 	      SendInfo(fd,command,t->w);
 	      t->desk = NewDesk + desk1;
 	    }
@@ -1852,7 +1852,7 @@ void IconMoveWindow(XEvent *Event,PagerWindow *t)
 			    x, y, &x1, &y1, &dumwin);
       XUngrabPointer(dpy,CurrentTime);
       XSync(dpy,0);
-      sprintf(command, "Move %dp %dp", x, y);
+  snprintf(command, sizeof(command), "Move %dp %dp", x, y);
       SendInfo(fd,command,t->w);
       SendInfo(fd,"Raise",t->w);
       SendInfo(fd,"Move",t->w);

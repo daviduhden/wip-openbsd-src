@@ -1030,8 +1030,9 @@ void ParseOptions(button_info *ub)
   char *s;
   char *items[]={"iconpath","pixmappath","colorlimit",NULL,NULL};
 
-  items[3]=mymalloc(strlen(MyName)+2);
-  sprintf(items[3],"*%s",MyName);
+	size_t name_len = strlen(MyName);
+	items[3] = mymalloc(name_len + 2);
+	snprintf(items[3], name_len + 2, "*%s", MyName);
 
   GetConfigLine(fd,&s);
   while(s && s[0])

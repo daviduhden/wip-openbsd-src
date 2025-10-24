@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <string.h>
 #include "FvwmIconMan.h"
 
 static char const rcsid[] =
@@ -77,10 +78,11 @@ void add_to_stringlist (StringList *list, char *s)
 		type == ALL_NAME ? "all" : s, pat);
 
   new = (StringEl *)safemalloc (sizeof (StringEl));
-  new->string = (char *)safemalloc ((strlen (pat) + 1) * sizeof (char));
+  size_t pat_len = strlen(pat);
+  new->string = (char *)safemalloc((pat_len + 1) * sizeof(char));
   new->type = type;
 
-  strcpy (new->string, pat);
+  strlcpy(new->string, pat, pat_len + 1);
   new->next = list->list;
   if (list->list)
     list->mask |= type;

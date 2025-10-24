@@ -99,10 +99,14 @@ int main(int argc, char **argv)
 
   /* Save our program  name - for error messages */
   string = strrchr (argv[0], '/');
-  if (string != (char *) 0) string++;
+  if (string != (char *) 0)
+    string++;
+  else
+    string = argv[0];
 
-  myName = safemalloc (strlen (string) + 1);
-  strcpy (myName, string);
+  size_t name_len = strlen(string);
+  myName = safemalloc(name_len + 1);
+  strlcpy(myName, string, name_len + 1);
 
   if(argc>=3)
   {
@@ -125,8 +129,9 @@ int main(int argc, char **argv)
   }
 
   if (argc > 6) {
-    pixmapName = safemalloc (strlen (argv[6]) + 1);
-    strcpy (pixmapName, argv[6]);
+  size_t pixmap_len = strlen(argv[6]);
+  pixmapName = safemalloc(pixmap_len + 1);
+  strlcpy(pixmapName, argv[6], pixmap_len + 1);
   }
 
   /* Open the display */
