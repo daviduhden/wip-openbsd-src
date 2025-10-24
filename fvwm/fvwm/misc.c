@@ -1110,7 +1110,7 @@ void HandleHardFocus(FvwmWindow *t)
 ** type -> DBG == Debug, ERR == Error, INFO == Information, WARN == Warning
 ** id -> name of function, or other identifier
 */
-void fvwm_msg(int type,char *id,char *msg,...)
+void fvwm_msg(int type, const char *id, const char *msg, ...)
 {
   char *typestr;
   va_list args1, args2;

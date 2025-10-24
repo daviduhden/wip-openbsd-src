@@ -49,8 +49,8 @@ int ScreenWidth, ScreenHeight;
 int Mscreen;
 
 long Vx, Vy;
-static char *MkDef(char *name, char *def);
-static char *MkNum(char *name,int def);
+static char *MkDef(const char *name, const char *def);
+static char *MkNum(const char *name,int def);
 static char *m4_defs(Display *display, const char *host, char *m4_options, char *config_file);
 #define MAXHOSTNAME 255
 #define EXTRA 50
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 
   m4_enable = TRUE;
   m4_prefix = FALSE;
-  strcpy(m4_options,"");
+  m4_options[0] = '\0';
   m4_default_quotes = 1;
 
   /* Record the program name for error messages */
@@ -92,9 +92,12 @@ int main(int argc, char **argv)
   if (s != NULL)
     temp = s + 1;
 
-  MyName = safemalloc(strlen(temp)+2);
-  strcpy(MyName,"*");
-  strcat(MyName, temp);
+  {
+    size_t name_len = strlen(temp) + 2;
+    MyName = safemalloc(name_len);
+    strlcpy(MyName, "*", name_len);
+    strlcat(MyName, temp, name_len);
+  }
 
   if(argc < 6)
     {
@@ -168,11 +171,13 @@ int main(int argc, char **argv)
 	filename = argv[i];
     }
 
-  for(i=0;i<strlen(filename);i++)
-    if((filename[i] == '\n')||(filename[i] == '\r'))
+  if (filename != NULL) {
+    for (i = 0; filename[i] != '\0'; i++)
+      if ((filename[i] == '\n') || (filename[i] == '\r'))
       {
 	filename[i] = 0;
       }
+  }
 
   if (!(dpy = XOpenDisplay(display_name)))
     {
@@ -215,47 +220,43 @@ static char *m4_defs(Display *display, const char *host, char *m4_options, char 
   /* Generate a temporary filename.  Honor the TMPDIR environment variable,
      if set. Hope nobody deletes this file! */
 
-  if (strlen(m4_outfile) == 0) {
-    if ((vc=getenv("TMPDIR"))) {
-      strlcpy(tmp_name, vc, sizeof(tmp_name));
+  if (m4_outfile[0] == '\0') {
+    const char *tmpdir = getenv("TMPDIR");
+    if (tmpdir != NULL) {
+      strlcpy(tmp_name, tmpdir, sizeof(tmp_name));
     } else {
-      strlcpy(tmp_name, "/tmp",sizeof(tmp_name));
+      strlcpy(tmp_name, "/tmp", sizeof(tmp_name));
     }
-    strlcat(tmp_name, "/fvwmrcXXXXXXXXXX",sizeof(tmp_name));
-    mktemp(tmp_name);
+    strlcat(tmp_name, "/fvwmrcXXXXXXXXXX", sizeof(tmp_name));
+    fd = mkstemp(tmp_name);
+    if (fd < 0) {
+      perror("mkstemp failed in m4_defs");
+      exit(0377);
+    }
+    close(fd);
   } else {
-    strlcpy(tmp_name,m4_outfile,sizeof(tmp_name));
+    strlcpy(tmp_name, m4_outfile, sizeof(tmp_name));
+    fd = open(tmp_name, O_WRONLY | O_EXCL | O_CREAT, 0600);
+    if (fd < 0) {
+      perror("exclusive open for output file failed in m4_defs");
+      exit(0377);
+    }
+    close(fd);
   }
-
-  if (*tmp_name == '\0')
-  {
-    perror("mktemp failed in m4_defs");
-    exit(0377);
-  }
-
-  /*
-  ** check to make sure it doesn't exist already, to prevent security hole
-  */
-  if ((fd = open(tmp_name, O_WRONLY|O_EXCL|O_CREAT, 0600)) < 0)
-  {
-    perror("exclusive open for output file failed in m4_defs");
-    exit(0377);
-  }
-  close(fd);
 
   /*
    * Create the appropriate command line to run m4, and
    * open a pipe to the command.
    */
 
-  if(m4_prefix)
-    sprintf(options, "%s --prefix-builtins %s > %s\n",
-	    m4_prog,
-	    m4_options, tmp_name);
+  if (m4_prefix)
+    snprintf(options, sizeof(options), "%s --prefix-builtins %s > %s\n",
+             m4_prog,
+             m4_options, tmp_name);
   else
-    sprintf(options, "%s  %s > %s\n",
-	    m4_prog,
-	    m4_options, tmp_name);
+    snprintf(options, sizeof(options), "%s  %s > %s\n",
+             m4_prog,
+             m4_options, tmp_name);
   tmpf = popen(options, "w");
   if (tmpf == NULL) {
     perror("Cannot open pipe to m4");
@@ -351,18 +352,18 @@ static char *m4_defs(Display *display, const char *host, char *m4_options, char 
   fputs(MkDef("FVWM_VERSION", VERSION), tmpf);
 
   /* Add options together */
-  *options = '\0';
+  options[0] = '\0';
 #ifdef	SHAPE
-  strcat(options, "SHAPE ");
+  strlcat(options, "SHAPE ", sizeof(options));
 #endif
 #ifdef	XPM
-  strcat(options, "XPM ");
+  strlcat(options, "XPM ", sizeof(options));
 #endif
 
-  strcat(options, "M4 ");
+  strlcat(options, "M4 ", sizeof(options));
 
 #ifdef	NO_SAVEUNDERS
-  strcat(options, "NO_SAVEUNDERS ");
+  strlcat(options, "NO_SAVEUNDERS ", sizeof(options));
 #endif
 
   fputs(MkDef("OPTIONS", options), tmpf);
@@ -402,70 +403,59 @@ void DeadPipe(int nonsense)
 
 
 
-static char *MkDef(char *name, char *def)
+static char *MkDef(const char *name, const char *def)
 {
-    static char *cp = NULL;
-    static int maxsize = 0;
-    int n;
+  static char *cp = NULL;
+  static int maxsize = 0;
+  int needed;
+  const char *prefix = m4_prefix ? "m4_define" : "define";
+  const char *suffix = m4_prefix ? "m4_" : "";
 
-    /* The char * storage only lasts for 1 call... */
-
-    /* Get space to hold everything, if needed */
-
-    n = EXTRA + strlen(name) + strlen(def);
-    if (n > maxsize) {
-	maxsize = n;
-	if (cp == NULL) {
-	    cp = malloc(n);
-	} else {
-	    cp = realloc(cp, n);
-	}
+  needed = snprintf(NULL, 0, "%s(%s,%s%s%s%s%s)%sdnl\n",
+            prefix,
+            name,
+            m4_startquote,
+            m4_startquote,
+            def,
+            m4_endquote,
+            m4_endquote,
+            suffix);
+  if (needed < 0) {
+    perror("MkDef failed to calculate length");
+    exit(0377);
+  }
+  needed += 1; /* account for terminating null */
+  if (needed > maxsize) {
+    char *tmp = realloc(cp, needed);
+    if (tmp == NULL) {
+      perror("MkDef can't allocate enough space for a macro definition");
+      free(cp);
+      exit(0377);
     }
+    cp = tmp;
+    maxsize = needed;
+  }
 
-    if (cp == NULL) {
-	perror("MkDef can't allocate enough space for a macro definition");
-	exit(0377);
-    }
+  if (snprintf(cp, maxsize, "%s(%s,%s%s%s%s%s)%sdnl\n",
+         prefix,
+         name,
+         m4_startquote,
+         m4_startquote,
+         def,
+         m4_endquote,
+         m4_endquote,
+         suffix) < 0) {
+    perror("MkDef failed to build macro definition");
+    exit(0377);
+  }
 
-    /* Create the macro definition, using the appropriate prefix, if any */
-
-    if (m4_prefix)
-      {
-	strcpy(cp, "m4_define(");
-      }
-    else
-      strcpy(cp, "define(");
-
-    strcat(cp, name);
-
-    /* Tack on "," and 2 sets of starting quotes */
-    strcat(cp, ",");
-    strcat(cp, m4_startquote);
-    strcat(cp, m4_startquote);
-
-    /* The definition itself */
-    strcat(cp, def);
-
-    /* Add 2 sets of closing quotes */
-    strcat(cp, m4_endquote);
-    strcat(cp, m4_endquote);
-
-    /* End the definition, appropriately */
-    strcat(cp, ")");
-    if (m4_prefix)
-      {
-	strcat(cp, "m4_");
-      }
-
-    strcat(cp, "dnl\n");
-
-   return(cp);
+  return(cp);
 }
 
-static char *MkNum(char *name,int def)
+static char *MkNum(const char *name,int def)
 {
     char num[20];
 
-    sprintf(num, "%d", def);
+  snprintf(num, sizeof(num), "%d", def);
     return(MkDef(name, num));
 }

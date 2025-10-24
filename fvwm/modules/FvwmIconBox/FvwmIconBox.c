@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 
 
   MyName = safemalloc(strlen(temp)+1);
-  strcpy(MyName, temp);
+  strlcpy(MyName, temp, strlen(temp)+1);
 
   signal (SIGPIPE, DeadPipe);
 
@@ -644,9 +644,9 @@ void RedrawIcon(struct icon_info *item, int f)
     h = max_icon_height + icon_relief;
 
     if (item->flags & ICONIFIED){
-      sprintf(label, "(%s)", item->name);
+      snprintf(label, sizeof(label), "(%s)", item->name);
     }else
-      strcpy(label, item->name);
+      strlcpy(label, item->name, sizeof(label));
 
     len = strlen(label);
     tw = XTextWidth(font, label, len);
@@ -1734,16 +1734,41 @@ void parsekey(char *tline)
   }
 
   XDisplayKeycodes(dpy, &kmin, &kmax);
-  for (i=kmin; i<=kmax; i++)
-    if (XKeycodeToKeysym(dpy, i, 0) == keysym)
+  {
+    Bool matched = False;
+
+    for (i = kmin; i <= kmax; i++)
+    {
+      KeySym *mapping;
+      int width;
+
+      mapping = XGetKeyboardMapping(dpy, i, 1, &width);
+      if (mapping == NULL)
+        continue;
+
+      for (int col = 0; col < width; col++)
       {
+        if (mapping[col] == keysym)
+        {
 	k = (struct keyfunc *)safemalloc(sizeof(struct keyfunc));
 	k->name = nptr;
-        k->keycode = i;
+	k->keycode = i;
 	k->action = aptr;
 	k->next = KeyActions;
 	KeyActions = k;
+	matched = True;
+	break;
+        }
       }
+      XFree(mapping);
+    }
+
+    if (!matched)
+    {
+      free(nptr);
+      free(aptr);
+    }
+  }
 }
 
 /***********************************************************************
@@ -1959,8 +1984,8 @@ void process_message(unsigned long type, unsigned long *body)
       RedrawIcon(tmp, 2);
     break;
   case M_DEFAULTICON:
-    str = (char *)safemalloc(strlen((char *)&body[3])+1);
-    strcpy(str, (char *)&body[3]);
+  str = (char *)safemalloc(strlen((char *)&body[3])+1);
+  strlcpy(str, (char *)&body[3], strlen((char *)&body[3]) + 1);
     FvwmDefaultIcon = str;
     break;
   case M_ICONIFY:
@@ -2211,8 +2236,8 @@ struct icon_info *UpdateItem(unsigned long type, unsigned long id, char *item)
   tmp = Head;
   while (tmp != NULL){
     if (tmp->id == id){
-      str = (char *)safemalloc(strlen(item)+1);
-      strcpy(str, item);
+  str = (char *)safemalloc(strlen(item)+1);
+  strlcpy(str, item, strlen(item) + 1);
 
       switch (type){
       case M_ICON_NAME:
@@ -2540,8 +2565,22 @@ void ExecuteKey(XEvent event)
        return;
 
   tmp = KeyActions;
-  event.xkey.keycode =
-    XKeysymToKeycode(dpy,XKeycodeToKeysym(dpy,event.xkey.keycode,0));
+  {
+    KeySym *mapping;
+    int width;
+
+    mapping = XGetKeyboardMapping(dpy, event.xkey.keycode, 1, &width);
+    if (mapping != NULL)
+    {
+      KeySym primary = width > 0 ? mapping[0] : NoSymbol;
+      KeyCode canonical = (primary != NoSymbol)
+        ? XKeysymToKeycode(dpy, primary)
+        : 0;
+      if (canonical != 0)
+        event.xkey.keycode = canonical;
+      XFree(mapping);
+    }
+  }
   while (tmp != NULL){
     if (tmp->keycode == event.xkey.keycode){
       SendFvwmPipe(fd, tmp->action, item->id);

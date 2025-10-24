@@ -205,10 +205,21 @@ void xevent_loop (void)
       /* Here's a real hack - some systems have two keys with the
        * same keysym and different keycodes. This converts all
        * the cases to one keycode. */
-      theEvent.xkey.keycode =
-	XKeysymToKeycode (theDisplay,
-			  XKeycodeToKeysym(theDisplay,
-					   theEvent.xkey.keycode,0));
+      {
+  KeySym *mapping;
+  int width;
+
+  mapping = XGetKeyboardMapping(theDisplay, theEvent.xkey.keycode, 1,
+              &width);
+  if (mapping != NULL) {
+    KeySym primary = (width > 0) ? mapping[0] : NoSymbol;
+    KeyCode canonical =
+      (primary != NoSymbol) ? XKeysymToKeycode(theDisplay, primary) : 0;
+    if (canonical != 0)
+      theEvent.xkey.keycode = canonical;
+    XFree(mapping);
+  }
+      }
       modifier = (theEvent.xkey.state & MODS_USED);
       ConsoleDebug (X11, "\tKeyPress: %d\n", theEvent.xkey.keycode);
 

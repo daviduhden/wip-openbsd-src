@@ -482,7 +482,7 @@ void CoerceEnterNotifyOnCurrentWindow();
 #define INFO 0
 #define WARN 1
 #define ERR  2
-void fvwm_msg(int type,char *id,char *msg,...);
+void fvwm_msg(int type, const char *id, const char *msg, ...);
 
 #endif /* MISC_H */
 

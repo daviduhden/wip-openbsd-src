@@ -471,7 +471,7 @@ Bool PlaceWindow(FvwmWindow *tmp_win, unsigned long tflag,int Desk, int PageX, i
       /*
           we have a USPosition, and overriding it is disallowed...
       */
-      if (!PPosOverride && (USPosition && !Scr.go.ModifyUSP))
+  if (!PPosOverride && ((USPosition != 0) && !Scr.go.ModifyUSP))
         {
           HonorStartsOnPage  =  False;
         }

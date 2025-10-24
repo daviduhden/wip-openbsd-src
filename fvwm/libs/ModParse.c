@@ -25,7 +25,7 @@
 */
 
 
-char *DoPeekArgument(const char *pstr, char **pret)
+char *DoPeekArgument(const char *pstr, const char **pret)
 {
   char *tok=NULL;
   const char *p;
@@ -84,8 +84,10 @@ char *DoPeekArgument(const char *pstr, char **pret)
     }
   }
 
-  if (!isspace(*p)) p++;
-  if (pret) *pret = p;
+  if (*p && !isspace((unsigned char)*p))
+    p++;
+  if (pret)
+    *pret = p;
   return tok;
 }
 
@@ -101,15 +103,17 @@ char *PeekArgument(const char *pstr)
 char *GetArgument(char **pstr)
 {
   char *tok ;
+  const char *next = NULL;
 
-  if (!pstr || !*pstr || !(tok=DoPeekArgument(*pstr, pstr)))
+  if (!pstr || !*pstr || !(tok=DoPeekArgument(*pstr, &next)))
     return NULL;			/* *pstr=NULL; ???? */
 
+  *pstr = (char *)next;
   /* skip tok and following whitespace/separators in pstr & DON'T realloc */
   EatWS(*pstr);
 
-  if (!**pstr) 
-      *pstr=NULL;			/* change \0 to NULL */
+    if (*pstr && !**pstr)
+        *pstr=NULL;			/* change \0 to NULL */
 
   return tok;
 }
@@ -291,26 +295,28 @@ const char *MatchToken(register const char *s, register const char *w)
 
 */
 
-int XCmpToken(char *s, char **t)
+int XCmpToken(const void *vs, const void *vt)
 {
-    register char *w=*t;
+    const char *s = (const char *)vs;
+    const char *w = *(const char * const *)vt;
 
     if (w==NULL) return 1;		/* non existant word */
     if (s==NULL) return -1;		/* non existant string */
 
     while (*w && (*s==*w ||
 #ifdef WORD_IS_UPPERCASE
-		            isupper(*s) && _toupper(*s)==*w
+              (isupper((unsigned char)*s) &&
+               _toupper((unsigned char)*s)==*w)
 #else
-		            toupper(*s)==toupper(*w)
+              toupper((unsigned char)*s)==toupper((unsigned char)*w)
 #endif
 		  ))
 	s++,w++;
 
-    if ((*s=='\0' && (ispunct(*w) || isspace(*w)))||
-	(*w=='\0' && (ispunct(*s) || isspace(*s))) )
+    if ((*s=='\0' && (ispunct((unsigned char)*w) || isspace((unsigned char)*w)))||
+  (*w=='\0' && (ispunct((unsigned char)*s) || isspace((unsigned char)*s)) ) )
 	return 0;			/* 1st word equal */
     else 
-	return toupper(*s)-toupper(*w);	/* smaller/greater */
+  return toupper((unsigned char)*s)-toupper((unsigned char)*w);	/* smaller/greater */
 }
 

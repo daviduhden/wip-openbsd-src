@@ -759,33 +759,57 @@ static Binding *ParseKeyEntry (char *tline)
   
  
   XDisplayKeycodes(theDisplay, &min, &max);
-  for (i=min; i<=max; i++) {
-    if (XKeycodeToKeysym(theDisplay, i, 0) == keysym) {
-      if (!func) {
-	func = parse_function_list (action);
-	if (!func) {
-	  ConsoleMessage ("Bad action: %s\n", action);
-	  return NULL;
-	}
-	actionstring = stripcpy(action);
-	keystring = stripcpy(key);
-      }
-      temp = new;
-      new  = (Binding *)safemalloc(sizeof(Binding));
-      new->IsMouse = 0;
-      new->Button_Key = i;
-      new->key_name = keystring;
-      new->Modifier = mods;
-      new->Action = actionstring;
-      new->Function = func;
-      new->NextBinding = temp;
-      if (!last) {
-	last = new;
-      }
-      new->LastBinding = last;
+  {
+    Bool matched = False;
 
-      ConsoleDebug (CONFIG, "Key: %d %s %d %s\n", i, new->key_name,
-		    mods, new->Action);
+    for (i = min; i <= max; i++) {
+      KeySym *mapping;
+      int width;
+
+      mapping = XGetKeyboardMapping(theDisplay, i, 1, &width);
+      if (mapping == NULL)
+        continue;
+
+      for (int col = 0; col < width; col++) {
+        if (mapping[col] == keysym) {
+          if (!func) {
+            func = parse_function_list(action);
+            if (!func) {
+              XFree(mapping);
+              ConsoleMessage("Bad action: %s\n", action);
+              return NULL;
+            }
+            actionstring = stripcpy(action);
+            keystring = stripcpy(key);
+          }
+          temp = new;
+          new = (Binding *)safemalloc(sizeof(Binding));
+          new->IsMouse = 0;
+          new->Button_Key = i;
+          new->key_name = keystring;
+          new->Modifier = mods;
+          new->Action = actionstring;
+          new->Function = func;
+          new->NextBinding = temp;
+          if (!last) {
+            last = new;
+          }
+          new->LastBinding = last;
+
+          ConsoleDebug(CONFIG, "Key: %d %s %d %s\n", i, new->key_name,
+                       mods, new->Action);
+          matched = True;
+          break;
+        }
+      }
+      XFree(mapping);
+    }
+
+    if (!matched && func) {
+      Free(actionstring);
+      Free(keystring);
+      free_function_list(func);
+      func = NULL;
     }
   }
   return new;

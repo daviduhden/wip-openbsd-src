@@ -322,18 +322,18 @@ typedef struct ScreenInfo
   int ClickToFocusRaises;
   int MouseFocusClickRaises;
   int StipledTitles;
-  struct
-  {
-    Bool ModifyUSP : 1;                          /* - RBW - 11/02/1998  */
-    Bool CaptureHonorsStartsOnPage : 1;          /* - RBW - 11/02/1998  */
-    Bool RecaptureHonorsStartsOnPage : 1;        /* - RBW - 11/02/1998  */
-    Bool ActivePlacementHonorsStartsOnPage : 1;  /* - RBW - 11/02/1998  */
-  } go; /* global options */
-  struct
-  {
-    Bool EmulateMWM : 1;
-    Bool EmulateWIN : 1;
-  } gs; /* global style structure */
+    struct
+    {
+        unsigned int ModifyUSP : 1;                          /* - RBW - 11/02/1998  */
+        unsigned int CaptureHonorsStartsOnPage : 1;          /* - RBW - 11/02/1998  */
+        unsigned int RecaptureHonorsStartsOnPage : 1;        /* - RBW - 11/02/1998  */
+        unsigned int ActivePlacementHonorsStartsOnPage : 1;  /* - RBW - 11/02/1998  */
+    } go; /* global options */
+    struct
+    {
+        unsigned int EmulateMWM : 1;
+        unsigned int EmulateWIN : 1;
+    } gs; /* global style structure */
   Bool hasIconFont;
   Bool hasWindowFont;
 } ScreenInfo;

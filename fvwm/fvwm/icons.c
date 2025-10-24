@@ -338,7 +338,7 @@ void RedoIconName(FvwmWindow *Tmp_win)
   if(Tmp_win->flags & SUPPRESSICON)
     return;
 
-  if (Tmp_win->icon_w == (int)NULL)
+  if (Tmp_win->icon_w == None)
     return;
 
   Tmp_win->icon_t_width = XTextWidth(Scr.IconFont.font,Tmp_win->icon_name,

@@ -119,7 +119,6 @@ void ParseBindEntry(XEvent *eventp,Window w,FvwmWindow *tmp_win,
   int button,i,min,max;
   int n1=0,n2=0,n3=0;
   KeySym keysym;
-  KeySym tkeysym;
   int contexts;
   int mods;
   int maxmods;
@@ -248,13 +247,38 @@ void ParseBindEntry(XEvent *eventp,Window w,FvwmWindow *tmp_win,
       max = button;
       maxmods = 0;
     }
-  for (i=min; i<=max; i++)
+  for (i = min; i <= max; i++)
   {
-    /* If this is a mouse binding we'll fall through the for loop (maxmods is
-     * zero) and the if condition is always true (fKey is zero). Since min ==
-     * max == button there is no loop at all is case of a mouse binding. */
-    for (m = 0, tkeysym = XK_Left; m <= maxmods && tkeysym != NoSymbol; m++)
-      if (!fKey || (tkeysym = XKeycodeToKeysym(dpy, i, m)) == keysym)
+    KeySym *mapping = NULL;
+    int mapping_width = 0;
+    int column_limit = maxmods;
+
+    if (fKey)
+    {
+      mapping = XGetKeyboardMapping(dpy, i, 1, &mapping_width);
+      if (mapping == NULL || mapping_width <= 0)
+      {
+        if (mapping)
+          XFree(mapping);
+        continue;
+      }
+      column_limit = mapping_width - 1;
+      if (column_limit > maxmods)
+        column_limit = maxmods;
+    }
+
+    for (m = 0; m <= column_limit; m++)
+    {
+      KeySym current = NoSymbol;
+
+      if (fKey)
+      {
+        current = mapping[m];
+        if (current == NoSymbol)
+          break;
+      }
+
+      if (!fKey || current == keysym)
       {
 	temp = Scr.AllBindings;
 	Scr.AllBindings = (Binding *)safemalloc(sizeof(Binding));
@@ -266,6 +290,10 @@ void ParseBindEntry(XEvent *eventp,Window w,FvwmWindow *tmp_win,
 	Scr.AllBindings->Action = stripcpy(action);
 	Scr.AllBindings->NextBinding = temp;
       }
+    }
+
+    if (mapping)
+      XFree(mapping);
   }
   return;
 }

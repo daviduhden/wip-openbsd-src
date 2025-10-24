@@ -195,8 +195,8 @@ typedef struct win_data {
   char *iconname;
   struct win_data *win_prev, *win_next;
   struct win_manager *manager;
-  int app_id_set : 1;
-  int geometry_set : 1;
+  unsigned int app_id_set : 1;
+  unsigned int geometry_set : 1;
   Uchar complete;
 } WinData;
 

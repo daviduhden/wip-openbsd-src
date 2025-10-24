@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <errno.h>
+#include <string.h>
 #include "FvwmIconMan.h"
 #include "readconfig.h"
 #include "x.h"
@@ -36,7 +37,7 @@ char *copy_string (char **target, char *src)
 
   ConsoleDebug (CORE, "copy_string: 2\n");
   *target = (char *)safemalloc ((len + 1) * sizeof (char));
-  strcpy (*target, src);
+  strlcpy(*target, src, len + 1);
   ConsoleDebug (CORE, "copy_string: 3\n");
   return *target;
 }

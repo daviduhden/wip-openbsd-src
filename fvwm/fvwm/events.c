@@ -382,11 +382,23 @@ void HandleKeyPress()
   Context = GetContext(Tmp_win,&Event, &PressedW);
   PressedW = None;
 
-  /* Here's a real hack - some systems have two keys with the
-   * same keysym and different keycodes. This converts all
-   * the cases to one keycode. */
-  Event.xkey.keycode =
-    XKeysymToKeycode(dpy,XKeycodeToKeysym(dpy,Event.xkey.keycode,0));
+  /* Normalize keycodes that map to the same keysym. */
+  {
+    KeySym *mapping;
+    int width;
+
+    mapping = XGetKeyboardMapping(dpy, Event.xkey.keycode, 1, &width);
+    if (mapping != NULL && width > 0)
+    {
+      KeySym primary = mapping[0];
+      KeyCode canonical = XKeysymToKeycode(dpy, primary);
+
+      if (canonical != 0)
+        Event.xkey.keycode = canonical;
+    }
+    if (mapping != NULL)
+      XFree(mapping);
+  }
 
   for (key = Scr.AllBindings; key != NULL; key = key->NextBinding)
     {
