@@ -14,17 +14,17 @@ void DB_WI_BORDER(char *label, FvwmWindow *fw);
 void DB_WI_XWINATTR(char *label, FvwmWindow *fw);
 void DB_WI_ALL(char *label, FvwmWindow *fw);
 #else
-#define DB_WI_WINDOWS(x,y)
-#define DB_WI_SUBWINS(x,y)
-#define DB_WI_FRAMEWINS(x,y)
-#define DB_WI_BUTTONWINS(x,y)
-#define DB_WI_FRAME(x,y)
-#define DB_WI_ICON(x,y)
-#define DB_WI_SIZEHINTS(x,y)
-#define DB_WI_TITLE(x,y)
-#define DB_WI_BORDER(x,y)
-#define DB_WI_XWINATTR(x,y)
-#define DB_WI_ALL(x,y)
+#define DB_WI_WINDOWS(x, y)
+#define DB_WI_SUBWINS(x, y)
+#define DB_WI_FRAMEWINS(x, y)
+#define DB_WI_BUTTONWINS(x, y)
+#define DB_WI_FRAME(x, y)
+#define DB_WI_ICON(x, y)
+#define DB_WI_SIZEHINTS(x, y)
+#define DB_WI_TITLE(x, y)
+#define DB_WI_BORDER(x, y)
+#define DB_WI_XWINATTR(x, y)
+#define DB_WI_ALL(x, y)
 #endif
 
 #endif /* _DEBUG_ */

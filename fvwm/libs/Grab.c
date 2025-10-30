@@ -28,4 +28,3 @@ void MyXUngrabServer(Display *disp)
     XUngrabServer(disp);
   }
 }
-

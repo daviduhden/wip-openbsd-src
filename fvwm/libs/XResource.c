@@ -13,8 +13,6 @@
 
 #include "fvwmlib.h"
 
-
-
 /***************************************************************************
  * If you have a module MyModule and want to parse X resources as well as
  * command line options and a config file:
@@ -80,25 +78,20 @@
 
 /*** END OF EXAMPLE ********************************************************/
 
-
-
-
 /* Default option table */
-static XrmOptionDescRec default_opts[] =
-{
-  { "-fg",       "*Foreground", XrmoptionSepArg, NULL },
-  { "-bg",       "*Background", XrmoptionSepArg, NULL },
-  { "-fn",       "*Font",       XrmoptionSepArg, NULL },
-  { "-geometry", "*Geometry",   XrmoptionSepArg, NULL },
-  { "-title",    "*Title",      XrmoptionSepArg, NULL }
+static XrmOptionDescRec default_opts[] = {
+  {"-fg", "*Foreground", XrmoptionSepArg, NULL},
+  {"-bg", "*Background", XrmoptionSepArg, NULL},
+  {"-fn", "*Font", XrmoptionSepArg, NULL},
+  {"-geometry", "*Geometry", XrmoptionSepArg, NULL},
+  {"-title", "*Title", XrmoptionSepArg, NULL}
   /* Remember to update NUM_DEFAULT_OPTIONS if you change this list! */
 };
 #define NUM_DEFAULT_OPTS 5
 
-
-
 /* internal function */
-static void DoMergeString(char *resource, XrmDatabase *ptarget, Bool override)
+static void DoMergeString(char *resource, XrmDatabase *ptarget,
+                          Bool override)
 {
   XrmDatabase db;
 
@@ -125,7 +118,7 @@ void MergeXResources(Display *dpy, XrmDatabase *pdb, Bool override)
     XrmPutStringResource(pdb, "", "");
   DoMergeString(XResourceManagerString(dpy), pdb, override);
   DoMergeString(XScreenResourceString(DefaultScreenOfDisplay(dpy)), pdb,
-		override);
+                override);
 }
 
 /***************************************************************************
@@ -146,14 +139,14 @@ void MergeXResources(Display *dpy, XrmDatabase *pdb, Bool override)
  *
  ***************************************************************************/
 void MergeCmdLineResources(XrmDatabase *pdb, XrmOptionDescList opts,
-			   int num_opts, char *name, int *pargc, char **argv,
-			   Bool fNoDefaults)
+                           int num_opts, char *name, int *pargc,
+                           char **argv, Bool fNoDefaults)
 {
   if (opts && num_opts > 0)
     XrmParseCommand(pdb, opts, num_opts, name, pargc, argv);
   if (!fNoDefaults)
-    XrmParseCommand(pdb, default_opts, NUM_DEFAULT_OPTS,
-		    name, pargc, argv);
+    XrmParseCommand(pdb, default_opts, NUM_DEFAULT_OPTS, name, pargc,
+                    argv);
 }
 
 /***************************************************************************
@@ -179,7 +172,7 @@ void MergeCmdLineResources(XrmDatabase *pdb, XrmOptionDescList opts,
  *
  ***************************************************************************/
 Bool MergeConfigLineResource(XrmDatabase *pdb, char *line, char *prefix,
-			     char *bindstr)
+                             char *bindstr)
 {
   int len;
   char *end;
@@ -211,13 +204,13 @@ Bool MergeConfigLineResource(XrmDatabase *pdb, char *line, char *prefix,
   /* prefix*suffix: value */
   reslen = len + (end - line) + 2;
   resource = (char *)safemalloc(reslen);
-  strlcpy(resource, prefix,reslen);
-  strlcat(resource, bindstr,reslen);
+  strlcpy(resource, prefix, reslen);
+  strlcat(resource, bindstr, reslen);
   strncat(resource, line, end - line);
 
   len = strlen(value);
   myvalue = (char *)safemalloc(len + 1);
-  strlcpy(myvalue, value,len+1);
+  strlcpy(myvalue, value, len + 1);
   for (len--; len >= 0 && isspace(myvalue[len]); len--)
     myvalue[len] = 0;
 
@@ -247,26 +240,27 @@ Bool MergeConfigLineResource(XrmDatabase *pdb, char *line, char *prefix,
  *
  ***************************************************************************/
 Bool GetResourceString(XrmDatabase db, const char *resource,
-		       const char *prefix, char **val)
+                       const char *prefix, char **val)
 {
-  XrmValue xval = { 0, NULL };
+  XrmValue xval = {0, NULL};
   char *str_type;
   char *name;
   size_t len;
 
   len = strlen(resource) + strlen(prefix) + 2;
   name = (char *)safemalloc(len);
-  strlcpy(name, prefix,len);
-  strlcat(name, ".",len);
-  strlcat(name, resource,len);
+  strlcpy(name, prefix, len);
+  strlcat(name, ".", len);
+  strlcat(name, resource, len);
 
-  if (!XrmGetResource(db, name, name, &str_type, &xval) || xval.addr == NULL)
-    {
-      free(name);
-      if (val)
-	*val = NULL;
-      return False;
-    }
+  if (!XrmGetResource(db, name, name, &str_type, &xval) ||
+      xval.addr == NULL)
+  {
+    free(name);
+    if (val)
+      *val = NULL;
+    return False;
+  }
   free(name);
   if (val)
     *val = xval.addr;

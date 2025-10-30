@@ -34,24 +34,24 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * routines that deal with I/O to and from the user
  */
 
-#define DEVTTY		"/dev/tty"	/* device for interactive i/o */
-static FILE *ttyoutf = NULL;		/* output pointing at control tty */
-static FILE *ttyinf = NULL;		/* input pointing at control tty */
+#define DEVTTY "/dev/tty"    /* device for interactive i/o */
+static FILE *ttyoutf = NULL; /* output pointing at control tty */
+static FILE *ttyinf = NULL;  /* input pointing at control tty */
 
 /*
  * tty_init()
@@ -59,25 +59,27 @@ static FILE *ttyinf = NULL;		/* input pointing at control tty */
  *	open fails, future ops that require user input will get an EOF
  */
 
-int
-tty_init(void)
+int tty_init(void)
 {
-	int ttyfd;
+  int ttyfd;
 
-	if ((ttyfd = open(DEVTTY, O_RDWR | O_CLOEXEC)) >= 0) {
-		if ((ttyoutf = fdopen(ttyfd, "w")) != NULL) {
-			if ((ttyinf = fdopen(ttyfd, "r")) != NULL)
-				return(0);
-			(void)fclose(ttyoutf);
-		}
-		(void)close(ttyfd);
-	}
+  if ((ttyfd = open(DEVTTY, O_RDWR | O_CLOEXEC)) >= 0)
+  {
+    if ((ttyoutf = fdopen(ttyfd, "w")) != NULL)
+    {
+      if ((ttyinf = fdopen(ttyfd, "r")) != NULL)
+        return (0);
+      (void)fclose(ttyoutf);
+    }
+    (void)close(ttyfd);
+  }
 
-	if (iflag) {
-		paxwarn(1, "Fatal error, cannot open %s", DEVTTY);
-		return(-1);
-	}
-	return(0);
+  if (iflag)
+  {
+    paxwarn(1, "Fatal error, cannot open %s", DEVTTY);
+    return (-1);
+  }
+  return (0);
 }
 
 /*
@@ -86,19 +88,18 @@ tty_init(void)
  *	if there is no controlling terminal, just return.
  */
 
-void
-tty_prnt(const char *fmt, ...)
+void tty_prnt(const char *fmt, ...)
 {
-	va_list ap;
-	char buf[8192];
+  va_list ap;
+  char buf[8192];
 
-	if (ttyoutf == NULL)
-		return;
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
-	va_end(ap);
-	safe_print(buf, ttyoutf);
-	(void)fflush(ttyoutf);
+  if (ttyoutf == NULL)
+    return;
+  va_start(ap, fmt);
+  (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+  safe_print(buf, ttyoutf);
+  (void)fflush(ttyoutf);
 }
 
 /*
@@ -109,17 +110,16 @@ tty_prnt(const char *fmt, ...)
  *	0 if data was read, -1 otherwise.
  */
 
-int
-tty_read(char *str, int len)
+int tty_read(char *str, int len)
 {
-	if (ttyinf == NULL || fgets(str, len, ttyinf) == NULL)
-		return(-1);
+  if (ttyinf == NULL || fgets(str, len, ttyinf) == NULL)
+    return (-1);
 
-	/*
+  /*
 	 * strip off that trailing newline
 	 */
-	str[strcspn(str, "\n")] = '\0';
-	return(0);
+  str[strcspn(str, "\n")] = '\0';
+  return (0);
 }
 
 /*
@@ -128,29 +128,29 @@ tty_read(char *str, int len)
  *	will be non-zero.
  */
 
-void
-paxwarn(int set, const char *fmt, ...)
+void paxwarn(int set, const char *fmt, ...)
 {
-	va_list ap;
-	char buf[8192];
+  va_list ap;
+  char buf[8192];
 
-	if (set)
-		exit_val = 1;
-	/*
+  if (set)
+    exit_val = 1;
+  /*
 	 * when vflag we better ship out an extra \n to get this message on a
 	 * line by itself
 	 */
-	if (vflag && vfpart) {
-		(void)fflush(listf);
-		(void)fputc('\n', stderr);
-		vfpart = 0;
-	}
-	(void)fprintf(stderr, "%s: ", argv0);
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
-	va_end(ap);
-	safe_print(buf, stderr);
-	(void)fputc('\n', stderr);
+  if (vflag && vfpart)
+  {
+    (void)fflush(listf);
+    (void)fputc('\n', stderr);
+    vfpart = 0;
+  }
+  (void)fprintf(stderr, "%s: ", argv0);
+  va_start(ap, fmt);
+  (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+  safe_print(buf, stderr);
+  (void)fputc('\n', stderr);
 }
 
 /*
@@ -159,33 +159,33 @@ paxwarn(int set, const char *fmt, ...)
  *	will be non-zero.
  */
 
-void
-syswarn(int set, int errnum, const char *fmt, ...)
+void syswarn(int set, int errnum, const char *fmt, ...)
 {
-	va_list ap;
-	char buf[8192];
+  va_list ap;
+  char buf[8192];
 
-	if (set)
-		exit_val = 1;
-	/*
+  if (set)
+    exit_val = 1;
+  /*
 	 * when vflag we better ship out an extra \n to get this message on a
 	 * line by itself
 	 */
-	if (vflag && vfpart) {
-		(void)fflush(listf);
-		(void)fputc('\n', stderr);
-		vfpart = 0;
-	}
-	(void)fprintf(stderr, "%s: ", argv0);
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
-	va_end(ap);
-	safe_print(buf, stderr);
+  if (vflag && vfpart)
+  {
+    (void)fflush(listf);
+    (void)fputc('\n', stderr);
+    vfpart = 0;
+  }
+  (void)fprintf(stderr, "%s: ", argv0);
+  va_start(ap, fmt);
+  (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+  safe_print(buf, stderr);
 
-	/*
+  /*
 	 * format and print the errno
 	 */
-	if (errnum > 0)
-		(void)fprintf(stderr, ": %s", strerror(errnum));
-	(void)fputc('\n', stderr);
+  if (errnum > 0)
+    (void)fprintf(stderr, ": %s", strerror(errnum));
+  (void)fputc('\n', stderr);
 }

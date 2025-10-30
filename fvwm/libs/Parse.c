@@ -4,10 +4,10 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "fvwmlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* If the string s begins with a quote chracter SkipQuote returns a pointer
  * to the first unquoted character or to the final '\0'. If it does not, a
@@ -31,7 +31,7 @@
  * The defaults are used if NULL is passed for the corresponding string.
  */
 char *SkipQuote(char *s, const char *qlong, const char *qstart,
-		const char *qend)
+                const char *qend)
 {
   char *t;
 
@@ -45,31 +45,31 @@ char *SkipQuote(char *s, const char *qlong, const char *qstart,
     qend = "";
 
   if (*s == '\\' && s[1] != 0)
-    return s+2;
+    return s + 2;
   else if (*qlong && (t = strchr(qlong, *s)))
-    {
-      char c = *t;
+  {
+    char c = *t;
 
+    s++;
+    while (*s && *s != c)
+    {
+      /* Skip over escaped text, ie \quote */
+      if (*s == '\\' && *(s + 1) != 0)
+        s++;
       s++;
-      while(*s && *s != c)
-	{
-	  /* Skip over escaped text, ie \quote */
-	  if(*s == '\\' && *(s+1) != 0)
-	    s++;
-	  s++;
-	}
-      if(*s == c)
-	s++;
-      return s;
     }
+    if (*s == c)
+      s++;
+    return s;
+  }
   else if (*qstart && (t = strchr(qstart, *s)))
-    {
-      char c = *((t - qstart) + qend);
+  {
+    char c = *((t - qstart) + qend);
 
-      while (*s && *s != c)
-	s = SkipQuote(s, qlong, "", "");
-      return (*s == *t) ? ++s : s;
-    }
+    while (*s && *s != c)
+      s = SkipQuote(s, qlong, "", "");
+    return (*s == *t) ? ++s : s;
+  }
   else
     return ++s;
 }
@@ -80,7 +80,8 @@ char *SkipQuote(char *s, const char *qlong, const char *qstart,
  * of this call is a pointer to the first character after the delimiter or
  * to the terminating '\0'. Quoting is handled like in SkipQuote. */
 char *GetQuotedString(char *sin, char **sout, const char *delims,
-		      const char *qlong, const char *qstart, const char *qend)
+                      const char *qlong, const char *qstart,
+                      const char *qend)
 {
   char *t = sin;
   unsigned int len;
@@ -100,7 +101,6 @@ char *GetQuotedString(char *sin, char **sout, const char *delims,
   return t;
 }
 
-
 /*
 ** PeekToken: returns next token from string, leaving string intact
 **            (you should free returned string later)
@@ -113,19 +113,20 @@ char *GetQuotedString(char *sin, char **sout, const char *delims,
 */
 char *PeekToken(const char *pstr)
 {
-  char *tok=NULL;
-  const char* p;
-  char bc=0,be=0,tmptok[MAX_TOKEN_LENGTH];
-  int len=0;
+  char *tok = NULL;
+  const char *p;
+  char bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
+  int len = 0;
 
   if (!pstr)
     return NULL;
 
-  p=pstr;
+  p = pstr;
   EatWS(p); /* skip leading space */
   if (*p)
   {
-    if (IsQuote(*p) || IsBlockStart(*p)) /* quoted string or block start? */
+    if (IsQuote(*p) ||
+        IsBlockStart(*p)) /* quoted string or block start? */
     {
       bc = *p; /* save block start char */
       p++;
@@ -136,7 +137,7 @@ char *PeekToken(const char *pstr)
       /* first, check stop conditions based on block or normal token */
       if (bc)
       {
-        if ((IsQuote(*p) && bc == *p) || IsBlockEnd(*p,bc))
+        if ((IsQuote(*p) && bc == *p) || IsBlockEnd(*p, bc))
         {
           be = *p;
           break;
@@ -148,7 +149,7 @@ char *PeekToken(const char *pstr)
           break;
       }
 
-      if (*p == '\\' && *(p+1)) /* if \, copy next char verbatim */
+      if (*p == '\\' && *(p + 1)) /* if \, copy next char verbatim */
         p++;
       tmptok[len] = *p;
       len++;
@@ -164,9 +165,9 @@ char *PeekToken(const char *pstr)
 
     if (len)
     {
-      tok = (char *)malloc(len+1);
-      strncpy(tok,tmptok,len);
-      tok[len]='\0';
+      tok = (char *)malloc(len + 1);
+      strncpy(tok, tmptok, len);
+      tok[len] = '\0';
     }
   }
 
@@ -177,13 +178,13 @@ char *PeekToken(const char *pstr)
 ** CmpToken: does case-insensitive compare on next token in string, leaving
 **           string intact (return code like strcmp)
 */
-int CmpToken(const char *pstr,char *tok)
+int CmpToken(const char *pstr, char *tok)
 {
-  int rc=0;
-  char *ntok=PeekToken(pstr);
+  int rc = 0;
+  char *ntok = PeekToken(pstr);
   if (ntok)
   {
-    rc = strcasecmp(tok,ntok);
+    rc = strcasecmp(tok, ntok);
     free(ntok);
   }
   return rc;
@@ -193,13 +194,13 @@ int CmpToken(const char *pstr,char *tok)
 ** MatchToken: does case-insensitive compare on next token in string, leaving
 **             string intact (returns true if matches, false otherwise)
 */
-int MatchToken(const char *pstr,char *tok)
+int MatchToken(const char *pstr, char *tok)
 {
-  int rc=0;
-  char *ntok=PeekToken(pstr);
+  int rc = 0;
+  char *ntok = PeekToken(pstr);
   if (ntok)
   {
-    rc = (strcasecmp(tok,ntok)==0);
+    rc = (strcasecmp(tok, ntok) == 0);
     free(ntok);
   }
   return rc;
@@ -243,8 +244,8 @@ void NukeToken(char **pstr)
  * characters (spaces are skipped before a token, delimiters are not).
  *
  **************************************************************************/
-char *DoGetNextToken(char *indata, char **token, char *spaces, char *delims,
-		     char *out_delim)
+char *DoGetNextToken(char *indata, char **token, char *spaces,
+                     char *delims, char *out_delim)
 {
   char *t, *start, *end, *text;
   int snum;
@@ -252,93 +253,88 @@ char *DoGetNextToken(char *indata, char **token, char *spaces, char *delims,
 
   snum = (spaces) ? strlen(spaces) : 0;
   dnum = (delims) ? strlen(delims) : 0;
-  if(indata == NULL)
-    {
-      if (out_delim)
-	*out_delim = '\0';
-      *token = NULL;
-      return NULL;
-    }
+  if (indata == NULL)
+  {
+    if (out_delim)
+      *out_delim = '\0';
+    *token = NULL;
+    return NULL;
+  }
   t = indata;
-  while ( (*t != 0) &&
-	  ( isspace((unsigned char)*t) ||
-	    (snum &&
-	     strchr(spaces, *t)) ) )
+  while ((*t != 0) &&
+         (isspace((unsigned char)*t) || (snum && strchr(spaces, *t))))
     t++;
   start = t;
-  while ( (*t != 0) &&
-	  !( isspace((unsigned char)*t) ||
-	     (snum &&
-	      strchr(spaces, *t)) ||
-	     (dnum &&
-	      strchr(delims, *t)) ) )
+  while ((*t != 0) &&
+         !(isspace((unsigned char)*t) || (snum && strchr(spaces, *t)) ||
+           (dnum && strchr(delims, *t))))
+  {
+    /* Check for qouted text */
+    if (IsQuote(*t))
     {
-      /* Check for qouted text */
-      if (IsQuote(*t))
-	{
-	  char c = *t;
+      char c = *t;
 
-	  t++;
-	  while((*t != c)&&(*t != 0))
-	    {
-	      /* Skip over escaped text, ie \quote */
-	      if((*t == '\\')&&(*(t+1) != 0))
-		t++;
-	      t++;
-	    }
-	  if(*t == c)
-	    t++;
-	}
-      else
-	{
-	  /* Skip over escaped text, ie \" or \space */
-	  if((*t == '\\')&&(*(t+1) != 0))
-	    t++;
-	  t++;
-	}
+      t++;
+      while ((*t != c) && (*t != 0))
+      {
+        /* Skip over escaped text, ie \quote */
+        if ((*t == '\\') && (*(t + 1) != 0))
+          t++;
+        t++;
+      }
+      if (*t == c)
+        t++;
     }
+    else
+    {
+      /* Skip over escaped text, ie \" or \space */
+      if ((*t == '\\') && (*(t + 1) != 0))
+        t++;
+      t++;
+    }
+  }
   end = t;
   if (out_delim)
     *out_delim = *end;
 
-  text = safemalloc(end-start+1);
+  text = safemalloc(end - start + 1);
   *token = text;
 
   /* copy token */
-  while(start < end)
+  while (start < end)
+  {
+    /* Check for qouted text */
+    if (IsQuote(*start))
     {
-      /* Check for qouted text */
-      if(IsQuote(*start))
-	{
-	  char c = *start;
-	  start++;
-	  while((*start != c)&&(*start != 0))
-	    {
-	      /* Skip over escaped text, ie \" or \space */
-	      if((*start == '\\')&&(*(start+1) != 0))
-		start++;
-	      *text++ = *start++;
-	    }
-	  if(*start == c)
-	    start++;
-	}
-      else
-	{
-	  /* Skip over escaped text, ie \" or \space */
-	  if((*start == '\\')&&(*(start+1) != 0))
-	    start++;
-	  *text++ = *start++;
-	}
+      char c = *start;
+      start++;
+      while ((*start != c) && (*start != 0))
+      {
+        /* Skip over escaped text, ie \" or \space */
+        if ((*start == '\\') && (*(start + 1) != 0))
+          start++;
+        *text++ = *start++;
+      }
+      if (*start == c)
+        start++;
     }
+    else
+    {
+      /* Skip over escaped text, ie \" or \space */
+      if ((*start == '\\') && (*(start + 1) != 0))
+        start++;
+      *text++ = *start++;
+    }
+  }
   *text = 0;
-  if(*end != 0)
+  if (*end != 0)
     end++;
 
   if (**token == 0)
-    {
-      free(*token);
-      *token = NULL;
-    }
+  {
+    free(*token);
+    *token = NULL;
+  }
   return end;
 }
 
@@ -358,12 +354,12 @@ char *SkipNTokens(char *indata, unsigned int n)
   char *junk;
 
   tmp = indata;
-  for ( ; n > 0 ; n--)
-    {
-      tmp = GetNextToken(tmp, &junk);
-      if (junk)
-	free(junk);
-    }
+  for (; n > 0; n--)
+  {
+    tmp = GetNextToken(tmp, &junk);
+    if (junk)
+      free(junk);
+  }
   return tmp;
 }
 
@@ -378,26 +374,28 @@ char *SkipNTokens(char *indata, unsigned int n)
  * returns "Geometry" in token.
  *
  **************************************************************************/
-char *GetModuleResource(char *indata, char **resource, char *module_name)
+char *GetModuleResource(char *indata, char **resource,
+                        char *module_name)
 {
   char *tmp;
   char *next;
 
   if (!module_name)
-    {
-      *resource = NULL;
-      return indata;
-    }
+  {
+    *resource = NULL;
+    return indata;
+  }
   next = GetNextToken(indata, &tmp);
   if (!tmp)
     return next;
 
-  if (tmp[0] != '*' || strncasecmp(tmp+1, module_name, strlen(module_name)))
-    {
-      *resource = NULL;
-      return indata;
-    }
-  CopyString(resource, tmp+1+strlen(module_name));
+  if (tmp[0] != '*' ||
+      strncasecmp(tmp + 1, module_name, strlen(module_name)))
+  {
+    *resource = NULL;
+    return indata;
+  }
+  CopyString(resource, tmp + 1 + strlen(module_name));
   free(tmp);
   return next;
 }
@@ -409,7 +407,8 @@ char *GetModuleResource(char *indata, char **resource, char *module_name)
  * If ret_action is non-NULL, a pointer to the next token is returned there.
  *
  **************************************************************************/
-int GetIntegerArguments(char *action, char **ret_action, int retvals[],int num)
+int GetIntegerArguments(char *action, char **ret_action, int retvals[],
+                        int num)
 {
   int i;
   char *token;
@@ -453,26 +452,26 @@ int GetTokenIndex(char *token, char *list[], int len, char **next)
   int k;
 
   if (!token || !list)
-    {
-      if (next)
-	*next = NULL;
-      return -1;
-    }
+  {
+    if (next)
+      *next = NULL;
+    return -1;
+  }
   l = (len) ? len : strlen(token);
   for (i = 0; list[i] != NULL; i++)
-    {
-      k = strlen(list[i]);
-      if (len < 0)
-	l = k;
-      if (len == 0 && k != l)
-	continue;
-      if (!strncasecmp(token, list[i], l))
-	break;
-    }
+  {
+    k = strlen(list[i]);
+    if (len < 0)
+      l = k;
+    if (len == 0 && k != l)
+      continue;
+    if (!strncasecmp(token, list[i], l))
+      break;
+  }
   if (next)
-    {
-      *next = (list[i]) ? token + l : token;
-    }
+  {
+    *next = (list[i]) ? token + l : token;
+  }
 
   return (list[i]) ? i : -1;
 }
@@ -495,16 +494,15 @@ char *GetNextTokenIndex(char *action, char *list[], int len, int *index)
 
   next = GetNextToken(action, &token);
   if (!token)
-    {
-      *index = -1;
-      return action;
-    }
+  {
+    *index = -1;
+    return action;
+  }
   *index = GetTokenIndex(token, list, len, NULL);
   free(token);
 
   return (*index == -1) ? action : next;
 }
-
 
 int GetRectangleArguments(char *action, int *width, int *height)
 {
@@ -549,9 +547,8 @@ int GetOnePercentArgument(char *action, int *value, int *unit_io)
   return n;
 }
 
-
-int GetTwoPercentArguments(char *action, int *val1, int *val2, int *val1_unit,
-		    int *val2_unit)
+int GetTwoPercentArguments(char *action, int *val1, int *val2,
+                           int *val1_unit, int *val2_unit)
 {
   char *tok1, *tok2;
   int n = 0;

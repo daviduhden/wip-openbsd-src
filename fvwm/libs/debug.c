@@ -10,15 +10,15 @@
 
 #include "config.h"
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include "fvwmlib.h"
 
 #ifndef HAVE_VFPRINTF
-# define VA_PRINTF(fp, lastarg, args) _doprnt((lastarg), (args), (fp))
+#define VA_PRINTF(fp, lastarg, args) _doprnt((lastarg), (args), (fp))
 #else
-# define VA_PRINTF(fp, lastarg, args) vfprintf((fp), (lastarg), (args))
+#define VA_PRINTF(fp, lastarg, args) vfprintf((fp), (lastarg), (args))
 #endif
 
 /* Don't put this into the #ifdef, since some compilers don't like completely
@@ -26,13 +26,11 @@
  */
 int f_db_level = 0;
 
-
 #ifdef DEBUG
 
 struct f_db_info f_db_info;
 
-void
-f_db_print(const char *fmt, ...)
+void f_db_print(const char *fmt, ...)
 {
   va_list ap;
 

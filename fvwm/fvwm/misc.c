@@ -12,54 +12,54 @@
  *
  **************************************************************************/
 
-
 #include "config.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "fvwm.h"
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
 #include "menus.h"
 #include "misc.h"
+#include "module.h"
 #include "parse.h"
 #include "screen.h"
-#include "module.h"
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
 
 FvwmWindow *FocusOnNextTimeStamp = NULL;
 
 char NoName[] = "Untitled"; /* name if no name in XA_WM_NAME */
 char NoClass[] = "NoClass"; /* Class if no res_class in class hints */
-char NoResource[] = "NoResource"; /* Class if no res_name in class hints */
+char NoResource[] =
+  "NoResource"; /* Class if no res_name in class hints */
 
 /**************************************************************************
  *
  * Releases dynamically allocated space used to store window/icon names
  *
  **************************************************************************/
-void free_window_names (FvwmWindow *tmp, Bool nukename, Bool nukeicon)
+void free_window_names(FvwmWindow *tmp, Bool nukename, Bool nukeicon)
 {
   if (!tmp)
     return;
 
   if (nukename && tmp->name)
-    {
-      if (tmp->name != tmp->icon_name && tmp->name != NoName)
-	XFree(tmp->name);
-      tmp->name = NULL;
-    }
+  {
+    if (tmp->name != tmp->icon_name && tmp->name != NoName)
+      XFree(tmp->name);
+    tmp->name = NULL;
+  }
   if (nukeicon && tmp->icon_name)
-    {
-      if (tmp->name != tmp->icon_name && tmp->icon_name != NoName)
-	XFree(tmp->icon_name);
-      tmp->icon_name = NULL;
-    }
+  {
+    if (tmp->name != tmp->icon_name && tmp->icon_name != NoName)
+      XFree(tmp->icon_name);
+    tmp->icon_name = NULL;
+  }
 
   return;
 }
@@ -81,7 +81,7 @@ void Destroy(FvwmWindow *Tmp_win)
    * look at the event, HandleUnmapNotify will have to mash the UnmapNotify
    * into a DestroyNotify.
    */
-  if(!Tmp_win)
+  if (!Tmp_win)
     return;
 
   /* first of all, remove the window from the list of all windows! */
@@ -99,43 +99,43 @@ void Destroy(FvwmWindow *Tmp_win)
 
   XUnmapWindow(dpy, Tmp_win->frame);
 
-  if(!PPosOverride)
-    XSync(dpy,0);
+  if (!PPosOverride)
+    XSync(dpy, 0);
 
-  if(Tmp_win == Scr.Hilite)
+  if (Tmp_win == Scr.Hilite)
     Scr.Hilite = NULL;
 
-  BroadcastPacket(M_DESTROY_WINDOW, 3,
-                  Tmp_win->w, Tmp_win->frame, (unsigned long)Tmp_win);
+  BroadcastPacket(M_DESTROY_WINDOW, 3, Tmp_win->w, Tmp_win->frame,
+                  (unsigned long)Tmp_win);
 
-  if(Scr.PreviousFocus == Tmp_win)
+  if (Scr.PreviousFocus == Tmp_win)
     Scr.PreviousFocus = NULL;
 
-  if(ButtonWindow == Tmp_win)
+  if (ButtonWindow == Tmp_win)
     ButtonWindow = NULL;
 
-  if((Tmp_win == Scr.Focus)&&(Tmp_win->flags & ClickToFocus))
+  if ((Tmp_win == Scr.Focus) && (Tmp_win->flags & ClickToFocus))
+  {
+    if (Tmp_win->next)
     {
-      if(Tmp_win->next)
-	{
-	  HandleHardFocus(Tmp_win->next);
-	}
-      else
-	SetFocus(Scr.NoFocusWin, NULL,1);
+      HandleHardFocus(Tmp_win->next);
     }
-  else if(Scr.Focus == Tmp_win)
-    SetFocus(Scr.NoFocusWin, NULL,1);
+    else
+      SetFocus(Scr.NoFocusWin, NULL, 1);
+  }
+  else if (Scr.Focus == Tmp_win)
+    SetFocus(Scr.NoFocusWin, NULL, 1);
 
-  if(Tmp_win == FocusOnNextTimeStamp)
+  if (Tmp_win == FocusOnNextTimeStamp)
     FocusOnNextTimeStamp = NULL;
 
-  if(Tmp_win == Scr.Ungrabbed)
+  if (Tmp_win == Scr.Ungrabbed)
     Scr.Ungrabbed = NULL;
 
-  if(Tmp_win == Scr.pushed_window)
+  if (Tmp_win == Scr.pushed_window)
     Scr.pushed_window = NULL;
 
-  if(Tmp_win == colormap_win)
+  if (Tmp_win == colormap_win)
     colormap_win = NULL;
 
   XDestroyWindow(dpy, Tmp_win->frame);
@@ -147,49 +147,49 @@ void Destroy(FvwmWindow *Tmp_win)
 
   XDeleteContext(dpy, Tmp_win->w, FvwmContext);
 
-  if ((Tmp_win->icon_w)&&(Tmp_win->flags & PIXMAP_OURS))
-    {
-      XFreePixmap(dpy, Tmp_win->iconPixmap);
-      XFreePixmap(dpy, Tmp_win->icon_maskPixmap);
-    }
+  if ((Tmp_win->icon_w) && (Tmp_win->flags & PIXMAP_OURS))
+  {
+    XFreePixmap(dpy, Tmp_win->iconPixmap);
+    XFreePixmap(dpy, Tmp_win->icon_maskPixmap);
+  }
 
 #ifdef MINI_ICON
   if (Tmp_win->mini_icon)
-    {
-      DestroyPicture(dpy, Tmp_win->mini_icon);
-    }
+  {
+    DestroyPicture(dpy, Tmp_win->mini_icon);
+  }
 #endif
 
   if (Tmp_win->icon_w)
-    {
-      XDestroyWindow(dpy, Tmp_win->icon_w);
-      XDeleteContext(dpy, Tmp_win->icon_w, FvwmContext);
-    }
-  if((Tmp_win->flags &ICON_OURS)&&(Tmp_win->icon_pixmap_w != None))
+  {
+    XDestroyWindow(dpy, Tmp_win->icon_w);
+    XDeleteContext(dpy, Tmp_win->icon_w, FvwmContext);
+  }
+  if ((Tmp_win->flags & ICON_OURS) && (Tmp_win->icon_pixmap_w != None))
     XDestroyWindow(dpy, Tmp_win->icon_pixmap_w);
-  if(Tmp_win->icon_pixmap_w != None)
+  if (Tmp_win->icon_pixmap_w != None)
     XDeleteContext(dpy, Tmp_win->icon_pixmap_w, FvwmContext);
 
   if (Tmp_win->flags & TITLE)
-    {
-      XDeleteContext(dpy, Tmp_win->title_w, FvwmContext);
-      for(i=0;i<Scr.nr_left_buttons;i++)
-	XDeleteContext(dpy, Tmp_win->left_w[i], FvwmContext);
-      for(i=0;i<Scr.nr_right_buttons;i++)
-	if(Tmp_win->right_w[i] != None)
-	  XDeleteContext(dpy, Tmp_win->right_w[i], FvwmContext);
-    }
+  {
+    XDeleteContext(dpy, Tmp_win->title_w, FvwmContext);
+    for (i = 0; i < Scr.nr_left_buttons; i++)
+      XDeleteContext(dpy, Tmp_win->left_w[i], FvwmContext);
+    for (i = 0; i < Scr.nr_right_buttons; i++)
+      if (Tmp_win->right_w[i] != None)
+        XDeleteContext(dpy, Tmp_win->right_w[i], FvwmContext);
+  }
   if (Tmp_win->flags & BORDER)
-    {
-      for(i=0;i<4;i++)
-	XDeleteContext(dpy, Tmp_win->sides[i], FvwmContext);
-      for(i=0;i<4;i++)
-	XDeleteContext(dpy, Tmp_win->corners[i], FvwmContext);
-    }
+  {
+    for (i = 0; i < 4; i++)
+      XDeleteContext(dpy, Tmp_win->sides[i], FvwmContext);
+    for (i = 0; i < 4; i++)
+      XDeleteContext(dpy, Tmp_win->corners[i], FvwmContext);
+  }
 
-  free_window_names (Tmp_win, True, True);
+  free_window_names(Tmp_win, True, True);
   if (Tmp_win->wmhints)
-    XFree ((char *)Tmp_win->wmhints);
+    XFree((char *)Tmp_win->wmhints);
   /* removing NoClass change for now... */
 #if 0
   if (Tmp_win->class.res_name)
@@ -198,40 +198,37 @@ void Destroy(FvwmWindow *Tmp_win)
     XFree ((char *)Tmp_win->class.res_class);
 #else
   if (Tmp_win->class.res_name && Tmp_win->class.res_name != NoResource)
-    XFree ((char *)Tmp_win->class.res_name);
+    XFree((char *)Tmp_win->class.res_name);
   if (Tmp_win->class.res_class && Tmp_win->class.res_class != NoClass)
-    XFree ((char *)Tmp_win->class.res_class);
+    XFree((char *)Tmp_win->class.res_class);
 #endif /* 0 */
-  if(Tmp_win->mwm_hints)
+  if (Tmp_win->mwm_hints)
     XFree((char *)Tmp_win->mwm_hints);
 
-  if(Tmp_win->cmap_windows != (Window *)NULL)
+  if (Tmp_win->cmap_windows != (Window *)NULL)
     XFree((void *)Tmp_win->cmap_windows);
 
   free((char *)Tmp_win);
 
-  if(!PPosOverride)
-    XSync(dpy,0);
+  if (!PPosOverride)
+    XSync(dpy, 0);
   return;
 }
-
-
 
 /**************************************************************************
  *
  * Removes expose events for a specific window from the queue
  *
  *************************************************************************/
-int flush_expose (Window w)
+int flush_expose(Window w)
 {
   XEvent dummy;
-  int i=0;
+  int i = 0;
 
-  while (XCheckTypedWindowEvent (dpy, w, Expose, &dummy))i++;
+  while (XCheckTypedWindowEvent(dpy, w, Expose, &dummy))
+    i++;
   return i;
 }
-
-
 
 /***********************************************************************
  *
@@ -241,26 +238,26 @@ int flush_expose (Window w)
  *  Puts windows back where they were before fvwm took over
  *
  ************************************************************************/
-void RestoreWithdrawnLocation (FvwmWindow *tmp,Bool restart)
+void RestoreWithdrawnLocation(FvwmWindow *tmp, Bool restart)
 {
-  int a,b,w2,h2;
+  int a, b, w2, h2;
   unsigned int mask;
   XWindowChanges xwc;
 
-  if(!tmp)
+  if (!tmp)
     return;
 
-  if (XGetGeometry (dpy, tmp->w, &JunkRoot, &xwc.x, &xwc.y,
-		    &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth))
-    {
-      XTranslateCoordinates(dpy,tmp->frame,Scr.Root,xwc.x,xwc.y,
-			    &a,&b,&JunkChild);
-      xwc.x = a + tmp->xdiff;
-      xwc.y = b + tmp->ydiff;
-      xwc.border_width = tmp->old_bw;
-      mask = (CWX | CWY| CWBorderWidth);
+  if (XGetGeometry(dpy, tmp->w, &JunkRoot, &xwc.x, &xwc.y, &JunkWidth,
+                   &JunkHeight, &JunkBW, &JunkDepth))
+  {
+    XTranslateCoordinates(dpy, tmp->frame, Scr.Root, xwc.x, xwc.y, &a,
+                          &b, &JunkChild);
+    xwc.x = a + tmp->xdiff;
+    xwc.y = b + tmp->ydiff;
+    xwc.border_width = tmp->old_bw;
+    mask = (CWX | CWY | CWBorderWidth);
 
-      /* We can not assume that the window is currently on the screen.
+    /* We can not assume that the window is currently on the screen.
        * Although this is normally the case, it is not always true.  The
        * most common example is when the user does something in an
        * application which will, after some amount of computational delay,
@@ -280,108 +277,108 @@ void RestoreWithdrawnLocation (FvwmWindow *tmp,Bool restart)
        * half off the screen. (RN)
        */
 
-      if(!restart)
-	{
-	  /* Don't mess with it if its partially on the screen now */
-	  if((tmp->frame_x < 0)||(tmp->frame_y<0)||
-	     (tmp->frame_x >= Scr.MyDisplayWidth)||
-	     (tmp->frame_y >= Scr.MyDisplayHeight))
-	    {
-	      w2 = (tmp->frame_width>>1);
-	      h2 = (tmp->frame_height>>1);
-	      if (( xwc.x < -w2) || (xwc.x > (Scr.MyDisplayWidth-w2 )))
-		{
-		  xwc.x = xwc.x % Scr.MyDisplayWidth;
-		  if ( xwc.x < -w2 )
-		    xwc.x += Scr.MyDisplayWidth;
-		}
-	      if ((xwc.y < -h2) || (xwc.y > (Scr.MyDisplayHeight-h2 )))
-		{
-		  xwc.y = xwc.y % Scr.MyDisplayHeight;
-		  if ( xwc.y < -h2 )
-		    xwc.y += Scr.MyDisplayHeight;
-		}
-	    }
-	}
-      XReparentWindow (dpy, tmp->w,Scr.Root,xwc.x,xwc.y);
-
-      if((tmp->flags & ICONIFIED)&&(!(tmp->flags & SUPPRESSICON)))
-	{
-	  if (tmp->icon_w)
-	    XUnmapWindow(dpy, tmp->icon_w);
-	  if (tmp->icon_pixmap_w)
-	    XUnmapWindow(dpy, tmp->icon_pixmap_w);
-	}
-
-      XConfigureWindow (dpy, tmp->w, mask, &xwc);
-      if(!restart)
-	XSync(dpy,0);
+    if (!restart)
+    {
+      /* Don't mess with it if its partially on the screen now */
+      if ((tmp->frame_x < 0) || (tmp->frame_y < 0) ||
+          (tmp->frame_x >= Scr.MyDisplayWidth) ||
+          (tmp->frame_y >= Scr.MyDisplayHeight))
+      {
+        w2 = (tmp->frame_width >> 1);
+        h2 = (tmp->frame_height >> 1);
+        if ((xwc.x < -w2) || (xwc.x > (Scr.MyDisplayWidth - w2)))
+        {
+          xwc.x = xwc.x % Scr.MyDisplayWidth;
+          if (xwc.x < -w2)
+            xwc.x += Scr.MyDisplayWidth;
+        }
+        if ((xwc.y < -h2) || (xwc.y > (Scr.MyDisplayHeight - h2)))
+        {
+          xwc.y = xwc.y % Scr.MyDisplayHeight;
+          if (xwc.y < -h2)
+            xwc.y += Scr.MyDisplayHeight;
+        }
+      }
     }
-}
+    XReparentWindow(dpy, tmp->w, Scr.Root, xwc.x, xwc.y);
 
+    if ((tmp->flags & ICONIFIED) && (!(tmp->flags & SUPPRESSICON)))
+    {
+      if (tmp->icon_w)
+        XUnmapWindow(dpy, tmp->icon_w);
+      if (tmp->icon_pixmap_w)
+        XUnmapWindow(dpy, tmp->icon_pixmap_w);
+    }
+
+    XConfigureWindow(dpy, tmp->w, mask, &xwc);
+    if (!restart)
+      XSync(dpy, 0);
+  }
+}
 
 /****************************************************************************
  *
  * Records the time of the last processed event. Used in XSetInputFocus
  *
  ****************************************************************************/
-Time lastTimestamp = CurrentTime;	/* until Xlib does this for us */
+Time lastTimestamp = CurrentTime; /* until Xlib does this for us */
 
-Bool StashEventTime (XEvent *ev)
+Bool StashEventTime(XEvent *ev)
 {
   Time NewTimestamp = CurrentTime;
 
   switch (ev->type)
-    {
-    case KeyPress:
-    case KeyRelease:
-      NewTimestamp = ev->xkey.time;
-      break;
-    case ButtonPress:
-    case ButtonRelease:
-      NewTimestamp = ev->xbutton.time;
-      break;
-    case MotionNotify:
-      NewTimestamp = ev->xmotion.time;
-      break;
-    case EnterNotify:
-    case LeaveNotify:
-      NewTimestamp = ev->xcrossing.time;
-      break;
-    case PropertyNotify:
-      NewTimestamp = ev->xproperty.time;
-      break;
-    case SelectionClear:
-      NewTimestamp = ev->xselectionclear.time;
-      break;
-    case SelectionRequest:
-      NewTimestamp = ev->xselectionrequest.time;
-      break;
-    case SelectionNotify:
-      NewTimestamp = ev->xselection.time;
-      break;
-    default:
-      return False;
-    }
+  {
+  case KeyPress:
+  case KeyRelease:
+    NewTimestamp = ev->xkey.time;
+    break;
+  case ButtonPress:
+  case ButtonRelease:
+    NewTimestamp = ev->xbutton.time;
+    break;
+  case MotionNotify:
+    NewTimestamp = ev->xmotion.time;
+    break;
+  case EnterNotify:
+  case LeaveNotify:
+    NewTimestamp = ev->xcrossing.time;
+    break;
+  case PropertyNotify:
+    NewTimestamp = ev->xproperty.time;
+    break;
+  case SelectionClear:
+    NewTimestamp = ev->xselectionclear.time;
+    break;
+  case SelectionRequest:
+    NewTimestamp = ev->xselectionrequest.time;
+    break;
+  case SelectionNotify:
+    NewTimestamp = ev->xselection.time;
+    break;
+  default:
+    return False;
+  }
   /* Only update is the new timestamp is later than the old one, or
    * if the new one is from a time at least 30 seconds earlier than the
    * old one (in which case the system clock may have changed) */
-  if((NewTimestamp > lastTimestamp)||((lastTimestamp - NewTimestamp) > 30000))
+  if ((NewTimestamp > lastTimestamp) ||
+      ((lastTimestamp - NewTimestamp) > 30000))
     lastTimestamp = NewTimestamp;
-  if(FocusOnNextTimeStamp)
-    {
-      SetFocus(FocusOnNextTimeStamp->w,FocusOnNextTimeStamp,1);
-      FocusOnNextTimeStamp = NULL;
-    }
+  if (FocusOnNextTimeStamp)
+  {
+    SetFocus(FocusOnNextTimeStamp->w, FocusOnNextTimeStamp, 1);
+    FocusOnNextTimeStamp = NULL;
+  }
   return True;
 }
 
-
-void ComputeActualPosition(int x,int y,int x_unit,int y_unit,
-			   int width,int height,int *pfinalX, int *pfinalY)
+void ComputeActualPosition(int x, int y, int x_unit, int y_unit,
+                           int width, int height, int *pfinalX,
+                           int *pfinalY)
 {
-  *pfinalX = x*x_unit/100;
-  *pfinalY = y*y_unit/100;
+  *pfinalX = x * x_unit / 100;
+  *pfinalY = y * y_unit / 100;
   if (*pfinalX < 0)
     *pfinalX += Scr.MyDisplayWidth - width;
   if (*pfinalY < 0)
@@ -389,38 +386,50 @@ void ComputeActualPosition(int x,int y,int x_unit,int y_unit,
 }
 
 int GetTwoArguments(char *action, int *val1, int *val2, int *val1_unit,
-		    int *val2_unit)
+                    int *val2_unit)
 {
   *val1_unit = Scr.MyDisplayWidth;
   *val2_unit = Scr.MyDisplayHeight;
-  return GetTwoPercentArguments(action, val1, val2, val1_unit, val2_unit);
+  return GetTwoPercentArguments(action, val1, val2, val1_unit,
+                                val2_unit);
 }
 
 /* The vars are named for the x-direction, but this is used for both x and y */
-static
-int GetOnePositionArgument(char *s1,int x,int w,int *pFinalX,float factor,
-			   int max)
+static int GetOnePositionArgument(char *s1, int x, int w, int *pFinalX,
+                                  float factor, int max)
 {
   int val;
   int cch = strlen(s1);
 
   if (cch == 0)
     return 0;
-  if (s1[cch-1] == 'p') {
-    factor = 1;  /* Use pixels, so don't multiply by factor */
-    s1[cch-1] = '\0';
+  if (s1[cch - 1] == 'p')
+  {
+    factor = 1; /* Use pixels, so don't multiply by factor */
+    s1[cch - 1] = '\0';
   }
-  if (strcmp(s1,"w") == 0) {
+  if (strcmp(s1, "w") == 0)
+  {
     *pFinalX = x;
-  } else if (sscanf(s1,"w-%d",&val) == 1) {
-    *pFinalX = x-(val*factor);
-  } else if (sscanf(s1,"w+%d",&val) == 1) {
-    *pFinalX = x+(val*factor);
-  } else if (sscanf(s1,"-%d",&val) == 1) {
-    *pFinalX = max-w - val*factor;
-  } else if (sscanf(s1,"%d",&val) == 1) {
-    *pFinalX = val*factor;
-  } else {
+  }
+  else if (sscanf(s1, "w-%d", &val) == 1)
+  {
+    *pFinalX = x - (val * factor);
+  }
+  else if (sscanf(s1, "w+%d", &val) == 1)
+  {
+    *pFinalX = x + (val * factor);
+  }
+  else if (sscanf(s1, "-%d", &val) == 1)
+  {
+    *pFinalX = max - w - val * factor;
+  }
+  else if (sscanf(s1, "%d", &val) == 1)
+  {
+    *pFinalX = val * factor;
+  }
+  else
+  {
     return 0;
   }
   /* DEBUG_FPRINTF((stderr,"Got %d\n",*pFinalX)); */
@@ -449,17 +458,24 @@ int GetMoveArguments(char *action, int x, int y, int w, int h,
   GetNextToken(action, &warp);
   *fWarp = StrEquals(warp, "Warp");
 
-  if (s1 != NULL && s2 != NULL) {
-    if (GetOnePositionArgument(s1,x,w,pFinalX,(float)scrWidth/100,scrWidth) &&
-        GetOnePositionArgument(s2,y,h,pFinalY,(float)scrHeight/100,scrHeight))
+  if (s1 != NULL && s2 != NULL)
+  {
+    if (GetOnePositionArgument(s1, x, w, pFinalX, (float)scrWidth / 100,
+                               scrWidth) &&
+        GetOnePositionArgument(s2, y, h, pFinalY,
+                               (float)scrHeight / 100, scrHeight))
       retval = 2;
     else
-	*fWarp = FALSE; /* make sure warping is off for interactive moves */
+      *fWarp =
+        FALSE; /* make sure warping is off for interactive moves */
   }
 
-  if (s1) free(s1);
-  if (s2) free(s2);
-  if (warp) free(warp);
+  if (s1)
+    free(s1);
+  if (s2)
+    free(s2);
+  if (warp)
+    free(warp);
 
   return retval;
 }
@@ -469,15 +485,15 @@ int GetMoveArguments(char *action, int x, int y, int w, int h,
  *
  * The vars are named for the x-direction, but this is used for both x and y
  *****************************************************************************/
-static
-char *GetOneMenuPositionArgument(char *action,int x,int w,int *pFinalX,
-				 float *width_factor)
+static char *GetOneMenuPositionArgument(char *action, int x, int w,
+                                        int *pFinalX,
+                                        float *width_factor)
 {
   char *token, *orgtoken, *naction;
   char c;
   int val;
   int chars;
-  float factor = (float)w/100;
+  float factor = (float)w / 100;
 
   naction = GetNextToken(action, &token);
   if (token == NULL)
@@ -485,32 +501,47 @@ char *GetOneMenuPositionArgument(char *action,int x,int w,int *pFinalX,
   orgtoken = token;
   *pFinalX = x;
   *width_factor = 0;
-  if (sscanf(token,"o%d%n", &val, &chars) >= 1) {
+  if (sscanf(token, "o%d%n", &val, &chars) >= 1)
+  {
     token += chars;
-    *pFinalX += val*factor;
-    *width_factor -= val/100;
-  } else if (token[0] == 'c') {
+    *pFinalX += val * factor;
+    *width_factor -= val / 100;
+  }
+  else if (token[0] == 'c')
+  {
     token++;
-    *pFinalX += w/2;
+    *pFinalX += w / 2;
     *width_factor -= 0.5;
   }
-  while (*token != 0) {
-    if (sscanf(token,"%d%n", &val, &chars) >= 1) {
+  while (*token != 0)
+  {
+    if (sscanf(token, "%d%n", &val, &chars) >= 1)
+    {
       token += chars;
-      if (sscanf(token,"%c", &c) == 1) {
-	if (c == 'm') {
-	  token++;
-	  *width_factor += val/100;
-	} else if (c == 'p') {
-	  token++;
-	  *pFinalX += val;
-	} else {
-	  *pFinalX += val*factor;
-	}
-      } else {
-	*pFinalX += val*factor;
+      if (sscanf(token, "%c", &c) == 1)
+      {
+        if (c == 'm')
+        {
+          token++;
+          *width_factor += val / 100;
+        }
+        else if (c == 'p')
+        {
+          token++;
+          *pFinalX += val;
+        }
+        else
+        {
+          *pFinalX += val * factor;
+        }
       }
-    } else {
+      else
+      {
+        *pFinalX += val * factor;
+      }
+    }
+    else
+    {
       naction = action;
       break;
     }
@@ -531,7 +562,7 @@ char *GetOneMenuPositionArgument(char *action,int x,int w,int *pFinalX,
  * See documentation for a detailed description.
  ****************************************************************************/
 char *GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win,
-		     MenuItem *mi, MenuOptions *pops)
+                     MenuItem *mi, MenuOptions *pops)
 {
   char *tok = NULL, *naction = action, *taction;
   int x, y, button, gflags;
@@ -541,88 +572,141 @@ char *GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win,
   Bool fValidPosHints = fLastMenuPosHintsValid;
 
   fLastMenuPosHintsValid = FALSE;
-  if (pops == NULL) {
-    fvwm_msg(ERR,"GetMenuOptions","no MenuOptions pointer passed");
+  if (pops == NULL)
+  {
+    fvwm_msg(ERR, "GetMenuOptions", "no MenuOptions pointer passed");
     return action;
   }
 
   taction = action;
-  while (action != NULL) {
+  while (action != NULL)
+  {
     /* ^ just to be able to jump to end of loop without 'goto' */
     gflags = NoValue;
     pops->flags.allflags = 0;
     pops->pos_hints.fRelative = FALSE;
     /* parse context argument (if present) */
     naction = GetNextToken(taction, &tok);
-    if (!tok) {
+    if (!tok)
+    {
       /* no context string */
       fHasContext = FALSE;
       break;
     }
 
-    pops->pos_hints.fRelative = TRUE; /* set to FALSE for absolute hints! */
+    pops->pos_hints.fRelative =
+      TRUE; /* set to FALSE for absolute hints! */
     fUseItemOffset = FALSE;
     fHasContext = TRUE;
-    if (StrEquals(tok, "context")) {
-      if (mi && mi->mr) context_window = mi->mr->w;
-      else if (tmp_win) {
-	if (tmp_win->flags & ICONIFIED) context_window=tmp_win->icon_pixmap_w;
-	else context_window = tmp_win->frame;
-      } else context_window = w;
+    if (StrEquals(tok, "context"))
+    {
+      if (mi && mi->mr)
+        context_window = mi->mr->w;
+      else if (tmp_win)
+      {
+        if (tmp_win->flags & ICONIFIED)
+          context_window = tmp_win->icon_pixmap_w;
+        else
+          context_window = tmp_win->frame;
+      }
+      else
+        context_window = w;
       pops->pos_hints.fRelative = TRUE;
-    } else if (StrEquals(tok,"menu")) {
-      if (mi && mi->mr) context_window = mi->mr->w;
-    } else if (StrEquals(tok,"item")) {
-      if (mi && mi->mr) {
-	context_window = mi->mr->w;
-	fUseItemOffset = TRUE;
+    }
+    else if (StrEquals(tok, "menu"))
+    {
+      if (mi && mi->mr)
+        context_window = mi->mr->w;
+    }
+    else if (StrEquals(tok, "item"))
+    {
+      if (mi && mi->mr)
+      {
+        context_window = mi->mr->w;
+        fUseItemOffset = TRUE;
       }
-    } else if (StrEquals(tok,"icon")) {
-      if (tmp_win) context_window = tmp_win->icon_pixmap_w;
-    } else if (StrEquals(tok,"window")) {
-      if (tmp_win) context_window = tmp_win->frame;
-    } else if (StrEquals(tok,"interior")) {
-      if (tmp_win) context_window = tmp_win->w;
-    } else if (StrEquals(tok,"title")) {
-      if (tmp_win) {
-	if (tmp_win->flags & ICONIFIED) context_window = tmp_win->icon_w;
-	else context_window = tmp_win->title_w;
+    }
+    else if (StrEquals(tok, "icon"))
+    {
+      if (tmp_win)
+        context_window = tmp_win->icon_pixmap_w;
+    }
+    else if (StrEquals(tok, "window"))
+    {
+      if (tmp_win)
+        context_window = tmp_win->frame;
+    }
+    else if (StrEquals(tok, "interior"))
+    {
+      if (tmp_win)
+        context_window = tmp_win->w;
+    }
+    else if (StrEquals(tok, "title"))
+    {
+      if (tmp_win)
+      {
+        if (tmp_win->flags & ICONIFIED)
+          context_window = tmp_win->icon_w;
+        else
+          context_window = tmp_win->title_w;
       }
-    } else if (strncasecmp(tok,"button",6) == 0) {
-      if (sscanf(&(tok[6]),"%d",&button) != 1 ||
-		 tok[6] == '+' || tok[6] == '-' || button < 0 || button > 9) {
-	fHasContext = FALSE;
-      } else if (tmp_win) {
-	if (button == 0) button = 10;
-	if (button & 0x01) context_window = tmp_win->left_w[button/2];
-	else context_window = tmp_win->right_w[button/2-1];
+    }
+    else if (strncasecmp(tok, "button", 6) == 0)
+    {
+      if (sscanf(&(tok[6]), "%d", &button) != 1 || tok[6] == '+' ||
+          tok[6] == '-' || button < 0 || button > 9)
+      {
+        fHasContext = FALSE;
       }
-    } else if (StrEquals(tok,"root")) {
+      else if (tmp_win)
+      {
+        if (button == 0)
+          button = 10;
+        if (button & 0x01)
+          context_window = tmp_win->left_w[button / 2];
+        else
+          context_window = tmp_win->right_w[button / 2 - 1];
+      }
+    }
+    else if (StrEquals(tok, "root"))
+    {
       context_window = Scr.Root;
       pops->pos_hints.fRelative = FALSE;
-    } else if (StrEquals(tok,"mouse")) {
+    }
+    else if (StrEquals(tok, "mouse"))
+    {
       context_window = 0;
-    } else if (StrEquals(tok,"rectangle")) {
+    }
+    else if (StrEquals(tok, "rectangle"))
+    {
       int flags;
       /* parse the rectangle */
       free(tok);
       naction = GetNextToken(taction, &tok);
-      if (tok == NULL) {
-	fvwm_msg(ERR,"GetMenuOptions","missing rectangle geometry");
-	return action;
+      if (tok == NULL)
+      {
+        fvwm_msg(ERR, "GetMenuOptions", "missing rectangle geometry");
+        return action;
       }
       flags = XParseGeometry(tok, &x, &y, &width, &height);
-      if ((flags & AllValues) != AllValues) {
-	free(tok);
-	fvwm_msg(ERR,"GetMenuOptions","invalid rectangle geometry");
-	return action;
+      if ((flags & AllValues) != AllValues)
+      {
+        free(tok);
+        fvwm_msg(ERR, "GetMenuOptions", "invalid rectangle geometry");
+        return action;
       }
-      if (flags & XNegative) x = Scr.MyDisplayWidth - x - width;
-      if (flags & YNegative) y = Scr.MyDisplayHeight - y - height;
+      if (flags & XNegative)
+        x = Scr.MyDisplayWidth - x - width;
+      if (flags & YNegative)
+        y = Scr.MyDisplayHeight - y - height;
       pops->pos_hints.fRelative = FALSE;
-    } else if (StrEquals(tok,"this")) {
+    }
+    else if (StrEquals(tok, "this"))
+    {
       context_window = w;
-    } else {
+    }
+    else
+    {
       /* no context string */
       fHasContext = FALSE;
     }
@@ -631,46 +715,55 @@ char *GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win,
       free(tok);
     if (fHasContext)
       taction = naction;
-    else naction = action;
+    else
+      naction = action;
 
-    if (!context_window || !fHasContext
-	|| !XGetGeometry(dpy, context_window, &JunkRoot, &JunkX, &JunkY,
-			 &width, &height, &JunkBW, &JunkDepth)
-	|| !XTranslateCoordinates(
-	  dpy, context_window, Scr.Root, 0, 0, &x, &y, &JunkChild)) {
+    if (!context_window || !fHasContext ||
+        !XGetGeometry(dpy, context_window, &JunkRoot, &JunkX, &JunkY,
+                      &width, &height, &JunkBW, &JunkDepth) ||
+        !XTranslateCoordinates(dpy, context_window, Scr.Root, 0, 0, &x,
+                               &y, &JunkChild))
+    {
       /* now window or could not get geometry */
-      XQueryPointer(dpy,Scr.Root,&JunkRoot,&JunkChild,&x,&y,&JunkX,&JunkY,
-		    &JunkMask);
+      XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &x, &y,
+                    &JunkX, &JunkY, &JunkMask);
       width = height = 1;
-    } else if (fUseItemOffset) {
+    }
+    else if (fUseItemOffset)
+    {
       y += mi->y_offset;
       height = mi->y_height;
     }
 
     /* parse position arguments */
-    taction = GetOneMenuPositionArgument(
-      naction, x, width, &(pops->pos_hints.x), &(pops->pos_hints.x_factor));
-    naction = GetOneMenuPositionArgument(
-      taction, y, height, &(pops->pos_hints.y), &(pops->pos_hints.y_factor));
-    if (naction == taction) {
+    taction = GetOneMenuPositionArgument(naction, x, width,
+                                         &(pops->pos_hints.x),
+                                         &(pops->pos_hints.x_factor));
+    naction = GetOneMenuPositionArgument(taction, y, height,
+                                         &(pops->pos_hints.y),
+                                         &(pops->pos_hints.y_factor));
+    if (naction == taction)
+    {
       /* argument is missing or invalid */
       if (fHasContext)
-	fvwm_msg(ERR,"GetMenuOptions","invalid position arguments");
+        fvwm_msg(ERR, "GetMenuOptions", "invalid position arguments");
       naction = action;
       taction = action;
       break;
     }
     taction = naction;
     pops->flags.f.has_poshints = 1;
-    if (fValidPosHints == TRUE && pops->pos_hints.fRelative == TRUE) {
+    if (fValidPosHints == TRUE && pops->pos_hints.fRelative == TRUE)
+    {
       pops->pos_hints = lastMenuPosHints;
     }
     /* we want to do this only once */
     break;
   } /* while (1) */
 
-  if (!pops->flags.f.has_poshints && fValidPosHints) {
-    DBUG("GetMenuOptions","recycling position hints");
+  if (!pops->flags.f.has_poshints && fValidPosHints)
+  {
+    DBUG("GetMenuOptions", "recycling position hints");
     pops->flags.f.has_poshints = 1;
     pops->pos_hints = lastMenuPosHints;
     pops->pos_hints.fRelative = FALSE;
@@ -678,30 +771,43 @@ char *GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win,
 
   action = naction;
   /* parse additional options */
-  while (naction && *naction) {
+  while (naction && *naction)
+  {
     naction = GetNextToken(action, &tok);
     if (!tok)
       break;
-    if (StrEquals(tok, "WarpTitle")) {
+    if (StrEquals(tok, "WarpTitle"))
+    {
       pops->flags.f.warp_title = 1;
       pops->flags.f.no_warp = 0;
-    } else if (StrEquals(tok, "NoWarp")) {
+    }
+    else if (StrEquals(tok, "NoWarp"))
+    {
       pops->flags.f.warp_title = 0;
       pops->flags.f.no_warp = 1;
-    } else if (StrEquals(tok, "Fixed")) {
+    }
+    else if (StrEquals(tok, "Fixed"))
+    {
       pops->flags.f.fixed = 1;
-    } else if (StrEquals(tok, "SelectInPlace")) {
+    }
+    else if (StrEquals(tok, "SelectInPlace"))
+    {
       pops->flags.f.select_in_place = 1;
-    } else if (StrEquals(tok, "SelectWarp")) {
+    }
+    else if (StrEquals(tok, "SelectWarp"))
+    {
       pops->flags.f.select_warp = 1;
-    } else {
-      free (tok);
+    }
+    else
+    {
+      free(tok);
       break;
     }
     action = naction;
-    free (tok);
+    free(tok);
   }
-  if (!pops->flags.f.select_in_place) {
+  if (!pops->flags.f.select_in_place)
+  {
     pops->flags.f.select_warp = 0;
   }
 
@@ -722,25 +828,24 @@ void WaitForButtonsUp()
   XEvent JunkEvent;
   unsigned int mask;
 
-  while(!AllUp)
-    {
-      XAllowEvents(dpy,ReplayPointer,CurrentTime);
-      XQueryPointer( dpy, Scr.Root, &JunkRoot, &JunkChild,
-		    &JunkX, &JunkY, &JunkX, &JunkY, &mask);
+  while (!AllUp)
+  {
+    XAllowEvents(dpy, ReplayPointer, CurrentTime);
+    XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &JunkX, &JunkY,
+                  &JunkX, &JunkY, &mask);
 
-      if((mask&
-	  (Button1Mask|Button2Mask|Button3Mask|Button4Mask|Button5Mask))==0)
-	AllUp = True;
-    }
-  XSync(dpy,0);
-  while(XCheckMaskEvent(dpy,
-			ButtonPressMask|ButtonReleaseMask|ButtonMotionMask,
-			&JunkEvent))
-    {
-      StashEventTime (&JunkEvent);
-      XAllowEvents(dpy,ReplayPointer,CurrentTime);
-    }
-
+    if ((mask & (Button1Mask | Button2Mask | Button3Mask | Button4Mask |
+                 Button5Mask)) == 0)
+      AllUp = True;
+  }
+  XSync(dpy, 0);
+  while (XCheckMaskEvent(
+    dpy, ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
+    &JunkEvent))
+  {
+    StashEventTime(&JunkEvent);
+    XAllowEvents(dpy, ReplayPointer, CurrentTime);
+  }
 }
 
 /*****************************************************************************
@@ -750,39 +855,39 @@ void WaitForButtonsUp()
  ****************************************************************************/
 Bool GrabEm(int cursor)
 {
-  int i=0,val=0;
+  int i = 0, val = 0;
   unsigned int mask;
 
-  XSync(dpy,0);
+  XSync(dpy, 0);
   /* move the keyboard focus prior to grabbing the pointer to
    * eliminate the enterNotify and exitNotify events that go
    * to the windows */
-  if(Scr.PreviousFocus == NULL)
+  if (Scr.PreviousFocus == NULL)
     Scr.PreviousFocus = Scr.Focus;
-  SetFocus(Scr.NoFocusWin,NULL,0);
-  mask = ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|PointerMotionMask
-    | EnterWindowMask | LeaveWindowMask;
-  while((i<1000)&&(val=XGrabPointer(dpy, Scr.Root, True, mask,
-				    GrabModeAsync, GrabModeAsync, Scr.Root,
-				    Scr.FvwmCursors[cursor], CurrentTime)!=
-		   GrabSuccess))
-    {
-      i++;
-      /* If you go too fast, other windows may not get a change to release
+  SetFocus(Scr.NoFocusWin, NULL, 0);
+  mask = ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
+         PointerMotionMask | EnterWindowMask | LeaveWindowMask;
+  while ((i < 1000) &&
+         (val = XGrabPointer(dpy, Scr.Root, True, mask, GrabModeAsync,
+                             GrabModeAsync, Scr.Root,
+                             Scr.FvwmCursors[cursor],
+                             CurrentTime) != GrabSuccess))
+  {
+    i++;
+    /* If you go too fast, other windows may not get a change to release
        * any grab that they have. */
-      usleep(1000);
-    }
+    usleep(1000);
+  }
 
   /* If we fall out of the loop without grabbing the pointer, its
      time to give up */
-  XSync(dpy,0);
-  if(val!=GrabSuccess)
-    {
-      return False;
-    }
+  XSync(dpy, 0);
+  if (val != GrabSuccess)
+  {
+    return False;
+  }
   return True;
 }
-
 
 /*****************************************************************************
  *
@@ -793,24 +898,22 @@ void UngrabEm()
 {
   Window w;
 
-  XSync(dpy,0);
-  XUngrabPointer(dpy,CurrentTime);
+  XSync(dpy, 0);
+  XUngrabPointer(dpy, CurrentTime);
 
-  if(Scr.PreviousFocus != NULL)
+  if (Scr.PreviousFocus != NULL)
+  {
+    w = Scr.PreviousFocus->w;
+
+    /* if the window still exists, focus on it */
+    if (w)
     {
-      w = Scr.PreviousFocus->w;
-
-      /* if the window still exists, focus on it */
-      if (w)
-	{
-	  SetFocus(w,Scr.PreviousFocus,0);
-	}
-      Scr.PreviousFocus = NULL;
+      SetFocus(w, Scr.PreviousFocus, 0);
     }
-  XSync(dpy,0);
+    Scr.PreviousFocus = NULL;
+  }
+  XSync(dpy, 0);
 }
-
-
 
 /****************************************************************************
  *
@@ -826,17 +929,16 @@ void KeepOnTop()
 
   /* flag that on-top windows should be re-raised */
   for (t = Scr.FvwmRoot.next; t != NULL; t = t->next)
+  {
+    if ((t->flags & ONTOP) && !(t->flags & VISIBLE))
     {
-      if((t->flags & ONTOP)&&!(t->flags & VISIBLE))
-	{
-	  RaiseWindow(t);
-	  t->flags &= ~RAISED;
-	}
-      else
-	t->flags |= RAISED;
+      RaiseWindow(t);
+      t->flags &= ~RAISED;
     }
+    else
+      t->flags |= RAISED;
+  }
 }
-
 
 /**************************************************************************
  *
@@ -854,17 +956,17 @@ void UnmapIt(FvwmWindow *t)
   XGetWindowAttributes(dpy, t->w, &winattrs);
   eventMask = winattrs.your_event_mask;
   XSelectInput(dpy, t->w, eventMask & ~StructureNotifyMask);
-  if(t->flags & ICONIFIED)
-    {
-      if(t->icon_pixmap_w != None)
-	XUnmapWindow(dpy,t->icon_pixmap_w);
-      if(t->icon_w != None)
-	XUnmapWindow(dpy,t->icon_w);
-    }
-  else if(t->flags & (MAPPED|MAP_PENDING))
-    {
-      XUnmapWindow(dpy,t->frame);
-    }
+  if (t->flags & ICONIFIED)
+  {
+    if (t->icon_pixmap_w != None)
+      XUnmapWindow(dpy, t->icon_pixmap_w);
+    if (t->icon_w != None)
+      XUnmapWindow(dpy, t->icon_w);
+  }
+  else if (t->flags & (MAPPED | MAP_PENDING))
+  {
+    XUnmapWindow(dpy, t->frame);
+  }
   XSelectInput(dpy, t->w, eventMask);
 }
 
@@ -875,23 +977,20 @@ void UnmapIt(FvwmWindow *t)
  *************************************************************************/
 void MapIt(FvwmWindow *t)
 {
-  if(t->flags & ICONIFIED)
-    {
-      if(t->icon_pixmap_w != None)
-	XMapWindow(dpy,t->icon_pixmap_w);
-      if(t->icon_w != None)
-	XMapWindow(dpy,t->icon_w);
-    }
-  else if(t->flags & MAPPED)
-    {
-      XMapWindow(dpy,t->frame);
-      t->flags |= MAP_PENDING;
-      XMapWindow(dpy, t->Parent);
-   }
+  if (t->flags & ICONIFIED)
+  {
+    if (t->icon_pixmap_w != None)
+      XMapWindow(dpy, t->icon_pixmap_w);
+    if (t->icon_w != None)
+      XMapWindow(dpy, t->icon_w);
+  }
+  else if (t->flags & MAPPED)
+  {
+    XMapWindow(dpy, t->frame);
+    t->flags |= MAP_PENDING;
+    XMapWindow(dpy, t->Parent);
+  }
 }
-
-
-
 
 void RaiseWindow(FvwmWindow *t)
 {
@@ -903,206 +1002,207 @@ void RaiseWindow(FvwmWindow *t)
   FvwmWindow **FvwmTopwins = NULL;
   int j, count2;
 
-
-  memset((void *) &changes, '\0', sizeof(changes));
+  memset((void *)&changes, '\0', sizeof(changes));
   /* raise the target, at least */
   count = 1;
   BroadcastPacket(M_RAISE_WINDOW, 3, t->w, t->frame, (unsigned long)t);
 
-  for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot; t2 = t2->stack_next)
+  for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot;
+       t2 = t2->stack_next)
+  {
+    if (t2->flags & ONTOP)
+      count++;
+    if ((t2->flags & TRANSIENT) && (t2->transientfor == t->w) &&
+        (t2 != t))
     {
-      if(t2->flags & ONTOP)
-	count++;
-      if((t2->flags & TRANSIENT) &&(t2->transientfor == t->w)&&
-	 (t2 != t))
-	{
-	  count++;
-	  BroadcastPacket(M_RAISE_WINDOW, 3,
-                          t2->w, t2->frame,(unsigned long) t2);
-	  if ((t2->flags & ICONIFIED)&&(!(t2->flags & SUPPRESSICON)))
-	    {
-	      count += 2;
-	    }
-	}
+      count++;
+      BroadcastPacket(M_RAISE_WINDOW, 3, t2->w, t2->frame,
+                      (unsigned long)t2);
+      if ((t2->flags & ICONIFIED) && (!(t2->flags & SUPPRESSICON)))
+      {
+        count += 2;
+      }
     }
-  if ((t->flags & ICONIFIED)&&(!(t->flags & SUPPRESSICON)))
-    {
-      count += 2;
-    }
+  }
+  if ((t->flags & ICONIFIED) && (!(t->flags & SUPPRESSICON)))
+  {
+    count += 2;
+  }
 
-  wins = (Window *)safemalloc(count*sizeof(Window));
-  FvwmTopwins = (FvwmWindow **)safemalloc(count*sizeof(FvwmWindow));
+  wins = (Window *)safemalloc(count * sizeof(Window));
+  FvwmTopwins = (FvwmWindow **)safemalloc(count * sizeof(FvwmWindow));
 
-  i=0;
+  i = 0;
   j = 0;
   count2 = 0;
 
   /* ONTOP windows on top */
-  for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot; t2 = t2->stack_next)
+  for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot;
+       t2 = t2->stack_next)
+  {
+    if (t2->flags & ONTOP)
     {
-      if(t2->flags & ONTOP)
-	{
-	  BroadcastPacket(M_RAISE_WINDOW, 3,
-                          t2->w, t2->frame, (unsigned long) t2);
-	  wins[i++] = t2->frame;
-          FvwmTopwins[j++] = t2;
-	}
+      BroadcastPacket(M_RAISE_WINDOW, 3, t2->w, t2->frame,
+                      (unsigned long)t2);
+      wins[i++] = t2->frame;
+      FvwmTopwins[j++] = t2;
     }
+  }
 
   /* now raise transients */
 #ifndef DONT_RAISE_TRANSIENTS
-  for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot; t2 = t2->stack_next)
+  for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot;
+       t2 = t2->stack_next)
   {
-    if((t2->flags & TRANSIENT) &&
-       (t2->transientfor == t->w) &&
-       (t2 != t) &&
-       (!(t2->flags & ONTOP)))
+    if ((t2->flags & TRANSIENT) && (t2->transientfor == t->w) &&
+        (t2 != t) && (!(t2->flags & ONTOP)))
     {
       wins[i++] = t2->frame;
       FvwmTopwins[j++] = t2;
-      if ((t2->flags & ICONIFIED)&&(!(t2->flags & SUPPRESSICON)))
+      if ((t2->flags & ICONIFIED) && (!(t2->flags & SUPPRESSICON)))
       {
-        if(!(t2->flags & NOICON_TITLE))
+        if (!(t2->flags & NOICON_TITLE))
           wins[i++] = t2->icon_w;
-        if(!(t2->icon_pixmap_w))
+        if (!(t2->icon_pixmap_w))
           wins[i++] = t2->icon_pixmap_w;
       }
     }
   }
 #endif
-  if ((t->flags & ICONIFIED)&&(!(t->flags & SUPPRESSICON)))
+  if ((t->flags & ICONIFIED) && (!(t->flags & SUPPRESSICON)))
   {
-    if(!(t->flags & NOICON_TITLE))
+    if (!(t->flags & NOICON_TITLE))
       wins[i++] = t->icon_w;
     if (t->icon_pixmap_w)
       wins[i++] = t->icon_pixmap_w;
   }
-  if(!(t->flags & ONTOP))
-    {
-      wins[i++] = t->frame;
-      FvwmTopwins[j++] = t;
-      Scr.LastWindowRaised = t;
-    }
+  if (!(t->flags & ONTOP))
+  {
+    wins[i++] = t->frame;
+    FvwmTopwins[j++] = t;
+    Scr.LastWindowRaised = t;
+  }
   count2 = j;
 
-  if(i > 0)
-    {
-/*      XRaiseWindow(dpy,wins[0]);  */
-      /*
+  if (i > 0)
+  {
+    /*      XRaiseWindow(dpy,wins[0]);  */
+    /*
            clasen@mathematik.uni-freiburg.de - 01/01/1999 -
          simply calling XRaiseWindow(dpy,wins[0]); here will put StaysOnTop
          windows over override_redirect windows like FvwmPager ballon_win or
          Motif menus. Instead raise wins[0] only above the topmost window
 	 which is managed by us.
       */
-     if (wins[0] != Scr.FvwmRoot.stack_next->frame && wins[0] != Scr.FvwmRoot.stack_next->icon_w && wins[0] != Scr.FvwmRoot.stack_next->icon_pixmap_w) 
-      { 
-        if (Scr.FvwmRoot.stack_next->flags & ICONIFIED)
-          {
-            /*
+    if (wins[0] != Scr.FvwmRoot.stack_next->frame &&
+        wins[0] != Scr.FvwmRoot.stack_next->icon_w &&
+        wins[0] != Scr.FvwmRoot.stack_next->icon_pixmap_w)
+    {
+      if (Scr.FvwmRoot.stack_next->flags & ICONIFIED)
+      {
+        /*
                 RBW - use the icon window or pixmap if there is one; but
                 there may not be (NoIconTitle or NoIcon) --
             */
-            if (Scr.FvwmRoot.stack_next->icon_w)
-              {
-                changes.sibling = Scr.FvwmRoot.stack_next->icon_w;
-              }
-            else if (Scr.FvwmRoot.stack_next->icon_pixmap_w)
-              {
-                changes.sibling = Scr.FvwmRoot.stack_next->icon_pixmap_w;
-              }
-            else
-              {
-                changes.sibling = Scr.FvwmRoot.stack_next->frame;
-              }
-          }
+        if (Scr.FvwmRoot.stack_next->icon_w)
+        {
+          changes.sibling = Scr.FvwmRoot.stack_next->icon_w;
+        }
+        else if (Scr.FvwmRoot.stack_next->icon_pixmap_w)
+        {
+          changes.sibling = Scr.FvwmRoot.stack_next->icon_pixmap_w;
+        }
         else
-          {
-            changes.sibling = Scr.FvwmRoot.stack_next->frame;
-          }
-        changes.stack_mode = Above;
-        XConfigureWindow(dpy, wins[0], (CWSibling|CWStackMode), &changes);
+        {
+          changes.sibling = Scr.FvwmRoot.stack_next->frame;
+        }
       }
+      else
+      {
+        changes.sibling = Scr.FvwmRoot.stack_next->frame;
+      }
+      changes.stack_mode = Above;
+      XConfigureWindow(dpy, wins[0], (CWSibling | CWStackMode),
+                       &changes);
+    }
 
-
-      /*
+    /*
           RBW  - 01/05/1998 - move all raised windows to front of stacking
           order chain.
       */
-      j = 0;
-      t2 = &Scr.FvwmRoot;
-      while (j < count2)
-        {
-          t1 = FvwmTopwins[j];
-	  if (t1 != t2->stack_next)
-            {
-              t1->stack_prev->stack_next = t1->stack_next;  /* Pluck from chain.       */
-              t1->stack_next->stack_prev = t1->stack_prev;
-              t1->stack_next = t2->stack_next;    /* Set new pointers.       */
-              t1->stack_prev = t2->stack_next->stack_prev;
-              t2->stack_next->stack_prev = t1;    /* Insert in new position in chain. */
-              t2->stack_next = t1;
-            }
-          j++;
-          if (t2->stack_next != &Scr.FvwmRoot)
-          {
-	    t2 = t2->stack_next;
-          }
-        }
-
+    j = 0;
+    t2 = &Scr.FvwmRoot;
+    while (j < count2)
+    {
+      t1 = FvwmTopwins[j];
+      if (t1 != t2->stack_next)
+      {
+        t1->stack_prev->stack_next =
+          t1->stack_next; /* Pluck from chain.       */
+        t1->stack_next->stack_prev = t1->stack_prev;
+        t1->stack_next = t2->stack_next; /* Set new pointers.       */
+        t1->stack_prev = t2->stack_next->stack_prev;
+        t2->stack_next->stack_prev =
+          t1; /* Insert in new position in chain. */
+        t2->stack_next = t1;
+      }
+      j++;
+      if (t2->stack_next != &Scr.FvwmRoot)
+      {
+        t2 = t2->stack_next;
+      }
     }
+  }
 
-  XRestackWindows(dpy,wins,i);
+  XRestackWindows(dpy, wins, i);
   free(wins);
-  if (FvwmTopwins) free(FvwmTopwins);
+  if (FvwmTopwins)
+    free(FvwmTopwins);
   raisePanFrames();
 }
 
-
 void LowerWindow(FvwmWindow *t)
 {
-  XLowerWindow(dpy,t->frame);
+  XLowerWindow(dpy, t->frame);
 
   BroadcastPacket(M_LOWER_WINDOW, 3, t->w, t->frame, (unsigned long)t);
 
-  if((t->flags & ICONIFIED)&&(!(t->flags & SUPPRESSICON)))
-    {
-      XLowerWindow(dpy, t->icon_w);
-      XLowerWindow(dpy, t->icon_pixmap_w);
-    }
+  if ((t->flags & ICONIFIED) && (!(t->flags & SUPPRESSICON)))
+  {
+    XLowerWindow(dpy, t->icon_w);
+    XLowerWindow(dpy, t->icon_pixmap_w);
+  }
   Scr.LastWindowRaised = (FvwmWindow *)0;
   /*
       RBW - 11/13/1998 - new: maintain the stacking order chain.
   */
-  t->stack_prev->stack_next = t->stack_next;            /* Pluck from chain.       */
+  t->stack_prev->stack_next =
+    t->stack_next; /* Pluck from chain.       */
   t->stack_next->stack_prev = t->stack_prev;
-  t->stack_next = Scr.FvwmRoot.stack_prev->stack_next;  /* Set new pointers.       */
+  t->stack_next =
+    Scr.FvwmRoot.stack_prev->stack_next; /* Set new pointers.       */
   t->stack_prev = Scr.FvwmRoot.stack_prev;
-  Scr.FvwmRoot.stack_prev->stack_next = t;              /* Insert at end of chain. */
+  Scr.FvwmRoot.stack_prev->stack_next = t; /* Insert at end of chain. */
   Scr.FvwmRoot.stack_prev = t;
 }
 
-
 void HandleHardFocus(FvwmWindow *t)
 {
-  int x,y;
+  int x, y;
 
   FocusOnNextTimeStamp = t;
   Scr.Focus = NULL;
   /* Do something to guarantee a new time stamp! */
-  XQueryPointer( dpy, Scr.Root, &JunkRoot, &JunkChild,
-		&JunkX, &JunkY, &x, &y, &JunkMask);
+  XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &JunkX, &JunkY,
+                &x, &y, &JunkMask);
   GrabEm(WAIT);
   XWarpPointer(dpy, Scr.Root, Scr.Root, 0, 0, Scr.MyDisplayWidth,
-	       Scr.MyDisplayHeight,
-	       x + 2,y+2);
-  XSync(dpy,0);
+               Scr.MyDisplayHeight, x + 2, y + 2);
+  XSync(dpy, 0);
   XWarpPointer(dpy, Scr.Root, Scr.Root, 0, 0, Scr.MyDisplayWidth,
-	       Scr.MyDisplayHeight,
-	       x ,y);
+               Scr.MyDisplayHeight, x, y);
   UngrabEm();
 }
-
 
 /*
 ** fvwm_msg: used to send output from fvwm to files and or stderr/stdout
@@ -1115,42 +1215,43 @@ void fvwm_msg(int type, const char *id, const char *msg, ...)
   char *typestr;
   va_list args1, args2;
 
-  switch(type)
+  switch (type)
   {
-    case DBG:
+  case DBG:
 #if 0
       if (!debugging)
         return;
 #endif /* 0 */
-      typestr="<<DEBUG>>";
-      break;
-    case ERR:
-      typestr="<<ERROR>>";
-      break;
-    case WARN:
-      typestr="<<WARNING>>";
-      break;
-    case INFO:
-    default:
-      typestr="";
-      break;
+    typestr = "<<DEBUG>>";
+    break;
+  case ERR:
+    typestr = "<<ERROR>>";
+    break;
+  case WARN:
+    typestr = "<<WARNING>>";
+    break;
+  case INFO:
+  default:
+    typestr = "";
+    break;
   }
 
-  va_start(args1,msg);
-  va_copy(args2,args1);
+  va_start(args1, msg);
+  va_copy(args2, args1);
 
-  fprintf(stderr,"[FVWM][%s]: %s ",id,typestr);
+  fprintf(stderr, "[FVWM][%s]: %s ", id, typestr);
   vfprintf(stderr, msg, args1);
-  fprintf(stderr,"\n");
+  fprintf(stderr, "\n");
 
   if (type == ERR)
   {
-    char tmp[1024]; /* I hate to use a fixed length but this will do for now */
-    snprintf(tmp, sizeof(tmp), "[FVWM][%s]: %s ",id,typestr);
-    vsnprintf(tmp+strlen(tmp), sizeof(tmp)-strlen(tmp), msg, args2);
-    tmp[strlen(tmp)+1]='\0';
-    tmp[strlen(tmp)]='\n';
-    BroadcastName(M_ERROR,0,0,0,tmp);
+    char tmp
+      [1024]; /* I hate to use a fixed length but this will do for now */
+    snprintf(tmp, sizeof(tmp), "[FVWM][%s]: %s ", id, typestr);
+    vsnprintf(tmp + strlen(tmp), sizeof(tmp) - strlen(tmp), msg, args2);
+    tmp[strlen(tmp) + 1] = '\0';
+    tmp[strlen(tmp)] = '\n';
+    BroadcastName(M_ERROR, 0, 0, 0, tmp);
   }
 
   va_end(args1);
@@ -1164,19 +1265,19 @@ void fvwm_msg(int type, const char *id, const char *msg, ...)
  * Note that this presently only works if the current
  * window is not click_to_focus;  I think that
  * that behaviour is correct and desirable. --11/08/97 gjb */
-void
-CoerceEnterNotifyOnCurrentWindow()
+void CoerceEnterNotifyOnCurrentWindow()
 {
   extern FvwmWindow *Tmp_win; /* from events.c */
   Window child, root;
   int root_x, root_y;
   int win_x, win_y;
-  Bool f = XQueryPointer(dpy, Scr.Root, &root,
-                         &child, &root_x, &root_y, &win_x, &win_y, &JunkMask);
-  if (f && child != None) {
+  Bool f = XQueryPointer(dpy, Scr.Root, &root, &child, &root_x, &root_y,
+                         &win_x, &win_y, &JunkMask);
+  if (f && child != None)
+  {
     Event.xany.window = child;
-    if (XFindContext(dpy, child, FvwmContext, (caddr_t *) &Tmp_win) ==
-XCNOENT)
+    if (XFindContext(dpy, child, FvwmContext, (caddr_t *)&Tmp_win) ==
+        XCNOENT)
       Tmp_win = NULL;
     HandleEnterNotify();
     Tmp_win = None;

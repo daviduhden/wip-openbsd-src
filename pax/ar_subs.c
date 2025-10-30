@@ -34,18 +34,18 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 static void wr_archive(ARCHD *, int is_app);
 static int get_arc(void);
@@ -57,8 +57,8 @@ extern sigset_t s_mask;
  * the user: list, append, read ...
  */
 
-static char hdbuf[BLKMULT];		/* space for archive header on read */
-u_long flcnt;				/* number of files processed */
+static char hdbuf[BLKMULT]; /* space for archive header on read */
+u_long flcnt;               /* number of files processed */
 
 /*
  * list()
@@ -66,148 +66,155 @@ u_long flcnt;				/* number of files processed */
  *	(no pattern matches all).
  */
 
-void
-list(void)
+void list(void)
 {
-	ARCHD *arcn;
-	int res;
-	ARCHD archd = {0};
-	time_t now;
+  ARCHD *arcn;
+  int res;
+  ARCHD archd = {0};
+  time_t now;
 
-	arcn = &archd;
-	/*
+  arcn = &archd;
+  /*
 	 * figure out archive type; pass any format specific options to the
 	 * archive option processing routine; call the format init routine. We
 	 * also save current time for ls_list() so we do not make a system
 	 * call for each file we need to print. If verbose (vflag) start up
 	 * the name and group caches.
 	 */
-	if ((get_arc() < 0) || ((*frmt->options)() < 0) ||
-	    ((*frmt->st_rd)() < 0))
-		return;
+  if ((get_arc() < 0) || ((*frmt->options)() < 0) ||
+      ((*frmt->st_rd)() < 0))
+    return;
 
-	now = time(NULL);
+  now = time(NULL);
 
-	/*
+  /*
 	 * step through the archive until the format says it is done
 	 */
-	while (next_head(arcn) == 0) {
-		/* Skip archive members rejected by invalid= policy. */
-		if (arcn->invalid == PAX_INVALID_SKIP) {
-			if (flcnt > 0)
-				--flcnt;
-			if (rd_skip(arcn->skip + arcn->pad) == 1)
-				break;
-			continue;
-		}
-		if (arcn->type == PAX_GLL || arcn->type == PAX_GLF) {
-			/*
+  while (next_head(arcn) == 0)
+  {
+    /* Skip archive members rejected by invalid= policy. */
+    if (arcn->invalid == PAX_INVALID_SKIP)
+    {
+      if (flcnt > 0)
+        --flcnt;
+      if (rd_skip(arcn->skip + arcn->pad) == 1)
+        break;
+      continue;
+    }
+    if (arcn->type == PAX_GLL || arcn->type == PAX_GLF)
+    {
+      /*
 			 * we need to read, to get the real filename
 			 */
-			off_t cnt;
-			if (!rd_wrfile(arcn, arcn->type == PAX_GLF
-			    ? -1 : -2, &cnt))
-				(void)rd_skip(cnt + arcn->pad);
-			continue;
-		}
+      off_t cnt;
+      if (!rd_wrfile(arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
+        (void)rd_skip(cnt + arcn->pad);
+      continue;
+    }
 
-		/*
+    /*
 		 * check for pattern, and user specified options match.
 		 * When all patterns are matched we are done.
 		 */
-		if ((res = pat_match(arcn)) < 0)
-			break;
+    if ((res = pat_match(arcn)) < 0)
+      break;
 
-		if ((res == 0) && (sel_chk(arcn) == 0)) {
-			/*
+    if ((res == 0) && (sel_chk(arcn) == 0))
+    {
+      /*
 			 * pattern resulted in a selected file
 			 */
-			if (pat_sel(arcn) < 0)
-				break;
+      if (pat_sel(arcn) < 0)
+        break;
 
-			/*
+      /*
 			 * modify the name as requested by the user if name
 			 * survives modification, do a listing of the file
 			 */
-			if ((res = mod_name(arcn)) < 0)
-				break;
-			if (res == 0)
-				ls_list(arcn, now, stdout);
-		}
+      if ((res = mod_name(arcn)) < 0)
+        break;
+      if (res == 0)
+        ls_list(arcn, now, stdout);
+    }
 
-		/*
+    /*
 		 * skip to next archive format header using values calculated
 		 * by the format header read routine
 		 */
-		if (rd_skip(arcn->skip + arcn->pad) == 1)
-			break;
-	}
+    if (rd_skip(arcn->skip + arcn->pad) == 1)
+      break;
+  }
 
-	/*
+  /*
 	 * all done, let format have a chance to cleanup, and make sure that
 	 * the patterns supplied by the user were all matched
 	 */
-	(void)(*frmt->end_rd)();
-	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
-	ar_close(0);
-	pat_chk();
+  (void)(*frmt->end_rd)();
+  (void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
+  ar_close(0);
+  pat_chk();
 }
 
-static int
-cmp_file_times(int mtime_flag, int ctime_flag, ARCHD *arcn, const char *path)
+static int cmp_file_times(int mtime_flag, int ctime_flag, ARCHD *arcn,
+                          const char *path)
 {
-	struct stat sb;
-	long res;
+  struct stat sb;
+  long res;
 
-	if (path == NULL)
-		path = arcn->name;
-	if (lstat(path, &sb) != 0)
-		return (0);
+  if (path == NULL)
+    path = arcn->name;
+  if (lstat(path, &sb) != 0)
+    return (0);
 
-	/*
+  /*
 	 * The target (sb) mtime might be rounded down due to the limitations
 	 * of the FS it's on.  If it's strictly greater or we don't care about
 	 * mtime, then precision doesn't matter, so check those cases first.
 	 */
-	if (ctime_flag && mtime_flag) {
-		if (timespeccmp(&arcn->sb.st_mtim, &sb.st_mtim, <=))
-			return timespeccmp(&arcn->sb.st_ctim, &sb.st_ctim, <=);
-		if (!timespeccmp(&arcn->sb.st_ctim, &sb.st_ctim, <=))
-			return 0;
-		/* <= ctim, but >= mtim */
-	} else if (ctime_flag)
-		return timespeccmp(&arcn->sb.st_ctim, &sb.st_ctim, <=);
-	else if (timespeccmp(&arcn->sb.st_mtim, &sb.st_mtim, <=))
-		return 1;
+  if (ctime_flag && mtime_flag)
+  {
+    if (timespeccmp(&arcn->sb.st_mtim, &sb.st_mtim, <=))
+      return timespeccmp(&arcn->sb.st_ctim, &sb.st_ctim, <=);
+    if (!timespeccmp(&arcn->sb.st_ctim, &sb.st_ctim, <=))
+      return 0;
+    /* <= ctim, but >= mtim */
+  }
+  else if (ctime_flag)
+    return timespeccmp(&arcn->sb.st_ctim, &sb.st_ctim, <=);
+  else if (timespeccmp(&arcn->sb.st_mtim, &sb.st_mtim, <=))
+    return 1;
 
-	/*
+  /*
 	 * If we got here then the target arcn > sb for mtime *and* that's
 	 * the deciding factor.  Check whether they're equal after rounding
 	 * down the arcn mtime to the precision of the target path.
 	 */
-	res = pathconfat(AT_FDCWD, path, _PC_TIMESTAMP_RESOLUTION,
-	    AT_SYMLINK_NOFOLLOW);
-	if (res == -1)
-		return 0;
+  res = pathconfat(AT_FDCWD, path, _PC_TIMESTAMP_RESOLUTION,
+                   AT_SYMLINK_NOFOLLOW);
+  if (res == -1)
+    return 0;
 
-	/* nanosecond resolution?  previous comparisons were accurate */
-	if (res == 1)
-		return 0;
+  /* nanosecond resolution?  previous comparisons were accurate */
+  if (res == 1)
+    return 0;
 
-	/* common case: second accuracy */
-	if (res == 1000000000)
-		return arcn->sb.st_mtime <= sb.st_mtime;
+  /* common case: second accuracy */
+  if (res == 1000000000)
+    return arcn->sb.st_mtime <= sb.st_mtime;
 
-	if (res < 1000000000) {
-		struct timespec ts = arcn->sb.st_mtim;
-		ts.tv_nsec = (ts.tv_nsec / res) * res;
-		return timespeccmp(&ts, &sb.st_mtim, <=);
-	} else {
-		/* not a POSIX compliant FS */
-		res /= 1000000000;
-		return ((arcn->sb.st_mtime / res) * res) <= sb.st_mtime;
-		return arcn->sb.st_mtime <= ((sb.st_mtime / res) * res);
-	}
+  if (res < 1000000000)
+  {
+    struct timespec ts = arcn->sb.st_mtim;
+    ts.tv_nsec = (ts.tv_nsec / res) * res;
+    return timespeccmp(&ts, &sb.st_mtim, <=);
+  }
+  else
+  {
+    /* not a POSIX compliant FS */
+    res /= 1000000000;
+    return ((arcn->sb.st_mtime / res) * res) <= sb.st_mtime;
+    return arcn->sb.st_mtime <= ((sb.st_mtime / res) * res);
+  }
 }
 
 /*
@@ -216,77 +223,79 @@ cmp_file_times(int mtime_flag, int ctime_flag, ARCHD *arcn, const char *path)
  *	pattern(s) (no patterns extracts all members)
  */
 
-void
-extract(void)
+void extract(void)
 {
-	ARCHD *arcn;
-	int res;
-	off_t cnt;
-	ARCHD archd = {0};
-	int fd;
-	time_t now;
+  ARCHD *arcn;
+  int res;
+  off_t cnt;
+  ARCHD archd = {0};
+  int fd;
+  time_t now;
 
-	sltab_start();
+  sltab_start();
 
-	arcn = &archd;
-	/*
+  arcn = &archd;
+  /*
 	 * figure out archive type; pass any format specific options to the
 	 * archive option processing routine; call the format init routine;
 	 * start up the directory modification time and access mode database
 	 */
-	if ((get_arc() < 0) || ((*frmt->options)() < 0) ||
-	    ((*frmt->st_rd)() < 0) || (dir_start() < 0))
-		return;
+  if ((get_arc() < 0) || ((*frmt->options)() < 0) ||
+      ((*frmt->st_rd)() < 0) || (dir_start() < 0))
+    return;
 
-	/*
+  /*
 	 * When we are doing interactive rename, we store the mapping of names
 	 * so we can fix up hard links files later in the archive.
 	 */
-	if (iflag && (name_start() < 0))
-		return;
+  if (iflag && (name_start() < 0))
+    return;
 
-	now = time(NULL);
+  now = time(NULL);
 
-	/*
+  /*
 	 * step through each entry on the archive until the format read routine
 	 * says it is done
 	 */
-	while (next_head(arcn) == 0) {
-		/* Honor invalid=bypass by skipping unwanted members outright. */
-		if (arcn->invalid == PAX_INVALID_SKIP) {
-			if (flcnt > 0)
-				--flcnt;
-			if (rd_skip(arcn->skip + arcn->pad) == 1)
-				break;
-			continue;
-		}
-		if (arcn->type == PAX_GLL || arcn->type == PAX_GLF) {
-			/*
+  while (next_head(arcn) == 0)
+  {
+    /* Honor invalid=bypass by skipping unwanted members outright. */
+    if (arcn->invalid == PAX_INVALID_SKIP)
+    {
+      if (flcnt > 0)
+        --flcnt;
+      if (rd_skip(arcn->skip + arcn->pad) == 1)
+        break;
+      continue;
+    }
+    if (arcn->type == PAX_GLL || arcn->type == PAX_GLF)
+    {
+      /*
 			 * we need to read, to get the real filename
 			 */
-			if (!rd_wrfile(arcn, arcn->type == PAX_GLF
-			    ? -1 : -2, &cnt))
-				(void)rd_skip(cnt + arcn->pad);
-			continue;
-		}
+      if (!rd_wrfile(arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
+        (void)rd_skip(cnt + arcn->pad);
+      continue;
+    }
 
-		/*
+    /*
 		 * check for pattern, and user specified options match. When
 		 * all the patterns are matched we are done
 		 */
-		if ((res = pat_match(arcn)) < 0)
-			break;
+    if ((res = pat_match(arcn)) < 0)
+      break;
 
-		if ((res > 0) || (sel_chk(arcn) != 0)) {
-			/*
+    if ((res > 0) || (sel_chk(arcn) != 0))
+    {
+      /*
 			 * file is not selected. skip past any file data and
 			 * padding and go back for the next archive member
 			 */
-			(void)rd_skip(arcn->skip + arcn->pad);
-			continue;
-		}
+      (void)rd_skip(arcn->skip + arcn->pad);
+      continue;
+    }
 
-		/*
+    /*
 		 * with -u or -D only extract when the archive member is newer
 		 * than the file with the same name in the file system (no
 		 * test of being the same type is required).
@@ -296,120 +305,125 @@ extract(void)
 		 * file AFTER the name mod. In honesty the pax spec is probably
 		 * flawed in this respect.
 		 */
-		if ((uflag || Dflag) &&
-		    cmp_file_times(uflag, Dflag, arcn, NULL)) {
-			(void)rd_skip(arcn->skip + arcn->pad);
-			continue;
-		}
+    if ((uflag || Dflag) && cmp_file_times(uflag, Dflag, arcn, NULL))
+    {
+      (void)rd_skip(arcn->skip + arcn->pad);
+      continue;
+    }
 
-		/*
+    /*
 		 * this archive member is now been selected. modify the name.
 		 */
-		if ((pat_sel(arcn) < 0) || ((res = mod_name(arcn)) < 0))
-			break;
-		if (res > 0) {
-			/*
+    if ((pat_sel(arcn) < 0) || ((res = mod_name(arcn)) < 0))
+      break;
+    if (res > 0)
+    {
+      /*
 			 * a bad name mod, skip and purge name from link table
 			 */
-			purg_lnk(arcn);
-			(void)rd_skip(arcn->skip + arcn->pad);
-			continue;
-		}
+      purg_lnk(arcn);
+      (void)rd_skip(arcn->skip + arcn->pad);
+      continue;
+    }
 
-		/*
+    /*
 		 * Non standard -Y and -Z flag. When the existing file is
 		 * same age or newer skip
 		 */
-		if ((Yflag || Zflag) &&
-		    cmp_file_times(Yflag, Zflag, arcn, NULL)) {
-			(void)rd_skip(arcn->skip + arcn->pad);
-			continue;
-		}
+    if ((Yflag || Zflag) && cmp_file_times(Yflag, Zflag, arcn, NULL))
+    {
+      (void)rd_skip(arcn->skip + arcn->pad);
+      continue;
+    }
 
-		if (vflag) {
-			if (vflag > 1)
-				ls_list(arcn, now, listf);
-			else {
-				(void)safe_print(arcn->name, listf);
-				vfpart = 1;
-			}
-		}
+    if (vflag)
+    {
+      if (vflag > 1)
+        ls_list(arcn, now, listf);
+      else
+      {
+        (void)safe_print(arcn->name, listf);
+        vfpart = 1;
+      }
+    }
 
-		/*
+    /*
 		 * if required, chdir around.
 		 */
-		if ((arcn->pat != NULL) && (arcn->pat->chdname != NULL))
-			if (chdir(arcn->pat->chdname) != 0)
-				syswarn(1, errno, "Cannot chdir to %s",
-				    arcn->pat->chdname);
+    if ((arcn->pat != NULL) && (arcn->pat->chdname != NULL))
+      if (chdir(arcn->pat->chdname) != 0)
+        syswarn(1, errno, "Cannot chdir to %s", arcn->pat->chdname);
 
-		/*
+    /*
 		 * all ok, extract this member based on type
 		 */
-		if (!PAX_IS_REG(arcn->type)) {
-			/*
+    if (!PAX_IS_REG(arcn->type))
+    {
+      /*
 			 * process archive members that are not regular files.
 			 * throw out padding and any data that might follow the
 			 * header (as determined by the format).
 			 */
-			if (PAX_IS_HARDLINK(arcn->type))
-				res = lnk_creat(arcn);
-			else
-				res = node_creat(arcn);
+      if (PAX_IS_HARDLINK(arcn->type))
+        res = lnk_creat(arcn);
+      else
+        res = node_creat(arcn);
 
-			(void)rd_skip(arcn->skip + arcn->pad);
-			if (res < 0)
-				purg_lnk(arcn);
+      (void)rd_skip(arcn->skip + arcn->pad);
+      if (res < 0)
+        purg_lnk(arcn);
 
-			if (vflag && vfpart) {
-				(void)putc('\n', listf);
-				vfpart = 0;
-			}
-			goto popd;
-		}
-		/*
+      if (vflag && vfpart)
+      {
+        (void)putc('\n', listf);
+        vfpart = 0;
+      }
+      goto popd;
+    }
+    /*
 		 * we have a file with data here. If we can not create it, skip
 		 * over the data and purge the name from hard link table
 		 */
-		if ((fd = file_creat(arcn)) < 0) {
-			(void)rd_skip(arcn->skip + arcn->pad);
-			purg_lnk(arcn);
-			goto popd;
-		}
-		/*
+    if ((fd = file_creat(arcn)) < 0)
+    {
+      (void)rd_skip(arcn->skip + arcn->pad);
+      purg_lnk(arcn);
+      goto popd;
+    }
+    /*
 		 * extract the file from the archive and skip over padding and
 		 * any unprocessed data
 		 */
-		res = rd_wrfile(arcn, fd, &cnt);
-		file_close(arcn, fd);
-		if (vflag && vfpart) {
-			(void)putc('\n', listf);
-			vfpart = 0;
-		}
-		if (!res)
-			(void)rd_skip(cnt + arcn->pad);
+    res = rd_wrfile(arcn, fd, &cnt);
+    file_close(arcn, fd);
+    if (vflag && vfpart)
+    {
+      (void)putc('\n', listf);
+      vfpart = 0;
+    }
+    if (!res)
+      (void)rd_skip(cnt + arcn->pad);
 
-popd:
-		/*
+  popd:
+    /*
 		 * if required, chdir around.
 		 */
-		if ((arcn->pat != NULL) && (arcn->pat->chdname != NULL))
-			if (fchdir(cwdfd) != 0)
-				syswarn(1, errno,
-				    "Can't fchdir to starting directory");
-	}
+    if ((arcn->pat != NULL) && (arcn->pat->chdname != NULL))
+      if (fchdir(cwdfd) != 0)
+        syswarn(1, errno, "Can't fchdir to starting directory");
+  }
 
-	/*
+  /*
 	 * all done, restore directory modes and times as required; make sure
 	 * all patterns supplied by the user were matched; block off signals
 	 * to avoid chance for multiple entry into the cleanup code.
 	 */
-	(void)(*frmt->end_rd)();
-	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
-	ar_close(0);
-	sltab_process(0);
-	proc_dir(0);
-	pat_chk();
+  (void)(*frmt->end_rd)();
+  (void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
+  ar_close(0);
+  sltab_process(0);
+  proc_dir(0);
+  pat_chk();
 }
 
 /*
@@ -418,157 +432,171 @@ popd:
  *	previously written archive.
  */
 
-static void
-wr_archive(ARCHD *arcn, int is_app)
+static void wr_archive(ARCHD *arcn, int is_app)
 {
-	int res;
-	int hlk;
-	int wr_one;
-	off_t cnt;
-	int (*wrf)(ARCHD *);
-	int fd = -1;
-	time_t now;
+  int res;
+  int hlk;
+  int wr_one;
+  off_t cnt;
+  int (*wrf)(ARCHD *);
+  int fd = -1;
+  time_t now;
 
-	/*
+  /*
 	 * if this format supports hard link storage, start up the database
 	 * that detects them.
 	 */
-	if (((hlk = frmt->hlk) == 1) && (lnk_start() < 0))
-		return;
+  if (((hlk = frmt->hlk) == 1) && (lnk_start() < 0))
+    return;
 
-	/*
+  /*
 	 * if this is not append, and there are no files, we do not write a
 	 * trailer
 	 */
-	wr_one = is_app;
+  wr_one = is_app;
 
-	/*
+  /*
 	 * start up the file traversal code and format specific write
 	 */
-	if (ftree_start() < 0) {
-		if (is_app)
-			goto trailer;
-		return;
-	} else if (((*frmt->st_wr)() < 0))
-		return;
+  if (ftree_start() < 0)
+  {
+    if (is_app)
+      goto trailer;
+    return;
+  }
+  else if (((*frmt->st_wr)() < 0))
+    return;
 
-	wrf = frmt->wr;
+  wrf = frmt->wr;
 
-	/*
+  /*
 	 * When we are doing interactive rename, we store the mapping of names
 	 * so we can fix up hard links files later in the archive.
 	 */
-	if (iflag && (name_start() < 0))
-		return;
+  if (iflag && (name_start() < 0))
+    return;
 
-	now = time(NULL);
+  now = time(NULL);
 
-	/*
+  /*
 	 * while there are files to archive, process them one at at time
 	 */
-	while (next_file(arcn) == 0) {
-		/*
+  while (next_file(arcn) == 0)
+  {
+    /*
 		 * check if this file meets user specified options match.
 		 */
-		if (sel_chk(arcn) != 0)
-			continue;
-		fd = -1;
-		if (uflag) {
-			/*
+    if (sel_chk(arcn) != 0)
+      continue;
+    fd = -1;
+    if (uflag)
+    {
+      /*
 			 * only archive if this file is newer than a file with
 			 * the same name that is already stored on the archive
 			 */
-			if ((res = chk_ftime(arcn)) < 0)
-				break;
-			if (res > 0) {
-				ftree_skipped_newer(arcn);
-				continue;
-			}
-		}
+      if ((res = chk_ftime(arcn)) < 0)
+        break;
+      if (res > 0)
+      {
+        ftree_skipped_newer(arcn);
+        continue;
+      }
+    }
 
-		/*
+    /*
 		 * this file is considered selected now. see if this is a hard
 		 * link to a file already stored
 		 */
-		ftree_sel(arcn);
-		if (hlk && (chk_lnk(arcn) < 0))
-			break;
+    ftree_sel(arcn);
+    if (hlk && (chk_lnk(arcn) < 0))
+      break;
 
-		/*
+    /*
 		 * Modify the name as requested by the user
 		 */
-		if ((res = mod_name(arcn)) < 0) {
-			/*
+    if ((res = mod_name(arcn)) < 0)
+    {
+      /*
 			 * pax finished, purge link table entry and stop
 			 */
-			purg_lnk(arcn);
-			break;
-		} else if (res > 0) {
-			/*
+      purg_lnk(arcn);
+      break;
+    }
+    else if (res > 0)
+    {
+      /*
 			 * skipping file, purge link table entry
 			 */
-			purg_lnk(arcn);
-			continue;
-		}
+      purg_lnk(arcn);
+      continue;
+    }
 
-		if (PAX_IS_REG(arcn->type) || (arcn->type == PAX_HRG)) {
-			/*
+    if (PAX_IS_REG(arcn->type) || (arcn->type == PAX_HRG))
+    {
+      /*
 			 * we will have to read this file. by opening it now we
 			 * can avoid writing a header to the archive for a file
 			 * we were later unable to read (we also purge it from
 			 * the link table).
 			 */
-			if ((fd = open(arcn->org_name, O_RDONLY)) < 0) {
-				syswarn(1,errno, "Unable to open %s to read",
-					arcn->org_name);
-				purg_lnk(arcn);
-				continue;
-			}
-		}
+      if ((fd = open(arcn->org_name, O_RDONLY)) < 0)
+      {
+        syswarn(1, errno, "Unable to open %s to read", arcn->org_name);
+        purg_lnk(arcn);
+        continue;
+      }
+    }
 
-		if (docrc && (set_crc(arcn, fd) < 0)) {
-			/*
+    if (docrc && (set_crc(arcn, fd) < 0))
+    {
+      /*
 			 * unable to obtain the crc we need, close the file,
 			 * purge link table entry
 			 */
-			rdfile_close(arcn, &fd);
-			purg_lnk(arcn);
-			continue;
-		}
+      rdfile_close(arcn, &fd);
+      purg_lnk(arcn);
+      continue;
+    }
 
-		if (vflag) {
-			if (vflag > 1)
-				ls_list(arcn, now, listf);
-			else {
-				(void)safe_print(arcn->name, listf);
-				vfpart = 1;
-			}
-		}
-		++flcnt;
+    if (vflag)
+    {
+      if (vflag > 1)
+        ls_list(arcn, now, listf);
+      else
+      {
+        (void)safe_print(arcn->name, listf);
+        vfpart = 1;
+      }
+    }
+    ++flcnt;
 
-		/*
+    /*
 		 * looks safe to store the file, have the format specific
 		 * routine write routine store the file header on the archive
 		 */
-		if ((res = (*wrf)(arcn)) < 0) {
-			rdfile_close(arcn, &fd);
-			break;
-		}
-		wr_one = 1;
-		if (res > 0) {
-			/*
+    if ((res = (*wrf)(arcn)) < 0)
+    {
+      rdfile_close(arcn, &fd);
+      break;
+    }
+    wr_one = 1;
+    if (res > 0)
+    {
+      /*
 			 * format write says no file data needs to be stored
 			 * so we are done messing with this file
 			 */
-			if (vflag && vfpart) {
-				(void)putc('\n', listf);
-				vfpart = 0;
-			}
-			rdfile_close(arcn, &fd);
-			continue;
-		}
+      if (vflag && vfpart)
+      {
+        (void)putc('\n', listf);
+        vfpart = 0;
+      }
+      rdfile_close(arcn, &fd);
+      continue;
+    }
 
-		/*
+    /*
 		 * Add file data to the archive, quit on write error. if we
 		 * cannot write the entire file contents to the archive we
 		 * must pad the archive to replace the missing file data
@@ -576,39 +604,41 @@ wr_archive(ARCHD *arcn, int is_app)
 		 * which FOLLOWS this one will not be where we expect it to
 		 * be).
 		 */
-		res = wr_rdfile(arcn, fd, &cnt);
-		rdfile_close(arcn, &fd);
-		if (vflag && vfpart) {
-			(void)putc('\n', listf);
-			vfpart = 0;
-		}
-		if (res < 0)
-			break;
+    res = wr_rdfile(arcn, fd, &cnt);
+    rdfile_close(arcn, &fd);
+    if (vflag && vfpart)
+    {
+      (void)putc('\n', listf);
+      vfpart = 0;
+    }
+    if (res < 0)
+      break;
 
-		/*
+    /*
 		 * pad as required, cnt is number of bytes not written
 		 */
-		if (((cnt > 0) && (wr_skip(cnt) < 0)) ||
-		    ((arcn->pad > 0) && (wr_skip(arcn->pad) < 0)))
-			break;
-	}
+    if (((cnt > 0) && (wr_skip(cnt) < 0)) ||
+        ((arcn->pad > 0) && (wr_skip(arcn->pad) < 0)))
+      break;
+  }
 
 trailer:
-	/*
+  /*
 	 * tell format to write trailer; pad to block boundary; reset directory
 	 * mode/access times, and check if all patterns supplied by the user
 	 * were matched. block off signals to avoid chance for multiple entry
 	 * into the cleanup code
 	 */
-	if (wr_one) {
-		(*frmt->end_wr)();
-		wr_fin();
-	}
-	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
-	ar_close(0);
-	if (tflag)
-		proc_dir(0);
-	ftree_chk();
+  if (wr_one)
+  {
+    (*frmt->end_wr)();
+    wr_fin();
+  }
+  (void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
+  ar_close(0);
+  if (tflag)
+    proc_dir(0);
+  ftree_chk();
 }
 
 /*
@@ -633,45 +663,45 @@ trailer:
  *	over write existing files that it creates.
  */
 
-void
-append(void)
+void append(void)
 {
-	ARCHD *arcn;
-	int res;
-	ARCHD archd = {0};
-	FSUB *orgfrmt;
-	int udev;
-	off_t tlen;
+  ARCHD *arcn;
+  int res;
+  ARCHD archd = {0};
+  FSUB *orgfrmt;
+  int udev;
+  off_t tlen;
 
-	arcn = &archd;
-	orgfrmt = frmt;
+  arcn = &archd;
+  orgfrmt = frmt;
 
-	/*
+  /*
 	 * Do not allow an append operation if the actual archive is of a
 	 * different format than the user specified format.
 	 */
-	if (get_arc() < 0)
-		return;
-	if ((orgfrmt != NULL) && (orgfrmt != frmt)) {
-		paxwarn(1, "Cannot mix current archive format %s with %s",
-		    frmt->name, orgfrmt->name);
-		return;
-	}
+  if (get_arc() < 0)
+    return;
+  if ((orgfrmt != NULL) && (orgfrmt != frmt))
+  {
+    paxwarn(1, "Cannot mix current archive format %s with %s",
+            frmt->name, orgfrmt->name);
+    return;
+  }
 
-	/*
+  /*
 	 * pass the format any options and start up format
 	 */
-	if (((*frmt->options)() < 0) || ((*frmt->st_rd)() < 0))
-		return;
+  if (((*frmt->options)() < 0) || ((*frmt->st_rd)() < 0))
+    return;
 
-	/*
+  /*
 	 * if we only are adding members that are newer, we need to save the
 	 * mod times for all files we see.
 	 */
-	if (uflag && (ftime_start() < 0))
-		return;
+  if (uflag && (ftime_start() < 0))
+    return;
 
-	/*
+  /*
 	 * some archive formats encode hard links by recording the device and
 	 * file serial number (inode) but copy the file anyway (multiple times)
 	 * to the archive. When we append, we run the risk that newly added
@@ -685,91 +715,98 @@ append(void)
 	 * when the inode number is larger than storage space in the archive
 	 * header. See the remap routines for more details.
 	 */
-	if ((udev = frmt->udev) && (dev_start() < 0))
-		return;
+  if ((udev = frmt->udev) && (dev_start() < 0))
+    return;
 
-	/*
+  /*
 	 * reading the archive may take a long time. If verbose tell the user
 	 */
-	if (vflag) {
-		(void)fprintf(listf,
-			"%s: Reading archive to position at the end...", argv0);
-		vfpart = 1;
-	}
+  if (vflag)
+  {
+    (void)fprintf(
+      listf, "%s: Reading archive to position at the end...", argv0);
+    vfpart = 1;
+  }
 
-	/*
+  /*
 	 * step through the archive until the format says it is done
 	 */
-	while (next_head(arcn) == 0) {
-		/* Entries flagged for bypass are consumed without further work. */
-		if (arcn->invalid == PAX_INVALID_SKIP) {
-			if (flcnt > 0)
-				--flcnt;
-			if (rd_skip(arcn->skip + arcn->pad) == 1)
-				break;
-			continue;
-		}
-		/*
+  while (next_head(arcn) == 0)
+  {
+    /* Entries flagged for bypass are consumed without further work. */
+    if (arcn->invalid == PAX_INVALID_SKIP)
+    {
+      if (flcnt > 0)
+        --flcnt;
+      if (rd_skip(arcn->skip + arcn->pad) == 1)
+        break;
+      continue;
+    }
+    /*
 		 * check if this file meets user specified options.
 		 */
-		if (sel_chk(arcn) != 0) {
-			if (rd_skip(arcn->skip + arcn->pad) == 1)
-				break;
-			continue;
-		}
+    if (sel_chk(arcn) != 0)
+    {
+      if (rd_skip(arcn->skip + arcn->pad) == 1)
+        break;
+      continue;
+    }
 
-		if (uflag) {
-			/*
+    if (uflag)
+    {
+      /*
 			 * see if this is the newest version of this file has
 			 * already been seen, if so skip.
 			 */
-			if ((res = chk_ftime(arcn)) < 0)
-				break;
-			if (res > 0) {
-				if (rd_skip(arcn->skip + arcn->pad) == 1)
-					break;
-				continue;
-			}
-		}
+      if ((res = chk_ftime(arcn)) < 0)
+        break;
+      if (res > 0)
+      {
+        if (rd_skip(arcn->skip + arcn->pad) == 1)
+          break;
+        continue;
+      }
+    }
 
-		/*
+    /*
 		 * Store this device number. Device numbers seen during the
 		 * read phase of append will cause newly appended files with a
 		 * device number seen in the old part of the archive to be
 		 * remapped to an unused device number.
 		 */
-		if ((udev && (add_dev(arcn) < 0)) ||
-		    (rd_skip(arcn->skip + arcn->pad) == 1))
-			break;
-	}
+    if ((udev && (add_dev(arcn) < 0)) ||
+        (rd_skip(arcn->skip + arcn->pad) == 1))
+      break;
+  }
 
-	/*
+  /*
 	 * done, finish up read and get the number of bytes to back up so we
 	 * can add new members. The format might have used the hard link table,
 	 * purge it.
 	 */
-	tlen = (*frmt->end_rd)();
-	lnk_end();
+  tlen = (*frmt->end_rd)();
+  lnk_end();
 
-	/*
+  /*
 	 * try to position for write, if this fails quit. if any error occurs,
 	 * we will refuse to write
 	 */
-	if (appnd_start(tlen) < 0)
-		return;
+  if (appnd_start(tlen) < 0)
+    return;
 
-	/*
+  /*
 	 * tell the user we are done reading.
 	 */
-	if (vflag && vfpart) {
-		(void)fputs("done.\n", listf);
-		vfpart = 0;
-	}
+  if (vflag && vfpart)
+  {
+    (void)fputs("done.\n", listf);
+    vfpart = 0;
+  }
 
-	/*
+  /*
 	 * go to the writing phase to add the new members
 	 */
-	wr_archive(arcn, 1);
+  wr_archive(arcn, 1);
 }
 
 /*
@@ -777,22 +814,21 @@ append(void)
  *	write a new archive
  */
 
-void
-archive(void)
+void archive(void)
 {
-	ARCHD archd = {0};
+  ARCHD archd = {0};
 
-	/*
+  /*
 	 * if we only are adding members that are newer, we need to save the
 	 * mod times for all files; set up for writing; pass the format any
 	 * options write the archive
 	 */
-	if ((uflag && (ftime_start() < 0)) || (wr_start() < 0))
-		return;
-	if ((*frmt->options)() < 0)
-		return;
+  if ((uflag && (ftime_start() < 0)) || (wr_start() < 0))
+    return;
+  if ((*frmt->options)() < 0)
+    return;
 
-	wr_archive(&archd, 0);
+  wr_archive(&archd, 0);
 }
 
 /*
@@ -803,83 +839,86 @@ archive(void)
  *	(except the files are forced to be under the destination directory).
  */
 
-void
-copy(void)
+void copy(void)
 {
-	ARCHD *arcn;
-	int res;
-	int fddest;
-	char *dest_pt;
-	size_t dlen;
-	size_t drem;
-	int fdsrc = -1;
-	struct stat sb;
-	ARCHD archd = {0};
-	char dirbuf[PAXPATHLEN+1];
+  ARCHD *arcn;
+  int res;
+  int fddest;
+  char *dest_pt;
+  size_t dlen;
+  size_t drem;
+  int fdsrc = -1;
+  struct stat sb;
+  ARCHD archd = {0};
+  char dirbuf[PAXPATHLEN + 1];
 
-	sltab_start();
+  sltab_start();
 
-	arcn = &archd;
-	/*
+  arcn = &archd;
+  /*
 	 * set up the destination dir path and make sure it is a directory. We
 	 * make sure we have a trailing / on the destination
 	 */
-	dlen = strlcpy(dirbuf, dirptr, sizeof(dirbuf));
-	if (dlen >= sizeof(dirbuf) ||
-	    (dlen == sizeof(dirbuf) - 1 && dirbuf[dlen - 1] != '/')) {
-		paxwarn(1, "directory name is too long %s", dirptr);
-		return;
-	}
-	dest_pt = dirbuf + dlen;
-	if (*(dest_pt-1) != '/') {
-		*dest_pt++ = '/';
-		*dest_pt = '\0';
-		++dlen;
-	}
-	drem = PAXPATHLEN - dlen;
+  dlen = strlcpy(dirbuf, dirptr, sizeof(dirbuf));
+  if (dlen >= sizeof(dirbuf) ||
+      (dlen == sizeof(dirbuf) - 1 && dirbuf[dlen - 1] != '/'))
+  {
+    paxwarn(1, "directory name is too long %s", dirptr);
+    return;
+  }
+  dest_pt = dirbuf + dlen;
+  if (*(dest_pt - 1) != '/')
+  {
+    *dest_pt++ = '/';
+    *dest_pt = '\0';
+    ++dlen;
+  }
+  drem = PAXPATHLEN - dlen;
 
-	if (stat(dirptr, &sb) == -1) {
-		syswarn(1, errno, "Cannot access destination directory %s",
-			dirptr);
-		return;
-	}
-	if (!S_ISDIR(sb.st_mode)) {
-		paxwarn(1, "Destination is not a directory %s", dirptr);
-		return;
-	}
+  if (stat(dirptr, &sb) == -1)
+  {
+    syswarn(1, errno, "Cannot access destination directory %s", dirptr);
+    return;
+  }
+  if (!S_ISDIR(sb.st_mode))
+  {
+    paxwarn(1, "Destination is not a directory %s", dirptr);
+    return;
+  }
 
-	/*
+  /*
 	 * start up the hard link table; file traversal routines and the
 	 * modification time and access mode database
 	 */
-	if ((lnk_start() < 0) || (ftree_start() < 0) || (dir_start() < 0))
-		return;
+  if ((lnk_start() < 0) || (ftree_start() < 0) || (dir_start() < 0))
+    return;
 
-	/*
+  /*
 	 * When we are doing interactive rename, we store the mapping of names
 	 * so we can fix up hard links files later in the archive.
 	 */
-	if (iflag && (name_start() < 0))
-		return;
+  if (iflag && (name_start() < 0))
+    return;
 
-	/*
+  /*
 	 * set up to cp file trees
 	 */
-	cp_start();
+  cp_start();
 
-	/*
+  /*
 	 * while there are files to archive, process them
 	 */
-	while (next_file(arcn) == 0) {
-		fdsrc = -1;
+  while (next_file(arcn) == 0)
+  {
+    fdsrc = -1;
 
-		/*
+    /*
 		 * check if this file meets user specified options
 		 */
-		if (sel_chk(arcn) != 0)
-			continue;
+    if (sel_chk(arcn) != 0)
+      continue;
 
-		/*
+    /*
 		 * if there is already a file in the destination directory with
 		 * the same name and it is newer, skip the one stored on the
 		 * archive.
@@ -889,133 +928,142 @@ copy(void)
 		 * the name mod. In honesty the pax spec is probably flawed in
 		 * this respect
 		 */
-		if (uflag || Dflag) {
-			/*
+    if (uflag || Dflag)
+    {
+      /*
 			 * create the destination name
 			 */
-			if (strlcpy(dest_pt, arcn->name + (*arcn->name == '/'),
-			    drem + 1) > drem) {
-				paxwarn(1, "Destination pathname too long %s",
-					arcn->name);
-				continue;
-			}
+      if (strlcpy(dest_pt, arcn->name + (*arcn->name == '/'),
+                  drem + 1) > drem)
+      {
+        paxwarn(1, "Destination pathname too long %s", arcn->name);
+        continue;
+      }
 
-			/*
+      /*
 			 * if existing file is same age or newer skip
 			 */
-			if (cmp_file_times(uflag, Dflag, arcn, dirbuf)) {
-				*dest_pt = '\0';
-				ftree_skipped_newer(arcn);
-				continue;
-			}
-			*dest_pt = '\0';
-		}
+      if (cmp_file_times(uflag, Dflag, arcn, dirbuf))
+      {
+        *dest_pt = '\0';
+        ftree_skipped_newer(arcn);
+        continue;
+      }
+      *dest_pt = '\0';
+    }
 
-		/*
+    /*
 		 * this file is considered selected. See if this is a hard link
 		 * to a previous file; modify the name as requested by the
 		 * user; set the final destination.
 		 */
-		ftree_sel(arcn);
-		if ((chk_lnk(arcn) < 0) || ((res = mod_name(arcn)) < 0))
-			break;
-		if ((res > 0) || (set_dest(arcn, dirbuf, dlen) < 0)) {
-			/*
+    ftree_sel(arcn);
+    if ((chk_lnk(arcn) < 0) || ((res = mod_name(arcn)) < 0))
+      break;
+    if ((res > 0) || (set_dest(arcn, dirbuf, dlen) < 0))
+    {
+      /*
 			 * skip file, purge from link table
 			 */
-			purg_lnk(arcn);
-			continue;
-		}
+      purg_lnk(arcn);
+      continue;
+    }
 
-		/*
+    /*
 		 * Non standard -Y and -Z flag. When the existing file is
 		 * same age or newer skip
 		 */
-		if ((Yflag || Zflag) &&
-		    cmp_file_times(Yflag, Zflag, arcn, NULL))
-			continue;
+    if ((Yflag || Zflag) && cmp_file_times(Yflag, Zflag, arcn, NULL))
+      continue;
 
-		if (vflag) {
-			(void)safe_print(arcn->name, listf);
-			vfpart = 1;
-		}
-		++flcnt;
+    if (vflag)
+    {
+      (void)safe_print(arcn->name, listf);
+      vfpart = 1;
+    }
+    ++flcnt;
 
-		/*
+    /*
 		 * try to create a hard link to the src file if requested
 		 * but make sure we are not trying to overwrite ourselves.
 		 */
-		if (lflag)
-			res = cross_lnk(arcn);
-		else
-			res = chk_same(arcn);
-		if (res <= 0) {
-			if (vflag && vfpart) {
-				(void)putc('\n', listf);
-				vfpart = 0;
-			}
-			continue;
-		}
+    if (lflag)
+      res = cross_lnk(arcn);
+    else
+      res = chk_same(arcn);
+    if (res <= 0)
+    {
+      if (vflag && vfpart)
+      {
+        (void)putc('\n', listf);
+        vfpart = 0;
+      }
+      continue;
+    }
 
-		/*
+    /*
 		 * have to create a new file
 		 */
-		if (!PAX_IS_REG(arcn->type)) {
-			/*
+    if (!PAX_IS_REG(arcn->type))
+    {
+      /*
 			 * create a link or special file
 			 */
-			if (PAX_IS_HARDLINK(arcn->type))
-				res = lnk_creat(arcn);
-			else
-				res = node_creat(arcn);
-			if (res < 0)
-				purg_lnk(arcn);
-			if (vflag && vfpart) {
-				(void)putc('\n', listf);
-				vfpart = 0;
-			}
-			continue;
-		}
+      if (PAX_IS_HARDLINK(arcn->type))
+        res = lnk_creat(arcn);
+      else
+        res = node_creat(arcn);
+      if (res < 0)
+        purg_lnk(arcn);
+      if (vflag && vfpart)
+      {
+        (void)putc('\n', listf);
+        vfpart = 0;
+      }
+      continue;
+    }
 
-		/*
+    /*
 		 * have to copy a regular file to the destination directory.
 		 * first open source file and then create the destination file
 		 */
-		if ((fdsrc = open(arcn->org_name, O_RDONLY)) < 0) {
-			syswarn(1, errno, "Unable to open %s to read",
-			    arcn->org_name);
-			purg_lnk(arcn);
-			continue;
-		}
-		if ((fddest = file_creat(arcn)) < 0) {
-			rdfile_close(arcn, &fdsrc);
-			purg_lnk(arcn);
-			continue;
-		}
+    if ((fdsrc = open(arcn->org_name, O_RDONLY)) < 0)
+    {
+      syswarn(1, errno, "Unable to open %s to read", arcn->org_name);
+      purg_lnk(arcn);
+      continue;
+    }
+    if ((fddest = file_creat(arcn)) < 0)
+    {
+      rdfile_close(arcn, &fdsrc);
+      purg_lnk(arcn);
+      continue;
+    }
 
-		/*
+    /*
 		 * copy source file data to the destination file
 		 */
-		cp_file(arcn, fdsrc, fddest);
-		file_close(arcn, fddest);
-		rdfile_close(arcn, &fdsrc);
+    cp_file(arcn, fdsrc, fddest);
+    file_close(arcn, fddest);
+    rdfile_close(arcn, &fdsrc);
 
-		if (vflag && vfpart) {
-			(void)putc('\n', listf);
-			vfpart = 0;
-		}
-	}
+    if (vflag && vfpart)
+    {
+      (void)putc('\n', listf);
+      vfpart = 0;
+    }
+  }
 
-	/*
+  /*
 	 * restore directory modes and times as required; make sure all
 	 * patterns were selected block off signals to avoid chance for
 	 * multiple entry into the cleanup code.
 	 */
-	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
-	ar_close(0);
-	sltab_process(0);
-	proc_dir(0);
-	ftree_chk();
+  (void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
+  ar_close(0);
+  sltab_process(0);
+  proc_dir(0);
+  ftree_chk();
 }
 
 /*
@@ -1037,79 +1085,82 @@ copy(void)
  *	the specs for rd_wrbuf() for more details)
  */
 
-static int
-next_head(ARCHD *arcn)
+static int next_head(ARCHD *arcn)
 {
-	int ret;
-	char *hdend;
-	int res;
-	int shftsz;
-	int hsz;
-	int in_resync = 0;		/* set when we are in resync mode */
-	int cnt = 0;			/* counter for trailer function */
-	int first = 1;			/* on 1st read, EOF isn't premature. */
+  int ret;
+  char *hdend;
+  int res;
+  int shftsz;
+  int hsz;
+  int in_resync = 0; /* set when we are in resync mode */
+  int cnt = 0;       /* counter for trailer function */
+  int first = 1;     /* on 1st read, EOF isn't premature. */
 
-	/*
+  /*
 	 * Clear out any per-file extended header state left from the
 	 * previous archive member before we reuse the structure.
 	 */
-	pax_kv_free(&arcn->xattr);
-	arcn->gattr = NULL;
-	arcn->invalid = PAX_INVALID_NONE;
+  pax_kv_free(&arcn->xattr);
+  arcn->gattr = NULL;
+  arcn->invalid = PAX_INVALID_NONE;
 
-	/*
+  /*
 	 * set up initial conditions, we want a whole frmt->hsz block as we
 	 * have no data yet.
 	 */
-	res = hsz = frmt->hsz;
-	hdend = hdbuf;
-	shftsz = hsz - 1;
-	for (;;) {
-		/*
+  res = hsz = frmt->hsz;
+  hdend = hdbuf;
+  shftsz = hsz - 1;
+  for (;;)
+  {
+    /*
 		 * keep looping until we get a contiguous FULL buffer
 		 * (frmt->hsz is the proper size)
 		 */
-		for (;;) {
-			if ((ret = rd_wrbuf(hdend, res)) == res)
-				break;
+    for (;;)
+    {
+      if ((ret = rd_wrbuf(hdend, res)) == res)
+        break;
 
-			/*
+      /*
 			 * If we read 0 bytes (EOF) from an archive when we
 			 * expect to find a header, we have stepped upon
 			 * an archive without the customary block of zeroes
 			 * end marker.  It's just stupid to error out on
 			 * them, so exit gracefully.
 			 */
-			if (first && ret == 0)
-				return(-1);
-			first = 0;
+      if (first && ret == 0)
+        return (-1);
+      first = 0;
 
-			/*
+      /*
 			 * some kind of archive read problem, try to resync the
 			 * storage device, better give the user the bad news.
 			 */
-			if ((ret == 0) || (rd_sync() < 0)) {
-				paxwarn(1,"Premature end of file on archive read");
-				return(-1);
-			}
-			if (!in_resync) {
-				if (act == APPND) {
-					paxwarn(1,
-					  "Archive I/O error, cannot continue");
-					return(-1);
-				}
-				paxwarn(1,"Archive I/O error. Trying to recover.");
-				++in_resync;
-			}
+      if ((ret == 0) || (rd_sync() < 0))
+      {
+        paxwarn(1, "Premature end of file on archive read");
+        return (-1);
+      }
+      if (!in_resync)
+      {
+        if (act == APPND)
+        {
+          paxwarn(1, "Archive I/O error, cannot continue");
+          return (-1);
+        }
+        paxwarn(1, "Archive I/O error. Trying to recover.");
+        ++in_resync;
+      }
 
-			/*
+      /*
 			 * oh well, throw it all out and start over
 			 */
-			res = hsz;
-			hdend = hdbuf;
-		}
+      res = hsz;
+      hdend = hdbuf;
+    }
 
-		/*
+    /*
 		 * ok we have a contiguous buffer of the right size. Call the
 		 * format read routine. If this was not a valid header and this
 		 * format stores trailers outside of the header, call the
@@ -1121,35 +1172,38 @@ next_head(ARCHD *arcn)
 		 * us that this block cannot contain a valid header either, so
 		 * we then throw out the entire block and start over.
 		 */
-		if ((*frmt->rd)(arcn, hdbuf) == 0)
-			break;
+    if ((*frmt->rd)(arcn, hdbuf) == 0)
+      break;
 
-		if (!frmt->inhead) {
-			/*
+    if (!frmt->inhead)
+    {
+      /*
 			 * this format has trailers outside of valid headers
 			 */
-			if ((ret = (*frmt->trail)(arcn,hdbuf,in_resync,&cnt)) == 0){
-				/*
+      if ((ret = (*frmt->trail)(arcn, hdbuf, in_resync, &cnt)) == 0)
+      {
+        /*
 				 * valid trailer found, drain input as required
 				 */
-				ar_drain();
-				return(-1);
-			}
+        ar_drain();
+        return (-1);
+      }
 
-			if (ret == 1) {
-				/*
+      if (ret == 1)
+      {
+        /*
 				 * we are in resync and we were told to throw
 				 * the whole block out because none of the
 				 * bytes in this block can be used to form a
 				 * valid header
 				 */
-				res = hsz;
-				hdend = hdbuf;
-				continue;
-			}
-		}
+        res = hsz;
+        hdend = hdbuf;
+        continue;
+      }
+    }
 
-		/*
+    /*
 		 * Brute force section.
 		 * not a valid header. We may be able to find a header yet. So
 		 * we shift over by one byte, and set up to read one byte at a
@@ -1157,34 +1211,37 @@ next_head(ARCHD *arcn)
 		 * We will keep moving byte at a time until we find a header or
 		 * get a read error and have to start over.
 		 */
-		if (!in_resync) {
-			if (act == APPND) {
-				paxwarn(1,"Unable to append, archive header flaw");
-				return(-1);
-			}
-			paxwarn(1,"Invalid header, starting valid header search.");
-			++in_resync;
-		}
-		memmove(hdbuf, hdbuf+1, shftsz);
-		res = 1;
-		hdend = hdbuf + shftsz;
-	}
+    if (!in_resync)
+    {
+      if (act == APPND)
+      {
+        paxwarn(1, "Unable to append, archive header flaw");
+        return (-1);
+      }
+      paxwarn(1, "Invalid header, starting valid header search.");
+      ++in_resync;
+    }
+    memmove(hdbuf, hdbuf + 1, shftsz);
+    res = 1;
+    hdend = hdbuf + shftsz;
+  }
 
-	/*
+  /*
 	 * ok got a valid header, check for trailer if format encodes it in the
 	 * the header. NOTE: the parameters are different than trailer routines
 	 * which encode trailers outside of the header!
 	 */
-	if (frmt->inhead && ((*frmt->trail)(arcn,NULL,0,NULL) == 0)) {
-		/*
+  if (frmt->inhead && ((*frmt->trail)(arcn, NULL, 0, NULL) == 0))
+  {
+    /*
 		 * valid trailer found, drain input as required
 		 */
-		ar_drain();
-		return(-1);
-	}
+    ar_drain();
+    return (-1);
+  }
 
-	++flcnt;
-	return(0);
+  ++flcnt;
+  return (0);
 }
 
 /*
@@ -1197,64 +1254,67 @@ next_head(ARCHD *arcn)
  *	0 if archive found -1 otherwise
  */
 
-static int
-get_arc(void)
+static int get_arc(void)
 {
-	int i;
-	int hdsz = 0;
-	int res;
-	int minhd = BLKMULT;
-	char *hdend;
-	int notice = 0;
+  int i;
+  int hdsz = 0;
+  int res;
+  int minhd = BLKMULT;
+  char *hdend;
+  int notice = 0;
 
-	/*
+  /*
 	 * find the smallest header size in all archive formats and then set up
 	 * to read the archive.
 	 */
-	for (i = 0; ford[i] >= 0; ++i) {
-		if (fsub[ford[i]].name != NULL && fsub[ford[i]].hsz < minhd)
-			minhd = fsub[ford[i]].hsz;
-	}
-	if (rd_start() < 0)
-		return(-1);
-	res = BLKMULT;
-	hdsz = 0;
-	hdend = hdbuf;
-	for (;;) {
-		for (;;) {
-			/*
+  for (i = 0; ford[i] >= 0; ++i)
+  {
+    if (fsub[ford[i]].name != NULL && fsub[ford[i]].hsz < minhd)
+      minhd = fsub[ford[i]].hsz;
+  }
+  if (rd_start() < 0)
+    return (-1);
+  res = BLKMULT;
+  hdsz = 0;
+  hdend = hdbuf;
+  for (;;)
+  {
+    for (;;)
+    {
+      /*
 			 * fill the buffer with at least the smallest header
 			 */
-			i = rd_wrbuf(hdend, res);
-			if (i > 0)
-				hdsz += i;
-			if (hdsz >= minhd)
-				break;
+      i = rd_wrbuf(hdend, res);
+      if (i > 0)
+        hdsz += i;
+      if (hdsz >= minhd)
+        break;
 
-			/*
+      /*
 			 * if we cannot recover from a read error quit
 			 */
-			if ((i == 0) || (rd_sync() < 0))
-				goto out;
+      if ((i == 0) || (rd_sync() < 0))
+        goto out;
 
-			/*
+      /*
 			 * when we get an error none of the data we already
 			 * have can be used to create a legal header (we just
 			 * got an error in the middle), so we throw it all out
 			 * and refill the buffer with fresh data.
 			 */
-			res = BLKMULT;
-			hdsz = 0;
-			hdend = hdbuf;
-			if (!notice) {
-				if (act == APPND)
-					return(-1);
-				paxwarn(1,"Cannot identify format. Searching...");
-				++notice;
-			}
-		}
+      res = BLKMULT;
+      hdsz = 0;
+      hdend = hdbuf;
+      if (!notice)
+      {
+        if (act == APPND)
+          return (-1);
+        paxwarn(1, "Cannot identify format. Searching...");
+        ++notice;
+      }
+    }
 
-		/*
+    /*
 		 * we have at least the size of the smallest header in any
 		 * archive format. Look to see if we have a match. The array
 		 * ford[] is used to specify the header id order to reduce the
@@ -1262,54 +1322,59 @@ get_arc(void)
 		 * may be subsets of each other and the order would then be
 		 * important).
 		 */
-		for (i = 0; ford[i] >= 0; ++i) {
-			if (fsub[ford[i]].id == NULL ||
-			    (*fsub[ford[i]].id)(hdbuf, hdsz) < 0)
-				continue;
-			frmt = &(fsub[ford[i]]);
-			/*
+    for (i = 0; ford[i] >= 0; ++i)
+    {
+      if (fsub[ford[i]].id == NULL ||
+          (*fsub[ford[i]].id)(hdbuf, hdsz) < 0)
+        continue;
+      frmt = &(fsub[ford[i]]);
+      /*
 			 * yuck, to avoid slow special case code in the extract
 			 * routines, just push this header back as if it was
 			 * not seen. We have left extra space at start of the
 			 * buffer for this purpose. This is a bit ugly, but
 			 * adding all the special case code is far worse.
 			 */
-			pback(hdbuf, hdsz);
-			return(0);
-		}
+      pback(hdbuf, hdsz);
+      return (0);
+    }
 
-		/*
+    /*
 		 * We have a flawed archive, no match. we start searching, but
 		 * we never allow additions to flawed archives
 		 */
-		if (!notice) {
-			if (act == APPND)
-				return(-1);
-			paxwarn(1, "Cannot identify format. Searching...");
-			++notice;
-		}
+    if (!notice)
+    {
+      if (act == APPND)
+        return (-1);
+      paxwarn(1, "Cannot identify format. Searching...");
+      ++notice;
+    }
 
-		/*
+    /*
 		 * brute force search for a header that we can id.
 		 * we shift through byte at a time. this is slow, but we cannot
 		 * determine the nature of the flaw in the archive in a
 		 * portable manner
 		 */
-		if (--hdsz > 0) {
-			memmove(hdbuf, hdbuf+1, hdsz);
-			res = BLKMULT - hdsz;
-			hdend = hdbuf + hdsz;
-		} else {
-			res = BLKMULT;
-			hdend = hdbuf;
-			hdsz = 0;
-		}
-	}
+    if (--hdsz > 0)
+    {
+      memmove(hdbuf, hdbuf + 1, hdsz);
+      res = BLKMULT - hdsz;
+      hdend = hdbuf + hdsz;
+    }
+    else
+    {
+      res = BLKMULT;
+      hdend = hdbuf;
+      hdsz = 0;
+    }
+  }
 
-    out:
-	/*
+out:
+  /*
 	 * we cannot find a header, bow, apologize and quit
 	 */
-	paxwarn(1, "Sorry, unable to determine archive format.");
-	return(-1);
+  paxwarn(1, "Sorry, unable to determine archive format.");
+  return (-1);
 }

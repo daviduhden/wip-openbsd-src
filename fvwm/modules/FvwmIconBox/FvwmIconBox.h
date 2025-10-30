@@ -6,32 +6,34 @@
 #include "../../libs/fvwmlib.h"
 struct icon_info;
 Bool ExecIconBoxFunction(char *msg);
-extern void   CreateWindow(void);
-extern Pixel  GetColor(char *name);
-extern Pixel  GetHilite(Pixel background);
-extern Pixel  GetShadow(Pixel background);
-extern void   nocolor(char *a, char *b);
-extern void   RedrawWindow(void);
-extern void   match_string(char *tline);
-extern void   Loop(void);
-extern void   ParseOptions(void);
-extern char   *safemalloc(int length);
-extern int    My_XNextEvent(Display *dpy, XEvent *event);
-extern void   CopyString(char **dest, char *source);
-extern void   RelieveWindow(Window win,int x,int y,int w,int h,GC rGC,GC sGC);
-extern void   SendFvwmPipe(int *,char *text, unsigned long window);
-extern void   DeadPipe(int nonsense);
-extern void   CreateIconWindow(struct icon_info *item);
-extern void   ConfigureIconWindow(struct icon_info *item);
-extern void   DrawIconWindow(struct icon_info *item);
-extern void   GetBitmapFile(struct icon_info *item);
-extern void   GetXPMFile(struct icon_info *item);
+extern void CreateWindow(void);
+extern Pixel GetColor(char *name);
+extern Pixel GetHilite(Pixel background);
+extern Pixel GetShadow(Pixel background);
+extern void nocolor(char *a, char *b);
+extern void RedrawWindow(void);
+extern void match_string(char *tline);
+extern void Loop(void);
+extern void ParseOptions(void);
+extern char *safemalloc(int length);
+extern int My_XNextEvent(Display *dpy, XEvent *event);
+extern void CopyString(char **dest, char *source);
+extern void RelieveWindow(Window win, int x, int y, int w, int h,
+                          GC rGC, GC sGC);
+extern void SendFvwmPipe(int *, char *text, unsigned long window);
+extern void DeadPipe(int nonsense);
+extern void CreateIconWindow(struct icon_info *item);
+extern void ConfigureIconWindow(struct icon_info *item);
+extern void DrawIconWindow(struct icon_info *item);
+extern void GetBitmapFile(struct icon_info *item);
+extern void GetXPMFile(struct icon_info *item);
 extern void GetIconWindow(struct icon_info *item);
 extern void GetIconBitmap(struct icon_info *item);
-extern void process_message(unsigned long type,unsigned long *body);
+extern void process_message(unsigned long type, unsigned long *body);
 extern Bool AddItem(unsigned long id, long desk, unsigned long flags);
 extern Bool DeleteItem(unsigned long id);
-extern struct icon_info *UpdateItem(unsigned long type, unsigned long id, char *item);
+extern struct icon_info *UpdateItem(unsigned long type,
+                                    unsigned long id, char *item);
 extern void freeitem(struct icon_info *item, int d);
 extern void RedrawHScrollbar(void);
 extern void RedrawVScrollbar(void);
@@ -70,8 +72,7 @@ extern int desk_cond(struct icon_info *item);
 extern int itemcmp(struct icon_info *item1, struct icon_info *item2);
 extern XErrorHandler myErrorHandler(Display *dpy, XErrorEvent *event);
 
-
-extern Display *dpy;			/* which display are we talking to */
+extern Display *dpy; /* which display are we talking to */
 extern Window Root;
 extern Window main_win;
 extern Window holder_win;
@@ -79,9 +80,9 @@ extern Window icon_win;
 extern int screen;
 extern int d_depth;
 extern Pixel fore_pix, back_pix, icon_fore_pix, icon_back_pix;
-extern GC  NormalGC;
-extern GC  ReliefGC;
-extern int ButtonWidth,ButtonHeight;
+extern GC NormalGC;
+extern GC ReliefGC;
+extern int ButtonWidth, ButtonHeight;
 extern XFontStruct *font;
 extern int num_rows;
 extern int num_columns;
@@ -106,7 +107,7 @@ struct icon_info
   int y;
   int icon_w;
   int icon_h;
-  Pixmap iconPixmap;		/* pixmap for the icon */
+  Pixmap iconPixmap; /* pixmap for the icon */
   Pixmap icon_maskPixmap;
   Window IconWin;
   Window icon_pixmap_w;
@@ -154,8 +155,6 @@ extern char *pixmapPath;
 
 extern int icon_relief;
 
-
-
 #define NOPLACE -1
 #define LEFT 0
 #define RIGHT 1
@@ -170,19 +169,18 @@ extern int icon_relief;
 #define DOUBLE_CLICK 2
 
 /* sorting */
-#define UNSORT     0
+#define UNSORT 0
 #define WINDOWNAME 1
-#define ICONNAME   2
-#define RESNAME    3
-#define RESCLASS   4
+#define ICONNAME 2
+#define RESNAME 3
+#define RESCLASS 4
 
 /* local flags */
-#define HIDE_H        (1<<0)
-#define HIDE_V        (1<<1)
-#define SETWMICONSIZE (1<<2)
-#define CURRENT_ONLY  (1<<3)
+#define HIDE_H (1 << 0)
+#define HIDE_V (1 << 1)
+#define SETWMICONSIZE (1 << 2)
+#define CURRENT_ONLY (1 << 3)
 
-#define DEFAULTICON   (1<<0)
-#define NONAME        (1<<1)
-#define NOCLASS       (1<<2)
-
+#define DEFAULTICON (1 << 0)
+#define NONAME (1 << 1)
+#define NOCLASS (1 << 2)

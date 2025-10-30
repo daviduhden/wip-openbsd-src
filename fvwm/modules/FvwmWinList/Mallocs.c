@@ -20,12 +20,12 @@
 
 #include "config.h"
 
+#include "../../libs/fvwmlib.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <sys/time.h>
-#include "../../libs/fvwmlib.h"
 
 extern char *Module;
 
@@ -34,12 +34,14 @@ char *saferealloc(char *ptr, size_t length)
   char *newptr;
   const char *name;
 
-  if (length == 0) {
+  if (length == 0)
+  {
     length = 1;
   }
 
   newptr = realloc(ptr, length);
-  if (newptr == NULL) {
+  if (newptr == NULL)
+  {
     name = (Module && *Module) ? Module : "FvwmWinList";
     fprintf(stderr, "%s: realloc failed for %zu bytes\n", name, length);
     exit(1);
@@ -60,5 +62,3 @@ void UpdateString(char **string, const char *value)
     *string = saferealloc(*string, value_len + 1);
   strlcpy(*string, value, value_len + 1);
 }
-
-

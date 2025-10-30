@@ -13,22 +13,22 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <err.h>
 #include "fvwm.h"
 #include "menus.h"
 #include "misc.h"
-#include "screen.h"
-#include "parse.h"
 #include "module.h"
+#include "parse.h"
+#include "screen.h"
+#include <err.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include <X11/Xproto.h>
 #include <X11/Xatom.h>
+#include <X11/Xproto.h>
 /* need to get prototype for XrmUniqueQuark for XUniqueContext call */
 #include <X11/Xresource.h>
 
@@ -43,24 +43,23 @@
 
 #define MAXHOSTNAME 255
 
-
 #ifndef lint
 static char sccsid[] = "@(#)fvwm.c " VERSION " fvwm";
 #endif
 
-int master_pid;			/* process number of 1st fvwm process */
+int master_pid; /* process number of 1st fvwm process */
 
-ScreenInfo Scr;		        /* structures for the screen */
-Display *dpy;			/* which display are we talking to */
+ScreenInfo Scr; /* structures for the screen */
+Display *dpy;   /* which display are we talking to */
 
-Window BlackoutWin=None;        /* window to hide window captures */
-Bool fFvwmInStartup = True;     /* Set to False when startup has finished */
+Window BlackoutWin = None;  /* window to hide window captures */
+Bool fFvwmInStartup = True; /* Set to False when startup has finished */
 
-char *default_config_command = "Read "FVWMRC;
+char *default_config_command = "Read " FVWMRC;
 
 #define MAX_CFG_CMDS 10
 static char *config_commands[MAX_CFG_CMDS];
-static int num_config_commands=0;
+static int num_config_commands = 0;
 
 #if 0
 /* unsused */
@@ -78,14 +77,14 @@ void SetMWM_INFO(Window window);
 void SetRCDefaults(void);
 void StartupStuff(void);
 
-XContext FvwmContext;		/* context for fvwm windows */
-XContext MenuContext;		/* context for fvwm menus */
+XContext FvwmContext; /* context for fvwm windows */
+XContext MenuContext; /* context for fvwm menus */
 
 int JunkX = 0, JunkY = 0;
-Window JunkRoot, JunkChild;		/* junk window */
+Window JunkRoot, JunkChild; /* junk window */
 unsigned int JunkWidth, JunkHeight, JunkBW, JunkDepth, JunkMask;
 
-Boolean debugging = False,PPosOverride,Blackout = False;
+Boolean debugging = False, PPosOverride, Blackout = False;
 
 char **g_argv;
 int g_argc;
@@ -108,7 +107,7 @@ static char s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
 
 #ifdef SHAPE
 int ShapeEventBase, ShapeErrorBase;
-Boolean ShapesSupported=False;
+Boolean ShapesSupported = False;
 #endif
 
 long isIconicState = 0;
@@ -117,7 +116,12 @@ Bool Restarting = False;
 int fd_width, x_fd;
 char *display_name = NULL;
 
-typedef enum { FVWM_RUNNING=0, FVWM_DONE, FVWM_RESTART } FVWM_STATE;
+typedef enum
+{
+  FVWM_RUNNING = 0,
+  FVWM_DONE,
+  FVWM_RESTART
+} FVWM_STATE;
 
 /*
  * Currently, the "isTerminated" variable is superfluous. However,
@@ -138,9 +142,9 @@ volatile sig_atomic_t isTerminated = False;
  */
 int main(int argc, char **argv)
 {
-  unsigned long valuemask;	/* mask for create windows */
-  XSetWindowAttributes attributes;	/* attributes for create windows */
-  void InternUsefulAtoms (void);
+  unsigned long valuemask;         /* mask for create windows */
+  XSetWindowAttributes attributes; /* attributes for create windows */
+  void InternUsefulAtoms(void);
   void InitVariables(void);
   int i;
   extern int x_fd;
@@ -155,7 +159,7 @@ int main(int argc, char **argv)
   g_argv = argv;
   g_argc = argc;
 
-  DBUG("main","Entered, about to parse args");
+  DBUG("main", "Entered, about to parse args");
 
   /* Put the default module directory into the environment so it can be used
      later by the config file, etc.  */
@@ -163,38 +167,39 @@ int main(int argc, char **argv)
 
   for (i = 1; i < argc; i++)
   {
-    if (strncasecmp(argv[i],"-debug",6)==0)
+    if (strncasecmp(argv[i], "-debug", 6) == 0)
     {
       debugging = True;
     }
-    else if (strncasecmp(argv[i],"-s",2)==0)
+    else if (strncasecmp(argv[i], "-s", 2) == 0)
     {
       single = True;
     }
-    else if (strncasecmp(argv[i],"-d",2)==0)
+    else if (strncasecmp(argv[i], "-d", 2) == 0)
     {
       if (++i >= argc)
         usage();
       display_name = argv[i];
     }
-    else if (strncasecmp(argv[i],"-f",2)==0)
+    else if (strncasecmp(argv[i], "-f", 2) == 0)
     {
       if (++i >= argc)
         usage();
       if (num_config_commands < MAX_CFG_CMDS)
       {
-	buflen = 6+strlen(argv[i]);
+        buflen = 6 + strlen(argv[i]);
         config_commands[num_config_commands] = (char *)malloc(buflen);
-        strlcpy(config_commands[num_config_commands],"Read ", buflen);
-        strlcat(config_commands[num_config_commands],argv[i], buflen);
+        strlcpy(config_commands[num_config_commands], "Read ", buflen);
+        strlcat(config_commands[num_config_commands], argv[i], buflen);
         num_config_commands++;
       }
       else
       {
-        fvwm_msg(ERR,"main","only %d -f and -cmd parms allowed!",MAX_CFG_CMDS);
+        fvwm_msg(ERR, "main", "only %d -f and -cmd parms allowed!",
+                 MAX_CFG_CMDS);
       }
     }
-    else if (strncasecmp(argv[i],"-cmd",4)==0)
+    else if (strncasecmp(argv[i], "-cmd", 4) == 0)
     {
       if (++i >= argc)
         usage();
@@ -205,7 +210,8 @@ int main(int argc, char **argv)
       }
       else
       {
-        fvwm_msg(ERR,"main","only %d -f and -cmd parms allowed!",MAX_CFG_CMDS);
+        fvwm_msg(ERR, "main", "only %d -f and -cmd parms allowed!",
+                 MAX_CFG_CMDS);
       }
     }
 #if 0
@@ -217,38 +223,38 @@ int main(int argc, char **argv)
       output_file = argv[i];
     }
 #endif
-    else if (strncasecmp(argv[i],"-h",2)==0)
+    else if (strncasecmp(argv[i], "-h", 2) == 0)
     {
       usage();
       exit(0);
     }
-    else if (strncasecmp(argv[i],"-blackout",9)==0)
+    else if (strncasecmp(argv[i], "-blackout", 9) == 0)
     {
       Blackout = True;
     }
     else if (strncasecmp(argv[i], "-version", 8) == 0)
     {
-      fvwm_msg(INFO,"main", "Fvwm Version %s\n", VERSION);
+      fvwm_msg(INFO, "main", "Fvwm Version %s\n", VERSION);
     }
     else
     {
-      fvwm_msg(ERR,"main","Unknown option:  `%s'\n", argv[i]);
+      fvwm_msg(ERR, "main", "Unknown option:  `%s'\n", argv[i]);
       option_error = TRUE;
     }
   }
 
-  DBUG("main","Done parsing args");
+  DBUG("main", "Done parsing args");
 
   if (option_error)
   {
     usage();
   }
 
-  DBUG("main","Installing signal handlers");
+  DBUG("main", "Installing signal handlers");
 
 #ifdef HAVE_SIGACTION
   {
-    struct sigaction  sigact;
+    struct sigaction sigact;
 
     /*
      * Use reliable signal semantics since they are predictable and portable.
@@ -262,7 +268,7 @@ int main(int argc, char **argv)
 #endif
     sigemptyset(&sigact.sa_mask);
 
-    sigact.sa_handler = DeadPipe;  /* This handler does nothing ??? */
+    sigact.sa_handler = DeadPipe; /* This handler does nothing ??? */
     sigaction(SIGPIPE, &sigact, NULL);
 
     /*
@@ -293,22 +299,23 @@ int main(int argc, char **argv)
 
   if (!(dpy = XOpenDisplay(display_name)))
   {
-    fvwm_msg(ERR,"main","can't open display %s", XDisplayName(display_name));
-    exit (1);
+    fvwm_msg(ERR, "main", "can't open display %s",
+             XDisplayName(display_name));
+    exit(1);
   }
-  Scr.screen= DefaultScreen(dpy);
+  Scr.screen = DefaultScreen(dpy);
   Scr.NumberOfScreens = ScreenCount(dpy);
 
   master_pid = getpid();
 
-  if(!single)
+  if (!single)
   {
-    int	myscreen = 0;
+    int myscreen = 0;
     char *cp;
 
     strlcpy(message, XDisplayString(dpy), sizeof(message));
 
-    for(i=0;i<Scr.NumberOfScreens;i++)
+    for (i = 0; i < Scr.NumberOfScreens; i++)
     {
       if (i != Scr.screen && fork() == 0)
       {
@@ -323,10 +330,10 @@ int main(int argc, char **argv)
         {
           cp = strchr(cp, '.');
           if (cp != NULL)
-            *cp = '\0';		/* truncate at display part */
+            *cp = '\0'; /* truncate at display part */
         }
-        snprintf(message + strlen(message), sizeof(message) - strlen(message),
-	    ".%d", myscreen);
+        snprintf(message + strlen(message),
+                 sizeof(message) - strlen(message), ".%d", myscreen);
         dpy = XOpenDisplay(message);
         Scr.screen = myscreen;
         Scr.NumberOfScreens = ScreenCount(dpy);
@@ -341,78 +348,79 @@ int main(int argc, char **argv)
 
   if (fcntl(x_fd, F_SETFD, 1) == -1)
   {
-    fvwm_msg(ERR,"main","close-on-exec failed");
-    exit (1);
+    fvwm_msg(ERR, "main", "close-on-exec failed");
+    exit(1);
   }
 
   /*  Add a DISPLAY entry to the environment, incase we were started
    * with fvwm -display term:0.0
    */
   len = strlen(XDisplayString(dpy));
-  buflen = len+10;
+  buflen = len + 10;
   display_string = safemalloc(buflen);
-  snprintf(display_string, buflen, "DISPLAY=%s",XDisplayString(dpy));
+  snprintf(display_string, buflen, "DISPLAY=%s", XDisplayString(dpy));
   putenv(display_string);
   /* Add a HOSTDISPLAY environment variable, which is the same as
    * DISPLAY, unless display = :0.0 or unix:0.0, in which case the full
    * host name will be used for ease in networking . */
   /* Note: Can't free the rdisplay_string after putenv, because it
    * becomes part of the environment! */
-  if(strncmp(display_string,"DISPLAY=:",9)==0)
+  if (strncmp(display_string, "DISPLAY=:", 9) == 0)
   {
     char client[MAXHOSTNAME], *rdisplay_string;
-    gethostname(client,MAXHOSTNAME);
-    buflen = len+14 + strlen(client);
+    gethostname(client, MAXHOSTNAME);
+    buflen = len + 14 + strlen(client);
     rdisplay_string = safemalloc(buflen);
-    snprintf(rdisplay_string, buflen, 
-	"HOSTDISPLAY=%s:%s",client,&display_string[9]);
+    snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s:%s", client,
+             &display_string[9]);
     putenv(rdisplay_string);
   }
-  else if(strncmp(display_string,"DISPLAY=unix:",13)==0)
+  else if (strncmp(display_string, "DISPLAY=unix:", 13) == 0)
   {
     char client[MAXHOSTNAME], *rdisplay_string;
-    gethostname(client,MAXHOSTNAME);
-    buflen=len+14 + strlen(client);
+    gethostname(client, MAXHOSTNAME);
+    buflen = len + 14 + strlen(client);
     rdisplay_string = safemalloc(buflen);
-    snprintf(rdisplay_string,buflen,"HOSTDISPLAY=%s:%s",client,
-            &display_string[13]);
+    snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s:%s", client,
+             &display_string[13]);
     putenv(rdisplay_string);
   }
   else
   {
     char *rdisplay_string;
-    buflen=len+14;
+    buflen = len + 14;
     rdisplay_string = safemalloc(buflen);
-    snprintf(rdisplay_string,buflen,"HOSTDISPLAY=%s",XDisplayString(dpy));
+    snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s",
+             XDisplayString(dpy));
     putenv(rdisplay_string);
   }
 
   Scr.Root = RootWindow(dpy, Scr.screen);
-  if(Scr.Root == None)
+  if (Scr.Root == None)
   {
-    fvwm_msg(ERR,"main","Screen %d is not a valid screen",(char *)Scr.screen);
+    fvwm_msg(ERR, "main", "Screen %d is not a valid screen",
+             (char *)Scr.screen);
     exit(1);
   }
 
-
 #ifdef SHAPE
-  ShapesSupported=XShapeQueryExtension(dpy, &ShapeEventBase, &ShapeErrorBase);
+  ShapesSupported =
+    XShapeQueryExtension(dpy, &ShapeEventBase, &ShapeErrorBase);
 #endif /* SHAPE */
 
-  InternUsefulAtoms ();
+  InternUsefulAtoms();
 
   /* Make sure property priority colors is empty */
-  XChangeProperty (dpy, Scr.Root, _XA_MIT_PRIORITY_COLORS,
-                   XA_CARDINAL, 32, PropModeReplace, NULL, 0);
-
+  XChangeProperty(dpy, Scr.Root, _XA_MIT_PRIORITY_COLORS, XA_CARDINAL,
+                  32, PropModeReplace, NULL, 0);
 
   XSetErrorHandler(CatchRedirectError);
   XSetIOErrorHandler(CatchFatal);
   XSelectInput(dpy, Scr.Root,
-               LeaveWindowMask| EnterWindowMask | PropertyChangeMask |
-               SubstructureRedirectMask | KeyPressMask |
-               SubstructureNotifyMask|
-               ButtonPressMask | ButtonReleaseMask );
+               LeaveWindowMask | EnterWindowMask | PropertyChangeMask |
+                 SubstructureRedirectMask | KeyPressMask |
+                 SubstructureNotifyMask | ButtonPressMask |
+                 ButtonReleaseMask);
   XSync(dpy, 0);
 
   XSetErrorHandler(FvwmErrorHandler);
@@ -425,86 +433,79 @@ int main(int argc, char **argv)
   initModules();
 
   Scr.gray_bitmap =
-    XCreateBitmapFromData(dpy,Scr.Root,g_bits, g_width,g_height);
+    XCreateBitmapFromData(dpy, Scr.Root, g_bits, g_width, g_height);
 
-
-  DBUG("main","Setting up rc file defaults...");
+  DBUG("main", "Setting up rc file defaults...");
   SetRCDefaults();
 
-  DBUG("main","Running config_commands...");
+  DBUG("main", "Running config_commands...");
   if (num_config_commands > 0)
   {
     int i;
-    for(i=0;i<num_config_commands;i++)
+    for (i = 0; i < num_config_commands; i++)
     {
-      ExecuteFunction(config_commands[i], NULL,&Event,C_ROOT,1);
+      ExecuteFunction(config_commands[i], NULL, &Event, C_ROOT, 1);
       free(config_commands[i]);
     }
   }
   else
   {
-    ExecuteFunction(default_config_command, NULL,&Event,C_ROOT,1);
+    ExecuteFunction(default_config_command, NULL, &Event, C_ROOT, 1);
   }
-  DBUG("main","Done running config_commands");
+  DBUG("main", "Done running config_commands");
 
-  if(Scr.d_depth<2)
+  if (Scr.d_depth < 2)
   {
-    Scr.gray_pixmap =
-      XCreatePixmapFromBitmapData(dpy,Scr.Root,g_bits, g_width,g_height,
-                                  Scr.StdColors.fore,
-				  Scr.StdColors.back,
-                                  Scr.d_depth);
-    Scr.light_gray_pixmap =
-      XCreatePixmapFromBitmapData(dpy,Scr.Root,l_g_bits,l_g_width,l_g_height,
-                                  Scr.StdColors.fore,
-				  Scr.StdColors.back,
-                                  Scr.d_depth);
+    Scr.gray_pixmap = XCreatePixmapFromBitmapData(
+      dpy, Scr.Root, g_bits, g_width, g_height, Scr.StdColors.fore,
+      Scr.StdColors.back, Scr.d_depth);
+    Scr.light_gray_pixmap = XCreatePixmapFromBitmapData(
+      dpy, Scr.Root, l_g_bits, l_g_width, l_g_height,
+      Scr.StdColors.fore, Scr.StdColors.back, Scr.d_depth);
   }
 
   /* create a window which will accept the keyboard focus when no other
      windows have it */
-  attributes.event_mask = KeyPressMask|FocusChangeMask;
+  attributes.event_mask = KeyPressMask | FocusChangeMask;
   attributes.override_redirect = True;
-  Scr.NoFocusWin=XCreateWindow(dpy,Scr.Root,-10, -10, 10, 10, 0, 0,
-                               InputOnly,CopyFromParent,
-                               CWEventMask|CWOverrideRedirect,
-                               &attributes);
+  Scr.NoFocusWin = XCreateWindow(
+    dpy, Scr.Root, -10, -10, 10, 10, 0, 0, InputOnly, CopyFromParent,
+    CWEventMask | CWOverrideRedirect, &attributes);
   XMapWindow(dpy, Scr.NoFocusWin);
 
   SetMWM_INFO(Scr.NoFocusWin);
 
-  XSetInputFocus (dpy, Scr.NoFocusWin, RevertToParent, CurrentTime);
+  XSetInputFocus(dpy, Scr.NoFocusWin, RevertToParent, CurrentTime);
 
   XSync(dpy, 0);
-  if(debugging)
-    XSynchronize(dpy,1);
+  if (debugging)
+    XSynchronize(dpy, 1);
 
-  Scr.SizeStringWidth = XTextWidth (Scr.StdFont.font,
-                                    " +8888 x +8888 ", 15);
+  Scr.SizeStringWidth =
+    XTextWidth(Scr.StdFont.font, " +8888 x +8888 ", 15);
   attributes.border_pixel = Scr.StdColors.fore;
   attributes.background_pixel = Scr.StdColors.back;
   attributes.bit_gravity = NorthWestGravity;
   valuemask = (CWBorderPixel | CWBackPixel | CWBitGravity);
-  if(!Scr.gs.EmulateMWM)
+  if (!Scr.gs.EmulateMWM)
   {
     x = 0;
     y = 0;
   }
   else
   {
-    x = Scr.MyDisplayWidth/2 - (Scr.SizeStringWidth + SIZE_HINDENT*2)/2;
-    y = Scr.MyDisplayHeight/2 - (Scr.StdFont.height + SIZE_VINDENT*2)/2;
+    x = Scr.MyDisplayWidth / 2 -
+        (Scr.SizeStringWidth + SIZE_HINDENT * 2) / 2;
+    y = Scr.MyDisplayHeight / 2 -
+        (Scr.StdFont.height + SIZE_VINDENT * 2) / 2;
   }
-  Scr.SizeWindow = XCreateWindow (dpy, Scr.Root, x, y,
-				  (unsigned int)(Scr.SizeStringWidth +
-						 SIZE_HINDENT*2),
-				  (unsigned int) (Scr.StdFont.height +
-						  SIZE_VINDENT*2),
-				  (unsigned int) 0, 0,
-				  (unsigned int) CopyFromParent,
-				  (Visual *) CopyFromParent,
-				  valuemask, &attributes);
-  if(Scr.SizeWindow != None)
+  Scr.SizeWindow = XCreateWindow(
+    dpy, Scr.Root, x, y,
+    (unsigned int)(Scr.SizeStringWidth + SIZE_HINDENT * 2),
+    (unsigned int)(Scr.StdFont.height + SIZE_VINDENT * 2),
+    (unsigned int)0, 0, (unsigned int)CopyFromParent,
+    (Visual *)CopyFromParent, valuemask, &attributes);
+  if (Scr.SizeWindow != None)
     XSetWindowBackground(dpy, Scr.SizeWindow, Scr.StdColors.back);
 
 #ifndef NON_VIRTUAL
@@ -523,27 +524,26 @@ int main(int argc, char **argv)
   if (Scr.ClickTime < 0)
     Scr.ClickTime = -Scr.ClickTime;
   fFvwmInStartup = False;
-  DBUG("main","Entering HandleEvents loop...");
+  DBUG("main", "Entering HandleEvents loop...");
 
   if (pledge("stdio rpath proc exec", NULL) == -1)
-	  err(1, "pledge");
+    err(1, "pledge");
 
   HandleEvents();
-  switch( fvwmRunState )
+  switch (fvwmRunState)
   {
   case FVWM_DONE:
-    Done(0, NULL);     /* does not return */
+    Done(0, NULL); /* does not return */
 
   case FVWM_RESTART:
-    Done(1, *g_argv);  /* does not return */
+    Done(1, *g_argv); /* does not return */
 
   default:
-    DBUG("main","Unknown FVWM run-state");
+    DBUG("main", "Unknown FVWM run-state");
   }
 
   return 0;
 }
-
 
 /*
 ** StartupStuff
@@ -563,24 +563,25 @@ void StartupStuff(void)
 #endif
 
   /* migo (02-Oct-1999): execute StartFunction */
-  if (FindPopup("StartFunction")) {
+  if (FindPopup("StartFunction"))
+  {
     ExecuteFunction("Function StartFunction", NULL, &Event, C_ROOT, 1);
   }
 
-  if(Restarting)
+  if (Restarting)
   {
     mr = FindPopup("RestartFunction");
-    if(mr != NULL)
-      ExecuteFunction("Function RestartFunction",NULL,&Event,C_ROOT,1);
+    if (mr != NULL)
+      ExecuteFunction("Function RestartFunction", NULL, &Event, C_ROOT,
+                      1);
   }
   else
   {
     mr = FindPopup("InitFunction");
-    if(mr != NULL)
-      ExecuteFunction("Function InitFunction",NULL,&Event,C_ROOT,1);
+    if (mr != NULL)
+      ExecuteFunction("Function InitFunction", NULL, &Event, C_ROOT, 1);
   }
 } /* StartupStuff */
-
 
 /***********************************************************************
  *
@@ -593,10 +594,10 @@ void StartupStuff(void)
 
 void CaptureAllWindows(void)
 {
-  int i,j;
+  int i, j;
   unsigned int nchildren;
   Window root, parent, *children;
-   FvwmWindow *tmp,*next;		/* temp fvwm window structure */
+  FvwmWindow *tmp, *next; /* temp fvwm window structure */
   Window w;
   unsigned long data[1];
   unsigned char *prop;
@@ -606,7 +607,7 @@ void CaptureAllWindows(void)
 
   MyXGrabServer(dpy);
 
-  if(!XQueryTree(dpy, Scr.Root, &root, &parent, &children, &nchildren))
+  if (!XQueryTree(dpy, Scr.Root, &root, &parent, &children, &nchildren))
   {
     MyXUngrabServer(dpy);
     return;
@@ -619,11 +620,11 @@ void CaptureAllWindows(void)
     /*
     ** weed out icon windows
     */
-    for (i=0;i<nchildren;i++)
+    for (i = 0; i < nchildren; i++)
     {
       if (children[i])
       {
-        XWMHints *wmhintsp = XGetWMHints (dpy, children[i]);
+        XWMHints *wmhintsp = XGetWMHints(dpy, children[i]);
         if (wmhintsp)
         {
           if (wmhintsp->flags & IconWindowHint)
@@ -637,7 +638,7 @@ void CaptureAllWindows(void)
               }
             }
           }
-          XFree ((char *) wmhintsp);
+          XFree((char *)wmhintsp);
         }
       }
     }
@@ -650,7 +651,7 @@ void CaptureAllWindows(void)
       {
         XUnmapWindow(dpy, children[i]);
         Event.xmaprequest.window = children[i];
-        HandleMapRequestKeepRaised (BlackoutWin);
+        HandleMapRequestKeepRaised(BlackoutWin);
       }
     }
     Scr.flags |= WindowsCaptured;
@@ -659,33 +660,32 @@ void CaptureAllWindows(void)
   {
     /* reborder all windows */
     tmp = Scr.FvwmRoot.next;
-    for(i=0;i<nchildren;i++)
+    for (i = 0; i < nchildren; i++)
     {
-      if(XFindContext(dpy, children[i], FvwmContext,
-                      (caddr_t *)&tmp)!=XCNOENT)
+      if (XFindContext(dpy, children[i], FvwmContext,
+                       (caddr_t *)&tmp) != XCNOENT)
       {
         isIconicState = DontCareState;
-        if(XGetWindowProperty(dpy,tmp->w,_XA_WM_STATE,0L,3L,False,
-                              _XA_WM_STATE,
-                              &atype,&aformat,&nitems,&bytes_remain,&prop)==
-           Success)
+        if (XGetWindowProperty(dpy, tmp->w, _XA_WM_STATE, 0L, 3L, False,
+                               _XA_WM_STATE, &atype, &aformat, &nitems,
+                               &bytes_remain, &prop) == Success)
         {
-          if(prop != NULL)
+          if (prop != NULL)
           {
             isIconicState = *(long *)prop;
             XFree(prop);
           }
         }
         next = tmp->next;
-        data[0] = (unsigned long) tmp->Desk;
-        XChangeProperty (dpy, tmp->w, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
-                         PropModeReplace, (unsigned char *) data, 1);
+        data[0] = (unsigned long)tmp->Desk;
+        XChangeProperty(dpy, tmp->w, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
+                        PropModeReplace, (unsigned char *)data, 1);
 
         XSelectInput(dpy, tmp->w, 0);
         w = tmp->w;
-        XUnmapWindow(dpy,tmp->frame);
-        XUnmapWindow(dpy,w);
-        RestoreWithdrawnLocation (tmp,True);
+        XUnmapWindow(dpy, tmp->frame);
+        XUnmapWindow(dpy, w);
+        RestoreWithdrawnLocation(tmp, True);
         Destroy(tmp);
         Event.xmaprequest.window = w;
         HandleMapRequestKeepRaised(BlackoutWin);
@@ -696,7 +696,7 @@ void CaptureAllWindows(void)
 
   isIconicState = DontCareState;
 
-  if(nchildren > 0)
+  if (nchildren > 0)
     XFree((char *)children);
 
   /* after the windows already on the screen are in place,
@@ -704,7 +704,7 @@ void CaptureAllWindows(void)
   PPosOverride = False;
   KeepOnTop();
   MyXUngrabServer(dpy);
-  XSync(dpy,0); /* should we do this on initial capture? */
+  XSync(dpy, 0); /* should we do this on initial capture? */
 }
 
 /*
@@ -720,7 +720,8 @@ void SetRCDefaults()
     "XORValue 0",
     "DefaultFont fixed",
     "DefaultColors black grey",
-    "MenuStyle * fvwm, Foreground black, Background grey, Greyed slategrey",
+    "MenuStyle * fvwm, Foreground black, Background grey, Greyed "
+    "slategrey",
     "TitleStyle Centered -- Raised",
     "Style \"*\" Color lightgrey/dimgrey, Title",
     "Style \"*\" RandomPlacement, SmartPlacement",
@@ -731,13 +732,12 @@ void SetRCDefaults()
     "+ \"I\" WindowId $0 FlipFocus",
     "+ \"I\" WindowId $0 Raise",
     "+ \"I\" WindowId $0 WarpToWindow 5p 5p",
-    NULL
-  };
-  int i=0;
+    NULL};
+  int i = 0;
 
   while (defaults[i])
   {
-    ExecuteFunction(defaults[i],NULL,&Event,C_ROOT,1);
+    ExecuteFunction(defaults[i], NULL, &Event, C_ROOT, 1);
     i++;
   }
 } /* SetRCDefaults */
@@ -767,26 +767,27 @@ int MappedNotOverride(Window w)
 
   isIconicState = DontCareState;
 
-  if((w==Scr.NoFocusWin)||(!XGetWindowAttributes(dpy, w, &wa)))
+  if ((w == Scr.NoFocusWin) || (!XGetWindowAttributes(dpy, w, &wa)))
     return False;
 
-  if(XGetWindowProperty(dpy,w,_XA_WM_STATE,0L,3L,False,_XA_WM_STATE,
-			&atype,&aformat,&nitems,&bytes_remain,&prop)==Success)
+  if (XGetWindowProperty(dpy, w, _XA_WM_STATE, 0L, 3L, False,
+                         _XA_WM_STATE, &atype, &aformat, &nitems,
+                         &bytes_remain, &prop) == Success)
   {
-    if(prop != NULL)
+    if (prop != NULL)
     {
       isIconicState = *(long *)prop;
       XFree(prop);
     }
   }
-  if(wa.override_redirect == True)
+  if (wa.override_redirect == True)
   {
-    XSelectInput(dpy,w,FocusChangeMask);
+    XSelectInput(dpy, w, FocusChangeMask);
   }
-  return (((isIconicState == IconicState)||(wa.map_state != IsUnmapped)) &&
-	  (wa.override_redirect != True));
+  return (
+    ((isIconicState == IconicState) || (wa.map_state != IsUnmapped)) &&
+    (wa.override_redirect != True));
 }
-
 
 /***********************************************************************
  *
@@ -820,34 +821,37 @@ Atom _XA_OL_DECOR_RESIZE;
 Atom _XA_OL_DECOR_HEADER;
 Atom _XA_OL_DECOR_ICON_NAME;
 
-void InternUsefulAtoms (void)
+void InternUsefulAtoms(void)
 {
   /*
    * Create priority colors if necessary.
    */
-  _XA_MIT_PRIORITY_COLORS = XInternAtom(dpy, "_MIT_PRIORITY_COLORS", False);
-  _XA_WM_CHANGE_STATE = XInternAtom (dpy, "WM_CHANGE_STATE", False);
-  _XA_WM_STATE = XInternAtom (dpy, "WM_STATE", False);
-  _XA_WM_COLORMAP_WINDOWS = XInternAtom (dpy, "WM_COLORMAP_WINDOWS", False);
-  _XA_WM_PROTOCOLS = XInternAtom (dpy, "WM_PROTOCOLS", False);
-  _XA_WM_TAKE_FOCUS = XInternAtom (dpy, "WM_TAKE_FOCUS", False);
-  _XA_WM_DELETE_WINDOW = XInternAtom (dpy, "WM_DELETE_WINDOW", False);
-  _XA_WM_DESKTOP = XInternAtom (dpy, "WM_DESKTOP", False);
-  _XA_MwmAtom=XInternAtom(dpy,"_MOTIF_WM_HINTS",False);
-  _XA_MOTIF_WM=XInternAtom(dpy,"_MOTIF_WM_INFO",False);
+  _XA_MIT_PRIORITY_COLORS =
+    XInternAtom(dpy, "_MIT_PRIORITY_COLORS", False);
+  _XA_WM_CHANGE_STATE = XInternAtom(dpy, "WM_CHANGE_STATE", False);
+  _XA_WM_STATE = XInternAtom(dpy, "WM_STATE", False);
+  _XA_WM_COLORMAP_WINDOWS =
+    XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+  _XA_WM_PROTOCOLS = XInternAtom(dpy, "WM_PROTOCOLS", False);
+  _XA_WM_TAKE_FOCUS = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
+  _XA_WM_DELETE_WINDOW = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+  _XA_WM_DESKTOP = XInternAtom(dpy, "WM_DESKTOP", False);
+  _XA_MwmAtom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
+  _XA_MOTIF_WM = XInternAtom(dpy, "_MOTIF_WM_INFO", False);
 
-  _XA_OL_WIN_ATTR=XInternAtom(dpy,"_OL_WIN_ATTR",False);
-  _XA_OL_WT_BASE=XInternAtom(dpy,"_OL_WT_BASE",False);
-  _XA_OL_WT_CMD=XInternAtom(dpy,"_OL_WT_CMD",False);
-  _XA_OL_WT_HELP=XInternAtom(dpy,"_OL_WT_HELP",False);
-  _XA_OL_WT_NOTICE=XInternAtom(dpy,"_OL_WT_NOTICE",False);
-  _XA_OL_WT_OTHER=XInternAtom(dpy,"_OL_WT_OTHER",False);
-  _XA_OL_DECOR_ADD=XInternAtom(dpy,"_OL_DECOR_ADD",False);
-  _XA_OL_DECOR_DEL=XInternAtom(dpy,"_OL_DECOR_DEL",False);
-  _XA_OL_DECOR_CLOSE=XInternAtom(dpy,"_OL_DECOR_CLOSE",False);
-  _XA_OL_DECOR_RESIZE=XInternAtom(dpy,"_OL_DECOR_RESIZE",False);
-  _XA_OL_DECOR_HEADER=XInternAtom(dpy,"_OL_DECOR_HEADER",False);
-  _XA_OL_DECOR_ICON_NAME=XInternAtom(dpy,"_OL_DECOR_ICON_NAME",False);
+  _XA_OL_WIN_ATTR = XInternAtom(dpy, "_OL_WIN_ATTR", False);
+  _XA_OL_WT_BASE = XInternAtom(dpy, "_OL_WT_BASE", False);
+  _XA_OL_WT_CMD = XInternAtom(dpy, "_OL_WT_CMD", False);
+  _XA_OL_WT_HELP = XInternAtom(dpy, "_OL_WT_HELP", False);
+  _XA_OL_WT_NOTICE = XInternAtom(dpy, "_OL_WT_NOTICE", False);
+  _XA_OL_WT_OTHER = XInternAtom(dpy, "_OL_WT_OTHER", False);
+  _XA_OL_DECOR_ADD = XInternAtom(dpy, "_OL_DECOR_ADD", False);
+  _XA_OL_DECOR_DEL = XInternAtom(dpy, "_OL_DECOR_DEL", False);
+  _XA_OL_DECOR_CLOSE = XInternAtom(dpy, "_OL_DECOR_CLOSE", False);
+  _XA_OL_DECOR_RESIZE = XInternAtom(dpy, "_OL_DECOR_RESIZE", False);
+  _XA_OL_DECOR_HEADER = XInternAtom(dpy, "_OL_DECOR_HEADER", False);
+  _XA_OL_DECOR_ICON_NAME =
+    XInternAtom(dpy, "_OL_DECOR_ICON_NAME", False);
   return;
 }
 
@@ -857,13 +861,12 @@ void InternUsefulAtoms (void)
  *	newhandler: Installs new signal handler (reliable semantics)
  *
  ************************************************************************/
-void
-newhandler(int sig)
+void newhandler(int sig)
 {
 #ifdef HAVE_SIGACTION
-  struct sigaction  sigact;
+  struct sigaction sigact;
 
-  sigaction(sig,NULL,&sigact);
+  sigaction(sig, NULL, &sigact);
   if (sigact.sa_handler != SIG_IGN)
   {
     /*
@@ -881,11 +884,10 @@ newhandler(int sig)
   }
 #else
   /* We don't have sigaction(), so use less robust methods.  */
-  if (signal(sig,SIG_IGN) == SIG_IGN)
-    signal(sig,SigDone);
+  if (signal(sig, SIG_IGN) == SIG_IGN)
+    signal(sig, SigDone);
 #endif
 }
-
 
 /*************************************************************************
  * Restart on a signal
@@ -906,10 +908,12 @@ RETSIGTYPE Restart(int nonsense)
 void CreateCursors(void)
 {
   /* define cursors */
-  Scr.FvwmCursors[POSITION] = XCreateFontCursor(dpy,XC_top_left_corner);
+  Scr.FvwmCursors[POSITION] =
+    XCreateFontCursor(dpy, XC_top_left_corner);
   Scr.FvwmCursors[DEFAULT] = XCreateFontCursor(dpy, XC_top_left_arrow);
   Scr.FvwmCursors[SYS] = XCreateFontCursor(dpy, XC_hand2);
-  Scr.FvwmCursors[TITLE_CURSOR] = XCreateFontCursor(dpy, XC_top_left_arrow);
+  Scr.FvwmCursors[TITLE_CURSOR] =
+    XCreateFontCursor(dpy, XC_top_left_arrow);
   Scr.FvwmCursors[MOVE] = XCreateFontCursor(dpy, XC_fleur);
   Scr.FvwmCursors[MENU] = XCreateFontCursor(dpy, XC_sb_left_arrow);
   Scr.FvwmCursors[WAIT] = XCreateFontCursor(dpy, XC_watch);
@@ -919,10 +923,14 @@ void CreateCursors(void)
   Scr.FvwmCursors[RIGHT] = XCreateFontCursor(dpy, XC_right_side);
   Scr.FvwmCursors[TOP] = XCreateFontCursor(dpy, XC_top_side);
   Scr.FvwmCursors[BOTTOM] = XCreateFontCursor(dpy, XC_bottom_side);
-  Scr.FvwmCursors[TOP_LEFT] = XCreateFontCursor(dpy,XC_top_left_corner);
-  Scr.FvwmCursors[TOP_RIGHT] = XCreateFontCursor(dpy,XC_top_right_corner);
-  Scr.FvwmCursors[BOTTOM_LEFT] = XCreateFontCursor(dpy,XC_bottom_left_corner);
-  Scr.FvwmCursors[BOTTOM_RIGHT] =XCreateFontCursor(dpy,XC_bottom_right_corner);
+  Scr.FvwmCursors[TOP_LEFT] =
+    XCreateFontCursor(dpy, XC_top_left_corner);
+  Scr.FvwmCursors[TOP_RIGHT] =
+    XCreateFontCursor(dpy, XC_top_right_corner);
+  Scr.FvwmCursors[BOTTOM_LEFT] =
+    XCreateFontCursor(dpy, XC_bottom_left_corner);
+  Scr.FvwmCursors[BOTTOM_RIGHT] =
+    XCreateFontCursor(dpy, XC_bottom_right_corner);
 }
 
 /***********************************************************************
@@ -934,85 +942,85 @@ void CreateCursors(void)
 void LoadDefaultLeftButton(ButtonFace *bf, int i)
 {
 #ifndef VECTOR_BUTTONS
-    bf->style = SimpleButton;
+  bf->style = SimpleButton;
 #else
-    bf->style = VectorButton;
-    switch (i % 5)
-    {
-    case 0:
-    case 4:
-	bf->vector.x[0] = 22;
-	bf->vector.y[0] = 39;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 78;
-	bf->vector.y[1] = 39;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 78;
-	bf->vector.y[2] = 61;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 22;
-	bf->vector.y[3] = 61;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 22;
-	bf->vector.y[4] = 39;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    case 1:
-	bf->vector.x[0] = 32;
-	bf->vector.y[0] = 45;
-	bf->vector.line_style[0] = 0;
-	bf->vector.x[1] = 68;
-	bf->vector.y[1] = 45;
-	bf->vector.line_style[1] = 0;
-	bf->vector.x[2] = 68;
-	bf->vector.y[2] = 55;
-	bf->vector.line_style[2] = 1;
-	bf->vector.x[3] = 32;
-	bf->vector.y[3] = 55;
-	bf->vector.line_style[3] = 1;
-	bf->vector.x[4] = 32;
-	bf->vector.y[4] = 45;
-	bf->vector.line_style[4] = 0;
-	bf->vector.num = 5;
-	break;
-    case 2:
-	bf->vector.x[0] = 49;
-	bf->vector.y[0] = 49;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 51;
-	bf->vector.y[1] = 49;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 51;
-	bf->vector.y[2] = 51;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 49;
-	bf->vector.y[3] = 51;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 49;
-	bf->vector.y[4] = 49;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    case 3:
-	bf->vector.x[0] = 32;
-	bf->vector.y[0] = 45;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 68;
-	bf->vector.y[1] = 45;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 68;
-	bf->vector.y[2] = 55;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 32;
-	bf->vector.y[3] = 55;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 32;
-	bf->vector.y[4] = 45;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    }
+  bf->style = VectorButton;
+  switch (i % 5)
+  {
+  case 0:
+  case 4:
+    bf->vector.x[0] = 22;
+    bf->vector.y[0] = 39;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 78;
+    bf->vector.y[1] = 39;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 78;
+    bf->vector.y[2] = 61;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 22;
+    bf->vector.y[3] = 61;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 22;
+    bf->vector.y[4] = 39;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  case 1:
+    bf->vector.x[0] = 32;
+    bf->vector.y[0] = 45;
+    bf->vector.line_style[0] = 0;
+    bf->vector.x[1] = 68;
+    bf->vector.y[1] = 45;
+    bf->vector.line_style[1] = 0;
+    bf->vector.x[2] = 68;
+    bf->vector.y[2] = 55;
+    bf->vector.line_style[2] = 1;
+    bf->vector.x[3] = 32;
+    bf->vector.y[3] = 55;
+    bf->vector.line_style[3] = 1;
+    bf->vector.x[4] = 32;
+    bf->vector.y[4] = 45;
+    bf->vector.line_style[4] = 0;
+    bf->vector.num = 5;
+    break;
+  case 2:
+    bf->vector.x[0] = 49;
+    bf->vector.y[0] = 49;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 51;
+    bf->vector.y[1] = 49;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 51;
+    bf->vector.y[2] = 51;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 49;
+    bf->vector.y[3] = 51;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 49;
+    bf->vector.y[4] = 49;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  case 3:
+    bf->vector.x[0] = 32;
+    bf->vector.y[0] = 45;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 68;
+    bf->vector.y[1] = 45;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 68;
+    bf->vector.y[2] = 55;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 32;
+    bf->vector.y[3] = 55;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 32;
+    bf->vector.y[4] = 45;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  }
 #endif /* VECTOR_BUTTONS */
 }
 
@@ -1025,85 +1033,85 @@ void LoadDefaultLeftButton(ButtonFace *bf, int i)
 void LoadDefaultRightButton(ButtonFace *bf, int i)
 {
 #ifndef VECTOR_BUTTONS
-    bf->style = SimpleButton;
+  bf->style = SimpleButton;
 #else
-    bf->style = VectorButton;
-    switch (i % 5)
-    {
-    case 0:
-    case 3:
-	bf->vector.x[0] = 25;
-	bf->vector.y[0] = 25;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 75;
-	bf->vector.y[1] = 25;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 75;
-	bf->vector.y[2] = 75;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 25;
-	bf->vector.y[3] = 75;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 25;
-	bf->vector.y[4] = 25;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    case 1:
-	bf->vector.x[0] = 39;
-	bf->vector.y[0] = 39;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 61;
-	bf->vector.y[1] = 39;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 61;
-	bf->vector.y[2] = 61;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 39;
-	bf->vector.y[3] = 61;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 39;
-	bf->vector.y[4] = 39;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    case 2:
-	bf->vector.x[0] = 49;
-	bf->vector.y[0] = 49;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 51;
-	bf->vector.y[1] = 49;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 51;
-	bf->vector.y[2] = 51;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 49;
-	bf->vector.y[3] = 51;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 49;
-	bf->vector.y[4] = 49;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    case 4:
-	bf->vector.x[0] = 36;
-	bf->vector.y[0] = 36;
-	bf->vector.line_style[0] = 1;
-	bf->vector.x[1] = 64;
-	bf->vector.y[1] = 36;
-	bf->vector.line_style[1] = 1;
-	bf->vector.x[2] = 64;
-	bf->vector.y[2] = 64;
-	bf->vector.line_style[2] = 0;
-	bf->vector.x[3] = 36;
-	bf->vector.y[3] = 64;
-	bf->vector.line_style[3] = 0;
-	bf->vector.x[4] = 36;
-	bf->vector.y[4] = 36;
-	bf->vector.line_style[4] = 1;
-	bf->vector.num = 5;
-	break;
-    }
+  bf->style = VectorButton;
+  switch (i % 5)
+  {
+  case 0:
+  case 3:
+    bf->vector.x[0] = 25;
+    bf->vector.y[0] = 25;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 75;
+    bf->vector.y[1] = 25;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 75;
+    bf->vector.y[2] = 75;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 25;
+    bf->vector.y[3] = 75;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 25;
+    bf->vector.y[4] = 25;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  case 1:
+    bf->vector.x[0] = 39;
+    bf->vector.y[0] = 39;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 61;
+    bf->vector.y[1] = 39;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 61;
+    bf->vector.y[2] = 61;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 39;
+    bf->vector.y[3] = 61;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 39;
+    bf->vector.y[4] = 39;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  case 2:
+    bf->vector.x[0] = 49;
+    bf->vector.y[0] = 49;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 51;
+    bf->vector.y[1] = 49;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 51;
+    bf->vector.y[2] = 51;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 49;
+    bf->vector.y[3] = 51;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 49;
+    bf->vector.y[4] = 49;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  case 4:
+    bf->vector.x[0] = 36;
+    bf->vector.y[0] = 36;
+    bf->vector.line_style[0] = 1;
+    bf->vector.x[1] = 64;
+    bf->vector.y[1] = 36;
+    bf->vector.line_style[1] = 1;
+    bf->vector.x[2] = 64;
+    bf->vector.y[2] = 64;
+    bf->vector.line_style[2] = 0;
+    bf->vector.x[3] = 36;
+    bf->vector.y[3] = 64;
+    bf->vector.line_style[3] = 0;
+    bf->vector.x[4] = 36;
+    bf->vector.y[4] = 36;
+    bf->vector.line_style[4] = 1;
+    bf->vector.num = 5;
+    break;
+  }
 #endif /* VECTOR_BUTTONS */
 }
 
@@ -1115,12 +1123,15 @@ void LoadDefaultRightButton(ButtonFace *bf, int i)
  ************************************************************************/
 void LoadDefaultButton(ButtonFace *bf, int i)
 {
-    int n = i / 2;
-    if ((n * 2) == i) {
-	if (--n < 0) n = 4;
-	LoadDefaultRightButton(bf, n);
-    } else
-	LoadDefaultLeftButton(bf, n);
+  int n = i / 2;
+  if ((n * 2) == i)
+  {
+    if (--n < 0)
+      n = 4;
+    LoadDefaultRightButton(bf, n);
+  }
+  else
+    LoadDefaultLeftButton(bf, n);
 }
 
 extern void FreeButtonFace(Display *dpy, ButtonFace *bf);
@@ -1133,41 +1144,42 @@ extern void FreeButtonFace(Display *dpy, ButtonFace *bf);
  ************************************************************************/
 void ResetAllButtons(FvwmDecor *fl)
 {
-    TitleButton *leftp, *rightp;
-    int i=0;
+  TitleButton *leftp, *rightp;
+  int i = 0;
 
-    for (leftp=fl->left_buttons, rightp=fl->right_buttons;
-         i < 5;
-         ++i, ++leftp, ++rightp) {
-      ButtonFace *lface, *rface;
-      int j;
+  for (leftp = fl->left_buttons, rightp = fl->right_buttons; i < 5;
+       ++i, ++leftp, ++rightp)
+  {
+    ButtonFace *lface, *rface;
+    int j;
 
-      leftp->flags = 0;
-      rightp->flags = 0;
+    leftp->flags = 0;
+    rightp->flags = 0;
 
-      lface = leftp->state;
-      rface = rightp->state;
+    lface = leftp->state;
+    rface = rightp->state;
 
+    FreeButtonFace(dpy, lface);
+    FreeButtonFace(dpy, rface);
+
+    LoadDefaultLeftButton(lface++, i);
+    LoadDefaultRightButton(rface++, i);
+
+    for (j = 1; j < MaxButtonState; ++j, ++lface, ++rface)
+    {
       FreeButtonFace(dpy, lface);
       FreeButtonFace(dpy, rface);
 
-      LoadDefaultLeftButton(lface++, i);
-      LoadDefaultRightButton(rface++, i);
-
-      for (j = 1; j < MaxButtonState; ++j, ++lface, ++rface) {
-        FreeButtonFace(dpy, lface);
-        FreeButtonFace(dpy, rface);
-
-        *lface = leftp->state[0];
-        *rface = rightp->state[0];
-      }
+      *lface = leftp->state[0];
+      *rface = rightp->state[0];
     }
+  }
 
-    /* standard MWM decoration hint assignments (veliaa@rpi.edu)
+  /* standard MWM decoration hint assignments (veliaa@rpi.edu)
        [Menu]  - Title Bar - [Minimize] [Maximize] */
-    fl->left_buttons[0].flags |= MWMDecorMenu;
-    fl->right_buttons[1].flags |= MWMDecorMinimize;
-    fl->right_buttons[0].flags |= MWMDecorMaximize;
+  fl->left_buttons[0].flags |= MWMDecorMenu;
+  fl->right_buttons[1].flags |= MWMDecorMinimize;
+  fl->right_buttons[0].flags |= MWMDecorMaximize;
 }
 
 /***********************************************************************
@@ -1183,27 +1195,30 @@ void DestroyFvwmDecor(FvwmDecor *fl)
   ResetAllButtons(fl);
   for (i = 0; i < 3; ++i)
   {
-      int j = 0;
-      for (; j < MaxButtonState; ++j)
-	  FreeButtonFace(dpy, &fl->titlebar.state[i]);
+    int j = 0;
+    for (; j < MaxButtonState; ++j)
+      FreeButtonFace(dpy, &fl->titlebar.state[i]);
   }
 #ifdef BORDERSTYLE
   FreeButtonFace(dpy, &fl->BorderStyle.active);
   FreeButtonFace(dpy, &fl->BorderStyle.inactive);
 #endif
 #ifdef USEDECOR
-  if (fl->tag) {
-      free(fl->tag);
-      fl->tag = NULL;
+  if (fl->tag)
+  {
+    free(fl->tag);
+    fl->tag = NULL;
   }
 #endif
-  if (fl->HiReliefGC != NULL) {
-      XFreeGC(dpy, fl->HiReliefGC);
-      fl->HiReliefGC = NULL;
+  if (fl->HiReliefGC != NULL)
+  {
+    XFreeGC(dpy, fl->HiReliefGC);
+    fl->HiReliefGC = NULL;
   }
-  if (fl->HiShadowGC != NULL) {
-      XFreeGC(dpy, fl->HiShadowGC);
-      fl->HiShadowGC = NULL;
+  if (fl->HiShadowGC != NULL)
+  {
+    XFreeGC(dpy, fl->HiShadowGC);
+    fl->HiShadowGC = NULL;
   }
   if (fl->WindowFont.font != NULL)
     XFreeFont(dpy, fl->WindowFont.font);
@@ -1216,58 +1231,62 @@ void DestroyFvwmDecor(FvwmDecor *fl)
  ************************************************************************/
 void InitFvwmDecor(FvwmDecor *fl)
 {
-    int i;
-    ButtonFace tmpbf;
+  int i;
+  ButtonFace tmpbf;
 
-    fl->HiReliefGC = NULL;
-    fl->HiShadowGC = NULL;
-    fl->TitleHeight = 0;
-    fl->WindowFont.font = NULL;
+  fl->HiReliefGC = NULL;
+  fl->HiShadowGC = NULL;
+  fl->TitleHeight = 0;
+  fl->WindowFont.font = NULL;
 
 #ifdef USEDECOR
-    fl->tag = NULL;
-    fl->next = NULL;
+  fl->tag = NULL;
+  fl->next = NULL;
 
-    if (fl != &Scr.DefaultDecor) {
-	extern void AddToDecor(FvwmDecor *, char *);
-	AddToDecor(fl, "HilightColor black grey");
-	AddToDecor(fl, "WindowFont fixed");
-    }
+  if (fl != &Scr.DefaultDecor)
+  {
+    extern void AddToDecor(FvwmDecor *, char *);
+    AddToDecor(fl, "HilightColor black grey");
+    AddToDecor(fl, "WindowFont fixed");
+  }
 #endif
 
-    /* initialize title-bar button styles */
-    tmpbf.style = SimpleButton;
+  /* initialize title-bar button styles */
+  tmpbf.style = SimpleButton;
 #ifdef MULTISTYLE
-    tmpbf.next = NULL;
+  tmpbf.next = NULL;
 #endif
-    for (i = 0; i < 5; ++i) {
-	int j = 0;
-	for (; j < MaxButtonState; ++j) {
-	    fl->left_buttons[i].state[j] =
-		fl->right_buttons[i].state[j] =  tmpbf;
-	}
+  for (i = 0; i < 5; ++i)
+  {
+    int j = 0;
+    for (; j < MaxButtonState; ++j)
+    {
+      fl->left_buttons[i].state[j] = fl->right_buttons[i].state[j] =
+        tmpbf;
     }
+  }
 
-    /* reset to default button set */
-    ResetAllButtons(fl);
+  /* reset to default button set */
+  ResetAllButtons(fl);
 
-    /* initialize title-bar styles */
-    fl->titlebar.flags = 0;
+  /* initialize title-bar styles */
+  fl->titlebar.flags = 0;
 
-    for (i = 0; i < MaxButtonState; ++i) {
-	fl->titlebar.state[i].style = SimpleButton;
+  for (i = 0; i < MaxButtonState; ++i)
+  {
+    fl->titlebar.state[i].style = SimpleButton;
 #ifdef MULTISTYLE
-	fl->titlebar.state[i].next = NULL;
+    fl->titlebar.state[i].next = NULL;
 #endif
-    }
+  }
 
 #ifdef BORDERSTYLE
-    /* initialize border texture styles */
-    fl->BorderStyle.active.style = SimpleButton;
-    fl->BorderStyle.inactive.style = SimpleButton;
+  /* initialize border texture styles */
+  fl->BorderStyle.active.style = SimpleButton;
+  fl->BorderStyle.inactive.style = SimpleButton;
 #ifdef MULTISTYLE
-    fl->BorderStyle.active.next = NULL;
-    fl->BorderStyle.inactive.next = NULL;
+  fl->BorderStyle.active.next = NULL;
+  fl->BorderStyle.inactive.next = NULL;
 #endif
 #endif
 }
@@ -1314,14 +1333,13 @@ void InitVariables(void)
   Scr.FvwmRoot.next = 0;
 
   /*  RBW - 11/13/1998 - 2 new fields to init - stacking order chain.  */
-  Scr.FvwmRoot.stack_next  =  &Scr.FvwmRoot;
-  Scr.FvwmRoot.stack_prev  =  &Scr.FvwmRoot;
+  Scr.FvwmRoot.stack_next = &Scr.FvwmRoot;
+  Scr.FvwmRoot.stack_prev = &Scr.FvwmRoot;
 
-  XGetWindowAttributes(dpy,Scr.Root,&(Scr.FvwmRoot.attr));
+  XGetWindowAttributes(dpy, Scr.Root, &(Scr.FvwmRoot.attr));
   Scr.root_pushes = 0;
   Scr.pushed_window = &Scr.FvwmRoot;
   Scr.FvwmRoot.number_cmap_windows = 0;
-
 
   Scr.MyDisplayWidth = DisplayWidth(dpy, Scr.screen);
   Scr.MyDisplayHeight = DisplayHeight(dpy, Scr.screen);
@@ -1338,8 +1356,8 @@ void InitVariables(void)
   Scr.IconFont.font = NULL;
 
 #ifndef NON_VIRTUAL
-  Scr.VxMax = 2*Scr.MyDisplayWidth;
-  Scr.VyMax = 2*Scr.MyDisplayHeight;
+  Scr.VxMax = 2 * Scr.MyDisplayWidth;
+  Scr.VyMax = 2 * Scr.MyDisplayHeight;
 #else
   Scr.VxMax = 0;
   Scr.VyMax = 0;
@@ -1359,10 +1377,10 @@ void InitVariables(void)
 
     Scr.CurrentDesk = 0;
     if ((XGetWindowProperty(dpy, Scr.Root, _XA_WM_DESKTOP, 0L, 1L, True,
-			    _XA_WM_DESKTOP, &atype, &aformat, &nitems,
-			    &bytes_remain, &prop))==Success)
+                            _XA_WM_DESKTOP, &atype, &aformat, &nitems,
+                            &bytes_remain, &prop)) == Success)
     {
-      if(prop != NULL)
+      if (prop != NULL)
       {
         Restarting = True;
         Scr.CurrentDesk = *(unsigned long *)prop;
@@ -1399,15 +1417,15 @@ void InitVariables(void)
   Scr.StipledTitles = False;
 
   /*  RBW - 11/02/1998    */
-  Scr.go.ModifyUSP                          =  1U;
-  Scr.go.CaptureHonorsStartsOnPage          =  1U;
-  Scr.go.RecaptureHonorsStartsOnPage        =  0U;
-  Scr.go.ActivePlacementHonorsStartsOnPage  =  0U;
+  Scr.go.ModifyUSP = 1U;
+  Scr.go.CaptureHonorsStartsOnPage = 1U;
+  Scr.go.RecaptureHonorsStartsOnPage = 0U;
+  Scr.go.ActivePlacementHonorsStartsOnPage = 0U;
 
   Scr.gs.EmulateMWM = False;
   Scr.gs.EmulateWIN = False;
   /* Not the right place for this, should only be called once somewhere .. */
-  InitPictureCMap(dpy,Scr.Root);
+  InitPictureCMap(dpy, Scr.Root);
 
   return;
 }
@@ -1420,27 +1438,27 @@ void InitVariables(void)
  ************************************************************************/
 void Reborder(void)
 {
-  FvwmWindow *tmp;			/* temp fvwm window structure */
+  FvwmWindow *tmp; /* temp fvwm window structure */
 
   /* put a border back around all windows */
-  MyXGrabServer (dpy);
+  MyXGrabServer(dpy);
 
-  InstallWindowColormaps (&Scr.FvwmRoot);	/* force reinstall */
-/*
+  InstallWindowColormaps(&Scr.FvwmRoot); /* force reinstall */
+                                         /*
     RBW - 05/15/1998
     Grab the last window and work backwards: preserve stacking order on restart.
 */
-  for (tmp = Scr.FvwmRoot.stack_prev; tmp != &Scr.FvwmRoot; tmp = tmp->stack_prev)
+  for (tmp = Scr.FvwmRoot.stack_prev; tmp != &Scr.FvwmRoot;
+       tmp = tmp->stack_prev)
   {
-    RestoreWithdrawnLocation (tmp,True);
-    XUnmapWindow(dpy,tmp->frame);
-    XDestroyWindow(dpy,tmp->frame);
+    RestoreWithdrawnLocation(tmp, True);
+    XUnmapWindow(dpy, tmp->frame);
+    XDestroyWindow(dpy, tmp->frame);
   }
 
-  MyXUngrabServer (dpy);
-  XSetInputFocus (dpy, PointerRoot, RevertToPointerRoot,CurrentTime);
-  XSync(dpy,0);
-
+  MyXUngrabServer(dpy);
+  XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
+  XSync(dpy, 0);
 }
 
 /***********************************************************************
@@ -1461,37 +1479,37 @@ void Done(int restart, char *command)
   MenuRoot *mr;
 
 #ifndef NON_VIRTUAL
-  MoveViewport(0,0,False);
+  MoveViewport(0, 0, False);
 #endif
 
   mr = FindPopup("ExitFunction");
-  if(mr != NULL)
-    ExecuteFunction("Function ExitFunction",NULL,&Event,C_ROOT,1);
+  if (mr != NULL)
+    ExecuteFunction("Function ExitFunction", NULL, &Event, C_ROOT, 1);
 
   /* Close all my pipes */
   ClosePipes();
 
-  Reborder ();
+  Reborder();
 
-  if(restart)
+  if (restart)
   {
-    SaveDesktopState();		/* I wonder why ... */
+    SaveDesktopState(); /* I wonder why ... */
 
     /* Really make sure that the connection is closed and cleared! */
-    XSelectInput(dpy, Scr.Root, 0 );
+    XSelectInput(dpy, Scr.Root, 0);
     XSync(dpy, 0);
     XCloseDisplay(dpy);
 
     {
       char *my_argv[10];
-      int i,done,j;
+      int i, done, j;
 
-      i=0;
-      j=0;
+      i = 0;
+      j = 0;
       done = 0;
-      while((g_argv[j] != NULL)&&(i<8))
+      while ((g_argv[j] != NULL) && (i < 8))
       {
-        if(strcmp(g_argv[j],"-s")!=0)
+        if (strcmp(g_argv[j], "-s") != 0)
         {
           my_argv[i] = g_argv[j];
           i++;
@@ -1500,22 +1518,22 @@ void Done(int restart, char *command)
         else
           j++;
       }
-      if(strstr(command,"fvwm")!= NULL)
+      if (strstr(command, "fvwm") != NULL)
         my_argv[i++] = "-s";
-      while(i<10)
+      while (i < 10)
         my_argv[i++] = NULL;
 
       /* really need to destroy all windows, explicitly,
        * not sleep, but this is adequate for now */
       sleep(1);
       ReapChildren();
-      execvp(command,my_argv);
+      execvp(command, my_argv);
     }
-    fvwm_msg(ERR,"Done","Call of '%s' failed!!!! (restarting '%s' instead)",
-             command,
-             g_argv[0]);
-    execvp(g_argv[0], g_argv);    /* that _should_ work */
-    fvwm_msg(ERR,"Done","Call of '%s' failed!!!!", g_argv[0]);
+    fvwm_msg(ERR, "Done",
+             "Call of '%s' failed!!!! (restarting '%s' instead)",
+             command, g_argv[0]);
+    execvp(g_argv[0], g_argv); /* that _should_ work */
+    fvwm_msg(ERR, "Done", "Call of '%s' failed!!!!", g_argv[0]);
   }
   else
   {
@@ -1526,7 +1544,7 @@ void Done(int restart, char *command)
 
 int CatchRedirectError(Display *dpy, XErrorEvent *event)
 {
-  fvwm_msg(ERR,"CatchRedirectError","another WM is running");
+  fvwm_msg(ERR, "CatchRedirectError", "another WM is running");
   exit(1);
 }
 
@@ -1557,19 +1575,19 @@ int FvwmErrorHandler(Display *dpy, XErrorEvent *event)
 
   /* some errors are acceptable, mostly they're caused by
    * trying to update a lost  window */
-  if((event->error_code == BadWindow)||(event->request_code == X_GetGeometry)||
-     (event->error_code==BadDrawable)||(event->request_code==X_SetInputFocus)||
-     (event->request_code==X_GrabButton)||
-     (event->request_code==X_ChangeWindowAttributes)||
-     (event->request_code == X_InstallColormap))
-    return 0 ;
+  if ((event->error_code == BadWindow) ||
+      (event->request_code == X_GetGeometry) ||
+      (event->error_code == BadDrawable) ||
+      (event->request_code == X_SetInputFocus) ||
+      (event->request_code == X_GrabButton) ||
+      (event->request_code == X_ChangeWindowAttributes) ||
+      (event->request_code == X_InstallColormap))
+    return 0;
 
-
-  fvwm_msg(ERR,"FvwmErrorHandler","*** internal error ***");
-  fvwm_msg(ERR,"FvwmErrorHandler","Request %d, Error %d, EventType: %d",
-           event->request_code,
-           event->error_code,
-           last_event_type);
+  fvwm_msg(ERR, "FvwmErrorHandler", "*** internal error ***");
+  fvwm_msg(ERR, "FvwmErrorHandler",
+           "Request %d, Error %d, EventType: %d", event->request_code,
+           event->error_code, last_event_type);
   return 0;
 }
 
@@ -1579,8 +1597,11 @@ void usage(void)
   fvwm_msg(INFO,"usage","\nFvwm Version %s Usage:\n\n",VERSION);
   fvwm_msg(INFO,"usage","  %s [-d dpy] [-debug] [-f config_cmd] [-s] [-blackout] [-version] [-h]\n",g_argv[0]);
 #else
-  fprintf(stderr,"\nFvwm Version %s Usage:\n\n",VERSION);
-  fprintf(stderr,"  %s [-d dpy] [-debug] [-f config_cmd] [-s] [-blackout] [-version] [-h]\n\n",g_argv[0]);
+  fprintf(stderr, "\nFvwm Version %s Usage:\n\n", VERSION);
+  fprintf(stderr,
+          "  %s [-d dpy] [-debug] [-f config_cmd] [-s] [-blackout] "
+          "[-version] [-h]\n\n",
+          g_argv[0]);
 #endif
 }
 
@@ -1596,18 +1617,17 @@ void SaveDesktopState()
 
   for (t = Scr.FvwmRoot.next; t != NULL; t = t->next)
   {
-    data[0] = (unsigned long) t->Desk;
-    XChangeProperty (dpy, t->w, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
-                     PropModeReplace, (unsigned char *) data, 1);
+    data[0] = (unsigned long)t->Desk;
+    XChangeProperty(dpy, t->w, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
+                    PropModeReplace, (unsigned char *)data, 1);
   }
 
-  data[0] = (unsigned long) Scr.CurrentDesk;
-  XChangeProperty (dpy, Scr.Root, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
-		   PropModeReplace, (unsigned char *) data, 1);
+  data[0] = (unsigned long)Scr.CurrentDesk;
+  XChangeProperty(dpy, Scr.Root, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
+                  PropModeReplace, (unsigned char *)data, 1);
 
   XSync(dpy, 0);
 }
-
 
 void SetMWM_INFO(Window window)
 {
@@ -1616,15 +1636,15 @@ void SetMWM_INFO(Window window)
   {
     long flags;
     Window win;
-  }  motif_wm_info;
+  } motif_wm_info;
 
   /* Set Motif WM_INFO atom to make motif relinquish
    * broken handling of modal dialogs */
-  motif_wm_info.flags     = 2;
+  motif_wm_info.flags = 2;
   motif_wm_info.win = window;
 
-  XChangeProperty(dpy,Scr.Root,_XA_MOTIF_WM,_XA_MOTIF_WM,32,
-		  PropModeReplace,(char *)&motif_wm_info,2);
+  XChangeProperty(dpy, Scr.Root, _XA_MOTIF_WM, _XA_MOTIF_WM, 32,
+                  PropModeReplace, (char *)&motif_wm_info, 2);
 #endif
 }
 
@@ -1635,24 +1655,21 @@ void BlackoutScreen()
 
   if (Blackout && (BlackoutWin == None) && !debugging)
   {
-    DBUG("BlackoutScreen","Blacking out screen during init...");
+    DBUG("BlackoutScreen", "Blacking out screen during init...");
     /* blackout screen */
-    attributes.border_pixel = BlackPixel(dpy,Scr.screen);
-    attributes.background_pixel = BlackPixel(dpy,Scr.screen);
+    attributes.border_pixel = BlackPixel(dpy, Scr.screen);
+    attributes.background_pixel = BlackPixel(dpy, Scr.screen);
     attributes.bit_gravity = NorthWestGravity;
-    attributes.override_redirect = True; /* is override redirect needed? */
-    valuemask = CWBorderPixel |
-      CWBackPixel   |
-      CWBitGravity  |
-      CWOverrideRedirect;
-    BlackoutWin = XCreateWindow(dpy,Scr.Root,0,0,
-                                DisplayWidth(dpy, Scr.screen),
-                                DisplayHeight(dpy, Scr.screen),0,
-                                CopyFromParent,
-                                CopyFromParent, CopyFromParent,
-                                valuemask,&attributes);
-    XMapWindow(dpy,BlackoutWin);
-    XSync(dpy,0);
+    attributes.override_redirect =
+      True; /* is override redirect needed? */
+    valuemask =
+      CWBorderPixel | CWBackPixel | CWBitGravity | CWOverrideRedirect;
+    BlackoutWin = XCreateWindow(
+      dpy, Scr.Root, 0, 0, DisplayWidth(dpy, Scr.screen),
+      DisplayHeight(dpy, Scr.screen), 0, CopyFromParent, CopyFromParent,
+      CopyFromParent, valuemask, &attributes);
+    XMapWindow(dpy, BlackoutWin);
+    XSync(dpy, 0);
   }
 } /* BlackoutScreen */
 
@@ -1660,9 +1677,9 @@ void UnBlackoutScreen()
 {
   if (Blackout && (BlackoutWin != None) && !debugging)
   {
-    DBUG("UnBlackoutScreen","UnBlacking out screen");
-    XDestroyWindow(dpy,BlackoutWin); /* unblacken the screen */
-    XSync(dpy,0);
+    DBUG("UnBlackoutScreen", "UnBlacking out screen");
+    XDestroyWindow(dpy, BlackoutWin); /* unblacken the screen */
+    XSync(dpy, 0);
     BlackoutWin = None;
   }
 } /* UnBlackoutScreen */

@@ -16,5 +16,5 @@
 #if 0
 void LoadIconFile(button_info*);
 #endif
-void CreateIconWindow(button_info*);
-void ConfigureIconWindow(button_info*);
+void CreateIconWindow(button_info *);
+void ConfigureIconWindow(button_info *);

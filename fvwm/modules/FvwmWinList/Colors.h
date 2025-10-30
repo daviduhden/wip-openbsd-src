@@ -16,4 +16,3 @@ Pixel GetColor(char *name);
 Pixel GetHilite(Pixel background);
 Pixel GetShadow(Pixel background);
 void nocolor(char *a, char *b);
-

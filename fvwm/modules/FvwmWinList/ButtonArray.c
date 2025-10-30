@@ -14,28 +14,26 @@
 
 #include "config.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "../../libs/fvwmlib.h"
 
-#include "FvwmWinList.h"
 #include "ButtonArray.h"
+#include "FvwmWinList.h"
 #include "Mallocs.h"
-
 
 extern XFontStruct *ButtonFont;
 extern Display *dpy;
 extern Window win;
-extern GC shadow[MAX_COLOUR_SETS],hilite[MAX_COLOUR_SETS];
-extern GC graph[MAX_COLOUR_SETS],background[MAX_COLOUR_SETS];
+extern GC shadow[MAX_COLOUR_SETS], hilite[MAX_COLOUR_SETS];
+extern GC graph[MAX_COLOUR_SETS], background[MAX_COLOUR_SETS];
 extern int LeftJustify, TruncateLeft, ShowFocus;
 
 extern long CurrentDesk;
 extern int ShowCurrentDesk;
-
 
 /*************************************************************************
  *                                                                       *
@@ -64,7 +62,7 @@ Button *ButtonNew(char *title, FvwmPicture *p, int up)
   }
   else
 
-  new->p.picture = 0;
+    new->p.picture = 0;
 
   new->up = up;
   new->next = NULL;
@@ -76,28 +74,33 @@ Button *ButtonNew(char *title, FvwmPicture *p, int up)
 /******************************************************************************
   InitArray - Initialize the arrary of buttons
 ******************************************************************************/
-void InitArray(ButtonArray *array,int x,int y,int w,int h)
+void InitArray(ButtonArray *array, int x, int y, int w, int h)
 {
-  array->count=0;
-  array->head=array->tail=NULL;
-  array->x=x;
-  array->y=y;
-  array->w=w;
-  array->h=h;
+  array->count = 0;
+  array->head = array->tail = NULL;
+  array->x = x;
+  array->y = y;
+  array->w = w;
+  array->h = h;
 }
 
 /******************************************************************************
   UpdateArray - Update the array specifics.  x,y, width, height
 ******************************************************************************/
-void UpdateArray(ButtonArray *array,int x,int y,int w, int h)
+void UpdateArray(ButtonArray *array, int x, int y, int w, int h)
 {
   Button *temp;
 
-  if (x!=-1) array->x=x;
-  if (y!=-1) array->y=y;
-  if (w!=-1) array->w=w;
-  if (h!=-1) array->h=h;
-  for(temp=array->head;temp!=NULL;temp=temp->next) temp->needsupdate=1;
+  if (x != -1)
+    array->x = x;
+  if (y != -1)
+    array->y = y;
+  if (w != -1)
+    array->w = w;
+  if (h != -1)
+    array->h = h;
+  for (temp = array->head; temp != NULL; temp = temp->next)
+    temp->needsupdate = 1;
 }
 
 /******************************************************************************
@@ -119,16 +122,16 @@ int AddButton(ButtonArray *array, char *title, FvwmPicture *p, int up)
   }
   array->count++;
 
-/* in Taskbar this replaces below  ArrangeButtonArray (array);
+  /* in Taskbar this replaces below  ArrangeButtonArray (array);
 */
 
-  new->tw=XTextWidth(ButtonFont,title,strlen(title));
-  new->truncatewidth=0;
-  new->next=NULL;
-  new->needsupdate=1;
-  new->set=0;
+  new->tw = XTextWidth(ButtonFont, title, strlen(title));
+  new->truncatewidth = 0;
+  new->next = NULL;
+  new->needsupdate = 1;
+  new->set = 0;
 
-  return (array->count-1);
+  return (array->count - 1);
 }
 
 /******************************************************************************
@@ -138,20 +141,23 @@ int UpdateButton(ButtonArray *array, int butnum, char *title, int up)
 {
   Button *temp;
 
-  temp=find_n(array,butnum);
-  if (temp!=NULL)
+  temp = find_n(array, butnum);
+  if (temp != NULL)
   {
-    if (title!=NULL)
+    if (title != NULL)
     {
-  size_t title_len = strlen(title);
-  temp->title = (char *)saferealloc(temp->title, title_len + 1);
-  strlcpy(temp->title, title, title_len + 1);
-      temp->tw=XTextWidth(ButtonFont,title,strlen(title));
+      size_t title_len = strlen(title);
+      temp->title = (char *)saferealloc(temp->title, title_len + 1);
+      strlcpy(temp->title, title, title_len + 1);
+      temp->tw = XTextWidth(ButtonFont, title, strlen(title));
       temp->truncatewidth = 0;
     }
-    if (up!=-1) temp->up=up;
-  } else return -1;
-  temp->needsupdate=1;
+    if (up != -1)
+      temp->up = up;
+  }
+  else
+    return -1;
+  temp->needsupdate = 1;
   return 1;
 }
 
@@ -161,8 +167,9 @@ int UpdateButton(ButtonArray *array, int butnum, char *title, int up)
 int UpdateButtonPicture(ButtonArray *array, int butnum, FvwmPicture *p)
 {
   Button *temp;
-  temp=find_n(array,butnum);
-  if (temp == NULL) return -1;
+  temp = find_n(array, butnum);
+  if (temp == NULL)
+    return -1;
   if (temp->p.picture != p->picture || temp->p.mask != p->mask)
   {
     temp->p.picture = p->picture;
@@ -182,7 +189,7 @@ int UpdateButtonSet(ButtonArray *array, int butnum, int set)
 {
   Button *btn;
 
-  btn=find_n(array, butnum);
+  btn = find_n(array, butnum);
   if (btn != NULL)
   {
     if ((btn->set & 1) != set)
@@ -190,14 +197,16 @@ int UpdateButtonSet(ButtonArray *array, int butnum, int set)
       btn->set = (btn->set & 2) | set;
       btn->needsupdate = 1;
     }
-  } else return -1;
+  }
+  else
+    return -1;
   return 1;
 }
 
 /******************************************************************************
   UpdateButtonDesk - Change desk of a button
 ******************************************************************************/
-int UpdateButtonDesk(ButtonArray *array, int butnum, long desk )
+int UpdateButtonDesk(ButtonArray *array, int butnum, long desk)
 {
   Button *btn;
 
@@ -205,37 +214,42 @@ int UpdateButtonDesk(ButtonArray *array, int butnum, long desk )
   if (btn != NULL)
   {
     btn->desk = desk;
-  } else return -1;
+  }
+  else
+    return -1;
   return 1;
 }
-
 
 /******************************************************************************
   RemoveButton - Delete a button from the list
 ******************************************************************************/
 void RemoveButton(ButtonArray *array, int butnum)
 {
-  Button *temp,*temp2;
+  Button *temp, *temp2;
 
-  if (butnum==0)
+  if (butnum == 0)
   {
-    temp2=array->head;
-    temp=array->head=array->head->next;
+    temp2 = array->head;
+    temp = array->head = array->head->next;
   }
   else
   {
-    temp=find_n(array,butnum-1);
-    if (temp==NULL) return;
-    temp2=temp->next;
-    temp->next=temp2->next;
+    temp = find_n(array, butnum - 1);
+    if (temp == NULL)
+      return;
+    temp2 = temp->next;
+    temp->next = temp2->next;
   }
 
-  if (array->tail==temp2) array->tail=temp;
+  if (array->tail == temp2)
+    array->tail = temp;
 
   FreeButton(temp2);
 
-  if (temp!=array->head) temp=temp->next;
-  for(;temp!=NULL;temp=temp->next) temp->needsupdate=1;
+  if (temp != array->head)
+    temp = temp->next;
+  for (; temp != NULL; temp = temp->next)
+    temp->needsupdate = 1;
 }
 
 /******************************************************************************
@@ -246,8 +260,9 @@ Button *find_n(ButtonArray *array, int n)
   Button *temp;
   int i;
 
-  temp=array->head;
-  for(i=0;i<n && temp!=NULL;i++,temp=temp->next);
+  temp = array->head;
+  for (i = 0; i < n && temp != NULL; i++, temp = temp->next)
+    ;
   return temp;
 }
 
@@ -256,8 +271,10 @@ Button *find_n(ButtonArray *array, int n)
 ******************************************************************************/
 void FreeButton(Button *ptr)
 {
-  if (ptr != NULL) {
-    if (ptr->title!=NULL) free(ptr->title);
+  if (ptr != NULL)
+  {
+    if (ptr->title != NULL)
+      free(ptr->title);
     free(ptr);
   }
 }
@@ -267,11 +284,11 @@ void FreeButton(Button *ptr)
 ******************************************************************************/
 void FreeAllButtons(ButtonArray *array)
 {
-Button *temp,*temp2;
-  for(temp=array->head;temp!=NULL;)
+  Button *temp, *temp2;
+  for (temp = array->head; temp != NULL;)
   {
-    temp2=temp;
-    temp=temp->next;
+    temp2 = temp;
+    temp = temp->next;
     FreeButton(temp2);
   }
 }
@@ -281,7 +298,7 @@ Button *temp,*temp2;
 ******************************************************************************/
 void DoButton(Button *button, int x, int y, int w, int h)
 {
-  int up,Fontheight,newx,set;
+  int up, Fontheight, newx, set;
   GC topgc;
   GC bottomgc;
   char *string;
@@ -289,8 +306,8 @@ void DoButton(Button *button, int x, int y, int w, int h)
   unsigned long gcm;
   XFontStruct *font;
 
-  up=button->up;
-  set=button->set;
+  up = button->up;
+  set = button->set;
   topgc = up ? hilite[set] : shadow[set];
   bottomgc = up ? shadow[set] : hilite[set];
   font = ButtonFont;
@@ -299,65 +316,70 @@ void DoButton(Button *button, int x, int y, int w, int h)
   gcv.font = font->fid;
   XChangeGC(dpy, graph[set], gcm, &gcv);
 
+  Fontheight = ButtonFont->ascent + ButtonFont->descent;
 
-  Fontheight=ButtonFont->ascent+ButtonFont->descent;
-
- /*? XClearArea(dpy,win,x,y,w,h,False);*/
-  XFillRectangle(dpy,win,background[set],x,y,w,h+1);
+  /*? XClearArea(dpy,win,x,y,w,h,False);*/
+  XFillRectangle(dpy, win, background[set], x, y, w, h + 1);
 
   if ((button->p.picture != 0)/* &&
-      (w + button->p.width + w3p + 3 > MIN_BUTTON_SIZE)*/) {
+      (w + button->p.width + w3p + 3 > MIN_BUTTON_SIZE)*/)
+  {
 
-    gcm = GCClipMask|GCClipXOrigin|GCClipYOrigin;
+    gcm = GCClipMask | GCClipXOrigin | GCClipYOrigin;
     gcv.clip_mask = button->p.mask;
     gcv.clip_x_origin = x + 4;
-    gcv.clip_y_origin = y + ((h-button->p.height) >> 1);
+    gcv.clip_y_origin = y + ((h - button->p.height) >> 1);
     XChangeGC(dpy, hilite[set], gcm, &gcv);
     XCopyArea(dpy, button->p.picture, win, hilite[set], 0, 0,
-                   button->p.width, button->p.height,
-                   gcv.clip_x_origin, gcv.clip_y_origin);
+              button->p.width, button->p.height, gcv.clip_x_origin,
+              gcv.clip_y_origin);
     gcm = GCClipMask;
     gcv.clip_mask = None;
     XChangeGC(dpy, hilite[set], gcm, &gcv);
 
-    newx = button->p.width+6;
+    newx = button->p.width + 6;
   }
   else
   {
     if (LeftJustify)
-      newx=4;
+      newx = 4;
     else
-      newx=max((w-button->tw)/2,4);
+      newx = max((w - button->tw) / 2, 4);
   }
 
-  string=button->title;
+  string = button->title;
 
-  if (!LeftJustify) {
-    if (TruncateLeft && (w-button->tw)/2 < 4) {
+  if (!LeftJustify)
+  {
+    if (TruncateLeft && (w - button->tw) / 2 < 4)
+    {
       if (button->truncatewidth == w)
-	string=button->truncate_title;
-      else {
-	string=button->title;
-	while(*string && (w-XTextWidth(ButtonFont,string,strlen(string)))/2 < 4)
-	    string++;
-	button->truncatewidth = w;
-	button->truncate_title=string;
+        string = button->truncate_title;
+      else
+      {
+        string = button->title;
+        while (
+          *string &&
+          (w - XTextWidth(ButtonFont, string, strlen(string))) / 2 < 4)
+          string++;
+        button->truncatewidth = w;
+        button->truncate_title = string;
       }
     }
   }
-  XDrawString(dpy,win,graph[set],x+newx,y+3+ButtonFont->ascent,string,strlen(string));
-  button->needsupdate=0;
+  XDrawString(dpy, win, graph[set], x + newx,
+              y + 3 + ButtonFont->ascent, string, strlen(string));
+  button->needsupdate = 0;
 
   /* Draw relief last, don't forget that XDrawLine doesn't do the last pixel */
-  XDrawLine(dpy,win,topgc,x,y,x+w-1,y);
-  XDrawLine(dpy,win,topgc,x+1,y+1,x+w-2,y+1);
-  XDrawLine(dpy,win,topgc,x,y+1,x,y+h+1);
-  XDrawLine(dpy,win,topgc,x+1,y+2,x+1,y+h);
-  XDrawLine(dpy,win,bottomgc,x+1,y+h,x+w,y+h);
-  XDrawLine(dpy,win,bottomgc,x+2,y+h-1,x+w-1,y+h-1);
-  XDrawLine(dpy,win,bottomgc,x+w-1,y,x+w-1,y+h);
-  XDrawLine(dpy,win,bottomgc,x+w-2,y+1,x+w-2,y+h-1);
-
+  XDrawLine(dpy, win, topgc, x, y, x + w - 1, y);
+  XDrawLine(dpy, win, topgc, x + 1, y + 1, x + w - 2, y + 1);
+  XDrawLine(dpy, win, topgc, x, y + 1, x, y + h + 1);
+  XDrawLine(dpy, win, topgc, x + 1, y + 2, x + 1, y + h);
+  XDrawLine(dpy, win, bottomgc, x + 1, y + h, x + w, y + h);
+  XDrawLine(dpy, win, bottomgc, x + 2, y + h - 1, x + w - 1, y + h - 1);
+  XDrawLine(dpy, win, bottomgc, x + w - 1, y, x + w - 1, y + h);
+  XDrawLine(dpy, win, bottomgc, x + w - 2, y + 1, x + w - 2, y + h - 1);
 }
 
 /******************************************************************************
@@ -366,20 +388,16 @@ void DoButton(Button *button, int x, int y, int w, int h)
 void DrawButtonArray(ButtonArray *barray, int all)
 {
   Button *btn;
-  int i = 0;		/* buttons displayed */
+  int i = 0; /* buttons displayed */
 
-  for(btn = barray->head; btn != NULL; btn = btn->next)
+  for (btn = barray->head; btn != NULL; btn = btn->next)
   {
-    if((!ShowCurrentDesk) || ( btn->desk == CurrentDesk ) )
+    if ((!ShowCurrentDesk) || (btn->desk == CurrentDesk))
     {
       if (btn->needsupdate || all)
       {
-        DoButton
-        (
-  		btn,barray->x,
-  		barray->y+(i*(barray->h+1)),
-  		barray->w,barray->h
-    	);
+        DoButton(btn, barray->x, barray->y + (i * (barray->h + 1)),
+                 barray->w, barray->h);
       }
       i++;
     }
@@ -394,8 +412,8 @@ void SwitchButton(ButtonArray *array, int butnum)
   Button *btn;
 
   btn = find_n(array, butnum);
-  btn->up =!btn->up;
-  btn->needsupdate=1;
+  btn->up = !btn->up;
+  btn->needsupdate = 1;
   DrawButtonArray(array, 0);
 }
 
@@ -407,19 +425,19 @@ void RadioButton(ButtonArray *array, int butnum)
   Button *temp;
   int i;
 
-  for(temp=array->head,i=0; temp!=NULL; temp=temp->next,i++)
+  for (temp = array->head, i = 0; temp != NULL; temp = temp->next, i++)
   {
     if (i == butnum)
     {
       if (ShowFocus && temp->up)
       {
         temp->up = 0;
-        temp->needsupdate=1;
+        temp->needsupdate = 1;
       }
       if (!(temp->set & 2))
       {
         temp->set |= 2;
-        temp->needsupdate=1;
+        temp->needsupdate = 1;
       }
     }
     else
@@ -441,29 +459,32 @@ void RadioButton(ButtonArray *array, int butnum)
 /******************************************************************************
   WhichButton - Based on x,y which button was pressed
 ******************************************************************************/
-int WhichButton(ButtonArray *array,int x, int y)
+int WhichButton(ButtonArray *array, int x, int y)
 {
   int num;
 
-  num=y/(array->h+1);
-  if (x<array->x || x>array->x+array->w || num<0 || num>array->count-1) num=-1;
+  num = y / (array->h + 1);
+  if (x < array->x || x > array->x + array->w || num < 0 ||
+      num > array->count - 1)
+    num = -1;
 
   /* Current Desk Hack */
 
-  if(ShowCurrentDesk)
+  if (ShowCurrentDesk)
   {
     Button *temp;
     int i, n;
 
-    temp=array->head;
-    for(i=0, n = 0;n < (num + 1) && temp != NULL;temp=temp->next, i++)
+    temp = array->head;
+    for (i = 0, n = 0; n < (num + 1) && temp != NULL;
+         temp = temp->next, i++)
     {
-       if(temp->desk == CurrentDesk)
-         n++;
+      if (temp->desk == CurrentDesk)
+        n++;
     }
-    num = i-1;
+    num = i - 1;
   }
-  return(num);
+  return (num);
 }
 
 /******************************************************************************
@@ -473,7 +494,7 @@ char *ButtonName(ButtonArray *array, int butnum)
 {
   Button *temp;
 
-  temp=find_n(array,butnum);
+  temp = find_n(array, butnum);
   return temp->title;
 }
 
@@ -485,8 +506,9 @@ void PrintButtons(ButtonArray *array)
   Button *temp;
 
   ConsoleMessage("List of Buttons:\n");
-  for(temp=array->head;temp!=NULL;temp=temp->next)
-    ConsoleMessage("   %s is %s\n",temp->title,(temp->up) ? "Up":"Down");
+  for (temp = array->head; temp != NULL; temp = temp->next)
+    ConsoleMessage("   %s is %s\n", temp->title,
+                   (temp->up) ? "Up" : "Down");
 }
 
 #if 0

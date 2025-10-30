@@ -12,12 +12,12 @@
 
 */
 
-#include <unistd.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <X11/Intrinsic.h>
 #include "FvwmButtons.h"
+#include <X11/Intrinsic.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 extern char *MyName;
 
@@ -25,61 +25,62 @@ extern char *MyName;
 *** buttonInfo()
 *** Give lots of info for this button: XPos, YPos, XPad, YPad, Frame(signed)
 **/
-void buttonInfo(button_info *b,int *x,int *y,int *px,int *py,int *f)
+void buttonInfo(button_info *b, int *x, int *y, int *px, int *py,
+                int *f)
 {
-  ushort w=b_Padding|b_Frame;
-  *x=buttonXPos(b,b->n);
-  *y=buttonYPos(b,b->n);
-  *px=b->xpad;
-  *py=b->ypad;
-  *f=b->framew;
-  w&=~(b->flags&(b_Frame|b_Padding));
+  ushort w = b_Padding | b_Frame;
+  *x = buttonXPos(b, b->n);
+  *y = buttonYPos(b, b->n);
+  *px = b->xpad;
+  *py = b->ypad;
+  *f = b->framew;
+  w &= ~(b->flags & (b_Frame | b_Padding));
 
-  if(b->flags&b_Container && w&b_Frame)
-    {
-      *f=0;
-      w&=~b_Frame;
-    }
-  if((b->flags&b_Container || b->flags&b_Swallow) && w&b_Padding)
-    {
-      *px=*py=0;
-      w&=~b_Padding;
-    }
+  if (b->flags & b_Container && w & b_Frame)
+  {
+    *f = 0;
+    w &= ~b_Frame;
+  }
+  if ((b->flags & b_Container || b->flags & b_Swallow) && w & b_Padding)
+  {
+    *px = *py = 0;
+    w &= ~b_Padding;
+  }
 
-  while(w && (b=b->parent))
+  while (w && (b = b->parent))
+  {
+    if (w & b_Frame && b->c->flags & b_Frame)
     {
-      if(w&b_Frame && b->c->flags&b_Frame)
-	{
-	  *f=b->c->framew;
-	  w&=~b_Frame;
-	}
-      if(w&b_Padding && b->c->flags&b_Padding)
-	{
-	  *px=b->c->xpad;
-	  *py=b->c->ypad;
-	  w&=~b_Padding;
-	}
+      *f = b->c->framew;
+      w &= ~b_Frame;
     }
+    if (w & b_Padding && b->c->flags & b_Padding)
+    {
+      *px = b->c->xpad;
+      *py = b->c->ypad;
+      w &= ~b_Padding;
+    }
+  }
 }
 
 /**
 *** GetInternalSize()
 **/
-void GetInternalSize(button_info *b,int *x,int *y,int *w,int *h)
+void GetInternalSize(button_info *b, int *x, int *y, int *w, int *h)
 {
   int f;
-  int px,py;
-  buttonInfo(b,x,y,&px,&py,&f);
-  f=abs(f);
+  int px, py;
+  buttonInfo(b, x, y, &px, &py, &f);
+  f = abs(f);
 
-  *w=buttonWidth(b)-2*(px+f);
-  *h=buttonHeight(b)-2*(py+f);
+  *w = buttonWidth(b) - 2 * (px + f);
+  *h = buttonHeight(b) - 2 * (py + f);
 
-  *x+=f+px;
-  *y+=f+py;
+  *x += f + px;
+  *y += f + py;
 
-  if(*w<=1 || *h<=1)
-    *w=*h=1;
+  if (*w <= 1 || *h <= 1)
+    *w = *h = 1;
 }
 
 /**
@@ -88,15 +89,15 @@ void GetInternalSize(button_info *b,int *x,int *y,int *w,int *h)
 **/
 int buttonFrameSigned(button_info *b)
 {
-  if(b->flags&b_Frame)
+  if (b->flags & b_Frame)
     return b->framew;
-  if(b->flags&b_Container)              /* Containers usually gets 0 relief  */
+  if (b->flags & b_Container) /* Containers usually gets 0 relief  */
     return 0;
-  while((b=b->parent))
-    if(b->c->flags&b_Frame)
+  while ((b = b->parent))
+    if (b->c->flags & b_Frame)
       return b->c->framew;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No relief width definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No relief width definition?\n", MyName);
 #endif
   return 0;
 }
@@ -107,15 +108,16 @@ int buttonFrameSigned(button_info *b)
 **/
 int buttonXPad(button_info *b)
 {
-  if(b->flags&b_Padding)
+  if (b->flags & b_Padding)
     return b->xpad;
-  if(b->flags&(b_Container|b_Swallow))  /* Normally no padding for these     */
+  if (b->flags &
+      (b_Container | b_Swallow)) /* Normally no padding for these     */
     return 0;
-  while((b=b->parent))
-    if(b->c->flags&b_Padding)
+  while ((b = b->parent))
+    if (b->c->flags & b_Padding)
       return b->c->xpad;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No padding definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No padding definition?\n", MyName);
 #endif
   return 0;
 }
@@ -126,15 +128,16 @@ int buttonXPad(button_info *b)
 **/
 int buttonYPad(button_info *b)
 {
-  if(b->flags&b_Padding)
+  if (b->flags & b_Padding)
     return b->ypad;
-  if(b->flags&(b_Container|b_Swallow))  /* Normally no padding for these     */
+  if (b->flags &
+      (b_Container | b_Swallow)) /* Normally no padding for these     */
     return 0;
-  while((b=b->parent))
-    if(b->c->flags&b_Padding)
+  while ((b = b->parent))
+    if (b->c->flags & b_Padding)
       return b->c->ypad;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No padding definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No padding definition?\n", MyName);
 #endif
   return 0;
 }
@@ -145,13 +148,13 @@ int buttonYPad(button_info *b)
 **/
 XFontStruct *buttonFont(button_info *b)
 {
-  if(b->flags&b_Font)
+  if (b->flags & b_Font)
     return b->font;
-  while((b=b->parent))
-    if(b->c->flags&b_Font)
+  while ((b = b->parent))
+    if (b->c->flags & b_Font)
       return b->c->font;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No font definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No font definition?\n", MyName);
 #endif
   return None;
 }
@@ -162,13 +165,13 @@ XFontStruct *buttonFont(button_info *b)
 **/
 Pixel buttonFore(button_info *b)
 {
-  if(b->flags&b_Fore)
+  if (b->flags & b_Fore)
     return b->fc;
-  while((b=b->parent))
-    if(b->c->flags&b_Fore)
+  while ((b = b->parent))
+    if (b->c->flags & b_Fore)
       return b->c->fc;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No foreground definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No foreground definition?\n", MyName);
 #endif
   return None;
 }
@@ -179,13 +182,13 @@ Pixel buttonFore(button_info *b)
 **/
 Pixel buttonBack(button_info *b)
 {
-  if(b->flags&b_Back)
+  if (b->flags & b_Back)
     return b->bc;
-  while((b=b->parent))
-    if(b->c->flags&b_Back)
+  while ((b = b->parent))
+    if (b->c->flags & b_Back)
       return b->c->bc;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No background definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No background definition?\n", MyName);
 #endif
   return None;
 }
@@ -196,13 +199,13 @@ Pixel buttonBack(button_info *b)
 **/
 Pixel buttonHilite(button_info *b)
 {
-  if(b->flags&b_Back)
+  if (b->flags & b_Back)
     return b->hc;
-  while((b=b->parent))
-    if(b->c->flags&b_Back)
+  while ((b = b->parent))
+    if (b->c->flags & b_Back)
       return b->c->hc;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No background definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No background definition?\n", MyName);
 #endif
   return None;
 }
@@ -213,13 +216,13 @@ Pixel buttonHilite(button_info *b)
 **/
 Pixel buttonShadow(button_info *b)
 {
-  if(b->flags&b_Back)
+  if (b->flags & b_Back)
     return b->sc;
-  while((b=b->parent))
-    if(b->c->flags&b_Back)
+  while ((b = b->parent))
+    if (b->c->flags & b_Back)
       return b->c->sc;
 #ifdef DEBUG
-  fprintf(stderr,"%s: BUG: No background definition?\n",MyName);
+  fprintf(stderr, "%s: BUG: No background definition?\n", MyName);
 #endif
   return None;
 }
@@ -230,19 +233,19 @@ Pixel buttonShadow(button_info *b)
 **/
 byte buttonSwallow(button_info *b)
 {
-  byte s=0,t=0;
-  if(b->flags&b_Swallow)
+  byte s = 0, t = 0;
+  if (b->flags & b_Swallow)
+  {
+    s = b->swallow;
+    t = b->swallow_mask;
+  }
+  while ((b = b->parent))
+    if (b->c->flags & b_Swallow)
     {
-      s=b->swallow;
-      t=b->swallow_mask;
+      s &= ~(b->c->swallow_mask & ~t);
+      s |= (b->c->swallow & b->c->swallow_mask & ~t);
+      t |= b->c->swallow_mask;
     }
-  while((b=b->parent))
-    if(b->c->flags&b_Swallow)
-      {
-	s&=~(b->c->swallow_mask&~t);
-	s|=(b->c->swallow&b->c->swallow_mask&~t);
-	t|=b->c->swallow_mask;
-      }
   return s;
 }
 
@@ -252,19 +255,19 @@ byte buttonSwallow(button_info *b)
 **/
 byte buttonJustify(button_info *b)
 {
-  byte j=1,i=0;
-  if(b->flags&b_Justify)
+  byte j = 1, i = 0;
+  if (b->flags & b_Justify)
+  {
+    i = b->justify_mask;
+    j = b->justify;
+  }
+  while ((b = b->parent))
+    if (b->c->flags & b_Justify)
     {
-      i=b->justify_mask;
-      j=b->justify;
+      j &= ~(b->c->justify_mask & ~i);
+      j |= (b->c->justify & b->c->justify_mask & ~i);
+      i |= b->c->justify_mask;
     }
-  while((b=b->parent))
-    if(b->c->flags&b_Justify)
-      {
-	j&=~(b->c->justify_mask&~i);
-	j|=(b->c->justify&b->c->justify_mask&~i);
-	i|=b->c->justify_mask;
-      }
   return j;
 }
 
@@ -275,32 +278,34 @@ byte buttonJustify(button_info *b)
 *** Makes sure the list of butten_info's is long enough, if not it reallocates
 *** a longer one. This happens in steps of 32. Inital length is 0.
 **/
-void alloc_buttonlist(button_info *ub,int num)
+void alloc_buttonlist(button_info *ub, int num)
 {
   button_info **bb;
-  int i,old;
+  int i, old;
 
-  if(num>=ub->c->allocated_buttons)
+  if (num >= ub->c->allocated_buttons)
+  {
+    old = ub->c->allocated_buttons;
+    if (num < old || old + 32 < old)
     {
-      old=ub->c->allocated_buttons;
-      if(num<old || old+32<old)
-	{
-	  fprintf(stderr,"%s: Too many buttons, integer overflow\n",MyName);
-	  exit(1);
-	}
-      while(ub->c->allocated_buttons<=num)
-        ub->c->allocated_buttons+=32;
-      bb=(button_info**)
-	mymalloc(ub->c->allocated_buttons*sizeof(button_info*));
-      for(i=old;i<ub->c->allocated_buttons;i++)
-	bb[i]=NULL;
-      if(ub->c->buttons)
-	{
-	  for(i=0;i<old;i++) bb[i]=ub->c->buttons[i];
-          free(ub->c->buttons);
-	}
-      ub->c->buttons=bb;
+      fprintf(stderr, "%s: Too many buttons, integer overflow\n",
+              MyName);
+      exit(1);
     }
+    while (ub->c->allocated_buttons <= num)
+      ub->c->allocated_buttons += 32;
+    bb = (button_info **)mymalloc(ub->c->allocated_buttons *
+                                  sizeof(button_info *));
+    for (i = old; i < ub->c->allocated_buttons; i++)
+      bb[i] = NULL;
+    if (ub->c->buttons)
+    {
+      for (i = 0; i < old; i++)
+        bb[i] = ub->c->buttons[i];
+      free(ub->c->buttons);
+    }
+    ub->c->buttons = bb;
+  }
 }
 
 /**
@@ -308,19 +313,20 @@ void alloc_buttonlist(button_info *ub,int num)
 *** Allocates memory for a new button struct. Calles alloc_buttonlist to
 *** assure enough space is present. Also initiates most elements of the struct.
 **/
-button_info *alloc_button(button_info *ub,int num)
+button_info *alloc_button(button_info *ub, int num)
 {
   button_info *b;
-  if(num>=ub->c->allocated_buttons)
-    alloc_buttonlist(ub,num);
-  if(ub->c->buttons[num])
-    {
-      fprintf(stderr,"%s: Allocated button twice, report bug twice\n",MyName);
-      exit(2);
-    }
+  if (num >= ub->c->allocated_buttons)
+    alloc_buttonlist(ub, num);
+  if (ub->c->buttons[num])
+  {
+    fprintf(stderr, "%s: Allocated button twice, report bug twice\n",
+            MyName);
+    exit(2);
+  }
 
-  b=(button_info*)mymalloc(sizeof(button_info));
-  ub->c->buttons[num]=b;
+  b = (button_info *)mymalloc(sizeof(button_info));
+  ub->c->buttons[num] = b;
 
   memset((void *)b, 0, sizeof(*b));
   b->flags = 0;
@@ -334,11 +340,11 @@ button_info *alloc_button(button_info *ub,int num)
   b->framew = 1;
   b->xpad = 2;
   b->ypad = 4;
-  b->w=1;
-  b->h=1;
-  b->bw=1;
+  b->w = 1;
+  b->h = 1;
+  b->bw = 1;
 
-  return(b);
+  return (b);
 }
 
 /**
@@ -347,32 +353,33 @@ button_info *alloc_button(button_info *ub,int num)
 **/
 void MakeContainer(button_info *b)
 {
-  b->c=(container_info*)mymalloc(sizeof(container_info));
-  b->flags|=b_Container;
-  b->c->buttons=NULL;
-  b->c->num_buttons=0;
-  b->c->num_rows=0;
-  b->c->num_columns=0;
-  b->c->allocated_buttons=0;
-  b->c->xpos=0;
-  b->c->ypos=0;
-  if(b->parent != NULL)
-    {
-      if (b->parent->c->flags&b_IconBack || b->parent->c->flags&b_IconParent)
-	b->c->flags=b_IconParent;
-      else
-	b->c->flags=0;
-    }
+  b->c = (container_info *)mymalloc(sizeof(container_info));
+  b->flags |= b_Container;
+  b->c->buttons = NULL;
+  b->c->num_buttons = 0;
+  b->c->num_rows = 0;
+  b->c->num_columns = 0;
+  b->c->allocated_buttons = 0;
+  b->c->xpos = 0;
+  b->c->ypos = 0;
+  if (b->parent != NULL)
+  {
+    if (b->parent->c->flags & b_IconBack ||
+        b->parent->c->flags & b_IconParent)
+      b->c->flags = b_IconParent;
+    else
+      b->c->flags = 0;
+  }
   else /* This applies to the UberButton */
-    {
-      b->c->flags=b_Font|b_Padding|b_Frame|b_Back|b_Fore;
-      b->c->font_string=strdup("fixed");
-      b->c->xpad=2;
-      b->c->ypad=4;
-      b->c->back=strdup("#908090");
-      b->c->fore=strdup("black");
-      b->c->framew=2;
-    }
+  {
+    b->c->flags = b_Font | b_Padding | b_Frame | b_Back | b_Fore;
+    b->c->font_string = strdup("fixed");
+    b->c->xpad = 2;
+    b->c->ypad = 4;
+    b->c->back = strdup("#908090");
+    b->c->fore = strdup("black");
+    b->c->framew = 2;
+  }
 }
 
 /* -------------------------- button administration ------------------------ */
@@ -383,14 +390,14 @@ void MakeContainer(button_info *b)
 **/
 void NumberButtons(button_info *b)
 {
-  int i=-1;
-  while(++i<b->c->num_buttons)
-    if(b->c->buttons[i])
-      {
-	b->c->buttons[i]->n=i;
-	if(b->c->buttons[i]->flags&b_Container)
-	  NumberButtons(b->c->buttons[i]);
-      }
+  int i = -1;
+  while (++i < b->c->num_buttons)
+    if (b->c->buttons[i])
+    {
+      b->c->buttons[i]->n = i;
+      if (b->c->buttons[i]->flags & b_Container)
+        NumberButtons(b->c->buttons[i]);
+    }
 }
 
 /**
@@ -399,64 +406,65 @@ void NumberButtons(button_info *b)
  **/
 char PlaceAndExpandButton(int x, int y, button_info *b, button_info *ub)
 {
-  int i,j,k;
-  container_info *c=ub->c;
+  int i, j, k;
+  container_info *c = ub->c;
 
-  i = x+y*c->num_columns;
-  if (x>=c->num_columns || x<0)
+  i = x + y * c->num_columns;
+  if (x >= c->num_columns || x < 0)
+  {
+    fprintf(stderr, "%s: Button out of horizontal range. Quitting.\n",
+            MyName);
+    fprintf(stderr, "Button=%d num_columns=%d BPosX=%d\n", i,
+            c->num_columns, b->BPosX);
+    exit(1);
+  }
+  if (y >= c->num_rows || y < 0)
+  {
+    if (b->flags & b_PosFixed || !(ub->c->flags & b_SizeSmart) || y < 0)
     {
-      fprintf(stderr,"%s: Button out of horizontal range. Quitting.\n",MyName);
-      fprintf(stderr,"Button=%d num_columns=%d BPosX=%d\n",
-	      i,c->num_columns,b->BPosX);
+      fprintf(stderr, "%s: Button out of vertical range. Quitting.\n",
+              MyName);
+      fprintf(stderr, "Button=%d num_rows=%d BPosY=%d\n", i,
+              c->num_rows, b->BPosY);
       exit(1);
     }
-  if (y>=c->num_rows || y<0)
+    c->num_rows = y + b->BHeight;
+    c->num_buttons = c->num_columns * c->num_rows;
+    alloc_buttonlist(ub, c->num_buttons);
+  }
+  if (x + b->BWidth > c->num_columns)
+  {
+    fprintf(stderr, "%s: Button too wide. giving up\n", MyName);
+    fprintf(stderr, "Button=%d num_columns=%d bwidth=%d w=%d\n", i,
+            c->num_columns, b->BWidth, x);
+    b->BWidth = c->num_columns - x;
+  }
+  if (y + b->BHeight > c->num_rows)
+  {
+    if (c->flags & b_SizeSmart)
     {
-      if (b->flags&b_PosFixed || !(ub->c->flags&b_SizeSmart) || y<0)
-	{
-	  fprintf(stderr,"%s: Button out of vertical range. Quitting.\n",
-		  MyName);
-	  fprintf(stderr,"Button=%d num_rows=%d BPosY=%d\n",
-		  i,c->num_rows,b->BPosY);
-	  exit(1);
-	}
-      c->num_rows=y+b->BHeight;
-      c->num_buttons=c->num_columns*c->num_rows;
-      alloc_buttonlist(ub,c->num_buttons);
+      c->num_rows = y + b->BHeight;
+      c->num_buttons = c->num_columns * c->num_rows;
+      alloc_buttonlist(ub, c->num_buttons);
     }
-  if(x+b->BWidth>c->num_columns)
+    else
     {
-      fprintf(stderr,"%s: Button too wide. giving up\n",MyName);
-      fprintf(stderr,"Button=%d num_columns=%d bwidth=%d w=%d\n",
-	      i,c->num_columns,b->BWidth,x);
-      b->BWidth = c->num_columns-x;
+      fprintf(stderr, "%s: Button too tall. Giving up\n", MyName);
+      fprintf(stderr, "Button=%d num_rows=%d bheight=%d h=%d\n", i,
+              c->num_rows, b->BHeight, y);
+      b->BHeight = c->num_rows - y;
     }
-  if(y+b->BHeight>c->num_rows)
-    {
-      if (c->flags&b_SizeSmart)
-	{
-	  c->num_rows=y+b->BHeight;
-	  c->num_buttons=c->num_columns*c->num_rows;
-	  alloc_buttonlist(ub,c->num_buttons);
-	}
-      else
-	{
-	  fprintf(stderr,"%s: Button too tall. Giving up\n",MyName);
-	  fprintf(stderr,"Button=%d num_rows=%d bheight=%d h=%d\n",
-		  i,c->num_rows,b->BHeight,y);
-	  b->BHeight = c->num_rows-y;
-	}
-    }
+  }
 
   /* check if buttons are free */
-  for(k=0;k<b->BHeight;k++)
-    for(j=0;j<b->BWidth;j++)
-      if (c->buttons[i+j+k*c->num_columns])
-	return 1;
+  for (k = 0; k < b->BHeight; k++)
+    for (j = 0; j < b->BWidth; j++)
+      if (c->buttons[i + j + k * c->num_columns])
+        return 1;
   /* claim all buttons */
-  for(k=0;k<b->BHeight;k++)
-    for(j=0;j<b->BWidth;j++)
-      c->buttons[i+j+k*c->num_columns] = b;
+  for (k = 0; k < b->BHeight; k++)
+    for (j = 0; j < b->BWidth; j++)
+      c->buttons[i + j + k * c->num_columns] = b;
   b->BPosX = x;
   b->BPosY = y;
   return 0;
@@ -468,27 +476,27 @@ char PlaceAndExpandButton(int x, int y, button_info *b, button_info *ub)
  **/
 void ShrinkButton(button_info *b, container_info *c)
 {
-  int i,j,k,l;
+  int i, j, k, l;
 
   if (!b)
-    {
-      fprintf(stderr,"error: shrink1: button is empty but shouldn't\n");
-      exit(1);
-    }
-  i = b->BPosX+b->BPosY*c->num_columns;
+  {
+    fprintf(stderr, "error: shrink1: button is empty but shouldn't\n");
+    exit(1);
+  }
+  i = b->BPosX + b->BPosY * c->num_columns;
   /* free all buttons but the upper left corner */
-  for(k=0;k<b->BHeight;k++)
-    for(j=0;j<b->BWidth;j++)
-      if(j||k)
-	{
-	  l = i+j+k*c->num_columns;
-	  if (c->buttons[l] != b)
-	    {
-	      fprintf(stderr,"error: shrink2: button was stolen\n");
-	      exit(1);
-	    }
-	  c->buttons[l] = NULL;
-	}
+  for (k = 0; k < b->BHeight; k++)
+    for (j = 0; j < b->BWidth; j++)
+      if (j || k)
+      {
+        l = i + j + k * c->num_columns;
+        if (c->buttons[l] != b)
+        {
+          fprintf(stderr, "error: shrink2: button was stolen\n");
+          exit(1);
+        }
+        c->buttons[l] = NULL;
+      }
 }
 
 /**
@@ -498,125 +506,137 @@ void ShrinkButton(button_info *b, container_info *c)
 **/
 void ShuffleButtons(button_info *ub)
 {
-  int i,actual_buttons_used;
+  int i, actual_buttons_used;
   int next_button_x, next_button_y, num_items;
   button_info *b;
   button_info **local_buttons;
-  container_info *c=ub->c;
+  container_info *c = ub->c;
 
   /* make local copy of buttons in ub */
   num_items = c->num_buttons;
-  local_buttons=(button_info**)mymalloc(sizeof(button_info)*num_items);
-  for(i=0;i<num_items;i++)
-    {
-      local_buttons[i] = c->buttons[i];
-      c->buttons[i] = NULL;
-    }
+  local_buttons =
+    (button_info **)mymalloc(sizeof(button_info) * num_items);
+  for (i = 0; i < num_items; i++)
+  {
+    local_buttons[i] = c->buttons[i];
+    c->buttons[i] = NULL;
+  }
 
   /* Allow for multi-width/height buttons */
   actual_buttons_used = 0;
-  for(i=0;i<num_items;i++)
-    actual_buttons_used+=local_buttons[i]->BWidth*local_buttons[i]->BHeight;
+  for (i = 0; i < num_items; i++)
+    actual_buttons_used +=
+      local_buttons[i]->BWidth * local_buttons[i]->BHeight;
 
-  if (!(c->flags&b_SizeFixed)||!(c->num_rows)||!(c->num_columns))
+  if (!(c->flags & b_SizeFixed) || !(c->num_rows) || !(c->num_columns))
+  {
+    /* Size and create the window */
+    if (c->num_rows == 0 && c->num_columns == 0)
+      c->num_rows = 2;
+    if (c->num_columns == 0)
+      c->num_columns = 1 + (actual_buttons_used - 1) / c->num_rows;
+    if (c->num_rows == 0)
+      c->num_rows = 1 + (actual_buttons_used - 1) / c->num_columns;
+    while (c->num_rows * c->num_columns < actual_buttons_used)
+      c->num_columns++;
+    if (!(c->flags & b_SizeFixed))
     {
-      /* Size and create the window */
-      if(c->num_rows==0 && c->num_columns==0)
-	c->num_rows=2;
-      if(c->num_columns==0)
-	c->num_columns=1+(actual_buttons_used-1)/c->num_rows;
-      if(c->num_rows==0)
-	c->num_rows=1+(actual_buttons_used-1)/c->num_columns;
-      while(c->num_rows * c->num_columns < actual_buttons_used)
-	c->num_columns++;
-      if (!(c->flags&b_SizeFixed))
-	{
-	  while(c->num_rows*c->num_columns >= actual_buttons_used + c->num_columns)
-	    c->num_rows--;
-	}
+      while (c->num_rows * c->num_columns >=
+             actual_buttons_used + c->num_columns)
+        c->num_rows--;
     }
+  }
 
-  if (c->flags&b_SizeSmart)
+  if (c->flags & b_SizeSmart)
+  {
+    /* Set rows/columns to at least the height/width of largest button */
+    for (i = 0; i < num_items; i++)
     {
-      /* Set rows/columns to at least the height/width of largest button */
-      for(i=0;i<num_items;i++)
-	{
-	  b=local_buttons[i];
-          if (c->num_rows<b->BHeight) c->num_rows=b->BHeight;
-	  if (c->num_columns<b->BWidth) c->num_columns=b->BWidth;
-          if (b->flags&b_PosFixed && c->num_columns<b->BWidth+b->BPosX)
-	    c->num_columns=b->BWidth+b->BPosX;
-          if (b->flags&b_PosFixed && c->num_columns<b->BWidth-b->BPosX)
-	    c->num_columns=b->BWidth-b->BPosX;
-          if (b->flags&b_PosFixed && c->num_rows<b->BHeight+b->BPosY)
-	    c->num_rows=b->BHeight+b->BPosY;
-          if (b->flags&b_PosFixed && c->num_rows<b->BHeight-b->BPosY)
-	    c->num_rows=b->BHeight-b->BPosY;
-	}
+      b = local_buttons[i];
+      if (c->num_rows < b->BHeight)
+        c->num_rows = b->BHeight;
+      if (c->num_columns < b->BWidth)
+        c->num_columns = b->BWidth;
+      if (b->flags & b_PosFixed &&
+          c->num_columns < b->BWidth + b->BPosX)
+        c->num_columns = b->BWidth + b->BPosX;
+      if (b->flags & b_PosFixed &&
+          c->num_columns < b->BWidth - b->BPosX)
+        c->num_columns = b->BWidth - b->BPosX;
+      if (b->flags & b_PosFixed && c->num_rows < b->BHeight + b->BPosY)
+        c->num_rows = b->BHeight + b->BPosY;
+      if (b->flags & b_PosFixed && c->num_rows < b->BHeight - b->BPosY)
+        c->num_rows = b->BHeight - b->BPosY;
     }
+  }
 
   /* this was buggy before */
-  c->num_buttons = c->num_rows*c->num_columns;
-  alloc_buttonlist(ub,c->num_buttons);
+  c->num_buttons = c->num_rows * c->num_columns;
+  alloc_buttonlist(ub, c->num_buttons);
 
   /* Shuffle subcontainers */
-  for(i=0;i<num_items;i++)
-    {
-      b=local_buttons[i];
-      /* Shuffle subcontainers recursively */
-      if(b && b->flags&b_Container)
-	ShuffleButtons(b);
-    }
+  for (i = 0; i < num_items; i++)
+  {
+    b = local_buttons[i];
+    /* Shuffle subcontainers recursively */
+    if (b && b->flags & b_Container)
+      ShuffleButtons(b);
+  }
 
   /* Place fixed buttons as given in BPosX and BPosY */
-  for(i=0;i<num_items;i++)
+  for (i = 0; i < num_items; i++)
+  {
+    b = local_buttons[i];
+    if (!(b->flags & b_PosFixed))
+      continue;
+    /* recalculate position for negative offsets */
+    if (b->BPosX < 0)
+      b->BPosX = b->BPosX + c->num_columns - b->BWidth + 1;
+    if (b->BPosY < 0)
+      b->BPosY = b->BPosY + c->num_rows - b->BHeight + 1;
+    /* Move button if position given by user */
+    if (PlaceAndExpandButton(b->BPosX, b->BPosY, b, ub))
     {
-      b=local_buttons[i];
-      if (!(b->flags&b_PosFixed)) continue;
-      /* recalculate position for negative offsets */
-      if (b->BPosX<0) b->BPosX=b->BPosX+c->num_columns-b->BWidth+1;
-      if (b->BPosY<0) b->BPosY=b->BPosY+c->num_rows-b->BHeight+1;
-      /* Move button if position given by user */
-      if (PlaceAndExpandButton(b->BPosX,b->BPosY,b,ub))
-	{
-	  fprintf(stderr, "%s: Overlapping fixed buttons. Quitting.\n",MyName);
-	  fprintf(stderr, "Button=%d, x=%d, y=%d\n", i,b->BPosX,b->BPosY);
-	  exit(1);
-	}
+      fprintf(stderr, "%s: Overlapping fixed buttons. Quitting.\n",
+              MyName);
+      fprintf(stderr, "Button=%d, x=%d, y=%d\n", i, b->BPosX, b->BPosY);
+      exit(1);
     }
+  }
 
   /* place floating buttons dynamically */
   next_button_x = next_button_y = 0;
-  for(i=0;i<num_items;i++)
-    {
-      b=local_buttons[i];
-      if (b->flags&b_PosFixed) continue;
+  for (i = 0; i < num_items; i++)
+  {
+    b = local_buttons[i];
+    if (b->flags & b_PosFixed)
+      continue;
 
-      if (next_button_x+b->BWidth>c->num_columns)
-	{
-	  next_button_y++;
-	  next_button_x=0;
-        }
-      /* Search for next free position to accomodate button */
-      while (PlaceAndExpandButton(next_button_x,next_button_y,b,ub))
-	{
-	  next_button_x++;
-	  if (next_button_x+b->BWidth>c->num_columns)
-	    {
-	      next_button_y++;
-	      next_button_x=0;
-	      if (next_button_y>=c->num_rows)
-		{
-		  /* could not place button */
-		  fprintf(stderr,"%s: Button confusion! Quitting\n", MyName);
-		  exit(1);
-		}
-	    }
-	}
+    if (next_button_x + b->BWidth > c->num_columns)
+    {
+      next_button_y++;
+      next_button_x = 0;
     }
+    /* Search for next free position to accomodate button */
+    while (PlaceAndExpandButton(next_button_x, next_button_y, b, ub))
+    {
+      next_button_x++;
+      if (next_button_x + b->BWidth > c->num_columns)
+      {
+        next_button_y++;
+        next_button_x = 0;
+        if (next_button_y >= c->num_rows)
+        {
+          /* could not place button */
+          fprintf(stderr, "%s: Button confusion! Quitting\n", MyName);
+          exit(1);
+        }
+      }
+    }
+  }
 
   /* shrink buttons in Container */
-  for(i=0;i<num_items;i++)
+  for (i = 0; i < num_items; i++)
     ShrinkButton(local_buttons[i], c);
   free(local_buttons);
 }
@@ -630,44 +650,46 @@ void ShuffleButtons(button_info *ub)
 *** gives the pointer to uberbutton, button and button index within uberbutton.
 *** If all, also returns containers, apart from the UberButton.
 **/
-button_info *NextButton(button_info **ub,button_info **b,int *i,int all)
+button_info *NextButton(button_info **ub, button_info **b, int *i,
+                        int all)
 {
   /* Get next button */
   (*i)++;
   /* Skip fake buttons */
-  while((*i)<(*ub)->c->num_buttons && !(*ub)->c->buttons[*i])
+  while ((*i) < (*ub)->c->num_buttons && !(*ub)->c->buttons[*i])
     (*i)++;
   /* End of contained buttons */
-  if((*i)>=(*ub)->c->num_buttons)
+  if ((*i) >= (*ub)->c->num_buttons)
+  {
+    *b = *ub;
+    *ub = (*b)->parent;
+    /* End of the world as we know it */
+    if (!(*ub))
     {
-      *b=*ub;
-      *ub=(*b)->parent;
-      /* End of the world as we know it */
-      if(!(*ub))
-	{
-	  *b=NULL;
-	  return *b;
-	}
-      *i=(*b)->n;
-      if((*i)>=(*ub)->c->num_buttons)
-	{
-	  fprintf(stderr,"%s: BUG: Couldn't return to uberbutton\n",MyName);
-	  exit(2);
-	}
-      NextButton(ub,b,i,all);
+      *b = NULL;
       return *b;
     }
-  *b=(*ub)->c->buttons[*i];
+    *i = (*b)->n;
+    if ((*i) >= (*ub)->c->num_buttons)
+    {
+      fprintf(stderr, "%s: BUG: Couldn't return to uberbutton\n",
+              MyName);
+      exit(2);
+    }
+    NextButton(ub, b, i, all);
+    return *b;
+  }
+  *b = (*ub)->c->buttons[*i];
 
   /* Found new container */
-  if((*b)->flags & b_Container)
-    {
-      *i=-1;
-      *ub=*b;
-      if(!all)
-	NextButton(ub,b,i,all);
-      return *b;
-    }
+  if ((*b)->flags & b_Container)
+  {
+    *i = -1;
+    *ub = *b;
+    if (!all)
+      NextButton(ub, b, i, all);
+    return *b;
+  }
   return *b;
 }
 
@@ -678,25 +700,25 @@ button_info *NextButton(button_info **ub,button_info **b,int *i,int all)
 *** Function that finds out which button a given position belongs to.
 *** Returns -1 is not part of any, button if a proper button.
 **/
-int button_belongs_to(button_info *ub,int button)
+int button_belongs_to(button_info *ub, int button)
 {
-  int x,y,xx,yy;
+  int x, y, xx, yy;
   button_info *b;
-  if(!ub || button<0 || button>ub->c->num_buttons)
+  if (!ub || button < 0 || button > ub->c->num_buttons)
     return -1;
-  if(ub->c->buttons[button])
+  if (ub->c->buttons[button])
     return button;
-  yy=button/ub->c->num_columns;
-  xx=button%ub->c->num_columns;
-  for(y=yy;y>=0;y--)
-    for(x=xx;x>=0;x--)
+  yy = button / ub->c->num_columns;
+  xx = button % ub->c->num_columns;
+  for (y = yy; y >= 0; y--)
+    for (x = xx; x >= 0; x--)
+    {
+      b = ub->c->buttons[x + y * ub->c->num_columns];
+      if (b && (x + b->BWidth > xx) && (y + b->BHeight > yy))
       {
-	b=ub->c->buttons[x+y*ub->c->num_columns];
-	if(b && (x+b->BWidth > xx) && (y+b->BHeight > yy))
-	  {
-	    return x+y*ub->c->num_columns;
-	  }
+        return x + y * ub->c->num_columns;
       }
+    }
   return -1;
 }
 
@@ -704,24 +726,27 @@ int button_belongs_to(button_info *ub,int button)
 *** select_button()
 *** Given (x,y) and uberbutton, returns pointer to referred button, or NULL
 **/
-button_info *select_button(button_info *ub,int x,int y)
+button_info *select_button(button_info *ub, int x, int y)
 {
   int i;
   button_info *b;
-  if(!(ub->flags&b_Container))
+  if (!(ub->flags & b_Container))
     return ub;
 
-  x-=buttonXPad(ub)+buttonFrame(ub);
-  y-=buttonYPad(ub)+buttonFrame(ub);
+  x -= buttonXPad(ub) + buttonFrame(ub);
+  y -= buttonYPad(ub) + buttonFrame(ub);
 
-  if(x >= ub->c->ButtonWidth * ub->c->num_columns || x<0 ||
-     y >= ub->c->ButtonHeight * ub->c->num_rows || y<0)
+  if (x >= ub->c->ButtonWidth * ub->c->num_columns || x < 0 ||
+      y >= ub->c->ButtonHeight * ub->c->num_rows || y < 0)
     return ub;
 
-  i=x/ub->c->ButtonWidth + (y/ub->c->ButtonHeight)*ub->c->num_columns;
-  i=button_belongs_to(ub,i);
-  if(i==-1)return ub;
-  b=ub->c->buttons[i];
-  return select_button(b,x-(i%ub->c->num_columns)*ub->c->ButtonWidth,
-		       y-(i/ub->c->num_columns)*ub->c->ButtonHeight);
+  i = x / ub->c->ButtonWidth +
+      (y / ub->c->ButtonHeight) * ub->c->num_columns;
+  i = button_belongs_to(ub, i);
+  if (i == -1)
+    return ub;
+  b = ub->c->buttons[i];
+  return select_button(
+    b, x - (i % ub->c->num_columns) * ub->c->ButtonWidth,
+    y - (i / ub->c->num_columns) * ub->c->ButtonHeight);
 }

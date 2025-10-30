@@ -1,4 +1,4 @@
-#include "fvwmlib.h"     
+#include "fvwmlib.h"
 
 #define ACTION1 1
 #define ACTION2 2
@@ -18,7 +18,7 @@ struct list
  * 
  *************************************************************************/
 void Loop(int *fd);
-void SendInfo(int *fd,char *message,unsigned long window);
+void SendInfo(int *fd, char *message, unsigned long window);
 char *safemalloc(int length);
 struct list *find_window(unsigned long id);
 void remove_window(unsigned long id);
@@ -26,5 +26,4 @@ void add_window(unsigned long new_win);
 void update_focus(struct list *l, unsigned long);
 void DeadPipe(int nonsense);
 void find_next_event_time(void);
-void process_message(unsigned long type,unsigned long *body);
-
+void process_message(unsigned long type, unsigned long *body);
