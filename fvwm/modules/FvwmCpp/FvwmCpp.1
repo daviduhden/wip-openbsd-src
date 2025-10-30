@@ -19,15 +19,12 @@
 .SH NAME
 FvwmCpp \- the FVWM  Cpp pre-processor
 .SH SYNOPSIS
-.PP
 FvwmCpp is spawned by fvwm, so no command line invocation will work.
 .SH DESCRIPTION
-.PP
 When called, this module will attempt to have /usr/lib/cpp pre-process
 the file specified in its invocation, and then have fvwm read the
 resulting file.
 .SH INVOCATION
-.PP
 FvwmCpp can be invoked by inserting the line 'FvwmCpp' in the .fvwmrc
 file. It can also be called from a menu or mouse binding.  If the user
 wants his entire .fvwmrc file pre-processed with FvwmCpp, then fvwm
@@ -53,7 +50,6 @@ the temporary file it will create.
 Causes the temporary file created by Cpp to be retained. This file is usually
 called "/tmp/fvwmrcXXXXXXXXXX".
 .SH CONFIGURATION OPTIONS
-.PP
 FvwmCpp defines some values for use in the pre-processor file:
 .IP TWM_TYPE
 Always set to "fvwm".
@@ -100,7 +96,6 @@ configure.h at compile time.
 The directory where fvwm looks for .fvwmrc and modules by default, as
 determined at compile time.
 .SH EXAMPLE PROLOG
-.PP
 .EX
 #define TWM_TYPE fvwm
 #define SERVERHOST spx20
@@ -125,7 +120,6 @@ determined at compile time.
 #define FVWM_MODULEDIR /local/homes/dsp/nation/modules
 .EE
 .SH BUGS
-.PP
 There are some problems with comments in your .fvwmrc file.
 The comment sign # is misinterpreted by the preprocessor.
 This has usually no impact on functionality but generates
@@ -150,8 +144,6 @@ and not
 .EX
 "Exec "ls" -l" (one word).
 .EE
-.PP
 .SH AUTHOR
-.PP
 FvwmCpp is the result of a random bit mutation on a hard disk,
 presumably a result of a cosmic-ray or some such thing.

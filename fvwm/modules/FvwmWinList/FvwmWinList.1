@@ -1,7 +1,7 @@
 .\" $OpenBSD: FvwmWinList.1,v 1.1.1.1 2006/11/26 10:53:55 matthieu Exp $
-." t
-." @(#)FvwmWinList.1 1995.5.27
-.TH FVWMWINLIST 1 "May 27, 1995" "0.4h" "FVWM Modules"
+.\" t
+.\" @(#)FvwmWinList.1 1995.5.27
+.TH FVWMWINLIST 1 "May 27, 1995" "0.4" "FVWM Modules"
 .UC
 .SH NAME
 FvwmWinList \- the FVWM window list module
@@ -12,36 +12,25 @@ FvwmWinList provides a window list composed of buttons, each corresponding to a
 client managed by fvwm. Clicking any mouse button performs either the default
 action or a user-configured command. Like other modules, FvwmWinList only works
 when fvwm is the window manager.
-
 .SH COPYRIGHTS
-.PP
 The FvwmWinList module is the original work of Mike Finger.
-.PP
 Copyright 1994, Mike Finger. The author makes no guarantees or warranties of
 any kind about the use of this module. Use this module at your own risk. You
 may freely use this module or any portion of it for any purpose as long as the
 copyright is kept intact.
-
 .SH INITIALIZATION
-.PP
 During initialization, \fIFvwmWinList\fP scans the same configuration file that
 fvwm reads at startup to locate its options. These options are discussed in a
 later section.
-
 .SH INVOCATION
-.PP
 FvwmWinList can be launched during initialization by inserting the line `Module
 FvwmWinList` in the .fvwmrc file.
-.PP
 It can also be bound to a keystroke, mouse button, or menu entry for later
 invocation. Supplying the argument `Transient` makes FvwmWinList resemble the
 built-in window list.
-.PP
 FvwmWinList must reside in a directory listed in fvwm's ModulePath option in
 order to be executed.
-
 .SH CONFIGURATION OPTIONS
-.PP
 Add the following directives to the .fvwmrc file to configure FvwmWinList.
 .IP "*FvwmWinListGeometry \fI{+-}<X>{+-}<Y>\fP"
 Specify the location and gravity of the FvwmWinList window. Size is not
@@ -94,7 +83,6 @@ Execute \fIresponse\fP when \fIaction\fP occurs. Supported actions are Click1,
 Click2, and Click3. Responses may be any fvwm built-in commands, including
 modules and functions.
 .SH SAMPLE CONFIGURATION
-.PP
 The following snippets illustrate typical configuration commands:
 .nf
 XCOMM Pop up the window list in transient mode on button 3 press & hold
@@ -118,7 +106,6 @@ XCOMM I like it anchored
 XCOMM*FvwmWinListNoAnchor
 .fi
 .SH AUTHOR
-.PP
 Mike Finger (mfinger@mermaid.micro.umn.edu)
             (Mike_Finger@atk.com)
             (doodman on IRC, check the #linux channel)

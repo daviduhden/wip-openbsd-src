@@ -6,10 +6,8 @@
 .SH NAME
 FvwmIconBox \- the FVWM iconbox module
 .SH SYNOPSIS
-.PP
 FvwmIconBox is spawned by fvwm, so no command line invocation will work.
 .SH DESCRIPTION
-.PP
 The FvwmIconBox module provides an icon manager.
 The user can do operations, like iconify and deiconify, for each icon
 shown in the module via mouse and keyboard.
@@ -17,7 +15,6 @@ shown in the module via mouse and keyboard.
 FvwmIconBox reads the same .fvwmrc file as fvwm reads when it starts up
 and looks for lines similar to "*FvwmIconBoxFore green".
 .SH COPYRIGHTS
-.PP
 The FvwmIconBox program is original work of Nobutaka Suzuki.
 .PP
 Copyright 1994, Nobutaka Suzuki.
@@ -27,7 +24,6 @@ Use this program at your own risk.
 Permission to use this program for any purpose is given, as long as the
 copyright is kept intact.
 .SH INITIALIZATION
-.PP
 During initialization, \fIFvwmIconBox\fP will eventually search a
 configuration file.
 The configuration file is the same file that fvwm used during
@@ -39,13 +35,11 @@ started, with a completely different configuration than FvwmIconBox,
 simply by changing the keyword FvwmIconBox to MoreIconBox.
 This way multiple clutter-reduction programs can be used.
 .SH INVOCATION
-.PP
 FvwmIconBox can be invoked by binding the action 'Module FvwmIconBox'
 to a menu or key-stroke in the .fvwmrc file.
 Fvwm will search the directory specified in the ModulePath
 configuration option to attempt to locate FvwmIconBox.
 .SH CONFIGURATION OPTIONS
-.PP
 FvwmIconBox shows icons only if NoIcon is applied.
 Note that the NoIcon attribute should be set after the Icon attribute
 specification.
@@ -118,7 +112,6 @@ Icons are placed from right to left.
 For example, when the placement is "Left Top", icons are placed from
 left to right, and new rows are added from top to bottom. The default
 value is "Left Bottom".
-
 .IP "*FvwmIconBoxLines"
 Specifies the number of icons placed in a line. If \fIprimary\fP is
 Left or Right, this value specifies the number of columns.
@@ -127,7 +120,6 @@ rows.
 For example, seven icons are placed in a row if *FvwmIconBoxLines is 7
 and *FvwmIconBoxPlacement is "Left Top".
 The default value is 6.
-
 .IP "*FvwmIconBoxHideSC \fIdirection\fP"
 Specifies the undisplayed scroll bar.
 \fIDirection\fP can be either \fIHorizontal\fP or \fIVertical\fP.
@@ -135,7 +127,6 @@ Specifies the undisplayed scroll bar.
 Specifies the location and/or size of FvwmIconBox.
 \fIwidth\fP and \fIheight\fP are measured in icons, not pixels.
 The default value is 6x1+0+0.
-
 .IP "*FvwmIconBoxMaxIconSize \fI<width>x<height>\fP"
 Specifies the maximum size of icon bitmap. A bitmap larger than
 this size is clipped to this size.
@@ -207,9 +198,7 @@ Specifies the frame-width of the module.
 scroll-bar, and \fIwidth2\fP corresponds to the width from the
 scroll-bar to the internal-window displaying icons.
 The default values are 8 and 6, respectively.
-
 .SH SAMPLE CONFIGURATION
-.PP
 The following are excerpts from a .fvwmrc file which describe
 FvwmIconBox initialization commands:
 .PP
@@ -272,7 +261,6 @@ XCOMM
 *FvwmIconBox            "Fvwm*"         -
 .fi
 .RE
-
 .SH AUTHOR
 Nobutaka Suzuki (nobuta-s@is.aist-nara.ac.jp).
 

@@ -1,15 +1,13 @@
 .\" $OpenBSD: FvwmButtons.1,v 1.1.1.1 2006/11/26 10:53:44 matthieu Exp $
 .\" t # I don't know this stuff, sorry. -Jarl
 .\" @(#)FvwmButtons.1	1/28/94
-.TH FVWMBUTTONS 1 "November 1, 1998" "FVWM Modules"
+.TH FVWMBUTTONS 1 "November 1, 1998" "2.0.41" "FVWM Modules"
 .UC
 .SH NAME
 FvwmButtons \- the FVWM buttonbox module
 .SH SYNOPSIS
-.PP
 FvwmButtons is spawned by fvwm, so no command line invocation will work.
 .SH DESCRIPTION
-.PP
 The FvwmButtons module provides a window of buttons which sits on the X
 terminal's root window. The user can press the buttons at any time,
 and trigger invocation of a user-specified command by the window
@@ -18,7 +16,6 @@ manager. FvwmButtons only works when fvwm is used as the window manager.
 The buttonbox can be of any configuration or geometry, and can have
 monochrome or color icons to represent the actions which would be invoked.
 .SH INITIALIZATION
-.PP
 During initialization, \fIFvwmButtons\fP will search for a configuration
 file which describes the buttonbox geometry, color, icons, and actions. The
 format of this file will be described later. The configuration file will be
@@ -322,19 +319,19 @@ be quoted inside a command.
 Quoting can be done with any of the three quotation characters; single
 quote:
 .EX
-'This is a "quote"',
+\&'This is a "quote"',
 .EE
 .PP
 double quote:
 .EX
-"It's another `quote'",
+\&"It's another `quote'",
 .EE
 .PP
 and backquote:
 .EX
 `This is a strange quote`.
 .EE
-
+.PP
 The backquoting is purposeful if you use a preprocessor like FvwmCpp and
 want it to get into your commands, like this:
 .EX
@@ -344,7 +341,6 @@ want it to get into your commands, like this:
 .PP
 Furthermore a single character can be quoted with a preceding backslash '\'.
 .SH ARRANGEMENT ALGORITHM
-.PP
 FvwmButtons tries to arrange its buttons as best it can, by using
 recursively, on each container including the buttonbox itself,
 the following algorithm.
@@ -415,9 +411,7 @@ for a swallowed window, it can be set in that button's configuration line
 using the option "Size \fIwidth height\fP". This will tell FvwmButtons
 to give this button at least \fIwidth\fP by \fIheight\fP pixels inside
 the relief and padding.
-
 .SH SAMPLE CONFIGURATION
-.PP
 The following are excepts from a .fvwmrc file which describe FvwmButtons
 initialization commands:
 .EX
@@ -480,7 +474,8 @@ XCOMM#########################################################
 .PP
 The last lines are a little tricky - one spawns an FvwmPager module, and
 captures it to display in a quadruple width button.
-is used, the Pager will be as big as possible within the button's relief.
+If this is used, the Pager will be as big as possible within the button's
+relief.
 .PP
 The final line is even more magic. Note the combination of \fIUseOld\fP
 and \fINoKill\fP, which will try to swallow an existing window with the
@@ -564,7 +559,6 @@ XCOMM big items
   -geometry 100x50+0-0 -font 5x7`)
 .EE
 .SH COPYRIGHTS
-.PP
 The FvwmButtons program, and the concept for interfacing this module to the
 Window Manager, are all original work by Robert Nation.
 .PP
@@ -575,8 +569,6 @@ copyright is kept intact.
 .PP
 Further modifications and patching by Jarl Totland, copyright 1996. The
 statement above still applies.
-
 .SH AUTHOR
-.PP
 Robert Nation.
 Somewhat enhanced by Jarl Totland, Jui-Hsuan Joshua Feng and Dominik Vogt.

@@ -1,13 +1,11 @@
 .\" $OpenBSD: FvwmForm.1,v 1.2 2010/03/20 20:13:27 schwarze Exp $
-.TH FVWMFORM 1 "FVWM Modules"
+.TH FVWMFORM 1 "February 1, 1995" "1.0" "FVWM Modules"
 .SH NAME
-FvwmForm - input form module for Fvwm
+FvwmForm \- input form module for Fvwm
 .SH SYNOPSIS
-.PP
 FvwmForm must be spawned by Fvwm.
 It will not work from the command line.
 .SH DESCRIPTION
-.PP
 FvwmForm provides a mechanism to get user input and act accordingly.
 This is achieved by means of a form that the user can fill out,
 and from which the user can select actions he wants Fvwm to take.
@@ -55,7 +53,6 @@ FvwmForm's path.
 When FvwmForm is invoked with a window context, e.g. from a window menu,
 all commands it sends to Fvwm will have that window context.
 .SH CONFIGURATION
-.PP
 The following options can be set in the .fvwmrc file.
 Note that the string "FvwmForm" should be changed if another module with
 different name is used.
@@ -107,7 +104,7 @@ A line can contain an arbitrary number of items whose options should
 follow.
 A FvwmForm window can have an arbitrary number of lines.
 The width of the window is that of the longest line.
-
+.PP
 Justification of items in the line is specified by \fIjustification\fP,
 which can be one of the following:
 .TP 16
@@ -226,7 +223,6 @@ If the choice is not selected, the result is empty.
 The same as the above, except that the converse conditions are taken.
 .SH EXAMPLE 1 - QuitVerify
 This example simulates the mwm way of confirming logout.
-.PP
 .RS
 .nf
 *QuitVerifyGrabServer
@@ -254,7 +250,6 @@ Style "QuitVerify" NoTitle, NoHandles, BorderWidth 3
 This example lets the user type in a hostname,
 and optionally a user name on the remote machine,
 and opens an xterm window from the remote host.
-.PP
 .RS
 .nf
 *RloginWarpPointer
@@ -285,10 +280,8 @@ xterm -T xterm@$(HostName) -display $HOSTDISPLAY &
 *RloginCommand       Nop
 .fi
 .RE
-
 .SH EXAMPLE 3 - Capture Window
 This example provides a front-end to xwd, xwud, and xpr.
-.PP
 .RS
 .nf
 *CaptureFont          *helvetica*m*r*n*14*
@@ -323,10 +316,8 @@ This example provides a front-end to xwd, xwud, and xpr.
 *CaptureButton        quit        "Quit"
 .fi
 .RE
-
 .SH COPYRIGHT
 FvwmForm is original work of Thomas Zuwei Feng.
-
 Copyright Feb 1995, Thomas Zuwei Feng.  No guarantees or warantees are
 provided or implied in any way whatsoever.  Use this program at your own
 risk.  Permission to use, modify, and redistribute this program is hereby
