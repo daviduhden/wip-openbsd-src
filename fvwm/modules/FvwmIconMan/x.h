@@ -1,6 +1,10 @@
 #ifndef IN_X_H
 #define IN_X_H
 
+#include "FvwmIconMan.h"
+
+#include <X11/Xlib.h>
+
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
 #endif
