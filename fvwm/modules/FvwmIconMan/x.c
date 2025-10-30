@@ -521,7 +521,7 @@ void X_init_manager(int man_id)
 
   man->fontheight = man->ButtonFont->ascent + man->ButtonFont->descent;
 
-  /* silly hack to guess the minimum char width of the font
+  /* Silly hack to guess the minimum char width of the font
      doesn't have to be perfect. */
 
   man->fontwidth = XTextWidth(man->ButtonFont, ".", 1);
