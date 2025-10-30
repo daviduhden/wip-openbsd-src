@@ -1,8 +1,8 @@
-." $OpenBSD: FvwmRearrange.1,v 2.0 2025/10/18 10:00:00 random Exp $
-." t
-." @(#)FvwmRearrange.1  18/10/25
+.\" $OpenBSD: FvwmRearrange.1,v 2.0 2025/10/18 10:00:00 random Exp $
+.\" t
+.\" @(#)FvwmRearrange.1  18/10/25
 .de EX
-." Begin example macro
+.\" Begin example macro
 .ne 5
 .if n .sp 1
 .if t .sp .5
@@ -10,6 +10,7 @@
 .in +.5i
 ..
 .de EE
+.\" End example macro
 .fi
 .in -.5i
 .if n .sp 1
@@ -22,7 +23,6 @@ FvwmRearrange \- reorganise FVWM clients
 .SH SYNOPSIS
 FvwmRearrange is launched internally by fvwm; invoking it directly from a shell
 is not supported.
-.PP
 .SH DESCRIPTION
 FvwmRearrange arranges windows either in a tiled grid or in a cascading stack.
 Tiling fills the current screen with non-overlapping frames.  Rows or columns
@@ -39,11 +39,9 @@ increment rules.
 FvwmRearrange is normally bound to menus, buttons, or key bindings.  The module
 accepts a variety of switches that tailor how windows are selected and laid
 out.  The following samples show typical usage:
-.PP
 .EX
 FvwmRearrange -tile -h 10 10 90 90
 .EE
-.PP
 .EX
 FvwmRearrange -cascade -resize 10 2 80 70
 .EE
@@ -56,7 +54,6 @@ possible.
 .PP
 For backward compatibility the module can also be invoked as FvwmTile or
 FvwmCascade, which internally pass \-tile or \-cascade.
-.PP
 .SH OPTIONS
 The options recognised by FvwmRearrange are described below.
 .PP
@@ -131,7 +128,6 @@ window that exceeds either limit is resized down to the limit.
 .PP
 Supplying zero for any numeric parameter leaves the corresponding default in
 place.
-.PP
 .SH AUTHORS
 Andrew Veliath (original FvwmTile and FvwmCascade modules)
 Dominik Vogt (merged FvwmTile and FvwmCascade into FvwmRearrange)

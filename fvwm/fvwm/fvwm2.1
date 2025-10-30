@@ -15,7 +15,7 @@
 .if t .sp .5
 ..
 .ta .3i .6i .9i 1.2i 1.5i 1.8i
-.TH FVWM 1 "late 20th century" "fvwm 2.xx"
+.TH FVWM 1 "August 11, 1998" "FVWM 2.xx" "FVWM Manual"
 .UC
 .SH NAME
 fvwm \- F(?) Virtual Window Manager (version 2.xx) for X11
@@ -271,7 +271,6 @@ window-manager to give them the keyboard focus anyway, so fvwm
 provides a window-style, "Lenience", which will allow fvwm to overlook
 this ICCCM rule.
 .SH M4 PREPROCESSING
-.PP
 M4 pre-processing is handled by a module in fvwm-2.0.  To get more
 details, try man FvwmM4.  In short, if you want fvwm to parse your
 files with m4, then replace the word "Read" with "FvwmM4" in
@@ -281,12 +280,10 @@ command
 fvwm -cmd "FvwmM4 .fvwmrc"
 .EE
 .SH CPP PREPROCESSING
-.PP
 Cpp is the C-language pre-processor.  fvwm-2.0 offers cpp processing
 which mirrors the m4 pre-processing.  To find out about it, re-read
 the M4 section above, but replace "m4" with "cpp".
 .SH AUTO-RAISE
-.PP
 Windows can be automatically raised when it receives focus, or some
 number of milliseconds after it receives focus, by using the
 auto-raise module, FvwmAuto.
@@ -2096,7 +2093,7 @@ Sends an arbitrary string (no quotes required) to all modules matching
 if the module is set up to understand and deal with these strings
 though...  Can be used for module to module communication, or
 implementation of more complex commands in modules.
-.IP "SetAnimation \fImilliseconds-delay\fP [ \fifractions-to-move-list\fP ]"
+.IP "SetAnimation \fImilliseconds-delay\fP [ \fIfractions-to-move-list\fP ]"
 Sets the time between frames and the list of fractional offsets to
 customize the animated moves of the \fIAnimatedMove\fP command and
 the animation of menus (if the menu style is set to animated).  If

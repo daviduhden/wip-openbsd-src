@@ -19,10 +19,8 @@
 .SH NAME
 FvwmIconMan \- an Fvwm Icon Manager
 .SH SYNOPSIS
-.PP
 FvwmIconMan is spawned by fvwm, so no command line invocation will work.
 .SH DESCRIPTION
-.PP
 FvwmIconMan is an icon manager modeled after the TWM icon manager. The user
 may have multiple icon managers, each of which armed with a list of window
 types which it manages. For example, the user may have one manager which lists
@@ -46,7 +44,6 @@ FvwmIconMan can be set to display which window currently has the keyboard
 focus, and by binding the select event (see below) to the fvwm Focus function,
 you can emulate the TWM icon manager's behavior.
 .SH INITIALIZATION
-.PP
 During initialization, FvwmIconMan searches though the fvwm configuration file
 for the options which are described below. It is highly recommended that you
 make FvwmIconMan be a sticky window. And if you want to make use of the
@@ -54,9 +51,8 @@ followfocus option, and/or binding an action to Focus, then you should make
 FvwmIconMan clicktofocus. Also, when using the Shape option, it's recommended
 that the FvwmIconMan window not be decorated at all by fvwm.
 .SH INVOCATION
-.PP
 FvwmIconMan can be invoked by inserting the line 'Module FvwmIconMan' in the
-.fvwmrc file.
+\&.fvwmrc file.
 If FvwmIconMan is to be spawned during fvwm's initialization,
 then this line should be placed in the InitFunction and ResetFunction
 declarations, or it can be bound to a menu, mouse button, or keystroke to
@@ -76,7 +72,6 @@ running transiently.
 So, when running transiently, FvwmIconMan will only create one manager window.
 Use the manager id 'transient' to specify options for this manager window.
 .SH CONFIGURATION OPTIONS REFERENCE CHART
-.PP
 FvwmIconMan has acquired quite a few options. I assume others share my dislike
 of paging though a long manpage, so here is a terse reference chart describing
 the available options. They are described in more detail in the next section.
@@ -111,7 +106,6 @@ usewinlist      honor WinListSkip?         true
 .fi
 .PP
 .SH CONFIGURATION OPTIONS
-.PP
 With the exception of the nummanagers option, all of the options may be
 defined on a per-manager basis. So, for example, the user may have his emacs
 manager with a red foreground, and his xterm manager with a blue one. A
@@ -247,7 +241,6 @@ the manager list is sorted by the window id, which never changes after the
 window is created. Or it can be set to \fInone\fP, which results in no sorting.
 Default is \fIname\fP.
 .SH ACTIONS
-.PP
 Actions are commands which may be bound to an event of the type: a keypress, a
 mouse click, or the mouse entering a window manager button - denoted by the
 action types \fIKey\fP, \fIMouse\fP, and \fISelect\fP.
@@ -520,5 +513,4 @@ Thanks to:
         Adam Rice <wysiwyg@glympton.airtime.co.uk>,
         Chris Siebenmann <cks@hawkwind.utcs.toronto.edu>,
         Bjorn Victor <victor@delial.docs.uu.se>.
-
 for contributing either code or truly keen ideas.

@@ -6,10 +6,8 @@
 .SH NAME
 FvwmIdent \- the FVWM identify-window module
 .SH SYNOPSIS
-.PP
 FvwmIdent is spawned by fvwm, so no command line invocation will work.
 .SH DESCRIPTION
-.PP
 The FvwmIdent module prompts the user to select a target window if the
 module was not launched from within a window context in Fvwm.
 .PP
@@ -19,7 +17,6 @@ was selected.
 FvwmIdent reads the same .fvwmrc file as fvwm reads when it starts up and
 looks for lines similar to "*FvwmIdentFore green".
 .SH COPYRIGHTS
-.PP
 The FvwmIdent program, and the concept for interfacing this module to the
 Window Manager, are original work by Robert Nation and Nobutaka Suzuki.
 .PP
@@ -29,7 +26,6 @@ warranties or anything are provided or implied in any way whatsoever.
 Use this program at your own risk. Permission to use this program for any
 purpose is given, as long as the copyright is kept intact.
 .SH INITIALIZATION
-.PP
 During initialization, \fIFvwmIdent\fP will search a configuration file
 which describes the colors and font to use. The configuration file is the
 same file that fvwm used during initialization.
@@ -40,7 +36,6 @@ started, with a completely different configuration than FvwmIdent,
 simply by changing the keyword FvwmIdent to MoreIdentify. This way
 multiple clutter-reduction programs can be used.
 .SH INVOCATION
-.PP
 FvwmIdent can be invoked by binding the action "Module FvwmIdent" to a
 menu or key-stroke in the .fvwmrc file.
 .PP
@@ -48,7 +43,6 @@ Fvwm will search the directory specified in the ModulePath configuration
 option to locate FvwmIdent. Although nothing keeps you from launching
 FvwmIdent at start-up time, you probably do not want to.
 .SH CONFIGURATION OPTIONS
-.PP
 FvwmIdent reads the same .fvwmrc file as fvwm reads when it starts up and
 looks for lines as listed below:
 .IP "*FvwmIdentFore \fIcolor\fP"
@@ -59,6 +53,5 @@ background.
 .IP "*FvwmIdentFont \fIfontname\fP"
 Tells the module to use \fIfontname\fP instead of fixed for text.
 .SH AUTHOR
-.PP
 Robert Nation and Nobutaka Suzuki (nobuta-s@is.aist-nara.ac.jp).
 

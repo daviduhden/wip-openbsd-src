@@ -6,7 +6,6 @@
 .SH NAME
 FvwmPager \- the FVWM Pager module
 .SH SYNOPSIS
-.PP
 FvwmPager is spawned by fvwm, so no command line invocation will work.
 .PP
 From within the .fvwmrc file, FvwmPager is spawned as follows:
@@ -47,7 +46,6 @@ Here, "0" is the first desktop to show, and "3" is the last and "*"
 is the current dektop. In the second format (with two asterisks) the
 current desk is always visible in the pager (and it is also the only one).
 .SH DESCRIPTION
-.PP
 The FvwmPager module shows a miniature view of the Fvwm desktops which
 are specified in the command line. This is a useful reminder of where
 your active windows are. Windows in the pager are shown in the same
@@ -85,7 +83,6 @@ Icon "Fvwm Pager" whatever
 .fi
 in their .fvwmrc files.
 .SH COPYRIGHTS
-.PP
 The FvwmPager program, and the concept for interfacing this module to the
 Window Manager, are original work by Robert Nation.
 .PP
@@ -94,7 +91,6 @@ provided or implied in any way whatsoever. Use this program at your own risk.
 Permission to use this program for any purpose is given, as long as the
 copyright is kept intact.
 .SH INITIALIZATION
-.PP
 During initialization, \fIFvwmPager\fP will eventually search a configuration
 file which describes the time-outs and actions to take. The configuration file
 is the same file that fvwm used during initialization.
@@ -104,15 +100,12 @@ OtherPager, then another module called OtherPager can be started, with a
 completely different configuration than FvwmPager, simply by changing the
 keyword FvwmPager to OtherPager. This way multiple pager programs can be used.
 .SH KEYBOARD FOCUS CONTROL
-.PP
 You can direct the keyboard focus to any window on the current desktop by
 clicking with button 2 on its image in the pager. The window does not need to
 be visible, but it does need to be on the current page.
 .SH INVOCATION
-.PP
 The invocation method was shown in the synopsis section.
 .SH CONFIGURATION OPTIONS
-.PP
 FvwmPager reads the same .fvwmrc file as fvwm reads when it starts up, and
 looks for certain configuration options:
 .IP "*FvwmPagerGeometry \fIgeometry\fP"

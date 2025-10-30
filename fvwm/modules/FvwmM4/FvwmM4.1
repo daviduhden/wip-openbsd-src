@@ -19,17 +19,13 @@
 .SH NAME
 FvwmM4 \- the FVWM  M4 pre-processor
 .SH SYNOPSIS
-.PP
 FvwmM4 is spawned by fvwm, so no command line invocation will work.
 .SH DESCRIPTION
-.PP
 When called, this module will attempt to have M4 pre-process the file
 specified in its invocation, and then have fvwm read the resulting file.
 .SH INVOCATION
-.PP
 FvwmM4 can be invoked by inserting the line "FvwmM4" in the .fvwmrc file.
 It can also be called from a menu or mouse binding.
-.PP
 If the user wants his entire .fvwmrc file pre-processed with FvwmM4,
 then fvwm should be invoked as:
 .EX
@@ -67,9 +63,7 @@ the temporary file it will create.
 Causes the temporary file create by m4 to be retained.
 This file is usually called "/tmp/fvwmrcXXXXXXXXXX".
 .SH CONFIGURATION OPTIONS
-.PP
 FvwmM4 defines some values for use in the pre-processor file:
-
 .IP TWM_TYPE
 Always set to "fvwm".
 .IP SERVERHOST
@@ -115,7 +109,6 @@ configure.h at compile time.
 The directory where fvwm looks for .fvwmrc and modules by default, as
 determined at compile time.
 .SH EXAMPLE PROLOG
-.PP
 .EX
 define(TWM_TYPE,``fvwm'')dnl
 define(SERVERHOST,``spx20'')dnl
@@ -141,6 +134,5 @@ define(OPTIONS,``SHAPE XPM M4 '')dnl
 define(FVWM_MODULEDIR,``/local/homes/dsp/nation/modules'')dnl
 .EE
 .SH AUTHOR
-.PP
 FvwmM4 is the result of a random bit mutation on a hard disk,
 presumably a result of a cosmic-ray or some such thing.
