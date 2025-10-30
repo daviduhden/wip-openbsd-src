@@ -290,7 +290,7 @@ static int extract_int(char *p, int *n)
  * "word" is a string with no spaces, or a qouted string.
  * Return value is ptr to indata,updated to point to text after the word
  * which is extracted.
- * token is the extracted word, which is copied into a malloced
+ * The token is the extracted word, which is copied into a malloced
  * space, and must be freed after use. 
  *
  **************************************************************************/

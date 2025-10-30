@@ -98,6 +98,23 @@ void add_to_stringlist(StringList *list, char *s)
   ConsoleDebug(WINLIST, "Exiting add_to_stringlist\n");
 }
 
+static int stringlist_requires_name(const StringList *list,
+                                    NameType type)
+{
+  StringEl *p;
+
+  if (!list)
+    return 0;
+
+  for (p = list->list; p; p = p->next)
+  {
+    if (p->type == type)
+      return 1;
+  }
+
+  return 0;
+}
+
 static int matches_string(NameType type, char *pattern, char *tname,
                           char *iname, char *rname, char *cname)
 {
@@ -262,8 +279,22 @@ WinManager *figure_win_manager(WinData *win, Uchar name_mask)
 
 int check_win_complete(WinData *p)
 {
+  int need_resname = 0;
+  int have_required_names = 0;
+
   if (p->complete)
     return 1;
+
+  if (p->manager)
+  {
+    if (p->manager->format_depend & RESOURCE_NAME)
+      need_resname = 1;
+    else if (stringlist_requires_name(&p->manager->show, RESOURCE_NAME))
+      need_resname = 1;
+    else if (stringlist_requires_name(&p->manager->dontshow,
+                                      RESOURCE_NAME))
+      need_resname = 1;
+  }
 
   ConsoleDebug(WINLIST, "Checking completeness:\n");
   ConsoleDebug(WINLIST, "\ttitlename: %s\n",
@@ -283,9 +314,13 @@ int check_win_complete(WinData *p)
   ConsoleDebug(WINLIST, "\tdesknum: %ld\n", p->desknum);
   ConsoleDebug(WINLIST, "\tmanager: 0x%lx\n",
                (unsigned long)p->manager);
+  ConsoleDebug(WINLIST, "\tneed_resname: %d\n", need_resname);
 
-  if (p->geometry_set && p->resname && p->classname && p->iconname &&
-      p->titlename && p->manager && p->app_id_set)
+  have_required_names = (!need_resname || p->resname) && p->classname &&
+                        p->iconname && p->titlename;
+
+  if (p->geometry_set && have_required_names && p->manager &&
+      p->app_id_set)
   {
     p->complete = 1;
     ConsoleDebug(WINLIST, "\tcomplete: 1\n\n");

@@ -4,6 +4,7 @@
 #include "x.h"
 #include "xmanager.h"
 #include <stdlib.h>
+#include <string.h>
 
 static char const rcsid[] =
   "$Id: xmanager.c,v 1.1.1.1 2006/11/26 10:53:51 matthieu Exp $";
@@ -262,13 +263,23 @@ static ManGeometry *query_geometry(WinManager *man)
 static void fix_manager_size(WinManager *man, int w, int h)
 {
   XSizeHints size;
-  long mask;
+  long mask = 0;
 
-  XGetWMNormalHints(theDisplay, man->theWindow, &size, &mask);
+  if (!XGetWMNormalHints(theDisplay, man->theWindow, &size, &mask))
+  {
+    memset(&size, 0, sizeof(size));
+    size.flags = 0;
+  }
+
+  size.flags |= PMinSize | PMaxSize | PBaseSize | PWinGravity;
   size.min_width = w;
   size.max_width = w;
   size.min_height = h;
   size.max_height = h;
+  size.base_width = w;
+  size.base_height = h;
+  size.win_gravity = man->gravity;
+
   XSetWMNormalHints(theDisplay, man->theWindow, &size);
 }
 
@@ -693,13 +704,19 @@ void set_win_displaystring(WinData *win)
 {
   WinManager *man = win->manager;
   int maxlen;
+  int used_resource_placeholder = 0;
 
   if (!man || ((man->format_depend & CLASS_NAME) && !win->classname) ||
       ((man->format_depend & ICON_NAME) && !win->iconname) ||
-      ((man->format_depend & TITLE_NAME) && !win->titlename) ||
-      ((man->format_depend & RESOURCE_NAME) && !win->resname))
+      ((man->format_depend & TITLE_NAME) && !win->titlename))
   {
     return;
+  }
+
+  if ((man->format_depend & RESOURCE_NAME) && !win->resname)
+  {
+    win->resname = "";
+    used_resource_placeholder = 1;
   }
 
   if (man->window_up)
@@ -714,6 +731,8 @@ void set_win_displaystring(WinData *win)
   }
   copy_string(&win->display_string,
               make_display_string(win, man->formatstring, maxlen));
+  if (used_resource_placeholder)
+    win->resname = NULL;
   if (win->button)
     win->button->drawn_state.dirty_flags |= STRING_CHANGED;
 }
