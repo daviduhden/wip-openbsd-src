@@ -9,8 +9,12 @@
  * whatsoever. Use this program at your own risk. Permission to use this
  * program for any purpose is given, as long as the copyright is kept intact.
  *
- *  Things to do:  Convert to C++  (In Progress)
  */
+
+#ifndef BUTTONARRAY_H
+#define BUTTONARRAY_H
+
+#include "../../libs/fvwmlib.h"
 
 /* Struct definitions */
 typedef struct button
@@ -51,3 +55,5 @@ void SwitchButton(ButtonArray *array, int butnum);
 void RadioButton(ButtonArray *array, int butnum);
 int WhichButton(ButtonArray *array, int x, int y);
 void PrintButtons(ButtonArray *array);
+
+#endif /* BUTTONARRAY_H */
