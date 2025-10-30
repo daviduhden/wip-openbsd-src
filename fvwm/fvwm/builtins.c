@@ -212,13 +212,6 @@ void FocusOn(FvwmWindow *t, Bool FocusByMouse)
     x = t->frame_x;
     y = t->frame_y;
   }
-#if 0  /* don't want to warp the pointer by default anymore */
-  if(!(t->flags & ClickToFocus))
-    XWarpPointer(dpy, None, Scr.Root, 0, 0, 0, 0, x+2,y+2);
-#endif /* 0 */
-#if 0  /* don't want to raise anymore either */
-  RaiseWindow(t);
-#endif /* 0 */
   KeepOnTop();
 
   /* If the window is still not visible, make it visible! */
@@ -870,19 +863,6 @@ void exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 {
   char *cmd = NULL;
 
-  /* if it doesn't already have an 'exec' as the first word, add that
-   * to keep down number of procs started */
-  /* need to parse string better to do this right though, so not doing this
-     for now... */
-#if 0
-  if (strncasecmp(action,"exec",4)!=0)
-  {
-    cmd = (char *)safemalloc(strlen(action)+6);
-    strcpy(cmd,"exec ");
-    strcat(cmd,action);
-  }
-  else
-#endif
   {
     cmd = strdup(action);
   }
@@ -915,16 +895,11 @@ void refresh_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
   XSetWindowAttributes attributes;
   unsigned long valuemask;
 
-#if 0
-  valuemask = (CWBackPixel);
-  attributes.background_pixel = 0;
-#else /* CKH - i'd like to try this a little differently (clear window)*/
   valuemask =
     CWOverrideRedirect | CWBackingStore | CWSaveUnder | CWBackPixmap;
   attributes.override_redirect = True;
   attributes.save_under = False;
   attributes.background_pixmap = None;
-#endif
   attributes.backing_store = NotUseful;
   w =
     XCreateWindow(dpy, Scr.Root, 0, 0, (unsigned int)Scr.MyDisplayWidth,
@@ -993,9 +968,6 @@ void wait_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
   while (!done)
   {
-#if 0
-    GrabEm(WAIT);
-#endif
     if (My_XNextEvent(dpy, &Event))
     {
       DispatchEvent();
@@ -1019,9 +991,6 @@ void wait_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
       }
     }
   }
-#if 0
-  UngrabEm();
-#endif
 }
 
 void flip_focus_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
@@ -2271,11 +2240,6 @@ static void NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
       }
       break;
 
-#if 0
-      case 33: /* PositionHints */
-	break;
-#endif
-
     default:
       fvwm_msg(ERR, "NewMenuStyle", "unknown option '%s'", option);
       break;
@@ -3265,13 +3229,6 @@ Boolean ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
     else if (strncasecmp(style, "MiniIcon", 8) == 0)
     {
       bf->style = MiniIconButton;
-#if 0
-/* Have to remove this again. This is all so badly written there is no chance
- * to prevent a coredump and a memory leak the same time without a rewrite of
- * large parts of the code. */
-	    if (bf->u.p)
-	      DestroyPicture(dpy, bf->u.p);
-#endif
       bf->u.p = NULL; /* pixmap read in when the window is created */
     }
 #endif

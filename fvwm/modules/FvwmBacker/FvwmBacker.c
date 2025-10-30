@@ -246,11 +246,7 @@ void ProcessMessage(unsigned long type, unsigned long *body)
     }
     else if (commands[body[0]].cmdStr != NULL)
     {
-#if 0
-	  system(commands[body[0]].cmdStr);
-#else /* much more useful: */
       SendFvwmPipe(commands[body[0]].cmdStr, (unsigned long)0);
-#endif
     }
   }
 }
@@ -359,11 +355,6 @@ void AddCommand(char *string)
         commands[DeskCount++].type = -1;
     }
   }
-  /*  commands[num]=(Command*)safemalloc(sizeof(Command));
-*/
-
-  /* Now check the type of command... */
-  /* strcpy(commands[num],temp);*/
 
   if (strncmp(temp, "-solid", 6) == 0)
   {

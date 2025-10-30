@@ -348,11 +348,7 @@ void initialize_pager(void)
     y = 0;
 
     valuemask = (CWBackPixel | CWBorderPixel | CWEventMask);
-#if 0
-      attributes.background_pixel = back_pix;
-#else
     attributes.background_pixel = GetColor(Desks[i].Dcolor);
-#endif
     attributes.border_pixel = fore_pix;
     attributes.event_mask = (ExposureMask | ButtonReleaseMask);
     Desks[i].title_w = XCreateWindow(
@@ -1584,7 +1580,7 @@ void MoveWindow(XEvent *Event)
       XSync(dpy, 0);
       if (t->flags & ICONIFIED)
       {
-/*
+        /*
     RBW - reverting to old code for 2.2...
     The new handling causes an unwanted viewport change whenever Button2
     is used; the old handling causes focus to be sent to No Input windows
@@ -1592,20 +1588,12 @@ void MoveWindow(XEvent *Event)
     I suspect it will involve expanding the module message to include wmhints
     and such.
 */
-#if 0
-            SendInfo(fd, "Focus", t->icon_w);
-#else
         XSetInputFocus(dpy, t->icon_w, RevertToParent,
                        Event->xbutton.time);
-#endif
       }
       else
       {
-#if 0
-	    SendInfo(fd, "Focus", t->w);
-#else
         XSetInputFocus(dpy, t->w, RevertToParent, Event->xbutton.time);
-#endif
       }
     }
   }
@@ -1619,16 +1607,9 @@ void MoveWindow(XEvent *Event)
  ************************************************************************/
 XErrorHandler FvwmErrorHandler(Display *dpy, XErrorEvent *event)
 {
-#if 1
   extern Bool error_occured;
   error_occured = True;
   return 0;
-#else
-  /* really should just exit here... */
-  /* domivogt (07-mar-1999): No, not really. See comment above. */
-  fprintf(stderr, "%s: XError!  Bagging out!\n", MyName);
-  exit(0);
-#endif /* 1 */
 }
 
 void LabelWindow(PagerWindow *t)
@@ -1919,24 +1900,16 @@ void IconMoveWindow(XEvent *Event, PagerWindow *t)
 
     if (t->flags & ICONIFIED)
     {
-/*
+      /*
     RBW - reverting to old code for 2.2...temporarily. See note above, in
     MoveWindow.
 */
-#if 0
-          SendInfo(fd, "Focus", t->icon_w);
-#else
       XSetInputFocus(dpy, t->icon_w, RevertToParent,
                      Event->xbutton.time);
-#endif
     }
     else
     {
-#if 0
-          SendInfo(fd, "Focus", t->w);
-#else
       XSetInputFocus(dpy, t->w, RevertToParent, Event->xbutton.time);
-#endif
     }
   }
 }

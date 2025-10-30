@@ -136,13 +136,8 @@ FvwmWindow *AddWindow(Window w)
   else
     tmp_win->name = NoName;
 
-  /* removing NoClass change for now... */
-#if 0
-  tmp_win->class.res_name = tmp_win->class.res_class = NULL;
-#else
   tmp_win->class.res_name = NoResource;
   tmp_win->class.res_class = NoClass;
-#endif /* 0 */
   XGetClassHint(dpy, tmp_win->w, &tmp_win->class);
 #if 1
   if (tmp_win->class.res_name == NULL)
@@ -728,14 +723,6 @@ FvwmWindow *AddWindow(Window w)
     for (i = 1; i <= 3; i++)
       if (Scr.buttons2grab & (1 << i))
       {
-#if 0
-	    XGrabButton(dpy,(i),0,tmp_win->frame,True,
-			ButtonPressMask, GrabModeSync,GrabModeAsync,None,
-			Scr.FvwmCursors[SYS]);
-	    XGrabButton(dpy,(i),LockMask,tmp_win->frame,True,
-			ButtonPressMask, GrabModeSync,GrabModeAsync,None,
-			Scr.FvwmCursors[SYS]);
-#else
         /* should we accept any modifier on this button? */
         /* domivogt (2-Jan-1999): No. Or at least not like this. In the
 	     * present form no button presses go through to the title bar
@@ -743,7 +730,6 @@ FvwmWindow *AddWindow(Window w)
         XGrabButton(dpy, (i), AnyModifier, tmp_win->frame, True,
                     ButtonPressMask, GrabModeSync, GrabModeAsync, None,
                     Scr.FvwmCursors[SYS]);
-#endif
       }
   }
   BroadcastConfig(M_ADD_WINDOW, tmp_win);

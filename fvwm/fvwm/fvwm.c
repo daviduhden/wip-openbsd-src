@@ -61,11 +61,6 @@ char *default_config_command = "Read " FVWMRC;
 static char *config_commands[MAX_CFG_CMDS];
 static int num_config_commands = 0;
 
-#if 0
-/* unsused */
-char *output_file = NULL;
-#endif
-
 int FvwmErrorHandler(Display *, XErrorEvent *);
 int CatchFatal(Display *);
 int CatchRedirectError(Display *, XErrorEvent *);
@@ -97,13 +92,6 @@ static char g_bits[] = {0x02, 0x01};
 #define l_g_width 4
 #define l_g_height 2
 static char l_g_bits[] = {0x08, 0x02};
-
-#if 0
-/* code unused */
-#define s_g_width 4
-#define s_g_height 4
-static char s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
-#endif
 
 #ifdef SHAPE
 int ShapeEventBase, ShapeErrorBase;
@@ -214,15 +202,6 @@ int main(int argc, char **argv)
                  MAX_CFG_CMDS);
       }
     }
-#if 0
-/* unused */
-    else if (strncasecmp(argv[i],"-outfile",8)==0)
-    {
-      if (++i >= argc)
-        usage();
-      output_file = argv[i];
-    }
-#endif
     else if (strncasecmp(argv[i], "-h", 2) == 0)
     {
       usage();
@@ -1593,16 +1572,11 @@ int FvwmErrorHandler(Display *dpy, XErrorEvent *event)
 
 void usage(void)
 {
-#if 0
-  fvwm_msg(INFO,"usage","\nFvwm Version %s Usage:\n\n",VERSION);
-  fvwm_msg(INFO,"usage","  %s [-d dpy] [-debug] [-f config_cmd] [-s] [-blackout] [-version] [-h]\n",g_argv[0]);
-#else
   fprintf(stderr, "\nFvwm Version %s Usage:\n\n", VERSION);
   fprintf(stderr,
           "  %s [-d dpy] [-debug] [-f config_cmd] [-s] [-blackout] "
           "[-version] [-h]\n\n",
           g_argv[0]);
-#endif
 }
 
 /****************************************************************************

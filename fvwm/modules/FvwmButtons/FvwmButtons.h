@@ -25,7 +25,7 @@
 #define DEBUG_HANGON   /* Debug hangon, swallow and unswallow */
 /* #define DEBUG_EVENTS */  /* Get much info on events */
 #define DEBUG_FVWM     /* Debug communciation with fvwm */
-/* #define DEBUG_X       */
+/* #define DEBUG_X */
 #endif
 
 /* ---------------------------- compatibility ------------------------------ */

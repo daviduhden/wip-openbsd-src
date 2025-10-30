@@ -187,12 +187,6 @@ int main(int argc, char **argv)
 
   OpenConsole(OUTPUT_FILE);
 
-#if 0
-  ConsoleMessage ("PID = %d\n", getpid());
-  ConsoleMessage ("Waiting for GDB to attach\n");
-  sleep (10);
-#endif
-
   init_globals();
   init_winlists();
 

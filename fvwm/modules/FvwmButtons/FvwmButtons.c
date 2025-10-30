@@ -1415,10 +1415,6 @@ void CreateWindow(button_info *ub, int maxx, int maxy)
 #endif
   XSetWMProtocols(Dpy, MyWindow, &_XA_WM_DEL_WIN, 1);
 
-#if 0
-  myclasshints.res_name=strdup((CurrentPanel == MainPanel)
-                                 ? MyName : CurrentPanel->uber->title);
-#else
   if (CurrentPanel == MainPanel)
   {
     myclasshints.res_name = strdup(MyName);
@@ -1430,7 +1426,6 @@ void CreateWindow(button_info *ub, int maxx, int maxy)
     strlcpy(myclasshints.res_name, MyName, total_len);
     strlcat(myclasshints.res_name, "Panel", total_len);
   }
-#endif
   myclasshints.res_class = strdup(
     (CurrentPanel == MainPanel) ? "FvwmButtons" : "FvwmButtonsPanel");
 

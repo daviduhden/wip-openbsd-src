@@ -1464,55 +1464,7 @@ void Prev(void)
  * 	Based on DeadPipe() from GoodStuff:
  *		Copyright 1993, Robert Nation.
  ***********************************************************************/
-void DeadPipe(int nonsense)
-{
-#if 0 /* can't do X or malloc stuff in a signal handler, so just exit */
-  struct icon_info *tmpi, *tmpi2;
-  struct mousefunc *tmpm, *tmpm2;
-  struct keyfunc *tmpk, *tmpk2;
-  struct iconfile *tmpf, *tmpf2;
-
-  if (FvwmDefaultIcon != NULL)
-    free(FvwmDefaultIcon);
-
-  tmpm = MouseActions;
-  while(tmpm != NULL){
-    tmpm2 = tmpm;
-    tmpm = tmpm->next;
-    free(tmpm2->action);
-    free(tmpm2);
-  }
-
-  tmpk = KeyActions;
-  while(tmpk != NULL){
-    tmpk2 = tmpk;
-    tmpk = tmpk->next;
-    free(tmpk2->action);
-    free(tmpk2->name);
-    free(tmpk2);
-  }
-
-  tmpf = IconListHead;
-  while(tmpf != NULL){
-    tmpf2 = tmpf;
-    tmpf = tmpf->next;
-    free(tmpf2->name);
-    free(tmpf2->iconfile);
-    free(tmpf2);
-  }
-
-  tmpi = Head;
-  while(tmpi != NULL){
-    tmpi2 = tmpi;
-    tmpi = tmpi->next;
-    freeitem(tmpi2, 0);
-  }
-  if ((local_flags & SETWMICONSIZE))
-    XDeleteProperty(dpy, Root, XA_WM_ICON_SIZE);
-  XSync(dpy,0);
-#endif /* 0 */
-  exit(0);
-}
+void DeadPipe(int nonsense) { exit(0); }
 
 /************************************************************************
  * ParseOptions
