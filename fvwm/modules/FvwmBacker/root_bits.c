@@ -22,23 +22,22 @@ extern Display *dpy;
 extern int screen;
 extern char *Module;
 
-unsigned long GetColor(char *name)
+unsigned long
+GetColor(char *name)
 {
-  Colormap cmap = DefaultColormap(dpy, screen);
-  XColor spec = {0};
+	Colormap cmap = DefaultColormap(dpy, screen);
+	XColor spec = {0};
 
-  if (!XParseColor(dpy, cmap, name, &spec))
-  {
-    fprintf(stderr, "%s: unknown color \"%s\"\n", Module, name);
-    exit(1);
-  }
+	if (!XParseColor(dpy, cmap, name, &spec)) {
+		fprintf(stderr, "%s: unknown color \"%s\"\n", Module, name);
+		exit(1);
+	}
 
-  if (!XAllocColor(dpy, cmap, &spec))
-  {
-    fprintf(stderr, "%s: unable to allocate color for \"%s\"\n", Module,
-            name);
-    exit(1);
-  }
+	if (!XAllocColor(dpy, cmap, &spec)) {
+		fprintf(stderr, "%s: unable to allocate color for \"%s\"\n",
+		    Module, name);
+		exit(1);
+	}
 
-  return spec.pixel;
+	return spec.pixel;
 }

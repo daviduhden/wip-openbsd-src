@@ -86,21 +86,19 @@
 #define C_R5 0x8000
 #define C_RALL (C_R1 | C_R2 | C_R3 | C_R4 | C_R5)
 #define C_LALL (C_L1 | C_L2 | C_L3 | C_L4 | C_L5)
-#define C_ALL                                                          \
-  (C_WINDOW | C_TITLE | C_ICON | C_ROOT | C_FRAME | C_SIDEBAR | C_L1 | \
-   C_L2 | C_L3 | C_L4 | C_L5 | C_R1 | C_R2 | C_R3 | C_R4 | C_R5)
+#define C_ALL                                                                  \
+	(C_WINDOW | C_TITLE | C_ICON | C_ROOT | C_FRAME | C_SIDEBAR | C_L1 |   \
+	    C_L2 | C_L3 | C_L4 | C_L5 | C_R1 | C_R2 | C_R3 | C_R4 | C_R5)
 
-typedef struct MyFont
-{
-  XFontStruct *font; /* font structure */
-  int height;        /* height of the font */
-  int y;             /* Y coordinate to draw characters */
+typedef struct MyFont {
+	XFontStruct *font; /* font structure */
+	int height;        /* height of the font */
+	int y;             /* Y coordinate to draw characters */
 } MyFont;
 
-typedef struct ColorPair
-{
-  Pixel fore;
-  Pixel back;
+typedef struct ColorPair {
+	Pixel fore;
+	Pixel back;
 } ColorPair;
 
 #ifdef MINI_ICONS
@@ -115,14 +113,14 @@ struct FvwmDecor; /* definition in screen.h */
   For 1 style statement, there can be any number of IconBoxes.
   The name list points at the first one in the chain.
  */
-typedef struct icon_boxes_struct
-{
-  struct icon_boxes_struct *next; /* next icon_boxes or zero */
-  int IconBox[4];                 /* x/y x/y for iconbox */
-  short IconGrid[2];              /* x incr, y incr */
-  unsigned char IconFlags;        /* some bits */
-  /* IconFill only takes 3 bits.  Defaults are top, left, vert co-ord first */
-  /* eg: t l = 0,0,0; l t = 0,0,1; b r = 1,1,0 */
+typedef struct icon_boxes_struct {
+	struct icon_boxes_struct *next; /* next icon_boxes or zero */
+	int IconBox[4];                 /* x/y x/y for iconbox */
+	short IconGrid[2];              /* x incr, y incr */
+	unsigned char IconFlags;        /* some bits */
+	/* IconFill only takes 3 bits.  Defaults are top, left, vert co-ord
+	 * first */
+	/* eg: t l = 0,0,0; l t = 0,0,1; b r = 1,1,0 */
 #define ICONFILLBOT (1 << 0)
 #define ICONFILLRGT (1 << 1)
 #define ICONFILLHRZ (1 << 2)
@@ -131,166 +129,161 @@ typedef struct icon_boxes_struct
 /* for each window that is on the display, one of these structures
  * is allocated and linked into a list
  */
-typedef struct FvwmWindow
-{
-  struct FvwmWindow *next;       /* next fvwm window */
-  struct FvwmWindow *prev;       /* prev fvwm window */
-  struct FvwmWindow *stack_next; /* next (lower) fvwm window in stacking
-				    * order*/
-  struct FvwmWindow
-    *stack_prev;  /* prev (higher) fvwm window in stacking
-				    * order */
-  Window w;       /* the child window */
-  int old_bw;     /* border width before reparenting */
-  Window frame;   /* the frame window */
-  Window Parent;  /* Ugly Ugly Ugly - it looks like you
-				 * HAVE to reparent the app window into
-				 * a window whose size = app window,
-				 * or else you can't keep xv and matlab
-				 * happy at the same time! */
-  Window title_w; /* the title bar window */
-  Window sides[4];
-  Window corners[4]; /* Corner pieces */
-  int nr_left_buttons;
-  int nr_right_buttons;
-  Window left_w[5];
-  Window right_w[5];
+typedef struct FvwmWindow {
+	struct FvwmWindow *next;       /* next fvwm window */
+	struct FvwmWindow *prev;       /* prev fvwm window */
+	struct FvwmWindow *stack_next; /* next (lower) fvwm window in stacking
+	                                * order*/
+	struct FvwmWindow *stack_prev; /* prev (higher) fvwm window in stacking
+	                                * order */
+	Window w;                      /* the child window */
+	int old_bw;                    /* border width before reparenting */
+	Window frame;                  /* the frame window */
+	Window Parent;                 /* Ugly Ugly Ugly - it looks like you
+	                                * HAVE to reparent the app window into
+	                                * a window whose size = app window,
+	                                * or else you can't keep xv and matlab
+	                                * happy at the same time! */
+	Window title_w;                /* the title bar window */
+	Window sides[4];
+	Window corners[4]; /* Corner pieces */
+	int nr_left_buttons;
+	int nr_right_buttons;
+	Window left_w[5];
+	Window right_w[5];
 #ifdef USEDECOR
-  struct FvwmDecor *fl;
+	struct FvwmDecor *fl;
 #endif
-  Window icon_w;        /* the icon window */
-  Window icon_pixmap_w; /* the icon window */
+	Window icon_w;        /* the icon window */
+	Window icon_pixmap_w; /* the icon window */
 #ifdef SHAPE
-  int wShaped; /* is this a shaped window */
+	int wShaped; /* is this a shaped window */
 #endif
-  int frame_x;      /* x position of frame */
-  int frame_y;      /* y position of frame */
-  int frame_width;  /* width of frame */
-  int frame_height; /* height of frame */
-  int boundary_width;
-  int corner_width;
-  int bw;
-  int title_x;
-  int title_y;
-  int title_height;       /* height of the title bar */
-  int title_width;        /* width of the title bar */
-  int icon_x_loc;         /* icon window x coordinate */
-  int icon_xl_loc;        /* icon label window x coordinate */
-  int icon_y_loc;         /* icon window y coordiante */
-  int icon_w_width;       /* width of the icon window */
-  int icon_w_height;      /* height of the icon window */
-  int icon_t_width;       /* width of the icon title window */
-  int icon_p_width;       /* width of the icon pixmap window */
-  int icon_p_height;      /* height of the icon pixmap window */
-  Pixmap iconPixmap;      /* pixmap for the icon */
-  int iconDepth;          /* Drawable depth for the icon */
-  Pixmap icon_maskPixmap; /* pixmap for the icon mask */
-  char *name;             /* name of the window */
-  char *icon_name;        /* name of the icon */
-  XWindowAttributes attr; /* the child window attributes */
-  XSizeHints hints;       /* normal hints */
-  XWMHints *wmhints;      /* WM hints */
-  XClassHint class;
-  int Desk;          /* Tells which desktop this window is on */
-  int FocusDesk;     /* Where (if at all) was it focussed */
-  int DeIconifyDesk; /* Desk to deiconify to, for StubbornIcons */
-  Window transientfor;
+	int frame_x;      /* x position of frame */
+	int frame_y;      /* y position of frame */
+	int frame_width;  /* width of frame */
+	int frame_height; /* height of frame */
+	int boundary_width;
+	int corner_width;
+	int bw;
+	int title_x;
+	int title_y;
+	int title_height;       /* height of the title bar */
+	int title_width;        /* width of the title bar */
+	int icon_x_loc;         /* icon window x coordinate */
+	int icon_xl_loc;        /* icon label window x coordinate */
+	int icon_y_loc;         /* icon window y coordiante */
+	int icon_w_width;       /* width of the icon window */
+	int icon_w_height;      /* height of the icon window */
+	int icon_t_width;       /* width of the icon title window */
+	int icon_p_width;       /* width of the icon pixmap window */
+	int icon_p_height;      /* height of the icon pixmap window */
+	Pixmap iconPixmap;      /* pixmap for the icon */
+	int iconDepth;          /* Drawable depth for the icon */
+	Pixmap icon_maskPixmap; /* pixmap for the icon mask */
+	char *name;             /* name of the window */
+	char *icon_name;        /* name of the icon */
+	XWindowAttributes attr; /* the child window attributes */
+	XSizeHints hints;       /* normal hints */
+	XWMHints *wmhints;      /* WM hints */
+	XClassHint class;
+	int Desk;          /* Tells which desktop this window is on */
+	int FocusDesk;     /* Where (if at all) was it focussed */
+	int DeIconifyDesk; /* Desk to deiconify to, for StubbornIcons */
+	Window transientfor;
 
 #ifdef GSFR
-  struct
-  {
-    start_iconic : 1;
-    staysontop : 1;
-    sticky : 1;
-    listskip : 1;
-    suppressicon : 1;
-    noicon_title : 1;
-    lenience : 1;
-    sticky_icon : 1;
-    circulate_skip_icon : 1;
-    circulateskip : 1;
-    click_focus : 1;
-    sloppy_focus : 1;
-    show_mapping : 1;
+	struct {
+		start_iconic : 1;
+		staysontop : 1;
+		sticky : 1;
+		listskip : 1;
+		suppressicon : 1;
+		noicon_title : 1;
+		lenience : 1;
+		sticky_icon : 1;
+		circulate_skip_icon : 1;
+		circulateskip : 1;
+		click_focus : 1;
+		sloppy_focus : 1;
+		show_mapping : 1;
 
-    notitle : 1;
-    noborder : 1;
-    icon : 1;
-    startsondesk : 1;
-    bw : 1;
-    nobw : 1;
-    fore_color : 1;
-    back_color : 1;
-    random_place : 1;
-    smart_place : 1;
-    mwm_button : 1;
-    mwm_decor : 1;
-    mwm_functions : 1;
-    mwm_override : 1;
-    mwm_border : 1;
-    decorate_transient : 1;
-    no_pposition : 1;
-    ol_decor : 1;
+		notitle : 1;
+		noborder : 1;
+		icon : 1;
+		startsondesk : 1;
+		bw : 1;
+		nobw : 1;
+		fore_color : 1;
+		back_color : 1;
+		random_place : 1;
+		smart_place : 1;
+		mwm_button : 1;
+		mwm_decor : 1;
+		mwm_functions : 1;
+		mwm_override : 1;
+		mwm_border : 1;
+		decorate_transient : 1;
+		no_pposition : 1;
+		ol_decor : 1;
 
 #ifdef MINI_ICONS
-    miniicon : 1;
+		miniicon : 1;
 #endif
-  } new_flags;
+	} new_flags;
 #else
-  unsigned long flags;
-  /*
-    RBW - 11/13/1998 - new flags to supplement the flags word, implemented
-    as named bit fields.
-*/
-  struct
-  {
-    unsigned ViewportMoved
-      : 1; /* To prevent double move in MoveViewport. */
-    unsigned IconifiedByParent
-      : 1; /* To prevent iconified transients in a
-				       * parent icon from counting for Next */
-  } tmpflags;
+	unsigned long flags;
+	/*
+	  RBW - 11/13/1998 - new flags to supplement the flags word, implemented
+	  as named bit fields.
+      */
+	struct {
+		unsigned ViewportMoved
+		    : 1; /* To prevent double move in MoveViewport. */
+		unsigned IconifiedByParent
+		    : 1; /* To prevent iconified transients in a
+		          * parent icon from counting for Next */
+	} tmpflags;
 #endif /* GSFR */
 
 #ifdef MINI_ICONS
-  char *mini_pixmap_file;
-  FvwmPicture *mini_icon;
+	char *mini_pixmap_file;
+	FvwmPicture *mini_icon;
 #endif
-  char *icon_bitmap_file;
+	char *icon_bitmap_file;
 
-  int orig_x;  /* unmaximized x coordinate */
-  int orig_y;  /* unmaximized y coordinate */
-  int orig_wd; /* unmaximized window width */
-  int orig_ht; /* unmaximized window height */
+	int orig_x;  /* unmaximized x coordinate */
+	int orig_y;  /* unmaximized y coordinate */
+	int orig_wd; /* unmaximized window width */
+	int orig_ht; /* unmaximized window height */
 
-  int xdiff, ydiff; /* used to restore window position on exit*/
-  int *mwm_hints;
-  int ol_hints;
-  int functions;
-  Window *cmap_windows;    /* Colormap windows property */
-  int number_cmap_windows; /* Should generally be 0 */
-  Pixel ReliefPixel;
-  Pixel ShadowPixel;
-  Pixel TextPixel;
-  Pixel BackPixel;
-  unsigned long buttons;
-  icon_boxes *IconBoxes; /* zero or more iconboxes */
+	int xdiff, ydiff; /* used to restore window position on exit*/
+	int *mwm_hints;
+	int ol_hints;
+	int functions;
+	Window *cmap_windows;    /* Colormap windows property */
+	int number_cmap_windows; /* Should generally be 0 */
+	Pixel ReliefPixel;
+	Pixel ShadowPixel;
+	Pixel TextPixel;
+	Pixel BackPixel;
+	unsigned long buttons;
+	icon_boxes *IconBoxes; /* zero or more iconboxes */
 } FvwmWindow;
 
 /* Window mask for Circulate and Direction functions */
-typedef struct WindowConditionMask
-{
-  Bool needsCurrentDesk;
-  Bool needsCurrentPage;
-  Bool needsName;
-  Bool needsNotName;
-  Bool useCirculateHit;
-  Bool useCirculateHitIcon;
-  Bool useCirculateSkip;
-  Bool useCirculateSkipIcon;
-  unsigned long onFlags;
-  unsigned long offFlags;
-  char *name;
+typedef struct WindowConditionMask {
+	Bool needsCurrentDesk;
+	Bool needsCurrentPage;
+	Bool needsName;
+	Bool needsNotName;
+	Bool useCirculateHit;
+	Bool useCirculateHitIcon;
+	Bool useCirculateSkip;
+	Bool useCirculateSkipIcon;
+	unsigned long onFlags;
+	unsigned long offFlags;
+	char *name;
 } WindowConditionMask;
 
 /***************************************************************************
@@ -311,20 +304,19 @@ typedef struct WindowConditionMask
 #define ClickToFocus (1 << 10)
 #define SloppyFocus (1 << 11)
 #define SHOW_ON_MAP (1 << 12) /* switch to desk when it gets mapped? */
-#define ALL_COMMON_FLAGS                                               \
-  (STARTICONIC | ONTOP | STICKY | WINDOWLISTSKIP | SUPPRESSICON |      \
-   NOICON_TITLE | Lenience | StickyIcon | CirculateSkipIcon |          \
-   CirculateSkip | ClickToFocus | SloppyFocus | SHOW_ON_MAP)
+#define ALL_COMMON_FLAGS                                                       \
+	(STARTICONIC | ONTOP | STICKY | WINDOWLISTSKIP | SUPPRESSICON |        \
+	    NOICON_TITLE | Lenience | StickyIcon | CirculateSkipIcon |         \
+	    CirculateSkip | ClickToFocus | SloppyFocus | SHOW_ON_MAP)
 
-#define BORDER (1 << 13)    /* Is this decorated with border*/
-#define TITLE (1 << 14)     /* Is this decorated with title */
-#define MAPPED (1 << 15)    /* is it mapped? */
-#define ICONIFIED (1 << 16) /* is it an icon now? */
-#define TRANSIENT (1 << 17) /* is it a transient window? */
-#define RAISED (1 << 18)    /* if its a sticky window, needs raising? */
-#define VISIBLE (1 << 19)   /* is the window fully visible */
-#define ICON_OURS                                                      \
-  (1 << 20) /* is the icon window supplied by the app? */
+#define BORDER (1 << 13)      /* Is this decorated with border*/
+#define TITLE (1 << 14)       /* Is this decorated with title */
+#define MAPPED (1 << 15)      /* is it mapped? */
+#define ICONIFIED (1 << 16)   /* is it an icon now? */
+#define TRANSIENT (1 << 17)   /* is it a transient window? */
+#define RAISED (1 << 18)      /* if its a sticky window, needs raising? */
+#define VISIBLE (1 << 19)     /* is the window fully visible */
+#define ICON_OURS (1 << 20)   /* is the icon window supplied by the app? */
 #define PIXMAP_OURS (1 << 21) /* is the icon pixmap ours to free? */
 #define SHAPED_ICON (1 << 22) /* is the icon shaped? */
 #define MAXIMIZED (1 << 23)   /* is the window maximized? */

@@ -38,7 +38,7 @@ AlignEscapedNewlines: Right    # Right-justify backslashes in multi-line macros.
 SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  # 1) Kernel headers first: <sys/...>
+  # 1) Kernel headers: <sys/...>
   - Regex: '^<sys/.*>$'
     Priority: 1
   # 2) Networking: <net/...>, <netinet/...>
@@ -52,9 +52,9 @@ IncludeCategories:
     Priority: 4
 
 # Function signatures and wrapping
-AlwaysBreakAfterDefinitionReturnType: All   # Return type on its own line (definitions).
-AlwaysBreakAfterDeclarationReturnType: All  # Same for declarations/prototypes.
-AlignAfterOpenBracket: DontAlign            # Use 4-space continuation, don't align to '('.
+BreakAfterReturnType: None                     # Don't break in declarations/prototypes.
+AlwaysBreakAfterDefinitionReturnType: TopLevel # Break for top-level definitions (style(9)).
+AlignAfterOpenBracket: DontAlign               # Use 4-space continuation, don't align to '('.
 
 # Short constructs on one line
 AllowShortIfStatementsOnASingleLine: false
@@ -65,7 +65,7 @@ AllowShortBlocksOnASingleLine: false
 # Preprocessor
 IndentPPDirectives: None
 
-# Optional: treat common queue(3) macros as statements (adjust to your codebase)
+# Optional: treat common queue(3) macros as statements (uncomment if useful)
 # StatementMacros:
 #   - SLIST_FOREACH
 #   - LIST_FOREACH

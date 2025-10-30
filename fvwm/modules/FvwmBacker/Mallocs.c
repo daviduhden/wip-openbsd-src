@@ -1,4 +1,4 @@
-/* FvwmWinList Module for Fvwm. 
+/* FvwmWinList Module for Fvwm.
  *
  *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
  *                               Mike_Finger@atk.com)
@@ -18,44 +18,47 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#include "../../libs/fvwmlib.h"
-#include "config.h"
+#include <sys/time.h>
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+
+#include "../../libs/fvwmlib.h"
+#include "config.h"
 
 extern char *Module;
 
 /******************************************************************************
   saferealloc - safely reallocate memory or exit if fails. (Doesn't work right)
 ******************************************************************************/
-char *saferealloc(char *ptr, int length)
+char *
+saferealloc(char *ptr, int length)
 {
-  char *newptr;
+	char *newptr;
 
-  if (length <= 0)
-    length = 1;
+	if (length <= 0)
+		length = 1;
 
-  newptr = realloc(ptr, length);
-  if (ptr == (char *)0)
-  {
-    fprintf(stderr, "%s:realloc failed", Module);
-    exit(1);
-  }
-  return ptr;
+	newptr = realloc(ptr, length);
+	if (ptr == (char *)0) {
+		fprintf(stderr, "%s:realloc failed", Module);
+		exit(1);
+	}
+	return ptr;
 }
 
-void UpdateString(char **string, char *value)
+void
+UpdateString(char **string, char *value)
 {
-  if (value == NULL)
-    return;
+	if (value == NULL)
+		return;
 
-  size_t value_len = strlen(value);
-  if (*string == NULL)
-    *string = safemalloc(value_len + 1);
-  else
-    *string = saferealloc(*string, value_len + 1);
-  strlcpy(*string, value, value_len + 1);
+	size_t value_len = strlen(value);
+	if (*string == NULL)
+		*string = safemalloc(value_len + 1);
+	else
+		*string = saferealloc(*string, value_len + 1);
+	strlcpy(*string, value, value_len + 1);
 }

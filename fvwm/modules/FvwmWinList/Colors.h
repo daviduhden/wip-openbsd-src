@@ -1,4 +1,4 @@
-/* Part of the FvwmWinList Module for Fvwm. 
+/* Part of the FvwmWinList Module for Fvwm.
  *
  * The functions in this header file were originally part of the GoodStuff
  * and FvwmIdent modules for Fvwm, so there copyrights are listed:

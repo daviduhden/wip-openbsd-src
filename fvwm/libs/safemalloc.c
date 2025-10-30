@@ -4,22 +4,22 @@
 /***********************************************************************
  *
  *  Procedure:
- *	safemalloc - mallocs specified space or exits if there's a 
+ *	safemalloc - mallocs specified space or exits if there's a
  *		     problem
  *
  ***********************************************************************/
-char *safemalloc(int length)
+char *
+safemalloc(int length)
 {
-  char *ptr;
+	char *ptr;
 
-  if (length <= 0)
-    length = 1;
+	if (length <= 0)
+		length = 1;
 
-  ptr = malloc(length);
-  if (ptr == (char *)0)
-  {
-    fprintf(stderr, "malloc of %d bytes failed. Exiting\n", length);
-    exit(1);
-  }
-  return ptr;
+	ptr = malloc(length);
+	if (ptr == (char *)0) {
+		fprintf(stderr, "malloc of %d bytes failed. Exiting\n", length);
+		exit(1);
+	}
+	return ptr;
 }

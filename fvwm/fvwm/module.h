@@ -1,12 +1,11 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-struct queue_buff_struct
-{
-  struct queue_buff_struct *next;
-  unsigned long *data;
-  int size;
-  int done;
+struct queue_buff_struct {
+	struct queue_buff_struct *next;
+	unsigned long *data;
+	int size;
+	int done;
 };
 
 extern int npipes;
@@ -35,7 +34,7 @@ extern struct queue_buff_struct **pipeQueue;
 #define M_MAP (1 << 16)
 
 /* It turns out this is defined by <sys/stream.h> on Solaris 2.6.
-   I suspect that simply redefining this will lead to trouble; 
+   I suspect that simply redefining this will lead to trouble;
    at some point, these should probably be renamed (FVWM_MSG_ERROR?). */
 #ifdef M_ERROR
 #undef M_ERROR
@@ -71,8 +70,7 @@ extern struct queue_buff_struct **pipeQueue;
  * creating and looping  over  large arrays.  The  impact seems  to be in
  * module.c, modconf.c and event.c.  dje 10/2/98
  */
-#define MAX_MASK                                                       \
-  (((1 << MAX_MESSAGES) - 1) & ~(M_LOCKONSEND + M_SENDCONFIG))
+#define MAX_MASK (((1 << MAX_MESSAGES) - 1) & ~(M_LOCKONSEND + M_SENDCONFIG))
 
 /*
  * M_LOCKONSEND  when set causes fvwm to  wait for the  module to send an
@@ -92,9 +90,8 @@ extern struct queue_buff_struct **pipeQueue;
 void KillModuleByName(char *name);
 void AddToModList(char *tline);
 void BroadcastMiniIcon(unsigned long event_type, unsigned long data1,
-                       unsigned long data2, unsigned long data3,
-                       unsigned long data4, unsigned long data5,
-                       unsigned long data6, unsigned long data7,
-                       unsigned long data8, const char *name);
+    unsigned long data2, unsigned long data3, unsigned long data4,
+    unsigned long data5, unsigned long data6, unsigned long data7,
+    unsigned long data8, const char *name);
 
 #endif /* MODULE_H */

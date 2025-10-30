@@ -1,99 +1,94 @@
-typedef struct ScreenInfo
-{
-  unsigned long screen;
-  int d_depth;         /* copy of DefaultDepth(dpy, screen) */
-  int MyDisplayWidth;  /* my copy of DisplayWidth(dpy, screen) */
-  int MyDisplayHeight; /* my copy of DisplayHeight(dpy, screen) */
+typedef struct ScreenInfo {
+	unsigned long screen;
+	int d_depth;         /* copy of DefaultDepth(dpy, screen) */
+	int MyDisplayWidth;  /* my copy of DisplayWidth(dpy, screen) */
+	int MyDisplayHeight; /* my copy of DisplayHeight(dpy, screen) */
 
-  char *FvwmRoot; /* the head of the fvwm window list */
-  Window Root;    /* the root window */
+	char *FvwmRoot; /* the head of the fvwm window list */
+	Window Root;    /* the root window */
 
-  Window Pager_w;
+	Window Pager_w;
 
-  Font PagerFont; /* font struct for window labels in pager (optional)*/
+	Font PagerFont; /* font struct for window labels in pager (optional)*/
 
-  GC NormalGC; /* normal GC for menus, pager, resize window */
+	GC NormalGC; /* normal GC for menus, pager, resize window */
 
-  char *Hilite;    /* the fvwm window that is highlighted
-			  * except for networking delays, this is the
-			  * window which REALLY has the focus */
-  unsigned VScale; /* Panner scale factor */
-  int VxMax;       /* Max location for top left of virt desk*/
-  int VyMax;
-  int Vx; /* Current loc for top left of virt desk */
-  int Vy;
-  int CurrentDesk;
-  Pixmap sticky_gray_pixmap;
-  Pixmap light_gray_pixmap;
-  Pixmap gray_pixmap;
+	char *Hilite;    /* the fvwm window that is highlighted
+	                  * except for networking delays, this is the
+	                  * window which REALLY has the focus */
+	unsigned VScale; /* Panner scale factor */
+	int VxMax;       /* Max location for top left of virt desk*/
+	int VyMax;
+	int Vx; /* Current loc for top left of virt desk */
+	int Vy;
+	int CurrentDesk;
+	Pixmap sticky_gray_pixmap;
+	Pixmap light_gray_pixmap;
+	Pixmap gray_pixmap;
 
 } ScreenInfo;
 
-typedef struct pager_window
-{
-  char *t;
-  Window w;
-  Window frame;
-  int x;
-  int y;
-  int width;
-  int height;
-  int desk;
-  int frame_x;
-  int frame_y;
-  int frame_width;
-  int frame_height;
-  int title_height;
-  int border_width;
-  int icon_x;
-  int icon_y;
-  int icon_width;
-  int icon_height;
-  Pixel text;
-  Pixel back;
-  unsigned long flags;
-  Window icon_w;
-  Window icon_pixmap_w;
-  char *icon_name;
-  FvwmPicture mini_icon;
-  int pager_view_width;
-  int pager_view_height;
-  int icon_view_width;
-  int icon_view_height;
+typedef struct pager_window {
+	char *t;
+	Window w;
+	Window frame;
+	int x;
+	int y;
+	int width;
+	int height;
+	int desk;
+	int frame_x;
+	int frame_y;
+	int frame_width;
+	int frame_height;
+	int title_height;
+	int border_width;
+	int icon_x;
+	int icon_y;
+	int icon_width;
+	int icon_height;
+	Pixel text;
+	Pixel back;
+	unsigned long flags;
+	Window icon_w;
+	Window icon_pixmap_w;
+	char *icon_name;
+	FvwmPicture mini_icon;
+	int pager_view_width;
+	int pager_view_height;
+	int icon_view_width;
+	int icon_view_height;
 
-  Window PagerView;
-  Window IconView;
+	Window PagerView;
+	Window IconView;
 
-  struct pager_window *next;
+	struct pager_window *next;
 } PagerWindow;
 
-typedef struct balloon_window
-{
-  Window w;        /* ID of balloon window */
-  PagerWindow *pw; /* pager window it's associated with */
-  XFontStruct *font;
-  int height;  /* height of balloon window based on font */
-  int border;  /* border width */
-  int yoffset; /* pixels above (<0) or below (>0) pager win */
+typedef struct balloon_window {
+	Window w;        /* ID of balloon window */
+	PagerWindow *pw; /* pager window it's associated with */
+	XFontStruct *font;
+	int height;  /* height of balloon window based on font */
+	int border;  /* border width */
+	int yoffset; /* pixels above (<0) or below (>0) pager win */
 } BalloonWindow;
 
-typedef struct desk_info
-{
-  Window w;
-  Window title_w;
-  Window CPagerWin;
-  int x;
-  int y;
-  char *Dcolor;
-  char *label;
+typedef struct desk_info {
+	Window w;
+	Window title_w;
+	Window CPagerWin;
+	int x;
+	int y;
+	char *Dcolor;
+	char *label;
 } DeskInfo;
 
-typedef struct pager_string_list
-{
-  struct pager_string_list *next;
-  int desk;
-  char *Dcolor;
-  char *label;
+typedef struct pager_string_list {
+	struct pager_string_list *next;
+	int desk;
+	char *Dcolor;
+	char *label;
 } PagerStringList;
 
 #define ON 1

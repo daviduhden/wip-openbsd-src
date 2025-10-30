@@ -8,11 +8,10 @@
  *       6 Nov 1998 - Paul D. Smith <psmith@BayNetworks.com>
  */
 
-#include "config.h"
-
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "config.h"
 #include "fvwmlib.h"
 
 #ifndef HAVE_VFPRINTF
@@ -30,17 +29,18 @@ int f_db_level = 0;
 
 struct f_db_info f_db_info;
 
-void f_db_print(const char *fmt, ...)
+void
+f_db_print(const char *fmt, ...)
 {
-  va_list ap;
+	va_list ap;
 
-  fprintf(stderr, "%s:%ld: ", f_db_info.filenm, f_db_info.lineno);
+	fprintf(stderr, "%s:%ld: ", f_db_info.filenm, f_db_info.lineno);
 
-  va_start(ap, fmt);
-  VA_PRINTF(stderr, fmt, ap);
-  va_end(ap);
+	va_start(ap, fmt);
+	VA_PRINTF(stderr, fmt, ap);
+	va_end(ap);
 
-  fputc('\n', stderr);
+	fputc('\n', stderr);
 }
 
 #endif

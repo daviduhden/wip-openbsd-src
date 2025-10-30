@@ -1,4 +1,4 @@
-/* Part of the FvwmWinList Module for Fvwm. 
+/* Part of the FvwmWinList Module for Fvwm.
  *
  *  Copyright 1994, Mike Finger (mfinger@mermaid.micro.umn.edu or
  *                               Mike_Finger@atk.com)
@@ -17,9 +17,11 @@
  * as long as the copyright is kept intact. */
 
 #include "Colors.h"
-#include "config.h"
+
 #include <X11/Xlib.h>
 #include <stdio.h>
+
+#include "config.h"
 
 extern Display *dpy;
 extern Window Root;
@@ -27,21 +29,23 @@ extern Window Root;
 /****************************************************************************
   Loads a single color
 *****************************************************************************/
-Pixel GetColor(char *name)
+Pixel
+GetColor(char *name)
 {
-  XColor color;
-  XWindowAttributes attributes;
+	XColor color;
+	XWindowAttributes attributes;
 
-  XGetWindowAttributes(dpy, Root, &attributes);
-  color.pixel = 0;
-  if (!XParseColor(dpy, attributes.colormap, name, &color))
-    nocolor("parse", name);
-  else if (!XAllocColor(dpy, attributes.colormap, &color))
-    nocolor("alloc", name);
-  return color.pixel;
+	XGetWindowAttributes(dpy, Root, &attributes);
+	color.pixel = 0;
+	if (!XParseColor(dpy, attributes.colormap, name, &color))
+		nocolor("parse", name);
+	else if (!XAllocColor(dpy, attributes.colormap, &color))
+		nocolor("alloc", name);
+	return color.pixel;
 }
 
-void nocolor(char *a, char *b)
+void
+nocolor(char *a, char *b)
 {
-  fprintf(stderr, "FvwmWinList: can't %s %s\n", a, b);
+	fprintf(stderr, "FvwmWinList: can't %s %s\n", a, b);
 }

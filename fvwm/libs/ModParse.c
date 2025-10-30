@@ -10,6 +10,7 @@
 */
 
 #include "ModParse.h"
+
 #include "fvwmlib.h"
 
 /*
@@ -23,130 +24,131 @@
 **         to MAX_TOKEN_LENGTH in size.
 */
 
-char *DoPeekArgument(const char *pstr, const char **pret)
+char *
+DoPeekArgument(const char *pstr, const char **pret)
 {
-  char *tok = NULL;
-  const char *p;
-  char bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
-  int len = 0;
+	char *tok = NULL;
+	const char *p;
+	char bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
+	int len = 0;
 
-  if (!pstr)
-    return NULL;
+	if (!pstr)
+		return NULL;
 
-  p = pstr;
-  EatWS(p); /* skip leading space */
-  if (*p)
-  {
-    if (IsQuote(*p) ||
-        IsBlockStart(*p)) /* quoted string or block start? */
-    {
-      bc = *p; /* save block start char */
-      p++;
-    }
-    /* find end of token */
-    while (*p && len < MAX_TOKEN_LENGTH)
-    {
-      /* first, check stop conditions based on block or normal token */
-      if (bc)
-      {
-        if ((IsQuote(*p) && bc == *p) || IsBlockEnd(*p, bc))
-        {
-          be = *p;
-          break;
-        }
-      }
-      else /* normal token */
-      {
-        if (isspace(*p) || *p == ',')
-          break;
-      }
+	p = pstr;
+	EatWS(p); /* skip leading space */
+	if (*p) {
+		if (IsQuote(*p) ||
+		    IsBlockStart(*p)) /* quoted string or block start? */
+		{
+			bc = *p; /* save block start char */
+			p++;
+		}
+		/* find end of token */
+		while (*p && len < MAX_TOKEN_LENGTH) {
+			/* first, check stop conditions based on block or normal
+			 * token */
+			if (bc) {
+				if ((IsQuote(*p) && bc == *p) ||
+				    IsBlockEnd(*p, bc)) {
+					be = *p;
+					break;
+				}
+			} else /* normal token */
+			{
+				if (isspace(*p) || *p == ',')
+					break;
+			}
 
-      if (*p == '\\' && *(p + 1)) /* if \, copy next char verbatim */
-        p++;
-      tmptok[len] = *p;
-      len++;
-      p++;
-    }
+			if (*p == '\\' &&
+			    *(p + 1)) /* if \, copy next char verbatim */
+				p++;
+			tmptok[len] = *p;
+			len++;
+			p++;
+		}
 
-    /* sanity checks: */
-    if (bc && !be) /* did we have block start, but not end? */
-    {
-      /* should yell about this */
-      return NULL;
-    }
+		/* sanity checks: */
+		if (bc && !be) /* did we have block start, but not end? */
+		{
+			/* should yell about this */
+			return NULL;
+		}
 
-    if (len)
-    {
-      tok = (char *)safemalloc(len + 1);
-      strncpy(tok, tmptok, len);
-      tok[len] = '\0';
-    }
-  }
+		if (len) {
+			tok = (char *)safemalloc(len + 1);
+			strncpy(tok, tmptok, len);
+			tok[len] = '\0';
+		}
+	}
 
-  if (*p && !isspace((unsigned char)*p))
-    p++;
-  if (pret)
-    *pret = p;
-  return tok;
+	if (*p && !isspace((unsigned char)*p))
+		p++;
+	if (pret)
+		*pret = p;
+	return tok;
 }
 
-char *PeekArgument(const char *pstr)
+char *
+PeekArgument(const char *pstr)
 {
-  return DoPeekArgument(pstr, NULL);
+	return DoPeekArgument(pstr, NULL);
 }
 
 /*
 ** GetArgument: destructively rips next token from string, returning it
 **           (you should free returned string later)
 */
-char *GetArgument(char **pstr)
+char *
+GetArgument(char **pstr)
 {
-  char *tok;
-  const char *next = NULL;
+	char *tok;
+	const char *next = NULL;
 
-  if (!pstr || !*pstr || !(tok = DoPeekArgument(*pstr, &next)))
-    return NULL; /* *pstr=NULL; ???? */
+	if (!pstr || !*pstr || !(tok = DoPeekArgument(*pstr, &next)))
+		return NULL; /* *pstr=NULL; ???? */
 
-  *pstr = (char *)next;
-  /* skip tok and following whitespace/separators in pstr & DON'T realloc */
-  EatWS(*pstr);
+	*pstr = (char *)next;
+	/* skip tok and following whitespace/separators in pstr & DON'T realloc
+	 */
+	EatWS(*pstr);
 
-  if (*pstr && !**pstr)
-    *pstr = NULL; /* change \0 to NULL */
+	if (*pstr && !**pstr)
+		*pstr = NULL; /* change \0 to NULL */
 
-  return tok;
+	return tok;
 }
 
 /*
 ** CmpArgument: does case-insensitive compare on next token in string, leaving
 **           string intact (return code like strcmp)
 */
-int CmpArgument(const char *pstr, char *tok)
+int
+CmpArgument(const char *pstr, char *tok)
 {
-  int rc = 0;
-  char *ntok = PeekArgument(pstr);
-  if (ntok)
-  {
-    rc = strcasecmp(tok, ntok);
-    free(ntok);
-  }
-  return rc;
+	int rc = 0;
+	char *ntok = PeekArgument(pstr);
+	if (ntok) {
+		rc = strcasecmp(tok, ntok);
+		free(ntok);
+	}
+	return rc;
 }
 
 /*
 ** MatchArgument: does case-insensitive compare on next token in string, leaving
 **             string intact (returns true if matches, false otherwise)
 */
-int MatchArgument(const char *pstr, char *tok)
+int
+MatchArgument(const char *pstr, char *tok)
 {
-  int rc = 0;
-  char *ntok = PeekArgument(pstr);
-  if (ntok)
-  {
-    rc = (strcasecmp(tok, ntok) == 0);
-    free(ntok);
-  }
-  return rc;
+	int rc = 0;
+	char *ntok = PeekArgument(pstr);
+	if (ntok) {
+		rc = (strcasecmp(tok, ntok) == 0);
+		free(ntok);
+	}
+	return rc;
 }
 
 /****************************************************************************
@@ -156,80 +158,70 @@ int MatchArgument(const char *pstr, char *tok)
  * Return value is ptr to indata,updated to point to text after the word
  * which is extracted.
  * token is the extracted word, which is copied into a malloced
- * space, and must be freed after use. 
+ * space, and must be freed after use.
  *
  **************************************************************************/
-char *GetNextArgument(char *indata, char **token)
+char *
+GetNextArgument(char *indata, char **token)
 {
-  char *t, *start, *end, *text;
+	char *t, *start, *end, *text;
 
-  t = indata;
-  if (t == NULL)
-  {
-    *token = NULL;
-    return NULL;
-  }
-  while (isspace(*t) && (*t != 0))
-    t++;
-  start = t;
-  while (!isspace(*t) && (*t != 0))
-  {
-    /* Check for qouted text */
-    if (*t == '"')
-    {
-      t++;
-      while ((*t != '"') && (*t != 0))
-      {
-        /* Skip over escaped text, ie \" or \space " */
-        if ((*t == '\\') && (*(t + 1) != 0))
-          t++;
-        t++;
-      }
-      if (*t == '"')
-        t++;
-    }
-    else
-    {
-      /* Skip over escaped text, ie \" or \space " */
-      if ((*t == '\\') && (*(t + 1) != 0))
-        t++;
-      t++;
-    }
-  }
-  end = t;
+	t = indata;
+	if (t == NULL) {
+		*token = NULL;
+		return NULL;
+	}
+	while (isspace(*t) && (*t != 0))
+		t++;
+	start = t;
+	while (!isspace(*t) && (*t != 0)) {
+		/* Check for qouted text */
+		if (*t == '"') {
+			t++;
+			while ((*t != '"') && (*t != 0)) {
+				/* Skip over escaped text, ie \" or \space " */
+				if ((*t == '\\') && (*(t + 1) != 0))
+					t++;
+				t++;
+			}
+			if (*t == '"')
+				t++;
+		} else {
+			/* Skip over escaped text, ie \" or \space " */
+			if ((*t == '\\') && (*(t + 1) != 0))
+				t++;
+			t++;
+		}
+	}
+	end = t;
 
-  text = safemalloc(end - start + 1);
-  *token = text;
+	text = safemalloc(end - start + 1);
+	*token = text;
 
-  while (start < end)
-  {
-    /* Check for qouted text */
-    if (*start == '"')
-    {
-      start++;
-      while ((*start != '"') && (*start != 0))
-      {
-        /* Skip over escaped text, ie \" or \space " */
-        if ((*start == '\\') && (*(start + 1) != 0))
-          start++;
-        *text++ = *start++;
-      }
-      if (*start == '"')
-        start++;
-    }
-    else
-    {
-      /* Skip over escaped text, ie \" or \space " */
-      if ((*start == '\\') && (*(start + 1) != 0))
-        start++;
-      *text++ = *start++;
-    }
-  }
-  *text = 0;
-  if (*end != 0)
-    end++;
+	while (start < end) {
+		/* Check for qouted text */
+		if (*start == '"') {
+			start++;
+			while ((*start != '"') && (*start != 0)) {
+				/* Skip over escaped text, ie \" or \space " */
+				if ((*start == '\\') && (*(start + 1) != 0))
+					start++;
+				*text++ = *start++;
+			}
+			if (*start == '"')
+				start++;
+		} else {
+			/* Skip over escaped text, ie \" or \space " */
+			if ((*start == '\\') && (*(start + 1) != 0))
+				start++;
+			*text++ = *start++;
+		}
+	}
+	*text = 0;
+	if (*end != 0)
+		end++;
 
-  return end;
+	return end;
 }
 
 /*
@@ -246,37 +238,39 @@ char *GetNextArgument(char *indata, char **token)
                         = 0  if s = t
                         > 0  if s > t
 
-   Note arguments are not declares register, so the function can be 
+   Note arguments are not declares register, so the function can be
    used with the bsearch() <search.h> function of the c library.
 
 */
 
-int XCmpToken(const void *vs, const void *vt)
+int
+XCmpToken(const void *vs, const void *vt)
 {
-  const char *s = (const char *)vs;
-  const char *w = *(const char *const *)vt;
+	const char *s = (const char *)vs;
+	const char *w = *(const char *const *)vt;
 
-  if (w == NULL)
-    return 1; /* non existant word */
-  if (s == NULL)
-    return -1; /* non existant string */
+	if (w == NULL)
+		return 1; /* non existant word */
+	if (s == NULL)
+		return -1; /* non existant string */
 
-  while (*w && (*s == *w ||
+	while (*w && (*s == *w ||
 #ifdef WORD_IS_UPPERCASE
-                (isupper((unsigned char)*s) &&
-                 _toupper((unsigned char)*s) == *w)
+	                 (isupper((unsigned char)*s) &&
+	                     _toupper((unsigned char)*s) == *w)
 #else
-                toupper((unsigned char)*s) == toupper((unsigned char)*w)
+	                 toupper((unsigned char)*s) ==
+	                     toupper((unsigned char)*w)
 #endif
-                  ))
-    s++, w++;
+	                     ))
+		s++, w++;
 
-  if ((*s == '\0' &&
-       (ispunct((unsigned char)*w) || isspace((unsigned char)*w))) ||
-      (*w == '\0' &&
-       (ispunct((unsigned char)*s) || isspace((unsigned char)*s))))
-    return 0; /* 1st word equal */
-  else
-    return toupper((unsigned char)*s) -
-           toupper((unsigned char)*w); /* smaller/greater */
+	if ((*s == '\0' &&
+	        (ispunct((unsigned char)*w) || isspace((unsigned char)*w))) ||
+	    (*w == '\0' &&
+	        (ispunct((unsigned char)*s) || isspace((unsigned char)*s))))
+		return 0; /* 1st word equal */
+	else
+		return toupper((unsigned char)*s) -
+		       toupper((unsigned char)*w); /* smaller/greater */
 }

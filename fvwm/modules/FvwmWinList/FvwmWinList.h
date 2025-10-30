@@ -1,10 +1,11 @@
 #ifndef FVWM_WINLIST_H
 #define FVWM_WINLIST_H
 
-#include "fvwmlib.h"
 #include <X11/Xmd.h>
 
-/* FvwmWinList Module for Fvwm. 
+#include "fvwmlib.h"
+
+/* FvwmWinList Module for Fvwm.
  *
  *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
  *                               Mike_Finger@atk.com)
@@ -33,12 +34,11 @@
 #define WINDOWLISTSKIP (1 << 3)
 
 /* Motif  window hints */
-typedef struct
-{
-  CARD32 flags;
-  CARD32 functions;
-  CARD32 decorations;
-  INT32 inputMode;
+typedef struct {
+	CARD32 flags;
+	CARD32 functions;
+	CARD32 decorations;
+	INT32 inputMode;
 } PropMotifWmHints;
 
 typedef PropMotifWmHints PropMwmHints;
@@ -91,8 +91,7 @@ void WaitForExpose(void);
 void RedrawWindow(int force);
 void StartMeUp(void);
 void ShutMeDown(void);
-void ConsoleMessage(const char *fmt, ...)
-  __attribute__((format(printf, 1, 2)));
+void ConsoleMessage(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 int OpenConsole(void);
 void ParseConfig(void);
 void LoopOnEvents(void);
@@ -104,8 +103,7 @@ void AddToSkipList(char *string);
 int InSkipList(char *string);
 void PrintSkipList(void);
 void FvwmNameMessage(long *body);
-void SetMwmHints(unsigned int value, unsigned int funcs,
-                 unsigned int input);
+void SetMwmHints(unsigned int value, unsigned int funcs, unsigned int input);
 
 int ErrorHandler(Display *d, XErrorEvent *event);
 

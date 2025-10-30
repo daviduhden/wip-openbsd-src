@@ -57,19 +57,18 @@
 /*
  * Data Interchange Format - Extended cpio header format - POSIX 1003.1-1990
  */
-typedef struct
-{
-  char c_magic[6];     /* magic cookie */
-  char c_dev[6];       /* device number */
-  char c_ino[6];       /* inode number */
-  char c_mode[6];      /* file type/access */
-  char c_uid[6];       /* owners uid */
-  char c_gid[6];       /* owners gid */
-  char c_nlink[6];     /* # of links at archive creation */
-  char c_rdev[6];      /* block/char major/minor # */
-  char c_mtime[11];    /* modification time */
-  char c_namesize[6];  /* length of pathname */
-  char c_filesize[11]; /* length of file in bytes */
+typedef struct {
+	char c_magic[6];     /* magic cookie */
+	char c_dev[6];       /* device number */
+	char c_ino[6];       /* inode number */
+	char c_mode[6];      /* file type/access */
+	char c_uid[6];       /* owners uid */
+	char c_gid[6];       /* owners gid */
+	char c_nlink[6];     /* # of links at archive creation */
+	char c_rdev[6];      /* block/char major/minor # */
+	char c_mtime[11];    /* modification time */
+	char c_namesize[6];  /* length of pathname */
+	char c_filesize[11]; /* length of file in bytes */
 } HD_CPIO;
 
 #define MAGIC 070707 /* transportable archive id */
@@ -87,31 +86,29 @@ typedef struct
  * Each field really represents a 16 bit short (NOT ASCII). Described as
  * an array of chars in an attempt to improve portability!!
  */
-typedef struct
-{
-  u_char h_magic[2];
-  u_char h_dev[2];
-  u_char h_ino[2];
-  u_char h_mode[2];
-  u_char h_uid[2];
-  u_char h_gid[2];
-  u_char h_nlink[2];
-  u_char h_rdev[2];
-  u_char h_mtime_1[2];
-  u_char h_mtime_2[2];
-  u_char h_namesize[2];
-  u_char h_filesize_1[2];
-  u_char h_filesize_2[2];
+typedef struct {
+	u_char h_magic[2];
+	u_char h_dev[2];
+	u_char h_ino[2];
+	u_char h_mode[2];
+	u_char h_uid[2];
+	u_char h_gid[2];
+	u_char h_nlink[2];
+	u_char h_rdev[2];
+	u_char h_mtime_1[2];
+	u_char h_mtime_2[2];
+	u_char h_namesize[2];
+	u_char h_filesize_1[2];
+	u_char h_filesize_2[2];
 } HD_BCPIO;
 
 #ifdef _PAX_
 /*
  * extraction and creation macros for binary cpio
  */
-#define SHRT_EXT(ch)                                                   \
-  ((((unsigned)(ch)[0]) << 8) | (((unsigned)(ch)[1]) & 0xff))
-#define RSHRT_EXT(ch)                                                  \
-  ((((unsigned)(ch)[1]) << 8) | (((unsigned)(ch)[0]) & 0xff))
+#define SHRT_EXT(ch) ((((unsigned)(ch)[0]) << 8) | (((unsigned)(ch)[1]) & 0xff))
+#define RSHRT_EXT(ch)                                                          \
+	((((unsigned)(ch)[1]) << 8) | (((unsigned)(ch)[0]) & 0xff))
 #define CHR_WR_0(val) ((char)(((val) >> 24) & 0xff))
 #define CHR_WR_1(val) ((char)(((val) >> 16) & 0xff))
 #define CHR_WR_2(val) ((char)(((val) >> 8) & 0xff))
@@ -127,22 +124,21 @@ typedef struct
 /*
  * System VR4 cpio header structure (with/without file data crc)
  */
-typedef struct
-{
-  char c_magic[6];    /* magic cookie */
-  char c_ino[8];      /* inode number */
-  char c_mode[8];     /* file type/access */
-  char c_uid[8];      /* owners uid */
-  char c_gid[8];      /* owners gid */
-  char c_nlink[8];    /* # of links at archive creation */
-  char c_mtime[8];    /* modification time */
-  char c_filesize[8]; /* length of file in bytes */
-  char c_maj[8];      /* block/char major # */
-  char c_min[8];      /* block/char minor # */
-  char c_rmaj[8];     /* special file major # */
-  char c_rmin[8];     /* special file minor # */
-  char c_namesize[8]; /* length of pathname */
-  char c_chksum[8];   /* 0 OR CRC of bytes of FILE data */
+typedef struct {
+	char c_magic[6];    /* magic cookie */
+	char c_ino[8];      /* inode number */
+	char c_mode[8];     /* file type/access */
+	char c_uid[8];      /* owners uid */
+	char c_gid[8];      /* owners gid */
+	char c_nlink[8];    /* # of links at archive creation */
+	char c_mtime[8];    /* modification time */
+	char c_filesize[8]; /* length of file in bytes */
+	char c_maj[8];      /* block/char major # */
+	char c_min[8];      /* block/char minor # */
+	char c_rmaj[8];     /* special file major # */
+	char c_rmin[8];     /* special file minor # */
+	char c_namesize[8]; /* length of pathname */
+	char c_chksum[8];   /* 0 OR CRC of bytes of FILE data */
 } HD_VCPIO;
 
 #define VMAGIC 070701  /* sVr4 new portable archive id */
