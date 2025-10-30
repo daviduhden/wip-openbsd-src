@@ -164,17 +164,6 @@ Window find_frame_window(Window win, int *off_x, int *off_y)
 static void reparentnotify_event(WinManager *man, XEvent *ev)
 {
   ConsoleDebug(X11, "XEVENT: ReparentNotify\n");
-#if 0
-  ConsoleMessage ("seen %d expected %d\n", num_reparents_seen,
-		  num_reparents_expected);
-  man->off_x = ev->xreparent.x;
-  man->off_y = ev->xreparent.y;
-  ConsoleDebug (X11, "reparent: off = (%d, %d)\n",man->off_x, man->off_y);
-  man->theFrame = find_frame_window (ev->xany.window,
-				     &man->off_x, &man->off_y);
-  ConsoleMessage ("\twin = 0x%x, frame = 0x%x\n", man->theWindow,
-		  man->theFrame);
-#endif
   if (man->can_draw == 0)
   {
     man->can_draw = 1;
@@ -315,27 +304,6 @@ void xevent_loop(void)
                    theEvent.xconfigure.border_width);
       ConsoleDebug(X11, "\tsendevent = %d\n",
                    theEvent.xconfigure.send_event);
-#if 0
-      set_manager_width (man, theEvent.xconfigure.width);
-      ConsoleDebug (X11, "\tboxwidth = %d\n", man->geometry.boxwidth);
-      draw_manager (man);
-
-      /* pointer may not be in the same box as before */
-      if (XQueryPointer (theDisplay, man->theWindow, &root, &child, &glob_x,
-			 &glob_y,
-			 &x, &y, &mask)) {
-	b = xy_to_button (man, x, y);
-	if (b != man->select_button) {
-	  move_highlight (man, b);
-	  run_binding (man, SELECT);
-	  draw_managers();
-	}
-      }
-      else {
-	if (man->select_button != NULL)
-	  move_highlight (NULL, NULL);
-      }
-#endif
       break;
 
     case MotionNotify:
@@ -466,45 +434,6 @@ void unmap_manager(WinManager *man)
   }
 }
 
-#if 0
-void read_all_reparent_events (WinManager *man, int block)
-{
-  XEvent evs[2];
-  int i = 0, got_one = 0, the_event;
-
-  /* We're going to be junking ConfigureNotify events, but that's ok,
-     since this is only going to be called from resize_manager() */
-  /* This shouldn't slow things down terribly, since we'd just have to read
-     these events anyway */
-
-  assert (man->can_draw);
-
-  if (block) {
-    while (1) {
-      XWindowEvent (theDisplay, man->theWindow, StructureNotifyMask, &evs[0]);
-      if (evs[0].type == ReparentNotify) {
-	the_event = 0;
-	got_one = 1;
-	break;
-      }
-    }
-  }
-  else {
-    while (XCheckWindowEvent (theDisplay, man->theWindow, StructureNotifyMask,
-			      &evs[i])) {
-      if (evs[i].type == ReparentNotify) {
-	got_one = 1;
-	the_event = i;
-	i ^= 1;
-      }
-    }
-  }
-  if (got_one) {
-    reparentnotify_event (man, &evs[the_event]);
-  }
-}
-#endif
-
 void X_init_manager(int man_id)
 {
   WinManager *man;
@@ -587,17 +516,6 @@ void X_init_manager(int man_id)
     {
       man->shadowcolor[i] = GetShadow(man->backcolor[i]);
       man->hicolor[i] = GetHilite(man->backcolor[i]);
-#if 0
-      /* thing about message id bg vs fg */
-      if (!lookup_shadow_color (man->backcolor[i], &man->shadowcolor[i])) {
-	ConsoleMessage ("Can't load %s shadow color\n",
-			contextDefaults[i].name);
-      }
-      if (!lookup_hilite_color (man->backcolor[i], &man->hicolor[i])) {
-	ConsoleMessage ("Can't load %s hilite color\n",
-			contextDefaults[i].name);
-      }
-#endif
     }
   }
 

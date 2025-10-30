@@ -35,9 +35,6 @@
 #include "../../libs/fvwmlib.h"
 
 #include "../../icons/fvwm2_big.xpm"
-#if 0
-#include "../../icons/k2.xpm"
-#endif /* 0 */
 
 typedef struct _XpmIcon
 {
@@ -112,11 +109,6 @@ int main(int argc, char **argv)
     /* sever our connection with fvwm, if we have one. */
     fd[0] = atoi(argv[1]);
     fd[1] = atoi(argv[2]);
-
-#if 0
-      if(fd[0]>0)close(fd[0]);
-      if(fd[1]>0)close(fd[1]);
-#endif /* 0 */
   }
   else
   {
@@ -154,11 +146,6 @@ int main(int argc, char **argv)
   if (pixmapName)
     GetXPMFile(pixmapName, pixmapPath);
   else
-#if 0
-    if(d_depth > 4)
-      GetXPMData(k2_xpm);
-    else
-#endif /* 0 */
     GetXPMData(fvwm2_big_xpm);
 
   /* Create a window to hold the banner */
@@ -200,9 +187,6 @@ int main(int argc, char **argv)
 #endif
   XMapWindow(dpy, win);
   XSync(dpy, 0);
-#if 0
-  usleep(timeout);
-#else
   XSelectInput(dpy, win, ButtonReleaseMask);
   /* Display the window */
   value.tv_usec = timeout % 1000000;

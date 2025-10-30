@@ -9,7 +9,6 @@
  * whatsoever. Use this program at your own risk. Permission to use this
  * program for any purpose is given, as long as the copyright is kept intact.
  *
- *  Things to do:  Convert to C++  (In Progress)
  */
 
 #include "config.h"
@@ -510,17 +509,3 @@ void PrintButtons(ButtonArray *array)
     ConsoleMessage("   %s is %s\n", temp->title,
                    (temp->up) ? "Up" : "Down");
 }
-
-#if 0
-/******************************************************************************
-  ButtonArrayMaxWidth - Calculate the width needed for the widest title
-******************************************************************************/
-int ButtonArrayMaxWidth(ButtonArray *array)
-{
-Button *temp;
-int x=0;
-  for(temp=array->head;temp!=NULL;temp=temp->next)
-    x=max(temp->tw,x);
-  return x;
-}
-#endif

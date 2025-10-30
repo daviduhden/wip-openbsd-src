@@ -2269,24 +2269,8 @@ void PaintMenu(MenuRoot *mr, XEvent *pevent)
       width = mr->width - border * 2;
       height = mr->height - border * 2;
 
-#if 0
-      /* these flags are never set at the moment */
-      x = border;
-      if (ms->look.FaceStyle & HOffCenter) {
-	if (ms->look.FaceStyle & HRight)
-	  x += (int)(width - p->width);
-      } else
-      x += (int)(width - p->width) / 2;
-
-      y = border;
-      if (ms->look.FaceStyle & VOffCenter) {
-	if (ms->look.FaceStyle & VBottom)
-	  y += (int)(height - p->height);
-      } else
-#else
       y = border + (int)(height - p->height) / 2;
       x = border + (int)(width - p->width) / 2;
-#endif
 
       if (x < border)
         x = border;
@@ -2393,19 +2377,6 @@ void DestroyMenu(MenuRoot *mr)
 
   if (mr->sidePic)
     DestroyPicture(dpy, mr->sidePic);
-
-#if 0
-  /* Hey, we can't just destroy the menu face here. Another menu may need it */
-  if (mr->ms != Scr.DefaultMenuStyle && mr->ms) /* I'm a bit paranoid about
-                                                  segfaults :) */
-  {
-    XFreeGC(dpy,mr->ms->look.MenuReliefGC);
-    XFreeGC(dpy,mr->ms->look.MenuShadowGC);
-    XFreeGC(dpy,mr->ms->look.MenuActiveGC);
-    XFreeGC(dpy,mr->ms->look.MenuGC);
-    free( mr->ms );
-  }
-#endif
 
   /* need to free the window list ? */
   mi = mr->first;
@@ -2709,7 +2680,8 @@ char scanForHotkeys(MenuItem *it, int which)
 {
   char *start, *txt;
 
-  start = (which > 0) ? it->item : it->item2; /* Get start of string	*/
+  start =
+    (which > 0) ? it->item : it->item2; /* Get start of string	*/
   for (txt = start; *txt != '\0'; txt++)
   {
     /* Scan whole string	*/

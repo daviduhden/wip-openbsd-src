@@ -678,24 +678,6 @@ void MakeList(void)
   strlcat(geometry, loc, sizeof(geometry));
   AddToList("Geometry:", geometry);
 
-#if 0
-  {
-    char tmp[20], *foo;
-  snprintf(tmp, sizeof(tmp), "%d", target.base_w);
-    foo = strdup(tmp);
-    AddToList("  - base_w:", foo);
-  snprintf(tmp, sizeof(tmp), "%d", target.width_inc);
-    foo = strdup(tmp);
-    AddToList("  - width_inc:", foo);
-  snprintf(tmp, sizeof(tmp), "%d", target.base_h);
-    foo = strdup(tmp);
-    AddToList("  - base_h:", foo);
-  snprintf(tmp, sizeof(tmp), "%d", target.height_inc);
-    foo = strdup(tmp);
-    AddToList("  - height_inc:", foo);
-  }
-#endif
-
   {
     Atom *protocols = NULL, *ap;
     Atom _XA_WM_TAKE_FOCUS = XInternAtom(dpy, "WM_TAKE_FOCUS", False);

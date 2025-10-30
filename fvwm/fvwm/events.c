@@ -207,18 +207,6 @@ int GetContext(FvwmWindow *t, XEvent *e, Window *w)
   /* Since key presses and button presses are grabbed in the frame
    * when we have re-parented windows, we need to find out the real
    * window where the event occured */
-#if 0
-  /* domivogt (2-Jan-1999): Causes a bug with ClickToFocus.
-   * keys and buttons are treated differently here because keys are bound to
-   * the frame window and buttons are bound to the client window (with
-   * XGrabKey/XGrabButton). */
-  if((e->type == KeyPress)&&(e->xkey.subwindow != None))
-    *w = e->xkey.subwindow;
-
-  if((e->type == ButtonPress)&&(e->xbutton.subwindow != None)&&
-     ((e->xbutton.subwindow == t->w)||(e->xbutton.subwindow == t->Parent)))
-    *w = e->xbutton.subwindow;
-#else
   if (e->xkey.subwindow != None)
   {
     if (e->type == KeyPress)
@@ -227,11 +215,10 @@ int GetContext(FvwmWindow *t, XEvent *e, Window *w)
              e->xbutton.subwindow == t->w ||
              e->xbutton.subwindow == t->Parent)
       /* domivogt (6-Jan-198): I don't understand what's happening here. If
-	 * the mouse is over the client window. The subwindow has an unique id
-	 * that no visible part of the FvwmWindow has. */
+	     * the mouse is over the client window. The subwindow has an unique id
+	     * that no visible part of the FvwmWindow has. */
       *w = e->xbutton.subwindow;
   }
-#endif
 
   if (*w == Scr.Root)
     Context = C_ROOT;
@@ -589,23 +576,6 @@ void HandlePropertyNotify()
 
   case XA_WM_NORMAL_HINTS:
     GetWindowSizeHints(Tmp_win);
-#if 0
-      /*
-      ** ckh - not sure why this next stuff was here, but fvwm 1.xx
-      ** didn't do this, and it seems to cause a bug when changing
-      ** fonts in XTerm
-      */
-      {
-	int new_width, new_height;
-	new_width = Tmp_win->frame_width;
-	new_height = Tmp_win->frame_height;
-	ConstrainSize(Tmp_win, &new_width, &new_height, False, 0, 0);
-	if((new_width != Tmp_win->frame_width)||
-	   (new_height != Tmp_win->frame_height))
-	  SetupFrame(Tmp_win,Tmp_win->frame_x, Tmp_win->frame_y,
-		     new_width,new_height,False);
-      }
-#endif /* 0 */
     BroadcastConfig(M_CONFIGURE_WINDOW, Tmp_win);
     break;
 

@@ -190,18 +190,10 @@ void Destroy(FvwmWindow *Tmp_win)
   free_window_names(Tmp_win, True, True);
   if (Tmp_win->wmhints)
     XFree((char *)Tmp_win->wmhints);
-  /* removing NoClass change for now... */
-#if 0
-  if (Tmp_win->class.res_name)
-    XFree ((char *)Tmp_win->class.res_name);
-  if (Tmp_win->class.res_class)
-    XFree ((char *)Tmp_win->class.res_class);
-#else
   if (Tmp_win->class.res_name && Tmp_win->class.res_name != NoResource)
     XFree((char *)Tmp_win->class.res_name);
   if (Tmp_win->class.res_class && Tmp_win->class.res_class != NoClass)
     XFree((char *)Tmp_win->class.res_class);
-#endif /* 0 */
   if (Tmp_win->mwm_hints)
     XFree((char *)Tmp_win->mwm_hints);
 
@@ -1088,11 +1080,11 @@ void RaiseWindow(FvwmWindow *t)
   {
     /*      XRaiseWindow(dpy,wins[0]);  */
     /*
-           clasen@mathematik.uni-freiburg.de - 01/01/1999 -
+         clasen@mathematik.uni-freiburg.de - 01/01/1999 -
          simply calling XRaiseWindow(dpy,wins[0]); here will put StaysOnTop
          windows over override_redirect windows like FvwmPager ballon_win or
          Motif menus. Instead raise wins[0] only above the topmost window
-	 which is managed by us.
+	       which is managed by us.
       */
     if (wins[0] != Scr.FvwmRoot.stack_next->frame &&
         wins[0] != Scr.FvwmRoot.stack_next->icon_w &&
@@ -1101,9 +1093,9 @@ void RaiseWindow(FvwmWindow *t)
       if (Scr.FvwmRoot.stack_next->flags & ICONIFIED)
       {
         /*
-                RBW - use the icon window or pixmap if there is one; but
-                there may not be (NoIconTitle or NoIcon) --
-            */
+               RBW - use the icon window or pixmap if there is one; but
+               there may not be (NoIconTitle or NoIcon) --
+          */
         if (Scr.FvwmRoot.stack_next->icon_w)
         {
           changes.sibling = Scr.FvwmRoot.stack_next->icon_w;
@@ -1218,10 +1210,6 @@ void fvwm_msg(int type, const char *id, const char *msg, ...)
   switch (type)
   {
   case DBG:
-#if 0
-      if (!debugging)
-        return;
-#endif /* 0 */
     typestr = "<<DEBUG>>";
     break;
   case ERR:

@@ -149,23 +149,6 @@ int MatchArgument(const char *pstr, char *tok)
   return rc;
 }
 
-#if 0
-/*
-** GetNextArgument: equiv interface of old parsing routine, for ease of transition
-*/
-char *GetNextArgument(char *indata,char **token)
-{
-  char *nindata=indata;
-
-  *token = PeekArgument(indata);
-
-  if (*token)
-    nindata+=strlen(*token);
-  EatWS(nindata);
-
-  return nindata;
-}
-#else
 /****************************************************************************
  *
  * Gets the next "word" of input from char string indata.
@@ -248,7 +231,6 @@ char *GetNextArgument(char *indata, char **token)
 
   return end;
 }
-#endif /* 0 */
 
 /*
    function:		MatchToken
@@ -256,29 +238,6 @@ char *GetNextArgument(char *indata, char **token)
    returns:		pointer to delimiter character
                         NULL if no match
 */
-
-#if 0 /* supported in 2.0.47b */
-const char *MatchToken(register const char *s, register const char *w)
-{
-    if (s==NULL) return NULL;
-    assert(w!=NULL);	/* the token may not be NULL -> design flaw */
-
-    while (*w && (*s==*w ||
-#ifdef WORD_IS_UPPERCASE
-		            isupper(*s) && _toupper(*s)==*w
-#else
-		            toupper(*s)==toupper(*w)
-#endif
-		  ))
-	s++,w++;
-
-    if (*w=='\0' &&			          /* end of word and */
-	(*s=='\0' || ispunct(*s) || isspace(*s))) /* same in string */
-	return s;				  /* return endptr */
-    else 
-	return NULL;				  /* no match */
-}
-#endif
 
 /*
    function:		CmpToken

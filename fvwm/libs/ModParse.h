@@ -40,32 +40,4 @@ int MatchArgument(const char *pstr, char *tok);
 int XCmpToken(const void *s, const void *t);
 /* needed by (L)FindToken */
 
-#if 0
-/* e.g: */
-
-  struct entry			/* these are stored in the table */
-  {    char *token;
-       /* ... */		/* any info */
-  };
-
-  struct entry table[] = { /* ... */ };	/* define entries here */
-
-  char *word = GetArgument( /* ... */);
-  entry_ptr = FindToken(word,table,struct entry);
-
-  (struct token *)bsearch("Style",
-                          (char *)table, sizeof (table)/sizeof (struct entry),
-                          sizeof(struct entry), CmpToken);
-#endif /* 0 */
-
-#if 0
-/* Note that lfind() is not part of the ANSI standard.  This is never used
- * currently; I think we should just keep it that way...
- */
-#define LFindToken(key, table, struct_entry)                           \
-  (struct_entry *)lfind(key, (char *)(table),                          \
-                        sizeof(table) / sizeof(struct_entry),          \
-                        sizeof(struct_entry), XCmpToken)
-#endif /* 0 */
-
 #endif /* MODPARSE_H */
