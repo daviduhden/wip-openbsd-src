@@ -238,8 +238,7 @@ void initialize_pager(void)
   if (window_h <= 0)
   {
     window_h = Rows * ((Scr.VyMax + Scr.MyDisplayHeight) / Scr.VScale +
-                       m + label_h + 1) -
-               2;
+                       m + label_h + 1) - 2;
   }
 
   if (xneg)

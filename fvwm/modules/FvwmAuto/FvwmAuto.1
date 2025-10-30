@@ -15,14 +15,14 @@
 .if t .sp .5
 ..
 .ta .3i .6i .9i 1.2i 1.5i 1.8i
-.TH FvwmAuto 1 "Dec 1, 1994" 2.1
+.TH FVWMAUTO 1 "December 1, 1994" "2.1" "FVWM Modules"
 .UC
 .SH NAME
 \fIFvwmAuto\fP \- the FVWM auto-raise module
 .SH SYNOPSIS
 \fIFvwmAuto\fP is spawned by fvwm, so no command line invocation will work.
 The correct syntax is:
-.nf
+.PP
 .EX
 Module FvwmAuto Timeout [EnterCommand [LeaveCommand]]
 .sp
@@ -32,9 +32,9 @@ AddToMenu Modules "Modules"      Title
 +                 "Buttons"      Module FvwmButtons
 +                 "Ident"        Module FvwmIdent
 +                 "Banner"       Module FvwmBanner
-+                 "Pager"        Module FvwmPager 0 3
+				 "Pager"        Module FvwmPager 0 3
 .EE
-.fi             
+.PP
 The \fITimeout\fP argument is required. It specifies how long a window must
 retain the keyboard input focus before the command is executed. The
 delay is measured in milliseconds, and any integer 0 or greater is
@@ -49,13 +49,14 @@ window gets the input focus, \fILeaveCommand\fP is executed
 is allowed. I would not use "Close" or "Destroy" with a low timeout,
 though.
 The \fILeaveCommand\fP can be handy for a tidy desktop. Experiment with:
-.nf
+.PP
 .EX
 Module FvwmAuto 0 Nop Lower
 Module FvwmAuto 0 Nop Iconify
 .EE
+.PP
 .SH AUTHOR
-.nf
 FvwmAuto just appeared one day, nobody knows how.
+.PP
 FvwmAuto was simply rewritten 09/96, nobody knows by whom.
 
