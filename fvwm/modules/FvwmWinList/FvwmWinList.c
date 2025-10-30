@@ -23,7 +23,7 @@
 
  * Bug Notes:(Don Mahurin)
 
- * Moving a window doesnt send M_CONFIGURE, as I thought it should. Desktop
+ * Moving a window doesn't send M_CONFIGURE, as I thought it should. Desktop
  * for that button is not updated.
 
 */
