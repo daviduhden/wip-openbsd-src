@@ -1,3 +1,6 @@
+#ifndef FVWMICONMAN_H
+#define FVWMICONMAN_H
+
 #include "config.h"
 
 #include <assert.h>
@@ -399,3 +402,5 @@ extern void print_managers(void);
 
 extern WinManager *find_windows_manager(Window win);
 extern int win_in_viewport(WinData *win);
+
+#endif /* FVWMICONMAN_H */

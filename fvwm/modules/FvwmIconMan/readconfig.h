@@ -1,3 +1,8 @@
+#ifndef READCONFIG_H
+#define READCONFIG_H
+
+#include "FvwmIconMan.h"
+
 typedef enum
 {
   READ_LINE = 1,
@@ -17,3 +22,5 @@ extern void run_binding(WinManager *man, Action action);
 #define MODS_USED                                                      \
   (ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask |          \
    Mod4Mask | Mod5Mask)
+
+#endif /* READCONFIG_H */
