@@ -100,17 +100,16 @@
 /*
  * structure of an old tar header as it appeared in BSD releases
  */
-typedef struct
-{
-  char name[TNMSZ];     /* name of entry */
-  char mode[8];         /* mode */
-  char uid[8];          /* uid */
-  char gid[8];          /* gid */
-  char size[12];        /* size */
-  char mtime[12];       /* modification time */
-  char chksum[CHK_LEN]; /* checksum */
-  char linkflag;        /* norm, hard, or sym. */
-  char linkname[TNMSZ]; /* linked to name */
+typedef struct {
+	char name[TNMSZ];     /* name of entry */
+	char mode[8];         /* mode */
+	char uid[8];          /* uid */
+	char gid[8];          /* gid */
+	char size[12];        /* size */
+	char mtime[12];       /* modification time */
+	char chksum[CHK_LEN]; /* checksum */
+	char linkflag;        /* norm, hard, or sym. */
+	char linkname[TNMSZ]; /* linked to name */
 } HD_TAR;
 
 #ifdef _PAX_
@@ -140,22 +139,21 @@ typedef struct
 #define TVERSION "00" /* 00 and no null */
 #define TVERSLEN 2
 
-typedef struct
-{
-  char name[TNMSZ];       /* name of entry */
-  char mode[8];           /* mode */
-  char uid[8];            /* uid */
-  char gid[8];            /* gid */
-  char size[12];          /* size */
-  char mtime[12];         /* modification time */
-  char chksum[CHK_LEN];   /* checksum */
-  char typeflag;          /* type of file. */
-  char linkname[TNMSZ];   /* linked to name */
-  char magic[TMAGLEN];    /* magic cookie */
-  char version[TVERSLEN]; /* version */
-  char uname[32];         /* ascii owner name */
-  char gname[32];         /* ascii group name */
-  char devmajor[8];       /* major device number */
-  char devminor[8];       /* minor device number */
-  char prefix[TPFSZ];     /* linked to name */
+typedef struct {
+	char name[TNMSZ];       /* name of entry */
+	char mode[8];           /* mode */
+	char uid[8];            /* uid */
+	char gid[8];            /* gid */
+	char size[12];          /* size */
+	char mtime[12];         /* modification time */
+	char chksum[CHK_LEN];   /* checksum */
+	char typeflag;          /* type of file. */
+	char linkname[TNMSZ];   /* linked to name */
+	char magic[TMAGLEN];    /* magic cookie */
+	char version[TVERSLEN]; /* version */
+	char uname[32];         /* ascii owner name */
+	char gname[32];         /* ascii group name */
+	char devmajor[8];       /* major device number */
+	char devminor[8];       /* minor device number */
+	char prefix[TPFSZ];     /* linked to name */
 } HD_USTAR;

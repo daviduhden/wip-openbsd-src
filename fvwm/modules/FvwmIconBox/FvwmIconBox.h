@@ -18,8 +18,8 @@ extern void ParseOptions(void);
 extern char *safemalloc(int length);
 extern int My_XNextEvent(Display *dpy, XEvent *event);
 extern void CopyString(char **dest, char *source);
-extern void RelieveWindow(Window win, int x, int y, int w, int h,
-                          GC rGC, GC sGC);
+extern void RelieveWindow(
+    Window win, int x, int y, int w, int h, GC rGC, GC sGC);
 extern void SendFvwmPipe(int *, char *text, unsigned long window);
 extern void DeadPipe(int nonsense);
 extern void CreateIconWindow(struct icon_info *item);
@@ -32,8 +32,8 @@ extern void GetIconBitmap(struct icon_info *item);
 extern void process_message(unsigned long type, unsigned long *body);
 extern Bool AddItem(unsigned long id, long desk, unsigned long flags);
 extern Bool DeleteItem(unsigned long id);
-extern struct icon_info *UpdateItem(unsigned long type,
-                                    unsigned long id, char *item);
+extern struct icon_info *UpdateItem(
+    unsigned long type, unsigned long id, char *item);
 extern void freeitem(struct icon_info *item, int d);
 extern void RedrawHScrollbar(void);
 extern void RedrawVScrollbar(void);
@@ -95,53 +95,49 @@ extern int icon_win_width, icon_win_height;
 extern Pixmap IconwinPixmap;
 extern char *IconwinPixmapFile;
 
-struct icon_info
-{
-  char *action;
-  char *name;
-  char *window_name;
-  char *res_class;
-  char *res_name;
-  char *icon_file;
-  int x;
-  int y;
-  int icon_w;
-  int icon_h;
-  Pixmap iconPixmap; /* pixmap for the icon */
-  Pixmap icon_maskPixmap;
-  Window IconWin;
-  Window icon_pixmap_w;
-  XWMHints *wmhints;
-  int icon_depth;
-  long id;
-  long desk;
-  long flags;
-  long extra_flags;
-  struct icon_info *next;
-  struct icon_info *prev;
+struct icon_info {
+	char *action;
+	char *name;
+	char *window_name;
+	char *res_class;
+	char *res_name;
+	char *icon_file;
+	int x;
+	int y;
+	int icon_w;
+	int icon_h;
+	Pixmap iconPixmap; /* pixmap for the icon */
+	Pixmap icon_maskPixmap;
+	Window IconWin;
+	Window icon_pixmap_w;
+	XWMHints *wmhints;
+	int icon_depth;
+	long id;
+	long desk;
+	long flags;
+	long extra_flags;
+	struct icon_info *next;
+	struct icon_info *prev;
 };
 
-struct iconfile
-{
-  char *name;
-  char *iconfile;
-  struct iconfile *next;
+struct iconfile {
+	char *name;
+	char *iconfile;
+	struct iconfile *next;
 };
 
-struct mousefunc
-{
-  int mouse;
-  int type;
-  char *action;
-  struct mousefunc *next;
+struct mousefunc {
+	int mouse;
+	int type;
+	char *action;
+	struct mousefunc *next;
 };
 
-struct keyfunc
-{
-  char *name;
-  KeyCode keycode;
-  char *action;
-  struct keyfunc *next;
+struct keyfunc {
+	char *name;
+	KeyCode keycode;
+	char *action;
+	struct keyfunc *next;
 };
 
 extern struct icon_info *Head;

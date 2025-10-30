@@ -125,12 +125,12 @@ int lnk_creat(ARCHD *);
 int cross_lnk(ARCHD *);
 int chk_same(ARCHD *);
 int node_creat(ARCHD *);
-void set_ftime(const char *, const struct timespec *,
-               const struct timespec *, int);
+void set_ftime(
+    const char *, const struct timespec *, const struct timespec *, int);
 int set_ids(char *, uid_t, gid_t);
 void set_pmode(char *, mode_t);
-int set_attr(const struct file_times *, int _force_times, mode_t,
-             int _do_mode, int _in_sig);
+int set_attr(const struct file_times *, int _force_times, mode_t, int _do_mode,
+    int _in_sig);
 int file_write(int, char *, int, int *, int *, int, char *);
 void file_flush(int, char *, int);
 void rdfile_close(ARCHD *, int *);
@@ -285,8 +285,8 @@ int map_dev(ARCHD *, u_long, u_long);
 #endif /* NOCPIO */
 int atdir_start(void);
 void atdir_end(void);
-void add_atdir(char *, dev_t, ino_t, const struct timespec *,
-               const struct timespec *);
+void add_atdir(
+    char *, dev_t, ino_t, const struct timespec *, const struct timespec *);
 int do_atdir(const char *, dev_t, ino_t);
 int dir_start(void);
 void add_dir(char *, struct stat *, int);
@@ -317,9 +317,9 @@ int pax_wr(ARCHD *);
  */
 int tty_init(void);
 void tty_prnt(const char *, ...)
-  __attribute__((nonnull(1), format(printf, 1, 2)));
+    __attribute__((nonnull(1), format(printf, 1, 2)));
 int tty_read(char *, int);
 void paxwarn(int, const char *, ...)
-  __attribute__((nonnull(2), format(printf, 2, 3)));
+    __attribute__((nonnull(2), format(printf, 2, 3)));
 void syswarn(int, int, const char *, ...)
-  __attribute__((nonnull(3), format(printf, 3, 4)));
+    __attribute__((nonnull(3), format(printf, 3, 4)));

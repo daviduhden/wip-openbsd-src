@@ -34,6 +34,9 @@
  * SUCH DAMAGE.
  */
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -41,8 +44,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "extern.h"
@@ -86,13 +87,12 @@ static u_int st_hash(const char *, int, int);
  * file hard link structure (hashed by dev/ino and chained) used to find the
  * hard links in a file system or with some archive formats (cpio)
  */
-typedef struct hrdlnk
-{
-  ino_t ino;    /* files inode number */
-  char *name;   /* name of first file seen with this ino/dev */
-  dev_t dev;    /* files device number */
-  u_long nlink; /* expected link count */
-  struct hrdlnk *fow;
+typedef struct hrdlnk {
+	ino_t ino;    /* files inode number */
+	char *name;   /* name of first file seen with this ino/dev */
+	dev_t dev;    /* files device number */
+	u_long nlink; /* expected link count */
+	struct hrdlnk *fow;
 } HRDLNK;
 
 /*
@@ -106,12 +106,11 @@ typedef struct hrdlnk
  * performance loss is not measurable (and the size of the archive we can
  * handle is greatly increased).
  */
-typedef struct ftm
-{
-  off_t seek;           /* location in scratch file */
-  struct timespec mtim; /* files last modification time */
-  struct ftm *fow;
-  int namelen; /* file name length */
+typedef struct ftm {
+	off_t seek;           /* location in scratch file */
+	struct timespec mtim; /* files last modification time */
+	struct ftm *fow;
+	int namelen; /* file name length */
 } FTM;
 
 /*
@@ -121,11 +120,10 @@ typedef struct ftm
  * changes for 500000 files? We use chaining to resolve collisions.
  */
 
-typedef struct namt
-{
-  char *oname; /* old name */
-  char *nname; /* new name typed in by the user */
-  struct namt *fow;
+typedef struct namt {
+	char *oname; /* old name */
+	char *nname; /* new name typed in by the user */
+	struct namt *fow;
 } NAMT;
 
 /*
@@ -154,18 +152,16 @@ typedef struct namt
  * dedicated reader; always wanted to say that...:)
  */
 
-typedef struct devt
-{
-  dev_t dev;          /* the orig device number we now have to map */
-  struct devt *fow;   /* new device map list */
-  struct dlist *list; /* map list based on inode truncation bits */
+typedef struct devt {
+	dev_t dev;          /* the orig device number we now have to map */
+	struct devt *fow;   /* new device map list */
+	struct dlist *list; /* map list based on inode truncation bits */
 } DEVT;
 
-typedef struct dlist
-{
-  ino_t trunc_bits; /* truncation pattern for a specific map */
-  dev_t dev;        /* the new device id we use */
-  struct dlist *fow;
+typedef struct dlist {
+	ino_t trunc_bits; /* truncation pattern for a specific map */
+	dev_t dev;        /* the new device id we use */
+	struct dlist *fow;
 } DLIST;
 
 /*
@@ -176,10 +172,9 @@ typedef struct dlist
  * table is hashed by inode with chaining.
  */
 
-typedef struct atdir
-{
-  struct file_times ft;
-  struct atdir *fow;
+typedef struct atdir {
+	struct file_times ft;
+	struct atdir *fow;
 } ATDIR;
 
 /*
@@ -192,26 +187,23 @@ typedef struct atdir
  * direction).
  */
 
-typedef struct dirdata
-{
-  struct file_times ft;
-  u_int16_t mode;     /* file mode to restore */
-  u_int16_t frc_mode; /* do we force mode settings? */
+typedef struct dirdata {
+	struct file_times ft;
+	u_int16_t mode;     /* file mode to restore */
+	u_int16_t frc_mode; /* do we force mode settings? */
 } DIRDATA;
 
-static HRDLNK **ltab =
-  NULL;                   /* hard link table for detecting hard links */
-static FTM **ftab = NULL; /* file time table for updating arch */
-static NAMT **ntab = NULL; /* interactive rename storage table */
+static HRDLNK **ltab = NULL; /* hard link table for detecting hard links */
+static FTM **ftab = NULL;    /* file time table for updating arch */
+static NAMT **ntab = NULL;   /* interactive rename storage table */
 #ifndef NOCPIO
 static DEVT **dtab = NULL; /* device/inode mapping tables */
 #endif
-static ATDIR **atab = NULL; /* file tree directory time reset table */
-static DIRDATA *dirp =
-  NULL;                /* storage for setting created dir time/mode */
-static size_t dirsize; /* size of dirp table */
-static size_t dircnt = 0; /* entries in dir time/mode storage */
-static int ffd = -1; /* tmp file for file time table name storage */
+static ATDIR **atab = NULL;  /* file tree directory time reset table */
+static DIRDATA *dirp = NULL; /* storage for setting created dir time/mode */
+static size_t dirsize;       /* size of dirp table */
+static size_t dircnt = 0;    /* entries in dir time/mode storage */
+static int ffd = -1;         /* tmp file for file time table name storage */
 
 /*
  * hard link table routines
@@ -236,16 +228,16 @@ static int ffd = -1; /* tmp file for file time table name storage */
  *	0 if created, -1 if failure
  */
 
-int lnk_start(void)
+int
+lnk_start(void)
 {
-  if (ltab != NULL)
-    return (0);
-  if ((ltab = calloc(L_TAB_SZ, sizeof(HRDLNK *))) == NULL)
-  {
-    paxwarn(1, "Cannot allocate memory for hard link table");
-    return (-1);
-  }
-  return (0);
+	if (ltab != NULL)
+		return (0);
+	if ((ltab = calloc(L_TAB_SZ, sizeof(HRDLNK *))) == NULL) {
+		paxwarn(1, "Cannot allocate memory for hard link table");
+		return (-1);
+	}
+	return (0);
 }
 
 /*
@@ -260,90 +252,86 @@ int lnk_start(void)
  *	if found returns 1; if not found returns 0; -1 on error
  */
 
-int chk_lnk(ARCHD *arcn)
+int
+chk_lnk(ARCHD *arcn)
 {
-  HRDLNK *pt;
-  HRDLNK **ppt;
-  u_int indx;
+	HRDLNK *pt;
+	HRDLNK **ppt;
+	u_int indx;
 
-  if (ltab == NULL)
-    return (-1);
-  /*
+	if (ltab == NULL)
+		return (-1);
+	/*
 	 * ignore those nodes that cannot have hard links
 	 */
-  if ((arcn->type == PAX_DIR) || (arcn->sb.st_nlink <= 1))
-    return (0);
+	if ((arcn->type == PAX_DIR) || (arcn->sb.st_nlink <= 1))
+		return (0);
 
-  /*
+	/*
 	 * hash inode number and look for this file
 	 */
-  indx = ((unsigned)arcn->sb.st_ino) % L_TAB_SZ;
-  if ((pt = ltab[indx]) != NULL)
-  {
-    /*
+	indx = ((unsigned)arcn->sb.st_ino) % L_TAB_SZ;
+	if ((pt = ltab[indx]) != NULL) {
+		/*
 		 * its hash chain in not empty, walk down looking for it
 		 */
-    ppt = &(ltab[indx]);
-    while (pt != NULL)
-    {
-      if ((pt->ino == arcn->sb.st_ino) && (pt->dev == arcn->sb.st_dev))
-        break;
-      ppt = &(pt->fow);
-      pt = pt->fow;
-    }
+		ppt = &(ltab[indx]);
+		while (pt != NULL) {
+			if ((pt->ino == arcn->sb.st_ino) &&
+			    (pt->dev == arcn->sb.st_dev))
+				break;
+			ppt = &(pt->fow);
+			pt = pt->fow;
+		}
 
-    if (pt != NULL)
-    {
-      /*
+		if (pt != NULL) {
+			/*
 			 * found a link. set the node type and copy in the
 			 * name of the file it is to link to. we need to
 			 * handle hardlinks to regular files differently than
 			 * other links.
 			 */
-      arcn->ln_nlen =
-        strlcpy(arcn->ln_name, pt->name, sizeof(arcn->ln_name));
-      /* XXX truncate? */
-      if ((size_t)arcn->nlen >= sizeof(arcn->name))
-        arcn->nlen = sizeof(arcn->name) - 1;
-      if (arcn->type == PAX_REG)
-        arcn->type = PAX_HRG;
-      else
-        arcn->type = PAX_HLK;
+			arcn->ln_nlen = strlcpy(
+			    arcn->ln_name, pt->name, sizeof(arcn->ln_name));
+			/* XXX truncate? */
+			if ((size_t)arcn->nlen >= sizeof(arcn->name))
+				arcn->nlen = sizeof(arcn->name) - 1;
+			if (arcn->type == PAX_REG)
+				arcn->type = PAX_HRG;
+			else
+				arcn->type = PAX_HLK;
 
-      /*
+			/*
 			 * if we have found all the links to this file, remove
 			 * it from the database
 			 */
-      if (--pt->nlink <= 1)
-      {
-        *ppt = pt->fow;
-        free(pt->name);
-        free(pt);
-      }
-      return (1);
-    }
-  }
+			if (--pt->nlink <= 1) {
+				*ppt = pt->fow;
+				free(pt->name);
+				free(pt);
+			}
+			return (1);
+		}
+	}
 
-  /*
+	/*
 	 * we never saw this file before. It has links so we add it to the
 	 * front of this hash chain
 	 */
-  if ((pt = malloc(sizeof(HRDLNK))) != NULL)
-  {
-    if ((pt->name = strdup(arcn->name)) != NULL)
-    {
-      pt->dev = arcn->sb.st_dev;
-      pt->ino = arcn->sb.st_ino;
-      pt->nlink = arcn->sb.st_nlink;
-      pt->fow = ltab[indx];
-      ltab[indx] = pt;
-      return (0);
-    }
-    free(pt);
-  }
+	if ((pt = malloc(sizeof(HRDLNK))) != NULL) {
+		if ((pt->name = strdup(arcn->name)) != NULL) {
+			pt->dev = arcn->sb.st_dev;
+			pt->ino = arcn->sb.st_ino;
+			pt->nlink = arcn->sb.st_nlink;
+			pt->fow = ltab[indx];
+			ltab[indx] = pt;
+			return (0);
+		}
+		free(pt);
+	}
 
-  paxwarn(1, "Hard link table out of memory");
-  return (-1);
+	paxwarn(1, "Hard link table out of memory");
+	return (-1);
 }
 
 /*
@@ -353,49 +341,50 @@ int chk_lnk(ARCHD *arcn)
  *	we do not want to accidently point another file at it later on.
  */
 
-void purg_lnk(ARCHD *arcn)
+void
+purg_lnk(ARCHD *arcn)
 {
-  HRDLNK *pt;
-  HRDLNK **ppt;
-  u_int indx;
+	HRDLNK *pt;
+	HRDLNK **ppt;
+	u_int indx;
 
-  if (ltab == NULL)
-    return;
-  /*
+	if (ltab == NULL)
+		return;
+	/*
 	 * do not bother to look if it could not be in the database
 	 */
-  if ((arcn->sb.st_nlink <= 1) || (arcn->type == PAX_DIR) ||
-      PAX_IS_HARDLINK(arcn->type))
-    return;
+	if ((arcn->sb.st_nlink <= 1) || (arcn->type == PAX_DIR) ||
+	    PAX_IS_HARDLINK(arcn->type))
+		return;
 
-  /*
+	/*
 	 * find the hash chain for this inode value, if empty return
 	 */
-  indx = ((unsigned)arcn->sb.st_ino) % L_TAB_SZ;
-  if ((pt = ltab[indx]) == NULL)
-    return;
+	indx = ((unsigned)arcn->sb.st_ino) % L_TAB_SZ;
+	if ((pt = ltab[indx]) == NULL)
+		return;
 
-  /*
+	/*
 	 * walk down the list looking for the inode/dev pair, unlink and
 	 * free if found
 	 */
-  ppt = &(ltab[indx]);
-  while (pt != NULL)
-  {
-    if ((pt->ino == arcn->sb.st_ino) && (pt->dev == arcn->sb.st_dev))
-      break;
-    ppt = &(pt->fow);
-    pt = pt->fow;
-  }
-  if (pt == NULL)
-    return;
+	ppt = &(ltab[indx]);
+	while (pt != NULL) {
+		if ((pt->ino == arcn->sb.st_ino) &&
+		    (pt->dev == arcn->sb.st_dev))
+			break;
+		ppt = &(pt->fow);
+		pt = pt->fow;
+	}
+	if (pt == NULL)
+		return;
 
-  /*
+	/*
 	 * remove and free it
 	 */
-  *ppt = pt->fow;
-  free(pt->name);
-  free(pt);
+	*ppt = pt->fow;
+	free(pt->name);
+	free(pt);
 }
 
 /*
@@ -406,33 +395,32 @@ void purg_lnk(ARCHD *arcn)
  *	write phase
  */
 
-void lnk_end(void)
+void
+lnk_end(void)
 {
-  int i;
-  HRDLNK *pt;
-  HRDLNK *ppt;
+	int i;
+	HRDLNK *pt;
+	HRDLNK *ppt;
 
-  if (ltab == NULL)
-    return;
+	if (ltab == NULL)
+		return;
 
-  for (i = 0; i < L_TAB_SZ; ++i)
-  {
-    if (ltab[i] == NULL)
-      continue;
-    pt = ltab[i];
-    ltab[i] = NULL;
+	for (i = 0; i < L_TAB_SZ; ++i) {
+		if (ltab[i] == NULL)
+			continue;
+		pt = ltab[i];
+		ltab[i] = NULL;
 
-    /*
+		/*
 		 * free up each entry on this chain
 		 */
-    while (pt != NULL)
-    {
-      ppt = pt;
-      pt = ppt->fow;
-      free(ppt->name);
-      free(ppt);
-    }
-  }
+		while (pt != NULL) {
+			ppt = pt;
+			pt = ppt->fow;
+			free(ppt->name);
+			free(ppt);
+		}
+	}
 }
 
 /*
@@ -466,30 +454,30 @@ void lnk_end(void)
  *	0 if the table and file was created ok, -1 otherwise
  */
 
-int ftime_start(void)
+int
+ftime_start(void)
 {
 
-  if (ftab != NULL)
-    return (0);
-  if ((ftab = calloc(F_TAB_SZ, sizeof(FTM *))) == NULL)
-  {
-    paxwarn(1, "Cannot allocate memory for file time table");
-    return (-1);
-  }
+	if (ftab != NULL)
+		return (0);
+	if ((ftab = calloc(F_TAB_SZ, sizeof(FTM *))) == NULL) {
+		paxwarn(1, "Cannot allocate memory for file time table");
+		return (-1);
+	}
 
-  /*
+	/*
 	 * get random name and create temporary scratch file, unlink name
 	 * so it will get removed on exit
 	 */
-  memcpy(tempbase, _TFILE_BASE, sizeof(_TFILE_BASE));
-  if ((ffd = mkstemp(tempfile)) == -1)
-  {
-    syswarn(1, errno, "Unable to create temporary file: %s", tempfile);
-    return (-1);
-  }
-  (void)unlink(tempfile);
+	memcpy(tempbase, _TFILE_BASE, sizeof(_TFILE_BASE));
+	if ((ffd = mkstemp(tempfile)) == -1) {
+		syswarn(
+		    1, errno, "Unable to create temporary file: %s", tempfile);
+		return (-1);
+	}
+	(void)unlink(tempfile);
 
-  return (0);
+	return (0);
 }
 
 /*
@@ -504,113 +492,105 @@ int ftime_start(void)
  *	-1 on error
  */
 
-int chk_ftime(ARCHD *arcn)
+int
+chk_ftime(ARCHD *arcn)
 {
-  FTM *pt;
-  int namelen;
-  u_int indx;
-  char ckname[PAXPATHLEN + 1];
+	FTM *pt;
+	int namelen;
+	u_int indx;
+	char ckname[PAXPATHLEN + 1];
 
-  /*
+	/*
 	 * no info, go ahead and add to archive
 	 */
-  if (ftab == NULL)
-    return (0);
+	if (ftab == NULL)
+		return (0);
 
-  /*
+	/*
 	 * hash the pathname and look up in table
 	 */
-  namelen = arcn->nlen;
-  indx = st_hash(arcn->name, namelen, F_TAB_SZ);
-  if ((pt = ftab[indx]) != NULL)
-  {
-    /*
+	namelen = arcn->nlen;
+	indx = st_hash(arcn->name, namelen, F_TAB_SZ);
+	if ((pt = ftab[indx]) != NULL) {
+		/*
 		 * the hash chain is not empty, walk down looking for match
 		 * only read up the path names if the lengths match, speeds
 		 * up the search a lot
 		 */
-    while (pt != NULL)
-    {
-      if (pt->namelen == namelen)
-      {
-        /*
+		while (pt != NULL) {
+			if (pt->namelen == namelen) {
+				/*
 				 * potential match, have to read the name
 				 * from the scratch file.
 				 */
-        if (lseek(ffd, pt->seek, SEEK_SET) != pt->seek)
-        {
-          syswarn(1, errno, "Failed ftime table seek");
-          return (-1);
-        }
-        if (read(ffd, ckname, namelen) != namelen)
-        {
-          syswarn(1, errno, "Failed ftime table read");
-          return (-1);
-        }
+				if (lseek(ffd, pt->seek, SEEK_SET) !=
+				    pt->seek) {
+					syswarn(1, errno,
+					    "Failed ftime table seek");
+					return (-1);
+				}
+				if (read(ffd, ckname, namelen) != namelen) {
+					syswarn(1, errno,
+					    "Failed ftime table read");
+					return (-1);
+				}
 
-        /*
+				/*
 				 * if the names match, we are done
 				 */
-        if (!strncmp(ckname, arcn->name, namelen))
-          break;
-      }
+				if (!strncmp(ckname, arcn->name, namelen))
+					break;
+			}
 
-      /*
+			/*
 			 * try the next entry on the chain
 			 */
-      pt = pt->fow;
-    }
+			pt = pt->fow;
+		}
 
-    if (pt != NULL)
-    {
-      /*
+		if (pt != NULL) {
+			/*
 			 * found the file, compare the times, save the newer
 			 */
-      if (timespeccmp(&arcn->sb.st_mtim, &pt->mtim, >))
-      {
-        /*
+			if (timespeccmp(&arcn->sb.st_mtim, &pt->mtim, >)) {
+				/*
 				 * file is newer
 				 */
-        pt->mtim = arcn->sb.st_mtim;
-        return (0);
-      }
-      /*
+				pt->mtim = arcn->sb.st_mtim;
+				return (0);
+			}
+			/*
 			 * file is older
 			 */
-      return (1);
-    }
-  }
+			return (1);
+		}
+	}
 
-  /*
+	/*
 	 * not in table, add it
 	 */
-  if ((pt = malloc(sizeof(FTM))) != NULL)
-  {
-    /*
+	if ((pt = malloc(sizeof(FTM))) != NULL) {
+		/*
 		 * add the name at the end of the scratch file, saving the
 		 * offset. add the file to the head of the hash chain
 		 */
-    if ((pt->seek = lseek(ffd, 0, SEEK_END)) >= 0)
-    {
-      if (write(ffd, arcn->name, namelen) == namelen)
-      {
-        pt->mtim = arcn->sb.st_mtim;
-        pt->namelen = namelen;
-        pt->fow = ftab[indx];
-        ftab[indx] = pt;
-        return (0);
-      }
-      syswarn(1, errno, "Failed write to file time table");
-    }
-    else
-      syswarn(1, errno, "Failed seek on file time table");
-  }
-  else
-    paxwarn(1, "File time table ran out of memory");
+		if ((pt->seek = lseek(ffd, 0, SEEK_END)) >= 0) {
+			if (write(ffd, arcn->name, namelen) == namelen) {
+				pt->mtim = arcn->sb.st_mtim;
+				pt->namelen = namelen;
+				pt->fow = ftab[indx];
+				ftab[indx] = pt;
+				return (0);
+			}
+			syswarn(1, errno, "Failed write to file time table");
+		} else
+			syswarn(1, errno, "Failed seek on file time table");
+	} else
+		paxwarn(1, "File time table ran out of memory");
 
-  if (pt != NULL)
-    free(pt);
-  return (-1);
+	if (pt != NULL)
+		free(pt);
+	return (-1);
 }
 
 /*
@@ -646,19 +626,17 @@ int chk_ftime(ARCHD *arcn)
  *    the specified symlink or hardlink to the first such
  */
 
-struct slpath
-{
-  char *sp_path;
-  struct slpath *sp_next;
+struct slpath {
+	char *sp_path;
+	struct slpath *sp_next;
 };
-struct slinode
-{
-  ino_t sli_ino;
-  char *sli_value;
-  struct slpath sli_paths;
-  struct slinode *sli_fow; /* hash table chain */
-  dev_t sli_dev;
-  mode_t sli_mode;
+struct slinode {
+	ino_t sli_ino;
+	char *sli_value;
+	struct slpath sli_paths;
+	struct slinode *sli_fow; /* hash table chain */
+	dev_t sli_dev;
+	mode_t sli_mode;
 };
 
 static struct slinode **slitab = NULL;
@@ -670,16 +648,16 @@ static struct slinode **slitab = NULL;
  *	0 if the table and file was created ok, -1 otherwise
  */
 
-int sltab_start(void)
+int
+sltab_start(void)
 {
 
-  if ((slitab = calloc(SL_TAB_SZ, sizeof *slitab)) == NULL)
-  {
-    syswarn(1, errno, "symlink table");
-    return (-1);
-  }
+	if ((slitab = calloc(SL_TAB_SZ, sizeof *slitab)) == NULL) {
+		syswarn(1, errno, "symlink table");
+		return (-1);
+	}
 
-  return (0);
+	return (0);
 }
 
 /*
@@ -689,95 +667,87 @@ int sltab_start(void)
  *	0 on success, -1 otherwise
  */
 
-int sltab_add_sym(const char *path0, const char *value0, mode_t mode)
+int
+sltab_add_sym(const char *path0, const char *value0, mode_t mode)
 {
-  struct stat sb;
-  struct slinode *s;
-  struct slpath *p;
-  char *path, *value;
-  u_int indx;
-  int fd;
+	struct stat sb;
+	struct slinode *s;
+	struct slpath *p;
+	char *path, *value;
+	u_int indx;
+	int fd;
 
-  /* create the placeholder */
-  fd = open(path0, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
-  if (fd == -1)
-    return (-1);
-  if (fstat(fd, &sb) == -1)
-  {
-    unlink(path0);
-    close(fd);
-    return (-1);
-  }
-  close(fd);
+	/* create the placeholder */
+	fd = open(path0, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
+	if (fd == -1)
+		return (-1);
+	if (fstat(fd, &sb) == -1) {
+		unlink(path0);
+		close(fd);
+		return (-1);
+	}
+	close(fd);
 
-  if (havechd && *path0 != '/')
-  {
-    if ((path = realpath(path0, NULL)) == NULL)
-    {
-      syswarn(1, errno, "Cannot canonicalize %s", path0);
-      unlink(path0);
-      return (-1);
-    }
-  }
-  else if ((path = strdup(path0)) == NULL)
-  {
-    syswarn(1, errno, "defered symlink path");
-    unlink(path0);
-    return (-1);
-  }
-  if ((value = strdup(value0)) == NULL)
-  {
-    syswarn(1, errno, "defered symlink value");
-    unlink(path);
-    free(path);
-    return (-1);
-  }
+	if (havechd && *path0 != '/') {
+		if ((path = realpath(path0, NULL)) == NULL) {
+			syswarn(1, errno, "Cannot canonicalize %s", path0);
+			unlink(path0);
+			return (-1);
+		}
+	} else if ((path = strdup(path0)) == NULL) {
+		syswarn(1, errno, "defered symlink path");
+		unlink(path0);
+		return (-1);
+	}
+	if ((value = strdup(value0)) == NULL) {
+		syswarn(1, errno, "defered symlink value");
+		unlink(path);
+		free(path);
+		return (-1);
+	}
 
-  /* now check the hash table for conflicting entry */
-  indx = (sb.st_ino ^ sb.st_dev) % SL_TAB_SZ;
-  for (s = slitab[indx]; s != NULL; s = s->sli_fow)
-  {
-    if (s->sli_ino != sb.st_ino || s->sli_dev != sb.st_dev)
-      continue;
+	/* now check the hash table for conflicting entry */
+	indx = (sb.st_ino ^ sb.st_dev) % SL_TAB_SZ;
+	for (s = slitab[indx]; s != NULL; s = s->sli_fow) {
+		if (s->sli_ino != sb.st_ino || s->sli_dev != sb.st_dev)
+			continue;
 
-    /*
+		/*
 		 * One of our placeholders got removed behind our back and
 		 * we've reused the inode.  Weird, but clean up the mess.
 		 */
-    free(s->sli_value);
-    free(s->sli_paths.sp_path);
-    p = s->sli_paths.sp_next;
-    while (p != NULL)
-    {
-      struct slpath *next_p = p->sp_next;
+		free(s->sli_value);
+		free(s->sli_paths.sp_path);
+		p = s->sli_paths.sp_next;
+		while (p != NULL) {
+			struct slpath *next_p = p->sp_next;
 
-      free(p->sp_path);
-      free(p);
-      p = next_p;
-    }
-    goto set_value;
-  }
+			free(p->sp_path);
+			free(p);
+			p = next_p;
+		}
+		goto set_value;
+	}
 
-  /* Normal case: create a new node */
-  if ((s = malloc(sizeof *s)) == NULL)
-  {
-    syswarn(1, errno, "defered symlink");
-    unlink(path);
-    free(path);
-    free(value);
-    return (-1);
-  }
-  s->sli_ino = sb.st_ino;
-  s->sli_dev = sb.st_dev;
-  s->sli_fow = slitab[indx];
-  slitab[indx] = s;
+	/* Normal case: create a new node */
+	if ((s = malloc(sizeof *s)) == NULL) {
+		syswarn(1, errno, "defered symlink");
+		unlink(path);
+		free(path);
+		free(value);
+		return (-1);
+	}
+	s->sli_ino = sb.st_ino;
+	s->sli_dev = sb.st_dev;
+	s->sli_fow = slitab[indx];
+	slitab[indx] = s;
 
 set_value:
-  s->sli_paths.sp_path = path;
-  s->sli_paths.sp_next = NULL;
-  s->sli_value = value;
-  s->sli_mode = mode;
-  return (0);
+	s->sli_paths.sp_path = path;
+	s->sli_paths.sp_next = NULL;
+	s->sli_value = value;
+	s->sli_mode = mode;
+	return (0);
 }
 
 /*
@@ -788,129 +758,122 @@ set_value:
  *	0 if things are ok, -1 if something went wrong
  */
 
-int sltab_add_link(const char *path, const struct stat *sb)
+int
+sltab_add_link(const char *path, const struct stat *sb)
 {
-  struct slinode *s;
-  struct slpath *p;
-  u_int indx;
+	struct slinode *s;
+	struct slpath *p;
+	u_int indx;
 
-  if (!S_ISREG(sb->st_mode) || sb->st_size != 0)
-    return (1);
+	if (!S_ISREG(sb->st_mode) || sb->st_size != 0)
+		return (1);
 
-  /* find the hash table entry for this hardlink */
-  indx = (sb->st_ino ^ sb->st_dev) % SL_TAB_SZ;
-  for (s = slitab[indx]; s != NULL; s = s->sli_fow)
-  {
-    if (s->sli_ino != sb->st_ino || s->sli_dev != sb->st_dev)
-      continue;
+	/* find the hash table entry for this hardlink */
+	indx = (sb->st_ino ^ sb->st_dev) % SL_TAB_SZ;
+	for (s = slitab[indx]; s != NULL; s = s->sli_fow) {
+		if (s->sli_ino != sb->st_ino || s->sli_dev != sb->st_dev)
+			continue;
 
-    if ((p = malloc(sizeof *p)) == NULL)
-    {
-      syswarn(1, errno, "deferred symlink hardlink");
-      return (-1);
-    }
-    if (havechd && *path != '/')
-    {
-      if ((p->sp_path = realpath(path, NULL)) == NULL)
-      {
-        syswarn(1, errno, "Cannot canonicalize %s", path);
-        free(p);
-        return (-1);
-      }
-    }
-    else if ((p->sp_path = strdup(path)) == NULL)
-    {
-      syswarn(1, errno, "defered symlink hardlink path");
-      free(p);
-      return (-1);
-    }
+		if ((p = malloc(sizeof *p)) == NULL) {
+			syswarn(1, errno, "deferred symlink hardlink");
+			return (-1);
+		}
+		if (havechd && *path != '/') {
+			if ((p->sp_path = realpath(path, NULL)) == NULL) {
+				syswarn(
+				    1, errno, "Cannot canonicalize %s", path);
+				free(p);
+				return (-1);
+			}
+		} else if ((p->sp_path = strdup(path)) == NULL) {
+			syswarn(1, errno, "defered symlink hardlink path");
+			free(p);
+			return (-1);
+		}
 
-    /* link it in */
-    p->sp_next = s->sli_paths.sp_next;
-    s->sli_paths.sp_next = p;
-    return (0);
-  }
+		/* link it in */
+		p->sp_next = s->sli_paths.sp_next;
+		s->sli_paths.sp_next = p;
+		return (0);
+	}
 
-  /* not found */
-  return (1);
+	/* not found */
+	return (1);
 }
 
-static int sltab_process_one(struct slinode *s, struct slpath *p,
-                             const char *first, int in_sig)
+static int
+sltab_process_one(
+    struct slinode *s, struct slpath *p, const char *first, int in_sig)
 {
-  struct stat sb;
-  char *path = p->sp_path;
-  mode_t mode;
-  int err;
+	struct stat sb;
+	char *path = p->sp_path;
+	mode_t mode;
+	int err;
 
-  /*
+	/*
 	 * is it the expected placeholder?  This can fail legimately
 	 * if the archive overwrote the link with another, later entry,
 	 * so don't warn.
 	 */
-  if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode) || sb.st_size != 0 ||
-      sb.st_ino != s->sli_ino || sb.st_dev != s->sli_dev)
-    return (0);
+	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode) || sb.st_size != 0 ||
+	    sb.st_ino != s->sli_ino || sb.st_dev != s->sli_dev)
+		return (0);
 
-  if (unlink(path) && errno != ENOENT)
-  {
-    if (!in_sig)
-      syswarn(1, errno, "deferred symlink removal");
-    return (0);
-  }
+	if (unlink(path) && errno != ENOENT) {
+		if (!in_sig)
+			syswarn(1, errno, "deferred symlink removal");
+		return (0);
+	}
 
-  err = 0;
-  if (first != NULL)
-  {
-    /* add another hardlink to the existing symlink */
-    if (linkat(AT_FDCWD, first, AT_FDCWD, path, 0) == 0)
-      return (0);
+	err = 0;
+	if (first != NULL) {
+		/* add another hardlink to the existing symlink */
+		if (linkat(AT_FDCWD, first, AT_FDCWD, path, 0) == 0)
+			return (0);
 
-    /*
+		/*
 		 * Couldn't hardlink the symlink for some reason, so we'll
 		 * try creating it as its own symlink, but save the error
 		 * for reporting if that fails.
 		 */
-    err = errno;
-  }
+		err = errno;
+	}
 
-  if (symlink(s->sli_value, path))
-  {
-    if (!in_sig)
-    {
-      const char *qualifier = "";
-      if (err)
-        qualifier = " hardlink";
-      else
-        err = errno;
+	if (symlink(s->sli_value, path)) {
+		if (!in_sig) {
+			const char *qualifier = "";
+			if (err)
+				qualifier = " hardlink";
+			else
+				err = errno;
 
-      syswarn(1, err, "deferred symlink%s: %s", qualifier, path);
-    }
-    return (0);
-  }
+			syswarn(
+			    1, err, "deferred symlink%s: %s", qualifier, path);
+		}
+		return (0);
+	}
 
-  /* success, so set the id, mode, and times */
-  mode = s->sli_mode;
-  if (pids)
-  {
-    /* if can't set the ids, force the set[ug]id bits off */
-    if (set_ids(path, sb.st_uid, sb.st_gid))
-      mode &= ~(SETBITS);
-  }
+	/* success, so set the id, mode, and times */
+	mode = s->sli_mode;
+	if (pids) {
+		/* if can't set the ids, force the set[ug]id bits off */
+		if (set_ids(path, sb.st_uid, sb.st_gid))
+			mode &= ~(SETBITS);
+	}
 
-  if (pmode)
-    set_pmode(path, mode);
+	if (pmode)
+		set_pmode(path, mode);
 
-  if (patime || pmtime)
-    set_ftime(path, &sb.st_mtim, &sb.st_atim, 0);
+	if (patime || pmtime)
+		set_ftime(path, &sb.st_mtim, &sb.st_atim, 0);
 
-  /*
+	/*
 	 * If we tried to link to first but failed, then this new symlink
 	 * might be a better one to try in the future.  Guess from the errno.
 	 */
-  if (err == 0 || err == ENOENT || err == EMLINK || err == EOPNOTSUPP)
-    return (1);
-  return (0);
+	if (err == 0 || err == ENOENT || err == EMLINK || err == EOPNOTSUPP)
+		return (1);
+	return (0);
 }
 
 /*
@@ -918,56 +881,51 @@ static int sltab_process_one(struct slinode *s, struct slpath *p,
  *	Do all the delayed process for escape symlinks
  */
 
-void sltab_process(int in_sig)
+void
+sltab_process(int in_sig)
 {
-  struct slinode *s;
-  struct slpath *p;
-  char *first;
-  u_int indx;
+	struct slinode *s;
+	struct slpath *p;
+	char *first;
+	u_int indx;
 
-  if (slitab == NULL)
-    return;
+	if (slitab == NULL)
+		return;
 
-  /* walk across the entire hash table */
-  for (indx = 0; indx < SL_TAB_SZ; indx++)
-  {
-    while ((s = slitab[indx]) != NULL)
-    {
-      /* pop this entry */
-      slitab[indx] = s->sli_fow;
+	/* walk across the entire hash table */
+	for (indx = 0; indx < SL_TAB_SZ; indx++) {
+		while ((s = slitab[indx]) != NULL) {
+			/* pop this entry */
+			slitab[indx] = s->sli_fow;
 
-      first = NULL;
-      p = &s->sli_paths;
-      while (1)
-      {
-        struct slpath *next_p;
+			first = NULL;
+			p = &s->sli_paths;
+			while (1) {
+				struct slpath *next_p;
 
-        if (sltab_process_one(s, p, first, in_sig))
-        {
-          if (!in_sig)
-            free(first);
-          first = p->sp_path;
-        }
-        else if (!in_sig)
-          free(p->sp_path);
+				if (sltab_process_one(s, p, first, in_sig)) {
+					if (!in_sig)
+						free(first);
+					first = p->sp_path;
+				} else if (!in_sig)
+					free(p->sp_path);
 
-        if ((next_p = p->sp_next) == NULL)
-          break;
-        *p = *next_p;
-        if (!in_sig)
-          free(next_p);
-      }
-      if (!in_sig)
-      {
-        free(first);
-        free(s->sli_value);
-        free(s);
-      }
-    }
-  }
-  if (!in_sig)
-    free(slitab);
-  slitab = NULL;
+				if ((next_p = p->sp_next) == NULL)
+					break;
+				*p = *next_p;
+				if (!in_sig)
+					free(next_p);
+			}
+			if (!in_sig) {
+				free(first);
+				free(s->sli_value);
+				free(s);
+			}
+		}
+	}
+	if (!in_sig)
+		free(slitab);
+	slitab = NULL;
 }
 
 /*
@@ -989,16 +947,17 @@ void sltab_process(int in_sig)
  *	0 if successful, -1 otherwise
  */
 
-int name_start(void)
+int
+name_start(void)
 {
-  if (ntab != NULL)
-    return (0);
-  if ((ntab = calloc(N_TAB_SZ, sizeof(NAMT *))) == NULL)
-  {
-    paxwarn(1, "Cannot allocate memory for interactive rename table");
-    return (-1);
-  }
-  return (0);
+	if (ntab != NULL)
+		return (0);
+	if ((ntab = calloc(N_TAB_SZ, sizeof(NAMT *))) == NULL) {
+		paxwarn(
+		    1, "Cannot allocate memory for interactive rename table");
+		return (-1);
+	}
+	return (0);
 }
 
 /*
@@ -1010,71 +969,65 @@ int name_start(void)
  *	0 if added, -1 otherwise
  */
 
-int add_name(char *oname, int onamelen, char *nname)
+int
+add_name(char *oname, int onamelen, char *nname)
 {
-  NAMT *pt;
-  u_int indx;
+	NAMT *pt;
+	u_int indx;
 
-  if (ntab == NULL)
-  {
-    /*
+	if (ntab == NULL) {
+		/*
 		 * should never happen
 		 */
-    paxwarn(0, "No interactive rename table, links may fail");
-    return (0);
-  }
+		paxwarn(0, "No interactive rename table, links may fail");
+		return (0);
+	}
 
-  /*
+	/*
 	 * look to see if we have already mapped this file, if so we
 	 * will update it
 	 */
-  indx = st_hash(oname, onamelen, N_TAB_SZ);
-  if ((pt = ntab[indx]) != NULL)
-  {
-    /*
+	indx = st_hash(oname, onamelen, N_TAB_SZ);
+	if ((pt = ntab[indx]) != NULL) {
+		/*
 		 * look down the has chain for the file
 		 */
-    while ((pt != NULL) && (strcmp(oname, pt->oname) != 0))
-      pt = pt->fow;
+		while ((pt != NULL) && (strcmp(oname, pt->oname) != 0))
+			pt = pt->fow;
 
-    if (pt != NULL)
-    {
-      /*
+		if (pt != NULL) {
+			/*
 			 * found an old mapping, replace it with the new one
 			 * the user just input (if it is different)
 			 */
-      if (strcmp(nname, pt->nname) == 0)
-        return (0);
+			if (strcmp(nname, pt->nname) == 0)
+				return (0);
 
-      free(pt->nname);
-      if ((pt->nname = strdup(nname)) == NULL)
-      {
-        paxwarn(1, "Cannot update rename table");
-        return (-1);
-      }
-      return (0);
-    }
-  }
+			free(pt->nname);
+			if ((pt->nname = strdup(nname)) == NULL) {
+				paxwarn(1, "Cannot update rename table");
+				return (-1);
+			}
+			return (0);
+		}
+	}
 
-  /*
+	/*
 	 * this is a new mapping, add it to the table
 	 */
-  if ((pt = malloc(sizeof(NAMT))) != NULL)
-  {
-    if ((pt->oname = strdup(oname)) != NULL)
-    {
-      if ((pt->nname = strdup(nname)) != NULL)
-      {
-        pt->fow = ntab[indx];
-        ntab[indx] = pt;
-        return (0);
-      }
-      free(pt->oname);
-    }
-    free(pt);
-  }
-  paxwarn(1, "Interactive rename table out of memory");
-  return (-1);
+	if ((pt = malloc(sizeof(NAMT))) != NULL) {
+		if ((pt->oname = strdup(oname)) != NULL) {
+			if ((pt->nname = strdup(nname)) != NULL) {
+				pt->fow = ntab[indx];
+				ntab[indx] = pt;
+				return (0);
+			}
+			free(pt->oname);
+		}
+		free(pt);
+	}
+	paxwarn(1, "Interactive rename table out of memory");
+	return (-1);
 }
 
 /*
@@ -1084,40 +1037,39 @@ int add_name(char *oname, int onamelen, char *nname)
  *	new name (oname is the link to name)
  */
 
-void sub_name(char *oname, int *onamelen, int onamesize)
+void
+sub_name(char *oname, int *onamelen, int onamesize)
 {
-  NAMT *pt;
-  u_int indx;
+	NAMT *pt;
+	u_int indx;
 
-  if (ntab == NULL)
-    return;
-  /*
+	if (ntab == NULL)
+		return;
+	/*
 	 * look the name up in the hash table
 	 */
-  indx = st_hash(oname, *onamelen, N_TAB_SZ);
-  if ((pt = ntab[indx]) == NULL)
-    return;
+	indx = st_hash(oname, *onamelen, N_TAB_SZ);
+	if ((pt = ntab[indx]) == NULL)
+		return;
 
-  while (pt != NULL)
-  {
-    /*
+	while (pt != NULL) {
+		/*
 		 * walk down the hash chain looking for a match
 		 */
-    if (strcmp(oname, pt->oname) == 0)
-    {
-      /*
+		if (strcmp(oname, pt->oname) == 0) {
+			/*
 			 * found it, replace it with the new name
 			 * and return (we know that oname has enough space)
 			 */
-      *onamelen = strlcpy(oname, pt->nname, onamesize);
-      if (*onamelen >= onamesize)
-        *onamelen = onamesize - 1; /* XXX truncate? */
-      return;
-    }
-    pt = pt->fow;
-  }
+			*onamelen = strlcpy(oname, pt->nname, onamesize);
+			if (*onamelen >= onamesize)
+				*onamelen = onamesize - 1; /* XXX truncate? */
+			return;
+		}
+		pt = pt->fow;
+	}
 
-  /*
+	/*
 	 * no match, just return
 	 */
 }
@@ -1172,16 +1124,16 @@ static DEVT *chk_dev(dev_t, int);
  *	0 if successful, -1 otherwise
  */
 
-int dev_start(void)
+int
+dev_start(void)
 {
-  if (dtab != NULL)
-    return (0);
-  if ((dtab = calloc(D_TAB_SZ, sizeof(DEVT *))) == NULL)
-  {
-    paxwarn(1, "Cannot allocate memory for device mapping table");
-    return (-1);
-  }
-  return (0);
+	if (dtab != NULL)
+		return (0);
+	if ((dtab = calloc(D_TAB_SZ, sizeof(DEVT *))) == NULL) {
+		paxwarn(1, "Cannot allocate memory for device mapping table");
+		return (-1);
+	}
+	return (0);
 }
 
 /*
@@ -1194,11 +1146,12 @@ int dev_start(void)
  *	0 if added ok, -1 otherwise
  */
 
-int add_dev(ARCHD *arcn)
+int
+add_dev(ARCHD *arcn)
 {
-  if (chk_dev(arcn->sb.st_dev, 1) == NULL)
-    return (-1);
-  return (0);
+	if (chk_dev(arcn->sb.st_dev, 1) == NULL)
+		return (-1);
+	return (0);
 }
 
 /*
@@ -1214,51 +1167,50 @@ int add_dev(ARCHD *arcn)
  *	is returned (indicates an error).
  */
 
-static DEVT *chk_dev(dev_t dev, int add)
+static DEVT *
+chk_dev(dev_t dev, int add)
 {
-  DEVT *pt;
-  u_int indx;
+	DEVT *pt;
+	u_int indx;
 
-  if (dtab == NULL)
-    return (NULL);
-  /*
+	if (dtab == NULL)
+		return (NULL);
+	/*
 	 * look to see if this device is already in the table
 	 */
-  indx = ((unsigned)dev) % D_TAB_SZ;
-  if ((pt = dtab[indx]) != NULL)
-  {
-    while ((pt != NULL) && (pt->dev != dev))
-      pt = pt->fow;
+	indx = ((unsigned)dev) % D_TAB_SZ;
+	if ((pt = dtab[indx]) != NULL) {
+		while ((pt != NULL) && (pt->dev != dev))
+			pt = pt->fow;
 
-    /*
+		/*
 		 * found it, return a pointer to it
 		 */
-    if (pt != NULL)
-      return (pt);
-  }
+		if (pt != NULL)
+			return (pt);
+	}
 
-  /*
+	/*
 	 * not in table, we add it only if told to as this may just be a check
 	 * to see if a device number is being used.
 	 */
-  if (add == 0)
-    return (NULL);
+	if (add == 0)
+		return (NULL);
 
-  /*
+	/*
 	 * allocate a node for this device and add it to the front of the hash
 	 * chain. Note we do not assign remaps values here, so the pt->list
 	 * list must be NULL.
 	 */
-  if ((pt = malloc(sizeof(DEVT))) == NULL)
-  {
-    paxwarn(1, "Device map table out of memory");
-    return (NULL);
-  }
-  pt->dev = dev;
-  pt->list = NULL;
-  pt->fow = dtab[indx];
-  dtab[indx] = pt;
-  return (pt);
+	if ((pt = malloc(sizeof(DEVT))) == NULL) {
+		paxwarn(1, "Device map table out of memory");
+		return (NULL);
+	}
+	pt->dev = dev;
+	pt->list = NULL;
+	pt->fow = dtab[indx];
+	dtab[indx] = pt;
+	return (pt);
 }
 /*
  * map_dev()
@@ -1273,70 +1225,66 @@ static DEVT *chk_dev(dev_t dev, int add)
  *	0 if all ok, -1 otherwise.
  */
 
-int map_dev(ARCHD *arcn, u_long dev_mask, u_long ino_mask)
+int
+map_dev(ARCHD *arcn, u_long dev_mask, u_long ino_mask)
 {
-  DEVT *pt;
-  DLIST *dpt;
-  static dev_t lastdev = 0; /* next device number to try */
-  int trc_ino = 0;
-  int trc_dev = 0;
-  ino_t trunc_bits = 0;
-  ino_t nino;
+	DEVT *pt;
+	DLIST *dpt;
+	static dev_t lastdev = 0; /* next device number to try */
+	int trc_ino = 0;
+	int trc_dev = 0;
+	ino_t trunc_bits = 0;
+	ino_t nino;
 
-  if (dtab == NULL)
-    return (0);
-  /*
+	if (dtab == NULL)
+		return (0);
+	/*
 	 * check for device and inode truncation, and extract the truncated
 	 * bit pattern.
 	 */
-  if ((arcn->sb.st_dev & (dev_t)dev_mask) != arcn->sb.st_dev)
-    ++trc_dev;
-  if ((nino = arcn->sb.st_ino & (ino_t)ino_mask) != arcn->sb.st_ino)
-  {
-    ++trc_ino;
-    trunc_bits = arcn->sb.st_ino & (ino_t)(~ino_mask);
-  }
+	if ((arcn->sb.st_dev & (dev_t)dev_mask) != arcn->sb.st_dev)
+		++trc_dev;
+	if ((nino = arcn->sb.st_ino & (ino_t)ino_mask) != arcn->sb.st_ino) {
+		++trc_ino;
+		trunc_bits = arcn->sb.st_ino & (ino_t)(~ino_mask);
+	}
 
-  /*
+	/*
 	 * see if this device is already being mapped, look up the device
 	 * then find the truncation bit pattern which applies
 	 */
-  if ((pt = chk_dev(arcn->sb.st_dev, 0)) != NULL)
-  {
-    /*
+	if ((pt = chk_dev(arcn->sb.st_dev, 0)) != NULL) {
+		/*
 		 * this device is already marked to be remapped
 		 */
-    for (dpt = pt->list; dpt != NULL; dpt = dpt->fow)
-      if (dpt->trunc_bits == trunc_bits)
-        break;
+		for (dpt = pt->list; dpt != NULL; dpt = dpt->fow)
+			if (dpt->trunc_bits == trunc_bits)
+				break;
 
-    if (dpt != NULL)
-    {
-      /*
+		if (dpt != NULL) {
+			/*
 			 * we are being remapped for this device and pattern
 			 * change the device number to be stored and return
 			 */
-      arcn->sb.st_dev = dpt->dev;
-      arcn->sb.st_ino = nino;
-      return (0);
-    }
-  }
-  else
-  {
-    /*
+			arcn->sb.st_dev = dpt->dev;
+			arcn->sb.st_ino = nino;
+			return (0);
+		}
+	} else {
+		/*
 		 * this device is not being remapped YET. if we do not have any
 		 * form of truncation, we do not need a remap
 		 */
-    if (!trc_ino && !trc_dev)
-      return (0);
+		if (!trc_ino && !trc_dev)
+			return (0);
 
-    /*
+		/*
 		 * we have truncation, have to add this as a device to remap
 		 */
-    if ((pt = chk_dev(arcn->sb.st_dev, 1)) == NULL)
-      goto bad;
+		if ((pt = chk_dev(arcn->sb.st_dev, 1)) == NULL)
+			goto bad;
 
-    /*
+		/*
 		 * if we just have a truncated inode, we have to make sure that
 		 * all future inodes that do not truncate (they have the
 		 * truncation pattern of all 0's) continue to map to the same
@@ -1345,57 +1293,54 @@ int map_dev(ARCHD *arcn, u_long dev_mask, u_long ino_mask)
 		 * pattern of all 0's. So we add the mapping for all 0's to the
 		 * same device number.
 		 */
-    if (!trc_dev && (trunc_bits != 0))
-    {
-      if ((dpt = malloc(sizeof(DLIST))) == NULL)
-        goto bad;
-      dpt->trunc_bits = 0;
-      dpt->dev = arcn->sb.st_dev;
-      dpt->fow = pt->list;
-      pt->list = dpt;
-    }
-  }
+		if (!trc_dev && (trunc_bits != 0)) {
+			if ((dpt = malloc(sizeof(DLIST))) == NULL)
+				goto bad;
+			dpt->trunc_bits = 0;
+			dpt->dev = arcn->sb.st_dev;
+			dpt->fow = pt->list;
+			pt->list = dpt;
+		}
+	}
 
-  /*
+	/*
 	 * look for a device number not being used. We must watch for wrap
 	 * around on lastdev (so we do not get stuck looking forever!)
 	 */
-  while (++lastdev > 0)
-  {
-    if (chk_dev(lastdev, 0) != NULL)
-      continue;
-    /*
+	while (++lastdev > 0) {
+		if (chk_dev(lastdev, 0) != NULL)
+			continue;
+		/*
 		 * found an unused value. If we have reached truncation point
 		 * for this format we are hosed, so we give up. Otherwise we
 		 * mark it as being used.
 		 */
-    if (((lastdev & ((dev_t)dev_mask)) != lastdev) ||
-        (chk_dev(lastdev, 1) == NULL))
-      goto bad;
-    break;
-  }
+		if (((lastdev & ((dev_t)dev_mask)) != lastdev) ||
+		    (chk_dev(lastdev, 1) == NULL))
+			goto bad;
+		break;
+	}
 
-  if ((lastdev <= 0) || ((dpt = malloc(sizeof(DLIST))) == NULL))
-    goto bad;
+	if ((lastdev <= 0) || ((dpt = malloc(sizeof(DLIST))) == NULL))
+		goto bad;
 
-  /*
+	/*
 	 * got a new device number, store it under this truncation pattern.
 	 * change the device number this file is being stored with.
 	 */
-  dpt->trunc_bits = trunc_bits;
-  dpt->dev = lastdev;
-  dpt->fow = pt->list;
-  pt->list = dpt;
-  arcn->sb.st_dev = lastdev;
-  arcn->sb.st_ino = nino;
-  return (0);
+	dpt->trunc_bits = trunc_bits;
+	dpt->dev = lastdev;
+	dpt->fow = pt->list;
+	pt->list = dpt;
+	arcn->sb.st_dev = lastdev;
+	arcn->sb.st_ino = nino;
+	return (0);
 
 bad:
-  paxwarn(1,
-          "Unable to fix truncated inode/device field when storing %s",
-          arcn->name);
-  paxwarn(0, "Archive may create improper hard links when extracted");
-  return (0);
+	paxwarn(1, "Unable to fix truncated inode/device field when storing %s",
+	    arcn->name);
+	paxwarn(0, "Archive may create improper hard links when extracted");
+	return (0);
 }
 #endif /* NOCPIO */
 
@@ -1423,16 +1368,17 @@ bad:
  *	0 is created ok, -1 otherwise.
  */
 
-int atdir_start(void)
+int
+atdir_start(void)
 {
-  if (atab != NULL)
-    return (0);
-  if ((atab = calloc(A_TAB_SZ, sizeof(ATDIR *))) == NULL)
-  {
-    paxwarn(1, "Cannot allocate space for directory access time table");
-    return (-1);
-  }
-  return (0);
+	if (atab != NULL)
+		return (0);
+	if ((atab = calloc(A_TAB_SZ, sizeof(ATDIR *))) == NULL) {
+		paxwarn(
+		    1, "Cannot allocate space for directory access time table");
+		return (-1);
+	}
+	return (0);
 }
 
 /*
@@ -1442,29 +1388,29 @@ int atdir_start(void)
  *	entries are for directories READ by pax
  */
 
-void atdir_end(void)
+void
+atdir_end(void)
 {
-  ATDIR *pt;
-  int i;
+	ATDIR *pt;
+	int i;
 
-  if (atab == NULL)
-    return;
-  /*
+	if (atab == NULL)
+		return;
+	/*
 	 * for each non-empty hash table entry reset all the directories
 	 * chained there.
 	 */
-  for (i = 0; i < A_TAB_SZ; ++i)
-  {
-    if ((pt = atab[i]) == NULL)
-      continue;
-    /*
+	for (i = 0; i < A_TAB_SZ; ++i) {
+		if ((pt = atab[i]) == NULL)
+			continue;
+		/*
 		 * remember to force the times, set_ftime() looks at pmtime
 		 * and patime, which only applies to things CREATED by pax,
 		 * not read by pax. Read time reset is controlled by -t.
 		 */
-    for (; pt != NULL; pt = pt->fow)
-      set_attr(&pt->ft, 1, 0, 0, 0);
-  }
+		for (; pt != NULL; pt = pt->fow)
+			set_attr(&pt->ft, 1, 0, 0, 0);
+	}
 }
 
 /*
@@ -1473,64 +1419,60 @@ void atdir_end(void)
  *	and chained by inode number. This is for directories READ by pax
  */
 
-void add_atdir(char *fname, dev_t dev, ino_t ino,
-               const struct timespec *mtimp,
-               const struct timespec *atimp)
+void
+add_atdir(char *fname, dev_t dev, ino_t ino, const struct timespec *mtimp,
+    const struct timespec *atimp)
 {
-  ATDIR *pt;
-  sigset_t allsigs, savedsigs;
-  u_int indx;
+	ATDIR *pt;
+	sigset_t allsigs, savedsigs;
+	u_int indx;
 
-  if (atab == NULL)
-    return;
+	if (atab == NULL)
+		return;
 
-  /*
+	/*
 	 * make sure this directory is not already in the table, if so just
 	 * return (the older entry always has the correct time). The only
 	 * way this will happen is when the same subtree can be traversed by
 	 * different args to pax and the -n option is aborting fts out of a
 	 * subtree before all the post-order visits have been made.
 	 */
-  indx = ((unsigned)ino) % A_TAB_SZ;
-  if ((pt = atab[indx]) != NULL)
-  {
-    while (pt != NULL)
-    {
-      if ((pt->ft.ft_ino == ino) && (pt->ft.ft_dev == dev))
-        break;
-      pt = pt->fow;
-    }
+	indx = ((unsigned)ino) % A_TAB_SZ;
+	if ((pt = atab[indx]) != NULL) {
+		while (pt != NULL) {
+			if ((pt->ft.ft_ino == ino) && (pt->ft.ft_dev == dev))
+				break;
+			pt = pt->fow;
+		}
 
-    /*
+		/*
 		 * oops, already there. Leave it alone.
 		 */
-    if (pt != NULL)
-      return;
-  }
+		if (pt != NULL)
+			return;
+	}
 
-  /*
+	/*
 	 * add it to the front of the hash chain
 	 */
-  sigfillset(&allsigs);
-  sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
-  if ((pt = malloc(sizeof *pt)) != NULL)
-  {
-    if ((pt->ft.ft_name = strdup(fname)) != NULL)
-    {
-      pt->ft.ft_dev = dev;
-      pt->ft.ft_ino = ino;
-      pt->ft.ft_mtim = *mtimp;
-      pt->ft.ft_atim = *atimp;
-      pt->fow = atab[indx];
-      atab[indx] = pt;
-      sigprocmask(SIG_SETMASK, &savedsigs, NULL);
-      return;
-    }
-    free(pt);
-  }
+	sigfillset(&allsigs);
+	sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
+	if ((pt = malloc(sizeof *pt)) != NULL) {
+		if ((pt->ft.ft_name = strdup(fname)) != NULL) {
+			pt->ft.ft_dev = dev;
+			pt->ft.ft_ino = ino;
+			pt->ft.ft_mtim = *mtimp;
+			pt->ft.ft_atim = *atimp;
+			pt->fow = atab[indx];
+			atab[indx] = pt;
+			sigprocmask(SIG_SETMASK, &savedsigs, NULL);
+			return;
+		}
+		free(pt);
+	}
 
-  sigprocmask(SIG_SETMASK, &savedsigs, NULL);
-  paxwarn(1, "Directory access time reset table ran out of memory");
+	sigprocmask(SIG_SETMASK, &savedsigs, NULL);
+	paxwarn(1, "Directory access time reset table ran out of memory");
 }
 
 /*
@@ -1544,52 +1486,52 @@ void add_atdir(char *fname, dev_t dev, ino_t ino,
  *	0 if found, -1 if not found.
  */
 
-int do_atdir(const char *name, dev_t dev, ino_t ino)
+int
+do_atdir(const char *name, dev_t dev, ino_t ino)
 {
-  ATDIR *pt;
-  ATDIR **ppt;
-  sigset_t allsigs, savedsigs;
-  u_int indx;
+	ATDIR *pt;
+	ATDIR **ppt;
+	sigset_t allsigs, savedsigs;
+	u_int indx;
 
-  if (atab == NULL)
-    return (-1);
-  /*
+	if (atab == NULL)
+		return (-1);
+	/*
 	 * hash by inode and search the chain for an inode and device match
 	 */
-  indx = ((unsigned)ino) % A_TAB_SZ;
-  if ((pt = atab[indx]) == NULL)
-    return (-1);
+	indx = ((unsigned)ino) % A_TAB_SZ;
+	if ((pt = atab[indx]) == NULL)
+		return (-1);
 
-  ppt = &(atab[indx]);
-  while (pt != NULL)
-  {
-    if ((pt->ft.ft_ino == ino) && (pt->ft.ft_dev == dev))
-      break;
-    /*
+	ppt = &(atab[indx]);
+	while (pt != NULL) {
+		if ((pt->ft.ft_ino == ino) && (pt->ft.ft_dev == dev))
+			break;
+		/*
 		 * no match, go to next one
 		 */
-    ppt = &(pt->fow);
-    pt = pt->fow;
-  }
+		ppt = &(pt->fow);
+		pt = pt->fow;
+	}
 
-  /*
+	/*
 	 * return if we did not find it.
 	 */
-  if (pt == NULL || pt->ft.ft_name == NULL ||
-      strcmp(name, pt->ft.ft_name) == 0)
-    return (-1);
+	if (pt == NULL || pt->ft.ft_name == NULL ||
+	    strcmp(name, pt->ft.ft_name) == 0)
+		return (-1);
 
-  /*
+	/*
 	 * found it. set the times and remove the entry from the table.
 	 */
-  set_attr(&pt->ft, 1, 0, 0, 0);
-  sigfillset(&allsigs);
-  sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
-  *ppt = pt->fow;
-  sigprocmask(SIG_SETMASK, &savedsigs, NULL);
-  free(pt->ft.ft_name);
-  free(pt);
-  return (0);
+	set_attr(&pt->ft, 1, 0, 0, 0);
+	sigfillset(&allsigs);
+	sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
+	*ppt = pt->fow;
+	sigprocmask(SIG_SETMASK, &savedsigs, NULL);
+	free(pt->ft.ft_name);
+	free(pt);
+	return (0);
 }
 
 /*
@@ -1619,18 +1561,18 @@ int do_atdir(const char *name, dev_t dev, ino_t ino)
  *	0 if ok, -1 otherwise
  */
 
-int dir_start(void)
+int
+dir_start(void)
 {
-  if (dirp != NULL)
-    return (0);
+	if (dirp != NULL)
+		return (0);
 
-  dirsize = DIRP_SIZE;
-  if ((dirp = reallocarray(NULL, dirsize, sizeof(DIRDATA))) == NULL)
-  {
-    paxwarn(1, "Unable to allocate memory for directory times");
-    return (-1);
-  }
-  return (0);
+	dirsize = DIRP_SIZE;
+	if ((dirp = reallocarray(NULL, dirsize, sizeof(DIRDATA))) == NULL) {
+		paxwarn(1, "Unable to allocate memory for directory times");
+		return (-1);
+	}
+	return (0);
 }
 
 /*
@@ -1646,58 +1588,54 @@ int dir_start(void)
  *	pax spec)
  */
 
-void add_dir(char *name, struct stat *psb, int frc_mode)
+void
+add_dir(char *name, struct stat *psb, int frc_mode)
 {
-  DIRDATA *dblk;
-  sigset_t allsigs, savedsigs;
-  char realname[PATH_MAX], *rp;
+	DIRDATA *dblk;
+	sigset_t allsigs, savedsigs;
+	char realname[PATH_MAX], *rp;
 
-  if (dirp == NULL)
-    return;
+	if (dirp == NULL)
+		return;
 
-  if (havechd && *name != '/')
-  {
-    if ((rp = realpath(name, realname)) == NULL)
-    {
-      paxwarn(1, "Cannot canonicalize %s", name);
-      return;
-    }
-    name = rp;
-  }
-  if (dircnt == dirsize)
-  {
-    dblk = reallocarray(dirp, dirsize * 2, sizeof(DIRDATA));
-    if (dblk == NULL)
-    {
-      paxwarn(1,
-              "Unable to store mode and times for created"
-              " directory: %s",
-              name);
-      return;
-    }
-    sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
-    dirp = dblk;
-    dirsize *= 2;
-    sigprocmask(SIG_SETMASK, &savedsigs, NULL);
-  }
-  dblk = &dirp[dircnt];
-  if ((dblk->ft.ft_name = strdup(name)) == NULL)
-  {
-    paxwarn(1,
-            "Unable to store mode and times for created"
-            " directory: %s",
-            name);
-    return;
-  }
-  dblk->ft.ft_mtim = psb->st_mtim;
-  dblk->ft.ft_atim = psb->st_atim;
-  dblk->ft.ft_ino = psb->st_ino;
-  dblk->ft.ft_dev = psb->st_dev;
-  dblk->mode = psb->st_mode & ABITS;
-  dblk->frc_mode = frc_mode;
-  sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
-  ++dircnt;
-  sigprocmask(SIG_SETMASK, &savedsigs, NULL);
+	if (havechd && *name != '/') {
+		if ((rp = realpath(name, realname)) == NULL) {
+			paxwarn(1, "Cannot canonicalize %s", name);
+			return;
+		}
+		name = rp;
+	}
+	if (dircnt == dirsize) {
+		dblk = reallocarray(dirp, dirsize * 2, sizeof(DIRDATA));
+		if (dblk == NULL) {
+			paxwarn(1,
+			    "Unable to store mode and times for created"
+			    " directory: %s",
+			    name);
+			return;
+		}
+		sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
+		dirp = dblk;
+		dirsize *= 2;
+		sigprocmask(SIG_SETMASK, &savedsigs, NULL);
+	}
+	dblk = &dirp[dircnt];
+	if ((dblk->ft.ft_name = strdup(name)) == NULL) {
+		paxwarn(1,
+		    "Unable to store mode and times for created"
+		    " directory: %s",
+		    name);
+		return;
+	}
+	dblk->ft.ft_mtim = psb->st_mtim;
+	dblk->ft.ft_atim = psb->st_atim;
+	dblk->ft.ft_ino = psb->st_ino;
+	dblk->ft.ft_dev = psb->st_dev;
+	dblk->mode = psb->st_mode & ABITS;
+	dblk->frc_mode = frc_mode;
+	sigprocmask(SIG_BLOCK, &allsigs, &savedsigs);
+	++dircnt;
+	sigprocmask(SIG_SETMASK, &savedsigs, NULL);
 }
 
 /*
@@ -1706,28 +1644,27 @@ void add_dir(char *name, struct stat *psb, int frc_mode)
  *	later warn about being unable to set its mode and times.
  */
 
-void delete_dir(dev_t dev, ino_t ino)
+void
+delete_dir(dev_t dev, ino_t ino)
 {
-  DIRDATA *dblk;
-  char *name;
-  size_t i;
+	DIRDATA *dblk;
+	char *name;
+	size_t i;
 
-  if (dirp == NULL)
-    return;
-  for (i = 0; i < dircnt; i++)
-  {
-    dblk = &dirp[i];
+	if (dirp == NULL)
+		return;
+	for (i = 0; i < dircnt; i++) {
+		dblk = &dirp[i];
 
-    if (dblk->ft.ft_name == NULL)
-      continue;
-    if (dblk->ft.ft_dev == dev && dblk->ft.ft_ino == ino)
-    {
-      name = dblk->ft.ft_name;
-      dblk->ft.ft_name = NULL;
-      free(name);
-      break;
-    }
-  }
+		if (dblk->ft.ft_name == NULL)
+			continue;
+		if (dblk->ft.ft_dev == dev && dblk->ft.ft_ino == ino) {
+			name = dblk->ft.ft_name;
+			dblk->ft.ft_name = NULL;
+			free(name);
+			break;
+		}
+	}
 }
 
 /*
@@ -1737,40 +1674,41 @@ void delete_dir(dev_t dev, ino_t ino)
  *	free stuff.
  */
 
-void proc_dir(int in_sig)
+void
+proc_dir(int in_sig)
 {
-  DIRDATA *dblk;
-  size_t cnt;
+	DIRDATA *dblk;
+	size_t cnt;
 
-  if (dirp == NULL)
-    return;
-  /*
+	if (dirp == NULL)
+		return;
+	/*
 	 * read backwards through the file and process each directory
 	 */
-  cnt = dircnt;
-  while (cnt-- > 0)
-  {
-    dblk = &dirp[cnt];
-    /*
+	cnt = dircnt;
+	while (cnt-- > 0) {
+		dblk = &dirp[cnt];
+		/*
 		 * If we remove a directory we created, we replace the
 		 * ft_name with NULL.  Ignore those.
 		 */
-    if (dblk->ft.ft_name == NULL)
-      continue;
+		if (dblk->ft.ft_name == NULL)
+			continue;
 
-    /*
+		/*
 		 * frc_mode set, make sure we set the file modes even if
 		 * the user didn't ask for it (see file_subs.c for more info)
 		 */
-    set_attr(&dblk->ft, 0, dblk->mode, pmode || dblk->frc_mode, in_sig);
-    if (!in_sig)
-      free(dblk->ft.ft_name);
-  }
+		set_attr(
+		    &dblk->ft, 0, dblk->mode, pmode || dblk->frc_mode, in_sig);
+		if (!in_sig)
+			free(dblk->ft.ft_name);
+	}
 
-  if (!in_sig)
-    free(dirp);
-  dirp = NULL;
-  dircnt = 0;
+	if (!in_sig)
+		free(dirp);
+	dirp = NULL;
+	dircnt = 0;
 }
 
 /*
@@ -1791,66 +1729,63 @@ void proc_dir(int in_sig)
  *	the hash value of the string MOD (%) the table size.
  */
 
-static u_int st_hash(const char *name, int len, int tabsz)
+static u_int
+st_hash(const char *name, int len, int tabsz)
 {
-  const char *pt;
-  char *dest;
-  const char *end;
-  int i;
-  u_int key = 0;
-  int steps;
-  int res;
-  u_int val;
+	const char *pt;
+	char *dest;
+	const char *end;
+	int i;
+	u_int key = 0;
+	int steps;
+	int res;
+	u_int val;
 
-  /*
+	/*
 	 * only look at the tail up to MAXKEYLEN, we do not need to waste
 	 * time here (remember these are pathnames, the tail is what will
 	 * spread out the keys)
 	 */
-  if (len > MAXKEYLEN)
-  {
-    pt = &(name[len - MAXKEYLEN]);
-    len = MAXKEYLEN;
-  }
-  else
-    pt = name;
+	if (len > MAXKEYLEN) {
+		pt = &(name[len - MAXKEYLEN]);
+		len = MAXKEYLEN;
+	} else
+		pt = name;
 
-  /*
+	/*
 	 * calculate the number of u_int size steps in the string and if
 	 * there is a runt to deal with
 	 */
-  steps = len / sizeof(u_int);
-  res = len % sizeof(u_int);
+	steps = len / sizeof(u_int);
+	res = len % sizeof(u_int);
 
-  /*
+	/*
 	 * add up the value of the string in unsigned integer sized pieces
 	 * too bad we cannot have unsigned int aligned strings, then we
 	 * could avoid the expensive copy.
 	 */
-  for (i = 0; i < steps; ++i)
-  {
-    end = pt + sizeof(u_int);
-    dest = (char *)&val;
-    while (pt < end)
-      *dest++ = *pt++;
-    key += val;
-  }
+	for (i = 0; i < steps; ++i) {
+		end = pt + sizeof(u_int);
+		dest = (char *)&val;
+		while (pt < end)
+			*dest++ = *pt++;
+		key += val;
+	}
 
-  /*
+	/*
 	 * add in the runt padded with zero to the right
 	 */
-  if (res)
-  {
-    val = 0;
-    end = pt + res;
-    dest = (char *)&val;
-    while (pt < end)
-      *dest++ = *pt++;
-    key += val;
-  }
+	if (res) {
+		val = 0;
+		end = pt + res;
+		dest = (char *)&val;
+		while (pt < end)
+			*dest++ = *pt++;
+		key += val;
+	}
 
-  /*
+	/*
 	 * return the result mod the table size
 	 */
-  return (key % tabsz);
+	return (key % tabsz);
 }

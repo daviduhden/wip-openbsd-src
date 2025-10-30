@@ -18,47 +18,49 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#include "config.h"
+#include <sys/time.h>
 
-#include "../../libs/fvwmlib.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+
+#include "../../libs/fvwmlib.h"
+#include "config.h"
 
 extern char *Module;
 
-char *saferealloc(char *ptr, size_t length)
+char *
+saferealloc(char *ptr, size_t length)
 {
-  char *newptr;
-  const char *name;
+	char *newptr;
+	const char *name;
 
-  if (length == 0)
-  {
-    length = 1;
-  }
+	if (length == 0) {
+		length = 1;
+	}
 
-  newptr = realloc(ptr, length);
-  if (newptr == NULL)
-  {
-    name = (Module && *Module) ? Module : "FvwmWinList";
-    fprintf(stderr, "%s: realloc failed for %zu bytes\n", name, length);
-    exit(1);
-  }
+	newptr = realloc(ptr, length);
+	if (newptr == NULL) {
+		name = (Module && *Module) ? Module : "FvwmWinList";
+		fprintf(
+		    stderr, "%s: realloc failed for %zu bytes\n", name, length);
+		exit(1);
+	}
 
-  return newptr;
+	return newptr;
 }
 
-void UpdateString(char **string, const char *value)
+void
+UpdateString(char **string, const char *value)
 {
-  if (value == NULL)
-    return;
+	if (value == NULL)
+		return;
 
-  size_t value_len = strlen(value);
-  if (*string == NULL)
-    *string = safemalloc(value_len + 1);
-  else
-    *string = saferealloc(*string, value_len + 1);
-  strlcpy(*string, value, value_len + 1);
+	size_t value_len = strlen(value);
+	if (*string == NULL)
+		*string = safemalloc(value_len + 1);
+	else
+		*string = saferealloc(*string, value_len + 1);
+	strlcpy(*string, value, value_len + 1);
 }

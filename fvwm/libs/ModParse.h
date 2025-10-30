@@ -32,10 +32,10 @@ int MatchArgument(const char *pstr, char *tok);
    table must be sorted in ascending order for FindToken.
 */
 
-#define FindToken(key, table, struct_entry)                            \
-  (struct_entry *)bsearch(key, (char *)(table),                        \
-                          sizeof(table) / sizeof(struct_entry),        \
-                          sizeof(struct_entry), XCmpToken)
+#define FindToken(key, table, struct_entry)                                    \
+	(struct_entry *)bsearch(key, (char *)(table),                          \
+	    sizeof(table) / sizeof(struct_entry), sizeof(struct_entry),        \
+	    XCmpToken)
 
 int XCmpToken(const void *s, const void *t);
 /* needed by (L)FindToken */

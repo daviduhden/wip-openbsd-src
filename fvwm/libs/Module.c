@@ -1,15 +1,14 @@
 /*
 ** Module.c: code for modules to communicate with fvwm
 */
-#include "config.h"
+#include "../fvwm/module.h"
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <errno.h>
-
-#include "../fvwm/module.h"
+#include "config.h"
 #include "fvwmlib.h"
 
 /************************************************************************
@@ -29,44 +28,38 @@
  *   body is a malloc'ed space which needs to be freed
  *
  **************************************************************************/
-int ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
+int
+ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 {
-  int count, total, count2, body_length;
-  char *cbody;
-  extern RETSIGTYPE DeadPipe(int);
+	int count, total, count2, body_length;
+	char *cbody;
+	extern RETSIGTYPE DeadPipe(int);
 
-  errno = 0;
-  if ((count = read(fd, header, HEADER_SIZE * sizeof(unsigned long))) >
-      0)
-  {
-    if (header[0] == START_FLAG)
-    {
-      body_length = header[2] - HEADER_SIZE;
-      *body = (unsigned long *)safemalloc(body_length *
-                                          sizeof(unsigned long));
-      cbody = (char *)(*body);
-      total = 0;
-      while (total < body_length * sizeof(unsigned long))
-      {
-        errno = 0;
-        if ((count2 =
-               read(fd, &cbody[total],
-                    body_length * sizeof(unsigned long) - total)) > 0)
-        {
-          total += count2;
-        }
-        else if (count2 < 0)
-        {
-          DeadPipe(errno);
-        }
-      }
-    }
-    else
-      count = 0;
-  }
-  if (count <= 0)
-    DeadPipe(errno);
-  return count;
+	errno = 0;
+	if ((count = read(fd, header, HEADER_SIZE * sizeof(unsigned long))) >
+	    0) {
+		if (header[0] == START_FLAG) {
+			body_length = header[2] - HEADER_SIZE;
+			*body = (unsigned long *)safemalloc(
+			    body_length * sizeof(unsigned long));
+			cbody = (char *)(*body);
+			total = 0;
+			while (total < body_length * sizeof(unsigned long)) {
+				errno = 0;
+				if ((count2 = read(fd, &cbody[total],
+				         body_length * sizeof(unsigned long) -
+				             total)) > 0) {
+					total += count2;
+				} else if (count2 < 0) {
+					DeadPipe(errno);
+				}
+			}
+		} else
+			count = 0;
+	}
+	if (count <= 0)
+		DeadPipe(errno);
+	return count;
 }
 
 /************************************************************************
@@ -74,23 +67,23 @@ int ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
  * SendText - Sends arbitrary text/command back to fvwm
  *
  ***********************************************************************/
-void SendText(int *fd, char *message, unsigned long window)
+void
+SendText(int *fd, char *message, unsigned long window)
 {
-  int w;
+	int w;
 
-  if (message != NULL)
-  {
-    write(fd[0], &window, sizeof(unsigned long));
+	if (message != NULL) {
+		write(fd[0], &window, sizeof(unsigned long));
 
-    w = strlen(message);
-    write(fd[0], &w, sizeof(int));
-    if (w)
-      write(fd[0], message, w);
+		w = strlen(message);
+		write(fd[0], &w, sizeof(int));
+		if (w)
+			write(fd[0], message, w);
 
-    /* keep going */
-    w = 1;
-    write(fd[0], &w, sizeof(int));
-  }
+		/* keep going */
+		w = 1;
+		write(fd[0], &w, sizeof(int));
+	}
 }
 
 /***************************************************************************
@@ -98,13 +91,13 @@ void SendText(int *fd, char *message, unsigned long window)
  * Sets the which-message-types-do-I-want mask for modules
  *
  **************************************************************************/
-void SetMessageMask(int *fd, unsigned long mask)
+void
+SetMessageMask(int *fd, unsigned long mask)
 {
-  char set_mask_mesg[50];
+	char set_mask_mesg[50];
 
-  snprintf(set_mask_mesg, sizeof(set_mask_mesg), "SET_MASK %lu\n",
-           mask);
-  SendText(fd, set_mask_mesg, 0);
+	snprintf(set_mask_mesg, sizeof(set_mask_mesg), "SET_MASK %lu\n", mask);
+	SendText(fd, set_mask_mesg, 0);
 }
 
 /***************************************************************************
@@ -117,51 +110,48 @@ void SetMessageMask(int *fd, unsigned long mask)
  * input area.  This could have led to the creation of a core file. Added
  * "body_size" to keep it in bounds.
  **************************************************************************/
-void GetConfigLine(int *fd, char **tline)
+void
+GetConfigLine(int *fd, char **tline)
 {
-  static int first_pass = 1;
-  int count, done = 0;
-  int body_size;
-  static char *line = NULL;
-  unsigned long header[HEADER_SIZE];
+	static int first_pass = 1;
+	int count, done = 0;
+	int body_size;
+	static char *line = NULL;
+	unsigned long header[HEADER_SIZE];
 
-  if (line != NULL)
-    free(line);
+	if (line != NULL)
+		free(line);
 
-  if (first_pass)
-  {
-    SendInfo(fd, "Send_ConfigInfo", 0);
-    first_pass = 0;
-  }
+	if (first_pass) {
+		SendInfo(fd, "Send_ConfigInfo", 0);
+		first_pass = 0;
+	}
 
-  while (!done)
-  {
-    count = ReadFvwmPacket(fd[1], header, (unsigned long **)&line);
-    /* DB(("Packet count is %d", count)); */
-    if (count <= 0)
-      *tline = NULL;
-    else
-    {
-      *tline = &line[3 * sizeof(long)];
-      body_size = header[2] - HEADER_SIZE;
-      /* DB(("Config line (%d): `%s'", body_size, body_size ? *tline : "")); */
-      while ((body_size > 0) && isspace(**tline))
-      {
-        (*tline)++;
-        --body_size;
-      }
-    }
+	while (!done) {
+		count = ReadFvwmPacket(fd[1], header, (unsigned long **)&line);
+		/* DB(("Packet count is %d", count)); */
+		if (count <= 0)
+			*tline = NULL;
+		else {
+			*tline = &line[3 * sizeof(long)];
+			body_size = header[2] - HEADER_SIZE;
+			/* DB(("Config line (%d): `%s'", body_size, body_size ?
+			 * *tline : "")); */
+			while ((body_size > 0) && isspace(**tline)) {
+				(*tline)++;
+				--body_size;
+			}
+		}
 
-    /*   fprintf(stderr,"%x %x\n",header[1],M_END_CONFIG_INFO);*/
-    if (header[1] == M_CONFIG_INFO)
-      done = 1;
-    else if (header[1] == M_END_CONFIG_INFO)
-    {
-      done = 1;
-      if (line != NULL)
-        free(line);
-      line = NULL;
-      *tline = NULL;
-    }
-  }
+		/*   fprintf(stderr,"%x %x\n",header[1],M_END_CONFIG_INFO);*/
+		if (header[1] == M_CONFIG_INFO)
+			done = 1;
+		else if (header[1] == M_END_CONFIG_INFO) {
+			done = 1;
+			if (line != NULL)
+				free(line);
+			line = NULL;
+			*tline = NULL;
+		}
+	}
 }

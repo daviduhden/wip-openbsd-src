@@ -1,9 +1,9 @@
 /***************************************************************************
- * Please translate the strings into the language which you use for 
+ * Please translate the strings into the language which you use for
  * your pop-up menus.
  *
- * Some decisions about where a function is prohibited (based on 
- * mwm-function-hints) is based on a string comparison between the 
+ * Some decisions about where a function is prohibited (based on
+ * mwm-function-hints) is based on a string comparison between the
  * menu item and the strings below.
  ***************************************************************************/
 #define MOVE_STRING "move"

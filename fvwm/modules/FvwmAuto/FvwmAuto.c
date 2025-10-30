@@ -27,22 +27,24 @@
 #include <sys/bsdtypes.h> /* Saul */
 #endif
 
+#include <sys/time.h>
+#include <sys/wait.h>
+
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <sys/wait.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 
-#include "../../fvwm/module.h"
-#include "../../libs/fvwmlib.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#include "../../fvwm/module.h"
+#include "../../libs/fvwmlib.h"
 
 /***********************************************************************
  *
@@ -50,7 +52,11 @@
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-void DeadPipe(int nonsense) { exit(0); }
+void
+DeadPipe(int nonsense)
+{
+	exit(0);
+}
 
 /***********************************************************************
  *
@@ -58,117 +64,119 @@ void DeadPipe(int nonsense) { exit(0); }
  *	main - start of module
  *
  ***********************************************************************/
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-  char *enter_fn = "Raise", /* default */
-    *leave_fn = NULL, mask_mesg[80];
-  unsigned long header[HEADER_SIZE], *body,
-    last_win = 0,  /* last window handled */
-    focus_win = 0; /* current focus */
-  int fd_width, fd[2], timeout, sec = 0, usec = 0;
-  struct timeval value, *delay;
-  fd_set in_fdset;
+	char *enter_fn = "Raise", /* default */
+	    *leave_fn = NULL, mask_mesg[80];
+	unsigned long header[HEADER_SIZE], *body,
+	    last_win = 0,  /* last window handled */
+	    focus_win = 0; /* current focus */
+	int fd_width, fd[2], timeout, sec = 0, usec = 0;
+	struct timeval value, *delay;
+	fd_set in_fdset;
 
-  if (argc < 7 || argc > 9)
-  {
-    fprintf(stderr, "FvwmAuto can use one to three arguments.\n");
-    exit(1);
-  }
+	if (argc < 7 || argc > 9) {
+		fprintf(stderr, "FvwmAuto can use one to three arguments.\n");
+		exit(1);
+	}
 
-  /* Dead pipes mean fvwm died */
-  signal(SIGPIPE, DeadPipe);
+	/* Dead pipes mean fvwm died */
+	signal(SIGPIPE, DeadPipe);
 
-  fd[0] = atoi(argv[1]);
-  fd[1] = atoi(argv[2]);
+	fd[0] = atoi(argv[1]);
+	fd[1] = atoi(argv[2]);
 
-  if ((timeout = atoi(argv[6])))
-  {
-    sec = timeout / 1000;
-    usec = (timeout % 1000) * 1000;
-    delay = &value;
-  }
-  else
-    delay = NULL;
+	if ((timeout = atoi(argv[6]))) {
+		sec = timeout / 1000;
+		usec = (timeout % 1000) * 1000;
+		delay = &value;
+	} else
+		delay = NULL;
 
-  if (argv[7]) /* if specified */
-  {
-    if (*argv[7] && !StrEquals(argv[7], "NOP")) /* not empty */
-      enter_fn = argv[7];                       /* override default */
-    else
-      enter_fn = NULL; /* nop */
+	if (argv[7]) /* if specified */
+	{
+		if (*argv[7] && !StrEquals(argv[7], "NOP")) /* not empty */
+			enter_fn = argv[7]; /* override default */
+		else
+			enter_fn = NULL; /* nop */
 
-    if (argv[8] && *argv[8] && !StrEquals(argv[8], "NOP"))
-      /* leave function specified */
-      leave_fn = argv[8];
-  }
+		if (argv[8] && *argv[8] && !StrEquals(argv[8], "NOP"))
+			/* leave function specified */
+			leave_fn = argv[8];
+	}
 
 #ifdef DEBUG
-  fprintf(stderr,
-          "[FvwmAuto]: timeout: %d EnterFn: >%s< LeaveFn: >%s<\n",
-          timeout, enter_fn, leave_fn);
+	fprintf(stderr, "[FvwmAuto]: timeout: %d EnterFn: >%s< LeaveFn: >%s<\n",
+	    timeout, enter_fn, leave_fn);
 #endif
 
-  fd_width = GetFdWidth();
-  snprintf(mask_mesg, sizeof(mask_mesg), "SET_MASK %lu\n",
-           (unsigned long)(M_FOCUS_CHANGE));
-  SendInfo(fd, mask_mesg, 0);
+	fd_width = GetFdWidth();
+	snprintf(mask_mesg, sizeof(mask_mesg), "SET_MASK %lu\n",
+	    (unsigned long)(M_FOCUS_CHANGE));
+	SendInfo(fd, mask_mesg, 0);
 
-  while (1)
-  {
-    FD_ZERO(&in_fdset);
-    FD_SET(fd[1], &in_fdset);
+	while (1) {
+		FD_ZERO(&in_fdset);
+		FD_SET(fd[1], &in_fdset);
 
-    if (delay) /* fill in struct - modified by select() */
-    {
-      delay->tv_sec = sec;
-      delay->tv_usec = usec;
-    }
-    select(fd_width, SELECT_TYPE_ARG234 & in_fdset, 0, 0,
-           (focus_win == last_win) ? NULL : delay);
+		if (delay) /* fill in struct - modified by select() */
+		{
+			delay->tv_sec = sec;
+			delay->tv_usec = usec;
+		}
+		select(fd_width, SELECT_TYPE_ARG234 & in_fdset, 0, 0,
+		    (focus_win == last_win) ? NULL : delay);
 #ifdef DEBUG
-    fprintf(stderr,
-            "[FvwmAuto]: after select:  focus_win: 0x%08lx, last_win: "
-            "0x%08lx\n",
-            focus_win, last_win);
-    fprintf(stderr,
-            "[FvwmAuto]: after select:  delay: 0x%08lx, delay struct: "
-            "%d.%06d sec\n",
-            delay, delay->tv_sec, delay->tv_usec);
+		fprintf(stderr,
+		    "[FvwmAuto]: after select:  focus_win: 0x%08lx, last_win: "
+		    "0x%08lx\n",
+		    focus_win, last_win);
+		fprintf(stderr,
+		    "[FvwmAuto]: after select:  delay: 0x%08lx, delay struct: "
+		    "%d.%06d sec\n",
+		    delay, delay->tv_sec, delay->tv_usec);
 #endif
 
-    if (FD_ISSET(fd[1], &in_fdset) &&
-        ReadFvwmPacket(fd[1], header, &body) > 0)
-    {
-      focus_win = body[0];
-      free(body);
+		if (FD_ISSET(fd[1], &in_fdset) &&
+		    ReadFvwmPacket(fd[1], header, &body) > 0) {
+			focus_win = body[0];
+			free(body);
 #ifdef DEBUG
-      fprintf(stderr, "[FvwmAuto]: M_FOCUS_CHANGE to 0x%08lx\n",
-              focus_win);
+			fprintf(stderr,
+			    "[FvwmAuto]: M_FOCUS_CHANGE to 0x%08lx\n",
+			    focus_win);
 #endif
-    }
-    if (((FD_ISSET(fd[1], &in_fdset) == 0) == (delay != NULL)) &&
-        /* new message and timeout==0  or */
-        /* no message and timeout>0 */
-        focus_win != last_win) /* there's sth. to do */
-    {
-      if (last_win && leave_fn) /* if last_win isn't the root */
-      {
-        SendInfo(fd, leave_fn, last_win);
+		}
+		if (((FD_ISSET(fd[1], &in_fdset) == 0) == (delay != NULL)) &&
+		    /* new message and timeout==0  or */
+		    /* no message and timeout>0 */
+		    focus_win != last_win) /* there's sth. to do */
+		{
+			if (last_win &&
+			    leave_fn) /* if last_win isn't the root */
+			{
+				SendInfo(fd, leave_fn, last_win);
 #ifdef DEBUG
-        fprintf(stderr, "[FvwmAuto]: executing %s on window 0x%08lx\n",
-                leave_fn, focus_win);
+				fprintf(stderr,
+				    "[FvwmAuto]: executing %s on window "
+				    "0x%08lx\n",
+				    leave_fn, focus_win);
 #endif
-      }
-      if (focus_win && enter_fn) /* if focus_win isn't the root */
-      {
-        SendInfo(fd, enter_fn, focus_win);
+			}
+			if (focus_win &&
+			    enter_fn) /* if focus_win isn't the root */
+			{
+				SendInfo(fd, enter_fn, focus_win);
 #ifdef DEBUG
-        fprintf(stderr, "[FvwmAuto]: executing %s on window 0x%08lx\n",
-                enter_fn, focus_win);
+				fprintf(stderr,
+				    "[FvwmAuto]: executing %s on window "
+				    "0x%08lx\n",
+				    enter_fn, focus_win);
 #endif
-      }
-      last_win = focus_win; /* switch to wait mode again */
-    }
-  }
-  return 0;
+			}
+			last_win = focus_win; /* switch to wait mode again */
+		}
+	}
+	return 0;
 }

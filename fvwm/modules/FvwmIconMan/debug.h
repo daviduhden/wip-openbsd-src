@@ -13,9 +13,9 @@
 
 extern int OpenConsole(const char *filenm);
 extern void ConsoleMessage(const char *fmt, ...)
-  __attribute__((__format__(__printf__, 1, 2)));
+    __attribute__((__format__(__printf__, 1, 2)));
 extern void ConsoleDebug(int flag, const char *fmt, ...)
-  __attribute__((__format__(__printf__, 2, 3)));
+    __attribute__((__format__(__printf__, 2, 3)));
 
 extern int CORE, FUNCTIONS, X11, FVWM, CONFIG, WINLIST, MEM;
 

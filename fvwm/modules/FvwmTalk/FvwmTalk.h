@@ -4,18 +4,17 @@
 #define ACTION2 2
 #define ACTION3 4
 
-struct list
-{
-  unsigned long id;
-  unsigned long last_focus_time;
-  unsigned long actions;
-  struct list *next;
+struct list {
+	unsigned long id;
+	unsigned long last_focus_time;
+	unsigned long actions;
+	struct list *next;
 };
 
 /*************************************************************************
  *
  * Subroutine Prototypes
- * 
+ *
  *************************************************************************/
 void Loop(int *fd);
 void SendInfo(int *fd, char *message, unsigned long window);

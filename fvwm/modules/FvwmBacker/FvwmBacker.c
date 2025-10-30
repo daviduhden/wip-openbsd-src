@@ -25,14 +25,15 @@
  * A. Davison
  * Septmber 1994.
  */
-#include "config.h"
+#include <sys/time.h>
+#include <sys/wait.h>
 
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <sys/wait.h>
+
+#include "config.h"
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -45,24 +46,22 @@
 #include <sys/bsdtypes.h> /* Saul */
 #endif                    /* Saul */
 
+#include <X11/Xlib.h>
 #include <stdlib.h>
 
 #include "../../fvwm/module.h"
 #include "FvwmBacker.h"
 #include "Mallocs.h"
 
-#include <X11/Xlib.h>
-
 unsigned long GetColor(char *color);
 
-typedef struct
-{
-  int type;                 /* The command type.
-	     * -1 = no command.
-	     *  0 = command to be spawned
-	     *  1 = a solid color to be set */
-  char *cmdStr;             /* The command string (Type 0)   */
-  unsigned long solidColor; /* A solid color after X parsing (Type 1) */
+typedef struct {
+	int type;                 /* The command type.
+	                           * -1 = no command.
+	                           *  0 = command to be spawned
+	                           *  1 = a solid color to be set */
+	char *cmdStr;             /* The command string (Type 0)   */
+	unsigned long solidColor; /* A solid color after X parsing (Type 1) */
 } Command;
 
 Command *commands;
@@ -85,98 +84,97 @@ FILE *logFile;
 
 /* #define LOGFILE "/tmp/FvwmBacker.log"*/
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-  char *temp, *s;
-  char *displayName = NULL;
+	char *temp, *s;
+	char *displayName = NULL;
 
-  commands = NULL;
+	commands = NULL;
 
-  /* Save the program name for error messages and config parsing */
-  temp = argv[0];
-  s = strrchr(argv[0], '/');
-  if (s != NULL)
-    temp = s + 1;
+	/* Save the program name for error messages and config parsing */
+	temp = argv[0];
+	s = strrchr(argv[0], '/');
+	if (s != NULL)
+		temp = s + 1;
 
-  Module = temp;
+	Module = temp;
 
-  if ((argc != 6) && (argc != 7))
-  {
-    fprintf(stderr, "%s Version %s should only be executed by fvwm!\n",
-            Module, VERSION);
-    exit(1);
-  }
+	if ((argc != 6) && (argc != 7)) {
+		fprintf(stderr,
+		    "%s Version %s should only be executed by fvwm!\n", Module,
+		    VERSION);
+		exit(1);
+	}
 
-  Fvwm_fd[0] = atoi(argv[1]);
-  Fvwm_fd[1] = atoi(argv[2]);
+	Fvwm_fd[0] = atoi(argv[1]);
+	Fvwm_fd[1] = atoi(argv[2]);
 
-  /* Grab the X display information now. */
+	/* Grab the X display information now. */
 
-  dpy = XOpenDisplay(displayName);
-  if (!dpy)
-  {
-    fprintf(stderr, "%s:  unable to open display '%s'\n", Module,
-            XDisplayName(displayName));
-    exit(2);
-  }
-  screen = DefaultScreen(dpy);
-  root = RootWindow(dpy, screen);
+	dpy = XOpenDisplay(displayName);
+	if (!dpy) {
+		fprintf(stderr, "%s:  unable to open display '%s'\n", Module,
+		    XDisplayName(displayName));
+		exit(2);
+	}
+	screen = DefaultScreen(dpy);
+	root = RootWindow(dpy, screen);
 
-  /* Open a log file if necessary */
+	/* Open a log file if necessary */
 #ifdef LOGFILE
-  logFile = fopen(LOGFILE, "a");
-  fprintf(logFile, "Initialising FvwmBacker\n");
+	logFile = fopen(LOGFILE, "a");
+	fprintf(logFile, "Initialising FvwmBacker\n");
 #endif
 
-  signal(SIGPIPE, DeadPipe);
+	signal(SIGPIPE, DeadPipe);
 
-  /* Parse the config file */
-  ParseConfig();
+	/* Parse the config file */
+	ParseConfig();
 
-  fd_width = GetFdWidth();
+	fd_width = GetFdWidth();
 
-  SetMessageMask(Fvwm_fd,
-                 M_NEW_DESK | M_CONFIG_INFO | M_END_CONFIG_INFO);
+	SetMessageMask(Fvwm_fd, M_NEW_DESK | M_CONFIG_INFO | M_END_CONFIG_INFO);
 
-  /*
-  ** we really only want the current desk, and window list sends it
-  */
-  SendInfo(Fvwm_fd, "Send_WindowList", 0);
+	/*
+	** we really only want the current desk, and window list sends it
+	*/
+	SendInfo(Fvwm_fd, "Send_WindowList", 0);
 
-  /* Recieve all messages from Fvwm */
-  EndLessLoop();
+	/* Recieve all messages from Fvwm */
+	EndLessLoop();
 
-  /* Should never get here! */
-  return 1;
+	/* Should never get here! */
+	return 1;
 }
 
 /******************************************************************************
   EndLessLoop -  Read until we get killed, blocking when can't read
 ******************************************************************************/
-void EndLessLoop()
+void
+EndLessLoop()
 {
-  fd_set readset;
-  struct timeval tv;
+	fd_set readset;
+	struct timeval tv;
 
-  while (1)
-  {
-    FD_ZERO(&readset);
-    FD_SET(Fvwm_fd[1], &readset);
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
+	while (1) {
+		FD_ZERO(&readset);
+		FD_SET(Fvwm_fd[1], &readset);
+		tv.tv_sec = 0;
+		tv.tv_usec = 0;
 
-    if (!select(fd_width, SELECT_TYPE_ARG234 & readset, NULL, NULL,
-                &tv))
-    {
-      FD_ZERO(&readset);
-      FD_SET(Fvwm_fd[1], &readset);
-      select(fd_width, SELECT_TYPE_ARG234 & readset, NULL, NULL, NULL);
-    }
+		if (!select(fd_width, SELECT_TYPE_ARG234 & readset, NULL, NULL,
+		        &tv)) {
+			FD_ZERO(&readset);
+			FD_SET(Fvwm_fd[1], &readset);
+			select(fd_width, SELECT_TYPE_ARG234 & readset, NULL,
+			    NULL, NULL);
+		}
 
-    if (!FD_ISSET(Fvwm_fd[1], &readset))
-      continue;
-    ReadFvwmPipe();
-  }
+		if (!FD_ISSET(Fvwm_fd[1], &readset))
+			continue;
+		ReadFvwmPipe();
+	}
 }
 
 /******************************************************************************
@@ -184,17 +182,17 @@ void EndLessLoop()
     Originally Loop() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
-void ReadFvwmPipe()
+void
+ReadFvwmPipe()
 {
-  int count;
-  unsigned long header[HEADER_SIZE], *body;
+	int count;
+	unsigned long header[HEADER_SIZE], *body;
 
-  body = NULL;
-  if ((count = ReadFvwmPacket(Fvwm_fd[1], header, &body)) > 0)
-  {
-    ProcessMessage(header[1], body);
-    free(body);
-  }
+	body = NULL;
+	if ((count = ReadFvwmPacket(Fvwm_fd[1], header, &body)) > 0) {
+		ProcessMessage(header[1], body);
+		free(body);
+	}
 }
 
 /******************************************************************************
@@ -202,53 +200,51 @@ void ReadFvwmPipe()
     Skeleton based on processmessage() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
-void ProcessMessage(unsigned long type, unsigned long *body)
+void
+ProcessMessage(unsigned long type, unsigned long *body)
 {
-  if (type == M_NEW_DESK)
-  {
-    if (body[0] > DeskCount || commands[body[0]].type == -1)
-    {
-      return;
-    }
+	if (type == M_NEW_DESK) {
+		if (body[0] > DeskCount || commands[body[0]].type == -1) {
+			return;
+		}
 #ifdef LOGFILE
-    fprintf(logFile, "Desk: %d\n", body[0]);
-    fprintf(logFile, "Command type: %d\n", commands[body[0]].type);
-    if (commands[body[0]].type == 0)
-      fprintf(logFile, "Command String: %s\n",
-              commands[body[0]].cmdStr);
-    else if (commands[body[0]].type == 1)
-      fprintf(logFile, "Color Number: %d\n",
-              commands[body[0]].solidColor);
-    else if (commands[body[0]].type == -1)
-      fprintf(logFile, "No Command\n");
-    else
-    {
-      fprintf(logFile, "Illegal command type !\n");
-      exit(1);
-    }
-    fflush(logFile);
+		fprintf(logFile, "Desk: %d\n", body[0]);
+		fprintf(logFile, "Command type: %d\n", commands[body[0]].type);
+		if (commands[body[0]].type == 0)
+			fprintf(logFile, "Command String: %s\n",
+			    commands[body[0]].cmdStr);
+		else if (commands[body[0]].type == 1)
+			fprintf(logFile, "Color Number: %d\n",
+			    commands[body[0]].solidColor);
+		else if (commands[body[0]].type == -1)
+			fprintf(logFile, "No Command\n");
+		else {
+			fprintf(logFile, "Illegal command type !\n");
+			exit(1);
+		}
+		fflush(logFile);
 #endif
 
-    if (commands[body[0]].type == 1)
-    {
-      /* Process a solid color request */
+		if (commands[body[0]].type == 1) {
+			/* Process a solid color request */
 
-      XSetWindowBackground(dpy, root, commands[body[0]].solidColor);
-      XClearWindow(dpy, root);
-      XFlush(dpy);
-      /*	XSetWindowBackground(dpy, root, commands[body[0]].solidColor);
-	   */
+			XSetWindowBackground(
+			    dpy, root, commands[body[0]].solidColor);
+			XClearWindow(dpy, root);
+			XFlush(dpy);
+			/*	XSetWindowBackground(dpy, root,
+			 * commands[body[0]].solidColor);
+			 */
 
 #ifdef LOGFILE
-      fprintf(logFile, "Color set.\n");
-      fflush(logFile);
+			fprintf(logFile, "Color set.\n");
+			fflush(logFile);
 #endif
-    }
-    else if (commands[body[0]].cmdStr != NULL)
-    {
-      SendFvwmPipe(commands[body[0]].cmdStr, (unsigned long)0);
-    }
-  }
+		} else if (commands[body[0]].cmdStr != NULL) {
+			SendFvwmPipe(
+			    commands[body[0]].cmdStr, (unsigned long)0);
+		}
+	}
 }
 
 /******************************************************************************
@@ -256,40 +252,38 @@ void ProcessMessage(unsigned long type, unsigned long *body)
     Based on SendInfo() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
-void SendFvwmPipe(char *message, unsigned long window)
+void
+SendFvwmPipe(char *message, unsigned long window)
 {
-  int w;
-  char *hold, *temp, *temp_msg;
-  hold = message;
+	int w;
+	char *hold, *temp, *temp_msg;
+	hold = message;
 
-  while (1)
-  {
-    temp = strchr(hold, ',');
-    if (temp != NULL)
-    {
-      temp_msg = malloc(temp - hold + 1);
-      strncpy(temp_msg, hold, (temp - hold));
-      temp_msg[(temp - hold)] = '\0';
-      hold = temp + 1;
-    }
-    else
-      temp_msg = hold;
+	while (1) {
+		temp = strchr(hold, ',');
+		if (temp != NULL) {
+			temp_msg = malloc(temp - hold + 1);
+			strncpy(temp_msg, hold, (temp - hold));
+			temp_msg[(temp - hold)] = '\0';
+			hold = temp + 1;
+		} else
+			temp_msg = hold;
 
-    write(Fvwm_fd[0], &window, sizeof(unsigned long));
+		write(Fvwm_fd[0], &window, sizeof(unsigned long));
 
-    w = strlen(temp_msg);
-    write(Fvwm_fd[0], &w, sizeof(int));
-    write(Fvwm_fd[0], temp_msg, w);
+		w = strlen(temp_msg);
+		write(Fvwm_fd[0], &w, sizeof(int));
+		write(Fvwm_fd[0], temp_msg, w);
 
-    /* keep going */
-    w = 1;
-    write(Fvwm_fd[0], &w, sizeof(int));
+		/* keep going */
+		w = 1;
+		write(Fvwm_fd[0], &w, sizeof(int));
 
-    if (temp_msg != hold)
-      free(temp_msg);
-    else
-      break;
-  }
+		if (temp_msg != hold)
+			free(temp_msg);
+		else
+			break;
+	}
 }
 
 /***********************************************************************
@@ -297,96 +291,94 @@ void SendFvwmPipe(char *message, unsigned long window)
     Based on DeadPipe() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
  **********************************************************************/
-void DeadPipe(int nonsense) { exit(1); }
+void
+DeadPipe(int nonsense)
+{
+	exit(1);
+}
 
 /******************************************************************************
   ParseConfig - Parse the configuration file fvwm to us to use
     Based on part of main() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
-void ParseConfig()
+void
+ParseConfig()
 {
-  char line2[40];
-  char *tline;
+	char line2[40];
+	char *tline;
 
-  snprintf(line2, sizeof(line2), "*%sDesk", Module);
+	snprintf(line2, sizeof(line2), "*%sDesk", Module);
 
-  GetConfigLine(Fvwm_fd, &tline);
+	GetConfigLine(Fvwm_fd, &tline);
 
-  while (tline != (char *)0)
-  {
-    if (strlen(tline) > 1)
-    {
-      if (strncasecmp(tline, line2, strlen(line2)) == 0)
-        AddCommand(&tline[strlen(line2)]);
-    }
-    GetConfigLine(Fvwm_fd, &tline);
-  }
+	while (tline != (char *)0) {
+		if (strlen(tline) > 1) {
+			if (strncasecmp(tline, line2, strlen(line2)) == 0)
+				AddCommand(&tline[strlen(line2)]);
+		}
+		GetConfigLine(Fvwm_fd, &tline);
+	}
 }
 
 /******************************************************************************
 AddCommand - Add a command to the correct spot on the dynamic array.
 ******************************************************************************/
-void AddCommand(char *string)
+void
+AddCommand(char *string)
 {
-  char *temp;
-  int num;
-  temp = string;
-  while (isspace(*temp))
-    temp++;
-  num = atoi(temp);
-  while (!isspace(*temp))
-    temp++;
-  while (isspace(*temp))
-    temp++;
-  if (DeskCount < 1)
-  {
-    commands = (Command *)safemalloc((num + 1) * sizeof(Command));
-    while (DeskCount < num + 1)
-      commands[DeskCount++].type = -1;
-  }
-  else
-  {
-    if (num + 1 > DeskCount)
-    {
-      commands =
-        (Command *)realloc(commands, (num + 1) * sizeof(Command));
-      while (DeskCount < num + 1)
-        commands[DeskCount++].type = -1;
-    }
-  }
+	char *temp;
+	int num;
+	temp = string;
+	while (isspace(*temp))
+		temp++;
+	num = atoi(temp);
+	while (!isspace(*temp))
+		temp++;
+	while (isspace(*temp))
+		temp++;
+	if (DeskCount < 1) {
+		commands = (Command *)safemalloc((num + 1) * sizeof(Command));
+		while (DeskCount < num + 1)
+			commands[DeskCount++].type = -1;
+	} else {
+		if (num + 1 > DeskCount) {
+			commands = (Command *)realloc(
+			    commands, (num + 1) * sizeof(Command));
+			while (DeskCount < num + 1)
+				commands[DeskCount++].type = -1;
+		}
+	}
 
-  if (strncmp(temp, "-solid", 6) == 0)
-  {
-    char *color;
-    char *tmp;
-    /* Process a solid color request */
+	if (strncmp(temp, "-solid", 6) == 0) {
+		char *color;
+		char *tmp;
+		/* Process a solid color request */
 
-    color = &temp[7];
-    while (isspace(*color))
-      color++;
-    tmp = color;
-    while (!isspace(*tmp))
-      tmp++;
-    *tmp = 0;
-    commands[num].type = 1;
-    commands[num].solidColor =
-      (!color || !*color) ? BlackPixel(dpy, screen) : GetColor(color);
+		color = &temp[7];
+		while (isspace(*color))
+			color++;
+		tmp = color;
+		while (!isspace(*tmp))
+			tmp++;
+		*tmp = 0;
+		commands[num].type = 1;
+		commands[num].solidColor = (!color || !*color)
+		                               ? BlackPixel(dpy, screen)
+		                               : GetColor(color);
 #ifdef LOGFILE
-    fprintf(logFile, "Adding color: %s as number %d to desk %d\n",
-            color, commands[num].solidColor, num);
-    fflush(logFile);
+		fprintf(logFile, "Adding color: %s as number %d to desk %d\n",
+		    color, commands[num].solidColor, num);
+		fflush(logFile);
 #endif
-  }
-  else
-  {
+	} else {
 #ifdef LOGFILE
-    fprintf(logFile, "Adding command: %s to desk %d\n", temp, num);
-    fflush(logFile);
+		fprintf(logFile, "Adding command: %s to desk %d\n", temp, num);
+		fflush(logFile);
 #endif
-    commands[num].type = 0;
-    size_t cmd_len = strlen(temp);
-    commands[num].cmdStr = (char *)safemalloc(cmd_len + 1);
-    strlcpy(commands[num].cmdStr, temp, cmd_len + 1);
-  }
+		commands[num].type = 0;
+		size_t cmd_len = strlen(temp);
+		commands[num].cmdStr = (char *)safemalloc(cmd_len + 1);
+		strlcpy(commands[num].cmdStr, temp, cmd_len + 1);
+	}
 }

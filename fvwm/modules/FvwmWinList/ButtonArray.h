@@ -1,10 +1,10 @@
-/* FvwmWinList Module for Fvwm. 
+/* FvwmWinList Module for Fvwm.
  *
  *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
  *                               Mike_Finger@atk.com)
  *
  * The functions in this header file that are the original work of Mike Finger.
- * 
+ *
  * No guarantees or warantees or anything are provided or implied in any way
  * whatsoever. Use this program at your own risk. Permission to use this
  * program for any purpose is given, as long as the copyright is kept intact.
@@ -17,21 +17,19 @@
 #include "../../libs/fvwmlib.h"
 
 /* Struct definitions */
-typedef struct button
-{
-  char *title;
-  char *truncate_title; /* valid only if truncatewidth > 0 */
-  int up, needsupdate, tw, set, truncatewidth;
-  struct button *next;
-  FvwmPicture p;
-  long desk;
+typedef struct button {
+	char *title;
+	char *truncate_title; /* valid only if truncatewidth > 0 */
+	int up, needsupdate, tw, set, truncatewidth;
+	struct button *next;
+	FvwmPicture p;
+	long desk;
 } Button;
 
-typedef struct
-{
-  int count;
-  Button *head, *tail;
-  int x, y, w, h;
+typedef struct {
+	int count;
+	Button *head, *tail;
+	int x, y, w, h;
 } ButtonArray;
 
 #define MAX_COLOUR_SETS 4
