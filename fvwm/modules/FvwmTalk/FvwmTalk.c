@@ -403,8 +403,7 @@ void request_selection(int time)
 
   if (XGetSelectionOwner(dpy, XA_PRIMARY) == None)
   {
-    /*  No primary selection so use the cut buffer.
-       */
+    /*  No primary selection so use the cut buffer. */
     paste_primary(DefaultRootWindow(dpy), XA_CUT_BUFFER0, False);
     return;
   }
