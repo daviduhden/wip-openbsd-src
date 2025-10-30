@@ -14,68 +14,60 @@
 .if n .sp 1
 .if t .sp .5
 ..
-.TH FvwmM4 1 12/12/94 2.0
+.TH FVWMM4 1 "December 12, 1994" "2.0" "FVWM Modules"
 .UC
 .SH NAME
 FvwmM4 \- the FVWM  M4 pre-processor
 .SH SYNOPSIS
+.PP
 FvwmM4 is spawned by fvwm, so no command line invocation will work.
-
 .SH DESCRIPTION
+.PP
 When called, this module will attempt to have M4 pre-process the file
 specified in its invocation, and then have fvwm read the resulting file.
-
 .SH INVOCATION
-FvwmM4 can be invoked by inserting the line 'FvwmM4' in
-the .fvwmrc file. It can also be called from a menu or mouse binding.
+.PP
+FvwmM4 can be invoked by inserting the line "FvwmM4" in the .fvwmrc file.
+It can also be called from a menu or mouse binding.
+.PP
 If the user wants his entire .fvwmrc file pre-processed with FvwmM4,
 then fvwm should be invoked as:
-
 .EX
 fvwm2 -cmd "FvwmM4 .fvwmrc"
-.EE
-
-Note that the argument to the option "-cmd" should be enclosed
-in quotes, and no other quoting should be used. For example, a
-typical invocation might be:
-
+.SH AUTHOR
+.PP
+Note that the argument to the option "-cmd" should be enclosed in quotes,
+and no other quoting should be used. For example, a typical invocation might be:
 .EX
 fvwm2 -cmd "FvwmM4 -m4-squote { -m4-equote } .fvwmrc"
 .EE
-
+.PP
 Some options can be specified on the command line:
 .IP -m4-prefix
 I think this makes all the m4 directives require the prefix "m4_".
-
 .TP
 -m4opt \fIoption\fP
 Lets you pass an option to the m4 program.  Not really needed as any
 unknown options will be passed on automatically.
-
 .TP
 -m4-squote \fIcharacter\fP
 Lets you change the m4 start-of-quote character to \fIcharacter\fP.
-
 .TP
 -m4-equote \fIcharacter\fP
 Lets you change the m4 end-of-quote character to \fIcharacter\fP.
-
 .TP
 -m4prog \fIname\fP
 Instead of invoking "m4", fvwm will invoke \fIname\fP.
-
 .TP
 -outfile \fIfilename\fP
 Instead of creating a random unique name for the temporary file for
 the preprocessed rc file, this option will let you specify the name of
 the temporary file it will create.
-
 .IP -debug
-Causes the temporary file create by m4 to
-be retained. This file is usually called "/tmp/fvwmrcXXXXXXXXXX"
-
-
+Causes the temporary file create by m4 to be retained.
+This file is usually called "/tmp/fvwmrcXXXXXXXXXX".
 .SH CONFIGURATION OPTIONS
+.PP
 FvwmM4 defines some values for use in the pre-processor file:
 
 .IP TWM_TYPE
@@ -107,7 +99,7 @@ Some distance/pixel measurement for the horizontal direction, I think.
 .IP Y_RESOLUTION
 Some distance/pixel measurement for the vertical direction, I think.
 .IP PLANES
-Number of color planes for the X server display
+Number of color planes for the X server display.
 .IP BITS_PER_RGB
 Number of bits in each rgb triplet.
 .IP CLASS
@@ -122,9 +114,8 @@ configure.h at compile time.
 .IP FVWM_MODULEDIR
 The directory where fvwm looks for .fvwmrc and modules by default, as
 determined at compile time.
-
 .SH EXAMPLE PROLOG
-
+.PP
 .EX
 define(TWM_TYPE,``fvwm'')dnl
 define(SERVERHOST,``spx20'')dnl
@@ -149,7 +140,7 @@ define(FVWM_VERSION,``1.24l'')dnl
 define(OPTIONS,``SHAPE XPM M4 '')dnl
 define(FVWM_MODULEDIR,``/local/homes/dsp/nation/modules'')dnl
 .EE
-
 .SH AUTHOR
+.PP
 FvwmM4 is the result of a random bit mutation on a hard disk,
-presumably a result of a  cosmic-ray or some such thing.
+presumably a result of a cosmic-ray or some such thing.

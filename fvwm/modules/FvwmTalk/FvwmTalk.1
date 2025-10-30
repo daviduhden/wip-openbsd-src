@@ -1,47 +1,37 @@
 .\" $OpenBSD: FvwmTalk.1,v 1.1.1.1 2006/11/26 10:53:55 matthieu Exp $
 .\" t
-.\" @(#)FvwmTalk.1	1/12/94
-.TH FvwmTalk 1 "Jan 28 1994" 1.20
+.\" @(#)FvwmTalk.1 1/12/94
+.TH FVWMTALK 1 "January 28, 1994" "1.20" "FVWM Modules"
 .UC
 .SH NAME
 FvwmTalk \- the FVWM command line interface
 .SH SYNOPSIS
 FvwmTalk is spawned by fvwm, so no command line invocation will work.
-
 .SH DESCRIPTION
-The FvwmTalk allows the user to type fvwm commands into a window, and
-have them executed immediately. These commands are usually specfified
-in the .fvwmrc file, or are bound to menu/mouse items as specified
-in that file. This tools is particularly useful for testing new
-configuration ideas, or for implementing temporary changes to your
+FvwmTalk allows the user to type fvwm commands into a window and execute them
+immediately. These commands are usually specified in the .fvwmrc file or are
+bound to menu or mouse items defined there. The tool is particularly useful for
+testing new configuration ideas or implementing temporary changes to the
 environment.
-
 .SH COPYRIGHTS
-The FvwmTalk program, and the concept for
-interfacing this module to the Window Manager, are all original work
-by Robert Nation
-
-Copyright 1994, Robert Nation. No guarantees or warranties or anything
-are provided or implied in any way whatsoever. Use this program at your
-own risk. Permission to use this program for any purpose is given,
-as long as the copyright is kept intact. 
-
-
+The FvwmTalk program, and the concept for interfacing this module to the window
+manager, are original work by Robert Nation.
+.PP
+Copyright 1994, Robert Nation. No guarantees or warranties are provided or
+implied. Use this program at your own risk. Permission to use this program for
+any purpose is granted, provided the copyright notice remains intact.
 .SH INITIALIZATION
-So kill me, I can't remember what goes on.
-
+FvwmTalk does not require explicit initialization beyond fvwm's own module
+startup sequence.
 .SH INVOCATION
-FvwmTalk can be invoked by inserting the line 'Module FvwmTalk' in
-the .fvwmrc file. This can be placed on a line by itself, if FvwmTalk
-is to be spawned during fvwm's initialization, or can be bound to a
-menu or mouse button or keystroke to invoke it later. Fvwm will search
-directory specified in the ModulePath configuration option to attempt
-to locate FvwmTalk.
-
+FvwmTalk can be invoked by inserting the line `Module FvwmTalk` in the .fvwmrc
+file. This can be placed on its own line if FvwmTalk is to be spawned during
+fvwm initialization, or it can be bound to a menu, mouse button, or keystroke
+to launch it later. Fvwm searches the directory specified in the ModulePath
+option to locate the module.
 .SH CONFIGURATION OPTIONS
-I plead ignorance here. Read the code.
-
-
+FvwmTalk accepts the standard fvwm module command-line options. Consult the
+source code for the complete list of supported arguments.
 .SH AUTHOR
 Robert Nation
 

@@ -1,7 +1,8 @@
 ." $OpenBSD: FvwmRearrange.1,v 2.0 2025/10/18 10:00:00 random Exp $
 ." t
 ." @(#)FvwmRearrange.1  18/10/25
-.de EX		"Begin example
+.de EX
+." Begin example macro
 .ne 5
 .if n .sp 1
 .if t .sp .5
@@ -14,48 +15,51 @@
 .if n .sp 1
 .if t .sp .5
 ..
-.TH FvwmRearrange 1 "October 18, 2025" "FvwmRearrange 2.0" "FvwmRearrange 2.0"
+.TH FVWMREARRANGE 1 "October 18, 2025" "2.0" "FVWM Modules"
 .UC
 .SH NAME
 FvwmRearrange \- reorganise FVWM clients
 .SH SYNOPSIS
 FvwmRearrange is launched internally by fvwm; invoking it directly from a shell
 is not supported.
-
+.PP
 .SH DESCRIPTION
 FvwmRearrange arranges windows either in a tiled grid or in a cascading stack.
 Tiling fills the current screen with non-overlapping frames.  Rows or columns
 may be generated automatically so every client finds a slot.  When tiling is in
 effect, windows are resized to match their assigned cell unless stretching has
 been disabled, which can leave gaps between tiles.
-
+.PP
 In cascade mode the module positions successive windows so that the title of
 each client remains visible beneath the one before it.  Windows can optionally
 be constrained to a maximum width and height while still honouring the resize
 increment rules.
-
+.PP
 .SH INVOCATION
 FvwmRearrange is normally bound to menus, buttons, or key bindings.  The module
 accepts a variety of switches that tailor how windows are selected and laid
 out.  The following samples show typical usage:
+.PP
 .EX
 FvwmRearrange -tile -h 10 10 90 90
 .EE
+.PP
 .EX
 FvwmRearrange -cascade -resize 10 2 80 70
 .EE
-
+.PP
 The first command tiles across the screen horizontally, beginning 10 percent
 from the left and top edges and finishing at the point 90 percent across and
 down.  The second command cascades windows starting 10 percent across and
 2 percent down, resizing each client to 80 by 70 percent of the screen when
 possible.
-
+.PP
 For backward compatibility the module can also be invoked as FvwmTile or
 FvwmCascade, which internally pass \-tile or \-cascade.
-
+.PP
 .SH OPTIONS
 The options recognised by FvwmRearrange are described below.
+.PP
 .IP \-a
 Process every window, including those marked with the WindowListSkip style.  As
 part of this shortcut, untitled, transient, and maximised clients are also
@@ -109,7 +113,7 @@ Include transient windows (implied by \-a).
 Tile windows.  If supplied it must appear before other options.
 .IP \-u
 Include untitled windows (implied by \-a).
-
+.PP
 You may supply up to four additional numeric arguments.  The first two numbers
 specify the initial X and Y offsets, in percentages of the screen size unless
 they end with \fIp\fP to denote pixels.  The interpretation of the third and
@@ -124,10 +128,10 @@ Cascading
 The third value caps the window width and the fourth value caps the height.  A
 window that exceeds either limit is resized down to the limit.
 .RE
-
+.PP
 Supplying zero for any numeric parameter leaves the corresponding default in
 place.
-
+.PP
 .SH AUTHORS
 Andrew Veliath (original FvwmTile and FvwmCascade modules)
 Dominik Vogt (merged FvwmTile and FvwmCascade into FvwmRearrange)

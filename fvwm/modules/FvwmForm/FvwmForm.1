@@ -1,29 +1,31 @@
 .\" $OpenBSD: FvwmForm.1,v 1.2 2010/03/20 20:13:27 schwarze Exp $
-.TH FvwmForm 1
+.TH FVWMFORM 1 "FVWM Modules"
 .SH NAME
 FvwmForm - input form module for Fvwm
 .SH SYNOPSIS
-FvwmForm must be spawned by Fvwm.  
+.PP
+FvwmForm must be spawned by Fvwm.
 It will not work from the command line.
 .SH DESCRIPTION
+.PP
 FvwmForm provides a mechanism to get user input and act accordingly.
 This is achieved by means of a form that the user can fill out,
 and from which the user can select actions he wants Fvwm to take.
 A form consists of five types of items:
-text labels, 
+text labels,
 single-line text inputs,
 mutually-exclusive selections,
 multiple-choice selections,
 and action buttons.
 These items are arranged into several lines,
 with a very flexible layout.
-
+.PP
 A text label only serves the purpose of explanation.
 It cannot accept any input.
 A text input field can be used to edit a single-line string.
 FvwmForm accepts Emacs-style cursor movement keys.
 No copying and pasting functions exist.
-
+.PP
 A selection consists of several choices.
 The selection itself is a logical entity that doesn't have any display
 feature.
@@ -31,12 +33,13 @@ Each choice is displayed as a push-button followed by a explanatory
 text label.
 When selected, an exclusive choice shows a circle in the middle,
 while a multiple choice shows a check.
-
+.PP
 An action button, when clicked on, will send a set of commands to
 Fvwm.
 FvwmForm will do variable substitutions in the command text to reflect
 the user's input.
 .SH INITIALIZATION
+.PP
 FvwmForm uses the same configuration file (usually .fvwmrc in the user's
 home directory) as Fvwm.
 To use FvwmForm for multiple input forms,
@@ -45,17 +48,18 @@ and they will be treated as different modules.  Or, you can invoke FvwmForm
 with an optional parameter, which it will use as the name instead
 (e.g. 'Module FvwmForm QuitVerify').  That way you don't even have to make
 a symbolic link for it!
-
+.PP
 Be sure to set ModulePath in your .fvwmrc file to include
 FvwmForm's path.
-
+.PP
 When FvwmForm is invoked with a window context, e.g. from a window menu,
 all commands it sends to Fvwm will have that window context.
 .SH CONFIGURATION
+.PP
 The following options can be set in the .fvwmrc file.
 Note that the string "FvwmForm" should be changed if another module with
 different name is used.
-
+.PP
 The order of the options DOES matter.
 In general, colors and fonts should be specified first.
 Lines, text labels, and input items should appear in their logical order.
@@ -72,7 +76,6 @@ It saves the user some mouse-travelling.
 Puts the FvwmForm window at location (\fIx\fP, \fIy\fP) on the screen.
 By convention, a negative \fIx\fP (resp. \fIy\fP) value measures
 distance from the right (resp. bottom) of the screen.
-
 If this option is omitted, FvwmForm will start at the center of the screen.
 .TP 4
 .B *FvwmFormBack \fIcolor\fP
@@ -151,7 +154,7 @@ Specifies a choice for a selection.
 The choice item has a \fIname\fP and a \fIvalue\fP.
 The \fIstring\fP will be displayed to the right of the choice button
 as a label.
-
+.PP
 The choice will assume the specified initial state ("on" means selected)
 when FvwmForm starts or resets.
 Note that if the selections are mutually exclusive,
@@ -162,10 +165,10 @@ FvwmForm will assure only one is selected.
 .TP 4
 .B *FvwmFormButton \fItype\fP "\fIstring\fP" [\fIkey\fP]
 This option specifies an action button.
-The button has \fIstring\fP as a label, 
+The button has \fIstring\fP as a label,
 and excutes a set of Fvwm \fIcommand\fP when it is activated.
 The commands should be specified using the *FvwmFormCommand option.
-
+.PP
 The optional \fIkey\fP specifies a keyboard shortcut that activates
 the button.
 It is in either a control character, specified as ^@, ^A, ..., ^_,
@@ -173,14 +176,14 @@ or a function key, specified as F1, F2, ..., F35.
 Control keys that are used for cursor movement in text input fields
 cannot activate any buttons, with the exception of TAB, RETURN, LINEFEED,
 which can activate a button when the cursor is in the last text input field.
-
+.PP
 The behavior of the button is determined by \fItype\fP:
 .TP 16
 continue
 FvwmForm will resume execution after sending the commands.
 .TP 16
 restart
-After sending the commands, 
+After sending the commands,
 FvwmForm will reset all the values to the initial ones,
 and then resume execution.
 .TP 16
@@ -191,7 +194,7 @@ FvwmForm will quit after sending the commands.
 This option specifies an Fvwm command associated with the current button.
 Commands that appear before any *FvwmFormButton option will be executed
 at start-up time.  This is usually a beep that gets the user's attention.
-
+.PP
 Before sending each command to Fvwm, FvwmForm recognizes variables of the
 following forms, and supply values to them.
 .TP 16
@@ -199,12 +202,12 @@ following forms, and supply values to them.
 If \fIname\fP corresponds to a text input field,
 the result is the user's input string.
 Special chars such as ", ', and \ will be preceded by a backslash.
-
+.PP
 If \fIname\fP corresponds to a choice,
 the result is the value of the choice (as specified in *FvwmFormChoice)
 if the choice is selected.
 If the choice is not selected, the result is a blank string.
-
+.PP
 If \fIname\fP corresponds to a selection,
 the result will be a list of the selected values of all its choices.
 .TP 16
@@ -213,7 +216,7 @@ If \fIname\fP is a text input field and its value is not an empty string,
 the result is \fIstring\fP,
 with recursive variable substitution applied.
 If the input value is empty, the result is empty.
-
+.PP
 If \fIname\fP is a choice and it is selected,
 the result is \fIstring\fP,
 with recursive variable substitution applied.
@@ -223,162 +226,103 @@ If the choice is not selected, the result is empty.
 The same as the above, except that the converse conditions are taken.
 .SH EXAMPLE 1 - QuitVerify
 This example simulates the mwm way of confirming logout.
-
+.PP
+.RS
+.nf
 *QuitVerifyGrabServer
-.br
 *QuitVerifyWarpPointer
-.br
-*QuitVerifyFont		*helvetica*m*r*n*14*
-.br
-*QuitVerifyButtonFont	*helvetica*m*o*n*14*
-.br
-*QuitVerifyFore		Black
-.br
-*QuitVerifyBack		Light Gray
-.br
-*QuitVerifyItemFore	Wheat
-.br
-*QuitVerifyItemBack	Gray50
-.br
+*QuitVerifyFont        *helvetica*m*r*n*14*
+*QuitVerifyButtonFont  *helvetica*m*o*n*14*
+*QuitVerifyFore        Black
+*QuitVerifyBack        Light Gray
+*QuitVerifyItemFore    Wheat
+*QuitVerifyItemBack    Gray50
 # begin items
-.br
-*QuitVerifyCommand	Beep
-.br
-*QuitVerifyLine		center
-.br
-*QuitVerifyText		"Do you really want to logout?"
-.br
-*QuitVerifyLine		expand
-.br
-*QuitVerifyButton	quit		"Logout"	^M
-.br
-*QuitVerifyCommand	Quit
-.br
-*QuitVerifyButton	quit		"Cancel"	^[
-.br
-*QuitVerifyCommand	Nop
-.br
+*QuitVerifyCommand     Beep
+*QuitVerifyLine        center
+*QuitVerifyText        "Do you really want to logout?"
+*QuitVerifyLine        expand
+*QuitVerifyButton      quit        "Logout"        ^M
+*QuitVerifyCommand     Quit
+*QuitVerifyButton      quit        "Cancel"       ^[
+*QuitVerifyCommand     Nop
 # Fvwm window style
-.br
 Style "QuitVerify" NoTitle, NoHandles, BorderWidth 3
-
+.fi
+.RE
 .SH EXAMPLE 2 - Remote Login
-This example lets the user type in a hostname, 
+This example lets the user type in a hostname,
 and optionally a user name on the remote machine,
 and opens an xterm window from the remote host.
-
+.PP
+.RS
+.nf
 *RloginWarpPointer
-.br
-*RloginFont		*helvetica*m*r*n*14*
-.br
-*RloginButtonFont	*helvetica*m*o*n*14*
-.br
-*RloginInputFont	*cour*m*r*n*14*
-.br
-*RloginFore		Black
-.br
-*RloginBack		Light Gray
-.br
-*RloginItemFore		Wheat
-.br
-*RloginItemBack		Gray50
-.br
+*RloginFont          *helvetica*m*r*n*14*
+*RloginButtonFont    *helvetica*m*o*n*14*
+*RloginInputFont     *cour*m*r*n*14*
+*RloginFore          Black
+*RloginBack          Light Gray
+*RloginItemFore      Wheat
+*RloginItemBack      Gray50
 # begin items
-.br
-*RloginLine		center
-.br
-*RloginText		"Login to Remote Host"
-.br
-*RloginLine		center
-.br
-*RloginText		"Host:"
-.br
-*RloginInput		HostName	20	""
-.br
-*RloginLine		center
-.br
-*RloginSelection	UserSel	single
-.br
-*RloginChoice		Default	Default	on	"same user"
-.br
-*RloginChoice		Custom	Custom	off	"user:"
-.br
-*RloginInput		UserName	10	""
-.br
-*RloginLine		expand
-.br
-*RloginButton		quit	"Login"		^M
-.br
-*RloginCommand	Exec exec rsh $(Custom?-l $(UserName)) $(HostName) xterm -T xterm@$(HostName) -display $HOSTDISPLAY &
-.br
-*RloginButton		restart	"Clear"
-.br
-*RloginButton		quit	"Cancel"	^[
-.br
-*RloginCommand	Nop
+*RloginLine          center
+*RloginText          "Login to Remote Host"
+*RloginLine          center
+*RloginText          "Host:"
+*RloginInput         HostName        20  ""
+*RloginLine          center
+*RloginSelection     UserSel single
+*RloginChoice        Default Default on  "same user"
+*RloginChoice        Custom  Custom  off "user:"
+*RloginInput         UserName        10  ""
+*RloginLine          expand
+*RloginButton        quit    "Login"     ^M
+*RloginCommand       Exec exec rsh $(Custom?-l $(UserName)) $(HostName) \
+xterm -T xterm@$(HostName) -display $HOSTDISPLAY &
+*RloginButton        restart "Clear"
+*RloginButton        quit    "Cancel"    ^[
+*RloginCommand       Nop
+.fi
+.RE
 
 .SH EXAMPLE 3 - Capture Window
 This example provides a front-end to xwd, xwud, and xpr.
-
-*CaptureFont		*helvetica*m*r*n*14*
-.br
-*CaptureButtonFont	*helvetica*m*o*n*14*
-.br
-*CaptureInputFont	*cour*m*r*n*14*
-.br
-*CaptureLine		center
-.br
-*CaptureText		"Capture Window"
-.br
-*CaptureLine		left
-.br
-*CaptureText		"File: "
-.br
-*CaptureInput		file		25	"/tmp/Capture"
-.br
-*CaptureLine		left
-.br
-*CaptureText		"Printer: "
-.br
-*CaptureInput		printer		20	"ps1"
-.br
-*CaptureLine		expand
-.br
-*CaptureSelection	PtrType	single
-.br
-*CaptureChoice		PS	ps	on	"PostScript"
-.br
-*CaptureChoice		Ljet	ljet	off	"HP LaserJet"
-.br
-*CaptureLine		left
-.br
-*CaptureText		"xwd options:"
-.br
-*CaptureLine		expand
-.br
-*CaptureSelection	Options	multiple
-.br
-*CaptureChoice		Brd	-nobdrs	off	"No border"
-.br
-*CaptureChoice		Frm	-frame	on	"With frame"
-.br
-*CaptureChoice		XYZ	-xy	off	"XY format"
-.br
-*CaptureLine		expand
-.br
-*CaptureButton		continue	"Capture"	^M
-.br
-*CaptureCommand	Exec exec xwd -out $(file) $(Options) &
-.br
-*CaptureButton		continue	"Preview"
-.br
-*CaptureCommand	Exec exec xwud -in $(file) &
-.br
-*CaptureButton		continue	"Print"
-.br
-*CaptureCommand	Exec xpr -device $(PtrType) $(file) | lpr -P $(printer) &
-.br
-*CaptureButton		quit		"Quit"
+.PP
+.RS
+.nf
+*CaptureFont          *helvetica*m*r*n*14*
+*CaptureButtonFont    *helvetica*m*o*n*14*
+*CaptureInputFont     *cour*m*r*n*14*
+*CaptureLine          center
+*CaptureText          "Capture Window"
+*CaptureLine          left
+*CaptureText          "File: "
+*CaptureInput         file            25  "/tmp/Capture"
+*CaptureLine          left
+*CaptureText          "Printer: "
+*CaptureInput         printer         20  "ps1"
+*CaptureLine          expand
+*CaptureSelection     PtrType single
+*CaptureChoice        PS      ps      on  "PostScript"
+*CaptureChoice        Ljet    ljet    off "HP LaserJet"
+*CaptureLine          left
+*CaptureText          "xwd options:"
+*CaptureLine          expand
+*CaptureSelection     Options multiple
+*CaptureChoice        Brd     -nobdrs off "No border"
+*CaptureChoice        Frm     -frame  on  "With frame"
+*CaptureChoice        XYZ     -xy     off "XY format"
+*CaptureLine          expand
+*CaptureButton        continue    "Capture"   ^M
+*CaptureCommand       Exec exec xwd -out $(file) $(Options) &
+*CaptureButton        continue    "Preview"
+*CaptureCommand       Exec exec xwud -in $(file) &
+*CaptureButton        continue    "Print"
+*CaptureCommand       Exec xpr -device $(PtrType) $(file) | lpr -P $(printer) &
+*CaptureButton        quit        "Quit"
+.fi
+.RE
 
 .SH COPYRIGHT
 FvwmForm is original work of Thomas Zuwei Feng.

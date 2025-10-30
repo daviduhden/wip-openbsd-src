@@ -27,25 +27,25 @@ fvwm \- F(?) Virtual Window Manager (version 2.xx) for X11
 look to window frames, and provide a simple virtual desktop.  Version
 2.xx uses only slightly more memory than 1.xx, mostly due to some
 global options being able to be window specific now.
-
+.PP
 Fvwm provides both a large virtual desktop and multiple disjoint
 desktops which can be used separately or together.  The virtual desktop
 allows you to pretend that your video screen is really quite large,
 and you can scroll around within the desktop.  The multiple disjoint
 desktops allow you to pretend that you really have several screens to
 work at, but each screen is completely unrelated to the others.
-
+.PP
 Fvwm provides keyboard accelerators which allow you to perform most
 window-manager functions, including moving and resizing windows, and
 operating the window-manager's menus, using keyboard shortcuts.
-
+.PP
 Fvwm has also blurred the distinction between configuration commands
 and built-in commands that most window-managers make.  Configuration
 commands typically set fonts, colors, menu contents, key and mouse
 function bindings, while built-in commands typically do things like
 raise and lower windows.  Fvwm makes no such distinction, and allows,
 to the extent that is practical, anything to be changed at any time.
-
+.PP
 Other noteworthy differences between Fvwm and other X11 window managers
 are the introduction of the SloppyFocus and per-window focus methods.
 SloppyFocus is focus-follows-mouse, but focus is not removed from
@@ -54,17 +54,15 @@ When sloppy focus is used as the default focus style, it is nice to
 make windows in which you do not typically type into (xmag,
 xload, xclock, xbiff, etc) click-to-focus, so that your terminal
 window doesn't lose focus unnecessarily.
-
 .SH COPYRIGHTS
 Since \fIfvwm\fP is derived from \fItwm\fP code it shares \fItwm\fP's
 copyrights.  Since nearly every line of twm code has been changed, the
 twm copyright has been removed from most of the individual code files.
 I do still recognize the influence of twm code in the overall package,
 so fvwm's copyright is still considered to be the same as twm's.
-
+.PP
 Please consult the COPYING file that has come with your distribution
 for details.
-
 .SH ANATOMY OF A WINDOW
 \fIFvwm\fP puts a decorative border around most windows.  This border
 consists of a bar on each side and a small "L" shaped section on each
@@ -72,13 +70,13 @@ corner.  There is an additional top bar called the title bar which is
 used to display the name of the window.  In addition, there are up to
 10 title-bar buttons.  The top, side, and bottom bars are collectively
 known as the side-bars.  The corner pieces are called the frame.
-
+.PP
 Unless the standard defaults files are modified, pressing mouse button
 1 in the title or side-bars will begin a move operation on the
 window.  Pressing button 1 in the corner frame pieces will begin a
 resize operation.  Pressing button 2 anywhere in the border brings up
 an extensive list of window operations.
-
+.PP
 Up to ten title-bar buttons may exist.  Their use is completely user
 definable.  The default configuration has a title-bar button on each
 side of the title-bar.  The one on the left is used to bring up a list
@@ -86,8 +84,6 @@ of window options, regardless of which mouse button is used.  The one
 on the right is used to iconify the window.  The number of title-bar
 buttons used depends on which ones have mouse actions bound to
 them.  See the section on the "Mouse" configuration parameter below.
-
-
 .SH THE VIRTUAL DESKTOP
 \fIFvwm\fP provides multiple virtual desktops for users who wish to
 use them.  The screen is a viewport onto a desktop which may be larger
@@ -97,7 +93,7 @@ when view applications are distinct).  Since each desktop can be
 larger than the physical screen, divided into m by n pages which are
 each the size of the physical screen, windows which are larger than
 the screen or large groups of related windows can easily be viewed.
-
+.PP
 The (m by n) size (i.e. number of pages) of the virtual desktops can be
 changed any time, by using the DeskTopSize built-in command.  All
 virtual desktops must be (are) the same size.  The total number of
@@ -108,13 +104,13 @@ is an accessory program, called a module, which is not essential for
 the window manager to operate.  Windows may also be listed, along with
 their geometries, in a window list, accessible as a pop-up menu, or as
 a separate window, called the FvwmWinList (another module).
-
+.PP
 "Sticky" windows are windows which transcend the virtual desktop by
 "Sticking to the screen's glass."  They always stay put on the screen.
 This is convenient for things like clocks and xbiff's, so you only need
 to run one such gadget and it always stays with you.  Icons can also be
 made to stick to the glass, if desired.
-
+.PP
 Window geometries are specified relative to the current viewport.  That
 is:
 .EX
@@ -132,7 +128,7 @@ xterm -geometry +1000+1000
 will place the window just off of the lower right hand corner of the
 screen.  It can be found by moving the mouse to the lower right hand
 corner of the screen and waiting for it to scroll into view.
-
+.PP
 A geometry specified as something like:
 .EX
 xterm -geometry -5-5
@@ -144,21 +140,20 @@ applications support window geometries with negative offsets. Some will
 place the window's upper right hand corner 5 pixels above and to the left
 of the upper left hand corner of the screen; others may do just plain
 bizarre things.
-
-
+.PP
 There are several ways to cause a window to map onto a desktop or page
 other than the currently active one. The geometry technique mentioned above
 (specifying x,y coordinates larger than the physical screen size), however,
 suffers from the limitation of being interpreted relative to the current
 viewport: the window will not consistently appear on a specific page, unless
 you always invoke the application from the same page.
-
+.PP
 A better way to place windows on a different page or desk from the
 currently mapped viewport is to use the StartsOnPage style specification
 (the successor to the older StartsOnDesk style) in the .fvwmrc configuration
 file. The placement is consistent: it does not depend on your current location
 on the virtual desktop.
-
+.PP
 Some applications that understand standard Xt command line arguments
 and X resources, like xterm and xfontsel, allow the user to specify
 the start-up desk or page on the command line:
@@ -172,9 +167,9 @@ xterm -xrm "*Page:3 2 1"
 will start an xterm two pages to the right and one down from the upper
 left hand page of desk number 3. Not all applications understand the use
 of these options, however.
-
+.PP
 You could achieve the same results with the following lines in your
-.Xdefaults file:
+\fB.Xdefaults\fP file:
 .EX
 XTerm*Desk: 1
 .EE
@@ -182,7 +177,6 @@ or
 .EX
 XTerm*Page: 3 2 1
 .EE
-
 .SH INITIALIZATION
 During initialization, \fIfvwm\fP will search for a configuration file
 which describes key and button bindings, and a few other things.  The
@@ -192,7 +186,7 @@ ${sysconfdir} (typically __projectroot__/lib/X11/fvwm).
 Failing that, it will look for system.fvwmrc in ${sysconfdir} for
 system-wide defaults.  If that file is not found, \fIfvwm\fP will be
 basically useless.
-
+.PP
 \fIFvwm\fP will set two environment variables which will be inherited
 by its children.  These are $DISPLAY which describes the display on
 which \fIfvwm\fP is running.  $DISPLAY may be unix:0.0 or :0.0, which
@@ -202,46 +196,43 @@ of the display.  $HOSTDISPLAY will always use the TCP/IP transport
 protocol (even for a local connection) so $DISPLAY should be used for
 local connections, as it may use Unix-domain sockets, which are
 faster.
-
+.PP
 Fvwm has three special functions for initialization:
 StartFunction, which is executed on startups and restarts; InitFunction
 and RestartFunction, which are executed during Initialization and Restarts
 (respectively) just after StartFunction.  These may be customized
 in a user's rc file via the AddToFunc facility (described later) to start up
 modules, xterms, or whatever you'd like to have started by fvwm.
-
+.PP
 \fIFvwm\fP also has a special exit function: ExitFunction, executed
 when exiting or restarting before actually quitting or anything else.
 It could be used to explicitly kill modules, etc.
-
 .SH COMPILATION OPTIONS
 \fIFvwm\fP has a number of compile-time options to reduce memory usage
 by limiting the use of certain features.  If you
 have trouble using a certain command or feature, check to see if
 support for it was included at compile time.  Optional features are
 described in the config.h file.
-
 .SH ICONS
 The basic \fIFvwm\fP configuration uses monochrome bitmap icons,
 similar to \fItwm\fP.  If XPM extensions are compiled in, then color
 icons similar to ctwm, MS-Windows, or the Macintosh icons can be used.
 In order to use these options you will need the XPM package, as
 described in the INSTALL.fvwm file.
-
+.PP
 If both the SHAPE and XPM options are compiled in you will get shaped
 color icons, which are very spiffy.
-
 .SH MODULES
 A module is a separate program which runs as a separate Unix process
 but transmits commands to \fIfvwm\fP to execute.  Users can write
 their own modules to do any weird or bizarre manipulations without
 bloating or affecting the integrity of \fIfvwm\fP itself.
-
+.PP
 Modules MUST be spawned by \fIfvwm\fP so that it can set up two pipes for
 \fIfvwm\fP and the module to communicate with.  The pipes will already be
 open for the module when it starts and the file descriptors for the
 pipes are provided as command line arguments.
-
+.PP
 Modules can be spawned during \fIfvwm\fP at any time during the X
 session by use of the Module built-in command.  Modules can exist for
 the duration of the X session, or can perform a single task and exit.
@@ -253,13 +244,12 @@ closure and has exited.  If modules fail to detect the pipe closure
 number of simultaneously executing modules is limited by the operating
 system's maximum number of simultaneously open files, usually between
 60 and 256.
-
+.PP
 Modules simply transmit text commands to the \fIfvwm\fP built-in
 command engine.  Text commands are formatted just as in the case of a
 mouse binding in the .fvwmrc setup file.  Certain auxiliary
 information is also transmitted, as in the sample module FvwmButtons.
 The FvwmButtons module is documented in its own man page.
-
 .SH ICCCM COMPLIANCE
 \fIFvwm\fP attempts to be ICCCM 1.1 compliant.  In addition, ICCCM
 states that it should be possible for applications to receive ANY
@@ -268,7 +258,7 @@ used in \fIfvwm\fP and most other window managers. In particular you
 cannot have the same keyboard shortcuts working with your fvwm2 and
 another fvwm2 running within Xnest (a nested X server). The same problem
 exists with mouse bindings.
-
+.PP
 The ICCCM states that windows possessing the property
 .EX
 WM_HINTS(WM_HINTS):
@@ -280,8 +270,6 @@ number of applications set this property, and yet expect the
 window-manager to give them the keyboard focus anyway, so fvwm
 provides a window-style, "Lenience", which will allow fvwm to overlook
 this ICCCM rule.
-
-
 .SH M4 PREPROCESSING
 .PP
 M4 pre-processing is handled by a module in fvwm-2.0.  To get more
@@ -292,19 +280,16 @@ command
 .EX
 fvwm -cmd "FvwmM4 .fvwmrc"
 .EE
-
 .SH CPP PREPROCESSING
 .PP
 Cpp is the C-language pre-processor.  fvwm-2.0 offers cpp processing
 which mirrors the m4 pre-processing.  To find out about it, re-read
 the M4 section above, but replace "m4" with "cpp".
-
 .SH AUTO-RAISE
 .PP
 Windows can be automatically raised when it receives focus, or some
 number of milliseconds after it receives focus, by using the
 auto-raise module, FvwmAuto.
-
 .SH OPTIONS
 These are the command line options that are recognized by \fIfvwm\fP:
 .IP "\fB-blackout\fP"
@@ -335,18 +320,17 @@ option. Normally, \fIfvwm\fP will attempt to start up on all screens
 of a multi-screen display.
 .IP "\fB-version\fP"
 Print the version of \fIfvwm\fP to stderr.
-
 .SH CONFIGURATION FILES
 The configuration file is used to describe mouse and button bindings,
 colors, the virtual display size, and related items.  The
 initialization configuration file is typically called ".fvwmrc".  By
 using the "Read" built-in, it is easy to read in new configuration
 files as you go.
-
+.PP
 Lines beginning with '#' will be ignored by \fIfvwm\fP.  Lines
 starting with '*' are expected to contain module configuration
 commands (rather than configuration commands for \fIfvwm\fP itself).
-
+.PP
 Fvwm makes no distinction between configuration commands and built-in
 commands, so anything mentioned in the built-in commands section  can
 be placed on a line by itself for fvwm to execute as it reads the
@@ -354,7 +338,6 @@ configuration file, or it can be placed as an executable command in a
 menu or bound to a mouse button or a keyboard key.  It is left as an
 exercise for the user to decide which function make sense for
 initialization and which ones make sense for run-time.
-
 .SH BUILT IN FUNCTIONS
 \fIFvwm\fP supports a set of built-in functions which can be bound to
 keyboard or mouse buttons.  If fvwm expects to find a built-in function
@@ -362,13 +345,13 @@ in a command, but fails, it will check to see if the specified command
 should have been "Function (rest of command)" or "Module (rest of
 command)".  This allows complex functions or modules to be invoked in a
 manner which is fairly transparent to the configuration file.
-
+.PP
 Example: the .fvwmrc file contains the line "HelpMe".  Fvwm will look
 for a built-in command called "HelpMe", and will fail. Next it will
 look for a user-defined complex function called "HelpMe".  If no such
 user defined function exists, Fvwm will try to execute a module called
 "HelpMe".
-
+.PP
 In previous versions of fvwm, quoting was critical and irrational in
 the .fvwmrc file.  As of fvwm-2, most of this has been cleared up.
 Quotes are required only when needed to make fvwm consider two or more
@@ -378,9 +361,9 @@ backslash character.  For example, if you have a pop-up menu called
 Window-Ops, then you don't need quotes: Popup Window-Ops, but if you
 replace the dash with a space, then you need quotes: Popup "Window
 Ops".
-
-
-.IP "AddButtonStyle \fIbutton\fP [ \fIstate\fP ] [ \fIstyle\fP ] [-- \fI[!]flag ...\fP]"
+.IP "AddButtonStyle \fIbutton\fP"
+Accepts optional arguments [\fIstate\fP], [\fIstyle\fP],
+and [-- \fI[!]flag ...\fP].
 Adds a button style to \fIbutton\fP.  \fIbutton\fP can be a button
 number, or one of "All," "Left," or "Right."  \fIstate\fP can be
 "ActiveUp," "ActiveDown" or "Inactive."  If \fIstate\fP is omitted,
@@ -388,7 +371,7 @@ then the style is added to every state.  If the button style and flags
 are enclosed in parentheses, then multiple state definitions can be
 placed on a single line.  Flags for additional button styles cannot be
 changed after definition.
-
+.PP
 Buttons are drawn in the order of definition, beginning with the most
 recent ButtonStyle, followed by those added with AddButtonStyle.  To
 clear the button style stack, change style flags, or for descriptions
@@ -411,8 +394,6 @@ for all buttons, which causes \fIfvwm\fP to draw any styles set with
 TitleStyle before drawing the buttons.  Finally, AddButtonStyle is
 used to place additional pixmaps for both ActiveUp and ActiveDown
 states and a Vector button style is drawn on top of all state.
-
-
 .IP "AddTitleStyle [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
 Adds a title style to the title bar.  \fIstate\fP should be one of
 "ActiveUp," "ActiveDown," or "Inactive."  If \fIstate\fP is omitted,
@@ -420,33 +401,31 @@ then the style is added to every state.  If the style and flags are
 enclosed in parentheses, then multiple state definitions can be placed
 on a single line.  This command is quite similar to the AddButtonStyle
 command (see above).
-
+.PP
 Title bars are drawn in the order of definition, beginning with the
 most recent TitleStyle, followed by those added with AddTitleStyle.
 To clear the title style stack, change style flags, or for the
 descriptions of available styles and flags, see the TitleStyle and
 ButtonStyle commands.
-
-
 .IP "AddToDecor \fIdecor\fP"
 Add or divert commands to the decor named \fIdecor\fP.  A decor is a
 name given to the set of commands which affect button styles,
 title-bar styles, border styles, hilight colors, and window fonts.  If
 \fIdecor\fP does not exist it is created; otherwise the existing
 \fIdecor\fP is modified.
-
+.PP
 Created decors start out exactly like the default fvwm decor without
 any style definitions.  A given decor may be applied to a set of
 windows with the UseDecor option of the Style command.  Modifying an
 existing decor will affect windows which are currently assigned to it.
-
+.PP
 AddToDecor is similar in usage to the AddToMenu and AddToFunc
 commands, except that menus and functions are replaced by ButtonStyle,
 AddButtonStyle, TitleStyle, AddTitleStyle, BorderStyle, HilightColor
 and WindowFont commands.  Decors created with AddToDecor can be
 manipulated with ChangeDecor, DestroyDecor, UpdateDecor, and the
 UseDecor Style option.
-
+.PP
 The following example creates a decor and style, both named
 "flatness."  Despite having the same name, they are distinct entities:
 .EX
@@ -466,8 +445,6 @@ Style command followed by a Recapture.  The decorations of all windows
 or of a specific decor can be updated with UpdateDecor (useful after
 decorations are modified; changing Style options requires a Recapture
 instead).  A decor can be destroyed with DestroyDecor.
-
-
 .IP "AddToFunc [ \fIname\fP [ \fItrigger\fP \fIaction\fP] ]"
 Begins or add to a function definition.  Here's an example:
 .EX
@@ -488,7 +465,7 @@ user presses and releases the mouse in a short period of time
 (ClickTime milliseconds).  "D" stands for double-click.  The action "I"
 will cause an action to be performed on the button-press, if the
 function is invoked with prior knowledge of which window to act on.
-
+.PP
 The special symbols $d, $w and $0 through $9 are available in the
 ComplexFunctions or Macros, or whatever you want to call them.  Within
 a macro, $w is expanded to the window-id (expressed in
@@ -500,7 +477,6 @@ Key F10 R A Function MailFunction \\
   xmh "-font fixed"
 .EE
 and MailFunction is
-
 .EX
 AddToFunc MailFunction
  + "I" Next ($0) Iconify -1
@@ -524,8 +500,6 @@ AddToFunc PrintFunction
  + "I" Exec xdpr -id $w
 .EE
 Note that $$ is expanded to $.
-
-
 .IP "AddToMenu \fImenu-name\fP [ \fImenu-label\fP \fIaction\fP ]"
 Begins or adds to a menu definition.  Typically a menu definition looks
 like this:
@@ -561,23 +535,22 @@ the user pops it up.  The remaining portion is a built-in command
 which should be executed if the user selects that menu item.  An empty
 menu-label ("") and the Nop function can be used to insert a separator
 into the menu.
-
+.PP
 Titles can be used within the menu. If you add the option "top" behind
 the keyword "Title", the title will be added to the top of the menu.
 If there was a title already, it is overwritten.
-
 .EX
 AddToMenu Utilities "Tools" Title top
 .EE
-
+.PP
 All text up to the first TAB in the menu label is aligned to the
 left side of the menu, all text right of the first TAB is aligned
 to the right side. All other TABs are replaced by spaces.
-
+.PP
 If the menu-label contains an ampersand ('&'), the next character
 is taken as a hotkey for the menu item. Hotkeys are underlined in
 the label. To get a literal '&', insert '&&'.
-
+.PP
 If the menu-label contains a sub-string which is set off by stars,
 then the text between the stars is expected to be the name of an
 xpm-icon or bitmap-file to insert in the menu.  To get a literal '*',
@@ -591,7 +564,7 @@ calculator above it.  The following:
  + "*xcalc.xpm*"           Exec exec xcalc
 .EE
 Omits the "Calculator" label, but leaves the picture.
-
+.PP
 If the menu-label contains a sub-string which is set off by percent signs,
 then the text between the percent signs is expected to be the name of an
 xpm-icon or bitmap-file to insert to the left of the menu label.
@@ -606,7 +579,7 @@ calculator to the left.  The following:
 .EE
 Omits the "Calculator" label, but leaves the picture.  The pictures
 used with this feature should be small (perhaps 16x16).
-
+.PP
 If the menu-name (not the label) contains a sub-string which is set
 off by at signs ("@"), then the text between them is expected to be
 the name of an xpm or bitmap file to draw along the left side of the
@@ -617,57 +590,51 @@ insert '@@'.  For example
 AddToMenu "StartMenu@linux-menu.xpm@"
 .EE
 creates a menu with a picture in its bottom left corner.
-
+.PP
 If the menu-name contains also a sub-string set of by '^'s, then the
 text between '^'s is expected to be the name a of X11 color and the
 column containing the side picture will be colorized with that
 color. You can set this color for a menu style using the SideColor
 option of the \fIMenuStyle\fP command.  To get a literal '^', insert
-'^^'.  Example:
+\fB^^\fP.  For example:
 .EX
 AddToMenu "StartMenu@linux-menu.xpm@^blue^"
 .EE
 creates a menu with a picture in its bottom left corner and colorizes
 with blue the region of the menu containing the picture.
-
+.PP
 In all the above cases, the name of the resulting menu is name specified,
 stripped of the substrings between the various delimiters.
-
-
 .IP "AnimatedMove \fIx y\fP [ \fIWarp\fP ]"
-
+.PP
 Move a window in an animated way. Similar to Move command, below.
 Options are the same, except they are required, since it doesn't make
 sense to have a user move the window interactively and animatedly. If
 the optional argument \fIWarp\fP is specified the pointer is warped with
 the window.
-
-
 .IP "Beep"
 As might be expected, this makes the terminal beep.
-
-
 .IP "BorderStyle [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
 Defines a border style for windows.  \fIstate\fP can be either
 "Active" or "Inactive."  If \fIstate\fP is omitted, then the style is
 set for both states.  If the style and flags are enclosed in
 parentheses, then multiple state definitions can be specified per
 line.
-
+.PP
 \fIstyle\fP is a subset of the available ButtonStyles, and can only be
 TiledPixmap (uniform pixmaps which match the bevel colors work best
 this way).  If an "!"  is prefixed to any flag, flag behavior is
 negated.  If \fIstyle\fP is not specified, then one can change flags
 without resetting the style.
-
+.PP
 The "HiddenHandles" flag hides the corner handle dividing lines on
 windows with handles (this option has no effect for NoHandle windows).
 By default, HiddenHandles is disabled.
-
+.PP
 The "NoInset" flag supplements HiddenHandles.  If given, the inner
 bevel around the window frame is not drawn.  If HiddenHandles is not
 specified, this flag has no effect.
-
+.PP
 To decorate the active and inactive window borders with a textured
 pixmap, one might specify:
 .EX
@@ -689,26 +656,26 @@ BorderStyle Inactive -- !NoInset
 .EE
 Title-bar buttons can inherit the border style with the UseBorderStyle
 flag (see ButtonStyle).
-
-
-.IP "ButtonStyle \fIbutton\fP [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
+.IP "ButtonStyle \fIbutton\fP"
+Optional arguments include [\fIstate\fP], [\fIstyle\fP],
+and [-- \fI[!]flag ...\fP].
 Sets the button style for a title-bar button.  \fIbutton\fP is the
 title-bar button number between 0 and 9, or one of "All," "Left,"
 "Right," or "Reset."  Button numbering is described in the Mouse
 section (see below).  If the style and flags are enclosed in
 parentheses, then multiple state definitions can be specified per
 line.
-
+.PP
 \fIstate\fP refers to which button state should be set.  Button states
 are defined as follows: "ActiveUp" and "ActiveDown" refer to the
 unpressed and pressed states for buttons on active windows; while the
 "Inactive" state denotes buttons on inactive windows.
-
+.PP
 If \fIstate\fP is ActiveUp, ActiveDown, or Inactive, that particular
 button state is set.  If \fIstate\fP is omitted, every state is set.
 Specifying a style destroys the current style (use AddButtonStyle to
 avoid this).
-
+.PP
 If \fIstyle\fP is omitted, then state-dependent flags can be set for
 the primary button style without destroying the current style.
 Examples (each line should be considered independent):
@@ -721,7 +688,7 @@ The first line sets every state of the left buttons to flat, while the
 second sets only the ActiveUp and Inactive states of every button to
 flat (only flags are changed; the buttons' individual styles are not
 changed).
-
+.PP
 If you want to reset all buttons to their defaults:
 .EX
 ButtonStyle Reset
@@ -735,42 +702,42 @@ button number 2:
 .EX
 ButtonStyle 1 Default 2
 .EE
-
+.PP
 For any given button, multiple state definitions can be given on one
 line by enclosing the style and flags in parentheses.  If only one
 definition per line is given the parentheses can be omitted.
-
+.PP
 \fIflags\fP affect the specified \fIstate\fP.  If an "!" is prefixed
 to any \fIflag\fP, its behavior is negated.  The available
 state-dependent flags for all styles are described here (the next
 ButtonStyle entry deals with state-independent flags).
-
+.PP
 "Raised" causes a raised relief pattern to be drawn.
-
+.PP
 "Sunk" causes a sunken relief pattern to be drawn.
-
+.PP
 "Flat" inhibits the relief pattern from being drawn.
-
+.PP
 "UseTitleStyle" causes the given button state to render the current
 title style before rendering the button's own styles.  The Raised,
 Flat, and Sunk TitleStyle flags are ignored since they are redundant
 in this context.
-
+.PP
 "UseBorderStyle" causes the button to inherit the decorated
 BorderStyle options.
-
+.PP
 Raised, Sunk, and Flat are mutually exclusive, and can be specified
 for the initial ButtonStyle only.  UseTitleStyle and UseBorderStyle
 are also mutually exclusive (both can be off however).  The default is
 Raised with both UseBorderStyle and UseTitleStyle left unset.
-
+.PP
 There is an \fBimportant note\fP for the ActiveDown state.  When a
 button is pressed, the relief is inverted.  Because of this, to obtain
 a sunken ActiveDown state you must specify the opposite of the desired
 relief (i.e. to obtain a pressed-in look which is raised, specify Sunk
 for ActiveDown).  This behavior is consistent, but may seem confusing
 at first.
-
+.PP
 Button styles are classified as non-destructive, partially destructive,
 or fully destructive.  Non-destructive styles do not affect the image.
 Partially destructive styles can obscure some or all parts of the
@@ -778,23 +745,23 @@ underlying image (i.e. Pixmap).  Fully destructive styles obscure the
 entire underlying image (i.e. Solid or one of the gradient styles).
 Thus, if stacking styles with AddButtonStyle (or AddTitleStyle for
 title bars), use care in sequencing styles to minimize redraw.
-
+.PP
 The available styles and their arguments now follow (depending on
 compilation options, some button styles may be unavailable).
-
+.PP
 The "Simple" style does nothing.  There are no arguments, and this
 style is an example of a non-destructive button style.
-
+.PP
 The "Default" style conditionally accepts one argument: a number which
 specifies the default button number to load.  If the style command
 given is ButtonStyle or AddButtonStyle, the argument is optional (if
 given, will override the current button).  If a command other than
 ButtonStyle or AddButtonStyle is used, the number must be specified.
-
+.PP
 The "Solid" style fills the button with a solid color.  The relief
 border color is not affected.  The color should be specified as a
 single argument.  This style is fully destructive.
-
+.PP
 The "Vector" style draws a line pattern.  Since this is a standard
 button style, the keyword "Vector" is optional.  The specification is
 a little cumbersome:
@@ -807,31 +774,30 @@ a line from (x=50,y=30) to (70,70) in the shadow color (@0), and then
 to (30,70) in the shadow color, and finally to (50,30) in the
 highlight color (@1).  Is that too confusing? See the sample .fvwmrc
 for a few examples.  This style is partially destructive.
-
+.PP
 The "VGradient" and "HGradient" styles denote gradient styles.  The H
 and V prefixes denote both horizontal and vertical directions.
-
+.PP
 This style has two forms:
-
 .in +2
 The first form specifies a linear gradient.  Arguments: total number
 of colors to allocate (between 2 and 128), the initial color, and the
 final color.
-
+.PP
 The second form specifies a nonlinear gradient.  Arguments: total
 number of colors to allocate (between 2 and 128), then the number of
 segments.  For each segment, specify the starting color, percentage to
 increment, then ending color.  Each subsequent segment begins with the
 color of the last segment.  All of the percentages must add up to 100.
 .in -2
-
+.PP
 Example:
 .EX
 TitleStyle VGradient 16 3 Red 20 Blue 30 \\
   Black 50 Grey
 .EE
 The gradient styles are fully destructive.
-
+.PP
 The "Pixmap" style displays a pixmap.  A pixmap should be specified as
 an argument.  For example, the following would give button 2 the same
 pixmap for both states, and button 4 different pixmaps for the up,
@@ -849,7 +815,7 @@ style reverts to Simple.  Flags specific to the Pixmap style are
 the pixmap (default is centered for both directions).  Pixmap
 transparency is used for the color "None."  This style is partially
 destructive.
-
+.PP
 The "MiniIcon" style draws the window's miniature icon in the button,
 which is specified with the MiniIcon option of the Style command. This
 button style accepts no arguments.  Example:
@@ -860,39 +826,35 @@ Style "Emacs" MiniIcon mini-doc.xpm
 
 ButtonStyle 1 MiniIcon
 .EE
-
+.PP
 The "TiledPixmap" style accepts a pixmap to be tiled as the button
 background.  One pixmap is specified as an argument.  Pixmap
 transparency is not used.  This style is fully destructive.
-
-
 .IP "ButtonStyle \fIbutton\fP - \fI[!]flag ...\fP"
 Sets state-independent flags for the specified \fIbutton\fP.
 State-independent flags affect button behavior.  Each flag is
 separated by a space.  If an "!" is prefixed to the flag then the flag
 behavior is negated.  The special flag "Clear" clears any existing
 flags.
-
+.PP
 The following flags are usually used to tell fvwm which buttons should
 be affected by MWM function hints.  This is not done automatically
 since you might have buttons bound to complex functions, for instance.
-
+.PP
 "MWMDecorMenu" should be assigned to title bar buttons which display a
 menu.  The default assignment is the leftmost button.  When a window
 with the MWMFunctions Style option requests not to show this button,
 it will be hidden.
-
+.PP
 "MWMDecorMin" should be assigned to title bar buttons which minimize
 or iconify the window.  The default assignment is the second button
 over from the rightmost button.  When a window with the MWMFunctions
 Style option requests not to show this button, it will be hidden.
-
+.PP
 "MWMDecorMax" should be assigned to title bar buttons which maximize
 the window.  The default assignment is the rightmost button.  When a
 window with the MWMFunctions Style option requests not to show this
 button, it will be hidden.
-
-
 .IP "ChangeDecor \fIdecor\fP"
 Changes the decor of a window to \fIdecor\fP.  \fIdecor\fP is
 "Default," or the name of a decor defined with AddToDecor.  If
@@ -904,28 +866,22 @@ AddToDecor command.
 .EX
 ChangeDecor "CustomDecor1"
 .EE
-
 .IP "ChangeMenuStyle \fImenustyle menu ...\fP"
 Changes the menu style of "menu" to "menustyle", you may specified more
 than one menu in each \fIChangeMenuStyle\fP.
 .EX
 ChangeMenuStyle  pixmap1 Screensavers ScreenLock
 .EE
-
 .IP "ClickTime [ \fIdelay\fP ]"
 Specifies the maximum delay (in milliseconds) between a button press
 and a button release for the Function built-in to consider the action
 a mouse click.  The default delay is 150 milliseconds.  Omitting the
 delay value resets the ClickTime to the default.
-
-
 .IP "Close"
 If the window accepts the delete window protocol a message is sent to
 the window asking it to gracefully remove itself.  If the window does
 not understand the delete window protocol then the window is
 destroyed.
-
-
 .IP "ColorLimit \fIlimit\fP"
 Specifies a limit  on the colors used in  pixmaps used  by fvwm.  Zero
 (the   default)  sets no     limit.   Fvwm uses  pixmaps  for  icons,
@@ -934,22 +890,18 @@ colors  to a set  of colors that  starts out with  common colors.  The
 current  list contains about 60 colors  and  starts with white, black,
 grey,   green,  blue, red, cyan,  yellow,  and   magenta.  The command
 "ColorLimit 9" would limit pixmaps to these 9 colors.
-
+.PP
 It makes the most sense to put this command at the front of the
-.fvwmrc  file.  This   command should  be   before any  menu
+\fB.fvwmrc\fP file.  This command should appear before any menu
 definitions that contain mini-icons.
-
+.PP
 Solid frame and title colors (including shadows and gradients) are not
 controlled by this command.
-
-
 .IP "ColormapFocus \fIFollowsMouse\fP|\fIFollowsFocus\fP"
 By default, fvwm installs the colormap of the window that the cursor
 is in.  If you use ColormapFocus FollowsFocus, then the installed
 colormap will be the one for the window that currently has the
 keyboard focus.
-
-
 .IP "Current (\fIconditions\fP) \fIcommand\fP"
 Performs \fIcommand\fP on the current window if it satisfies all
 \fIconditions\fP.  Conditions include "Iconic", "!Iconic", "Visible",
@@ -961,12 +913,10 @@ the wildcards * and ?.  The window name, icon name, class, and
 resource will be considered when attempting to find a match.  The
 window name can begin with ! which will prevent \fIcommand\fP if any
 of the window name, icon name, class or resource match.
-
+.PP
 Note that earlier versions of fvwm2 required the conditions to be
 enclosed in brackets instead of parentheses (this is still supported
 for backwards compatibility).
-
-
 .IP "CursorMove \fIhorizontal vertical\fP"
 Moves the mouse pointer by \fIhorizontal\fP pages in the X direction
 and \fIvertical\fP pages in the Y direction.  Either or both entries
@@ -978,98 +928,96 @@ specified in pixels by appending a 'p' to the horizontal and/or vertical
 specification.  For example "CursorMove -10p -10p" means move ten
 pixels up and ten pixels left.  The CursorMove function should not be
 called from pop-up menus.
-
 .IP "CursorStyle \fIcontext cursornum\fP"
 Defines a new cursor for the specified context.  The various contexts
 are:
-
 .in +.5i
 POSITION (XC_top_left_corner)
 .in +.3i
 used when initially placing windows
 .in -.3i
-
+.PP
 TITLE (XC_top_left_arrow)
 .in +.3i
 used in a window title-bar
 .in -.3i
-
+.PP
 DEFAULT (XC_top_left_arrow)
 .in +.3i
 used in windows that don't set their cursor
 .in -.3i
-
+.PP
 SYS (XC_hand2)
 .in +.3i
 used in one of the title-bar buttons
 .in -.3i
-
+.PP
 MOVE (XC_fleur)
 .in +.3i
 used when moving or resizing windows
 .in -.3i
-
+.PP
 WAIT (XC_watch)
 .in +.3i
 used during an EXEC builtin command
 .in -.3i
-
+.PP
 MENU (XC_sb_left_arrow)
 .in +.3i
 used in menus
 .in -.3i
-
+.PP
 SELECT (XC_dot)
 .in +.3i
 used for various builtin commands such as iconify
 .in -.3i
-
+.PP
 DESTROY (XC_pirate)
 .in +.3i
 used for DESTROY, CLOSE, and DELETE built-ins
 .in -.3i
-
+.PP
 TOP (XC_top_side)
 .in +.3i
 used in the top side-bar of a window
 .in -.3i
-
+.PP
 RIGHT (XC_right_side)
 .in +.3i
 used in the right side-bar of a window
 .in -.3i
-
+.PP
 BOTTOM (XC_bottom_side)
 .in +.3i
 used in the bottom side-bar of a window
 .in -.3i
-
+.PP
 LEFT (XC_left_side)
 .in +.3i
 used in the left side-bar of a window
 .in -.3i
-
+.PP
 TOP_LEFT (XC_top_left_corner)
 .in +.3i
 used in the top left corner of a window
 .in -.3i
-
+.PP
 TOP_RIGHT (XC_top_right_corner)
 .in +.3i
 used in the top right corner of a window
 .in -.3i
-
+.PP
 BOTTOM_LEFT (XC_bottom_left_corner)
 .in +.3i
 used in the bottom left corner of a window
 .in -.3i
-
+.PP
 BOTTOM_RIGHT (XC_bottom_right_corner)
 .in +.3i
 used in the bottom right corner of a window
 .in -.3i
 .in -.5i
-
+.PP
 And the cursornum is the numeric value of the cursor as defined in the
 include file X11/cursorfont.h.  An example:
 .EX
@@ -1077,8 +1025,6 @@ include file X11/cursorfont.h.  An example:
 CursorStyle DESTROY 56
 .EE
 The defaults are shown in parenthesis above.
-
-
 .IP "DefaultColors [ \fI foreground background\fP ]"
 \fIDefaultColors\fP sets the default forground and background
 colors used in miscellaneous windows created by fvwm, for example
@@ -1087,8 +1033,6 @@ If you don't want to change one color or the other, use - as its
 color name. To revert to the builtin default colors omit both
 color names. Note that the default colors are not used in menus,
 window titles or icon titles.
-
-
 .IP "DefaultFont [ \fIfontname\fP ]"
 \fIDefaultFont\fP sets the default font to font \fIfontname\fP.
 The default font is used by fvwm2 whenever no other font has been
@@ -1098,52 +1042,42 @@ icon titles as well as the geometry feedback windows during a move
 or resize operation. To override the default font in a specific
 context, use the \fIWindowFont\fP, \fIIconFont\fP or \fIMenuStyle\fP
 commands.
-
-
 .IP "Delete"
 Sends a message to a window asking that it remove itself, frequently
 causing the application to exit.
-
-
 .IP "Desk \fIarg1\fP [ \fIarg2\fP ] [ \fImin max\fP ]"
 Switches the current viewport to another desktop (workspace, room).
-
+.PP
 The command takes 1, 2, 3, or 4 arguments. A single argument is
 interpreted as a relative desk number. Two arguments are understood
 as a relative and an absolute desk number. Three arguments specify
 a relative desk and the minimum and maximum of the allowable range.
 Four arguments specify the relative, absolute, minimum and maximum
 values. (Desktop numbers can be negative.)
-
+.PP
 If \fIarg1\fP is non zero then the next desktop number will be the
 current desktop number plus \fIarg1\fP.
-
+.PP
 If \fIarg1\fP is zero then the new desktop number will be \fIarg2\fP.
 (If \fIarg2\fP is not present, then the command has no effect.)
-
+.PP
 If \fImin\fP and \fImax\fP are given, the new desktop number will
 be no smaller than min and no bigger than max. Values out of this
 range are truncated (if you gave an absolute desk number) or wrapped
 around (if you gave a relative desk number).
-
+.PP
 The syntax is the same as for \fIMoveToDesk\fP, which moves a window
 to a different desktop.
-
+.PP
 The number of active desktops is determined dynamically.  Only
 desktops which contain windows or are currently being displayed are
 active.  Desktop numbers must be between 2147483647 and -2147483648
 (is that enough?).
-
-
 .IP "DeskTopSize \fIHorizontal\fPx\fIVertical\fP"
 Defines the virtual desktop size in units of the physical screen size.
-
-
 .IP "Destroy"
 Destroys an application window, which usually causes the application
 to crash and burn.
-
-
 .IP "DestroyDecor \fIdecor\fP"
 Deletes the \fIdecor\fP defined with AddToDecor, so that subsequent
 references to it are no longer valid.  Windows using this \fIdecor\fP
@@ -1152,8 +1086,6 @@ destroyed.
 .EX
 DestroyDecor "CustomDecor1"
 .EE
-
-
 .IP "DestroyFunc"
 Deletes a function, so that subsequent references to it are no longer
 valid.  You can use this to change the contents of a function during an
@@ -1161,8 +1093,6 @@ fvwm session.  The function can be rebuilt using AddToFunc.
 .EX
 DestroyFunc "PrintFunction"
 .EE
-
-
 .IP "DestroyMenu"
 Deletes a menu, so that subsequent references to it are no longer
 valid.  You can use this to change the contents of a menu during an
@@ -1170,14 +1100,12 @@ fvwm session.  The menu can be rebuilt using AddToMenu.
 .EX
 DestroyMenu "Utilities"
 .EE
-
 .IP "DestroyMenuStyle \fImenustyle\fP"
 Deletes the menu style named "menustyle" and changes all menus using
 this style to the default style, you cannot destroy the default menu.
 .EX
 DestroyMenuStyle pixamp1
 .EE
-
 .IP "DestroyModuleConfig"
 Deletes module configuration entries, so that new configuration lines
 may be entered instead.  You can use this to change the the way a
@@ -1187,8 +1115,6 @@ be used for portions of the name as well.
 DestroyModuleConfig FvwmFormFore
 DestroyModuleConfig FvwmButtons*
 .EE
-
-
 .IP "Direction \fIdirection\fP (\fIconditions\fP) \fIcommand\fP"
 Performs \fIcommand\fP (typically Focus) on a window in the given
 direction which satisfies all \fIconditions\fP.  Conditions are the same
@@ -1197,39 +1123,34 @@ East, Southeast, South, Southwest, West and Northwest. Which window
 Direction selects depends on angle and distance between the centerpoints
 of the windows. Closer windows are considered a better match than
 those farther away.
-
-
 .IP "Echo \fIstring\fP"
 Prints a message to stderr.  Potentially useful for debugging things
 in your .fvwmrc.
 .EX
 Echo Beginning style defs...
 .EE
-
-
 .IP "EdgeResistance \fIscrolling moving\fP"
 Tells how hard it should be to change the desktop viewport by moving
 the mouse over the edge of the screen and how hard it should be to
 move a window over the edge of the screen.
-
+.PP
 The first parameter tells how milliseconds the pointer must spend on
 the screen edge before \fIfvwm\fP will move the viewport.  This is
 intended for people who use "EdgeScroll 100 100" but find themselves
 accidentally flipping pages when they don't want to.
-
+.PP
 The second parameter tells how many pixels over the edge of the screen
 a window's edge must move before it actually moves partially off the
 screen. By default the viewport is moved a full page in the requested
 direction, but if you used \fIEdgeScroll\fP and set any values other
 than zero they will be used instead.
-
+.PP
 Note that, with "EdgeScroll 0 0", it is still possible to move or
 resize windows across the edge of the current screen.  By making the
 first parameter to EdgeResistance 10000 this type of motion is
 impossible.  With EdgeResistance less than 10000 but greater than 0
 moving over pages becomes difficult but not impossible.
 See also, EdgeThickness.
-
 .IP "EdgeScroll \fIhorizontal vertical\fP"
 Specifies the percentage of a page to scroll when the cursor hits the
 edge of a page.  A trailing "p" changes the interpretation to mean "pixels".
@@ -1239,37 +1160,32 @@ or possibly better, set the EdgeThickness to zero.
 See the EdgeThickness command. If you want whole
 pages, use "EdgeScroll 100 100".  Both horizontal and vertical should
 be positive numbers.
-
+.PP
 If the horizontal and vertical percentages are multiplied by 1000 then
 scrolling will wrap around at the edge of the desktop.  If "EdgeScroll
 100000 100000" is used \fIfvwm\fP will scroll by whole pages, wrapping
 around at the edge of the desktop.
-
 .IP "EdgeThickness \fI0\fP|\fI1\fP|\fI2\fP"
 This is the width or height of the invisible window that fvwm2 creates
 on the edges of the screen that are used for the edgescrolling feature.
-
+.PP
 A value of  zero completely disables  mouse edge scrolling, even while
 dragging a window.
-
+.PP
 1 gives the  smallest pan frames,  which seem to  work best  except on
 some servers.
-
+.PP
 2 is the default.
-
+.PP
 Pan frames of 1 or 2 pixels can sometimes be confusing, for example,
 if you drag a window over the edge of the screen, so that it stradles
 aa pan frame, clicks on the window, near the edge of the screen are
 treated as clicks on the root window.
-
-
 .IP "Emulate \fIfvwm\fP|\fImwm\fP|\fIwin\fP"
 This command affects how miscellaneous things are done by fvwm.
 For example where the move/resize feedback window appears depends
 on this command. To have more MWM- or WIN-like behavior you can call
 Emulate with "MWM" or "WIN" as its argument.
-
-
 .IP "Exec \fIcommand\fP"
 Executes \fIcommand\fP.  You should not use an ampersand ``&'' at the
 end of the command.  You probably want to use an additional ``exec'' at
@@ -1278,7 +1194,7 @@ invokes to run your command will stay until the command exits.  In
 effect, you'll have twice as many processes running as you need.
 Note that some shells are smart enough to avoid this, but it never hurts
 to include the ``exec'' anyway.
-
+.PP
 The following example binds function key F1 in the root window, with
 no modifiers, to the exec function.  The program rxvt will be started
 with an assortment of options.
@@ -1286,7 +1202,7 @@ with an assortment of options.
 Key F1 R N Exec exec rxvt -fg yellow -bg blue \\
   -e /bin/tcsh
 .EE
-
+.PP
 Note that this function doesn't wait for \fIcommand\fP to complete, so
 things like:
 .EX
@@ -1294,7 +1210,6 @@ Exec "echo AddToMenu ... > /tmp/file"
 Read /tmp/file
 .EE
 won't work reliably.
-
 .IP "ExecUseShell [ \fIshell\fP ]"
 Makes the Exec command use the specified shell, or the value of the
 $SHELL environment variable if no shell is specified, instead of the
@@ -1303,8 +1218,6 @@ default Bourne shell (/bin/sh).
 ExecUseShell
 ExecUseShell /usr/local/bin/tcsh
 .EE
-
-
 .IP "FlipFocus"
 Executes a \fIFocus\fP command as if the user had used the pointer to
 select the window.  This command alters the order of the windowlist in
@@ -1312,8 +1225,6 @@ the same way as clicking in a window to focus, i.e. the target window is
 removed from the windowlist and placed at the start. This command is
 recommended for use with the \fIDirection\fP command and in the function
 invoked from \fIWindowList\fP.
-
-
 .IP "Focus"
 Moves the viewport or window as needed to make the selected window
 visible.  Sets the keyboard focus to the selected window.  Does not
@@ -1321,7 +1232,7 @@ automatically raise the window.  Does not warp the pointer into
 the selected window (see WarpToWindow function).  Does not de-iconify.
 This command does not alter the order of the windowlist, it rotates the
 windowlist around so that the target window is at the start.
-
+.PP
 To raise and warp a pointer together with Focus or FlipFocus, use a function:
 .EX
 AddToFunc SelectWindow
@@ -1329,11 +1240,9 @@ AddToFunc SelectWindow
 + I Raise
 + I WarpToWindow 50 8p
 .EE
-
-
 .IP "Function \fI\FunctionName\\fP"
 Used to bind a previously defined function to a key or mouse button.
-
+.PP
 The following example binds mouse button 1 to a function called
 "Move-or-Raise", whose definition was provided as an example earlier
 in this man page.  After performing this binding \fIfvwm\fP will
@@ -1344,8 +1253,6 @@ Mouse 1 T A Function Move-or-Raise
 .EE
 The keyword "Function" may be omitted if "FunctionName" does not
 coincide with an fvwm built-in function name
-
-
 .IP "GlobalOpts [ \fIoptions\fP ]"
 This is a TEMPORARY command used to set some global options which will
 later be handled as Style parms (or options to Style parms).  It
@@ -1358,25 +1265,25 @@ CaptureHonorsStartsOnPage/CaptureIgnoresStartsOnPage,
 RecaptureHonorsStartsOnPage/RecaptureIgnoresStartsOnPage,
 ActivePlacementHonorsStartsOnPage/ActivePlacementIgnoresStartsOnPage,
 NoStipledTitles/StipledTitles
-
+.PP
 Example:
 .EX
 GlobalOpts ClickToFocusDoesntPassClick, \\
   ClickToFocusDoesntRaise
 .EE
-
+.PP
 RecaptureHonorsStartsOnPage causes a window to be placed according to, or
 revert to, the StartsOnPage desk and page specification on Restart or
 Recapture. RecaptureIgnoresStartsOnPage causes fvwm to respect the current
 window position on Restart or Recapture. The default is
 RecaptureIgnoresStartsOnPage.
-
+.PP
 CaptureHonorsStartsOnPage causes the initial capture (of an already
 existing window) at startup to place the window according to the
 StartsOnPage desk and page specification. CaptureIgnoresStartsOnPage
 causes fvwm to ignore these settings (including StartsOnDesk) on
 initial capture. The default is CaptureHonorsStartsOnPage.
-
+.PP
 ActivePlacementIgnoresStartsOnPage suppresses StartsOnPage or StartsOnDesk
 placement in the event that both ActivePlacement and SkipMapping are in
 effect when a window is created. This prevents you from interactively
@@ -1386,7 +1293,6 @@ allows this to happen anyway. The option has no effect if SkipMapping is
 not in effect, because fvwm will switch to the proper desk/page to perform
 interactive placement. The default is ActivePlacementHonorsStartsOnPage,
 which matches the way StartsOnDesk handled the situation.
-
 .IP "GotoPage x y"
 Moves the desktop viewport to page (x,y).  The upper left page is
 (0,0), the upper right is (M,0), where M is one less than the current
@@ -1394,57 +1300,45 @@ number of horizontal pages specified in the DeskTopSize command.  The
 lower left page is (0,N), and the lower right page is (M,N), where N
 is the desktop's vertical size as specified in the DeskTopSize
 command.  The GotoPage function should not be used in a pop-up menu.
-
-
 .IP "HilightColor \fItextcolor backgroundcolor\fP"
 Specifies the text and background colors for the decorations on the
 window which currently has the keyboard focus.
-
-
 .IP "IconFont [ \fIfontname\fP ]"
 Makes \fIfvwm\fP use font \fIfontname\fP for icon labels. To reset
 this font to the default font (see \fIDefaultFont\fP) you may omit
 \fIfontname\fP.
-
-
 .IP "Iconify [ \fIvalue\fP ]"
 Iconifies a window if it is not already iconified or de-iconifies it
 if it is already iconified.  If the optional argument \fIvalue\fP is
 positive only iconification will be allowed.  If the optional
 argument is negative only de-iconification will be allowed.
-
-
 .IP "IconPath \fIpath\fP"
 Specifies a colon separated list of full path names of directories
 where bitmap (monochrome) icons can be found.  Each path should start
 with a slash.  Environment variables can be used here as well (i.e.
 $HOME or ${HOME}).
-
+.PP
 Note: if the FvwmM4 is used to parse your rc files, then \fIm4\fP may
 want to mangle the word "include" which will frequently show up in the
 IconPath or PixmapPath command.  To fix this add undefine(`include')
 prior to the IconPath command, or better use the '-m4-prefix' option
 to force all m4 directives to have a prefix of "m4_" (see the
 \fIFvwmM4\fP man page).
-
-
 .IP "ImagePath \fIpath\fP"
 Specifies a colon separated list of directories in which to search
 for images (both monochrome and pixmap).
-
+.PP
 \fINOTE\fP: ImagePath makes obsolete IconPath and PixmapPath commands in the
 next fvwm versions. In this version all of the three commands are allowed.
-
+.PP
 The ImagePath may contain environment variables such as $HOME (or
 ${HOME}).  Further, a '+' in the path is expanded to the previous
 value of the path, allowing easy appending or prepending to the path.
-
+.PP
 For example:
 .EX
 ImagePath $HOME/icons:+:__projectroot__/include/bitmaps
 .EE
-
-
 .IP "Key \fIkeyname Context Modifiers Function\fP"
 Binds a keyboard key to a specified \fIfvwm\fP built-in function, or
 removes the binding if \fIFunction\fP is '-'.  Definition is the same
@@ -1456,30 +1350,24 @@ binding. However, when you press a key the context window is the
 window that has the keyboard focus. That is not necessarily the
 same as the window the pointer is over (with SloppyFocus or
 ClickToFocus).
-
+.PP
 The following example binds the built in window list to pop up when
 Alt-Ctrl-Shift-F11 is hit, no matter where the mouse pointer is:
 .EX
 Key F11 A SCM WindowList
 .EE
-
+.PP
 Binding a key to a title-bar button will not cause that button to
 appear unless a mouse binding also exists.
-
-
 .IP "KillModule \fIname\fP"
 Causes the module which was invoked with name \fIname\fP to be killed.
 \fIname\fP may include wild-cards.
-
-
 .IP "Lower"
 Allows the user to lower a window.
-
-
 .IP "Maximize [ \fI horizontal vertical\fP ]"
 Without its optional arguments Maximize causes the window to
 alternately switch from a full-screen size to its normal size.
-
+.PP
 With the optional arguments horizontal and vertical, which are
 expressed as percentage of a full screen, the user can control the new
 size of the window.  If horizontal is greater than 0 then the
@@ -1499,11 +1387,9 @@ This makes a window that is half the screen size in each direction:
 Mouse 0 4 A Maximize 50 50
 .EE
 Values larger than 100 can be used with caution.
-
+.PP
 If the letter "p" is appended to each coordinate (horizontal and/or
 vertical), then the scroll amount will be measured in pixels.
-
-
 .IP "Menu \fImenu-name\fP [ \fIposition\fP ] [ \fIdouble-click-action\fP ]"
 Causes a previously defined menu to be popped up in a "sticky" manner.
 That is, if the user invokes the menu with a click action instead of a
@@ -1511,7 +1397,7 @@ drag action, the menu will stay up.  The command
 \fIdouble-click-action\fP will be invoked if the user double-clicks
 (or hits the key rapidly twice if the menu is bound to a key) when
 bringing the menu up.
-
+.PP
 Several other commands affect menu operation.  See \fIMenuStyle\fP
 and \fISetAnimation\fP.  When in a menu, keyboard
 shortcuts work as expected.  Cursor keystrokes are also allowed.
@@ -1522,10 +1408,10 @@ Ctrl-F popup the next menu; Ctrl-Cursor-Up and Ctrl-Cursor-Down move
 up and down five items, respectively;  Shift-Cursor-Up and
 Shift-Cursor-Down move to the first and last items, respectively; Enter
 executes the current item; Escape exits the current sequence of menus.
-
+.PP
 The pointer will be warped to where it was when the menu was invoked if
 it was both invoked and terminated with a keystroke.
-
+.PP
 The \fIposition\fP arguments allow to place the menu somewhere on the
 screen, for example centered on the visible screen or above a title
 bar.  Basically it works like this: you specify a \fIcontext-rectangle\fP
@@ -1536,7 +1422,6 @@ arguments consist of several parts:
 [ [context-rectangle] x y ] [ special-options ]
 .EE
 The \fIcontext-rectangle\fP can be one of:
-
 .in +.5i
 Root
 .in +.3i
@@ -1580,28 +1465,30 @@ the current window, menu or icon.
 .in -.3i
 This
 .in +.3i
-whatever widget the pointer is on (e.g. a corner of a window or the root window).
+whatever widget the pointer is on (e.g. a corner of a window or the
+root window).
 .in -.3i
 Rectangle <geometry>
 .in +.3i
-the rectangle defined by <\fIgeometry\fP> in X geometry format.  Width and height default to 1 if omitted.
+the rectangle defined by <\fIgeometry\fP> in X geometry format.
+Width and height default to 1 if omitted.
 .in -.3i
 .in -.5i
-
+.PP
 If the context-rectangle is omitted "Mouse" is the default.
 Note that not all of these make sense under all circumstances
 (e.g. "Icon" if the pointer is on a menu).
-
+.PP
 The offset values \fIx\fP and \fIy\fP specify how far the menu is
 moved from it's default position. By default, the numeric value given
 is interpreted as a percentage of the context rectangle's width (height),
 but with a trailing "m" the menu's width (height) is used instead.
 Furthermore a trailing "p" changes the interpretation to mean "pixels".
-
+.PP
 Instead of a single value you can use a list of values. All additional
 numbers after the first one are separated from threir predecessor but
 their sign. Do not use any other separators.
-
+.PP
 If x or y are prefixed with 'o<number>' where <number> is an integer, the
 menu and the rectangle will be moved to overlap at the specified position
 before any other offsets are applied. The menu and the rectangle will be
@@ -1611,10 +1498,9 @@ So 'o0' means that the top/left borders of the menu and the rectangle
 overlap, with 'o100' it's the bottom/right borders and if you use 'o50'
 they are centered upon each other (try it and you will see it is much
 simpler than this description). The default is 'o0'. The prefix
-'o<number>' is an abbreviation for '+<number>-<number>m'.
-
+\fBo<number>\fP is an abbreviation for "+<number>-<number>m".
+.PP
 A prefix of 'c' is equivalent of 'o50'.  Examples:
-
 .EX
 \&# window list in the middle of the screen
 WindowList Root c c
@@ -1643,31 +1529,29 @@ Note that you can put a submenu far off the current menu so you could
 not reach it with the mouse without leaving the menu. If the pointer
 leaves the current menu in the general direction of the submenu the
 menu will stay up.
-
+.PP
 The \fIspecial-options\fP:
-
 .in +.5i
 The "animated" and "mwm" or "win" meny styles may move a menu somewhere
 else on the screen.  If you do not want this you can add \fIFixed\fP
 as an option. This might happen for example if you want the menu always
 in the top right corner of the screen.
-
+.PP
 Where do you want a submenu to appear when you click on it's menu item?
 The default is to place the title under the cursor, but if you want it
 where the position arguments say, use the \fISelectInPlace\fP option.
 If you want the pointer on the title of the menu, use \fISelectWarp\fP
 too.
-
+.PP
 The pointer is warped to the title of a submenu whenever the pointer
 would be on an item when the submenu is popped up ("fvwm" menu style) or
 never warped to thetitle at all ("mwm" or "win" menu styles). You can
 force (forbid) warping whenever the submenu is opened with the
 \fIWarpTitle\fP (\fINoWarp\fP) option.
-
+.PP
 Note that the \fIspecial-options\fP do work with a normal menu that has
 no other position arguments.
 .in -.5i
-
 .IP "MenuStyle \fIstylename options\fP"
 Sets a new menu style or changes a previously defined style.
 The \fIstylename\fP is the style name; if it contains spaces or tabs it
@@ -1676,7 +1560,7 @@ The default menu style is used for every menu-like object (e.g. the
 window created by the \fIWindowList\fP command) that had not be assigned
 a style using the \fIChangeMenuStyle\fP. See also \fIDestroyMenuStyle\fP.
 When using monochrome color options are ignored.
-
+.PP
 \fIoptions\fP is a comma separated list containing some of the
 keywords FVWM/MWM/WIN,
 Foreground,
@@ -1698,10 +1582,10 @@ PopupImmediately/PopupDelayed,
 DoubleClickTime,
 SidePic,
 SideColor.
-
+.PP
 In the above list some options are listed as option pairs or triples
 with a / in between. These options exclude each other.
-
+.PP
 \fIFVWM\fP, \fIMWM\fP, \fIWIN\fP reset all options to the style with
 the same name in former versions of fvwm2. The default for new menu
 styles is FVWM style. These options override all others except
@@ -1710,103 +1594,99 @@ PopupDelay, so they should be used only as the first option
 specified for a menu style or to reset the style to defined bahavior.
 The same effect can be created by setting all the other options one
 by one.
-
+.PP
 \fIMWM\fP and \fIWIN\fP style menus popup sub-menus automatically.
 WIN menus indicate the current menu item by changing the
 background to dark. \fIFVWM\fP sub-menus overlap the parent menu,
 MWM and WIN style menus never overlap the parent menu.
-
+.PP
 \fIFVWM\fP style is equivalent to HilightBackOff, Hilight3DThin,
 ActiveForeOff, AnimationOff, Font, MenuFace, PopupOffset 0 67, TitleWarp,
 TitleUnderlines1, SeparatorsShort, TriangleRelief, PopupDelayed.
-
+.PP
 \fIMWM\fP style is equivalent to HilightBackOff, Hilight3DThick,
 ActiveForeOff, AnimationOff, Font, MenuFace, PopupOffset -3 100,
 TitleWarpOff, TitleUnderlines2, SeparatorsLong, TriangleRelief,
 PopupImmediately.
-
+.PP
 \fIWIN\fP style is equivalent to HilightBack, Hilight3DOff,
 ActiveForeOff, AnimationOff, Font, MenuFace, PopupOffset -5 100,
 TitleWarpOff, TitleUnderlines1, SeparatorsShort, TriangleSolid,
 PopupImmediately.
-
+.PP
 \fIForeground\fP and \fIBackground\fP may have a color name as an
 argument. This color is used for menu text or the menu's background.
 You can omit the color name to reset these colors to the built in default.
-
+.PP
 \fIGreyed\fP may have a color name as an argument. This color is the
 one used to draw a menu-selection which is prohibited (or not
 recommended) by the mwm-hints which an application has specified.
 If the color is omitted the color of "greyed" menu entries is based
 on the background color of the menu.
-
+.PP
 \fIHilightBack\fP and \fIHilightBackOff\fP switch hilighting the background
 of the selected menu item on and off. A specific background color
 may be used by providing the color name as an argument to
 \fIHilightBack\fP. If you use this option without an argument the
 color is based on the menu's background color.
-
+.PP
 \fIActiveFore\fP and \fIActiveForeOff\fP switch hilighting the foreground
 of the selected menu item on and off. A specific foreground color
 may be used by providing the color name as an argument to
 ActiveFore. Omitting the color name has the same effet as
 using ActiveForeOff.
-
+.PP
 \fIHilight3DThick\fP, \fIHilight3DThin\fP and \fIHilight3DOff\fP
 determine if the selected menu item is hilighted with a 3D relief.
 Thick reliefs are two pixels wide, thin reliefs are one pixel wide.
-
+.PP
 \fIAnimation\fP and \fIAnimationOff\fP turn menu animation on or off.
 When animation is on, sub-menus that don't fit on the screen cause
 the parent menu to be shifted to the left so the sub-menu can be seen.
-
+.PP
 \fIFont\fP takes a font name as an argument. If a font by this name
 exists it is used for the text of all menu items. If it does not
 exist or if the name is left blank the built in default is used.
-
+.PP
 \fIMenuFace\fP enforces a fancy background upon the menus. You can
 use the same options for MenuFace as for ButtonStyle plus DGradient,
 (top-left to down-right) and BGradient (down-left to top-right). See
 \fIButtonStyle\fP for more info. If you use MenuFace without arguments
 the style is reverted back to normal.
-
+.PP
 Some examples of MenuFaces are:
-
 .EX
 MenuFace DGradient 128 2 lightgrey 50 blue 50 white
 MenuFace TiledPixmap texture10.xpm
 MenuFace HGradient 128 2 Red 40 Maroon 60 White
 MenuFace Solid Maroon
 .EE
-
+.PP
 If you encounter performance problems with gradient backgrounds
 you can try one or all of the following:
-
+.PP
 Turn Hilighting of the active menu item other than forground color
 off:
-
 .EX
 MenuStyle <stylename> Hilight3DOff, HilightBackOff
 MenuStyle ActiveFore <preferred color>
 .EE
-
+.PP
 Make sure submenus do not overlap the parent menu. This can prevent
 menus being redrawn every time a submenu pops up or down.
-
 .EX
 MenuStyle <stylename> PopupOffset 1 100
 .EE
-
+.PP
 Run you X server with backing storage. If your Xserver is started
 with the -bs option, turn it off. If not try the -wm option.
-
 .EX
 startx -- -wm
 .EE
-
+.PP
 You may have to adapt this example to your system (e.g. if you
 use xinit to start X).
-
+.PP
 \fIPopupDelay\fP requires one numeric argument. This value is the
 delay in milliseconds before a sub-menu is popped up when the
 pointer moves over a menu item that has a sub-menu. If the value
@@ -1816,12 +1696,12 @@ effect if the \fIPopupImmediately\fP option is used since sub-menus pop
 up immediately then. The PopupDelay option should only be applied to the
 default style ('*') since it is a global setting and affects all
 menus.
-
+.PP
 \fIPopupImmediately\fP makes menu items with sub menus pop up it up as
 soon as the pointer enters the item. The PopupDelay is ignored then.
 If \fIPopupDelayed\fP is used fvwm2 looks at the \fIPopupDelay\fP option
 if or when this automatic popup happens.
-
+.PP
 \fIPopupOffset\fP requires two integer arguments. Both values affect
 where sub-menus are placed relative to the parent menu. If both
 values are zero, the left edge of the sub-menu overlaps the left edge
@@ -1829,24 +1709,24 @@ of the parent menu. If the first value is non-zero the sub-menu is
 shifted that many pixels to the right (or left if negative). If the
 second value is non-zero the menu is moved by that many percent of
 the parent menu's width to the right or left.
-
+.PP
 \fITitleWarp\fP and \fITitleWarpOff\fP affect if the pointer warps to
 the menu title when a sub-menu is opened or not. Not that regardless of
 this setting the pointer will not be warped if the menu does not pop up
 under the pointer.
-
+.PP
 \fITitleUnderlines0\fP, \fITitleUnderlines1\fP and \fITitleUnderlines2\fP
 specify how many lines are drawn below a menu title.
-
+.PP
 \fISeparatorsLong\fP and \fISeparatorsShort\fP set the length of
 menu separators. Long separators run from the left edge all the
 way to the right edge. Short separators leave a few pixels to
 the edges of the menu.
-
+.PP
 \fITrianglesSolid\fP and \fITrianglesRelief\fP affect how the
 small triangles for sub-menus is drawn. Solid triangles are
 filled with a color while relief triangles are hollow.
-
+.PP
 \fIDoubleClickTime\fP requires one numeric argument. This value is the
 time in milliseconds between two mouse clicks in a menu to be
 considered as a double click. The default is 450 milliseconds.
@@ -1854,21 +1734,20 @@ If the argument is omitted the doucle click time is reset to this
 default. The DoubleClickTime option should only be applied to the
 default style ('*') since it is a global setting and affects all
 menus.
-
+.PP
 \fISidePic\fP takes the name of an xpm or bitmap file as an argument.
 The picture is drawn along the left side of the menu. The SidePic
 option can be overridden by a menu specific side pixmap (see
 \fIAddToMenu\fP). If the file name is omitted an existing side
 pixmap is remove from the menu style.
-
+.PP
 \fISideColor\fP takes the name of an X11 color as an argument. This
 color is used to colorize the column containing the side picture
 (see above). The SideColor option can be overridden by a menu
 specific side color (see \fIAddToMenu\fP). If the color name is
 omitted the side color option is switched off.
-
+.PP
 Examples:
-
 .EX
 MenuStyle * mwm
 MenuStyle * Foreground Black, Background gray40
@@ -1884,23 +1763,21 @@ MenuStyle gred HilightBackOff, Hilight3DOff
 MenuStyle gred Font lucidasanstypewriter-12
 MenuStyle gred MenuFace DGradient 64 Red Black
 .EE
-
+.PP
 Note that all style options could be placed on a single line for each
 style name.
-
-
 .IP "MenuStyle \fIforecolor backcolor shadecolor font style\fP [ \fIanim\fP ]"
 This is the old syntax of the MenuStyle command. It is obsolete and
 may be removed in the future. Please use the new syntax as described
 above.
-
+.PP
 Sets the menu style.  When using monochrome the colors are ignored.
 The shade-color is the one used to draw a menu-selection which is
 prohibited (or not recommended) by the mwm-hints which an application
 has specified.  The style option is either "fvwm" "mwm" or "win",
 which changes the appearance and operation of the menus
 and where the feedback window appears during resizes and moves.
-
+.PP
 "mwm" and "win" style menus popup sub-menus automatically.
 "win" menus indicate the current menu item by changing the
 background to black.
@@ -1908,13 +1785,12 @@ background to black.
 never overlap the parent menu.
 "mwm" resize and move feedback windows are in the center of the
 screen, instead of the upper left corner.
-
+.PP
 The "anim" option is either "anim" or blank.  When this option
 is "anim", sub-menus that don't fit on the screen cause the parent menu
 to be shifted to the left so the sub-menu can be seen.
-
+.PP
 See also \fISetAnimation\fP command.
-
 .IP "Module \fIModuleName\fP"
 Specifies a module which should be spawned during initialization.  At
 the current time the available modules (included with fvwm) are
@@ -1935,26 +1811,22 @@ animation effects when a window is iconified or deiconifed).
 .\" Note: The "Optional Module Name" description is missing.
 These modules have their own man pages.  There are other modules out
 on there as well.
-
+.PP
 Modules can be short lived transient programs or, like FvwmButtons,
 can remain for the duration of the X session.  Modules will be
 terminated by the window manager prior to restarts and quits, if
 possible.  See the introductory section on modules.  The keyword
 "module" may be omitted if \fIModuleName\fP is distinct from all
 built-in and function names.
-
-
 .IP "ModulePath"
 Specifies a colon separated list of paths for \fIfvwm\fP to search
 when looking for a module to load.  Individual directories do not need
 trailing slashes.  Environment variables can be used here as well (i.e.
 $HOME or ${HOME}).  The builtin module path is available via the
 environment variable $FVWM_MODULEDIR.
-
-
 .IP "Mouse \fIButton Context Modifiers Function\fP"
 Defines a mouse binding, or removes the binding if \fIFunction\fP is
-'-'. \fIButton\fP is the mouse button number.  If \fIButton\fP is
+\fB-\fP. \fIButton\fP is the mouse button number.  If \fIButton\fP is
 zero then any button will perform the specified function.
 \fIContext\fP describes where the binding applies.  Valid contexts are
 R for the root window, W for an application window, T for a window
@@ -1964,15 +1836,15 @@ title-bar buttons, or any combination of these letters.  A is for any
 context except for title-bar buttons.  For instance, a context of FST
 will apply when the mouse is anywhere in a window's border except the
 title-bar buttons.
-
+.PP
 \fIModifiers\fP is any combination of N for no modifiers, C for
 control, S for shift, M for Meta, or A for any modifier.  For example,
 a modifier of SM will apply when both the Meta and Shift keys are
 down.  X11 modifiers mod1 through mod5 are represented as the digits
 1 through 5.
-
+.PP
 \fIFunction\fP is one of \fIfvwm\fP's built-in functions.
-
+.PP
 The title bar buttons are numbered with odd numbered buttons on the
 left side of the title bar and even numbers on the right.
 Smaller-numbered buttons are displayed toward the outside of the
@@ -1986,25 +1858,23 @@ determines the number of buttons drawn on the left side of the title
 bar.  The highest even number determines the number or right side
 buttons which are drawn.  Actions can be bound to either mouse buttons
 or keyboard keys.
-
-
 .IP "Move [ \fIx y\fP [ \fIWarp\fP ] ]"
 Allows the user to move a window.  If called from somewhere in a
 window or its border, then that window will be moved.  If called from
 the root window then the user will be allowed to select the target
 window. If the optional argument \fIWarp\fP is specified the pointer is warped
 with the window.
-
+.PP
 The operation can be aborted with Escape or by pressing any mouse button
 (except button 1 which confirms the move).
-
+.PP
 If the optional arguments x and y are provided, then the window will
 be moved immediately without user interaction.  Each argument can
 specify an absolute or relative position from either the left (top) or
 right (bottom) of the screen.  By default, the numeric value given is
 interpreted as a percentage of the screen width (height), but a trailing
 "p" changes the interpretation to mean "pixels".
-
+.PP
 Simple Examples:
 .EX
 \&# Interactive move
@@ -2014,7 +1884,7 @@ Mouse 2 T A Move 10 10
 \&# Move top left to (10pixels,10pixels)
 Mouse 3 T A Move 10p 10p
 .EE
-
+.PP
 More complex examples (these can be bound as actions to keystrokes,
 etc.; only the command is shown, though):
 .EX
@@ -2030,18 +1900,14 @@ Move w+5 50
 \&# is at x=40 pixels
 Move 40p w-10p
 .EE
-
+.PP
 See also the "AnimatedMove" command, above.
-
-
 .IP "MoveToDesk \fIarg1\fP [ \fIarg2\fP ] [ \fImin max\fP ]"
 Moves the selected window to another desktop (workspace, room).
-
+.PP
 The arguments are the same as for the \fIDesk\fP command. MoveToDesk
 is a replacement for the old WindowsDesk command, which can no longer
 be used.
-
-
 .IP "MoveToPage [ \fIx y\fP ]"
 Moves the selected window to another page (x,y). The upper left page is
 (0,0), the upper right is (M,0), where M is one less than the current
@@ -2051,28 +1917,20 @@ is the desktop's vertical size as specified in the DeskTopSize
 command. If \fIx\fP and \fIy\fP are not given, the window is moved to
 the current page (a window that has the focus but is off-screen can
 be retrieved with this).
-
-
 .IP "Next (\fIconditions\fP) \fIcommand\fP"
 Performs \fIcommand\fP (typically Focus) on the next window which
 satisfies all \fIconditions\fP.  Conditions are the same as for \fICurrent\fP
 with the addition of CirculateHit which overrides the CirculateSkip style
 attribute and CirculateHitIcon which overrides the CirculateSkipIcon style
 attribute for iconified windows.
-
-
 .IP "None (\fIconditions\fP) \fIcommand\fP"
 Performs \fIcommand\fP if no window which satisfies all
 \fIconditions\fP exists.  Conditions are the same as for \fINext\fP.
-
-
 .IP "Nop"
 Does nothing.  This is used to insert a blank line or separator in a
 menu.  If the menu item specification is Nop " ", then a blank line is
 inserted.  If it looks like Nop "", then a separator line is inserted.
 Can also be used as the double-click action for Menu.
-
-
 .IP "OpaqueMoveSize \fIpercentage\fP"
 Tells \fIfvwm\fP the maximum size window with which opaque window
 movement should be used.  The percentage is percent of the total
@@ -2081,21 +1939,15 @@ traditional rubber-band outline.  With "OpaqueMoveSize 100" all windows
 will be move as solid windows.  The default is "OpaqueMoveSize 5", which
 allows small windows to be moved in an opaque manner but large windows
 are moved as rubber-bands.
-
-
 .IP "PipeRead \fIcmd option\fP"
 Causes fvwm to read commands output from the program named
 \fIcmd\fP.  Useful for building up dynamic menu entries based on a
 directories contents, for example.
-
-
 .IP "PixmapPath \fIpath\fP"
 Specifies a colon separated list of full path names of directories
 where pixmap (color) icons can be found.  Each path should start with
 a slash.  Environment variables can be used here as well (i.e.  $HOME
 or ${HOME}).
-
-
 .IP "Popup \fIPopupName\fP [ \fIposition\fP ] [ \fIdefault-action\fP ]"
 This built-in has two purposes: to bind a menu to a key or mouse
 button, and to bind a sub-menu into a menu.  The formats for the two
@@ -2104,7 +1956,7 @@ as for \fIMenu\fP.  The command \fIdefault-action\fP will be invoked
 if the user clicks a button to invoke the menu and releases it
 immediately again (or hits the key rapidly twice if the menu is bound
 to a key).
-
+.PP
 To bind a previously defined pop-up menu to a key or mouse button:
 .sp
 .in +.25i
@@ -2168,71 +2020,49 @@ simply clicks.  These are Twm style popup-menus, which are a little
 hard on the wrist.  Menu provides Motif or Microsoft-Windows style
 menus which will stay up on a click action.  See menu for an explanation
 of the interactive behaviour of menus.
-
-
 .IP "Prev (\fIconditions\fP) \fIcommand\fP"
 Performs \fIcommand\fP (typically Focus) on the previous window which
 satisfies all \fIconditions\fP.  Conditions are the same as for \fINext\fP.
-
-
 .IP "Quit"
 Exits fvwm, generally causing X to exit too.
-
-
 .IP "QuitScreen"
 Causes fvwm to stop managing the screen on which the command was issued.
-
-
 .IP "Raise"
 Allows the user to raise a window.
-
-
 .IP "RaiseLower"
 Alternately raises and lowers a window.
-
-
 .IP "Read \fIfilename\fP [ \fIoption\fP ]"
 Causes fvwm to read commands from the file named \fIfilename\fP.
 If the option following the filename is "Quiet", no message is
 produced if the file is not found.
-
-
 .IP "Recapture"
 Causes fvwm to recapture all of its windows.  This ensures that the
 latest style parameters will be used.  The recapture operation is
 visually disturbing.
-
-
 .IP "Refresh"
 Causes all windows on the screen to redraw themselves.
-
-
 .IP "RefreshWindow"
 Causes current (or chosen) window to redraw itself.
-
-
 .IP "Resize [ \fIx y\fP ]"
 Allows the user to resize a window.  If called from somewhere in a
 window or its border, then that window will be resized.  If called from
 the root window then the user will be allowed to select the target
 window.
-
+.PP
 The operation can be aborted with Escape or by pressing any mouse button
 (except button 1 which confirms the resize).
-
+.PP
 If the optional arguments x and y are provided, then the window will
 be resized so that its dimensions are \fIx\fP by \fIy\fP).  The units
 of x and y are percent-of-screen, unless a letter "p" is appended to
 each coordinate, in which case the location is specified in pixels.
-
-
 .IP "Restart  \fIWindowManagerName\fP "
 Causes \fIfvwm\fP to restart itself if WindowManagerName is "fvwm2",
 or to switch to an alternate window manager if WindowManagerName is
 other than "fvwm2".  If the window manager is not in your default
 search path, then you should use the full path name for
 \fIWindowManagerName\fP.
-
+.PP
 This command should not have a trailing ampersand or any command line
 arguments and should not make use of any environmental variables.  Of
 the following examples, the first two are sure losers, but the third
@@ -2242,7 +2072,6 @@ Key F1 R N Restart fvwm &
 Key F1 R N Restart $(HOME)/bin/fvwm
 Key F1 R N Restart /home/nation/bin/fvwm
 .EE
-
 .IP "Scroll \fIhorizonal vertical\fP"
 Scrolls the virtual desktop's viewport by \fIhorizontal\fP pages in
 the x-direction and \fIvertical\fP pages in the y-direction.  Either
@@ -2252,23 +2081,21 @@ down and left by one full page.  "Scroll 50 25" means to scroll left
 half a page and down a quarter of a page.  The scroll function should
 not be called from pop-up menus. Normally, scrolling stops at the edge
 of the desktop.
-
+.PP
 If the horizontal and vertical percentages are multiplied by 1000 then
 scrolling will wrap around at the edge of the desktop.  If "Scroll
 100000 0" is executed over and over \fIfvwm\fP will move to the next
 desktop page on each execution and will wrap around at the edge of the
 desktop, so that every page is hit in turn.
-
+.PP
 If the letter "p" is appended to each coordinate (horizontal and/or
 vertical), then the scroll amount will be measured in pixels.
-
 .IP "SendToModule \fImodulename string\fP"
 Sends an arbitrary string (no quotes required) to all modules matching
 \fImodulename\fP, which may contain wildcards.  This only makes sense
 if the module is set up to understand and deal with these strings
 though...  Can be used for module to module communication, or
 implementation of more complex commands in modules.
-
 .IP "SetAnimation \fImilliseconds-delay\fP [ \fifractions-to-move-list\fP ]"
 Sets the time between frames and the list of fractional offsets to
 customize the animated moves of the \fIAnimatedMove\fP command and
@@ -2281,13 +2108,12 @@ between the starting location and the ending location.  e.g.:
 SetAnimation 10 -.01 0 .01 .03 .08 .18 .3 \\
   .45 .6 .75 .85 .90 .94 .97 .99 1.0
 .EE
-
+.PP
 Sets the delay between frames to 10ms, and sets the positions of the 16
 frames of the animation motion.  Notice that negative values are allowed,
 and in particular can be used to make the motion appear more cartoonish, by
 briefly moving slightly in the opposite direction of the main motion.  The
 above settings are the default.
-
 .IP "SetEnv \fIvarname stringvalue\fP"
 Set an environment variable to a new value, similar to shell's export
 or setenv command.  The variable and its value are inherited by processes
@@ -2296,32 +2122,29 @@ with the FvwmM4 module; e.g.  "SetEnv height HEIGHT" will make the FvwmM4-set
 variable "HEIGHT" usable by processes started by fvwm2 as the environment
 variable "$height".  If \fIstringvalue\fP includes whitespace, you should
 enclose it in quotes.
-
-
 .IP "SnapAttraction \fIproximity\fP [ \fIbehavior\fP ]"
 If during an interactive move the window (or icon) comes within \fIproximity\fP
 pixels of another the window (or icon) will be moved to make the borders
 adjoin. The default of -1 means that no snapping will happen.  A setting of
 0 does indeed snap when the distance is zero pixels.  This is relevant when
 the \fISnapGrid\fP command is used.
-
+.PP
 The \fIbehavior\fP argument is optional and may be set to one of the four
 following values:
-
+.PP
 With \fIAll\fP both icons and windows snap to other windows and other
 icons.
-
+.PP
 \fISameType\fP lets snap windows only to other windows and icons
 only to other icons.
-
+.PP
 With \fIWindows\fP windows snap only to other windows.  Icons do not
 snap.
-
+.PP
 Similarly with \fIIcons\fP icons snap to only other icons and
 windows do not snap.
-
+.PP
 The default SnapAttraction setting for behavior is "All".
-
 .IP "SnapGrid \fIx-grid-size y-grid-size\fP"
 During an interactive move a window (or icon) will be positioned such that
 its location (top left corner) will be coincindent with the nearest grid point.
@@ -2333,11 +2156,9 @@ position.  In other words, the window will move the shortest distance possible
 to satisfy both \fISnapGrid\fP and \fISnapAttraction\fP.  Note that the X and
 Y coordinates are not coupled.  For example, a window may snap to another window
 on the X axis while snapping to a grid point on the Y axis.
-
 .IP "Stick"
 Makes a window sticky if it is not already sticky, or non-sticky if it
 is already sticky.
-
 .IP "Style \fIwindowname options\fP"
 This command is intended to replace the old fvwm 1.xx global commands
 NoBorder, NoTitle, StartsOnDesk, Sticky, StaysOnTop, Icon,
@@ -2346,19 +2167,19 @@ NoBoundaryWidth, StdForeColor, and StdBackColor with a single flexible
 and comprehensive window(s) specific command.  This command is used to
 set attributes of a window to values other than the default or to set
 the window manager default styles.
-
+.PP
 \fIwindowname\fP can be a window's name, class, or resource string.
 It can contain the wildcards * and/or ?, which are matched in the
 usual Unix filename manner.  They are searched in the reverse order
 stated, so that Style commands based on the name override or augment
 those based on the class, which override or augment those based on the
 resource string.
-
+.PP
 Note - windows that have no name (WM_NAME) are given a name of
 "Untitled", and windows that don't have a class (WM_CLASS, res_class)
 are given Class = "NoClass" and those that don't have a resource
 (WM_CLASS, res_name) are given Resource = "NoResource".
-
+.PP
 \fIoptions\fP is a comma separated list containing some or all of the
 keywords BorderWidth, HandleWidth, NoIcon/Icon, MiniIcon, IconBox,
 IconGrid, IconFill,
@@ -2373,22 +2194,22 @@ SmartPlacement/DumbPlacement, RandomPlacement/ActivePlacement,
 DecorateTransient/NakedTransient, SkipMapping/ShowMapping, UseDecor,
 UseStyle, NoPPosition/UsePPosition, Lenience/NoLenience,
 ClickToFocus/SloppyFocus/MouseFocus|FocusFollowsMouse.
-
+.PP
 In the above list some options are listed as
 style-option/opposite-style-option.  The opposite-style-option for
 entries that have them describes the \fIfvwm\fP default behavior and
 can be used if you want to change the \fIfvwm\fP default behavior.
-
+.PP
 \fIDecorateTransient\fP causes transient windows, which are normally
 left undecorated, to be given the usual \fIfvwm\fP decorations (title
 bar, buttons, etc.). Note that some pop-up windows, such as the xterm
 menus, are not managed by the window manager and still do not receive
 decorations. \fINakedTransient\fP (the default) causes transient windows
 not to be given the standard decorations.
-
+.PP
 \fIIcon\fP takes an (optional) unquoted string argument which is the icon
 bitmap or pixmap to use.
-
+.PP
 \fIIconBox\fP takes four numeric arguments or an X11 geometry string:
 .EX
 IconBox l t r b
@@ -2397,7 +2218,7 @@ or
 .EX
 IconBox geometry
 .EE
-
+.PP
 Where l is the left coordinate, t is the top, r is right and b is
 bottom. Negative coordinates indicate distance from the right or
 bottom of the screen.
@@ -2417,7 +2238,7 @@ one style must be defined in one command.  For example:
 Style "*" IconBox -80x200-1-1, \\
           IconBox 1000x70-1-1
 .EE
-
+.PP
 \fIIconGrid\fP takes 2 numeric arguments greater than zero.
 .EX
 IconGrid x y
@@ -2432,7 +2253,7 @@ applies to:
 .EX
 Style "*" IconBox -80x240-1-1, IconGrid 90 90
 .EE
-
+.PP
 \fIIconFill\fP takes 2 arguments.
 .EX
 IconFill Bottom Right
@@ -2453,17 +2274,17 @@ applies to:
 .EX
 Style "*" IconBox -80x240-1-1, IconFill b r
 .EE
-
+.PP
 \fIMiniIcon\fP specifies a pixmap to use as the miniature icon for the
 window.  This miniature icon can be drawn in a title-bar button (see
 ButtonStyle), and can be used by various fvwm modules (FvwmWinList,
 FvwmIconMan, and FvwmTaskBar). It takes the name of a pixmap as an
 argument.
-
+.PP
 \fIStartsOnDesk\fP takes a numeric argument which is the desktop number on
 which the window should be initially placed.  Note that standard Xt
 programs can also specify this via a resource (e.g. "-xrm '*Desk: 1'").
-
+.PP
 \fIStartsOnPage\fP takes 1, 2, or 3 numeric arguments. If one or three
 arguments are givem, the first (or only) argument is the desktop number.  If
 three arguments are given, the 2nd and 3rd arguments identify the x,y page
@@ -2472,67 +2293,67 @@ page position, and indicate no desk preference. If only one argument is given,
 StartsOnPage functions exactly like StartsOnDesk. For those standard Xt
 programs which understand this usage, the starting desk/page can also be
 specified via a resource (e.g., "-xrm 'Fvwm.Page: 1 0 2'").
-
+.PP
 StartsOnPage in conjunction with SkipMapping is a useful technique when you
 want to start an app on some other page and continue with what you were
 doing, rather than waiting for it to appear.
-
+.PP
 \fIStaysOnTop\fP makes the window always try to stay on top of the other
 windows.  This might be handy for clocks or mailboxes that you would
 always like to be visible.  If the window is explicitly lowered it
 will not try to force its way back to the top until it is explicitly
 raised.  StaysPut (the default) allows the window to be obscured and
 stay that way.
-
+.PP
 \fIBorderWidth\fP takes a numeric argument which is the width of the border
 to place the window if it does not have resize-handles.
-
+.PP
 \fIHandleWidth\fP takes a numeric argument which is the width of the border
 to place the window if it does have resize-handles.
-
+.PP
 \fIButton\fP and \fINoButton\fP take a numeric argument which is the
 number of the title-bar button which is to be included/omitted.
-
+.PP
 \fIStickyIcon\fP makes the window sticky when its iconified.  It will
 deiconify on top the active desktop.
-
+.PP
 \fIMWMButtons\fP makes the Maximize button look pressed-in when the window
 is maximized.  See the MWMButton flag in ButtonStyle for more
 information.
-
+.PP
 \fIMWMBorder\fP makes the 3-D bevel more closely match mwm's.
-
+.PP
 \fIMWMDecor\fP makes fvwm attempt to recognize and respect the mwm
 decoration hints that applications occasionally use.
-
+.PP
 \fIMWMFunctions\fP makes fvwm attempt to recognize and respect the mwm
 prohibited operations hints that applications occasionally use.
 HintOverride makes fvwm shade out operations that mwm would prohibit,
 but it lets you perform the operation anyway.
-
+.PP
 \fIOLDecor\fP makes fvwm attempt to recognize and respect the olwm and olvwm
 hints that many older XView and OLIT applications use.
-
+.PP
 \fIColor\fP takes two arguments.  The first is the window-label text color
 and the second is the window decoration's normal background color.
 The two colors are separated with a slash.  If the use of a slash
 causes problems then the separate ForeColor and BackColor options can
 be used.
-
+.PP
 \fIUseDecor\fP accepts one argument: the name of a decor created with
 AddToDecor.  If UseDecor is not specified, the "Default" decor is
 used.  Windows do not actually contain decors, but are always assigned
 to one.  If the decor is later modified with AddToDecor, the changes
 will be visible for all windows which are assigned to it.  The decor
 for a window can be reassigned with ChangeDecor.
-
+.PP
 \fIUseStyle\fP takes one arg, which is the name of another style.  That way
 you can have unrelated window names easily inherit similar traits
 without retyping.  For example: 'Style "rxvt" UseStyle "XTerm"'.
-
+.PP
 \fISkipMapping\fP tells fvwm not to switch to the desk the window is on when
 it gets mapped initially (useful with StartsOnDesk or StartsOnPage).
-
+.PP
 \fILenience\fP instructs fvwm to ignore the convention in the ICCCM which
 states that if an application sets the input field of the wm_hints
 structure to False, then it never wants the window manager to give it
@@ -2540,7 +2361,7 @@ the input focus.  The only application that I know of which needs this
 is sxpm, and that is a silly bug with a trivial fix and has no overall
 effect on the program anyway.  Rumor is that some older applications
 have problems too.
-
+.PP
 \fIClickToFocus\fP instructs fvwm to give the focus to the window when it is
 clicked in.  The default \fIMouseFocus\fP (or its alias
 \fIFocusFollowsMouse\fP) tells fvwm to give the window the focus as soon as
@@ -2549,23 +2370,23 @@ window. \fISloppyFocus\fP is similar, but doesn't give up the focus if the
 pointer leaves the window to pass over the root window or a ClickToFocus
 window (unless you click on it, that is), which makes it possible to
 move the mouse out of the way without losing focus.
-
+.PP
 \fINoPPosition\fP instructs fvwm to ignore the PPosition field when adding
 new windows.  Adherence to the PPosition field is required for some
 applications, but if you don't have one of those its a real headache.
-
+.PP
 \fIRandomPlacement\fP causes windows which would normally require user
 placement to be automatically placed in ever-so-slightly random
 locations.  For the best of all possible worlds use both
 RandomPlacement and SmartPlacement.
-
+.PP
 \fISmartPlacement\fP causes windows which would normally require user
 placement to be automatically placed in a smart location - a location
 in which they do not overlap any other windows on the screen.  If no
 such position can be found user placement or random placement (if
 specified) will be used as a fall-back method.  For the best of all
 possible worlds use both RandomPlacement and SmartPlacement.
-
+.PP
 An example:
 .EX
 \&# Change default fvwm behavior to no title-
@@ -2617,7 +2438,7 @@ window name match but also gets NoHandles, Sticky, and WindowListSkip
 by a match to "Fvwm*".  It will get NoTitle by virtue of a match to
 "*".  If conflicting styles are specified for a window, then the last
 style specified will be used.
-
+.PP
 If the NoIcon attribute is set then the specified window will simply
 disappear when it is iconified.  The window can be recovered through
 the window-list.  If Icon is set without an argument then the NoIcon
@@ -2627,12 +2448,8 @@ allows only the FvwmPager module icon to exist:
 Style "*" NoIcon
 Style "Fvwm Pager" Icon
 .EE
-
-
 .IP "Title"
 Does nothing.  This is used to insert a title line in a popup or menu.
-
-
 .IP "TitleStyle [ \fIjustification\fP ] [ \fIheight num\fP ]"
 Sets attributes for the title bar.  Justifications can be "Centered",
 "RightJustified," or "LeftJustified."  \fIheight\fP sets the title
@@ -2643,8 +2460,6 @@ for the specified font.  Example:
 .EX
 TitleStyle LeftJustified Height 24
 .EE
-
-
 .IP "TitleStyle [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
 Sets the style for the title bar.  \fIstate\fP can be one of
 "ActiveUp," "ActiveDown," or "Inactive."  If \fIstate\fP is omitted,
@@ -2652,7 +2467,7 @@ then the style is added to every state.  If parentheses are placed
 around the style and flags, then multiple state definitions can be
 given per line.  \fIstyle\fP can be omitted so that flags can be set
 while not destroying the current style.
-
+.PP
 If an "!" is prefixed to any \fIflag\fP, its behavior is negated.
 Valid flags for each state include "Raised," "Flat," and "Sunk" (these
 are mutually exclusive).  The default is Raised.  See the note in
@@ -2679,8 +2494,6 @@ TitleStyle -- flat
 ButtonStyle All ActiveUp (-- flat) Inactive \\
   (-- flat)
 .EE
-
-
 .IP "UpdateDecor [ \fIdecor\fP ]"
 Updates window decorations.  \fIdecor\fP is an optional argument which
 specifies the \fIdecor\fP to update.  If given, only windows which are
@@ -2690,8 +2503,6 @@ BorderStyle (possibly used in conjunction with AddToDecor).
 Specifying an invalid decor results in all windows being updated.
 This command is less disturbing than Recapture, but does not affect
 window style options as Recapture does.
-
-
 .IP "Wait \fIname\fP"
 This built-in is intended to be used in \fIfvwm\fP functions only.  It
 causes execution of a function to pause until a new window name
@@ -2711,21 +2522,15 @@ AddToFunc InitFunction
 The above function starts an xterm on the current desk, waits for it
 to map itself, then switches to desk 2 and starts an xmh.  After the
 xmh window appears control moves to desk 0.
-
-
 .IP "WarpToWindow \fIx y\fP"
 Warps the cursor to the associated window.  The parameters x and y
 default to percentage of window down and in from the upper left hand
 corner (or number of pixels down and in if 'p' is appended to the
 numbers).
-
-
 .IP "WindowFont [ \fIfontname\fP ]"
 Makes \fIfvwm\fP use font \fIfontname\fP instead of "fixed" for window
 title-bars. To reset this font to the default font (see \fIDefaultFont\fP)
 you may omit \fIfontname\fP.
-
-
 .IP "WindowId \fIid func\fP"
 The WindowId function is similar to the Next and Prev funcs, except
 that it looks for a specific window \fIid\fP and runs the specified
@@ -2735,9 +2540,7 @@ WindowId 0x34567890 Raise
 WindowId 0x34567890 WarpToWindow 50 50
 .EE
 Mostly this is useful for functions used with the WindowList builtin.
-
-
-.IP "WindowList [ \fIposition\fP ] [ \fIoptions\fP ] [ \fIdouble-click-action\fP ]"
+.IP "WindowList [\fIposition\fP] [\fIoptions\fP] [\fIdouble-click-action\fP]"
 Generates a pop-up menu (and pops it up) in which the title and
 geometry of each of the windows currently on the desk top are shown.
 The geometry of iconified windows is shown in parenthesis.  Selecting
@@ -2754,13 +2557,13 @@ AddToFunc WindowListFunc
 .EE
 You can Destroy the builtin WindowListFunc and create your own if
 these defaults do not suit you.
-
+.PP
 The \fIposition\fP arguments are the same as for \fIMenu\fP. The
 command \fIdouble-click-action\fP will be invoked if the user
 double-clicks (or hits the key rapidly twice if the menu is bound
 to a key) when bringing the window list.  The double-click-action
 must be quoted if it consists of more than one word.
-
+.PP
 The double-click-action is useful to define a default window if you
 have bound the window list to a key (or button) like this:
 .EX
@@ -2769,15 +2572,15 @@ Key Tab A M WindowList "Prev FlipFocus"
 Hitting Alt-Tab once it brings up the window list, if you hit it
 twice the focus is flipped between the current and the last focused
 window.
-
+.PP
 The \fIoptions\fP passed to WindowList can be "NoGeometry", "Function
 <funcname>", "Desk <desknum>", "CurrentDesk", "NoIcons", "Icons",
 "OnlyIcons", "NoNormal", "Normal", "OnlyNormal", "NoSticky", "Sticky",
 "OnlySticky", "NoOnTop", "OnTop", "OnlyOnTop", "NoDeskSort", "UseIconName",
 "Alphabetic", "NotAlphabetic".
-
+.PP
 (Note - normal means not iconic, sticky, or ontop)
-
+.PP
 If you pass in a function via "Function <funcname>", $0 is the window
 id:
 .EX
@@ -2785,25 +2588,21 @@ AddToFunc IFunc "I" WindowId $0 Iconify
 WindowList Function IFunc, NoSticky, \\
   CurrentDesk, NoIcons
 .EE
-
+.PP
 If you wanted to use the WindowList as an icon manager, you could invoke
 the following:
 .EX
 WindowList OnlyIcons, Sticky, OnTop, Geometry
 .EE
 (Note - the "Only" options essentially wipe out all other ones...)
-
-
 .IP "WindowsDesk \fIarg1\fP [ \fIarg2\fP ]"
 Moves the selected window to another desktop (workspace, room).
-
+.PP
 This command has been removed and must be replaced by \fIMoveToDesk\fP,
 the arguments for which are the same as for the \fIDesk\fP command.
 \fINote:\fP You cannot simply change the name of the command: the
 syntax has changed. If you used "WindowsDesk n" to move a window to
 desk n, you will have to change it to "MoveToDesk 0 n".
-
-
 .IP "WindowShade [ \fIopt\fP ]"
 Toggles the window shade feature for titled windows.  Windows in the
 shaded state only display a title bar.  If \fIopt\fP is not given, the
@@ -2811,20 +2610,13 @@ window shade state is toggled.  If \fIopt\fP is 1, the window is
 forced to the shaded state.  If \fIopt\fP is 2, then the window is
 forced to the non-shaded state.  Maximized windows and windows without
 titles cannot be shaded.
-
-
 .IP "XORvalue \fInumber\fP"
 Changes the value with which bits are XOR'ed when doing rubber-band
 window moving or resizing.  Setting this value is a trial-and-error
 process.
-
-
 .IP "+"
 Used to continue adding to the last specified decor, function or menu.
 See the discussion for AddToDecor, AddToFunc, and AddToMenu.
-
-
-
 .SH KEYBOARD SHORTCUTS
 All (I think) window manager operations can be performed from the
 keyboard so mouseless operation should be possible.  In addition to
@@ -2837,14 +2629,10 @@ the pointer movement to go in larger steps and holding down the
 control key will cause the cursor movement to go in smaller steps.
 Standard emacs and vi cursor movement controls (^n, ^p, ^f, ^b, and
 ^j, ^k, ^h, ^l) can be used instead of the arrow keys.
-
-
 .SH SUPPLIED CONFIGURATION
 A sample configuration file, .fvwmrc, is supplied with the \fIfvwm\fP
 distribution.  It is well commented and can be used as a source of
 examples for \fIfvwm\fP configuration.
-
-
 .SH USE ON MULTI-SCREEN DISPLAYS
 If the -s command line argument is not given, \fIfvwm\fP will
 automatically start up on every screen on the specified display.
@@ -2852,11 +2640,9 @@ After \fIfvwm\fP starts each screen is treated independently.
 Restarts of \fIfvwm\fP need to be performed separately on each screen.
 The use of EdgeScroll 0 0 is strongly recommended for multi-screen
 displays.
-
+.PP
 You may need to quit on each screen to quit from the X session
 completely.
-
-
 .SH ENVIRONMENT
 .TP
 DISPLAY
@@ -2867,8 +2653,6 @@ option is given.
 FVWM_MODULEDIR
 Set by \fIfvwm\fP to the directory containing the standard \fIfvwm\fP
 modules.
-
-
 .SH BUGS
 As of fvwm 2.2 there were exactly 46.144 unidentified bugs.
 Identified bugs have mostly been fixed, though.  Since then 12.25 bugs
@@ -2882,13 +2666,12 @@ will be bug-free.  Since this is a computer program infinity =
 rate of bug discovery we should expect to achieve this point in
 4.27e+27 years.  I guess I better plan on passing this thing on to my
 children....
-
-Known bugs can be found in the BUGS file and TO-DO list in the 
+.PP
+Known bugs can be found in the BUGS file and TO-DO list in the
 distribution.
-
 .SH AUTHOR
 Robert Nation with help from many people, based on \fItwm\fP code,
-which was written by Tom LaStrange.  After Robert Nation came Charles 
-Hines, followed by Brady Montz. Currently fvwm is maintained by a long 
-list of people (Dan Espen, Steve Robbins, Paul Smith, Jason Tibbitts, 
+which was written by Tom LaStrange.  After Robert Nation came Charles
+Hines, followed by Brady Montz. Currently fvwm is maintained by a long
+list of people (Dan Espen, Steve Robbins, Paul Smith, Jason Tibbitts,
 Dominik Vogt, Bob Woodside and others).

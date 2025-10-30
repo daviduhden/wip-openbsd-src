@@ -14,52 +14,47 @@
 .if n .sp 1
 .if t .sp .5
 ..
-.TH FvwmCpp 1 12/12/94 2.0
+.TH FVWMCPP 1 "December 12, 1994" "2.0" "FVWM Modules"
 .UC
 .SH NAME
 FvwmCpp \- the FVWM  Cpp pre-processor
 .SH SYNOPSIS
+.PP
 FvwmCpp is spawned by fvwm, so no command line invocation will work.
-
 .SH DESCRIPTION
+.PP
 When called, this module will attempt to have /usr/lib/cpp pre-process
 the file specified in its invocation, and then have fvwm read the
 resulting file.
-
 .SH INVOCATION
+.PP
 FvwmCpp can be invoked by inserting the line 'FvwmCpp' in the .fvwmrc
 file. It can also be called from a menu or mouse binding.  If the user
 wants his entire .fvwmrc file pre-processed with FvwmCpp, then fvwm
 should be invoked as:
-
 .EX
 fvwm2 -cmd "FvwmCpp .fvwmrc"
 .EE
-
+.PP
 Some options can be specified on the command line:
 .TP
 -cppopt \fIoption\fP
 Lets you pass an option to the cpp program.  Not really needed as any unknown
 options will be passed on automatically.
-
 .TP
 -cppprog \fIname\fP
 Instead of invoking "/usr/lib/cpp", fvwm will invoke \fIname\fP.
-
 .TP
 -outfile \fIfilename\fP
 Instead of creating a random unique name for the temporary file for
 the preprocessed rc file, this option will let you specify the name of
 the temporary file it will create.
-
 .IP -debug
-Causes the temporary file create by Cpp to
-be retained. This file is usually called "/tmp/fvwmrcXXXXXXXXXX"
-
-
+Causes the temporary file created by Cpp to be retained. This file is usually
+called "/tmp/fvwmrcXXXXXXXXXX".
 .SH CONFIGURATION OPTIONS
+.PP
 FvwmCpp defines some values for use in the pre-processor file:
-
 .IP TWM_TYPE
 Always set to "fvwm".
 .IP SERVERHOST
@@ -104,9 +99,8 @@ configure.h at compile time.
 .IP FVWM_MODULEDIR
 The directory where fvwm looks for .fvwmrc and modules by default, as
 determined at compile time.
-
 .SH EXAMPLE PROLOG
-
+.PP
 .EX
 #define TWM_TYPE fvwm
 #define SERVERHOST spx20
@@ -126,14 +120,12 @@ determined at compile time.
 #define PLANES 8
 #define BITS_PER_RGB 8
 #define CLASS PseudoColor
-#define COLOR Yes
 #define FVWM_VERSION 2.0 pl 1
 #define OPTIONS SHAPE XPM Cpp
 #define FVWM_MODULEDIR /local/homes/dsp/nation/modules
-
 .EE
-
 .SH BUGS
+.PP
 There are some problems with comments in your .fvwmrc file.
 The comment sign # is misinterpreted by the preprocessor.
 This has usually no impact on functionality but generates
@@ -158,7 +150,8 @@ and not
 .EX
 "Exec "ls" -l" (one word).
 .EE
-
+.PP
 .SH AUTHOR
+.PP
 FvwmCpp is the result of a random bit mutation on a hard disk,
 presumably a result of a cosmic-ray or some such thing.
