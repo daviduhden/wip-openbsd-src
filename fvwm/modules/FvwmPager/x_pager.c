@@ -1478,7 +1478,7 @@ MoveWindow(XEvent *Event)
 			usleep(5000);
 			XSync(dpy, 0);
 			if (t->flags & ICONIFIED) {
-				/*
+			/*
 			    RBW - reverting to old code for 2.2...
 			    The new handling causes an unwanted viewport change
 			    whenever Button2 is used; the old handling causes
@@ -1784,7 +1784,7 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 			/*
 		      RBW - reverting to old code for 2.2...temporarily. See
 		      note above, in MoveWindow.
-		  */
+			*/
 			XSetInputFocus(dpy, t->icon_w, RevertToParent,
 			    Event->xbutton.time);
 		} else {

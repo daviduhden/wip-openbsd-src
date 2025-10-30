@@ -86,7 +86,7 @@ Destroy(FvwmWindow *Tmp_win)
 
 	/* first of all, remove the window from the list of all windows! */
 	/*
-	    RBW - 11/13/1998 - new: have to unhook the stacking order chain
+	   RBW - 11/13/1998 - new: have to unhook the stacking order chain
 	   also. There's always a prev and next, since this is a ring anchored
 	   on Scr.FvwmRoot
 	*/
@@ -978,21 +978,21 @@ RaiseWindow(FvwmWindow *t)
 	if (i > 0) {
 		/*      XRaiseWindow(dpy,wins[0]);  */
 		/*
-		     clasen@mathematik.uni-freiburg.de - 01/01/1999 -
-		     simply calling XRaiseWindow(dpy,wins[0]); here will put
+		   clasen@mathematik.uni-freiburg.de - 01/01/1999 -
+		   Simply calling XRaiseWindow(dpy,wins[0]); here will put
 		   StaysOnTop windows over override_redirect windows like
 		   FvwmPager ballon_win or Motif menus. Instead raise wins[0]
 		   only above the topmost window which is managed by us.
-		  */
+		*/
 		if (wins[0] != Scr.FvwmRoot.stack_next->frame &&
 		    wins[0] != Scr.FvwmRoot.stack_next->icon_w &&
 		    wins[0] != Scr.FvwmRoot.stack_next->icon_pixmap_w) {
 			if (Scr.FvwmRoot.stack_next->flags & ICONIFIED) {
 				/*
-				       RBW - use the icon window or pixmap if
+				   RBW - use the icon window or pixmap if
 				   there is one; but there may not be
 				   (NoIconTitle or NoIcon) --
-				  */
+				*/
 				if (Scr.FvwmRoot.stack_next->icon_w) {
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next->icon_w;

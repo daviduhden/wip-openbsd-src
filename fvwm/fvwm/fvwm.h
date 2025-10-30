@@ -236,7 +236,7 @@ typedef struct FvwmWindow {
 	/*
 	  RBW - 11/13/1998 - new flags to supplement the flags word, implemented
 	  as named bit fields.
-      */
+    */
 	struct {
 		unsigned ViewportMoved
 		    : 1; /* To prevent double move in MoveViewport. */
