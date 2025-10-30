@@ -1363,7 +1363,7 @@ Reborder(void)
 	MyXGrabServer(dpy);
 
 	InstallWindowColormaps(&Scr.FvwmRoot); /* force reinstall */
-	                                       /*
+	  /*
           RBW - 05/15/1998
           Grab the last window and work backwards: preserve stacking order on restart.
       */

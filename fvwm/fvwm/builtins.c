@@ -48,9 +48,9 @@ static char *button_states[MaxButtonState] = {
  *      eventp  - pointer to XEvent to patch up
  *      w       - pointer to Window to patch up
  *      tmp_win - pointer to FvwmWindow Structure to patch up
- *	context	- the context in which the mouse button was pressed
- *	func	- the function to defer
- *	cursor	- the cursor to display while waiting
+ *      context	- the context in which the mouse button was pressed
+ *      func	- the function to defer
+ *      cursor	- the cursor to display while waiting
  *      finishEvent - ButtonRelease or ButtonPress; tells what kind of event to
  *                    terminate on.
  *
@@ -4646,17 +4646,6 @@ SetGlobalOptions(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		} else if (StrEquals(opt, "STIPLEDTITLES")) {
 			Scr.StipledTitles = True;
 		}
-		/*  RBW - 11/14/1998 - I'll eventually remove these. */
-		/*
-		else if (StrEquals(opt,"STARTSONPAGEMODIFIESUSPOSITION"))
-		{
-		  Scr.go.ModifyUSP = True;
-		}
-		else if (StrEquals(opt,"STARTSONPAGEHONORSUSPOSITION"))
-		{
-		  Scr.go.ModifyUSP = False;
-		}
-	    */
 		else if (StrEquals(opt, "CAPTUREHONORSSTARTSONPAGE")) {
 			Scr.go.CaptureHonorsStartsOnPage = True;
 		} else if (StrEquals(opt, "CAPTUREIGNORESSTARTSONPAGE")) {
