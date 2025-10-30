@@ -1,4 +1,8 @@
+#ifndef FVWM_WINLIST_H
+#define FVWM_WINLIST_H
+
 #include "fvwmlib.h"
+#include <X11/Xmd.h>
 
 /* FvwmWinList Module for Fvwm. 
  *
@@ -104,3 +108,5 @@ void SetMwmHints(unsigned int value, unsigned int funcs,
                  unsigned int input);
 
 int ErrorHandler(Display *d, XErrorEvent *event);
+
+#endif /* FVWM_WINLIST_H */
