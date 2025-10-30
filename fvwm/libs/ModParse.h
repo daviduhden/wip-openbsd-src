@@ -13,15 +13,14 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h> /* for free() */
 #include <string.h>
-#include <stdlib.h>                     /* for free() */
 
 char *PeekArgument(const char *pstr);
 char *GetArgument(char **pstr);
-int CmpArgument(const char *pstr,char *tok);
-int MatchArgument(const char *pstr,char *tok);
+int CmpArgument(const char *pstr, char *tok);
+int MatchArgument(const char *pstr, char *tok);
 #define NukeArgument(pstr) free(GetArgument(pstr))
-
 
 /*
    function:		FindToken
@@ -33,15 +32,13 @@ int MatchArgument(const char *pstr,char *tok);
    table must be sorted in ascending order for FindToken.
 */
 
-#define FindToken(key,table,struct_entry)				\
-        (struct_entry *) bsearch(key,					\
-				 (char *)(table), 			\
-				 sizeof(table) / sizeof(struct_entry),	\
-				 sizeof(struct_entry),			\
-				 XCmpToken)
+#define FindToken(key, table, struct_entry)                            \
+  (struct_entry *)bsearch(key, (char *)(table),                        \
+                          sizeof(table) / sizeof(struct_entry),        \
+                          sizeof(struct_entry), XCmpToken)
 
 int XCmpToken(const void *s, const void *t);
-                                             /* needed by (L)FindToken */
+/* needed by (L)FindToken */
 
 #if 0
 /* e.g: */
@@ -65,12 +62,10 @@ int XCmpToken(const void *s, const void *t);
 /* Note that lfind() is not part of the ANSI standard.  This is never used
  * currently; I think we should just keep it that way...
  */
-# define LFindToken(key,table,struct_entry)				\
-         (struct_entry *) lfind(key,					\
-				 (char *)(table), 			\
-				 sizeof(table) / sizeof(struct_entry),	\
-				 sizeof(struct_entry),			\
-				 XCmpToken)
+#define LFindToken(key, table, struct_entry)                           \
+  (struct_entry *)lfind(key, (char *)(table),                          \
+                        sizeof(table) / sizeof(struct_entry),          \
+                        sizeof(struct_entry), XCmpToken)
 #endif /* 0 */
 
-#endif  /* MODPARSE_H */
+#endif /* MODPARSE_H */

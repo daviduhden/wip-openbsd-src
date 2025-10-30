@@ -13,26 +13,26 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <signal.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <stdio.h>
 #include <string.h>
-#include <sys/wait.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 
-#include <unistd.h>
+#include <X11/Intrinsic.h>
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <X11/Xproto.h>
+#include <X11/Xutil.h>
+#include <X11/cursorfont.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xproto.h>
-#include <X11/Xatom.h>
-#include <X11/Intrinsic.h>
-#include <X11/cursorfont.h>
+#include <unistd.h>
 
 #include "../../fvwm/module.h"
 #include "FvwmScroll.h"
@@ -41,7 +41,7 @@ char *MyName;
 int fd_width;
 int fd[2];
 
-Display *dpy;			/* which display are we talking to */
+Display *dpy; /* which display are we talking to */
 Window Root;
 int screen;
 int x_fd;
@@ -52,8 +52,7 @@ char *BackColor = "black";
 
 Window app_win;
 
-#define MW_EVENTS   (ExposureMask | ButtonReleaseMask | KeyReleaseMask)
-
+#define MW_EVENTS (ExposureMask | ButtonReleaseMask | KeyReleaseMask)
 
 /***********************************************************************
  *
@@ -70,7 +69,7 @@ int main(int argc, char **argv)
 
   /* Save the program name for error messages and config parsing */
   temp = argv[0];
-  s=strrchr(argv[0], '/');
+  s = strrchr(argv[0], '/');
   if (s != NULL)
     temp = s + 1;
 
@@ -80,73 +79,73 @@ int main(int argc, char **argv)
   strlcat(MyName, temp, name_len + 2);
   Clength = strlen(MyName);
 
-  if(argc < 6)
-    {
-      fprintf(stderr,"%s Version %s should only be executed by fvwm!\n",MyName,
-	      VERSION);
-      exit(1);
-    }
+  if (argc < 6)
+  {
+    fprintf(stderr, "%s Version %s should only be executed by fvwm!\n",
+            MyName, VERSION);
+    exit(1);
+  }
 
-  if(argc >= 7)
-    {
-      extern int Reduction_H;
-      Reduction_H = atoi(argv[6]);
-    }
+  if (argc >= 7)
+  {
+    extern int Reduction_H;
+    Reduction_H = atoi(argv[6]);
+  }
 
-  if(argc >= 8)
-    {
-      extern int Reduction_V;
-      Reduction_V = atoi(argv[7]);
-    }
+  if (argc >= 8)
+  {
+    extern int Reduction_V;
+    Reduction_V = atoi(argv[7]);
+  }
 
   /* Dead pipe == dead fvwm */
-  signal (SIGPIPE, DeadPipe);
+  signal(SIGPIPE, DeadPipe);
 
   fd[0] = atoi(argv[1]);
   fd[1] = atoi(argv[2]);
 
   /* An application window may have already been selected - look for it */
-  sscanf(argv[4],"%x",(unsigned int *)&app_win);
+  sscanf(argv[4], "%x", (unsigned int *)&app_win);
 
   /* Open the Display */
   if (!(dpy = XOpenDisplay(display_name)))
-    {
-      fprintf(stderr,"%s: can't open display %s", MyName,
-	      XDisplayName(display_name));
-      exit (1);
-    }
+  {
+    fprintf(stderr, "%s: can't open display %s", MyName,
+            XDisplayName(display_name));
+    exit(1);
+  }
   x_fd = XConnectionNumber(dpy);
-  screen= DefaultScreen(dpy);
+  screen = DefaultScreen(dpy);
   Root = RootWindow(dpy, screen);
   d_depth = DefaultDepth(dpy, screen);
 
-  ScreenHeight = DisplayHeight(dpy,screen);
-  ScreenWidth = DisplayWidth(dpy,screen);
+  ScreenHeight = DisplayHeight(dpy, screen);
+  ScreenWidth = DisplayWidth(dpy, screen);
 
   /* scan config file for set-up parameters */
   /* Colors and fonts */
-  GetConfigLine(fd,&tline);
+  GetConfigLine(fd, &tline);
 
-  while(tline != (char *)0)
+  while (tline != (char *)0)
+  {
+    if (strlen(tline) > 1)
     {
-      if(strlen(tline)>1)
-	{
-	  if(strncasecmp(tline,CatString3(MyName, "Back",""),
-			   Clength+4)==0)
-	    {
-	      CopyString(&BackColor,&tline[Clength+4]);
-	    }
-	}
-      GetConfigLine(fd,&tline);
+      if (strncasecmp(tline, CatString3(MyName, "Back", ""),
+                      Clength + 4) == 0)
+      {
+        CopyString(&BackColor, &tline[Clength + 4]);
+      }
     }
+    GetConfigLine(fd, &tline);
+  }
 
   /* sever our connection with fvwm */
   close(fd[0]);
   close(fd[1]);
-  if(app_win == 0)
+  if (app_win == 0)
     GetTargetWindow(&app_win);
 
-  if(app_win == 0)
+  if (app_win == 0)
     return 0;
 
   fd_width = GetFdWidth();
@@ -155,8 +154,6 @@ int main(int argc, char **argv)
   Loop(app_win);
   return 0;
 }
-
-
 
 /***********************************************************************
  *
@@ -167,12 +164,11 @@ void DeadPipe(int nonsense)
 {
   extern Atom wm_del_win;
 
-  XReparentWindow(dpy,app_win,Root,0,0);
-  send_clientmessage (dpy, app_win, wm_del_win, CurrentTime);
-  XSync(dpy,0);
+  XReparentWindow(dpy, app_win, Root, 0, 0);
+  send_clientmessage(dpy, app_win, wm_del_win, CurrentTime);
+  XSync(dpy, 0);
   exit(0);
 }
-
 
 /**********************************************************************
  *
@@ -183,47 +179,42 @@ void DeadPipe(int nonsense)
 void GetTargetWindow(Window *app_win)
 {
   XEvent eventp;
-  int val = -10,trials;
+  int val = -10, trials;
   Window target_win;
 
   trials = 0;
-  while((trials <100)&&(val != GrabSuccess))
+  while ((trials < 100) && (val != GrabSuccess))
+  {
+    val = XGrabPointer(
+      dpy, Root, True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
+      Root, XCreateFontCursor(dpy, XC_crosshair), CurrentTime);
+    if (val != GrabSuccess)
     {
-      val=XGrabPointer(dpy, Root, True,
-		       ButtonReleaseMask,
-		       GrabModeAsync, GrabModeAsync, Root,
-		       XCreateFontCursor(dpy,XC_crosshair),
-		       CurrentTime);
-      if(val != GrabSuccess)
-	{
-	  usleep(1000);
-	}
-      trials++;
+      usleep(1000);
     }
-  if(val != GrabSuccess)
-    {
-      fprintf(stderr,"%s: Couldn't grab the cursor!\n",MyName);
-      exit(1);
-    }
-  XMaskEvent(dpy, ButtonReleaseMask,&eventp);
-  XUngrabPointer(dpy,CurrentTime);
-  XSync(dpy,0);
+    trials++;
+  }
+  if (val != GrabSuccess)
+  {
+    fprintf(stderr, "%s: Couldn't grab the cursor!\n", MyName);
+    exit(1);
+  }
+  XMaskEvent(dpy, ButtonReleaseMask, &eventp);
+  XUngrabPointer(dpy, CurrentTime);
+  XSync(dpy, 0);
   *app_win = eventp.xany.window;
-  if(eventp.xbutton.subwindow != None)
+  if (eventp.xbutton.subwindow != None)
     *app_win = eventp.xbutton.subwindow;
 
   target_win = ClientWindow(*app_win);
-  if(target_win != None)
+  if (target_win != None)
     *app_win = target_win;
 }
 
-
 void nocolor(char *a, char *b)
 {
- fprintf(stderr,"FvwmInitBanner: can't %s %s\n", a,b);
+  fprintf(stderr, "FvwmInitBanner: can't %s %s\n", a, b);
 }
-
-
 
 /****************************************************************************
  *
@@ -234,39 +225,38 @@ Window ClientWindow(Window input)
 {
   Atom _XA_WM_STATE;
   unsigned int nchildren;
-  Window root, parent, *children,target;
+  Window root, parent, *children, target;
   unsigned long nitems, bytesafter;
   unsigned char *prop;
   Atom atype;
   int aformat;
   int i;
 
-  _XA_WM_STATE = XInternAtom (dpy, "WM_STATE", False);
+  _XA_WM_STATE = XInternAtom(dpy, "WM_STATE", False);
 
-  if (XGetWindowProperty (dpy,input, _XA_WM_STATE , 0L,
-			  3L , False, _XA_WM_STATE,&atype,
-			  &aformat, &nitems, &bytesafter,
-			  &prop) == Success)
+  if (XGetWindowProperty(dpy, input, _XA_WM_STATE, 0L, 3L, False,
+                         _XA_WM_STATE, &atype, &aformat, &nitems,
+                         &bytesafter, &prop) == Success)
+  {
+    if (prop != NULL)
     {
-      if(prop != NULL)
-	{
-	  XFree(prop);
-	  return input;
-	}
+      XFree(prop);
+      return input;
     }
+  }
 
-  if(!XQueryTree(dpy, input, &root, &parent, &children, &nchildren))
+  if (!XQueryTree(dpy, input, &root, &parent, &children, &nchildren))
     return None;
 
   for (i = 0; i < nchildren; i++)
+  {
+    target = ClientWindow(children[i]);
+    if (target != None)
     {
-      target = ClientWindow(children[i]);
-      if(target != None)
-	{
-	  XFree((char *)children);
-	  return target;
-	}
+      XFree((char *)children);
+      return target;
     }
+  }
   XFree((char *)children);
   return None;
 }

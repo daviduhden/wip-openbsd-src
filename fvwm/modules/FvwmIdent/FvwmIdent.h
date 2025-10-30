@@ -1,10 +1,10 @@
-#include "../../libs/fvwmlib.h"       
-#define STICKY         (1<<2) /* Does window stick to glass? */
-#define ONTOP          (1<<1) /* does window stay on top */
-#define BORDER         (1<<13) /* Is this decorated with border*/
-#define TITLE          (1<<14) /* Is this decorated with title */
-#define ICONIFIED      (1<<16) /* is it an icon now? */
-#define TRANSIENT      (1<<17) /* is it a transient window? */
+#include "../../libs/fvwmlib.h"
+#define STICKY (1 << 2)     /* Does window stick to glass? */
+#define ONTOP (1 << 1)      /* does window stay on top */
+#define BORDER (1 << 13)    /* Is this decorated with border*/
+#define TITLE (1 << 14)     /* Is this decorated with title */
+#define ICONIFIED (1 << 16) /* is it an icon now? */
+#define TRANSIENT (1 << 17) /* is it a transient window? */
 struct target_struct
 {
   char res[256];
@@ -30,9 +30,9 @@ struct target_struct
 
 struct Item
 {
-  char* col1;
-  char* col2;
-  struct Item* next;
+  char *col1;
+  char *col2;
+  struct Item *next;
 };
 
 /*************************************************************************
@@ -41,10 +41,10 @@ struct Item
  * 
  *************************************************************************/
 void Loop(int *fd);
-void SendInfo(int *fd,char *message,unsigned long window);
+void SendInfo(int *fd, char *message, unsigned long window);
 char *safemalloc(int length);
 void DeadPipe(int nonsense);
-void process_message(unsigned long type,unsigned long *body);
+void process_message(unsigned long type, unsigned long *body);
 void GetTargetWindow(Window *app_win);
 void RedrawWindow(void);
 void change_window_name(char *str);
@@ -62,4 +62,3 @@ void list_icon_name(unsigned long *body);
 void list_class(unsigned long *body);
 void list_res_name(unsigned long *body);
 void list_end(void);
-

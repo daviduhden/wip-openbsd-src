@@ -10,60 +10,65 @@
  * in the Public Domain for your edification and enjoyment.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "extern.h"
+#include "pax.h"
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include "pax.h"
-#include "extern.h"
 
-int
-getoldopt(int argc, char **argv, const char *optstring)
+int getoldopt(int argc, char **argv, const char *optstring)
 {
-	static char	*key;		/* Points to next keyletter */
-	static char	use_getopt;	/* !=0 if argv[1][0] was '-' */
-	char		c;
-	char		*place;
+  static char *key;       /* Points to next keyletter */
+  static char use_getopt; /* !=0 if argv[1][0] was '-' */
+  char c;
+  char *place;
 
-	optarg = NULL;
+  optarg = NULL;
 
-	if (key == NULL) {		/* First time */
-		if (argc < 2)
-			return (-1);
-		key = argv[1];
-		if (*key == '-')
-			use_getopt++;
-		else
-			optind = 2;
-	}
+  if (key == NULL)
+  { /* First time */
+    if (argc < 2)
+      return (-1);
+    key = argv[1];
+    if (*key == '-')
+      use_getopt++;
+    else
+      optind = 2;
+  }
 
-	if (use_getopt)
-		return (getopt(argc, argv, optstring));
+  if (use_getopt)
+    return (getopt(argc, argv, optstring));
 
-	c = *key++;
-	if (c == '\0') {
-		key--;
-		return (-1);
-	}
-	place = strchr(optstring, c);
+  c = *key++;
+  if (c == '\0')
+  {
+    key--;
+    return (-1);
+  }
+  place = strchr(optstring, c);
 
-	if (place == NULL || c == ':') {
-		fprintf(stderr, "%s: unknown option %c\n", argv[0], c);
-		return ('?');
-	}
+  if (place == NULL || c == ':')
+  {
+    fprintf(stderr, "%s: unknown option %c\n", argv[0], c);
+    return ('?');
+  }
 
-	place++;
-	if (*place == ':') {
-		if (optind < argc) {
-			optarg = argv[optind];
-			optind++;
-		} else {
-			fprintf(stderr, "%s: %c argument missing\n",
-				argv[0], c);
-			return ('?');
-		}
-	}
+  place++;
+  if (*place == ':')
+  {
+    if (optind < argc)
+    {
+      optarg = argv[optind];
+      optind++;
+    }
+    else
+    {
+      fprintf(stderr, "%s: %c argument missing\n", argv[0], c);
+      return ('?');
+    }
+  }
 
-	return (c);
+  return (c);
 }

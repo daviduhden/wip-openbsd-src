@@ -16,22 +16,22 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <X11/Xproto.h>
 #include "fvwmlib.h"
+#include <X11/Xproto.h>
+#include <stdio.h>
 
 #define SCALE 65535.0
 #define HALF_SCALE (SCALE * 0.5)
 
-enum ColorChannel {
+enum ColorChannel
+{
   CHANNEL_RED = 0,
   CHANNEL_GREEN = 1,
   CHANNEL_BLUE = 2
 };
 
-static void
-color_mult(unsigned short *red, unsigned short *green,
-           unsigned short *blue, double factor)
+static void color_mult(unsigned short *red, unsigned short *green,
+                       unsigned short *blue, double factor)
 {
   double components[3];
   components[CHANNEL_RED] = (double)*red;
@@ -39,9 +39,11 @@ color_mult(unsigned short *red, unsigned short *green,
   components[CHANNEL_BLUE] = (double)*blue;
 
   if (components[CHANNEL_RED] == components[CHANNEL_GREEN] &&
-      components[CHANNEL_RED] == components[CHANNEL_BLUE]) {
+      components[CHANNEL_RED] == components[CHANNEL_BLUE])
+  {
     double level = components[CHANNEL_RED] * factor;
-    if (level > SCALE) {
+    if (level > SCALE)
+    {
       level = SCALE;
     }
     *red = (unsigned short)level;
@@ -52,16 +54,20 @@ color_mult(unsigned short *red, unsigned short *green,
 
   int max_index = CHANNEL_RED;
   int min_index = CHANNEL_RED;
-  for (int idx = CHANNEL_GREEN; idx <= CHANNEL_BLUE; ++idx) {
-    if (components[idx] > components[max_index]) {
+  for (int idx = CHANNEL_GREEN; idx <= CHANNEL_BLUE; ++idx)
+  {
+    if (components[idx] > components[max_index])
+    {
       max_index = idx;
     }
-    if (components[idx] < components[min_index]) {
+    if (components[idx] < components[min_index])
+    {
       min_index = idx;
     }
   }
 
-  int mid_index = CHANNEL_RED + CHANNEL_GREEN + CHANNEL_BLUE - max_index - min_index;
+  int mid_index =
+    CHANNEL_RED + CHANNEL_GREEN + CHANNEL_BLUE - max_index - min_index;
   double max_value = components[max_index];
   double min_value = components[min_index];
   double span = max_value - min_value;
@@ -70,23 +76,28 @@ color_mult(unsigned short *red, unsigned short *green,
   double lightness = 0.5 * (max_value + min_value);
   double extrema_sum = max_value + min_value;
   double saturation_denominator = (lightness <= HALF_SCALE)
-    ? extrema_sum
-    : (2.0 * SCALE - extrema_sum);
+                                    ? extrema_sum
+                                    : (2.0 * SCALE - extrema_sum);
   double saturation = span / saturation_denominator;
 
   lightness *= factor;
-  if (lightness > SCALE) {
+  if (lightness > SCALE)
+  {
     lightness = SCALE;
   }
   saturation *= factor;
-  if (saturation > 1.0) {
+  if (saturation > 1.0)
+  {
     saturation = 1.0;
   }
 
   double new_max;
-  if (lightness <= HALF_SCALE) {
+  if (lightness <= HALF_SCALE)
+  {
     new_max = lightness * (1.0 + saturation);
-  } else {
+  }
+  else
+  {
     new_max = saturation * SCALE + lightness - saturation * lightness;
   }
 
@@ -104,8 +115,7 @@ color_mult(unsigned short *red, unsigned short *green,
   *blue = (unsigned short)updated[CHANNEL_BLUE];
 }
 
-static Pixel
-adjust_pixel_brightness(Pixel pixel, double factor)
+static Pixel adjust_pixel_brightness(Pixel pixel, double factor)
 {
   extern Colormap PictureCMap;
   extern Display *PictureSaveDisplay;
@@ -113,22 +123,21 @@ adjust_pixel_brightness(Pixel pixel, double factor)
 
   color_spec.pixel = pixel;
   XQueryColor(PictureSaveDisplay, PictureCMap, &color_spec);
-  color_mult(&color_spec.red, &color_spec.green, &color_spec.blue, factor);
+  color_mult(&color_spec.red, &color_spec.green, &color_spec.blue,
+             factor);
   XAllocColor(PictureSaveDisplay, PictureCMap, &color_spec);
 
   return color_spec.pixel;
 }
 
 #define DARKNESS_FACTOR 0.5
-Pixel
-GetShadow(Pixel background)
+Pixel GetShadow(Pixel background)
 {
   return adjust_pixel_brightness(background, DARKNESS_FACTOR);
 }
 
 #define BRIGHTNESS_FACTOR 1.4
-Pixel
-GetHilite(Pixel background)
+Pixel GetHilite(Pixel background)
 {
   return adjust_pixel_brightness(background, BRIGHTNESS_FACTOR);
 }

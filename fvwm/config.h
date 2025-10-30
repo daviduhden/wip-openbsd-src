@@ -111,8 +111,6 @@
 /* Specify a type for sig_atomic_t if it's not available.  */
 /* #undef sig_atomic_t */
 
-
-
 /* Define to empty if the keyword does not work.  */
 /* #undef const */
 
@@ -177,9 +175,9 @@
 /* #undef FVWM_DEBUG_MSGS */
 
 #ifdef FVWM_DEBUG_MSGS
-#   define DBUG(x,y) fvwm_msg(DBG,x,y)
+#define DBUG(x, y) fvwm_msg(DBG, x, y)
 #else
-#   define DBUG(x,y) /* no messages */
+#define DBUG(x, y) /* no messages */
 #endif
 
 /* Define if you have the atexit function.  */
@@ -314,53 +312,51 @@
 /* Version number of package */
 #define VERSION "2.2.5"
 
-
 #ifdef STDC_HEADERS
-#  include <stdlib.h>
-#  include <string.h>
+#include <stdlib.h>
+#include <string.h>
 #else
-#  ifdef HAVE_STRING_H
-#    include <string.h>
-#  else
-#    include <strings.h>
-#  endif
-#  ifdef HAVE_MEMORY_H
-#    include <memory.h>
-#  endif
-#  ifdef HAVE_STDLIB_H
-#    include <stdlib.h>
-#  endif
-#  ifdef HAVE_MALLOC_H
-#    include <malloc.h>
-#  endif
-#  ifndef HAVE_STRCHR
-#    define strchr(_s,_c)   index((_s),(_c))
-#    define strrchr(_s,_c)  rindex((_s),(_c))
-#  endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_MEMORY_H
+#include <memory.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+#ifndef HAVE_STRCHR
+#define strchr(_s, _c) index((_s), (_c))
+#define strrchr(_s, _c) rindex((_s), (_c))
+#endif
 #endif
 
 #ifndef HAVE_MEMCPY
-#  define memcpy(_d,_s,_l)  bcopy((_s),(_d),(_l))
+#define memcpy(_d, _s, _l) bcopy((_s), (_d), (_l))
 #endif
 #ifndef HAVE_MEMMOVE
-#  define memmove(_d,_s,_l) bcopy((_s),(_d),(_l))
+#define memmove(_d, _s, _l) bcopy((_s), (_d), (_l))
 #endif
 
 #if HAVE_SYS_TYPES_H
-#  include <sys/types.h>
+#include <sys/types.h>
 #endif
 
 #if HAVE_UNISTD_H
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 #ifndef min
-#  define min(a,b) (((a)<(b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 #ifndef max
-#  define max(a,b) (((a)>(b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 #ifndef abs
-#  define abs(a) (((a)>=0)?(a):-(a))
+#define abs(a) (((a) >= 0) ? (a) : -(a))
 #endif
-

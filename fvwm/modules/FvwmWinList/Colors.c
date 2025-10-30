@@ -16,34 +16,32 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#include "config.h"
-#include <stdio.h>
-#include <X11/Xlib.h>
 #include "Colors.h"
-
+#include "config.h"
+#include <X11/Xlib.h>
+#include <stdio.h>
 
 extern Display *dpy;
 extern Window Root;
 
 /****************************************************************************
   Loads a single color
-*****************************************************************************/ 
+*****************************************************************************/
 Pixel GetColor(char *name)
 {
   XColor color;
   XWindowAttributes attributes;
 
-  XGetWindowAttributes(dpy,Root,&attributes);
+  XGetWindowAttributes(dpy, Root, &attributes);
   color.pixel = 0;
-   if (!XParseColor (dpy, attributes.colormap, name, &color)) 
-     nocolor("parse",name);
-   else if(!XAllocColor (dpy, attributes.colormap, &color)) 
-       nocolor("alloc",name);
+  if (!XParseColor(dpy, attributes.colormap, name, &color))
+    nocolor("parse", name);
+  else if (!XAllocColor(dpy, attributes.colormap, &color))
+    nocolor("alloc", name);
   return color.pixel;
 }
 
-
 void nocolor(char *a, char *b)
 {
- fprintf(stderr,"FvwmWinList: can't %s %s\n", a,b);
+  fprintf(stderr, "FvwmWinList: can't %s %s\n", a, b);
 }

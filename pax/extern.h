@@ -55,7 +55,7 @@ int ar_read(char *, int);
 int ar_write(char *, int);
 int ar_rdsync(void);
 int ar_fow(off_t, off_t *);
-int ar_rev(off_t );
+int ar_rev(off_t);
 int ar_next(void);
 
 /*
@@ -126,11 +126,11 @@ int cross_lnk(ARCHD *);
 int chk_same(ARCHD *);
 int node_creat(ARCHD *);
 void set_ftime(const char *, const struct timespec *,
-    const struct timespec *, int);
+               const struct timespec *, int);
 int set_ids(char *, uid_t, gid_t);
 void set_pmode(char *, mode_t);
-int set_attr(const struct file_times *, int _force_times, mode_t, int _do_mode,
-    int _in_sig);
+int set_attr(const struct file_times *, int _force_times, mode_t,
+             int _do_mode, int _in_sig);
 int file_write(int, char *, int, int *, int *, int, char *);
 void file_flush(int, char *, int);
 void rdfile_close(ARCHD *, int *);
@@ -192,7 +192,7 @@ int getoldopt(int, char **, const char *);
 extern FSUB fsub[];
 extern int ford[];
 void options(int, char **);
-OPLIST * opt_next(void);
+OPLIST *opt_next(void);
 extern char *chdname;
 
 /*
@@ -250,7 +250,6 @@ extern char *tempfile;
 extern char *tempbase;
 extern int havechd;
 
-
 /*
  * sel_subs.c
  */
@@ -280,14 +279,14 @@ int dev_start(void);
 int add_dev(ARCHD *);
 int map_dev(ARCHD *, u_long, u_long);
 #else
-# define dev_start()	0
-# define add_dev(x)	0
-# define map_dev(x,y,z)	0
+#define dev_start() 0
+#define add_dev(x) 0
+#define map_dev(x, y, z) 0
 #endif /* NOCPIO */
 int atdir_start(void);
 void atdir_end(void);
 void add_atdir(char *, dev_t, ino_t, const struct timespec *,
-    const struct timespec *);
+               const struct timespec *);
 int do_atdir(const char *, dev_t, ino_t);
 int dir_start(void);
 void add_dir(char *, struct stat *, int);
@@ -318,9 +317,9 @@ int pax_wr(ARCHD *);
  */
 int tty_init(void);
 void tty_prnt(const char *, ...)
-    __attribute__((nonnull(1), format(printf, 1, 2)));
+  __attribute__((nonnull(1), format(printf, 1, 2)));
 int tty_read(char *, int);
 void paxwarn(int, const char *, ...)
-    __attribute__((nonnull(2), format(printf, 2, 3)));
+  __attribute__((nonnull(2), format(printf, 2, 3)));
 void syswarn(int, int, const char *, ...)
-    __attribute__((nonnull(3), format(printf, 3, 4)));
+  __attribute__((nonnull(3), format(printf, 3, 4)));

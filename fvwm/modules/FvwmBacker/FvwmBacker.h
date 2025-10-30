@@ -18,14 +18,14 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#include "../../libs/fvwmlib.h"     
+#include "../../libs/fvwmlib.h"
 
 /* Function Prototypes */
 
 void EndLessLoop();
 void ReadFvwmPipe();
-void ProcessMessage(unsigned long type,unsigned long *body);
-void SendFvwmPipe(char *message,unsigned long window);
+void ProcessMessage(unsigned long type, unsigned long *body);
+void SendFvwmPipe(char *message, unsigned long window);
 void DeadPipe(int nonsense);
 void ParseConfig(void);
 void AddCommand(char *string);

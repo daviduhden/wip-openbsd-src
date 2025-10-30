@@ -12,6 +12,4 @@
 
 */
 
-void ParseOptions(button_info*);
-
-
+void ParseOptions(button_info *);

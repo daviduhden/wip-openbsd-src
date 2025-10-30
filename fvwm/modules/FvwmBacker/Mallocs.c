@@ -18,13 +18,13 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include "../../libs/fvwmlib.h"
 #include "config.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <sys/time.h>
-#include "../../libs/fvwmlib.h"
 
 extern char *Module;
 
@@ -33,15 +33,17 @@ extern char *Module;
 ******************************************************************************/
 char *saferealloc(char *ptr, int length)
 {
-char *newptr;
+  char *newptr;
 
-  if(length <=0) length=1;
+  if (length <= 0)
+    length = 1;
 
-  newptr=realloc(ptr,length);
-    if (ptr == (char *)0) {
-      fprintf(stderr,"%s:realloc failed",Module);
-      exit(1);
-    }
+  newptr = realloc(ptr, length);
+  if (ptr == (char *)0)
+  {
+    fprintf(stderr, "%s:realloc failed", Module);
+    exit(1);
+  }
   return ptr;
 }
 
@@ -57,4 +59,3 @@ void UpdateString(char **string, char *value)
     *string = saferealloc(*string, value_len + 1);
   strlcpy(*string, value, value_len + 1);
 }
-

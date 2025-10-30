@@ -26,17 +26,17 @@ typedef struct button
 typedef struct
 {
   int count;
-  Button *head,*tail;
-  int x,y,w,h;
+  Button *head, *tail;
+  int x, y, w, h;
 } ButtonArray;
 
 #define MAX_COLOUR_SETS 4
 
 /* Function Prototypes */
 Button *ButtonNew(char *title, FvwmPicture *p, int up);
-void InitArray(ButtonArray *array,int x,int y,int w,int h);
-void UpdateArray(ButtonArray *array,int x,int y,int w, int h);
-int AddButton(ButtonArray *array, char *title, FvwmPicture *p,int up);
+void InitArray(ButtonArray *array, int x, int y, int w, int h);
+void UpdateArray(ButtonArray *array, int x, int y, int w, int h);
+int AddButton(ButtonArray *array, char *title, FvwmPicture *p, int up);
 int UpdateButton(ButtonArray *array, int butnum, char *title, int up);
 int UpdateButtonPicture(ButtonArray *array, int butnum, FvwmPicture *p);
 int UpdateButtonSet(ButtonArray *array, int butnum, int set);
@@ -47,7 +47,7 @@ void FreeButton(Button *ptr);
 void FreeAllButtons(ButtonArray *array);
 void DoButton(Button *ptr, int x, int y, int w, int h);
 void DrawButtonArray(ButtonArray *array, int all);
-void SwitchButton(ButtonArray *array,int butnum);
+void SwitchButton(ButtonArray *array, int butnum);
 void RadioButton(ButtonArray *array, int butnum);
-int WhichButton(ButtonArray *array,int x, int y);
+int WhichButton(ButtonArray *array, int x, int y);
 void PrintButtons(ButtonArray *array);
