@@ -1,0 +1,72 @@
+# .clang-format — OpenBSD KNF (style(9)) approximation
+BasedOnStyle: LLVM
+Language: Cpp
+
+# Limits and indentation
+ColumnLimit: 80
+UseTab: ForIndentation         # Tabs for indentation; spaces for alignment.
+TabWidth: 8                    # 8-column hard tab.
+IndentWidth: 8                 # One block level = 1 tab.
+ContinuationIndentWidth: 4     # Second-level indent = 4 spaces.
+
+# Braces
+BreakBeforeBraces: Linux       # Functions: brace on new line. Control stmts: same line. "} else" on same line.
+
+# switch/case
+IndentCaseLabels: false        # 'case' not indented relative to 'switch'.
+
+# Spacing/parentheses/operators
+SpaceBeforeParens: ControlStatements   # Space after if/for/while; none for function calls.
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+BreakBeforeBinaryOperators: None       # Operators at end of the previous line.
+
+# Pointers and references
+PointerAlignment: Right        # 'char *p'
+DerivePointerAlignment: false
+
+# Comments and macros
+ReflowComments: true
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 1
+AlignEscapedNewlines: Right    # Right-justify backslashes in multi-line macros.
+
+# Includes: order by categories (blank lines between groups)
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  # 1) Kernel headers first: <sys/...>
+  - Regex: '^<sys/.*>$'
+    Priority: 1
+  # 2) Networking: <net/...>, <netinet/...>
+  - Regex: '^<(net(/.*)?|netinet(/.*)?)>$'
+    Priority: 2
+  # 3) Other system headers (<...>)
+  - Regex: '^<.*>$'
+    Priority: 3
+  # 4) Local headers ("...")
+  - Regex: '^".*"$'
+    Priority: 4
+
+# Function signatures and wrapping
+AlwaysBreakAfterDefinitionReturnType: All   # Return type on its own line (definitions).
+AlwaysBreakAfterDeclarationReturnType: All  # Same for declarations/prototypes.
+AlignAfterOpenBracket: DontAlign            # Use 4-space continuation, don't align to '('.
+
+# Short constructs on one line
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: false
+
+# Preprocessor
+IndentPPDirectives: None
+
+# Optional: treat common queue(3) macros as statements (adjust to your codebase)
+# StatementMacros:
+#   - SLIST_FOREACH
+#   - LIST_FOREACH
+#   - TAILQ_FOREACH
