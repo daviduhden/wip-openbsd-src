@@ -231,7 +231,6 @@ int main(int argc, char **argv)
       }
     }
   }
-#endif /* 0 */
   return 0;
 }
 
