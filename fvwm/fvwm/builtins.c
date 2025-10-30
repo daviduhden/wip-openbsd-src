@@ -4645,8 +4645,7 @@ SetGlobalOptions(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 			Scr.StipledTitles = False;
 		} else if (StrEquals(opt, "STIPLEDTITLES")) {
 			Scr.StipledTitles = True;
-		}
-		else if (StrEquals(opt, "CAPTUREHONORSSTARTSONPAGE")) {
+		} else if (StrEquals(opt, "CAPTUREHONORSSTARTSONPAGE")) {
 			Scr.go.CaptureHonorsStartsOnPage = True;
 		} else if (StrEquals(opt, "CAPTUREIGNORESSTARTSONPAGE")) {
 			Scr.go.CaptureHonorsStartsOnPage = False;

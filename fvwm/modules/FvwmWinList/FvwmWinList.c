@@ -21,11 +21,6 @@
  * Modifications Done to Add Pixmaps, focus highlighting and Current Desk Only
  * By Don Mahurin, 1996, Some of this Code was taken from FvwmTaskBar
 
- * Bug Notes:(Don Mahurin)
-
- * Moving a window doesn't send M_CONFIGURE, as I thought it should. Desktop
- * for that button is not updated.
-
 */
 
 #define TRUE 1
@@ -304,7 +299,8 @@ ProcessMessage(unsigned long type, unsigned long *body)
 	case M_ADD_WINDOW:
 	case M_CONFIGURE_WINDOW:
 		if ((i = FindItem(&windows, body[0])) != -1) {
-			if (UpdateItemDesk(&windows, i, body[7]) > 0) {
+			if (UpdateItemDesk(&windows, body[0], body[7]) > 0) {
+				UpdateButtonDesk(&buttons, i, body[7]);
 				AdjustWindow();
 				RedrawWindow(1);
 			}
