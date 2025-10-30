@@ -5,6 +5,7 @@
 #include "defaults.h"
 #include "menus.h"
 #include <ctype.h>
+#include <stdio.h>
 
 /************************************************************************
  * ReapChildren - wait() for all dead child processes
