@@ -7,6 +7,8 @@
 #define DEFAULT_NUM_COLS 1
 #define DEFAULT_NUM_ROWS 0
 
+#include "FvwmIconMan.h"
+
 extern void draw_managers(void);
 extern void draw_manager(WinManager *man);
 
