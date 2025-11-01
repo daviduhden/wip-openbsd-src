@@ -281,7 +281,7 @@ void BroadcastName(unsigned long event_type, unsigned long data1,
 void SendName(int channel, unsigned long event_type, unsigned long data1,
     unsigned long data2, unsigned long data3, const char *name);
 void SendStrToModule(F_CMD_ARGS);
-RETSIGTYPE DeadPipe(int nonsense);
+void DeadPipe(int nonsense);
 void GetMwmHints(FvwmWindow *t);
 void GetOlHints(FvwmWindow *t);
 void SelectDecor(FvwmWindow *, unsigned long, int, int);

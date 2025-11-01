@@ -139,9 +139,6 @@
 /* Define if you need to in order for stat and other things to work.  */
 /* #undef _POSIX_SOURCE */
 
-/* Define as the return type of signal handlers (int or void).  */
-#define RETSIGTYPE void
-
 /* Define to the type of arg1 for select(). */
 #define SELECT_TYPE_ARG1 int
 

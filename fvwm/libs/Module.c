@@ -33,7 +33,7 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 {
 	int count, total, count2, body_length;
 	char *cbody;
-	extern RETSIGTYPE DeadPipe(int);
+	extern void DeadPipe(int);
 
 	errno = 0;
 	if ((count = read(fd, header, HEADER_SIZE * sizeof(unsigned long))) >

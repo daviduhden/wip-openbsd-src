@@ -101,7 +101,7 @@ Bool error_occured = False;
 
 static volatile sig_atomic_t isTerminated = False;
 
-static RETSIGTYPE TerminateHandler(int);
+static void TerminateHandler(int);
 
 /***********************************************************************
  *
@@ -355,7 +355,7 @@ process_message(unsigned long type, unsigned long *body)
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-static RETSIGTYPE
+static void
 TerminateHandler(int nonsense)
 {
 	isTerminated = True;

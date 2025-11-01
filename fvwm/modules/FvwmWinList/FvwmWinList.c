@@ -115,12 +115,12 @@ int ShowCurrentDesk = 0;
 
 static volatile sig_atomic_t isTerminated = False;
 
-static RETSIGTYPE TerminateHandler(int sig);
+static void TerminateHandler(int sig);
 
 /***************************************************************************
  * TerminateHandler - reentrant signal handler that ends the main event loop
  ***************************************************************************/
-static RETSIGTYPE
+static void
 TerminateHandler(int sig)
 {
 	isTerminated = True;

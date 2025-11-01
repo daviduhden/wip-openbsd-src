@@ -83,7 +83,7 @@ extern void SaveButtons(button_info *);
 
 void DeadPipe(int nonsense) __attribute__((__noreturn__));
 static void DeadPipeCleanup(void);
-static RETSIGTYPE TerminateHandler(int sig);
+static void TerminateHandler(int sig);
 void SetButtonSize(button_info *, int, int);
 /* main */
 void Loop(void);
@@ -196,7 +196,7 @@ DeadPipe(int whatever)
 *** TerminateHandler()
 *** Signal handler that will make the event-loop terminate
 **/
-static RETSIGTYPE
+static void
 TerminateHandler(int sig)
 {
 	isTerminated = True;
