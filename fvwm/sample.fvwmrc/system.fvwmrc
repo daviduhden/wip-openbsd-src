@@ -5,6 +5,7 @@
 
 # be sure to customize these paths for your installation:
 ModulePath /usr/X11R6/lib/X11/fvwm
+#ModulePath /usr/xobj/app/fvwm/modules
 PixmapPath /usr/X11R6/include/X11/pixmaps
 IconPath   /usr/X11R6/include/X11/bitmaps
 
@@ -12,12 +13,11 @@ EdgeResistance 250 10
 EdgeScroll 100 100
 ClickTime 750
 
-# make sure these fonts exist on your system:
-WindowFont -adobe-times-bold-r-*-*-14-*-*-*-*-*-*-*
-IconFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
+WindowFont 10x20
+IconFont 8x13bold
 
-HilightColor #bebebe blue
-MenuStyle #4d4d4d #bebebe #e7e7e7 -adobe-times-bold-r-*-*-12-*-*-*-*-*-*-* fvwm
+HilightColor #bebebe #0000ff
+MenuStyle #4d4d4d #bebebe #e7e7e7 7x13bold fvwm
 
 DeskTopSize 3x3
 
@@ -25,7 +25,7 @@ ColormapFocus FollowsMouse
 
 # default Styles:
 Style "*"           BorderWidth 7, HandleWidth 7
-Style "*"           Icon unknown1.xpm, Color #bebebe/darkred
+Style "*"           Icon unknown1.xpm, Color #bebebe/#8b0000
 Style "*"           MWMFunctions, MWMDecor, HintOverride
 Style "*"           DecorateTransient, NoPPosition
 Style "*"           IconBox 0 -10 -280 -1
@@ -42,7 +42,7 @@ Style "FvwmButtons" Icon toolbox.xpm, ClickToFocus
 # Styles for your common terminal emulator programs:
 AddToDecor terms
 + ButtonStyle 1 Pixmap mini.xterm.xpm
-+ HilightColor #bebebe blue
++ HilightColor #bebebe #0000ff
 Style "XTerm"       UseDecor terms
 Style "XTerm"       Icon xterm.xpm, SloppyFocus, IconBox -70 1 -1 -140
 Style "rxvt"        UseDecor terms
@@ -54,10 +54,10 @@ Style "*lock"       NoTitle, NoHandles, Sticky, WindowListSkip, ClickToFocus
 Style "xbiff"       NoTitle, Sticky, WindowListSkip, ClickToFocus
 Style "xcalc"       Icon xcalc.xpm, NoButton 2,RandomPlacement,ClickToFocus
 Style "xmh"         Icon mail1.xpm, NoIconTitle,StickyIcon
-Style "xmh"	    RandomPlacement, NoButton 2
-Style "xmag"	    Icon mag_glass.xpm, RandomPlacement, ClickToFocus
+Style "xmh"         RandomPlacement, NoButton 2
+Style "xmag"        Icon mag_glass.xpm, RandomPlacement, ClickToFocus
 Style "xgraph"      Icon graphs.xpm, RandomPlacement, ClickToFocus
-Style "xmosaic"     Color Green/Yellow, ClickToFocus
+Style "xmosaic"     Color #008000/#ffff00, ClickToFocus
 Style "xconsole"    Icon rterm.xpm, WindowListSkip, Sticky
 
 
@@ -86,10 +86,10 @@ Mouse 3	TSIF	A	RaiseLower
 
 ######################## Initialization Functions ############################
 AddToFunc InitFunction 	  "I" Module FvwmPager 0 0
-#+			  "I" exec /usr/X11R6/bin/xsetroot -solid black
+#+			  "I" exec /usr/X11R6/bin/xsetroot -solid #000000
 
 AddToFunc RestartFunction "I" Module FvwmPager 0 0
-#+			  "I" exec /usr/X11R6/bin/xsetroot -solid black
+#+			  "I" exec /usr/X11R6/bin/xsetroot -solid #000000
 
 
 ######################## Menus ###################
@@ -321,18 +321,18 @@ Key F8		A	M	CirculateDown
 #Key Prior	R       N       Scroll -100000 0
 
 ################## FvwmButtons button-bar ################################
-*FvwmButtonsBack bisque3
+*FvwmButtonsBack #cdb79e
 *FvwmButtons(Frame 2 Padding 2 2 Container(Rows 2 Frame 1 Padding 10 0 \
                                            Swallow(Respawn)))
 *FvwmButtons(NoSize Title Close, Icon bomb.xpm, Action Close)
-*FvwmButtons(Title Resize Icon mini.resize.xpm Back bisque4 Action Resize)
+*FvwmButtons(Title Resize Icon mini.resize.xpm Back #8b7d6b Action Resize)
 *FvwmButtons(Frame -3 Swallow(Respawn,NoHints) xclock \
-       `Exec exec xclock -bg darkolivegreen -padding 0 -geometry +2000+0`)
-*FvwmButtons(3x1 Back darkolivegreen Fore white Frame 2 Padding 2 2 \
-                 Container(Rows 1 Frame -2 Padding 1 1 Back darkolivegreen))
-*FvwmButtons(Frame 2 Title(Side,Right) Mail Fore white \
+       `Exec exec xclock -bg #556b2f -padding 0 -geometry +2000+0`)
+*FvwmButtons(3x1 Back #556b2f Fore #ffffff Frame 2 Padding 2 2 \
+                 Container(Rows 1 Frame -2 Padding 1 1 Back #556b2f))
+*FvwmButtons(Frame 2 Title(Side,Right) Mail Fore #ffffff \
          Swallow(UseOld,NoRespawn)\
-         xbiff `Exec exec xbiff -bg darkolivegreen -geometry +200+200`)
+         xbiff `Exec exec xbiff -bg #556b2f -geometry +200+200`)
 *FvwmButtons(2x1 Swallow (NoHints) "FvwmTalk" "FvwmTalk")
 *FvwmButtons(End)
 *FvwmButtons(End)
@@ -340,14 +340,14 @@ Key F8		A	M	CirculateDown
 
 ########################## Window-Identifier ###############################
 # Just choose colors and a fonts
-*FvwmIdentBack MidnightBlue
-*FvwmIdentFore Yellow
-*FvwmIdentFont -adobe-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*
+*FvwmIdentBack #191970
+*FvwmIdentFore #ffff00
+*FvwmIdentFont 8x13
 
 ########################### Pager #########################################
-*FvwmPagerFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
-*FvwmPagerBack darkblue
-*FvwmPagerFore white
+*FvwmPagerFont 7x13bold
+*FvwmPagerBack #00008b
+*FvwmPagerFore #ffffff
 *FvwmPagerHilight #2d2d2d
 *FvwmPagerGeometry 80x60-1-1
 *FvwmPagerLabel 0 "OpenBSD"
@@ -358,8 +358,8 @@ Key F8		A	M	CirculateDown
 
 ##########################FvwmWinList##################################
 *FvwmWinListBack #908090
-*FvwmWinListFore Black
-*FvwmWinListFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
+*FvwmWinListFore #000000
+*FvwmWinListFont 8x13bold
 *FvwmWinListAction Click1 Iconify -1,Focus
 *FvwmWinListAction Click2 Iconify
 *FvwmWinListAction Click3 Module "FvwmIdent" FvwmIdent
@@ -367,11 +367,11 @@ Key F8		A	M	CirculateDown
 *FvwmWinListGeometry +0-1
 
 
-*FvwmBackerDesk 0 -solid steelblue
-*FvwmBackerDesk 1 -solid midnightblue
+*FvwmBackerDesk 0 -solid #4682b4
+*FvwmBackerDesk 1 -solid #191970
 
-*FvwmScrollBack grey40
-*FvwmScrollFore green
+*FvwmScrollBack #666666
+*FvwmScrollFore #00ff00
 
 ############################################################
 ############################################################
@@ -381,13 +381,13 @@ Key F8		A	M	CirculateDown
 
 ############################################################
 *FvwmIconBoxIconBack    #cfcfcf
-*FvwmIconBoxIconHiFore  black
-*FvwmIconBoxIconHiBack  LightSkyBlue
+*FvwmIconBoxIconHiFore  #000000
+*FvwmIconBoxIconHiBack  #87cefa
 *FvwmIconBoxBack        #5f9ea0
-#*FvwmIconBoxFore       blue
+#*FvwmIconBoxFore       #0000ff
 *FvwmIconBoxGeometry    5x1+0+0
 *FvwmIconBoxMaxIconSize 64x38
-*FvwmIconBoxFont        -adobe-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*
+*FvwmIconBoxFont        8x13
 *FvwmIconBoxSortIcons   IconName
 *FvwmIconBoxPadding     4
 *FvwmIconBoxLines       10
@@ -421,13 +421,13 @@ Key F8		A	M	CirculateDown
 
 # FvwmForm alias - ssh or telnet to host via xterm
 *SshWarpPointer
-*SshFont         *helvetica*m*r*n*12*
-*SshButtonFont   *helvetica*m*o*n*12*
-*SshInputFont    *cour*m*r*n*12*
-*SshFore         Black
-*SshBack         White
-*SshItemFore     Black
-*SshItemBack     Wheat
+*SshFont         8x13
+*SshButtonFont   7x13bold
+*SshInputFont    6x13
+*SshFore         #000000
+*SshBack         #ffffff
+*SshItemFore     #000000
+*SshItemBack     #f5deb3
 # begin items
 *SshLine         center
 *SshText         "Login to Remote Host"
@@ -460,13 +460,12 @@ Key F8		A	M	CirculateDown
 # FvwmForm alias - query exit ala mwm
 *QuitVerifyGrabServer
 *QuitVerifyWarpPointer
-*QuitVerifyFont          *helvetica*m*r*n*14*
-#*QuitVerifyButtonFont    *helvetica*m*o*n*14*
+*QuitVerifyFont          8x13
 *QuitVerifyButtonFont    7x13bold
-*QuitVerifyFore          Black
-*QuitVerifyBack          Light Gray
-*QuitVerifyItemFore Wheat
-*QuitVerifyItemBack Gray50
+*QuitVerifyFore          #000000
+*QuitVerifyBack          #d3d3d3
+*QuitVerifyItemFore #f5deb3
+*QuitVerifyItemBack #7f7f7f
 # begin items
 *QuitVerifyLine          center
 *QuitVerifyText          "Do you really want to exit FVWM?"
@@ -479,13 +478,13 @@ Key F8		A	M	CirculateDown
 # MyTalk & MyFvwmTalk from Dave Goldberg
 # MyTalk Form - dissappears after use
 *MyTalkWarpPointer
-*MyTalkFont *helvetica*m*r*n*14*
-*MyTalkButtonFont *helvetica*m*o*n*14*
-*MyTalkInputFont *cour*m*r*n*14*
-*MyTalkFore Red
-*MyTalkBack Gray
-*MyTalkItemFore Blue
-*MyTalkItemBack Gray
+*MyTalkFont 8x13
+*MyTalkButtonFont 7x13bold
+*MyTalkInputFont 6x13
+*MyTalkFore #ff0000
+*MyTalkBack #bebebe
+*MyTalkItemFore #0000ff
+*MyTalkItemBack #bebebe
 *MyTalkLine center
 *MyTalkText "Fvwm Function"
 *MyTalkInput Func 40 ""
@@ -497,13 +496,13 @@ Key F8		A	M	CirculateDown
 *MyTalkCommand Nop
 # MyFvwmTalk Form - sticks around
 *MyFvwmTalkWarpPointer
-*MyFvwmTalkFont *helvetica*m*r*n*14*
-*MyFvwmTalkButtonFont *helvetica*m*o*n*14*
-*MyFvwmTalkInputFont *cour*m*r*n*14*
-*MyFvwmTalkFore Red
-*MyFvwmTalkBack Gray
-*MyFvwmTalkItemFore Blue
-*MyFvwmTalkItemBack Gray
+*MyFvwmTalkFont 8x13
+*MyFvwmTalkButtonFont 7x13bold
+*MyFvwmTalkInputFont 6x13
+*MyFvwmTalkFore #ff0000
+*MyFvwmTalkBack #bebebe
+*MyFvwmTalkItemFore #0000ff
+*MyFvwmTalkItemBack #bebebe
 *MyFvwmTalkLine center
 *MyFvwmTalkText "Fvwm Function"
 *MyFvwmTalkInput Func 40 ""
