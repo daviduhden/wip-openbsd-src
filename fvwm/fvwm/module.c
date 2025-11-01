@@ -342,7 +342,7 @@ HandleModuleInput(Window w, int channel)
 	return 0;
 }
 
-RETSIGTYPE
+void
 DeadPipe(int nonsense)
 {
 }

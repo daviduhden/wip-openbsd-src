@@ -24,7 +24,7 @@ static char *IM_VERSION = "1.3";
 static char const rcsid[] =
     "$Id: FvwmIconMan.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
-static RETSIGTYPE TerminateHandler(int);
+static void TerminateHandler(int);
 
 char *
 copy_string(char **target, char *src)
@@ -89,7 +89,7 @@ PrintMemuse(void)
 
 #endif
 
-static RETSIGTYPE
+static void
 TerminateHandler(int sig)
 {
 	isTerminated = True;
