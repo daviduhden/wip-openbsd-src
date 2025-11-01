@@ -42,6 +42,9 @@
 #ifndef _MENUS_
 #define _MENUS_
 
+#include "config.h"
+#include "fvwm.h"
+
 /* Function types used for formatting menus */
 
 #define FUNC_NO_WINDOW False
