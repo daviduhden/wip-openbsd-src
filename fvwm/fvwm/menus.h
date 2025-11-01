@@ -44,6 +44,7 @@
 
 #include "config.h"
 #include "fvwm.h"
+#include "../libs/fvwmlib.h"
 
 /* Function types used for formatting menus */
 
@@ -54,8 +55,6 @@
 #define MENU_IS_RIGHT 0x02
 #define MENU_IS_UP 0x04
 #define MENU_IS_DOWN 0x08
-
-#include "../libs/fvwmlib.h"
 
 typedef enum {
 	/* menu types */
