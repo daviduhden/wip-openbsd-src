@@ -353,8 +353,8 @@ typedef struct WindowConditionMask {
 
 #include <stdlib.h>
 extern void Reborder(void);
-extern RETSIGTYPE SigDone(int nonsense);
-extern RETSIGTYPE Restart(int nonsense);
+extern void SigDone(int nonsense);
+extern void Restart(int nonsense);
 extern void Done(int, char *) __attribute__((__noreturn__));
 extern void BlackoutScreen(void);
 extern void UnBlackoutScreen(void);

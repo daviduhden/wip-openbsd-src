@@ -817,7 +817,7 @@ newhandler(int sig)
 /*************************************************************************
  * Restart on a signal
  ************************************************************************/
-RETSIGTYPE
+void
 Restart(int nonsense)
 {
 	isTerminated = True;
@@ -1387,7 +1387,7 @@ Reborder(void)
  *
  ***********************************************************************
  */
-RETSIGTYPE
+void
 SigDone(int nonsense)
 {
 	isTerminated = True;
