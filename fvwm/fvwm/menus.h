@@ -42,9 +42,9 @@
 #ifndef _MENUS_
 #define _MENUS_
 
+#include "../libs/fvwmlib.h"
 #include "config.h"
 #include "fvwm.h"
-#include "../libs/fvwmlib.h"
 
 /* Function types used for formatting menus */
 
