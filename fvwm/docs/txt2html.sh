@@ -13,8 +13,8 @@
 # This has to be run from the directory where the output file is wanted.
 # This is designed for the files, ChangeLog, TO-DO, FAQ
 
-name=$(basename $1)
-outfile=$name.html
+name=$(basename "$1")
+outfile="$name.html"
 
 # make header:
 echo "<html>
@@ -28,12 +28,12 @@ echo "<html>
 <h1><font color=\"pink\">The Official FVWM Homepage - $name Information</font></h1>
 </center>
 <pre>
-" >$outfile
+" >"$outfile"
 
 # Embed the text with some adjustment:
 sed -e 's/&/\&amp;/' \
 	-e 's/</\&lt;/' \
-	-e 's/>/\&gt;/' $1 >>$outfile
+	-e 's/>/\&gt;/' "$1" >>"$outfile"
 
 # make footer:
 echo "</pre>
@@ -42,4 +42,4 @@ echo "</pre>
      on $(date) -->
   </body>
 </html>
-" >>$outfile
+" >>"$outfile"

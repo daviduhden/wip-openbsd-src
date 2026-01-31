@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 #  Modification History
 
@@ -12,8 +12,8 @@
 # If you run, run_man2html.sh fvwm2, this creates "fvwm2.html" in
 # the current directory.
 
-name=$(basename $1)
-outfile=$name.html
+name=$(basename "$1")
+outfile="$name.html"
 
 # make header:
 echo "<html>
@@ -27,17 +27,17 @@ echo "<html>
 <h1><font color=\"pink\">The Official FVWM Homepage - $name Man Page</font></h1>
 </center>
 <pre>
-" >$outfile
+" >"$outfile"
 
 # Embed the text with some adjustment:
 # Italics are shown in yellow.  References, (if there were any)
 # would be shown in cyan.  Unfortunately bold stuff in man pages
 # is lost.  Maybe in the man command, maybe in man2html.
 # Output looks pretty good anyway (to my eyes).
-man $name | man2html -bare \
+man "$name" | man2html -bare \
 	-uelem 'font color="yellow"' \
 	-belem 'font color="cyan"' \
-	>>$outfile
+	>>"$outfile"
 
 # make footer:
 echo "</pre>
@@ -46,4 +46,4 @@ echo "</pre>
      on $(date) -->
   </body>
 </html>
-" >>$outfile
+" >>"$outfile"
