@@ -38,14 +38,14 @@ check_root() {
 	fi
 }
 
-# Function to remove the src directory
-remove_src_directory() {
-	rm -rf /usr/src
+# Function to remove the src content
+remove_src_content() {
+	rm -rf /usr/src/*
 }
 
-# Function to remove the xenocara directory
-remove_xenocara_directory() {
-	rm -rf /usr/xenocara
+# Function to remove the xenocara content
+remove_xenocara_content() {
+	rm -rf /usr/xenocara/*
 }
 
 # Function to permanently set the CVSROOT environment variable if not already set
@@ -77,12 +77,12 @@ checkout_selected_repository() {
 	cd /usr || exit 1
 	case "$SELECTED_REPO" in
 	src)
-		remove_src_directory
+		remove_src_content
 		log "Checking out src from anoncvs..."
 		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs checkout -P src
 		;;
 	xenocara)
-		remove_xenocara_directory
+		remove_xenocara_content
 		log "Checking out xenocara from anoncvs..."
 		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs checkout -P xenocara
 		;;
