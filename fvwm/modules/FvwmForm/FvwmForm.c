@@ -473,9 +473,9 @@ ReadConfig()
 			/* syntax: *FFText "<text>" */
 			cp += 4;
 			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity
-				                     ? items_capacity * 2
-				                     : INITIAL_ITEMS_CAPACITY;
+				items_capacity = items_capacity ?
+				    items_capacity * 2 :
+				    INITIAL_ITEMS_CAPACITY;
 				items = (Item *)realloc(
 				    items, sizeof(Item) * items_capacity);
 			}
@@ -491,7 +491,7 @@ ReadConfig()
 			item->text.n = strlen(item->text.value);
 			item->header.size_x =
 			    XTextWidth(
-			        xfs[f_text], item->text.value, item->text.n) +
+			    xfs[f_text], item->text.value, item->text.n) +
 			    2 * TEXT_SPC;
 			item->header.size_y =
 			    FontHeight(xfs[f_text]) + 2 * TEXT_SPC;
@@ -504,9 +504,9 @@ ReadConfig()
 			/* syntax: *FFInput <name> <size> "<init_value>" */
 			cp += 5;
 			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity
-				                     ? items_capacity * 2
-				                     : INITIAL_ITEMS_CAPACITY;
+				items_capacity = items_capacity ?
+				    items_capacity * 2 :
+				    INITIAL_ITEMS_CAPACITY;
 				items = (Item *)realloc(
 				    items, sizeof(Item) * items_capacity);
 			}
@@ -536,7 +536,7 @@ ReadConfig()
 			    FontWidth(xfs[f_input]) * item->input.size +
 			    2 * TEXT_SPC + 2 * BOX_SPC;
 			item->header.size_y = FontHeight(xfs[f_input]) +
-			                      3 * TEXT_SPC + 2 * BOX_SPC;
+			    3 * TEXT_SPC + 2 * BOX_SPC;
 			fprintf(fp_err, "Input, %s, [%d], \"%s\"\n",
 			    item->header.name, item->input.size,
 			    item->input.init_value);
@@ -545,9 +545,9 @@ ReadConfig()
 			/* syntax: *FFSelection <name> single | multiple */
 			cp += 9;
 			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity
-				                     ? items_capacity * 2
-				                     : INITIAL_ITEMS_CAPACITY;
+				items_capacity = items_capacity ?
+				    items_capacity * 2 :
+				    INITIAL_ITEMS_CAPACITY;
 				items = (Item *)realloc(
 				    items, sizeof(Item) * items_capacity);
 			}
@@ -571,8 +571,8 @@ ReadConfig()
 			cur_sel->header.size_y = 0;
 			fprintf(fp_err, "Selection %s (%s)\n",
 			    cur_sel->header.name,
-			    (cur_sel->select.key == IS_MULTIPLE) ? "multiple"
-			                                         : "single");
+			    (cur_sel->select.key == IS_MULTIPLE) ? "multiple" :
+			    "single");
 			continue;
 		} else if (strncmp(cp, "Choice", 6) == 0) {
 			/* syntax: *FFChoice <name> <value> on|off "<text>" */
@@ -581,7 +581,7 @@ ReadConfig()
 				cp++;
 			if (cur_sel == NULL) {
 				fprintf(fp_err, "Choice specified before "
-				                "Selection, skipping\n");
+				    "Selection, skipping\n");
 				continue;
 			}
 			if (cur_sel->select.n + 1 >
@@ -589,13 +589,13 @@ ReadConfig()
 				cur_sel->select.choices_cap *= 2;
 				cur_sel->select.choices =
 				    (Item **)realloc(cur_sel->select.choices,
-				        sizeof(Item *) *
-				            cur_sel->select.choices_cap);
+				    sizeof(Item *) *
+				    cur_sel->select.choices_cap);
 			}
 			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity
-				                     ? items_capacity * 2
-				                     : INITIAL_ITEMS_CAPACITY;
+				items_capacity = items_capacity ?
+				    items_capacity * 2 :
+				    INITIAL_ITEMS_CAPACITY;
 				items = (Item *)realloc(
 				    items, sizeof(Item) * items_capacity);
 			}
@@ -632,7 +632,7 @@ ReadConfig()
 			item->header.size_x =
 			    FontHeight(xfs[f_text]) + 4 * TEXT_SPC +
 			    XTextWidth(
-			        xfs[f_text], item->choice.text, item->choice.n);
+			    xfs[f_text], item->choice.text, item->choice.n);
 			fprintf(fp_err, "Choice %s, \"%s\", [%d, %d]\n",
 			    item->header.name, item->choice.text,
 			    item->header.size_x, item->header.size_y);
@@ -643,9 +643,9 @@ ReadConfig()
 			 */
 			cp += 6;
 			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity
-				                     ? items_capacity * 2
-				                     : INITIAL_ITEMS_CAPACITY;
+				items_capacity = items_capacity ?
+				    items_capacity * 2 :
+				    INITIAL_ITEMS_CAPACITY;
 				items = (Item *)realloc(
 				    items, sizeof(Item) * items_capacity);
 			}
@@ -683,11 +683,11 @@ ReadConfig()
 			    (char **)malloc(sizeof(char *) * 8);
 			item->button.commands_cap = 8;
 			item->header.size_y = FontHeight(xfs[f_button]) +
-			                      2 * TEXT_SPC + 2 * BOX_SPC;
+			    2 * TEXT_SPC + 2 * BOX_SPC;
 			item->header.size_x =
 			    2 * TEXT_SPC + 2 * BOX_SPC +
 			    XTextWidth(xfs[f_button], item->button.text,
-			        item->button.len);
+			    item->button.len);
 			append_item_to_line(cur_line, item);
 			cur_button = item;
 			continue;
@@ -702,7 +702,7 @@ ReadConfig()
 				cur_button->button.commands = (char **)realloc(
 				    cur_button->button.commands,
 				    sizeof(char *) *
-				        cur_button->button.commands_cap);
+				    cur_button->button.commands_cap);
 			}
 			cur_button->button.commands[cur_button->button.n++] =
 			    CopyNString(cp, 0);
@@ -718,8 +718,8 @@ ReadConfig()
 			if (line->items[i]->header.size_y < line->size_y)
 				line->items[i]->header.pos_y +=
 				    (line->size_y -
-				        line->items[i]->header.size_y) /
-				        2 +
+				     line->items[i]->header.size_y) /
+				    2 +
 				    1;
 		}
 		total_height += ITEM_VSPC + line->size_y;
@@ -775,25 +775,25 @@ ReadConfig()
 			if (extra == 0) {
 				if (line->n < 2) { /* same as L_CENTER */
 					width = (max_width - line->size_x) / 2 +
-					        ITEM_HSPC;
+					    ITEM_HSPC;
 					for (i = 0; i < line->n; i++) {
 						line->items[i]->header.pos_x =
 						    width;
 						width += ITEM_HSPC +
-						         line->items[i]
-						             ->header.size_x;
+						    line->items[i]
+						    ->header.size_x;
 					}
 				} else {
 					extra = (max_width - line->size_x) /
-					        (line->n - 1);
+					    (line->n - 1);
 					width = ITEM_HSPC;
 					for (i = 0; i < line->n; i++) {
 						line->items[i]->header.pos_x =
 						    width;
 						width += ITEM_HSPC +
-						         line->items[i]
-						             ->header.size_x +
-						         extra;
+						    line->items[i]
+						    ->header.size_x +
+						    extra;
 					}
 				}
 			} else {
@@ -805,7 +805,7 @@ ReadConfig()
 						line->items[i]->header.size_x +=
 						    extra;
 					width += ITEM_HSPC +
-					         line->items[i]->header.size_x;
+					    line->items[i]->header.size_x;
 				}
 			}
 			break;
@@ -827,7 +827,7 @@ GetColors()
 		colors[c_fore] = colors[c_itemfore] = colors[c_itemlo] =
 		    colors[c_itemhi] = BlackPixel(dpy, screen);
 	} else if (visual->class == TrueColor || visual->class == StaticColor ||
-	           visual->class == StaticGray) {
+	    visual->class == StaticGray) {
 		if (XParseColor(dpy, d_cmap, color_names[c_fore], &xc_item) &&
 		    XAllocColor(dpy, d_cmap, &xc_item))
 			colors[c_fore] = xc_item.pixel;
@@ -841,14 +841,14 @@ GetColors()
 			colors[c_back] = WhitePixel(dpy, screen);
 
 		if (XParseColor(
-		        dpy, d_cmap, color_names[c_itemfore], &xc_item) &&
+		    dpy, d_cmap, color_names[c_itemfore], &xc_item) &&
 		    XAllocColor(dpy, d_cmap, &xc_item))
 			colors[c_itemfore] = xc_item.pixel;
 		else
 			colors[c_itemfore] = BlackPixel(dpy, screen);
 
 		if (XParseColor(
-		        dpy, d_cmap, color_names[c_itemback], &xc_item) &&
+		    dpy, d_cmap, color_names[c_itemback], &xc_item) &&
 		    XAllocColor(dpy, d_cmap, &xc_item))
 			colors[c_itemback] = xc_item.pixel;
 		else
@@ -1125,13 +1125,13 @@ ToggleChoice(Item *item)
 /* do var substitution for command string */
 void
 ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
-#define AddChar(chr)                                                           \
-	{                                                                      \
-		if (dn >= N) {                                                 \
-			N *= 2;                                                \
-			buf = (char *)realloc(buf, N);                         \
-		}                                                              \
-		buf[dn++] = (chr);                                             \
+#define AddChar(chr)							\
+	{								\
+		if (dn >= N) {						\
+			N *= 2;						\
+			buf = (char *)realloc(buf, N);			\
+		}							\
+		buf[dn++] = (chr);					\
 	}
 {
 	static char var[256];
@@ -1174,12 +1174,12 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 					case I_INPUT:
 						if (x == ')') {
 							for (cp = item->input
-							         .value;
+							    .value;
 							    *cp != '\0'; cp++) {
 								if (*cp ==
-								        '\"' ||
+								    '\"' ||
 								    *cp ==
-								        '\'' ||
+								    '\'' ||
 								    *cp == '\\')
 									AddChar(
 									    '\\');
@@ -1189,33 +1189,33 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 							ParseCommand(dn, sp,
 							    ')', &dn2, &sp);
 							if ((x == '?' &&
-							        strlen(
-							            item->input
-							                .value) >
-							            0) ||
+							    strlen(
+							    item->input
+							    .value) >
+							    0) ||
 							    (x == '!' &&
-							        strlen(
-							            item->input
-							                .value) ==
-							            0))
+							     strlen(
+							     item->input
+							     .value) ==
+							     0))
 								dn = dn2;
 						}
 						break;
 					case I_CHOICE:
 						if (x == ')') {
 							for (cp = item->choice
-							         .value;
+							    .value;
 							    *cp != '\0'; cp++)
 								AddChar(*cp);
 						} else {
 							ParseCommand(dn, sp,
 							    ')', &dn2, &sp);
 							if ((x == '?' &&
-							        item->choice
-							            .on) ||
+							    item->choice
+							    .on) ||
 							    (x == '!' &&
-							        !item->choice
-							            .on))
+							     !item->choice
+							     .on))
 								dn = dn2;
 						}
 						break;
@@ -1227,15 +1227,14 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 						for (j = 0; j < item->select.n;
 						    j++) {
 							if (item->select
-							        .choices[j]
-							        ->choice.on) {
-								for (
-								    cp = item
-								        ->select
-								        .choices
-								            [j]
-								        ->choice
-								        .value;
+							    .choices[j]
+							    ->choice.on) {
+								for (cp = item
+								    ->select
+								    .choices
+								    [j]
+								    ->choice
+								    .value;
 								    *cp != '\0';
 								    cp++)
 									AddChar(
@@ -1250,9 +1249,9 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 			}
 			goto next_loop;
 		}
-	normal_char:
+ normal_char:
 		AddChar(c);
-	next_loop:;
+ next_loop:		;
 	}
 }
 
@@ -1439,8 +1438,8 @@ ReadXServer()
 				if (grab_server && !server_grabbed) {
 					if (GrabSuccess ==
 					    XGrabPointer(dpy, frame, True, 0,
-					        GrabModeAsync, GrabModeAsync,
-					        None, None, CurrentTime))
+					    GrabModeAsync, GrabModeAsync,
+					    None, None, CurrentTime))
 						server_grabbed = 1;
 				}
 				break;
@@ -1495,7 +1494,7 @@ ReadXServer()
 						    i, item->button.keypress);
 						if (item->type == I_BUTTON &&
 						    item->button.keypress ==
-						        buf[0]) {
+						    buf[0]) {
 							RedrawItem(item, 1);
 							sleep(1);
 							RedrawItem(item, 0);
@@ -1517,8 +1516,8 @@ ReadXServer()
 					old_cursor = abs_cursor;
 					rel_cursor = cur_text->input.n;
 					if ((cur_text->input.left =
-					            rel_cursor -
-					            cur_text->input.size) < 0)
+					    rel_cursor -
+					    cur_text->input.size) < 0)
 						cur_text->input.left = 0;
 					abs_cursor =
 					    rel_cursor - cur_text->input.left;
@@ -1543,9 +1542,9 @@ ReadXServer()
 						rel_cursor++;
 						abs_cursor++;
 						if (abs_cursor >=
-						        cur_text->input.size &&
+						    cur_text->input.size &&
 						    rel_cursor <
-						        cur_text->input.n) {
+						    cur_text->input.n) {
 							abs_cursor--;
 							cur_text->input.left++;
 						}
@@ -1556,7 +1555,7 @@ ReadXServer()
 					old_cursor = abs_cursor;
 					if (rel_cursor > 0) {
 						sp = cur_text->input.value +
-						     rel_cursor;
+						    rel_cursor;
 						dp = sp - 1;
 						for (; *dp = *sp, *sp != '\0';
 						    dp++, sp++)
@@ -1580,7 +1579,7 @@ ReadXServer()
 				case '\004': /* ^D */
 					if (rel_cursor < cur_text->input.n) {
 						sp = cur_text->input.value +
-						     rel_cursor + 1;
+						    rel_cursor + 1;
 						dp = sp - 1;
 						for (; *dp = *sp, *sp != '\0';
 						    dp++, sp++)
@@ -1618,7 +1617,7 @@ ReadXServer()
 							RedrawItem(old_item, 1);
 							rel_cursor =
 							    item->input
-							        .o_cursor;
+							    .o_cursor;
 							abs_cursor =
 							    rel_cursor -
 							    item->input.left;
@@ -1635,7 +1634,7 @@ ReadXServer()
 						    i, item->button.keypress);
 						if (item->type == I_BUTTON &&
 						    item->button.keypress ==
-						        buf[0]) {
+						    buf[0]) {
 							RedrawItem(item, 1);
 							sleep(1);
 							RedrawItem(item, 0);
@@ -1655,7 +1654,7 @@ ReadXServer()
 							RedrawItem(old_item, 1);
 							rel_cursor =
 							    item->input
-							        .o_cursor;
+							    .o_cursor;
 							abs_cursor =
 							    rel_cursor -
 							    item->input.left;
@@ -1666,26 +1665,26 @@ ReadXServer()
 				default:
 					old_cursor = abs_cursor;
 					if ((buf[0] >= ' ' &&
-					        buf[0] < '\177') ||
+					    buf[0] < '\177') ||
 					    (buf[0] >= 160)) { /* regular or
 						                  intl char */
 						if (++(cur_text->input.n) >=
 						    cur_text->input.buf) {
 							cur_text->input.buf +=
 							    cur_text->input
-							        .size;
+							    .size;
 							cur_text->input.value =
 							    (char *)realloc(
-							        cur_text->input
-							            .value,
-							        cur_text->input
-							            .buf);
+							    cur_text->input
+							    .value,
+							    cur_text->input
+							    .buf);
 						}
 						dp = cur_text->input.value +
-						     cur_text->input.n;
+						    cur_text->input.n;
 						sp = dp - 1;
 						ep = cur_text->input.value +
-						     rel_cursor;
+						    rel_cursor;
 						for (; *dp = *sp, sp != ep;
 						    sp--, dp--)
 							;
@@ -1698,14 +1697,14 @@ ReadXServer()
 							    cur_text->input.n)
 								abs_cursor =
 								    cur_text
-								        ->input
-								        .size -
+								    ->input
+								    .size -
 								    1;
 							else
 								abs_cursor =
 								    cur_text
-								        ->input
-								        .size;
+								    ->input
+								    .size;
 							cur_text->input.left =
 							    rel_cursor -
 							    abs_cursor;
@@ -1722,7 +1721,7 @@ ReadXServer()
 						    i, item->button.keypress);
 						if (item->type == I_BUTTON &&
 						    item->button.keypress ==
-						        keypress) {
+						    keypress) {
 							RedrawItem(item, 1);
 							sleep(
 							    1); /* .5 seconds */
@@ -1733,43 +1732,51 @@ ReadXServer()
 					}
 					break;
 				}
-			redraw_newcursor: {
-				int x, dy;
-				x = BOX_SPC + TEXT_SPC +
-				    FontWidth(xfs[f_input]) * old_cursor - 1;
-				dy = cur_text->header.size_y - 1;
-				XSetForeground(
-				    dpy, gc_button, colors[c_itemback]);
-				XDrawLine(dpy, cur_text->header.win, gc_button,
-				    x, BOX_SPC, x, dy - BOX_SPC);
-			}
-			redraw: {
-				int len, x, dy;
-				len = cur_text->input.n - cur_text->input.left;
-				if (len > cur_text->input.size)
-					len = cur_text->input.size;
-				else
+ redraw_newcursor:				{
+					int x, dy;
+					x = BOX_SPC + TEXT_SPC +
+					    FontWidth(xfs[f_input]) *
+					    old_cursor - 1;
+					dy = cur_text->header.size_y - 1;
+					XSetForeground(
+					    dpy, gc_button, colors[c_itemback]);
+					XDrawLine(dpy, cur_text->header.win,
+					    gc_button, x, BOX_SPC, x,
+					    dy - BOX_SPC);
+				}
+ redraw:				{
+					int len, x, dy;
+					len = cur_text->input.n -
+					    cur_text->input.left;
+					if (len > cur_text->input.size)
+						len = cur_text->input.size;
+					else
+						XDrawImageString(dpy,
+						    cur_text->header.win,
+						    gc_input,
+						    BOX_SPC + TEXT_SPC +
+						    FontWidth(xfs[f_input]) *
+						    len,
+						    BOX_SPC + TEXT_SPC +
+						    xfs[f_input]->ascent,
+						    cur_text->input.blanks,
+						    cur_text->input.size - len);
 					XDrawImageString(dpy,
 					    cur_text->header.win, gc_input,
+					    BOX_SPC + TEXT_SPC,
 					    BOX_SPC + TEXT_SPC +
-					        FontWidth(xfs[f_input]) * len,
-					    BOX_SPC + TEXT_SPC +
-					        xfs[f_input]->ascent,
-					    cur_text->input.blanks,
-					    cur_text->input.size - len);
-				XDrawImageString(dpy, cur_text->header.win,
-				    gc_input, BOX_SPC + TEXT_SPC,
-				    BOX_SPC + TEXT_SPC + xfs[f_input]->ascent,
-				    cur_text->input.value +
-				        cur_text->input.left,
-				    len);
-				x = BOX_SPC + TEXT_SPC +
-				    FontWidth(xfs[f_input]) * abs_cursor - 1;
-				dy = cur_text->header.size_y - 1;
-				XDrawLine(dpy, cur_text->header.win, gc_input,
-				    x, BOX_SPC, x, dy - BOX_SPC);
-			}
-			no_redraw:
+					    xfs[f_input]->ascent,
+					    cur_text->input.value +
+					    cur_text->input.left, len);
+					x = BOX_SPC + TEXT_SPC +
+					    FontWidth(xfs[f_input]) *
+					    abs_cursor - 1;
+					dy = cur_text->header.size_y - 1;
+					XDrawLine(dpy, cur_text->header.win,
+					    gc_input, x, BOX_SPC, x,
+					    dy - BOX_SPC);
+				}
+ no_redraw:
 				break; /* end of case KeyPress */
 			} /* end of switch (event.type) */
 			continue;
@@ -1790,10 +1797,10 @@ ReadXServer()
 						RedrawItem(old_item, 1);
 						abs_cursor =
 						    (event.xbutton.x - BOX_SPC -
-						        TEXT_SPC +
-						        FontWidth(
-						            xfs[f_input]) /
-						            2) /
+						     TEXT_SPC +
+						     FontWidth(
+						     xfs[f_input]) /
+						     2) /
 						    FontWidth(xfs[f_input]);
 						if (abs_cursor < 0)
 							abs_cursor = 0;
@@ -1802,7 +1809,7 @@ ReadXServer()
 							abs_cursor =
 							    item->input.size;
 						rel_cursor = abs_cursor +
-						             item->input.left;
+						    item->input.left;
 						if (rel_cursor < 0)
 							rel_cursor = 0;
 						if (rel_cursor > item->input.n)
@@ -1810,16 +1817,16 @@ ReadXServer()
 							    item->input.n;
 						if (rel_cursor > 0 &&
 						    rel_cursor ==
-						        item->input.left)
+						    item->input.left)
 							item->input.left--;
 						if (rel_cursor <
-						        item->input.n &&
+						    item->input.n &&
 						    rel_cursor ==
-						        item->input.left +
-						            item->input.size)
+						    item->input.left +
+						    item->input.size)
 							item->input.left++;
 						abs_cursor = rel_cursor -
-						             item->input.left;
+						    item->input.left;
 						RedrawItem(item, 0);
 					}
 					if (item->type == I_CHOICE)
@@ -1849,10 +1856,10 @@ ReadXServer()
 					}
 					if (event.xbutton.x >= 0 &&
 					    event.xbutton.x <
-					        item->header.size_x &&
+					    item->header.size_x &&
 					    event.xbutton.y >= 0 &&
 					    event.xbutton.y <
-					        item->header.size_y) {
+					    item->header.size_y) {
 						DoCommand(item);
 					}
 					break;

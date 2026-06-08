@@ -161,7 +161,7 @@ static int
 rects_equal(XRectangle *x, XRectangle *y)
 {
 	return (x->x == y->x) && (x->y == y->y) && (x->width == y->width) &&
-	       (x->height == y->height);
+	    (x->height == y->height);
 }
 
 static int
@@ -323,11 +323,11 @@ static char *
 make_display_string(WinData *win, char *format, int len)
 {
 #define MAX_DISPLAY_SIZE 1024
-#define COPY(field)                                                            \
-	temp_p = win->field;                                                   \
-	if (temp_p)                                                            \
-		while (*temp_p && out_p - buf < len - 1)                       \
-			*out_p++ = *temp_p++;                                  \
+#define COPY(field)							\
+	temp_p = win->field;						\
+	if (temp_p)							\
+		while (*temp_p && out_p - buf < len - 1)		\
+			*out_p++ = *temp_p++;				\
 	in_p++;
 
 	static char buf[MAX_DISPLAY_SIZE];
@@ -753,7 +753,7 @@ clear_empty_region(WinManager *man)
 		} else {
 			rects[0].x = (n % cols) * man->geometry.boxwidth;
 			rects[0].y = (num_visible_rows(n, cols) - 1) *
-			             man->geometry.boxheight;
+			    man->geometry.boxheight;
 			rects[0].width = man->geometry.width - rects[0].y;
 			rects[0].height = boxheight;
 			rects[1].x = 0;
@@ -827,7 +827,7 @@ set_shape(WinManager *man)
 			rects[0].y = 0;
 			rects[0].width = man->geometry.width;
 			rects[0].height = (num_visible_rows(n, cols) - 1) *
-			                  man->geometry.boxheight;
+			    man->geometry.boxheight;
 			rects[1].x = 0;
 			rects[1].y = rects[0].height;
 			rects[1].width = (n % cols) * man->geometry.boxwidth;
@@ -841,7 +841,7 @@ set_shape(WinManager *man)
 			rects[1].y = rects[0].y + rects[0].height;
 			rects[1].width = man->geometry.width;
 			rects[1].height = (num_visible_rows(n, cols) - 1) *
-			                  man->geometry.boxheight;
+			    man->geometry.boxheight;
 		}
 		if (man->shape.num_rects != 2 ||
 		    !rects_equal(rects, man->shape.rects) ||
@@ -892,7 +892,7 @@ size_manager(WinManager *man)
 
 	new = figure_geometry(man);
 
-	assert(new->width &&new->height);
+	assert(new->width && new->height);
 
 	w = new->width;
 	h = new->height;
@@ -1290,11 +1290,11 @@ draw_button(WinManager *man, int button, int force)
 				if (b->w != b->drawn_state.w ||
 				    b->h != b->drawn_state.h ||
 				    b->x - man->geometry.gravity_x !=
-				        b->drawn_state.x -
-				            man->drawn_geometry.gravity_x ||
+				    b->drawn_state.x -
+				    man->drawn_geometry.gravity_x ||
 				    b->y - man->geometry.gravity_y !=
-				        b->drawn_state.y -
-				            man->drawn_geometry.gravity_y) {
+				    b->drawn_state.y -
+				    man->drawn_geometry.gravity_y) {
 					draw_background = 1;
 					draw_icon = 1;
 					draw_string = 1;
@@ -1549,14 +1549,14 @@ find_windows_spot(WinData *win)
 
 			if (cur - 1 >= 0 &&
 			    compare_windows(man->sort, win,
-			        bp[cur - 1]->drawn_state.win) < 0) {
+			    bp[cur - 1]->drawn_state.win) < 0) {
 				start = cur - 1;
 				finish = -1;
 				cmp_dir = -1;
 				correction = 1;
 			} else if (cur < num_windows - 1 &&
-			           compare_windows(man->sort, win,
-			               bp[cur + 1]->drawn_state.win) > 0) {
+			    compare_windows(man->sort, win,
+			    bp[cur + 1]->drawn_state.win) > 0) {
 				start = cur + 1;
 				finish = num_windows;
 				cmp_dir = 1;
@@ -1571,9 +1571,9 @@ find_windows_spot(WinData *win)
 			correction = 0;
 		}
 		for (i = start; i != finish && bp[i]->drawn_state.win &&
-		                cmp_dir * compare_windows(man->sort, win,
-		                              bp[i]->drawn_state.win) >
-		                    0;
+		    cmp_dir * compare_windows(man->sort, win,
+		    bp[i]->drawn_state.win) >
+		    0;
 		    i = i + cmp_dir)
 			;
 		i += correction;
@@ -1645,7 +1645,7 @@ insert_windows_button(WinData *win)
 
 	if (win->button) {
 		ConsoleDebug(X11, "insert_windows_button: POSSIBLE BUG: "
-		                  "already have a button\n");
+		    "already have a button\n");
 		return;
 	}
 
@@ -1818,7 +1818,7 @@ man_exposed(WinManager *man, XEvent *theEvent)
 			x2 = index_to_col(man, i) * w2;
 			y2 = index_to_row(man, i) * h2;
 			if (RECTANGLES_INTERSECT(
-			        x1, y1, w1, h1, x2, y2, w2, h2)) {
+			    x1, y1, w1, h1, x2, y2, w2, h2)) {
 				bp[i]->drawn_state.dirty_flags |= REDRAW_BUTTON;
 			}
 		}
@@ -1848,10 +1848,10 @@ check_managers_consistency(void)
 				    j);
 				abort();
 			} else if ((*b)->drawn_state.win &&
-			           j >= globals.managers[i]
-			                    .buttons.num_windows) {
+			    j >= globals.managers[i]
+			    .buttons.num_windows) {
 				ConsoleMessage("manager %d: button %d has "
-				               "window and shouldn't\n",
+				    "window and shouldn't\n",
 				    i, j);
 				abort();
 			}

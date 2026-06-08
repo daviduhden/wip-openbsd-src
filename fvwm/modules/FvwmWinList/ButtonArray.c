@@ -315,9 +315,7 @@ DoButton(Button *button, int x, int y, int w, int h)
 	XFillRectangle(dpy, win, background[set], x, y, w, h + 1);
 
 	if ((button->p.picture != 0)/* &&
-      (w + button->p.width + w3p + 3 > MIN_BUTTON_SIZE)*/)
-  {
-
+      (w + button->p.width + w3p + 3 > MIN_BUTTON_SIZE)*/) {
 		gcm = GCClipMask | GCClipXOrigin | GCClipYOrigin;
 		gcv.clip_mask = button->p.mask;
 		gcv.clip_x_origin = x + 4;
@@ -347,10 +345,10 @@ DoButton(Button *button, int x, int y, int w, int h)
 			else {
 				string = button->title;
 				while (*string &&
-				       (w - XTextWidth(ButtonFont, string,
-				                strlen(string))) /
-				               2 <
-				           4)
+				    (w - XTextWidth(ButtonFont, string,
+				     strlen(string))) /
+				    2 <
+				    4)
 					string++;
 				button->truncatewidth = w;
 				button->truncate_title = string;

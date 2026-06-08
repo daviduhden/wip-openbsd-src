@@ -11,11 +11,11 @@ static char const rcsid[] =
 
 GlobalData globals;
 ContextDefaults contextDefaults[] = {
-    {"plain", BUTTON_UP, {"black", "black"}, {"white", "gray"}},
-    {"focus", BUTTON_UP, {"white", "gray"}, {"black", "black"}},
-    {"select", BUTTON_FLAT, {"black", "black"}, {"white", "gray"}},
-    {"focusandselect", BUTTON_FLAT, {"white", "gray"}, {"black", "black"}},
-    {"title", BUTTON_EDGEUP, {"black", "black"}, {"white", "gray"}}};
+	{"plain", BUTTON_UP, {"black", "black"}, {"white", "gray"}},
+	{"focus", BUTTON_UP, {"white", "gray"}, {"black", "black"}},
+	{"select", BUTTON_FLAT, {"black", "black"}, {"white", "gray"}},
+	{"focusandselect", BUTTON_FLAT, {"white", "gray"}, {"black", "black"}},
+	{"title", BUTTON_EDGEUP, {"black", "black"}, {"white", "gray"}}};
 
 int Fvwm_fd[2];
 int x_fd;
@@ -105,15 +105,15 @@ print_managers(void)
 		print_stringlist(&globals.managers[i].show);
 
 		ConsoleDebug(CORE, "Font: %s\n",
-		    (globals.managers[i].fontname)
-		        ? globals.managers[i].fontname
-		        : "(NULL)");
+		    (globals.managers[i].fontname) ?
+		    globals.managers[i].fontname :
+		    "(NULL)");
 		ConsoleDebug(
 		    CORE, "Geometry: %s\n", globals.managers[i].geometry_str);
 		ConsoleDebug(CORE, "Button geometry: %s\n",
-		    (globals.managers[i].button_geometry_str)
-		        ? globals.managers[i].button_geometry_str
-		        : "(NULL)");
+		    (globals.managers[i].button_geometry_str) ?
+		    globals.managers[i].button_geometry_str :
+		    "(NULL)");
 		ConsoleDebug(CORE, "\n");
 	}
 

@@ -14,11 +14,11 @@
 
 /* Default option table */
 static XrmOptionDescRec default_opts[] = {
-    {"-fg", "*Foreground", XrmoptionSepArg, NULL},
-    {"-bg", "*Background", XrmoptionSepArg, NULL},
-    {"-fn", "*Font", XrmoptionSepArg, NULL},
-    {"-geometry", "*Geometry", XrmoptionSepArg, NULL},
-    {"-title", "*Title", XrmoptionSepArg, NULL}
+	{"-fg", "*Foreground", XrmoptionSepArg, NULL},
+	{"-bg", "*Background", XrmoptionSepArg, NULL},
+	{"-fn", "*Font", XrmoptionSepArg, NULL},
+	{"-geometry", "*Geometry", XrmoptionSepArg, NULL},
+	{"-title", "*Title", XrmoptionSepArg, NULL}
     /* Remember to update NUM_DEFAULT_OPTIONS if you change this list! */
 };
 #define NUM_DEFAULT_OPTS 5

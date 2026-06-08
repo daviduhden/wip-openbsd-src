@@ -30,8 +30,8 @@
 #define DEFAULT_ACTION "Iconify"
 #endif
 
-#define RECTANGLES_INTERSECT(x1, y1, w1, h1, x2, y2, w2, h2)                   \
-	(((x1) + (w1) > (x2) && (x1) < (x2) + (w2)) &&                         \
+#define RECTANGLES_INTERSECT(x1, y1, w1, h1, x2, y2, w2, h2)		\
+	(((x1) + (w1) > (x2) && (x1) < (x2) + (w2)) &&			\
 	    ((y1) + (h1) > (y2) && (y1) < (y2) + (h2)))
 
 #define MAX_ARGS 3
@@ -85,7 +85,7 @@ typedef enum {
 	FOCUS_CONTEXT = 1,
 	SELECT_CONTEXT = 2,
 	FOCUS_SELECT_CONTEXT =
-	    3, /* had better be FOCUS_CONTEXT | SELECT_CONTEXT */
+		3, /* had better be FOCUS_CONTEXT | SELECT_CONTEXT */
 	TITLE_CONTEXT = 4,
 	NUM_CONTEXTS
 } Contexts;
@@ -189,8 +189,8 @@ typedef struct win_data {
 	char *iconname;
 	struct win_data *win_prev, *win_next;
 	struct win_manager *manager;
-	unsigned int app_id_set : 1;
-	unsigned int geometry_set : 1;
+	unsigned int app_id_set:1;
+	unsigned int geometry_set:1;
 	Uchar complete;
 } WinData;
 
@@ -257,7 +257,7 @@ typedef struct win_manager {
 	Pixel backcolor[NUM_CONTEXTS], forecolor[NUM_CONTEXTS];
 	Pixel hicolor[NUM_CONTEXTS], shadowcolor[NUM_CONTEXTS];
 	GC hiContext[NUM_CONTEXTS], backContext[NUM_CONTEXTS],
-	    reliefContext[NUM_CONTEXTS];
+	   reliefContext[NUM_CONTEXTS];
 	GC shadowContext[NUM_CONTEXTS], flatContext[NUM_CONTEXTS];
 	XFontStruct *ButtonFont;
 #ifdef MINI_ICONS

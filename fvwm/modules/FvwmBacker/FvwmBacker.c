@@ -164,7 +164,7 @@ EndLessLoop()
 		tv.tv_usec = 0;
 
 		if (!select(fd_width, SELECT_TYPE_ARG234 & readset, NULL, NULL,
-		        &tv)) {
+		    &tv)) {
 			FD_ZERO(&readset);
 			FD_SET(Fvwm_fd[1], &readset);
 			select(fd_width, SELECT_TYPE_ARG234 & readset, NULL,
@@ -363,9 +363,9 @@ AddCommand(char *string)
 			tmp++;
 		*tmp = 0;
 		commands[num].type = 1;
-		commands[num].solidColor = (!color || !*color)
-		                               ? BlackPixel(dpy, screen)
-		                               : GetColor(color);
+		commands[num].solidColor = (!color || !*color) ?
+		    BlackPixel(dpy, screen) :
+		    GetColor(color);
 #ifdef LOGFILE
 		fprintf(logFile, "Adding color: %s as number %d to desk %d\n",
 		    color, commands[num].solidColor, num);

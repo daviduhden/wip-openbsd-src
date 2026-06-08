@@ -370,8 +370,7 @@ MakeContainer(button_info *b)
 			b->c->flags = b_IconParent;
 		else
 			b->c->flags = 0;
-	} else /* This applies to the UberButton */
-	{
+	} else /* This applies to the UberButton */ {
 		b->c->flags = b_Font | b_Padding | b_Frame | b_Back | b_Fore;
 		b->c->font_string = strdup("fixed");
 		b->c->xpad = 2;
@@ -489,7 +488,7 @@ ShrinkButton(button_info *b, container_info *c)
 				l = i + j + k * c->num_columns;
 				if (c->buttons[l] != b) {
 					fprintf(stderr, "error: shrink2: "
-					                "button was stolen\n");
+					    "button was stolen\n");
 					exit(1);
 				}
 				c->buttons[l] = NULL;
@@ -539,7 +538,7 @@ ShuffleButtons(button_info *ub)
 			c->num_columns++;
 		if (!(c->flags & b_SizeFixed)) {
 			while (c->num_rows * c->num_columns >=
-			       actual_buttons_used + c->num_columns)
+			    actual_buttons_used + c->num_columns)
 				c->num_rows--;
 		}
 	}
@@ -613,8 +612,8 @@ ShuffleButtons(button_info *ub)
 			next_button_x = 0;
 		}
 		/* Search for next free position to accomodate button */
-		while (
-		    PlaceAndExpandButton(next_button_x, next_button_y, b, ub)) {
+		while (PlaceAndExpandButton(next_button_x, next_button_y, b,
+		    ub)) {
 			next_button_x++;
 			if (next_button_x + b->BWidth > c->num_columns) {
 				next_button_y++;

@@ -70,14 +70,14 @@ char Text[256];
 int pos = 0;
 
 XSizeHints sizehints = {
-    (PMinSize | PResizeInc | PBaseSize | PWinGravity | PMaxSize), 0, 0, 100,
-    100,               /* x, y, width and height */
-    1, 1,              /* Min width and height */
-    0, 0,              /* Max width and height */
-    1, 1,              /* Width and height increments */
-    {0, 0}, {0, 0},    /* Aspect ratio - not used */
-    1, 1,              /* base size */
-    (NorthWestGravity) /* gravity */
+	(PMinSize | PResizeInc | PBaseSize | PWinGravity | PMaxSize), 0, 0, 100,
+	100,               /* x, y, width and height */
+	1, 1,              /* Min width and height */
+	0, 0,              /* Max width and height */
+	1, 1,              /* Width and height increments */
+	{0, 0}, {0, 0},    /* Aspect ratio - not used */
+	1, 1,              /* base size */
+	(NorthWestGravity) /* gravity */
 };
 
 Pixel GetColor(char *name);
@@ -156,7 +156,7 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
 		}
-	};
+	}
 
 	fore_pix = GetColor(ForeColor);
 	back_pix = GetColor(BackColor);
@@ -240,7 +240,7 @@ Loop(int *fd)
 					if (pos > 0)
 						Text[--pos] = 0;
 				} else if ((keysym == XK_Return) ||
-				           (keysym == XK_KP_Enter)) {
+				    (keysym == XK_KP_Enter)) {
 					SendText(fd, Text, 0);
 					last_error[0] = 0;
 					strncpy(previous_line, Text, 255);
@@ -402,9 +402,9 @@ paste_primary(int window, int property, int Delete)
 	nread = 0;
 	do {
 		if (XGetWindowProperty(dpy, window, property, nread / 4,
-		        PROP_SIZE, Delete, AnyPropertyType, &actual_type,
-		        &actual_format, &nitems, &bytes_after,
-		        (unsigned char **)&data) != Success)
+		    PROP_SIZE, Delete, AnyPropertyType, &actual_type,
+		    &actual_format, &nitems, &bytes_after,
+		    (unsigned char **)&data) != Success)
 			return;
 		if (actual_type != XA_STRING)
 			return;
@@ -450,5 +450,5 @@ DrawWindow(int mode)
 	XDrawLine(dpy, window, myGC, 4 + w,
 	    2 * (font->ascent + font->descent + 2) + 2, 4 + w,
 	    2 * (font->ascent + font->descent + 2) + font->ascent +
-	        font->descent);
+	    font->descent);
 }

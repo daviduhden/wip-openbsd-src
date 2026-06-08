@@ -103,7 +103,6 @@ typedef enum {
 
 /* button style flags (per-state) */
 enum {
-
 	/* specific style flags */
 	/* justification bits (3.17 -> 4 bits) */
 	HOffCenter = (1 << 4),
@@ -207,7 +206,6 @@ typedef struct FvwmDecor {
 } FvwmDecor;
 
 typedef struct ScreenInfo {
-
 	unsigned long screen;
 	int d_depth;         /* copy of DefaultDepth(dpy, screen) */
 	int NumberOfScreens; /* number of screens on display */
@@ -314,17 +312,14 @@ typedef struct ScreenInfo {
 	int MouseFocusClickRaises;
 	int StipledTitles;
 	struct {
-		unsigned int ModifyUSP : 1; /* - RBW - 11/02/1998  */
-		unsigned int CaptureHonorsStartsOnPage
-		    : 1; /* - RBW - 11/02/1998  */
-		unsigned int RecaptureHonorsStartsOnPage
-		    : 1; /* - RBW - 11/02/1998  */
-		unsigned int ActivePlacementHonorsStartsOnPage
-		    : 1; /* - RBW - 11/02/1998  */
+		unsigned int ModifyUSP:1; /* - RBW - 11/02/1998  */
+		unsigned int CaptureHonorsStartsOnPage:1; /* - RBW - 11/02/1998  */
+		unsigned int RecaptureHonorsStartsOnPage:1; /* - RBW - 11/02/1998  */
+		unsigned int ActivePlacementHonorsStartsOnPage:1; /* - RBW - 11/02/1998  */
 	} go;            /* global options */
 	struct {
-		unsigned int EmulateMWM : 1;
-		unsigned int EmulateWIN : 1;
+		unsigned int EmulateMWM:1;
+		unsigned int EmulateWIN:1;
 	} gs; /* global style structure */
 	Bool hasIconFont;
 	Bool hasWindowFont;

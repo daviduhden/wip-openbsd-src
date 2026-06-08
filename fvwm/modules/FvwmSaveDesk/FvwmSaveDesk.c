@@ -155,7 +155,8 @@ process_message(unsigned long type, unsigned long *body)
 			l->name = (char *)safemalloc(name_len + 1);
 			strlcpy(l->name, (char *)&body[3], name_len + 1);
 		}
-	} break;
+	}
+		break;
 	case M_NEW_PAGE:
 		list_new_page(body);
 		break;
@@ -239,6 +240,7 @@ list_new_page(unsigned long *body)
 	Vx = (long)body[0];
 	Vy = (long)body[1];
 }
+
 /***********************************************************************
  *
  *  Procedure:

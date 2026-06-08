@@ -58,8 +58,8 @@ Pixel back_pix, fore_pix, hilite_pix, shadow_pix;
 GC ReliefGC, ShadowGC;
 extern char *BackColor;
 
-#define MW_EVENTS                                                              \
-	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
+#define MW_EVENTS							\
+	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |	\
 	    ButtonPressMask | ButtonMotionMask | FocusChangeMask)
 
 Atom wm_del_win;
@@ -144,7 +144,7 @@ CreateWindow(int x, int y, int w, int h)
 	_XA_WM_PROTOCOLS = XInternAtom(dpy, "WM_PROTOCOLS", False);
 
 	mysizehints.flags = PWinGravity | PResizeInc | PBaseSize | PMaxSize |
-	                    PMinSize | USSize | USPosition;
+	    PMinSize | USSize | USPosition;
 	/* subtract one for the right/bottom border */
 	mysizehints.width_inc = 1;
 	mysizehints.height_inc = 1;
@@ -297,71 +297,70 @@ Loop(Window target)
 				exposed = 2;
 				RedrawWindow(target);
 			} else if ((Event.xbutton.y > Height - BAR_WIDTH) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH -
-			                                  SCROLL_BAR_WIDTH -
-			                                  2) &&
-			           (Event.xbutton.x < Width - BAR_WIDTH)) {
+			    (Event.xbutton.x > Width - BAR_WIDTH -
+			     SCROLL_BAR_WIDTH -
+			     2) &&
+			    (Event.xbutton.x < Width - BAR_WIDTH)) {
 				motion = RIGHT;
 				exposed = 2;
 				RedrawWindow(target);
 			} else if ((Event.xbutton.y <
-			               SCROLL_BAR_WIDTH + PAD_WIDTH3) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH)) {
+			    SCROLL_BAR_WIDTH + PAD_WIDTH3) &&
+			    (Event.xbutton.x > Width - BAR_WIDTH)) {
 				motion = TOP;
 				exposed = 2;
 				RedrawWindow(target);
 			} else if ((Event.xbutton.y > Height - BAR_WIDTH -
-			                                  SCROLL_BAR_WIDTH -
-			                                  2) &&
-			           (Event.xbutton.y < Height - BAR_WIDTH) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH)) {
+			    SCROLL_BAR_WIDTH -
+			    2) &&
+			    (Event.xbutton.y < Height - BAR_WIDTH) &&
+			    (Event.xbutton.x > Width - BAR_WIDTH)) {
 				motion = BOTTOM;
 				exposed = 2;
 				RedrawWindow(target);
 			} else if ((Event.xbutton.x > Width - BAR_WIDTH) &&
-			           (Event.xbutton.y < Height - BAR_WIDTH)) {
-
+			    (Event.xbutton.y < Height - BAR_WIDTH)) {
 				motion = VERTICAL;
 				target_y_offset =
 				    (Event.xbutton.y - PAD_WIDTH3 -
-				        SCROLL_BAR_WIDTH) *
+				     SCROLL_BAR_WIDTH) *
 				    target_height /
 				    (Height - BAR_WIDTH - PAD_WIDTH3 -
-				        2 * SCROLL_BAR_WIDTH);
+				     2 * SCROLL_BAR_WIDTH);
 				if (target_y_offset + Height - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_height)
 					target_y_offset = target_height -
-					                  Height + BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    Height + BAR_WIDTH +
+					    PAD_WIDTH3;
 				if (target_y_offset < 0)
 					target_y_offset = 0;
 				XMoveWindow(dpy, target, -target_x_offset,
 				    -target_y_offset);
 				RedrawWindow(target);
 			} else if ((Event.xbutton.y > Height - BAR_WIDTH) &&
-			           (Event.xbutton.x < Width - BAR_WIDTH)) {
+			    (Event.xbutton.x < Width - BAR_WIDTH)) {
 				motion = HORIZONTAL;
 				target_x_offset =
 				    (Event.xbutton.x - PAD_WIDTH3 -
-				        SCROLL_BAR_WIDTH) *
+				     SCROLL_BAR_WIDTH) *
 				    target_width /
 				    (Width - BAR_WIDTH - PAD_WIDTH3 -
-				        2 * SCROLL_BAR_WIDTH);
+				     2 * SCROLL_BAR_WIDTH);
 				if (target_x_offset < 0)
 					target_x_offset = 0;
 
 				if (target_x_offset + Width - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_width)
 					target_x_offset = target_width - Width +
-					                  BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    BAR_WIDTH +
+					    PAD_WIDTH3;
 				XMoveWindow(dpy, target, -target_x_offset,
 				    -target_y_offset);
 				RedrawWindow(target);
 			} else if ((Event.xbutton.y > Height - BAR_WIDTH) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH)) {
+			    (Event.xbutton.x > Width - BAR_WIDTH)) {
 				exposed = 2;
 				motion = QUIT;
 			}
@@ -377,8 +376,8 @@ Loop(Window target)
 					int root_x, root_y;
 					Window dummy;
 					if (XTranslateCoordinates(dpy, main_win,
-					        Root, 0, 0, &root_x, &root_y,
-					        &dummy)) {
+					    Root, 0, 0, &root_x, &root_y,
+					    &dummy)) {
 						XReparentWindow(dpy, target,
 						    Root, root_x, root_y);
 					} else {
@@ -401,27 +400,27 @@ Loop(Window target)
 				motion = NONE;
 				exposed = 2;
 			} else if ((motion == RIGHT) &&
-			           (Event.xbutton.y > Height - BAR_WIDTH) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH -
-			                                  SCROLL_BAR_WIDTH -
-			                                  2) &&
-			           (Event.xbutton.x < Width - BAR_WIDTH)) {
+			    (Event.xbutton.y > Height - BAR_WIDTH) &&
+			    (Event.xbutton.x > Width - BAR_WIDTH -
+			     SCROLL_BAR_WIDTH -
+			     2) &&
+			    (Event.xbutton.x < Width - BAR_WIDTH)) {
 				target_x_offset +=
 				    (Width - BAR_WIDTH - PAD_WIDTH2);
 				if (target_x_offset + Width - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_width)
 					target_x_offset = target_width - Width +
-					                  BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    BAR_WIDTH +
+					    PAD_WIDTH3;
 				XMoveWindow(dpy, target, -target_x_offset,
 				    -target_y_offset);
 				motion = NONE;
 				exposed = 2;
 			} else if ((motion == TOP) &&
-			           (Event.xbutton.y <
-			               SCROLL_BAR_WIDTH + PAD_WIDTH3) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH)) {
+			    (Event.xbutton.y <
+			     SCROLL_BAR_WIDTH + PAD_WIDTH3) &&
+			    (Event.xbutton.x > Width - BAR_WIDTH)) {
 				target_y_offset -=
 				    (Height - BAR_WIDTH - PAD_WIDTH2);
 				if (target_y_offset < 0)
@@ -431,19 +430,19 @@ Loop(Window target)
 				motion = NONE;
 				exposed = 2;
 			} else if ((motion == BOTTOM) &&
-			           (Event.xbutton.y > Height - BAR_WIDTH -
-			                                  SCROLL_BAR_WIDTH -
-			                                  2) &&
-			           (Event.xbutton.y < Height - BAR_WIDTH) &&
-			           (Event.xbutton.x > Width - BAR_WIDTH)) {
+			    (Event.xbutton.y > Height - BAR_WIDTH -
+			     SCROLL_BAR_WIDTH -
+			     2) &&
+			    (Event.xbutton.y < Height - BAR_WIDTH) &&
+			    (Event.xbutton.x > Width - BAR_WIDTH)) {
 				target_y_offset +=
 				    (Height - BAR_WIDTH - PAD_WIDTH2);
 				if (target_y_offset + Height - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_height)
 					target_y_offset = target_height -
-					                  Height + BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    Height + BAR_WIDTH +
+					    PAD_WIDTH3;
 				XMoveWindow(dpy, target, -target_x_offset,
 				    -target_y_offset);
 				motion = NONE;
@@ -452,16 +451,16 @@ Loop(Window target)
 			if (motion == VERTICAL) {
 				target_y_offset =
 				    (Event.xbutton.y - PAD_WIDTH3 -
-				        SCROLL_BAR_WIDTH) *
+				     SCROLL_BAR_WIDTH) *
 				    target_height /
 				    (Height - BAR_WIDTH - PAD_WIDTH3 -
-				        2 * SCROLL_BAR_WIDTH);
+				     2 * SCROLL_BAR_WIDTH);
 				if (target_y_offset + Height - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_height)
 					target_y_offset = target_height -
-					                  Height + BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    Height + BAR_WIDTH +
+					    PAD_WIDTH3;
 				if (target_y_offset < 0)
 					target_y_offset = 0;
 				XMoveWindow(dpy, target, -target_x_offset,
@@ -470,19 +469,19 @@ Loop(Window target)
 			if (motion == HORIZONTAL) {
 				target_x_offset =
 				    (Event.xbutton.x - PAD_WIDTH3 -
-				        SCROLL_BAR_WIDTH) *
+				     SCROLL_BAR_WIDTH) *
 				    target_width /
 				    (Width - BAR_WIDTH - PAD_WIDTH3 -
-				        2 * SCROLL_BAR_WIDTH);
+				     2 * SCROLL_BAR_WIDTH);
 				if (target_x_offset < 0)
 					target_x_offset = 0;
 
 				if (target_x_offset + Width - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_width)
 					target_x_offset = target_width - Width +
-					                  BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    BAR_WIDTH +
+					    PAD_WIDTH3;
 				XMoveWindow(dpy, target, -target_x_offset,
 				    -target_y_offset);
 			}
@@ -493,46 +492,46 @@ Loop(Window target)
 		case MotionNotify:
 			if ((motion == LEFT) &&
 			    ((Event.xmotion.y < Height - BAR_WIDTH) ||
-			        (Event.xmotion.x >
-			            SCROLL_BAR_WIDTH + PAD_WIDTH3))) {
+			     (Event.xmotion.x >
+			      SCROLL_BAR_WIDTH + PAD_WIDTH3))) {
 				motion = NONE;
 				exposed = 2;
 			} else if ((motion == RIGHT) &&
-			           ((Event.xmotion.y < Height - BAR_WIDTH) ||
-			               (Event.xmotion.x < Width - BAR_WIDTH -
-			                                      SCROLL_BAR_WIDTH -
-			                                      2) ||
-			               (Event.xmotion.x > Width - BAR_WIDTH))) {
+			    ((Event.xmotion.y < Height - BAR_WIDTH) ||
+			     (Event.xmotion.x < Width - BAR_WIDTH -
+			      SCROLL_BAR_WIDTH -
+			      2) ||
+			     (Event.xmotion.x > Width - BAR_WIDTH))) {
 				motion = NONE;
 				exposed = 2;
 			} else if ((motion == TOP) &&
-			           ((Event.xmotion.y >
-			                SCROLL_BAR_WIDTH + PAD_WIDTH3) ||
-			               (Event.xmotion.x < Width - BAR_WIDTH))) {
+			    ((Event.xmotion.y >
+			      SCROLL_BAR_WIDTH + PAD_WIDTH3) ||
+			     (Event.xmotion.x < Width - BAR_WIDTH))) {
 				motion = NONE;
 				exposed = 2;
 			} else if ((motion == BOTTOM) &&
-			           ((Event.xmotion.y < Height - BAR_WIDTH -
-			                                   SCROLL_BAR_WIDTH -
-			                                   2) ||
-			               (Event.xmotion.y > Height - BAR_WIDTH) ||
-			               (Event.xmotion.x < Width - BAR_WIDTH))) {
+			    ((Event.xmotion.y < Height - BAR_WIDTH -
+			      SCROLL_BAR_WIDTH -
+			      2) ||
+			     (Event.xmotion.y > Height - BAR_WIDTH) ||
+			     (Event.xmotion.x < Width - BAR_WIDTH))) {
 				motion = NONE;
 				exposed = 2;
 			}
 			if (motion == VERTICAL) {
 				target_y_offset =
 				    (Event.xmotion.y - PAD_WIDTH3 -
-				        SCROLL_BAR_WIDTH) *
+				     SCROLL_BAR_WIDTH) *
 				    target_height /
 				    (Height - BAR_WIDTH - PAD_WIDTH3 -
-				        2 * SCROLL_BAR_WIDTH);
+				     2 * SCROLL_BAR_WIDTH);
 				if (target_y_offset + Height - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_height)
 					target_y_offset = target_height -
-					                  Height + BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    Height + BAR_WIDTH +
+					    PAD_WIDTH3;
 				if (target_y_offset < 0)
 					target_y_offset = 0;
 				XMoveWindow(dpy, target, -target_x_offset,
@@ -541,25 +540,25 @@ Loop(Window target)
 			if (motion == HORIZONTAL) {
 				target_x_offset =
 				    (Event.xmotion.x - PAD_WIDTH3 -
-				        SCROLL_BAR_WIDTH) *
+				     SCROLL_BAR_WIDTH) *
 				    target_width /
 				    (Width - BAR_WIDTH - PAD_WIDTH3 -
-				        2 * SCROLL_BAR_WIDTH);
+				     2 * SCROLL_BAR_WIDTH);
 				if (target_x_offset < 0)
 					target_x_offset = 0;
 
 				if (target_x_offset + Width - BAR_WIDTH -
-				        PAD_WIDTH3 >
+				    PAD_WIDTH3 >
 				    target_width)
 					target_x_offset = target_width - Width +
-					                  BAR_WIDTH +
-					                  PAD_WIDTH3;
+					    BAR_WIDTH +
+					    PAD_WIDTH3;
 				XMoveWindow(dpy, target, -target_x_offset,
 				    -target_y_offset);
 			}
 			if ((motion == QUIT) &&
 			    ((Event.xbutton.y < Height - BAR_WIDTH) ||
-			        (Event.xbutton.x < Width - BAR_WIDTH))) {
+			     (Event.xbutton.x < Width - BAR_WIDTH))) {
 				motion = NONE;
 				exposed = 2;
 			}
@@ -578,11 +577,11 @@ Loop(Window target)
 				change_window_name(temp);
 			} else if (Event.xproperty.atom == XA_WM_ICON_NAME) {
 				if (XGetWindowProperty(dpy, target,
-				        Event.xproperty.atom, 0,
-				        MAX_ICON_NAME_LEN, False, XA_STRING,
-				        &actual, &actual_format, &nitems,
-				        &bytesafter,
-				        (unsigned char **)&prop) == Success &&
+				    Event.xproperty.atom, 0,
+				    MAX_ICON_NAME_LEN, False, XA_STRING,
+				    &actual, &actual_format, &nitems,
+				    &bytesafter,
+				    (unsigned char **)&prop) == Success &&
 				    (prop != NULL))
 					change_icon_name(prop);
 			} else if (Event.xproperty.atom == XA_WM_HINTS) {
@@ -595,7 +594,7 @@ Loop(Window target)
 				/* don't do Normal Hints. They alter the size of
 				 * the window */
 			} else if (Event.xproperty.atom ==
-			           _XA_WM_COLORMAP_WINDOWS) {
+			    _XA_WM_COLORMAP_WINDOWS) {
 			}
 			break;
 
@@ -618,7 +617,8 @@ Loop(Window target)
 			if (XGetWindowAttributes(dpy, target, &xwa) != 0) {
 				XSetWindowColormap(dpy, main_win, xwa.colormap);
 			}
-		} break;
+		}
+			break;
 		default:
 			break;
 		}
@@ -649,7 +649,7 @@ RedrawWindow(Window target)
 	    Height - BAR_WIDTH - PAD_WIDTH3 + 4, ShadowGC, ReliefGC);
 
 	y = (Height - BAR_WIDTH - PAD_WIDTH3 - 2 * SCROLL_BAR_WIDTH) *
-	        target_y_offset / target_height +
+	    target_y_offset / target_height +
 	    PAD_WIDTH2 + 2 + SCROLL_BAR_WIDTH;
 	x = Width - SCROLL_BAR_WIDTH - PAD_WIDTH2 - 2;
 	w = SCROLL_BAR_WIDTH;
@@ -683,7 +683,7 @@ RedrawWindow(Window target)
 	}
 
 	x = (Width - BAR_WIDTH - PAD_WIDTH3 - 2 * SCROLL_BAR_WIDTH) *
-	        target_x_offset / target_width +
+	    target_x_offset / target_width +
 	    PAD_WIDTH2 + 2 + SCROLL_BAR_WIDTH;
 	y = Height - SCROLL_BAR_WIDTH - PAD_WIDTH2 - 2;
 	w = (Width - BAR_WIDTH - PAD_WIDTH3 - 2 * SCROLL_BAR_WIDTH) *
@@ -806,8 +806,8 @@ GrabWindow(Window target)
 	if (XFetchName(dpy, target, &temp) == 0)
 		temp = NULL;
 	if (XGetWindowProperty(dpy, target, XA_WM_ICON_NAME, 0,
-	        MAX_ICON_NAME_LEN, False, XA_STRING, &actual, &actual_format,
-	        &nitems, &bytesafter, (unsigned char **)&prop) == Success &&
+	    MAX_ICON_NAME_LEN, False, XA_STRING, &actual, &actual_format,
+	    &nitems, &bytesafter, (unsigned char **)&prop) == Success &&
 	    (prop != NULL)) {
 		change_icon_name(prop);
 		XFree(prop);

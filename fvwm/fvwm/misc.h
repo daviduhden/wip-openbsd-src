@@ -15,12 +15,12 @@
 #include <sys/wait.h>
 
 #if HAVE_WAITPID
-#define ReapChildren()                                                         \
-	while ((waitpid(-1, NULL, WNOHANG)) > 0)                               \
+#define ReapChildren()							\
+	while ((waitpid(-1, NULL, WNOHANG)) > 0)			\
 		;
 #elif HAVE_WAIT3
-#define ReapChildren()                                                         \
-	while ((wait3(NULL, WNOHANG, NULL)) > 0)                               \
+#define ReapChildren()							\
+	while ((wait3(NULL, WNOHANG, NULL)) > 0)			\
 		;
 #else
 #error One of waitpid or wait3 is needed.
@@ -37,7 +37,7 @@ typedef struct name_list_struct {
 	char *Decor;
 #endif
 	int Desk; /* Desktop number */
-	          /* RBW - 11/02/1998 - page x,y numbers */
+		  /* RBW - 11/02/1998 - page x,y numbers */
 	int PageX;
 	int PageY;
 	/**/
@@ -50,7 +50,6 @@ typedef struct name_list_struct {
 	icon_boxes *IconBoxes; /* pointer to iconbox(s) */
 	unsigned long on_buttons;
 	unsigned long off_buttons;
-
 } name_list;
 
 /* used for parsing configuration */
@@ -69,8 +68,8 @@ struct config {
 struct functions {
 	char *keyword;
 #ifdef __STDC__
-	void (*action)(
-	    XEvent *, Window, FvwmWindow *, unsigned long, char *, int *);
+	void (*action)(XEvent *, Window, FvwmWindow *, unsigned long, char *,
+	    int *);
 #else
 	void (*action)();
 #endif
@@ -119,13 +118,13 @@ struct functions {
 #endif
 
 /* some fancy font handling stuff */
-#define NewFontAndColor(newfont, color, backcolor)                             \
-	{                                                                      \
-		Globalgcv.font = newfont;                                      \
-		Globalgcv.foreground = color;                                  \
-		Globalgcv.background = backcolor;                              \
-		Globalgcm = GCFont | GCForeground | GCBackground;              \
-		XChangeGC(dpy, Scr.ScratchGC3, Globalgcm, &Globalgcv);         \
+#define NewFontAndColor(newfont, color, backcolor)			\
+	{								\
+		Globalgcv.font = newfont;				\
+		Globalgcv.foreground = color;				\
+		Globalgcv.background = backcolor;			\
+		Globalgcm = GCFont | GCForeground | GCBackground;	\
+		XChangeGC(dpy, Scr.ScratchGC3, Globalgcm, &Globalgcv);	\
 	}
 
 #ifdef NO_ICONS
@@ -154,8 +153,8 @@ extern char NoResource[];
 /* Macro for args passed to fvwm commands...
    For now, this macro is only used within this file. dje 12/19/98
 */
-#define F_CMD_ARGS                                                             \
-	XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,  \
+#define F_CMD_ARGS							\
+	XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,\
 	    char *action, int *Module
 
 extern void LookInList(FvwmWindow *, name_list *);

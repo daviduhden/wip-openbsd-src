@@ -42,9 +42,8 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 	/* Watch out: Fw may not be on the windowlist and the windowlist may be
 	 * empty */
 	if (Fw && Fw != Scr.Focus && Fw != &Scr.FvwmRoot) {
-		if (FocusByMouse) /* pluck window from list and deposit at top
+		if (FocusByMouse) { /* pluck window from list and deposit at top
 		                   */
-		{
 			/* remove Fw from list */
 			if (Fw->prev)
 				Fw->prev->next = Fw->next;
@@ -68,9 +67,8 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 			while (tmp_win && tmp_win != Fw)
 				tmp_win = tmp_win->next;
 
-			if (tmp_win) /* the window is on the (non-zero length)
+			if (tmp_win) { /* the window is on the (non-zero length)
 			                windowlist */
-			{
 				/* make tmp_win point to the last window on the
 				 * list */
 				while (tmp_win->next)
@@ -127,9 +125,9 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 		  */
 		if ((Fw->Desk == Scr.CurrentDesk) &&
 		    (((Fw->frame_x + Fw->frame_width) >= 0 &&
-		         Fw->frame_x < Scr.MyDisplayWidth) &&
-		        ((Fw->frame_y + Fw->frame_height) >= 0 &&
-		            Fw->frame_y < Scr.MyDisplayHeight))) {
+		      Fw->frame_x < Scr.MyDisplayWidth) &&
+		     ((Fw->frame_y + Fw->frame_height) >= 0 &&
+		      Fw->frame_y < Scr.MyDisplayHeight))) {
 			OnThisPage = True;
 		}
 	}
@@ -181,8 +179,8 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 		Scr.Focus = Fw;
 		Scr.UnknownWinFocused = None;
 	} else if (!((Fw) && (Fw->wmhints) &&
-	               (Fw->wmhints->flags & InputHint) &&
-	               (Fw->wmhints->input == False))) {
+	    (Fw->wmhints->flags & InputHint) &&
+	    (Fw->wmhints->input == False))) {
 		/* Window will accept input focus */
 		XSetInputFocus(dpy, w, RevertToParent, lastTimestamp);
 		Scr.Focus = Fw;

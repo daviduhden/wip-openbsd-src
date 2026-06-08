@@ -688,7 +688,7 @@ tar_wr(ARCHD *arcn)
 	 */
 	if (ul_oct(arcn->sb.st_mode, hd->mode, sizeof(hd->mode), 0) ||
 	    ull_oct(arcn->sb.st_mtime < 0 ? 0 : arcn->sb.st_mtime, hd->mtime,
-	        sizeof(hd->mtime), 1) ||
+	    sizeof(hd->mtime), 1) ||
 	    ul_oct(arcn->sb.st_uid, hd->uid, sizeof(hd->uid), 0) ||
 	    ul_oct(arcn->sb.st_gid, hd->gid, sizeof(hd->gid), 0))
 		goto out;
@@ -699,7 +699,7 @@ tar_wr(ARCHD *arcn)
 	 * to be written
 	 */
 	if (ul_oct(tar_chksm(hdblk, sizeof(HD_TAR)), hd->chksum,
-	        sizeof(hd->chksum), 3))
+	    sizeof(hd->chksum), 3))
 		goto out;
 	if (wr_rdbuf(hdblk, sizeof(HD_TAR)) < 0 ||
 	    wr_skip(BLKMULT - sizeof(HD_TAR)) < 0) {
@@ -791,7 +791,7 @@ reset:
 	/* Process Extended headers. */
 	if (hd->typeflag == XHDRTYPE || hd->typeflag == GHDRTYPE) {
 		if (rd_xheader(arcn, hd->typeflag == GHDRTYPE,
-		        (off_t)asc_ull(hd->size, sizeof(hd->size), OCT)) < 0)
+		    (off_t)asc_ull(hd->size, sizeof(hd->size), OCT)) < 0)
 			return (-1);
 
 		/* Update and check the ustar header. */
@@ -825,8 +825,8 @@ reset:
 		    hd->typeflag != LONGNAMETYPE) {
 			arcn->nlen =
 			    cnt + expandname(dest, sizeof(arcn->name) - cnt,
-			              &gnu_name_string, hd->name,
-			              sizeof(hd->name));
+			    &gnu_name_string, hd->name,
+			    sizeof(hd->name));
 			if (pax_component_too_long(arcn->name))
 				(void)pax_handle_invalid_path(
 				    arcn, "path", arcn->name);
@@ -1132,7 +1132,7 @@ xheader_add_ts(
 		return -1;
 	rec->reclen = reclen;
 	if (asprintf(&s, "%d %s=%lld%s\n", reclen, keyword,
-	        (long long)value->tv_sec, frac) < 0) {
+	    (long long)value->tv_sec, frac) < 0) {
 		free(rec);
 		return -1;
 	}
@@ -1179,12 +1179,12 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 		goto out;
 
 	if (global) {
-		const char *fmt = override_name != NULL
-		                      ? override_name
-		                      : pax_option_globexthdr_name();
+		const char *fmt = override_name != NULL ?
+		    override_name :
+		    pax_option_globexthdr_name();
 		if (fmt != NULL) {
 			if (pax_format_xhdr_name(buf, sizeof(buf), fmt,
-			        fname ? fname : "", seq) == -1)
+			    fname ? fname : "", seq) == -1)
 				goto out;
 		} else {
 			const char *tmpdir = getenv("TMPDIR");
@@ -1194,12 +1194,12 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 			    tmpdir, (long)getpid(), seq);
 		}
 	} else {
-		const char *fmt = override_name != NULL
-		                      ? override_name
-		                      : pax_option_exthdr_name();
+		const char *fmt = override_name != NULL ?
+		    override_name :
+		    pax_option_exthdr_name();
 		if (fmt != NULL) {
 			if (pax_format_xhdr_name(buf, sizeof(buf), fmt,
-			        fname ? fname : "", 0) == -1)
+			    fname ? fname : "", 0) == -1)
 				goto out;
 		} else if (fname != NULL) {
 			char *opath = NULL, *odirbuf = NULL;
@@ -1227,7 +1227,7 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 		memcpy(hd->gid, fhd->gid, sizeof(hd->gid));
 	}
 	if (ul_oct(tar_chksm(hdblk, sizeof(HD_USTAR)), hd->chksum,
-	        sizeof(hd->chksum), 3))
+	    sizeof(hd->chksum), 3))
 		goto out;
 
 	if (wr_rdbuf(hdblk, sizeof(HD_USTAR)) < 0 ||
@@ -1879,7 +1879,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	if (!ustar && pax_option_invalid() == PAX_INVALID_BINARY) {
 		if (needs_hdrcharset_binary(arcn->name) ||
 		    (PAX_IS_LINK(arcn->type) &&
-		        needs_hdrcharset_binary(arcn->ln_name)))
+		     needs_hdrcharset_binary(arcn->ln_name)))
 			need_hdrcharset_binary = 1;
 	}
 #endif
@@ -1900,9 +1900,9 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 		else
 			hd->typeflag = BLKTYPE;
 		if (ul_oct(MAJOR(arcn->sb.st_rdev), hd->devmajor,
-		        sizeof(hd->devmajor), 3) ||
+		    sizeof(hd->devmajor), 3) ||
 		    ul_oct(MINOR(arcn->sb.st_rdev), hd->devminor,
-		        sizeof(hd->devminor), 3) ||
+		    sizeof(hd->devminor), 3) ||
 		    ul_oct(0, hd->size, sizeof(hd->size), 3))
 			goto out;
 		break;
@@ -1927,7 +1927,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 			if (!ustar && pax_option_linkdata()) {
 				arcn->pad = TAR_PAD(arcn->sb.st_size);
 				if (ull_oct(arcn->sb.st_size, hd->size,
-				        sizeof(hd->size), 3))
+				    sizeof(hd->size), 3))
 					goto out;
 				write_data = 1;
 			} else {
@@ -1955,7 +1955,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 			}
 #ifndef SMALL
 			else if (xheader_add_ull(
-			             &xhdr, "size", arcn->sb.st_size) == -1) {
+			    &xhdr, "size", arcn->sb.st_size) == -1) {
 				paxwarn(1, "File is too long for pax %s",
 				    arcn->org_name);
 				xheader_free(&xhdr);
@@ -2027,7 +2027,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 			}
 		}
 		if ((pax_option_times() || bad_mtime || arcn->sb.st_mtime < 0 ||
-		        arcn->sb.st_mtim.tv_nsec != 0) &&
+		    arcn->sb.st_mtim.tv_nsec != 0) &&
 		    xheader_add_ts(&xhdr, "mtime", &arcn->sb.st_mtim) == -1) {
 			paxwarn(1, "Couldn't preserve %s in pax format for %s",
 			    "mtime", arcn->org_name);
@@ -2073,7 +2073,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	 * needs to be written
 	 */
 	if (ul_oct(tar_chksm(hdblk, sizeof(HD_USTAR)), hd->chksum,
-	        sizeof(hd->chksum), 3))
+	    sizeof(hd->chksum), 3))
 		goto out;
 	if (wr_rdbuf(hdblk, sizeof(HD_USTAR)) < 0 ||
 	    wr_skip(BLKMULT - sizeof(HD_USTAR)) < 0) {
@@ -2227,7 +2227,7 @@ pax_opt(void)
 			pax_option_set_times(1);
 		} else if (opt->assign != OPT_ASSIGN_NONE) {
 			if (pax_option_add_keyword(
-			        opt->name, opt->value, opt->assign) < 0) {
+			    opt->name, opt->value, opt->assign) < 0) {
 				paxwarn(1, "Unable to record pax keyword %s=%s",
 				    opt->name, opt->value);
 				free(opt->name);
@@ -2468,7 +2468,7 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 			continue;
 		}
 		if (pax_store_kv(global ? &pax_global_xattr : &arcn->xattr,
-		        keyword, p) == -1) {
+		    keyword, p) == -1) {
 			paxwarn(1, "Unable to store extended header keyword %s",
 			    keyword);
 			ret = -1;

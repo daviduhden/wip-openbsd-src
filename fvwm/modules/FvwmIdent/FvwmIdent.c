@@ -135,8 +135,8 @@ main(int argc, char **argv)
 	ScreenWidth = DisplayWidth(dpy, screen);
 
 	SetMessageMask(fd, M_CONFIGURE_WINDOW | M_WINDOW_NAME | M_ICON_NAME |
-	                       M_RES_CLASS | M_RES_NAME | M_END_WINDOWLIST |
-	                       M_CONFIG_INFO | M_END_CONFIG_INFO);
+	    M_RES_CLASS | M_RES_NAME | M_END_WINDOWLIST |
+	    M_CONFIG_INFO | M_END_CONFIG_INFO);
 	/* scan config file for set-up parameters */
 	/* Colors and fonts */
 
@@ -145,15 +145,15 @@ main(int argc, char **argv)
 	while (tline != (char *)0) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline, CatString3(MyName, "Font", ""),
-			        Clength + 4) == 0) {
+			    Clength + 4) == 0) {
 				CopyString(&font_string, &tline[Clength + 4]);
 			} else if (strncasecmp(tline,
-			               CatString3(MyName, "Fore", ""),
-			               Clength + 4) == 0) {
+			    CatString3(MyName, "Fore", ""),
+			    Clength + 4) == 0) {
 				CopyString(&ForeColor, &tline[Clength + 4]);
 			} else if (strncasecmp(tline,
-			               CatString3(MyName, "Back", ""),
-			               Clength + 4) == 0) {
+			    CatString3(MyName, "Back", ""),
+			    Clength + 4) == 0) {
 				CopyString(&BackColor, &tline[Clength + 4]);
 			}
 		}
@@ -350,7 +350,7 @@ list_end(void)
 	if ((font = XLoadQueryFont(dpy, font_string)) == NULL) {
 		if ((font = XLoadQueryFont(dpy, "fixed")) == NULL)
 			exit(1);
-	};
+	}
 
 	/* make window infomation list */
 	MakeList();
@@ -361,7 +361,7 @@ list_end(void)
 	height = ListSize * (font->ascent + font->descent);
 
 	mysizehints.flags = USSize | USPosition | PWinGravity | PResizeInc |
-	                    PBaseSize | PMinSize | PMaxSize;
+	    PBaseSize | PMinSize | PMaxSize;
 	/* subtract one for the right/bottom border */
 	mysizehints.width = lmax + 10;
 	mysizehints.height = height + 10;
@@ -711,9 +711,9 @@ MakeList(void)
 			XSizeHints *size_hints =
 			    XAllocSizeHints(); /* the size hints */
 			if ((getrc = XGetWMSizeHints(dpy,
-			         target.id,  /* get size hints */
-			         size_hints, /* Hints */
-			         &supplied_return, XA_WM_ZOOM_HINTS))) {
+			    target.id,  /* get size hints */
+			    size_hints, /* Hints */
+			    &supplied_return, XA_WM_ZOOM_HINTS))) {
 				if (supplied_return &
 				    PAspect) { /* if window has a aspect ratio
 					        */

@@ -75,9 +75,9 @@ typedef enum {
 
 typedef struct MenuFeel {
 	struct {
-		unsigned char Animated : 1;
-		unsigned char PopupImmediately : 1;
-		unsigned char TitleWarp : 1;
+		unsigned char Animated:1;
+		unsigned char PopupImmediately:1;
+		unsigned char TitleWarp:1;
 	} f;
 	int PopupOffsetPercent;
 	int PopupOffsetAdd;
@@ -102,13 +102,13 @@ typedef struct MenuFace {
 typedef struct MenuLook {
 	MenuFace face;
 	struct {
-		unsigned char Hilight : 1;
-		unsigned char hasActiveFore : 1;
-		unsigned char hasActiveBack : 1;
-		unsigned char hasStippleFore : 1;
-		unsigned char LongSeparators : 1;
-		unsigned char TriangleRelief : 1;
-		unsigned char hasSideColor : 1;
+		unsigned char Hilight:1;
+		unsigned char hasActiveFore:1;
+		unsigned char hasActiveBack:1;
+		unsigned char hasStippleFore:1;
+		unsigned char LongSeparators:1;
+		unsigned char TriangleRelief:1;
+		unsigned char hasSideColor:1;
 	} f;
 	char ReliefThickness;
 	char TitleUnderlines;
@@ -186,8 +186,7 @@ typedef struct MenuRoot {
 	                                * (too tall for screen */
 	/* can get the menu that this popped up through selected->mr when
 	     selected IS_POPUP_MENU_ITEM(selected) */
-	struct MenuRoot
-	    *mrDynamicPrev; /* the menu that popped this up, if any */
+	struct MenuRoot *mrDynamicPrev; /* the menu that popped this up, if any */
 
 	char *name;         /* name of root */
 	Window w;           /* the window of the menu */
@@ -204,18 +203,16 @@ typedef struct MenuRoot {
 	Bool colorize;
 	short xoffset;
 	MenuStyle *ms; /* Menu Face    */
-	union          /* internal flags, deleted when menu pops down! */
-	{
+	union          /* internal flags, deleted when menu pops down! */ {
 		/* need to change that type if we have more than 8 flags.
 		 * more that a word will entail some changes in the code! */
 		unsigned char allflags;
 		struct {
-			unsigned painted : 1;
-			unsigned is_left
-			    : 1; /* menu direction relative to parent menu */
-			unsigned is_right : 1;
-			unsigned is_up : 1;
-			unsigned is_down : 1;
+			unsigned painted:1;
+			unsigned is_left:1; /* menu direction relative to parent menu */
+			unsigned is_right:1;
+			unsigned is_up:1;
+			unsigned is_down:1;
 		} f;
 	} flags;
 	int xanimation; /* x distance window was moved by animation     */
@@ -255,12 +252,12 @@ typedef struct {
 		 * more that a word will entail some changes in the code! */
 		unsigned char allflags;
 		struct {
-			unsigned no_warp : 1;
-			unsigned warp_title : 1;
-			unsigned fixed : 1;
-			unsigned select_in_place : 1;
-			unsigned select_warp : 1;
-			unsigned has_poshints : 1;
+			unsigned no_warp:1;
+			unsigned warp_title:1;
+			unsigned fixed:1;
+			unsigned select_in_place:1;
+			unsigned select_warp:1;
+			unsigned has_poshints:1;
 		} f;
 	} flags;
 } MenuOptions;

@@ -28,7 +28,7 @@ GetFontSetOrFixed(Display *disp, char *fontname)
 		/* fixed should always be avail, so try that */
 		/* plain X11R6.3 hack */
 		if ((fontset = XCreateFontSet(
-		         disp, "fixed,-*--14-*", &ml, &mc, &ds)) == NULL) {
+		    disp, "fixed,-*--14-*", &ml, &mc, &ds)) == NULL) {
 			fprintf(stderr,
 			    "[FVWM][GetFontSetOrFixed]: ERROR -- can't get "
 			    "fontset 'fixed'\n");

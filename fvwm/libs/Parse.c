@@ -121,8 +121,7 @@ PeekToken(const char *pstr)
 	EatWS(p); /* skip leading space */
 	if (*p) {
 		if (IsQuote(*p) ||
-		    IsBlockStart(*p)) /* quoted string or block start? */
-		{
+		    IsBlockStart(*p)) { /* quoted string or block start? */
 			bc = *p; /* save block start char */
 			p++;
 		}
@@ -136,8 +135,7 @@ PeekToken(const char *pstr)
 					be = *p;
 					break;
 				}
-			} else /* normal token */
-			{
+			} else /* normal token */ {
 				if (isspace((unsigned char)*p) || *p == ',')
 					break;
 			}
@@ -151,8 +149,7 @@ PeekToken(const char *pstr)
 		}
 
 		/* sanity checks: */
-		if (bc && !be) /* did we have block start, but not end? */
-		{
+		if (bc && !be) { /* did we have block start, but not end? */
 			/* should yell about this */
 			return NULL;
 		}
@@ -256,12 +253,12 @@ DoGetNextToken(
 	}
 	t = indata;
 	while ((*t != 0) &&
-	       (isspace((unsigned char)*t) || (snum && strchr(spaces, *t))))
+	    (isspace((unsigned char)*t) || (snum && strchr(spaces, *t))))
 		t++;
 	start = t;
 	while ((*t != 0) &&
-	       !(isspace((unsigned char)*t) || (snum && strchr(spaces, *t)) ||
-	           (dnum && strchr(delims, *t)))) {
+	    !(isspace((unsigned char)*t) || (snum && strchr(spaces, *t)) ||
+	    (dnum && strchr(delims, *t)))) {
 		/* Check for qouted text */
 		if (IsQuote(*t)) {
 			char c = *t;

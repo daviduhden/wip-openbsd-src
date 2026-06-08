@@ -107,7 +107,7 @@ list(void)
 			 */
 			off_t cnt;
 			if (!rd_wrfile(
-			        arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
+			    arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
 				(void)rd_skip(cnt + arcn->pad);
 			continue;
 		}
@@ -267,7 +267,7 @@ extract(void)
 			 * we need to read, to get the real filename
 			 */
 			if (!rd_wrfile(
-			        arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
+			    arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
 				(void)rd_skip(cnt + arcn->pad);
 			continue;
 		}
@@ -391,7 +391,7 @@ extract(void)
 		if (!res)
 			(void)rd_skip(cnt + arcn->pad);
 
-	popd:
+ popd:
 		/*
 		 * if required, chdir around.
 		 */
@@ -897,7 +897,7 @@ copy(void)
 			 * create the destination name
 			 */
 			if (strlcpy(dest_pt, arcn->name + (*arcn->name == '/'),
-			        drem + 1) > drem) {
+			    drem + 1) > drem) {
 				paxwarn(1, "Destination pathname too long %s",
 				    arcn->name);
 				continue;
@@ -1099,7 +1099,7 @@ next_head(ARCHD *arcn)
 			if (!in_resync) {
 				if (act == APPND) {
 					paxwarn(1, "Archive I/O error, cannot "
-					           "continue");
+					    "continue");
 					return (-1);
 				}
 				paxwarn(
@@ -1134,7 +1134,7 @@ next_head(ARCHD *arcn)
 			 * this format has trailers outside of valid headers
 			 */
 			if ((ret = (*frmt->trail)(
-			         arcn, hdbuf, in_resync, &cnt)) == 0) {
+			    arcn, hdbuf, in_resync, &cnt)) == 0) {
 				/*
 				 * valid trailer found, drain input as required
 				 */

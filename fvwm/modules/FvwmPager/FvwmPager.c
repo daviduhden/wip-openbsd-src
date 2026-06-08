@@ -142,7 +142,7 @@ main(int argc, char **argv)
 		fprintf(
 		    stderr, "   where desktops n through m are displayed\n");
 		fprintf(stderr, "   if n and m are \"*\" the current desktop "
-		                "is displayed\n");
+		    "is displayed\n");
 		exit(1);
 	}
 
@@ -229,11 +229,11 @@ main(int argc, char **argv)
 	Scr.d_depth = DefaultDepth(dpy, Scr.screen);
 
 	SetMessageMask(fd, M_ADD_WINDOW | M_CONFIGURE_WINDOW |
-	                       M_DESTROY_WINDOW | M_FOCUS_CHANGE | M_NEW_PAGE |
-	                       M_NEW_DESK | M_RAISE_WINDOW | M_LOWER_WINDOW |
-	                       M_ICONIFY | M_ICON_LOCATION | M_DEICONIFY |
-	                       M_ICON_NAME | M_CONFIG_INFO | M_END_CONFIG_INFO |
-	                       M_MINI_ICON | M_END_WINDOWLIST);
+	    M_DESTROY_WINDOW | M_FOCUS_CHANGE | M_NEW_PAGE |
+	    M_NEW_DESK | M_RAISE_WINDOW | M_LOWER_WINDOW |
+	    M_ICONIFY | M_ICON_LOCATION | M_DEICONIFY |
+	    M_ICON_NAME | M_CONFIG_INFO | M_END_CONFIG_INFO |
+	    M_MINI_ICON | M_END_WINDOWLIST);
 #ifdef DEBUG
 	fprintf(stderr, "[main]: calling ParseOptions\n");
 #endif
@@ -284,8 +284,8 @@ Loop(int *fd)
 			int x, y;
 
 			if (XGetGeometry(dpy, Scr.Pager_w, &root, &x, &y,
-			        (unsigned *)&window_w, (unsigned *)&window_h,
-			        &border_width, &depth) == 0) {
+			    (unsigned *)&window_w, (unsigned *)&window_h,
+			    &border_width, &depth) == 0) {
 				exit(0);
 			}
 			error_occured = False;
@@ -472,9 +472,7 @@ list_configure(unsigned long *body)
 		}
 		if (t->desk != body[7]) {
 			ChangeDeskForWindow(t, body[7]);
-		}
-
-		else
+		} else
 			MoveResizePagerView(t);
 		if (FocusWin == t)
 			Hilight(t, ON);
@@ -1138,7 +1136,7 @@ ParseOptions(void)
 				ShowPagerBalloons = 1;
 				ShowIconBalloons = 0;
 			} else if (strncasecmp(BalloonTypeString, "Icon", 4) ==
-			           0) {
+			    0) {
 				ShowPagerBalloons = 0;
 				ShowIconBalloons = 1;
 			} else {
@@ -1151,41 +1149,29 @@ ParseOptions(void)
 			   ShowPagerBalloons or ShowIconBalloons whenever we
 			   receive iconify or deiconify packets */
 			ShowBalloons = 1;
-		}
-
-		else if (StrEquals(resource, "BalloonBack")) {
+		} else if (StrEquals(resource, "BalloonBack")) {
 			if (Scr.d_depth > 1) {
 				if (BalloonBack)
 					free(BalloonBack);
 				CopyString(&BalloonBack, arg1);
 			}
-		}
-
-		else if (StrEquals(resource, "BalloonFore")) {
+		} else if (StrEquals(resource, "BalloonFore")) {
 			if (Scr.d_depth > 1) {
 				if (BalloonFore)
 					free(BalloonFore);
 				CopyString(&BalloonFore, arg1);
 			}
-		}
-
-		else if (StrEquals(resource, "BalloonFont")) {
+		} else if (StrEquals(resource, "BalloonFont")) {
 			if (BalloonFont)
 				free(BalloonFont);
 			CopyString(&BalloonFont, arg1);
-		}
-
-		else if (StrEquals(resource, "BalloonBorderColor")) {
+		} else if (StrEquals(resource, "BalloonBorderColor")) {
 			if (BalloonBorderColor)
 				free(BalloonBorderColor);
 			CopyString(&BalloonBorderColor, arg1);
-		}
-
-		else if (StrEquals(resource, "BalloonBorderWidth")) {
+		} else if (StrEquals(resource, "BalloonBorderWidth")) {
 			sscanf(arg1, "%d", &BalloonBorderWidth);
-		}
-
-		else if (StrEquals(resource, "BalloonYOffset")) {
+		} else if (StrEquals(resource, "BalloonYOffset")) {
 			sscanf(arg1, "%d", &BalloonYOffset);
 		}
 

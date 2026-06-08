@@ -14,11 +14,11 @@
 
 /* --------------------------- button information -------------------------- */
 
-#define buttonXPos(b, i)                                                       \
-	((b)->parent->c->xpos + ((i) % (b)->parent->c->num_columns) *          \
+#define buttonXPos(b, i)						\
+	((b)->parent->c->xpos + ((i) % (b)->parent->c->num_columns) *	\
 	                            ((b)->parent->c->ButtonWidth))
-#define buttonYPos(b, i)                                                       \
-	((b)->parent->c->ypos + ((i) / (b)->parent->c->num_columns) *          \
+#define buttonYPos(b, i)						\
+	((b)->parent->c->ypos + ((i) / (b)->parent->c->num_columns) *	\
 	                            ((b)->parent->c->ButtonHeight))
 #define buttonWidth(b) ((b)->BWidth * (b)->parent->c->ButtonWidth)
 #define buttonHeight(b) ((b)->BHeight * (b)->parent->c->ButtonHeight)

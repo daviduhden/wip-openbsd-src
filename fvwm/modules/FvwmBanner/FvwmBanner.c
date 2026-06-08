@@ -144,7 +144,7 @@ main(int argc, char **argv)
 
 	/* Create a window to hold the banner */
 	mysizehints.flags = USSize | USPosition | PWinGravity | PResizeInc |
-	                    PBaseSize | PMinSize | PMaxSize;
+	    PBaseSize | PMinSize | PMaxSize;
 	/* subtract one for the right/bottom border */
 	mysizehints.width = view.attributes.width;
 	mysizehints.height = view.attributes.height;
@@ -189,7 +189,6 @@ main(int argc, char **argv)
 		FD_SET(x_fd, &in_fdset);
 
 		if (!XPending(dpy))
-
 			retval = select(fd_width, SELECT_TYPE_ARG234 & in_fdset,
 			    0, 0, &value);
 
@@ -234,12 +233,13 @@ GetXPMData(char **data)
 	    XpmReturnPixels | XpmCloseness | XpmExtensions;
 	view.attributes.closeness = 40000 /* Allow for "similar" colors */;
 	if (XpmCreatePixmapFromData(dpy, Root, data, &view.pixmap, &view.mask,
-	        &view.attributes) != XpmSuccess) {
+	    &view.attributes) != XpmSuccess) {
 		fprintf(stderr,
 		    "FvwmBanner: ERROR couldn't convert data to pixmap\n");
 		exit(1);
 	}
 }
+
 void
 GetXPMFile(char *file, char *path)
 {
@@ -254,7 +254,7 @@ GetXPMFile(char *file, char *path)
 
 	if (full_file) {
 		if (XpmReadFileToPixmap(dpy, Root, full_file, &view.pixmap,
-		        &view.mask, &view.attributes) == XpmSuccess) {
+		    &view.mask, &view.attributes) == XpmSuccess) {
 			return;
 		}
 		fprintf(stderr, "FvwmBanner: ERROR reading pixmap file\n");
@@ -281,8 +281,8 @@ parseOptions(int fd[2])
 	while (GetConfigLine(fd, &tline), tline != NULL) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline,
-			        CatString3("*", myName, "Pixmap"),
-			        clength + 7) == 0) {
+			    CatString3("*", myName, "Pixmap"),
+			    clength + 7) == 0) {
 				if (pixmapName == (char *)0) {
 					CopyString(
 					    &pixmapName, &tline[clength + 7]);
@@ -294,8 +294,8 @@ parseOptions(int fd[2])
 				continue;
 			}
 			if (strncasecmp(tline,
-			        CatString3("*", myName, "Timeout"),
-			        clength + 8) == 0) {
+			    CatString3("*", myName, "Timeout"),
+			    clength + 8) == 0) {
 				timeout = atoi(&tline[clength + 8]) * 1000000;
 				continue;
 			}

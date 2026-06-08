@@ -76,7 +76,7 @@ typedef struct {
 #ifdef _PAX_
 #define AMAGIC "070707"   /* ascii equivalent string of MAGIC */
 #define CPIO_MASK 0x3ffff /* bits valid in the dev/ino fields */
-                          /* used for dev/inode remaps */
+			  /* used for dev/inode remaps */
 #endif                    /* _PAX_ */
 
 /*

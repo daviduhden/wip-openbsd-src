@@ -1274,13 +1274,13 @@ ar_start_gzip(int fd, const char *path, int wr)
 		if (pmode == 0 || (act != EXTRACT && act != COPY)) {
 			if (act == LIST) {
 				if (pledge("stdio rpath getpw proc tape",
-				        NULL) == -1)
+				    NULL) == -1)
 					err(1, "pledge");
 				/* can not gzip while appending */
 			} else {
 				if (pledge("stdio rpath wpath cpath fattr "
-				           "dpath getpw proc tape",
-				        NULL) == -1)
+				    "dpath getpw proc tape",
+				    NULL) == -1)
 					err(1, "pledge");
 			}
 		}

@@ -8,8 +8,8 @@
 static char const rcsid[] =
     "$Id: x.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
-#define GRAB_EVENTS                                                            \
-	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |              \
+#define GRAB_EVENTS							\
+	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |	\
 	    EnterWindowMask | LeaveWindowMask)
 
 #ifdef SHAPE
@@ -34,8 +34,8 @@ grab_pointer(WinManager *man)
 	/* This should only be called after we get our EXPOSE event */
 	if (grab_state == NEED_TO_GRAB) {
 		if (XGrabPointer(theDisplay, man->theWindow, True, GRAB_EVENTS,
-		        GrabModeAsync, GrabModeAsync, None, None,
-		        CurrentTime) != GrabSuccess) {
+		    GrabModeAsync, GrabModeAsync, None, None,
+		    CurrentTime) != GrabSuccess) {
 			ConsoleMessage("Couldn't grab pointer\n");
 			ShutMeDown(0);
 		}
@@ -109,11 +109,11 @@ handle_buttonevent(XEvent *theEvent, WinManager *man)
 			    MouseEntry != NULL;
 			    MouseEntry = MouseEntry->NextBinding) {
 				if (((MouseEntry->Button_Key ==
-				         theEvent->xbutton.button) ||
-				        (MouseEntry->Button_Key == 0)) &&
+				    theEvent->xbutton.button) ||
+				    (MouseEntry->Button_Key == 0)) &&
 				    ((MouseEntry->Modifier == AnyModifier) ||
-				        (MouseEntry->Modifier ==
-				            (modifier & (~LockMask))))) {
+				     (MouseEntry->Modifier ==
+				      (modifier & (~LockMask))))) {
 					Function *ftype = MouseEntry->Function;
 					ConsoleDebug(
 					    X11, "\tgot a mouse binding\n");
@@ -218,10 +218,10 @@ xevent_loop(void)
 					KeySym primary =
 					    (width > 0) ? mapping[0] : NoSymbol;
 					KeyCode canonical =
-					    (primary != NoSymbol)
-					        ? XKeysymToKeycode(
-					              theDisplay, primary)
-					        : 0;
+					    (primary != NoSymbol) ?
+					    XKeysymToKeycode(
+					    theDisplay, primary) :
+					    0;
 					if (canonical != 0)
 						theEvent.xkey.keycode =
 						    canonical;
@@ -235,10 +235,10 @@ xevent_loop(void)
 			for (key = man->bindings[KEYPRESS]; key != NULL;
 			    key = key->NextBinding) {
 				if ((key->Button_Key ==
-				        theEvent.xkey.keycode) &&
+				    theEvent.xkey.keycode) &&
 				    ((key->Modifier ==
-				         (modifier & (~LockMask))) ||
-				        (key->Modifier == AnyModifier))) {
+				      (modifier & (~LockMask))) ||
+				     (key->Modifier == AnyModifier))) {
 					Function *ftype = key->Function;
 					if (ftype && ftype->func) {
 						run_function_list(ftype);
@@ -457,14 +457,14 @@ X_init_manager(int man_id)
 		man->ButtonFont = XLoadQueryFont(theDisplay, man->fontname);
 		if (!man->ButtonFont) {
 			if (!(man->ButtonFont =
-			            XLoadQueryFont(theDisplay, FONT_STRING))) {
+			    XLoadQueryFont(theDisplay, FONT_STRING))) {
 				ConsoleMessage("Can't get font\n");
 				ShutMeDown(1);
 			}
 		}
 	} else {
 		if (!(man->ButtonFont =
-		            XLoadQueryFont(theDisplay, FONT_STRING))) {
+		    XLoadQueryFont(theDisplay, FONT_STRING))) {
 			ConsoleMessage("Can't get font\n");
 			ShutMeDown(1);
 		}
@@ -473,7 +473,7 @@ X_init_manager(int man_id)
 	for (i = 0; i < NUM_CONTEXTS; i++) {
 		if (man->backColorName[i]) {
 			if (!lookup_color(
-			        man->backColorName[i], &man->backcolor[i])) {
+			    man->backColorName[i], &man->backcolor[i])) {
 				if (!load_default_context_back(man, i)) {
 					ConsoleMessage(
 					    "Can't load %s background color\n",
@@ -487,7 +487,7 @@ X_init_manager(int man_id)
 
 		if (man->foreColorName[i]) {
 			if (!lookup_color(
-			        man->foreColorName[i], &man->forecolor[i])) {
+			    man->foreColorName[i], &man->forecolor[i])) {
 				if (!load_default_context_fore(man, i)) {
 					ConsoleMessage(
 					    "Can't load %s foreground color\n",
@@ -622,7 +622,7 @@ create_manager_window(int man_id)
 	XGCValues gcval;
 	unsigned long gcmask = 0;
 	unsigned long winattrmask = CWBackPixel | CWBorderPixel | CWEventMask |
-	                            CWBackingStore | CWBitGravity;
+	    CWBackingStore | CWBitGravity;
 	XSetWindowAttributes winattr;
 	unsigned int line_width = 1;
 	int line_style = LineSolid;
@@ -662,8 +662,8 @@ create_manager_window(int man_id)
 	winattr.backing_store = WhenMapped;
 	winattr.bit_gravity = man->gravity;
 	winattr.event_mask = ExposureMask | PointerMotionMask |
-	                     EnterWindowMask | LeaveWindowMask | KeyPressMask |
-	                     StructureNotifyMask;
+	    EnterWindowMask | LeaveWindowMask | KeyPressMask |
+	    StructureNotifyMask;
 
 	if (globals.transient)
 		winattr.event_mask |= ButtonReleaseMask;
@@ -672,8 +672,8 @@ create_manager_window(int man_id)
 
 	man->theWindow =
 	    XCreateWindow(theDisplay, theRoot, sizehints.x, sizehints.y,
-	        man->geometry.width, man->geometry.height, 0, CopyFromParent,
-	        InputOutput, (Visual *)CopyFromParent, winattrmask, &winattr);
+	    man->geometry.width, man->geometry.height, 0, CopyFromParent,
+	    InputOutput, (Visual *)CopyFromParent, winattrmask, &winattr);
 #ifdef SHAPE
 	XShapeSelectInput(theDisplay, man->theWindow, ShapeNotifyMask);
 #endif

@@ -225,8 +225,8 @@ void
 ParseSwallow(char **ss, byte *flags, byte *mask)
 {
 	char *swallowopts[] = {"nohints", "hints", "nokill", "kill", "noclose",
-	    "close", "respawn", "norespawn", "useold", "noold", "usetitle",
-	    "notitle", NULL};
+		"close", "respawn", "norespawn", "useold", "noold", "usetitle",
+		"notitle", NULL};
 	char *t, *s = *ss;
 
 	while (*s && *s != ')') {
@@ -305,7 +305,7 @@ void
 ParseContainer(char **ss, button_info *b)
 {
 	char *conts[] = {"columns", "rows", "font", "frame", "back", "fore",
-	    "padding", "title", "swallow", "nosize", "size", "boxsize", NULL};
+		"padding", "title", "swallow", "nosize", "size", "boxsize", NULL};
 	char *t, *o, *s = *ss;
 	int i, j;
 
@@ -469,8 +469,8 @@ match_string(button_info **uberb, char *s)
 
 	if (*s == '(' && s++) {
 		char *opts[] = {"back", "fore", "font", "title", "icon",
-		    "frame", "padding", "swallow", "action", "container", "end",
-		    "nosize", "size", "panel", "left", "right", "center", NULL};
+			"frame", "padding", "swallow", "action", "container", "end",
+			"nosize", "size", "panel", "left", "right", "center", NULL};
 		s = trimleft(s);
 		while (*s && *s != ')') {
 			if ((*s >= '0' && *s <= '9') || *s == '+' ||
@@ -648,10 +648,10 @@ match_string(button_info **uberb, char *s)
 					if (!(b->swallow & b_NoHints))
 						b->hints =
 						    (XSizeHints *)mymalloc(
-						        sizeof(XSizeHints));
+						    sizeof(XSizeHints));
 					if (o) {
 						if (!(buttonSwallow(b) &
-						        b_UseOld))
+						    b_UseOld))
 							SendText(fd, o, 0);
 						if (b->spawn)
 							free(b->spawn);
@@ -708,7 +708,7 @@ match_string(button_info **uberb, char *s)
 
 			case 9: /* Container */
 				b->flags &= b_Frame | b_Back | b_Fore |
-				            b_Padding | b_Action;
+				    b_Padding | b_Action;
 				MakeContainer(b);
 				*uberb = b;
 				s = trimleft(s);
@@ -767,7 +767,7 @@ match_string(button_info **uberb, char *s)
 					else if (strncasecmp(t, "down", 4) == 0)
 						t = "panel-d";
 					else if (strncasecmp(
-					             t, "geometry", 8) == 0)
+					    t, "geometry", 8) == 0)
 						t = "panel-g";
 					else
 						t = "panel-u";
@@ -778,8 +778,8 @@ match_string(button_info **uberb, char *s)
 				b->IconWin = None;
 				t = seekright(&s);
 				b->hangon =
-				    (t) ? t
-				        : strdup(""); /* which panel to popup */
+				    (t) ? t :
+				    strdup(""); /* which panel to popup */
 				break;
 
 			case 14: /* Left */
@@ -888,13 +888,12 @@ ParseConfigLine(button_info **ubb, char *s)
 {
 	button_info *ub = *ubb;
 	char *opts[] = {"geometry", "font", "padding", "columns", "rows",
-	    "back", "fore", "frame", "file", "pixmap", "panel", "boxsize",
-	    NULL};
+		"back", "fore", "frame", "file", "pixmap", "panel", "boxsize",
+		NULL};
 	int i, j, k;
 
 	switch (GetTokenIndex(s, opts, -1, &s)) {
-	case 0: /* Geometry */
-	{
+	case 0: /* Geometry */ {
 		char geom[64];
 		int flags, g_x, g_y;
 		unsigned int width, height;
@@ -1025,7 +1024,7 @@ ParseConfigFile(button_info *ub)
 	while (fgets(s, 1023, f)) {
 		/* Allow for line continuation: */
 		while ((l = strlen(s)) < sizeof(s) && l >= 2 &&
-		       s[l - 1] == '\n' && s[l - 2] == '\\')
+		    s[l - 1] == '\n' && s[l - 2] == '\\')
 			fgets(s + l - 2, sizeof(s) - l, f);
 
 		/* And comments: */

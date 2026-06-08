@@ -106,11 +106,11 @@ file_creat(ARCHD *arcn)
 		 * it cannot fix anything, we will skip the last attempt
 		 */
 		if ((fd = open(arcn->name, O_WRONLY | O_CREAT | O_TRUNC,
-		         file_mode)) >= 0)
+		    file_mode)) >= 0)
 			break;
 		oerrno = errno;
 		if (nodirs || chk_path(arcn->name, arcn->sb.st_uid,
-		                  arcn->sb.st_gid, 0) < 0) {
+		    arcn->sb.st_gid, 0) < 0) {
 			syswarn(1, oerrno, "Unable to create %s", arcn->name);
 			return (-1);
 		}
@@ -381,7 +381,7 @@ node_creat(ARCHD *arcn)
 			 */
 			if (op_mode == OP_TAR && Lflag) {
 				while (lstat(nm, &sb) == 0 &&
-				       S_ISLNK(sb.st_mode)) {
+				    S_ISLNK(sb.st_mode)) {
 					len = readlink(
 					    nm, target, sizeof target - 1);
 					if (len == -1) {
@@ -398,7 +398,7 @@ node_creat(ARCHD *arcn)
 			}
 			res = mkdir(nm, file_mode);
 
-		badlink:
+ badlink:
 			if (ign)
 				res = 0;
 			break;
@@ -862,9 +862,9 @@ set_attr(const struct file_times *ft, int force_times, mode_t mode, int do_mode,
 		if (do_mode && (mode & ABITS) != (sb.st_mode & ABITS))
 			fset_pmode(ft->ft_name, fd, mode);
 		if (((force_times || patime) &&
-		        timespeccmp(&ft->ft_atim, &sb.st_atim, !=)) ||
+		    timespeccmp(&ft->ft_atim, &sb.st_atim, !=)) ||
 		    ((force_times || pmtime) &&
-		        timespeccmp(&ft->ft_mtim, &sb.st_mtim, !=)))
+		     timespeccmp(&ft->ft_mtim, &sb.st_mtim, !=)))
 			fset_ftime(ft->ft_name, fd, &ft->ft_mtim, &ft->ft_atim,
 			    force_times);
 		r = 0;
@@ -1002,7 +1002,7 @@ file_write(
 		if (strp) {
 			if (*strp)
 				err(1, "WARNING! Major Internal Error! GNU "
-				       "hack Failing!");
+				    "hack Failing!");
 			*strp = malloc(wcnt + 1);
 			if (*strp == NULL) {
 				paxwarn(1, "Out of memory");

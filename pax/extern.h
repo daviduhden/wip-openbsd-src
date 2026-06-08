@@ -317,9 +317,9 @@ int pax_wr(ARCHD *);
  */
 int tty_init(void);
 void tty_prnt(const char *, ...)
-    __attribute__((nonnull(1), format(printf, 1, 2)));
+	__attribute__((nonnull(1), format(printf, 1, 2)));
 int tty_read(char *, int);
 void paxwarn(int, const char *, ...)
-    __attribute__((nonnull(2), format(printf, 2, 3)));
+	__attribute__((nonnull(2), format(printf, 2, 3)));
 void syswarn(int, int, const char *, ...)
-    __attribute__((nonnull(3), format(printf, 3, 4)));
+	__attribute__((nonnull(3), format(printf, 3, 4)));

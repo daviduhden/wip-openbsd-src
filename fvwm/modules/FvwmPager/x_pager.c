@@ -30,7 +30,7 @@ Pixel focus_pix;
 Pixel focus_fore_pix;
 extern Pixel win_back_pix, win_fore_pix, win_hi_back_pix, win_hi_fore_pix;
 extern int window_w, window_h, window_x, window_y, usposition, uselabel, xneg,
-    yneg;
+	   yneg;
 extern int StartIconic;
 extern int MiniIcons;
 extern int ShowBalloons, ShowPagerBalloons, ShowIconBalloons;
@@ -88,14 +88,14 @@ BalloonWindow balloon; /* balloon window */
  ***********************************************************************/
 char *pager_name = "Fvwm Pager";
 XSizeHints sizehints = {
-    (PMinSize | PResizeInc | PBaseSize | PWinGravity), 0, 0, 100,
-    100,               /* x, y, width and height */
-    1, 1,              /* Min width and height */
-    0, 0,              /* Max width and height */
-    1, 1,              /* Width and height increments */
-    {0, 0}, {0, 0},    /* Aspect ratio - not used */
-    1, 1,              /* base size */
-    (NorthWestGravity) /* gravity */
+	(PMinSize | PResizeInc | PBaseSize | PWinGravity), 0, 0, 100,
+	100,               /* x, y, width and height */
+	1, 1,              /* Min width and height */
+	0, 0,              /* Max width and height */
+	1, 1,              /* Width and height increments */
+	{0, 0}, {0, 0},    /* Aspect ratio - not used */
+	1, 1,              /* base size */
+	(NorthWestGravity) /* gravity */
 };
 
 void
@@ -133,7 +133,7 @@ initialize_pager(void)
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
 		}
-	};
+	}
 	if (uselabel)
 		label_h = font->ascent + font->descent + 2;
 	else
@@ -161,10 +161,10 @@ initialize_pager(void)
 		    g_bits, g_width, g_height, fore_pix, back_pix, Scr.d_depth);
 		Scr.light_gray_pixmap =
 		    XCreatePixmapFromBitmapData(dpy, Scr.Root, l_g_bits,
-		        l_g_width, l_g_height, fore_pix, back_pix, Scr.d_depth);
+		    l_g_width, l_g_height, fore_pix, back_pix, Scr.d_depth);
 		Scr.sticky_gray_pixmap =
 		    XCreatePixmapFromBitmapData(dpy, Scr.Root, s_g_bits,
-		        s_g_width, s_g_height, fore_pix, back_pix, Scr.d_depth);
+		    s_g_width, s_g_height, fore_pix, back_pix, Scr.d_depth);
 	}
 
 	n = Scr.VxMax / Scr.MyDisplayWidth;
@@ -199,22 +199,22 @@ initialize_pager(void)
 	if (window_w > 0) {
 		window_w = ((window_w - n) / (n + 1)) * (n + 1) + n;
 		Scr.VScale = Columns * (Scr.VxMax + Scr.MyDisplayWidth) /
-		             (window_w - Columns + 1 - Columns * n);
+		    (window_w - Columns + 1 - Columns * n);
 	}
 	if (window_h > 0) {
 		window_h = ((window_h - m) / (m + 1)) * (m + 1) + m;
 		Scr.VScale = Rows * (Scr.VyMax + Scr.MyDisplayHeight) /
-		             (window_h + 2 - Rows * (label_h - m - 1));
+		    (window_h + 2 - Rows * (label_h - m - 1));
 	}
 	if (window_w <= 0)
 		window_w =
 		    Columns *
-		        ((Scr.VxMax + Scr.MyDisplayWidth) / Scr.VScale + n) +
+		    ((Scr.VxMax + Scr.MyDisplayWidth) / Scr.VScale + n) +
 		    Columns - 1;
 	if (window_h <= 0) {
 		window_h =
 		    Rows * ((Scr.VyMax + Scr.MyDisplayHeight) / Scr.VScale + m +
-		               label_h + 1) -
+		    label_h + 1) -
 		    2;
 	}
 
@@ -323,7 +323,7 @@ initialize_pager(void)
 		    1, CopyFromParent, InputOutput, CopyFromParent, valuemask,
 		    &attributes);
 		attributes.event_mask = (ExposureMask | ButtonReleaseMask |
-		                         ButtonPressMask | ButtonMotionMask);
+		    ButtonPressMask | ButtonMotionMask);
 		desk_h = window_h - label_h;
 		Desks[i].w = XCreateWindow(dpy, Desks[i].title_w, x, y, w,
 		    desk_h, 1, CopyFromParent, InputOutput, CopyFromParent,
@@ -381,9 +381,8 @@ initialize_pager(void)
 	/* create balloon window
 	   -- ric@giccs.georgetown.edu */
 	if (ShowBalloons) {
-
 		valuemask = CWOverrideRedirect | CWEventMask | CWBackPixel |
-		            CWBorderPixel;
+		    CWBorderPixel;
 
 		/* tell WM to ignore this window */
 		attributes.override_redirect = True;
@@ -431,9 +430,9 @@ initialize_pager(void)
 		/* now create the window */
 		balloon.w =
 		    XCreateWindow(dpy, Scr.Root, 0, 0, /* coords set later */
-		        1,                             /* width set later */
-		        balloon.height, balloon.border, CopyFromParent,
-		        InputOutput, CopyFromParent, valuemask, &attributes);
+		    1,                             /* width set later */
+		    balloon.height, balloon.border, CopyFromParent,
+		    InputOutput, CopyFromParent, valuemask, &attributes);
 
 		/* set font */
 		gcv.font = balloon.font->fid;
@@ -540,8 +539,8 @@ DispatchEvent(XEvent *Event)
 		if (ShowBalloons)
 			UnmapBalloonWindow();
 		if (((Event->xbutton.button == 2) ||
-		        ((Event->xbutton.button == 3) &&
-		            (Event->xbutton.state & Mod1Mask))) &&
+		    ((Event->xbutton.button == 3) &&
+		     (Event->xbutton.state & Mod1Mask))) &&
 		    (Event->xbutton.subwindow != None)) {
 			MoveWindow(Event);
 		} else if (Event->xbutton.button == 3) {
@@ -771,16 +770,16 @@ ReConfigureIcons(void)
 		n1 = (Scr.Vx + t->x) / Scr.MyDisplayWidth;
 		m1 = (Scr.Vy + t->y) / Scr.MyDisplayHeight;
 		x = (Scr.Vx + t->x) * (icon_w - n) /
-		        (Scr.VxMax + Scr.MyDisplayWidth) +
+		    (Scr.VxMax + Scr.MyDisplayWidth) +
 		    n1;
 		y = (Scr.Vy + t->y) * (icon_h - m) /
-		        (Scr.VyMax + Scr.MyDisplayHeight) +
+		    (Scr.VyMax + Scr.MyDisplayHeight) +
 		    m1;
 		w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-		        (Scr.VxMax + Scr.MyDisplayWidth) -
+		    (Scr.VxMax + Scr.MyDisplayWidth) -
 		    2 - x + n1;
 		h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-		        (Scr.VyMax + Scr.MyDisplayHeight) -
+		    (Scr.VyMax + Scr.MyDisplayHeight) -
 		    2 - y + m1;
 
 		if (w < 1)
@@ -925,9 +924,9 @@ SwitchToDeskAndPage(int Desk, XEvent *Event)
 		/* patch to let mouse button 3 change desks and do not cling to
 		 * a page */
 		vx = Event->xbutton.x * (Scr.VxMax + Scr.MyDisplayWidth) /
-		     (desk_w * Scr.MyDisplayWidth);
+		    (desk_w * Scr.MyDisplayWidth);
 		vy = Event->xbutton.y * (Scr.VyMax + Scr.MyDisplayHeight) /
-		     (desk_h * Scr.MyDisplayHeight);
+		    (desk_h * Scr.MyDisplayHeight);
 		Scr.Vx = vx * Scr.MyDisplayWidth;
 		Scr.Vy = vy * Scr.MyDisplayHeight;
 		snprintf(command, sizeof(command), "GotoPage %d %d\n", vx, vy);
@@ -937,9 +936,9 @@ SwitchToDeskAndPage(int Desk, XEvent *Event)
 	} else {
 		snprintf(command, sizeof(command), "GotoPage %d %d\n",
 		    Event->xbutton.x * (Scr.VxMax + Scr.MyDisplayWidth) /
-		        (desk_w * Scr.MyDisplayWidth),
+		    (desk_w * Scr.MyDisplayWidth),
 		    Event->xbutton.y * (Scr.VyMax + Scr.MyDisplayHeight) /
-		        (desk_h * Scr.MyDisplayHeight));
+		    (desk_h * Scr.MyDisplayHeight));
 		SendInfo(fd, command, 0);
 	}
 #endif
@@ -954,9 +953,9 @@ IconSwitchPage(XEvent *Event)
 
 	snprintf(command, sizeof(command), "GotoPage %d %d\n",
 	    Event->xbutton.x * (Scr.VxMax + Scr.MyDisplayWidth) /
-	        (icon_w * Scr.MyDisplayWidth),
+	    (icon_w * Scr.MyDisplayWidth),
 	    Event->xbutton.y * (Scr.VyMax + Scr.MyDisplayHeight) /
-	        (icon_h * Scr.MyDisplayHeight));
+	    (icon_h * Scr.MyDisplayHeight));
 	SendInfo(fd, command, 0);
 #endif
 	Wait = 1;
@@ -979,10 +978,10 @@ AddNewWindow(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (desk_w - n) /
-	        (Scr.VxMax + Scr.MyDisplayWidth) -
+	    (Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (desk_h - m) /
-	        (Scr.VyMax + Scr.MyDisplayHeight) -
+	    (Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1015,10 +1014,10 @@ AddNewWindow(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-	        (Scr.VxMax + Scr.MyDisplayWidth) -
+	    (Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-	        (Scr.VyMax + Scr.MyDisplayHeight) -
+	    (Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1030,7 +1029,7 @@ AddNewWindow(PagerWindow *t)
 	if (Scr.CurrentDesk == t->desk) {
 		t->IconView =
 		    XCreateWindow(dpy, icon_win, x, y, w, h, 1, CopyFromParent,
-		        InputOutput, CopyFromParent, valuemask, &attributes);
+		    InputOutput, CopyFromParent, valuemask, &attributes);
 		XGrabButton(dpy, 2, AnyModifier, t->IconView, True,
 		    ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
 		    GrabModeAsync, GrabModeAsync, None, None);
@@ -1067,10 +1066,10 @@ ChangeDeskForWindow(PagerWindow *t, long newdesk)
 	y = (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (desk_w - n) /
-	        (Scr.VxMax + Scr.MyDisplayWidth) -
+	    (Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (desk_h - m) /
-	        (Scr.VyMax + Scr.MyDisplayHeight) -
+	    (Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1092,10 +1091,10 @@ ChangeDeskForWindow(PagerWindow *t, long newdesk)
 	y = (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-	        (Scr.VxMax + Scr.MyDisplayWidth) -
+	    (Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-	        (Scr.VyMax + Scr.MyDisplayHeight) -
+	    (Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1123,10 +1122,10 @@ MoveResizePagerView(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (desk_w - n) /
-	        (Scr.VxMax + Scr.MyDisplayWidth) -
+	    (Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (desk_h - m) /
-	        (Scr.VyMax + Scr.MyDisplayHeight) -
+	    (Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 
 	if (w < 1)
@@ -1148,10 +1147,10 @@ MoveResizePagerView(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-	        (Scr.VxMax + Scr.MyDisplayWidth) -
+	    (Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-	        (Scr.VyMax + Scr.MyDisplayHeight) -
+	    (Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 
 	if (w < 1)
@@ -1262,11 +1261,11 @@ Scroll(int window_w, int window_h, int x, int y, int Desk)
 			y = window_h;
 
 		sx = (100 * (x * (Scr.VxMax + Scr.MyDisplayWidth) / window_w -
-		                Scr.Vx)) /
-		     Scr.MyDisplayWidth;
+		    Scr.Vx)) /
+		    Scr.MyDisplayWidth;
 		sy = (100 * (y * (Scr.VyMax + Scr.MyDisplayHeight) / window_h -
-		                Scr.Vy)) /
-		     Scr.MyDisplayHeight;
+		    Scr.Vy)) /
+		    Scr.MyDisplayHeight;
 		/* Make sure we don't get stuck a few pixels fromt the top/left
 		 * border. Since sx/sy are ints, values between 0 and 1 are
 		 * rounded down. */
@@ -1287,7 +1286,7 @@ MoveWindow(XEvent *Event)
 {
 	char command[100];
 	int x1, y1, finished = 0, wx, wy, n, x, y, xi = 0, yi = 0, wx1, wy1, x2,
-	            y2;
+	    y2;
 	Window dumwin;
 	PagerWindow *t;
 	int m, n1, m1;
@@ -1321,7 +1320,7 @@ MoveWindow(XEvent *Event)
 	n1 = (Scr.Vx + t->x) / Scr.MyDisplayWidth;
 	m1 = (Scr.Vy + t->y) / Scr.MyDisplayHeight;
 	wx = (Scr.Vx + t->x) * (desk_w - n) / (Scr.VxMax + Scr.MyDisplayWidth) +
-	     n1;
+	    n1;
 	wy =
 	    (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
@@ -1411,14 +1410,14 @@ MoveWindow(XEvent *Event)
 		    x - x1, y - y1, &x2, &y2, &dumwin);
 
 		n1 = x2 * (Scr.VxMax + Scr.MyDisplayWidth) /
-		     (desk_w * Scr.MyDisplayWidth);
+		    (desk_w * Scr.MyDisplayWidth);
 		m1 = y2 * (Scr.VyMax + Scr.MyDisplayHeight) /
-		     (desk_h * Scr.MyDisplayHeight);
+		    (desk_h * Scr.MyDisplayHeight);
 		x = (x2 - n1) * (Scr.VxMax + Scr.MyDisplayWidth) /
-		        (desk_w - n) -
+		    (desk_w - n) -
 		    Scr.Vx;
 		y = (y2 - m1) * (Scr.VyMax + Scr.MyDisplayHeight) /
-		        (desk_h - m) -
+		    (desk_h - m) -
 		    Scr.Vy;
 		if (x + t->frame_width + Scr.Vx < 0)
 			x = -Scr.Vx;
@@ -1444,7 +1443,7 @@ MoveWindow(XEvent *Event)
 		}
 		if (NewDesk + desk1 != t->desk) {
 			if (((t->flags & ICONIFIED) &&
-			        (t->flags & StickyIcon)) ||
+			    (t->flags & StickyIcon)) ||
 			    (t->flags & STICKY)) {
 				NewDesk = Scr.CurrentDesk - desk1;
 				if (t->desk != Scr.CurrentDesk)
@@ -1467,7 +1466,7 @@ MoveWindow(XEvent *Event)
 					XMoveWindow(dpy, t->w,
 					    x + t->border_width,
 					    y + t->title_height +
-					        t->border_width);
+					    t->border_width);
 				XSync(dpy, 0);
 			} else
 				MoveResizePagerView(t);
@@ -1576,6 +1575,7 @@ LabelIconWindow(PagerWindow *t)
 	XDrawString(dpy, t->IconView, StdGC, 2, windowFont->ascent + 2,
 	    t->icon_name, strlen(t->icon_name));
 }
+
 void
 PictureWindow(PagerWindow *t)
 {
@@ -1597,16 +1597,16 @@ PictureWindow(PagerWindow *t)
 				iconX = 0;
 			if (t->pager_view_height > t->mini_icon.height)
 				iconY = (t->pager_view_height -
-				            t->mini_icon.height) /
-				        2;
+				    t->mini_icon.height) /
+				    2;
 			else if (t->pager_view_height < t->mini_icon.height)
 				iconY = -((t->mini_icon.height -
-				              t->pager_view_height) /
-				          2);
+				    t->pager_view_height) /
+				    2);
 			else
 				iconY = 0;
 			Globalgcm = GCForeground | GCBackground | GCClipMask |
-			            GCClipXOrigin | GCClipYOrigin;
+			    GCClipXOrigin | GCClipYOrigin;
 			Globalgcv.clip_mask = t->mini_icon.mask;
 			Globalgcv.clip_x_origin = iconX;
 			Globalgcv.clip_y_origin = iconY;
@@ -1625,6 +1625,7 @@ PictureWindow(PagerWindow *t)
 		}
 	}
 }
+
 void
 PictureIconWindow(PagerWindow *t)
 {
@@ -1646,16 +1647,16 @@ PictureIconWindow(PagerWindow *t)
 				iconX = 0;
 			if (t->icon_view_height > t->mini_icon.height)
 				iconY = (t->icon_view_height -
-				            t->mini_icon.height) /
-				        2;
+				    t->mini_icon.height) /
+				    2;
 			else if (t->icon_view_height < t->mini_icon.height)
 				iconY = -((t->mini_icon.height -
-				              t->icon_view_height) /
-				          2);
+				    t->icon_view_height) /
+				    2);
 			else
 				iconY = 0;
 			Globalgcm = GCForeground | GCBackground | GCClipMask |
-			            GCClipXOrigin | GCClipYOrigin;
+			    GCClipXOrigin | GCClipYOrigin;
 			Globalgcv.clip_mask = t->mini_icon.mask;
 			Globalgcv.clip_x_origin = iconX;
 			Globalgcv.clip_y_origin = iconY;
@@ -1693,7 +1694,7 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 	n1 = (Scr.Vx + t->x) / Scr.MyDisplayWidth;
 	m1 = (Scr.Vy + t->y) / Scr.MyDisplayHeight;
 	wx = (Scr.Vx + t->x) * (icon_w - n) / (Scr.VxMax + Scr.MyDisplayWidth) +
-	     n1;
+	    n1;
 	wy =
 	    (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
@@ -1750,13 +1751,13 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 		x = x - x1;
 		y = y - y1;
 		n1 = x * (Scr.VxMax + Scr.MyDisplayWidth) /
-		     (icon_w * Scr.MyDisplayWidth);
+		    (icon_w * Scr.MyDisplayWidth);
 		m1 = y * (Scr.VyMax + Scr.MyDisplayHeight) /
-		     (icon_h * Scr.MyDisplayHeight);
+		    (icon_h * Scr.MyDisplayHeight);
 		x = (x - n1) * (Scr.VxMax + Scr.MyDisplayWidth) / (icon_w - n) -
 		    Scr.Vx;
 		y = (y - m1) * (Scr.VyMax + Scr.MyDisplayHeight) /
-		        (icon_h - m) -
+		    (icon_h - m) -
 		    Scr.Vy;
 
 		if (((t->flags & ICONIFIED) && (t->flags & StickyIcon)) ||
@@ -1858,9 +1859,9 @@ MapBalloonWindow(XEvent *event)
 
 	/* too close to right */
 	else if (window_changes.x + window_changes.width >
-	         Scr.MyDisplayWidth - (2 * balloon.border) - 2)
+	    Scr.MyDisplayWidth - (2 * balloon.border) - 2)
 		window_changes.x = Scr.MyDisplayWidth - window_changes.width -
-		                   (2 * balloon.border) - 2;
+		    (2 * balloon.border) - 2;
 
 	/* too close to top ... make yoffset +ve */
 	if (window_changes.y < 2) {
@@ -1871,7 +1872,7 @@ MapBalloonWindow(XEvent *event)
 
 	/* too close to bottom ... make yoffset -ve */
 	else if (window_changes.y + balloon.height >
-	         Scr.MyDisplayHeight - (2 * balloon.border) - 2) {
+	    Scr.MyDisplayHeight - (2 * balloon.border) - 2) {
 		y = -balloon.yoffset - balloon.height - (2 * balloon.border);
 		XTranslateCoordinates(dpy, view, Scr.Root, x, y,
 		    &window_changes.x, &window_changes.y, &dummy);

@@ -37,8 +37,8 @@ IsClick(int x, int y, long EndMask, XEvent *d)
 	t0 = lastTimestamp;
 
 	while ((total < Scr.ClickTime) && (x - xcurrent < 3) &&
-	       (x - xcurrent > -3) && (y - ycurrent < 3) &&
-	       (y - ycurrent > -3) && ((lastTimestamp - t0) < Scr.ClickTime)) {
+	    (x - xcurrent > -3) && (y - ycurrent < 3) &&
+	    (y - ycurrent > -3) && ((lastTimestamp - t0) < Scr.ClickTime)) {
 		usleep(20000);
 		total += 20;
 		if (XCheckMaskEvent(dpy, EndMask, d)) {
@@ -46,7 +46,7 @@ IsClick(int x, int y, long EndMask, XEvent *d)
 			return True;
 		}
 		if (XCheckMaskEvent(
-		        dpy, ButtonMotionMask | PointerMotionMask, d)) {
+		    dpy, ButtonMotionMask | PointerMotionMask, d)) {
 			xcurrent = d->xmotion.x_root;
 			ycurrent = d->xmotion.y_root;
 			StashEventTime(d);
@@ -132,7 +132,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	 * a window to operate on */
 	if (NeedsTarget) {
 		if (DeferExecution(
-		        eventp, &w, &tmp_win, &context, SELECT, ButtonPress)) {
+		    eventp, &w, &tmp_win, &context, SELECT, ButtonPress)) {
 			WaitForButtonsUp();
 			for (i = 0; i < 10; i++)
 				if (arguments[i] != NULL)

@@ -397,7 +397,7 @@ MkDef(const char *name, const char *def)
 		char *tmp = realloc(cp, needed);
 		if (tmp == NULL) {
 			perror("MkDef can't allocate enough space for a macro "
-			       "definition");
+			    "definition");
 			free(cp);
 			exit(0377);
 		}
@@ -406,8 +406,8 @@ MkDef(const char *name, const char *def)
 	}
 
 	if (snprintf(cp, maxsize, "%s(%s,%s%s%s%s%s)%sdnl\n", prefix, name,
-	        m4_startquote, m4_startquote, def, m4_endquote, m4_endquote,
-	        suffix) < 0) {
+	    m4_startquote, m4_startquote, def, m4_endquote, m4_endquote,
+	    suffix) < 0) {
 		perror("MkDef failed to build macro definition");
 		exit(0377);
 	}

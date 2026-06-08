@@ -1,4 +1,3 @@
-
 /****************************************************************************
  * This module is all original code
  * by Rob Nation
@@ -367,8 +366,8 @@ main(int argc, char **argv)
 	XSetIOErrorHandler(CatchFatal);
 	XSelectInput(dpy, Scr.Root,
 	    LeaveWindowMask | EnterWindowMask | PropertyChangeMask |
-	        SubstructureRedirectMask | KeyPressMask |
-	        SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask);
+	    SubstructureRedirectMask | KeyPressMask |
+	    SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask);
 	XSync(dpy, 0);
 
 	XSetErrorHandler(FvwmErrorHandler);
@@ -415,7 +414,7 @@ main(int argc, char **argv)
 	attributes.override_redirect = True;
 	Scr.NoFocusWin =
 	    XCreateWindow(dpy, Scr.Root, -10, -10, 10, 10, 0, 0, InputOnly,
-	        CopyFromParent, CWEventMask | CWOverrideRedirect, &attributes);
+	    CopyFromParent, CWEventMask | CWOverrideRedirect, &attributes);
 	XMapWindow(dpy, Scr.NoFocusWin);
 
 	SetMWM_INFO(Scr.NoFocusWin);
@@ -554,8 +553,7 @@ CaptureAllWindows(void)
 
 	PPosOverride = True;
 
-	if (!(Scr.flags & WindowsCaptured)) /* initial capture? */
-	{
+	if (!(Scr.flags & WindowsCaptured)) { /* initial capture? */
 		/*
 		** weed out icon windows
 		*/
@@ -569,7 +567,7 @@ CaptureAllWindows(void)
 						    j++) {
 							if (children[j] ==
 							    wmhintsp
-							        ->icon_window) {
+							    ->icon_window) {
 								children[j] =
 								    None;
 								break;
@@ -591,18 +589,17 @@ CaptureAllWindows(void)
 			}
 		}
 		Scr.flags |= WindowsCaptured;
-	} else /* must be recapture */
-	{
+	} else /* must be recapture */ {
 		/* reborder all windows */
 		tmp = Scr.FvwmRoot.next;
 		for (i = 0; i < nchildren; i++) {
 			if (XFindContext(dpy, children[i], FvwmContext,
-			        (caddr_t *)&tmp) != XCNOENT) {
+			    (caddr_t *)&tmp) != XCNOENT) {
 				isIconicState = DontCareState;
 				if (XGetWindowProperty(dpy, tmp->w,
-				        _XA_WM_STATE, 0L, 3L, False,
-				        _XA_WM_STATE, &atype, &aformat, &nitems,
-				        &bytes_remain, &prop) == Success) {
+				    _XA_WM_STATE, 0L, 3L, False,
+				    _XA_WM_STATE, &atype, &aformat, &nitems,
+				    &bytes_remain, &prop) == Success) {
 					if (prop != NULL) {
 						isIconicState = *(long *)prop;
 						XFree(prop);
@@ -650,17 +647,17 @@ SetRCDefaults()
 {
 	/* set up default colors, fonts, etc */
 	char *defaults[] = {"HilightColor black grey", "XORValue 0",
-	    "DefaultFont fixed", "DefaultColors black grey",
-	    "MenuStyle * fvwm, Foreground black, Background grey, Greyed "
-	    "slategrey",
-	    "TitleStyle Centered -- Raised",
-	    "Style \"*\" Color lightgrey/dimgrey, Title",
-	    "Style \"*\" RandomPlacement, SmartPlacement",
-	    "AddToMenu builtin_menu \"Builtin Menu\" Title",
-	    "+ \"Exit FVWM\" Quit", "Mouse 1 R N Popup builtin_menu",
-	    "AddToFunc WindowListFunc \"I\" WindowId $0 Iconify -1",
-	    "+ \"I\" WindowId $0 FlipFocus", "+ \"I\" WindowId $0 Raise",
-	    "+ \"I\" WindowId $0 WarpToWindow 5p 5p", NULL};
+		"DefaultFont fixed", "DefaultColors black grey",
+		"MenuStyle * fvwm, Foreground black, Background grey, Greyed "
+		"slategrey",
+		"TitleStyle Centered -- Raised",
+		"Style \"*\" Color lightgrey/dimgrey, Title",
+		"Style \"*\" RandomPlacement, SmartPlacement",
+		"AddToMenu builtin_menu \"Builtin Menu\" Title",
+		"+ \"Exit FVWM\" Quit", "Mouse 1 R N Popup builtin_menu",
+		"AddToFunc WindowListFunc \"I\" WindowId $0 Iconify -1",
+		"+ \"I\" WindowId $0 FlipFocus", "+ \"I\" WindowId $0 Raise",
+		"+ \"I\" WindowId $0 WarpToWindow 5p 5p", NULL};
 	int i = 0;
 
 	while (defaults[i]) {
@@ -699,8 +696,8 @@ MappedNotOverride(Window w)
 		return False;
 
 	if (XGetWindowProperty(dpy, w, _XA_WM_STATE, 0L, 3L, False,
-	        _XA_WM_STATE, &atype, &aformat, &nitems, &bytes_remain,
-	        &prop) == Success) {
+	    _XA_WM_STATE, &atype, &aformat, &nitems, &bytes_remain,
+	    &prop) == Success) {
 		if (prop != NULL) {
 			isIconicState = *(long *)prop;
 			XFree(prop);
@@ -1295,8 +1292,8 @@ InitVariables(void)
 
 		Scr.CurrentDesk = 0;
 		if ((XGetWindowProperty(dpy, Scr.Root, _XA_WM_DESKTOP, 0L, 1L,
-		        True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
-		        &bytes_remain, &prop)) == Success) {
+		    True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
+		    &bytes_remain, &prop)) == Success) {
 			if (prop != NULL) {
 				Restarting = True;
 				Scr.CurrentDesk = *(unsigned long *)prop;
@@ -1578,7 +1575,7 @@ BlackoutScreen()
 		attributes.override_redirect =
 		    True; /* is override redirect needed? */
 		valuemask = CWBorderPixel | CWBackPixel | CWBitGravity |
-		            CWOverrideRedirect;
+		    CWOverrideRedirect;
 		BlackoutWin = XCreateWindow(dpy, Scr.Root, 0, 0,
 		    DisplayWidth(dpy, Scr.screen),
 		    DisplayHeight(dpy, Scr.screen), 0, CopyFromParent,

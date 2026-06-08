@@ -44,19 +44,19 @@ typedef struct {
  * these are now sorted so we can use bsearch on them.
  */
 FunctionType builtin_functions[] = {
-    {"bif", builtin_bif, 2, {ButtonArg, JmpArg}},
-    {"bifn", builtin_bifn, 2, {ButtonArg, JmpArg}},
-    {"gotobutton", builtin_gotobutton, 1, {ButtonArg}},
-    {"gotomanager", builtin_gotomanager, 1, {ManagerArg}},
-    {"jmp", builtin_jmp, 1, {JmpArg}}, {"label", builtin_label, 1, {StringArg}},
-    {"print", builtin_print, 1, {StringArg}},
-    {"printdebug", builtin_printdebug, 0}, {"quit", builtin_quit, 0},
-    {"refresh", builtin_refresh, 0}, {"ret", builtin_ret, 0},
-    {"searchback", builtin_searchback, 1, {StringArg}},
-    {"searchforward", builtin_searchforward, 1, {StringArg}},
-    {"select", builtin_select, 0},
-    {"sendcommand", builtin_sendcommand, 1, {StringArg}},
-    {"warp", builtin_warp, 0}};
+	{"bif", builtin_bif, 2, {ButtonArg, JmpArg}},
+	{"bifn", builtin_bifn, 2, {ButtonArg, JmpArg}},
+	{"gotobutton", builtin_gotobutton, 1, {ButtonArg}},
+	{"gotomanager", builtin_gotomanager, 1, {ManagerArg}},
+	{"jmp", builtin_jmp, 1, {JmpArg}}, {"label", builtin_label, 1, {StringArg}},
+	{"print", builtin_print, 1, {StringArg}},
+	{"printdebug", builtin_printdebug, 0}, {"quit", builtin_quit, 0},
+	{"refresh", builtin_refresh, 0}, {"ret", builtin_ret, 0},
+	{"searchback", builtin_searchback, 1, {StringArg}},
+	{"searchforward", builtin_searchforward, 1, {StringArg}},
+	{"select", builtin_select, 0},
+	{"sendcommand", builtin_sendcommand, 1, {StringArg}},
+	{"warp", builtin_warp, 0}};
 
 static int num_builtins = sizeof(builtin_functions) / sizeof(FunctionType);
 
@@ -68,8 +68,8 @@ struct charstring {
 };
 
 struct charstring key_modifiers[] = {{'s', ShiftMask}, {'c', ControlMask},
-    {'m', Mod1Mask}, {'1', Mod1Mask}, {'2', Mod2Mask}, {'3', Mod3Mask},
-    {'4', Mod4Mask}, {'5', Mod5Mask}, {'a', AnyModifier}, {'n', 0}, {0, 0}};
+	{'m', Mod1Mask}, {'1', Mod1Mask}, {'2', Mod2Mask}, {'3', Mod3Mask},
+	{'4', Mod4Mask}, {'5', Mod5Mask}, {'a', AnyModifier}, {'n', 0}, {0, 0}};
 
 #if FVWM_VERSION == 1
 static FILE *config_fp = NULL;
@@ -476,7 +476,7 @@ parse_function(char **line, char *pstop_char)
 					return NULL;
 				}
 				if (extract_int(tok,
-				        &ftype->args[j].value.int_value) == 0) {
+				    &ftype->args[j].value.int_value) == 0) {
 					ConsoleMessage(
 					    "%s: expect integer argument: %s\n",
 					    builtin_functions_i->name, tok);
@@ -545,7 +545,7 @@ parse_function(char **line, char *pstop_char)
 					return NULL;
 				}
 				if (extract_int(tok,
-				        &ftype->args[j].value.int_value) == 0) {
+				    &ftype->args[j].value.int_value) == 0) {
 					ftype->args[j].value.string_value = tok;
 					ftype->args[j].type = JmpArg;
 					++JmpArgs;
@@ -610,11 +610,11 @@ parse_function_list(char *line)
 					if (i->args[j].type == JmpArg) {
 						/* we have a winner! */
 						if (!strcasecmp(
-						        f->args[0]
-						            .value.string_value,
-						        i->args[j]
-						            .value
-						            .string_value)) {
+						    f->args[0]
+						    .value.string_value,
+						    i->args[j]
+						    .value
+						    .string_value)) {
 							/* the label matches it,
 							 * so replace with the
 							 * jump_count */
@@ -738,7 +738,7 @@ static Binding *
 ParseKeyEntry(char *tline)
 {
 	char *action, modifiers[20], key[20], *ptr, *token, *actionstring,
-	    *keystring;
+	     *keystring;
 	Binding *new = NULL, *temp, *last = NULL;
 	Function *func = NULL;
 	int i, min, max;
@@ -1058,19 +1058,19 @@ parse_format_dependencies(char *format)
 	return flags;
 }
 
-#define SET_MANAGER(manager, field, value)                                     \
-	do {                                                                   \
-		int id = manager;                                              \
-		if (id == -1) {                                                \
-			for (id = 0; id < globals.num_managers; id++) {        \
-				globals.managers[id].field = value;            \
-			}                                                      \
-		} else if (id < globals.num_managers) {                        \
-			globals.managers[id].field = value;                    \
-		} else {                                                       \
-			ConsoleMessage(                                        \
-			    "Internal error in SET_MANAGER: %d\n", id);        \
-		}                                                              \
+#define SET_MANAGER(manager, field, value)				\
+	do {								\
+		int id = manager;					\
+		if (id == -1) {						\
+			for (id = 0; id < globals.num_managers; id++) {	\
+				globals.managers[id].field = value;	\
+			}						\
+		} else if (id < globals.num_managers) {			\
+			globals.managers[id].field = value;		\
+		} else {						\
+			ConsoleMessage(					\
+			    "Internal error in SET_MANAGER: %d\n", id);	\
+		}							\
 	} while (0)
 
 static void
@@ -1197,7 +1197,7 @@ read_in_resources(char *file)
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
 					ConsoleMessage("This is not a valid "
-					               "manager: %s.\n",
+					    "manager: %s.\n",
 					    option1);
 					manager = 0;
 				}
@@ -1249,7 +1249,7 @@ read_in_resources(char *file)
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
 					ConsoleMessage("This isn't a valid "
-					               "action name: %s\n",
+					    "action name: %s\n",
 					    p);
 					continue;
 				}
@@ -1289,13 +1289,13 @@ read_in_resources(char *file)
 					    j++) {
 						add_to_binding(
 						    &globals.managers[j]
-						        .bindings[i],
+						    .bindings[i],
 						    binding);
 					}
 				} else if (manager < globals.num_managers) {
 					add_to_binding(
 					    &globals.managers[manager]
-					        .bindings[i],
+					    .bindings[i],
 					    binding);
 				} else {
 					ConsoleMessage(
@@ -1316,9 +1316,9 @@ read_in_resources(char *file)
 				for (i = 0; i < NUM_CONTEXTS; i++)
 					SET_MANAGER(manager, backColorName[i],
 					    conditional_copy_string(
-					        &globals.managers[id]
-					            .backColorName[i],
-					        p));
+					    &globals.managers[id]
+					    .backColorName[i],
+					    p));
 			} else if (!strcasecmp(option1, "buttongeometry")) {
 				p = read_next_cmd(READ_ARG);
 				if (!p) {
@@ -1329,8 +1329,8 @@ read_in_resources(char *file)
 
 				SET_MANAGER(manager, button_geometry_str,
 				    copy_string(&globals.managers[id]
-				                    .button_geometry_str,
-				        p));
+				    .button_geometry_str,
+				    p));
 			} else if (!strcasecmp(option1, "dontshow")) {
 				char *token = NULL;
 				p = read_next_cmd(READ_REST_OF_LINE);
@@ -1355,12 +1355,12 @@ read_in_resources(char *file)
 						    i++)
 							add_to_stringlist(
 							    &globals.managers[i]
-							        .dontshow,
+							    .dontshow,
 							    token);
 					} else {
 						add_to_stringlist(
 						    &globals.managers[manager]
-						        .dontshow,
+						    .dontshow,
 						    token);
 					}
 					Free(token);
@@ -1436,7 +1436,7 @@ read_in_resources(char *file)
 
 				SET_MANAGER(manager, fontname,
 				    copy_string(
-				        &globals.managers[id].fontname, p));
+				    &globals.managers[id].fontname, p));
 			} else if (!strcasecmp(option1, "foreground")) {
 				p = read_next_cmd(READ_ARG);
 				if (!p) {
@@ -1450,9 +1450,9 @@ read_in_resources(char *file)
 				for (i = 0; i < NUM_CONTEXTS; i++)
 					SET_MANAGER(manager, foreColorName[i],
 					    conditional_copy_string(
-					        &globals.managers[id]
-					            .foreColorName[i],
-					        p));
+					    &globals.managers[id]
+					    .foreColorName[i],
+					    p));
 			} else if (!strcasecmp(option1, "format")) {
 				char *token;
 				NameType flags;
@@ -1471,8 +1471,8 @@ read_in_resources(char *file)
 
 				SET_MANAGER(manager, formatstring,
 				    copy_string(
-				        &globals.managers[id].formatstring,
-				        token));
+				    &globals.managers[id].formatstring,
+				    token));
 				flags = parse_format_dependencies(token);
 				SET_MANAGER(manager, format_depend, flags);
 				Free(token);
@@ -1480,7 +1480,7 @@ read_in_resources(char *file)
 				ConsoleMessage(
 				    "Geometry option no longer supported.\n");
 				ConsoleMessage("Use ManagerGeometry and "
-				               "ButtonGeometry.\n");
+				    "ButtonGeometry.\n");
 			} else if (!strcasecmp(option1, "iconname")) {
 				char *token;
 				p = read_next_cmd(READ_REST_OF_LINE);
@@ -1497,7 +1497,7 @@ read_in_resources(char *file)
 
 				SET_MANAGER(manager, iconname,
 				    copy_string(
-				        &globals.managers[id].iconname, token));
+				    &globals.managers[id].iconname, token));
 				Free(token);
 			} else if (!strcasecmp(option1, "managergeometry")) {
 				p = read_next_cmd(READ_ARG);
@@ -1509,7 +1509,7 @@ read_in_resources(char *file)
 
 				SET_MANAGER(manager, geometry_str,
 				    copy_string(
-				        &globals.managers[id].geometry_str, p));
+				    &globals.managers[id].geometry_str, p));
 			} else if (!strcasecmp(option1, "resolution")) {
 				p = read_next_cmd(READ_ARG);
 				if (!p) {
@@ -1528,7 +1528,7 @@ read_in_resources(char *file)
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
 					ConsoleMessage("What kind of "
-					               "resolution is this?\n");
+					    "resolution is this?\n");
 					continue;
 				}
 
@@ -1585,12 +1585,12 @@ read_in_resources(char *file)
 						    i++)
 							add_to_stringlist(
 							    &globals.managers[i]
-							        .show,
+							    .show,
 							    token);
 					} else {
 						add_to_stringlist(
 						    &globals.managers[manager]
-						        .show,
+						    .show,
 						    token);
 					}
 					Free(token);
@@ -1602,7 +1602,7 @@ read_in_resources(char *file)
 			} else if (!strcasecmp(option1, "showtitle")) {
 				ConsoleMessage("Bad line: %s\n", current_line);
 				ConsoleMessage("showtitle is no longer an "
-				               "option. Use format\n");
+				    "option. Use format\n");
 				continue;
 			} else if (!strcasecmp(option1, "sort")) {
 				p = read_next_cmd(READ_ARG);
@@ -1622,7 +1622,7 @@ read_in_resources(char *file)
 				} else if (!strcasecmp(p, "none")) {
 					i = SortNone;
 				} else if (!strcasecmp(p, "false") ||
-				           !strcasecmp(p, "true")) {
+				    !strcasecmp(p, "true")) {
 					/* Old options */
 					ConsoleMessage(
 					    "FvwmIconMan*sort option no longer "
@@ -1656,7 +1656,7 @@ read_in_resources(char *file)
 
 				SET_MANAGER(manager, titlename,
 				    copy_string(&globals.managers[id].titlename,
-				        token));
+				    token));
 				Free(token);
 			} else if (!strcasecmp(option1, "plainButton")) {
 				handle_button_config(
@@ -1668,7 +1668,7 @@ read_in_resources(char *file)
 				handle_button_config(
 				    manager, FOCUS_CONTEXT, option1);
 			} else if (!strcasecmp(
-			               option1, "focusandselectButton")) {
+			    option1, "focusandselectButton")) {
 				handle_button_config(
 				    manager, FOCUS_SELECT_CONTEXT, option1);
 			} else if (!strcasecmp(option1, "titlebutton")) {

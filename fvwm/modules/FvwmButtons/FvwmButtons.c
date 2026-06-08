@@ -56,20 +56,20 @@
 #include "misc.h"  /* ConstrainSize() */
 #include "parse.h" /* ParseOptions() */
 
-#define MW_EVENTS                                                              \
-	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
+#define MW_EVENTS							\
+	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |	\
 	    ButtonPressMask | KeyReleaseMask | KeyPressMask)
 /* SW_EVENTS are for swallowed windows... */
-#define SW_EVENTS                                                              \
-	(PropertyChangeMask | StructureNotifyMask | ResizeRedirectMask |       \
+#define SW_EVENTS							\
+	(PropertyChangeMask | StructureNotifyMask | ResizeRedirectMask |\
 	    SubstructureNotifyMask)
 
 #ifdef DEBUG_FVWM
-#define MySendText(a, b, c)                                                    \
-	{                                                                      \
-		fprintf(stderr, "%s: Sending text to fvwm: \"%s\"\n", MyName,  \
-		    (b));                                                      \
-		SendText((a), (b), (c));                                       \
+#define MySendText(a, b, c)						\
+	{								\
+		fprintf(stderr, "%s: Sending text to fvwm: \"%s\"\n", MyName,\
+		    (b));						\
+		SendText((a), (b), (c));				\
 	}
 #else
 #define MySendText(a, b, c) SendText((a), (b), (c));
@@ -169,11 +169,12 @@ DestroyedWindow(Display *d, XEvent *e, char *a)
 {
 	if (e->xany.window == (Window)a)
 		if ((e->type == DestroyNotify &&
-		        e->xdestroywindow.window == (Window)a) ||
+		    e->xdestroywindow.window == (Window)a) ||
 		    (e->type == UnmapNotify && e->xunmap.window == (Window)a))
 			return True;
 	return False;
 }
+
 int
 IsThereADestroyEvent(button_info *b)
 {
@@ -225,7 +226,7 @@ DeadPipeCleanup(void)
 			    MyName, (ushort)b, (ushort)b->IconWin, b->hangon);
 #endif
 			if (!IsThereADestroyEvent(
-			        b)) { /* Has someone destroyed it? */
+			    b)) { /* Has someone destroyed it? */
 				if (!(buttonSwallow(b) & b_NoClose)) {
 					if (buttonSwallow(b) & b_Kill) {
 						XKillClient(Dpy, b->IconWin);
@@ -535,14 +536,12 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	if (argc > 6) /* There is a naming argument here! */
-	{
+	if (argc > 6) { /* There is a naming argument here! */
 		free(MyName);
 		MyName = strdup(argv[6]);
 	}
 
-	if (argc > 7) /* There is a config file here! */
-	{
+	if (argc > 7) { /* There is a config file here! */
 		config_file = strdup(argv[7]);
 	}
 
@@ -685,8 +684,8 @@ main(int argc, char **argv)
 	XMapWindow(Dpy, MyWindow);
 
 	SetMessageMask(fd, M_NEW_DESK | M_END_WINDOWLIST | M_MAP |
-	                       M_WINDOW_NAME | M_RES_CLASS | M_CONFIG_INFO |
-	                       M_END_CONFIG_INFO | M_RES_NAME);
+	    M_WINDOW_NAME | M_RES_CLASS | M_CONFIG_INFO |
+	    M_END_CONFIG_INFO | M_RES_NAME);
 
 	/* request a window list, since this triggers a response which
 	 * will tell us the current desktop and paging status, needed to
@@ -731,8 +730,8 @@ Loop(void)
 			case Expose:
 				PanelIndex = MainPanel;
 				while (PanelIndex &&
-				       (PanelIndex->uber->IconWinParent !=
-				           Event.xany.window))
+				    (PanelIndex->uber->IconWinParent !=
+				     Event.xany.window))
 					PanelIndex = PanelIndex->next;
 				if (PanelIndex) {
 					UberButton = PanelIndex->uber;
@@ -744,8 +743,8 @@ Loop(void)
 				if (Event.xexpose.count == 0) {
 					button = -1;
 					ub = UberButton;
-					while (
-					    NextButton(&ub, &b, &button, 1)) {
+					while (NextButton(&ub, &b, &button,
+					    1)) {
 						if (!ready &&
 						    !(b->flags & b_Container))
 							MakeButton(b);
@@ -765,8 +764,8 @@ Loop(void)
 				if (Event.xexpose.count == 0) {
 					button = -1;
 					ub = UberButton;
-					while (
-					    NextButton(&ub, &b, &button, 1)) {
+					while (NextButton(&ub, &b, &button,
+					    1)) {
 						if (b->flags & b_Container) {
 							x = buttonXPos(
 							    b, buttonNum(b));
@@ -779,13 +778,13 @@ Loop(void)
 							    b, button);
 						}
 						if (!(ex > x + buttonWidth(b) ||
-						        ex2 < x ||
-						        ey > y + buttonHeight(
-						                     b) ||
-						        ey2 < y)) {
+						    ex2 < x ||
+						    ey > y + buttonHeight(
+						    b) ||
+						    ey2 < y)) {
 							if (ready < 1 &&
 							    !(b->flags &
-							        b_Container))
+							    b_Container))
 								MakeButton(b);
 							RedrawButton(b, 1);
 						}
@@ -812,7 +811,8 @@ Loop(void)
 				        while(NextButton(&ub,&b,&button,0))
 				          MakeButton(b);
 				        RedrawWindow(NULL);
-				      } */ /* I don't like to change its size after it started */
+				      } */
+/* I don't like to change its size after it started */
 				break;
 
 			case KeyPress:
@@ -827,9 +827,8 @@ Loop(void)
 				b = NULL;
 				do
 					if (PanelIndex->uber
-					        ->swallow) /* is the panel
+					    ->swallow) { /* is the panel
 					                      shown? */
-					{
 						UberButton = PanelIndex->uber;
 						MyWindow =
 						    UberButton->IconWinParent;
@@ -837,19 +836,19 @@ Loop(void)
 						    MyWindow)
 							CurrentButton = b =
 							    select_button(
-							        UberButton,
-							        Event.xbutton.x,
-							        Event.xbutton
-							            .y);
+							    UberButton,
+							    Event.xbutton.x,
+							    Event.xbutton
+							    .y);
 					}
 				while (!b && PanelIndex->next &&
-				       (PanelIndex = PanelIndex->next));
+				    (PanelIndex = PanelIndex->next));
 
 				if (!b || !(b->flags & b_Action) ||
 				    ((act = GetButtonAction(
-				          b, Event.xbutton.button)) == NULL &&
-				        (act = GetButtonAction(b, 0)) ==
-				            NULL)) {
+				      b, Event.xbutton.button)) == NULL &&
+				     (act = GetButtonAction(b, 0)) ==
+				     NULL)) {
 					CurrentButton = NULL;
 					break;
 				}
@@ -887,7 +886,7 @@ Loop(void)
 				} while (!b && (PanelIndex = PanelIndex->next));
 
 				if (!(act = GetButtonAction(
-				          b, Event.xbutton.button)))
+				    b, Event.xbutton.button)))
 					act = GetButtonAction(b, 0);
 				if (b && b == CurrentButton && act) {
 					if (strncasecmp(act, "Exec", 4) == 0) {
@@ -902,13 +901,13 @@ Loop(void)
 						   materializes */
 						i = 4;
 						while (act[i] != 0 &&
-						       act[i] != '"' &&
-						       isspace(act[i]))
+						    act[i] != '"' &&
+						    isspace(act[i]))
 							i++;
 						if (act[i] == '"') {
 							i2 = i + 1;
 							while (act[i2] != 0 &&
-							       act[i2] != '"')
+							    act[i2] != '"')
 								i2++;
 
 							if (i2 - i > 1) {
@@ -916,14 +915,14 @@ Loop(void)
 								    b_Hangon;
 								b->hangon =
 								    mymalloc(
-								        i2 - i);
+								    i2 - i);
 								strncpy(
 								    b->hangon,
 								    &act[i + 1],
 								    i2 - i - 1);
 								b->hangon[i2 -
-								          i -
-								          1] =
+								    i -
+								    1] =
 								    0;
 							}
 							i2++;
@@ -938,7 +937,7 @@ Loop(void)
 							strlcpy(tmp, "Exec ",
 							    tmp_len);
 							while (act[i2] != 0 &&
-							       isspace(act[i2]))
+							    isspace(act[i2]))
 								i2++;
 							strlcat(tmp, &act[i2],
 							    tmp_len);
@@ -946,10 +945,10 @@ Loop(void)
 							free(tmp);
 						}
 					} else if (strncasecmp(act,
-					               "DumpButtons", 11) == 0)
+					    "DumpButtons", 11) == 0)
 						DumpButtons(UberButton);
 					else if (strncasecmp(act, "SaveButtons",
-					             11) == 0)
+					    11) == 0)
 						SaveButtons(UberButton);
 					else if (strncasecmp(act, "panel", 5))
 						MySendText(fd, act, 0);
@@ -994,9 +993,9 @@ Loop(void)
 					if ((buttonSwallowCount(b) == 3) &&
 					    Event.xany.window == b->IconWin) {
 						if (Event.xproperty.atom ==
-						        XA_WM_NAME &&
+						    XA_WM_NAME &&
 						    buttonSwallow(b) &
-						        b_UseTitle) {
+						    b_UseTitle) {
 							if (b->flags & b_Title)
 								free(b->title);
 							b->flags |= b_Title;
@@ -1006,16 +1005,15 @@ Loop(void)
 							    &b->title, tmp);
 							XFree(tmp);
 							MakeButton(b);
-						} else if (
-						    (Event.xproperty.atom ==
-						        XA_WM_NORMAL_HINTS) &&
+						} else if ((Event.xproperty.atom ==
+						    XA_WM_NORMAL_HINTS) &&
 						    (!(buttonSwallow(b) &
-						        b_NoHints))) {
+						     b_NoHints))) {
 							long supp;
 							if (!XGetWMNormalHints(
-							        Dpy, b->IconWin,
-							        b->hints,
-							        &supp))
+							    Dpy, b->IconWin,
+							    b->hints,
+							    &supp))
 								b->hints
 								    ->flags = 0;
 							MakeButton(b);
@@ -1043,7 +1041,7 @@ Loop(void)
 						b->swallow &= ~b_Count;
 						b->IconWin = None;
 						if (buttonSwallow(b) &
-						        b_Respawn &&
+						    b_Respawn &&
 						    b->hangon && b->spawn) {
 #ifdef DEBUG_HANGON
 							fprintf(stderr,
@@ -1051,7 +1049,7 @@ Loop(void)
 #endif
 							b->swallow |= 1;
 							b->flags |= b_Swallow |
-							            b_Hangon;
+							    b_Hangon;
 							MySendText(
 							    fd, b->spawn, 0);
 						} else {
@@ -1159,7 +1157,7 @@ RecursiveLoadData(button_info *b, int *maxx, int *maxy)
 			if (b->c->flags & b_IconBack &&
 			    !(b->c->flags & b_TransBack)) {
 				if (!LoadIconFile(
-				        b->c->back_file, &b->c->backicon))
+				    b->c->back_file, &b->c->backicon))
 					b->c->flags &= ~b_IconBack;
 			}
 
@@ -1195,12 +1193,12 @@ RecursiveLoadData(button_info *b, int *maxx, int *maxy)
 		if (strncasecmp(b->c->font_string, "none", 4) == 0)
 			b->c->font = NULL;
 		else if (!(b->c->font =
-		                 XLoadQueryFont(Dpy, b->c->font_string))) {
+		    XLoadQueryFont(Dpy, b->c->font_string))) {
 			fprintf(stderr, "%s: Couldn't load font %s\n", MyName,
 			    b->c->font_string);
 			if (b == UberButton) {
 				if (!(b->c->font =
-				            XLoadQueryFont(Dpy, "fixed")))
+				    XLoadQueryFont(Dpy, "fixed")))
 					fprintf(stderr,
 					    "%s: Couldn't load font fixed\n",
 					    MyName);
@@ -1252,7 +1250,7 @@ RecursiveLoadData(button_info *b, int *maxx, int *maxy)
 #endif
 		if (buttonJustify(b) & b_Horizontal) {
 			i += buttonXPad(b) +
-			     XTextWidth(font, b->title, strlen(b->title));
+			    XTextWidth(font, b->title, strlen(b->title));
 			j = max(j, font->ascent + font->descent);
 		} else {
 			i = max(
@@ -1347,8 +1345,7 @@ CreateWindow(button_info *ub, int maxx, int maxy)
 	mysizehints.base_height += ub->c->num_rows * 2;
 	mysizehints.base_width += ub->c->num_columns * 2;
 
-	if (req_w > -1 || req_h > -1) /* from geometry */
-	{
+	if (req_w > -1 || req_h > -1) { /* from geometry */
 #ifdef DEBUG_INIT
 		fprintf(stderr, "constraining (w=%i,h=%i)...", req_w, req_h);
 #endif
@@ -1448,9 +1445,9 @@ CreateWindow(button_info *ub, int maxx, int maxy)
 	{
 		XTextProperty mynametext;
 		char *list[] = {NULL, NULL};
-		list[0] = (CurrentPanel == MainPanel)
-		              ? MyName
-		              : CurrentPanel->uber->title;
+		list[0] = (CurrentPanel == MainPanel) ?
+		    MyName :
+		    CurrentPanel->uber->title;
 		if (!XStringListToTextProperty(list, 1, &mynametext)) {
 			fprintf(stderr, "%s: Failed to convert name to XText\n",
 			    MyName);
@@ -1558,15 +1555,15 @@ void
 DebugEvents(XEvent *event)
 {
 	char *event_names[] = {NULL, NULL, "KeyPress", "KeyRelease",
-	    "ButtonPress", "ButtonRelease", "MotionNotify", "EnterNotify",
-	    "LeaveNotify", "FocusIn", "FocusOut", "KeymapNotify", "Expose",
-	    "GraphicsExpose", "NoExpose", "VisibilityNotify", "CreateNotify",
-	    "DestroyNotify", "UnmapNotify", "MapNotify", "MapRequest",
-	    "ReparentNotify", "ConfigureNotify", "ConfigureRequest",
-	    "GravityNotify", "ResizeRequest", "CirculateNotify",
-	    "CirculateRequest", "PropertyNotify", "SelectionClear",
-	    "SelectionRequest", "SelectionNotify", "ColormapNotify",
-	    "ClientMessage", "MappingNotify"};
+		"ButtonPress", "ButtonRelease", "MotionNotify", "EnterNotify",
+		"LeaveNotify", "FocusIn", "FocusOut", "KeymapNotify", "Expose",
+		"GraphicsExpose", "NoExpose", "VisibilityNotify", "CreateNotify",
+		"DestroyNotify", "UnmapNotify", "MapNotify", "MapRequest",
+		"ReparentNotify", "ConfigureNotify", "ConfigureRequest",
+		"GravityNotify", "ResizeRequest", "CirculateNotify",
+		"CirculateRequest", "PropertyNotify", "SelectionClear",
+		"SelectionRequest", "SelectionNotify", "ColormapNotify",
+		"ClientMessage", "MappingNotify"};
 	fprintf(stderr, "%s: Received %s event from window 0x%x\n", MyName,
 	    event_names[event->type], (ushort)event->xany.window);
 }
@@ -1577,12 +1574,12 @@ void
 DebugFvwmEvents(unsigned long type)
 {
 	char *events[] = {"M_NEW_PAGE", "M_NEW_DESK", "M_ADD_WINDOW",
-	    "M_RAISE_WINDOW", "M_LOWER_WINDOW", "M_CONFIGURE_WINDOW",
-	    "M_FOCUS_CHANGE", "M_DESTROY_WINDOW", "M_ICONIFY", "M_DEICONIFY",
-	    "M_WINDOW_NAME", "M_ICON_NAME", "M_RES_CLASS", "M_RES_NAME",
-	    "M_END_WINDOWLIST", "M_ICON_LOCATION", "M_MAP", "M_ERROR",
-	    "M_CONFIG_INFO", "M_END_CONFIG_INFO", "M_ICON_FILE",
-	    "M_DEFAULTICON", NULL};
+		"M_RAISE_WINDOW", "M_LOWER_WINDOW", "M_CONFIGURE_WINDOW",
+		"M_FOCUS_CHANGE", "M_DESTROY_WINDOW", "M_ICONIFY", "M_DEICONIFY",
+		"M_WINDOW_NAME", "M_ICON_NAME", "M_RES_CLASS", "M_RES_NAME",
+		"M_END_WINDOWLIST", "M_ICON_LOCATION", "M_MAP", "M_ERROR",
+		"M_CONFIG_INFO", "M_END_CONFIG_INFO", "M_ICON_FILE",
+		"M_DEFAULTICON", NULL};
 	int i = 0;
 	while (events[i]) {
 		if (type & 1 << i)
@@ -1619,7 +1616,6 @@ My_XNextEvent(Display *Dpy, XEvent *event)
 	FD_SET(fd[1], &in_fdset);
 
 	if (select(fd_width, SELECT_TYPE_ARG234 & in_fdset, 0, 0, NULL) > 0) {
-
 		if (FD_ISSET(x_fd, &in_fdset)) {
 			if (XPending(Dpy)) {
 				XNextEvent(Dpy, event);
@@ -1709,7 +1705,6 @@ process_message(unsigned long type, unsigned long *body)
 		default:
 			break;
 		}
-
 	} while ((PanelIndex = PanelIndex->next));
 }
 
@@ -1741,7 +1736,7 @@ CheckForHangon(unsigned long *body)
 				 * with later... */
 				b->IconWinParent =
 				    GetRealGeometry(Dpy, b->IconWin, &b->x,
-				        &b->y, &b->w, &b->h, &b->bw, &d);
+				    &b->y, &b->w, &b->h, &b->bw, &d);
 
 #ifdef DEBUG_HANGON
 				fprintf(stderr,
@@ -1770,7 +1765,7 @@ CheckForHangon(unsigned long *body)
 			}
 			break;
 		} else if (buttonSwallowCount(b) >= 2 &&
-		           (Window)body[0] == b->IconWin)
+		    (Window)body[0] == b->IconWin)
 			break; /* This window has already been swallowed by
 			          someone else! */
 }
@@ -1833,10 +1828,9 @@ swallow(unsigned long *body)
 #endif
 
 			if (p ==
-			    None) /* This means the window is no more */ /* NO!
+			    None) { /* This means the window is no more */ /* NO!
 			                                                    wrong
 			                                                  */
-			{
 				fprintf(stderr,
 				    "%s: Window 0x%lx (\"%s\") disappeared "
 				    "%s\n",
@@ -1848,9 +1842,8 @@ swallow(unsigned long *body)
 				return;
 			}
 
-			if (p != b->IconWinParent) /* The window has been
+			if (p != b->IconWinParent) { /* The window has been
 			                              reparented */
-			{
 				fprintf(stderr,
 				    "%s: Window 0x%lx (\"%s\") was %s (window "
 				    "0x%lx)\n",

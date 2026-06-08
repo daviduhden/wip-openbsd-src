@@ -288,25 +288,25 @@ main(int argc, char **argv)
 				 * files. */
 			} else if (act == APPND) {
 				if (pledge("stdio rpath wpath getpw tape",
-				        NULL) == -1)
+				    NULL) == -1)
 					err(1, "pledge");
 			} else {
 				if (pledge("stdio rpath wpath cpath fattr "
-				           "dpath getpw tape",
-				        NULL) == -1)
+				    "dpath getpw tape",
+				    NULL) == -1)
 					err(1, "pledge");
 			}
 		} else {
 			if (act == LIST) {
 				if (pledge("stdio rpath getpw proc exec tape",
-				        NULL) == -1)
+				    NULL) == -1)
 					err(1, "pledge");
 				/* can not gzip while appending */
 			} else {
 				if (pledge("stdio rpath wpath cpath fattr "
-				           "dpath getpw proc "
-				           "exec tape",
-				        NULL) == -1)
+				    "dpath getpw proc "
+				    "exec tape",
+				    NULL) == -1)
 					err(1, "pledge");
 			}
 		}

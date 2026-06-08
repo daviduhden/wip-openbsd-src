@@ -39,8 +39,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 	EatWS(p); /* skip leading space */
 	if (*p) {
 		if (IsQuote(*p) ||
-		    IsBlockStart(*p)) /* quoted string or block start? */
-		{
+		    IsBlockStart(*p)) { /* quoted string or block start? */
 			bc = *p; /* save block start char */
 			p++;
 		}
@@ -54,8 +53,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 					be = *p;
 					break;
 				}
-			} else /* normal token */
-			{
+			} else /* normal token */ {
 				if (isspace(*p) || *p == ',')
 					break;
 			}
@@ -69,8 +67,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 		}
 
 		/* sanity checks: */
-		if (bc && !be) /* did we have block start, but not end? */
-		{
+		if (bc && !be) { /* did we have block start, but not end? */
 			/* should yell about this */
 			return NULL;
 		}
@@ -254,23 +251,28 @@ XCmpToken(const void *vs, const void *vt)
 	if (s == NULL)
 		return -1; /* non existant string */
 
-	while (*w && (*s == *w ||
 #ifdef WORD_IS_UPPERCASE
-	                 (isupper((unsigned char)*s) &&
-	                     _toupper((unsigned char)*s) == *w)
-#else
-	                 toupper((unsigned char)*s) ==
-	                     toupper((unsigned char)*w)
-#endif
-	                     ))
+	while (*w &&
+	    (*s == *w ||
+	     (isupper((unsigned char)*s) &&
+	      _toupper((unsigned char)*s) == *w))) {
 		s++, w++;
+	}
+#else
+	while (*w &&
+	    (*s == *w ||
+	     toupper((unsigned char)*s) ==
+	     toupper((unsigned char)*w))) {
+		s++, w++;
+	}
+#endif
 
 	if ((*s == '\0' &&
-	        (ispunct((unsigned char)*w) || isspace((unsigned char)*w))) ||
+	    (ispunct((unsigned char)*w) || isspace((unsigned char)*w))) ||
 	    (*w == '\0' &&
-	        (ispunct((unsigned char)*s) || isspace((unsigned char)*s))))
+	     (ispunct((unsigned char)*s) || isspace((unsigned char)*s))))
 		return 0; /* 1st word equal */
 	else
 		return toupper((unsigned char)*s) -
-		       toupper((unsigned char)*w); /* smaller/greater */
+		    toupper((unsigned char)*w); /* smaller/greater */
 }

@@ -210,6 +210,7 @@ list_new_page(unsigned long *body)
 	Vx = (long)body[0];
 	Vy = (long)body[1];
 }
+
 /***********************************************************************
  *
  *  Procedure:

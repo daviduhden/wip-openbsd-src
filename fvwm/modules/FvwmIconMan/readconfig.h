@@ -18,8 +18,8 @@ extern Binding *ParseMouseEntry(char *tline);
 extern void run_function_list(Function *func);
 extern void run_binding(WinManager *man, Action action);
 
-#define MODS_USED                                                              \
-	(ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask | \
+#define MODS_USED							\
+	(ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask |\
 	    Mod5Mask)
 
 #endif /* READCONFIG_H */

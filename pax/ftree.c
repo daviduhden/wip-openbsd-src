@@ -482,7 +482,7 @@ next_file(ARCHD *arcn)
 			 * have to read the symlink path from the file
 			 */
 			if ((cnt = readlink(ftent->fts_path, arcn->ln_name,
-			         PAXPATHLEN)) == -1) {
+			    PAXPATHLEN)) == -1) {
 				syswarn(1, errno, "Unable to read symlink %s",
 				    ftent->fts_path);
 				continue;
@@ -541,7 +541,7 @@ getpathname(char *buf, int buflen)
 			if ((ch = getchar()) == EOF) {
 				if (bp != buf)
 					paxwarn(1, "Ignoring unterminated "
-					           "pathname at EOF");
+					    "pathname at EOF");
 				return (NULL);
 			}
 			if ((*bp = ch) == '\0')

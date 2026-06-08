@@ -75,7 +75,7 @@ SetRootWindow(char *tline, XWindowAttributes *root_attr, Atom colors_atom)
 	xpm_attributes.colormap = root_attr->colormap;
 	xpm_attributes.valuemask = XpmSize | XpmReturnAllocPixels | XpmColormap;
 	if ((val = XpmReadFileToPixmap(dpy, root, tline, &rootXpm, &shapeMask,
-	         &xpm_attributes)) != XpmSuccess) {
+	    &xpm_attributes)) != XpmSuccess) {
 		if (val == XpmOpenFailed)
 			fprintf(stderr, "Couldn't open pixmap file\n");
 		else if (val == XpmColorFailed)
@@ -122,11 +122,11 @@ FreePreviousResources(
 	    (root_attr->visual != NULL) ? root_attr->visual->class : StaticGray;
 	Bool can_free_colors =
 	    (visual_class == PseudoColor || visual_class == GrayScale ||
-	        visual_class == DirectColor);
+	     visual_class == DirectColor);
 
 	if (XGetWindowProperty(dpy, root, colors_atom, 0L, (~0L), True,
-	        XA_CARDINAL, &type, &format, &length, &after,
-	        &data) == Success) {
+	    XA_CARDINAL, &type, &format, &length, &after,
+	    &data) == Success) {
 		if (can_free_colors && type == XA_CARDINAL && format == 32 &&
 		    length > 0 && data != NULL) {
 			Pixel *pixels = (Pixel *)data;
@@ -139,8 +139,8 @@ FreePreviousResources(
 
 	data = NULL;
 	if (XGetWindowProperty(dpy, root, pixmap_atom, 0L, 1L, True,
-	        AnyPropertyType, &type, &format, &length, &after,
-	        &data) == Success) {
+	    AnyPropertyType, &type, &format, &length, &after,
+	    &data) == Success) {
 		if ((type == XA_PIXMAP) && (format == 32) && (length == 1) &&
 		    data != NULL)
 			XKillClient(dpy, *((Pixmap *)data));

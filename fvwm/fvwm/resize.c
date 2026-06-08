@@ -1,4 +1,3 @@
-
 /****************************************************************************
  * This module is all original code
  * by Rob Nation
@@ -75,7 +74,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #ifdef WINDOWSHADE
 	    || (tmp_win->buttons & WSHADE)
 #endif
-	) {
+	    ) {
 		XBell(dpy, 0);
 		return;
 	}
@@ -151,23 +150,19 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			ymotion = -1;
 		if (PressedW == tmp_win->sides[3]) /* left */
 			xmotion = 1;
-		if (PressedW == tmp_win->corners[0]) /* upper-left */
-		{
+		if (PressedW == tmp_win->corners[0]) { /* upper-left */
 			ymotion = 1;
 			xmotion = 1;
 		}
-		if (PressedW == tmp_win->corners[1]) /* upper-right */
-		{
+		if (PressedW == tmp_win->corners[1]) { /* upper-right */
 			xmotion = -1;
 			ymotion = 1;
 		}
-		if (PressedW == tmp_win->corners[2]) /* lower left */
-		{
+		if (PressedW == tmp_win->corners[2]) { /* lower left */
 			ymotion = -1;
 			xmotion = 1;
 		}
-		if (PressedW == tmp_win->corners[3]) /* lower right */
-		{
+		if (PressedW == tmp_win->corners[3]) { /* lower right */
 			ymotion = -1;
 			xmotion = -1;
 		}
@@ -190,7 +185,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	while (!finished) {
 		XMaskEvent(dpy,
 		    ButtonPressMask | ButtonReleaseMask | KeyPressMask |
-		        ButtonMotionMask | PointerMotionMask | ExposureMask,
+		    ButtonMotionMask | PointerMotionMask | ExposureMask,
 		    &Event);
 		StashEventTime(&Event);
 
@@ -198,7 +193,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			/* discard any extra motion events before a release */
 			while (XCheckMaskEvent(dpy,
 			    ButtonMotionMask | ButtonReleaseMask |
-			        PointerMotionMask,
+			    PointerMotionMask,
 			    &Event)) {
 				StashEventTime(&Event);
 				if (Event.type == ButtonRelease)
@@ -215,15 +210,15 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			XAllowEvents(dpy, ReplayPointer, CurrentTime);
 			done = TRUE;
 			if (((Event.xbutton.button == 1) &&
-			        (button_mask & Button1Mask)) ||
+			    (button_mask & Button1Mask)) ||
 			    ((Event.xbutton.button == 2) &&
-			        (button_mask & Button2Mask)) ||
+			     (button_mask & Button2Mask)) ||
 			    ((Event.xbutton.button == 3) &&
-			        (button_mask & Button3Mask)) ||
+			     (button_mask & Button3Mask)) ||
 			    ((Event.xbutton.button == 4) &&
-			        (button_mask & Button4Mask)) ||
+			     (button_mask & Button4Mask)) ||
 			    ((Event.xbutton.button == 5) &&
-			        (button_mask & Button5Mask))) {
+			     (button_mask & Button5Mask))) {
 				/* No new button was pressed, just a delayed
 				 * event */
 				break;
@@ -342,7 +337,7 @@ DoResize(int x_root, int y_root, FvwmWindow *tmp_win, geom *drag, geom *orig,
 		action = 1;
 		*ymotionp = 1;
 	} else if ((y_root >= orig->y + orig->height - 1) ||
-	           ((*ymotionp == -1) && (y_root > orig->y))) {
+	    ((*ymotionp == -1) && (y_root > orig->y))) {
 		drag->y = orig->y;
 		drag->height = 1 + y_root - drag->y;
 		action = 1;
@@ -421,8 +416,8 @@ DisplaySize(
 
 	(void)snprintf(str, sizeof(str), " %4d x %-4d ", dwidth, dheight);
 	offset = (Scr.SizeStringWidth + SIZE_HINDENT * 2 -
-	             XTextWidth(Scr.StdFont.font, str, strlen(str))) /
-	         2;
+	    XTextWidth(Scr.StdFont.font, str, strlen(str))) /
+	    2;
 	if (Init) {
 		XClearWindow(dpy, Scr.SizeWindow);
 		if (Scr.d_depth >= 2)

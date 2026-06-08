@@ -50,8 +50,8 @@ remove_xenocara_content() {
 
 # Function to permanently set the CVSROOT environment variable if not already set
 set_cvsroot() {
-	if ! grep -q "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" ~/.profile; then
-		print "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" >>~/.profile
+	if [ ! -f "$HOME/.profile" ] || ! grep -Fq "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" "$HOME/.profile"; then
+		print "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" >>"$HOME/.profile"
 		log "CVSROOT variable added to ~/.profile"
 	else
 		log "CVSROOT variable already exists in ~/.profile"
@@ -111,9 +111,31 @@ ask_copy_from_wip() {
 	done
 }
 
+# Resolve local wip-openbsd-src path before expensive filesystem search.
+resolve_wip_openbsd_src_dir() {
+	if [ -n "${WIP_OPENBSD_SRC_DIR:-}" ] && [ -d "$WIP_OPENBSD_SRC_DIR" ]; then
+		print "$WIP_OPENBSD_SRC_DIR"
+		return 0
+	fi
+
+	SCRIPT_DIR=$(unset CDPATH; cd -- "$(dirname -- "$0")" && pwd -P)
+	if [ "$(basename "$SCRIPT_DIR")" = "wip-openbsd-src" ] && [ -d "$SCRIPT_DIR/.git" ]; then
+		print "$SCRIPT_DIR"
+		return 0
+	fi
+
+	if [ -d "$PWD/wip-openbsd-src" ]; then
+		print "$PWD/wip-openbsd-src"
+		return 0
+	fi
+
+	warn "Falling back to full filesystem search for wip-openbsd-src."
+	find / -type d -name "wip-openbsd-src" 2>/dev/null | head -n 1
+}
+
 # Function to change directory to the wip-openbsd-src directory
 move_to_wip_openbsd_src() {
-	wip_openbsd_src_dir=$(find / -type d -name "wip-openbsd-src" 2>/dev/null | head -n 1)
+	wip_openbsd_src_dir=$(resolve_wip_openbsd_src_dir)
 	if [ -z "$wip_openbsd_src_dir" ]; then
 		error "wip-openbsd-src directory not found."
 		exit 1

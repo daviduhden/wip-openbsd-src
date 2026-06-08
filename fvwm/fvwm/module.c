@@ -433,17 +433,17 @@ BroadcastPacket(unsigned long event_type, unsigned long num_datum, ...)
 		    i, body, (num_datum + HEADER_SIZE) * sizeof(body[0]));
 }
 
-#define CONFIGARGS(_t)                                                         \
-	24, (_t)->w, (_t)->frame, (unsigned long)(_t), (_t)->frame_x,          \
-	    (_t)->frame_y, (_t)->frame_width, (_t)->frame_height, (_t)->Desk,  \
-	    (_t)->flags, (_t)->title_height, (_t)->boundary_width,             \
-	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_width : 0,      \
-	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_height : 0,     \
-	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.width_inc : 1,      \
-	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.height_inc : 1,     \
-	    (_t)->hints.min_width, (_t)->hints.min_height,                     \
-	    (_t)->hints.max_width, (_t)->hints.max_height, (_t)->icon_w,       \
-	    (_t)->icon_pixmap_w, (_t)->hints.win_gravity, (_t)->TextPixel,     \
+#define CONFIGARGS(_t)							\
+	24, (_t)->w, (_t)->frame, (unsigned long)(_t), (_t)->frame_x,	\
+	    (_t)->frame_y, (_t)->frame_width, (_t)->frame_height, (_t)->Desk,\
+	    (_t)->flags, (_t)->title_height, (_t)->boundary_width,	\
+	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_width : 0,\
+	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_height : 0,\
+	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.width_inc : 1,\
+	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.height_inc : 1,\
+	    (_t)->hints.min_width, (_t)->hints.min_height,		\
+	    (_t)->hints.max_width, (_t)->hints.max_height, (_t)->icon_w,\
+	    (_t)->icon_pixmap_w, (_t)->hints.win_gravity, (_t)->TextPixel,\
 	    (_t)->BackPixel
 
 void
@@ -606,9 +606,9 @@ PositiveWrite(int module, unsigned long *ptr, int size)
 	 * the fact that the server is  grabbed to the  lock on send module, or
 	 * in some other way get finer control.
 	 */
-	if ((PipeMask[module] & M_LOCKONSEND) /* module uses lock on send */
-	    && (myxgrabcount != 0)            /* and server grabbed */
-	    && (ptr[1] & M_ICONIFY)) {        /* and its an iconify event */
+	if ((PipeMask[module] & M_LOCKONSEND) && /* module uses lock on send */
+	    (myxgrabcount != 0) &&            /* and server grabbed */
+	     (ptr[1] & M_ICONIFY)) {        /* and its an iconify event */
 		return -1;                    /* don't send it */
 	}
 	AddToQueue(module, ptr, size, 0);
@@ -622,7 +622,7 @@ PositiveWrite(int module, unsigned long *ptr, int size)
 		FlushQueue(module);
 		fcntl(readPipes[module], F_SETFL, 0);
 		while ((e = read(readPipes[module], &targetWindow,
-		            sizeof(Window))) > 0) {
+		    sizeof(Window))) > 0) {
 			if (HandleModuleInput(targetWindow, module) == 66) {
 				break;
 			}
@@ -699,7 +699,7 @@ FlushQueue(int module)
 			 * values too. Solaris 2 doesn't seem to have a man page
 			 * for write(2) (!) */
 			else if ((errno == EWOULDBLOCK) || (errno == EAGAIN) ||
-			         (errno == EINTR)) {
+			    (errno == EINTR)) {
 				return;
 			} else {
 				KillModule(module, 123);
@@ -785,6 +785,7 @@ send_list_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		SendPacket(*Module, M_END_WINDOWLIST, 0);
 	}
 }
+
 void
 set_mask_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)

@@ -66,9 +66,9 @@ color_mult(unsigned short *red, unsigned short *green, unsigned short *blue,
 
 	double lightness = 0.5 * (max_value + min_value);
 	double extrema_sum = max_value + min_value;
-	double saturation_denominator = (lightness <= HALF_SCALE)
-	                                    ? extrema_sum
-	                                    : (2.0 * SCALE - extrema_sum);
+	double saturation_denominator = (lightness <= HALF_SCALE) ?
+	    extrema_sum :
+	    (2.0 * SCALE - extrema_sum);
 	double saturation = span / saturation_denominator;
 
 	lightness *= factor;

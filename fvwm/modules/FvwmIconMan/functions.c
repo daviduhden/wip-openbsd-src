@@ -208,7 +208,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 			}
 			for (i = 0, num_mapped = 0; i < n; i++) {
 				if (globals.managers[i].buttons.num_windows >
-				        0 &&
+				    0 &&
 				    globals.managers[i].window_mapped) {
 					wa[num_mapped++] = &globals.managers[i];
 				}
@@ -222,15 +222,16 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 				new = NULL;
 			}
 		}
-	} break;
+	}
+		break;
 
 	case NextButton:
 		if (man) {
 			for (i = man->index + 1, new = man + 1;
-			    i < globals.num_managers &&new->buttons
-			            .num_windows ==
+			    i < globals.num_managers && new->buttons
+			    .num_windows ==
 			    0;
-			    i++, new ++)
+			    i++, new++)
 				;
 			if (i == globals.num_managers)
 				new = man;
@@ -241,7 +242,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 		if (man) {
 			for (i = man->index - 1, new = man - 1;
 			    i > -1 && new->buttons.num_windows == 0;
-			    i--, new --)
+			    i--, new--)
 				;
 			if (i == -1)
 				new = man;
@@ -253,7 +254,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 		break;
 	}
 
-	if (new && new != man &&new->buttons.num_windows > 0) {
+	if (new && new != man && new->buttons.num_windows > 0) {
 		function_context.current_button = new->buttons.buttons[0];
 	}
 

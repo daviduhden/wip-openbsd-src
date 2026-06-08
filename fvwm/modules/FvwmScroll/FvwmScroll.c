@@ -128,7 +128,7 @@ main(int argc, char **argv)
 	while (tline != (char *)0) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline, CatString3(MyName, "Back", ""),
-			        Clength + 4) == 0) {
+			    Clength + 4) == 0) {
 				CopyString(&BackColor, &tline[Clength + 4]);
 			}
 		}
@@ -232,8 +232,8 @@ ClientWindow(Window input)
 	_XA_WM_STATE = XInternAtom(dpy, "WM_STATE", False);
 
 	if (XGetWindowProperty(dpy, input, _XA_WM_STATE, 0L, 3L, False,
-	        _XA_WM_STATE, &atype, &aformat, &nitems, &bytesafter,
-	        &prop) == Success) {
+	    _XA_WM_STATE, &atype, &aformat, &nitems, &bytesafter,
+	    &prop) == Success) {
 		if (prop != NULL) {
 			XFree(prop);
 			return input;

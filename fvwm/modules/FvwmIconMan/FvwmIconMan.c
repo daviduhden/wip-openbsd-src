@@ -151,7 +151,6 @@ main_loop(void)
 			ConsoleMessage(
 			    "Internal error with select: errno=%d\n", errno);
 		} else {
-
 			if (FD_ISSET(x_fd, &readset) || XPending(theDisplay)) {
 				xevent_loop();
 			}
@@ -252,14 +251,14 @@ main(int argc, char **argv)
 	fd_width = GetFdWidth();
 
 	SetMessageMask(Fvwm_fd, M_CONFIGURE_WINDOW | M_RES_CLASS | M_RES_NAME |
-	                            M_ADD_WINDOW | M_DESTROY_WINDOW |
-	                            M_ICON_NAME | M_DEICONIFY | M_ICONIFY |
-	                            M_END_WINDOWLIST | M_NEW_DESK | M_NEW_PAGE |
-	                            M_FOCUS_CHANGE | M_WINDOW_NAME |
+	    M_ADD_WINDOW | M_DESTROY_WINDOW |
+	    M_ICON_NAME | M_DEICONIFY | M_ICONIFY |
+	    M_END_WINDOWLIST | M_NEW_DESK | M_NEW_PAGE |
+	    M_FOCUS_CHANGE | M_WINDOW_NAME |
 #ifdef MINI_ICONS
-	                            M_MINI_ICON |
+	    M_MINI_ICON |
 #endif
-	                            M_STRING);
+	    M_STRING);
 
 	SendInfo(Fvwm_fd, "Send_WindowList", 0);
 

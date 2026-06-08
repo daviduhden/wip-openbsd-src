@@ -86,8 +86,8 @@
 #define C_R5 0x8000
 #define C_RALL (C_R1 | C_R2 | C_R3 | C_R4 | C_R5)
 #define C_LALL (C_L1 | C_L2 | C_L3 | C_L4 | C_L5)
-#define C_ALL                                                                  \
-	(C_WINDOW | C_TITLE | C_ICON | C_ROOT | C_FRAME | C_SIDEBAR | C_L1 |   \
+#define C_ALL								\
+	(C_WINDOW | C_TITLE | C_ICON | C_ROOT | C_FRAME | C_SIDEBAR | C_L1 |\
 	    C_L2 | C_L3 | C_L4 | C_L5 | C_R1 | C_R2 | C_R3 | C_R4 | C_R5)
 
 typedef struct MyFont {
@@ -194,41 +194,41 @@ typedef struct FvwmWindow {
 
 #ifdef GSFR
 	struct {
-		start_iconic : 1;
-		staysontop : 1;
-		sticky : 1;
-		listskip : 1;
-		suppressicon : 1;
-		noicon_title : 1;
-		lenience : 1;
-		sticky_icon : 1;
-		circulate_skip_icon : 1;
-		circulateskip : 1;
-		click_focus : 1;
-		sloppy_focus : 1;
-		show_mapping : 1;
+		start_iconic :1;
+		staysontop :1;
+		sticky :1;
+		listskip :1;
+		suppressicon :1;
+		noicon_title :1;
+		lenience :1;
+		sticky_icon :1;
+		circulate_skip_icon :1;
+		circulateskip :1;
+		click_focus :1;
+		sloppy_focus :1;
+		show_mapping :1;
 
-		notitle : 1;
-		noborder : 1;
-		icon : 1;
-		startsondesk : 1;
-		bw : 1;
-		nobw : 1;
-		fore_color : 1;
-		back_color : 1;
-		random_place : 1;
-		smart_place : 1;
-		mwm_button : 1;
-		mwm_decor : 1;
-		mwm_functions : 1;
-		mwm_override : 1;
-		mwm_border : 1;
-		decorate_transient : 1;
-		no_pposition : 1;
-		ol_decor : 1;
+		notitle :1;
+		noborder :1;
+		icon :1;
+		startsondesk :1;
+		bw :1;
+		nobw :1;
+		fore_color :1;
+		back_color :1;
+		random_place :1;
+		smart_place :1;
+		mwm_button :1;
+		mwm_decor :1;
+		mwm_functions :1;
+		mwm_override :1;
+		mwm_border :1;
+		decorate_transient :1;
+		no_pposition :1;
+		ol_decor :1;
 
 #ifdef MINI_ICONS
-		miniicon : 1;
+		miniicon :1;
 #endif
 	} new_flags;
 #else
@@ -238,10 +238,8 @@ typedef struct FvwmWindow {
 	  as named bit fields.
     */
 	struct {
-		unsigned ViewportMoved
-		    : 1; /* To prevent double move in MoveViewport. */
-		unsigned IconifiedByParent
-		    : 1; /* To prevent iconified transients in a
+		unsigned ViewportMoved:1; /* To prevent double move in MoveViewport. */
+		unsigned IconifiedByParent:1; /* To prevent iconified transients in a
 		          * parent icon from counting for Next */
 	} tmpflags;
 #endif /* GSFR */
@@ -304,9 +302,9 @@ typedef struct WindowConditionMask {
 #define ClickToFocus (1 << 10)
 #define SloppyFocus (1 << 11)
 #define SHOW_ON_MAP (1 << 12) /* switch to desk when it gets mapped? */
-#define ALL_COMMON_FLAGS                                                       \
-	(STARTICONIC | ONTOP | STICKY | WINDOWLISTSKIP | SUPPRESSICON |        \
-	    NOICON_TITLE | Lenience | StickyIcon | CirculateSkipIcon |         \
+#define ALL_COMMON_FLAGS						\
+	(STARTICONIC | ONTOP | STICKY | WINDOWLISTSKIP | SUPPRESSICON |	\
+	    NOICON_TITLE | Lenience | StickyIcon | CirculateSkipIcon |	\
 	    CirculateSkip | ClickToFocus | SloppyFocus | SHOW_ON_MAP)
 
 #define BORDER (1 << 13)      /* Is this decorated with border*/

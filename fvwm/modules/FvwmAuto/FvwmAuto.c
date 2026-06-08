@@ -68,10 +68,10 @@ int
 main(int argc, char **argv)
 {
 	char *enter_fn = "Raise", /* default */
-	    *leave_fn = NULL, mask_mesg[80];
+	     *leave_fn = NULL, mask_mesg[80];
 	unsigned long header[HEADER_SIZE], *body,
-	    last_win = 0,  /* last window handled */
-	    focus_win = 0; /* current focus */
+		      last_win = 0,  /* last window handled */
+		      focus_win = 0; /* current focus */
 	int fd_width, fd[2], timeout, sec = 0, usec = 0;
 	struct timeval value, *delay;
 	fd_set in_fdset;
@@ -94,8 +94,7 @@ main(int argc, char **argv)
 	} else
 		delay = NULL;
 
-	if (argv[7]) /* if specified */
-	{
+	if (argv[7]) { /* if specified */
 		if (*argv[7] && !StrEquals(argv[7], "NOP")) /* not empty */
 			enter_fn = argv[7]; /* override default */
 		else
@@ -120,8 +119,7 @@ main(int argc, char **argv)
 		FD_ZERO(&in_fdset);
 		FD_SET(fd[1], &in_fdset);
 
-		if (delay) /* fill in struct - modified by select() */
-		{
+		if (delay) { /* fill in struct - modified by select() */
 			delay->tv_sec = sec;
 			delay->tv_usec = usec;
 		}
@@ -151,11 +149,9 @@ main(int argc, char **argv)
 		if (((FD_ISSET(fd[1], &in_fdset) == 0) == (delay != NULL)) &&
 		    /* new message and timeout==0  or */
 		    /* no message and timeout>0 */
-		    focus_win != last_win) /* there's sth. to do */
-		{
+		    focus_win != last_win) { /* there's sth. to do */
 			if (last_win &&
-			    leave_fn) /* if last_win isn't the root */
-			{
+			    leave_fn) { /* if last_win isn't the root */
 				SendInfo(fd, leave_fn, last_win);
 #ifdef DEBUG
 				fprintf(stderr,
@@ -165,8 +161,7 @@ main(int argc, char **argv)
 #endif
 			}
 			if (focus_win &&
-			    enter_fn) /* if focus_win isn't the root */
-			{
+			    enter_fn) { /* if focus_win isn't the root */
 				SendInfo(fd, enter_fn, focus_win);
 #ifdef DEBUG
 				fprintf(stderr,

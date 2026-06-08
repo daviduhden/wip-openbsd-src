@@ -234,7 +234,7 @@ RestoreWithdrawnLocation(FvwmWindow *tmp, Bool restart)
 		return;
 
 	if (XGetGeometry(dpy, tmp->w, &JunkRoot, &xwc.x, &xwc.y, &JunkWidth,
-	        &JunkHeight, &JunkBW, &JunkDepth)) {
+	    &JunkHeight, &JunkBW, &JunkDepth)) {
 		XTranslateCoordinates(dpy, tmp->frame, Scr.Root, xwc.x, xwc.y,
 		    &a, &b, &JunkChild);
 		xwc.x = a + tmp->xdiff;
@@ -434,9 +434,9 @@ GetMoveArguments(char *action, int x, int y, int w, int h, int *pFinalX,
 
 	if (s1 != NULL && s2 != NULL) {
 		if (GetOnePositionArgument(
-		        s1, x, w, pFinalX, (float)scrWidth / 100, scrWidth) &&
+		    s1, x, w, pFinalX, (float)scrWidth / 100, scrWidth) &&
 		    GetOnePositionArgument(
-		        s2, y, h, pFinalY, (float)scrHeight / 100, scrHeight))
+		    s2, y, h, pFinalY, (float)scrHeight / 100, scrHeight))
 			retval = 2;
 		else
 			*fWarp = FALSE; /* make sure warping is off for
@@ -648,9 +648,9 @@ GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
 
 		if (!context_window || !fHasContext ||
 		    !XGetGeometry(dpy, context_window, &JunkRoot, &JunkX,
-		        &JunkY, &width, &height, &JunkBW, &JunkDepth) ||
+		    &JunkY, &width, &height, &JunkBW, &JunkDepth) ||
 		    !XTranslateCoordinates(dpy, context_window, Scr.Root, 0, 0,
-		        &x, &y, &JunkChild)) {
+		    &x, &y, &JunkChild)) {
 			/* now window or could not get geometry */
 			XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &x,
 			    &y, &JunkX, &JunkY, &JunkMask);
@@ -744,7 +744,7 @@ WaitForButtonsUp()
 		    &JunkY, &JunkX, &JunkY, &mask);
 
 		if ((mask & (Button1Mask | Button2Mask | Button3Mask |
-		                Button4Mask | Button5Mask)) == 0)
+		    Button4Mask | Button5Mask)) == 0)
 			AllUp = True;
 	}
 	XSync(dpy, 0);
@@ -775,11 +775,11 @@ GrabEm(int cursor)
 		Scr.PreviousFocus = Scr.Focus;
 	SetFocus(Scr.NoFocusWin, NULL, 0);
 	mask = ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
-	       PointerMotionMask | EnterWindowMask | LeaveWindowMask;
+	    PointerMotionMask | EnterWindowMask | LeaveWindowMask;
 	while ((i < 1000) &&
-	       (val = XGrabPointer(dpy, Scr.Root, True, mask, GrabModeAsync,
-	                  GrabModeAsync, Scr.Root, Scr.FvwmCursors[cursor],
-	                  CurrentTime) != GrabSuccess)) {
+	    (val = XGrabPointer(dpy, Scr.Root, True, mask, GrabModeAsync,
+	     GrabModeAsync, Scr.Root, Scr.FvwmCursors[cursor],
+	     CurrentTime) != GrabSuccess)) {
 		i++;
 		/* If you go too fast, other windows may not get a change to
 		 * release any grab that they have. */
@@ -997,10 +997,10 @@ RaiseWindow(FvwmWindow *t)
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next->icon_w;
 				} else if (Scr.FvwmRoot.stack_next
-				               ->icon_pixmap_w) {
+				    ->icon_pixmap_w) {
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next
-					        ->icon_pixmap_w;
+					    ->icon_pixmap_w;
 				} else {
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next->frame;
@@ -1159,7 +1159,7 @@ CoerceEnterNotifyOnCurrentWindow()
 	if (f && child != None) {
 		Event.xany.window = child;
 		if (XFindContext(dpy, child, FvwmContext,
-		        (caddr_t *)&Tmp_win) == XCNOENT)
+		    (caddr_t *)&Tmp_win) == XCNOENT)
 			Tmp_win = NULL;
 		HandleEnterNotify();
 		Tmp_win = None;

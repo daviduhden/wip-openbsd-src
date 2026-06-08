@@ -69,8 +69,8 @@ typedef struct grpt {
  * data structure for storing user supplied time ranges (-T option)
  */
 
-#define ATOI2(ar)                                                              \
-	((ar)[0] - '0') * 10 + ((ar)[1] - '0');                                \
+#define ATOI2(ar)							\
+	((ar)[0] - '0') * 10 + ((ar)[1] - '0');				\
 	(ar) += 2;
 
 typedef struct time_rng {
@@ -506,11 +506,11 @@ trng_match(ARCHD *arcn)
 			 * time range
 			 */
 			if (((pt->flgs & HASLOW) &&
-			        (arcn->sb.st_mtime < pt->low_time) &&
-			        (arcn->sb.st_ctime < pt->low_time)) ||
+			    (arcn->sb.st_mtime < pt->low_time) &&
+			    (arcn->sb.st_ctime < pt->low_time)) ||
 			    ((pt->flgs & HASHIGH) &&
-			        (arcn->sb.st_mtime > pt->high_time) &&
-			        (arcn->sb.st_ctime > pt->high_time))) {
+			     (arcn->sb.st_mtime > pt->high_time) &&
+			     (arcn->sb.st_ctime > pt->high_time))) {
 				pt = pt->fow;
 				continue;
 			}
@@ -520,9 +520,9 @@ trng_match(ARCHD *arcn)
 			 * user wants only ctime checked for this time range
 			 */
 			if (((pt->flgs & HASLOW) &&
-			        (arcn->sb.st_ctime < pt->low_time)) ||
+			    (arcn->sb.st_ctime < pt->low_time)) ||
 			    ((pt->flgs & HASHIGH) &&
-			        (arcn->sb.st_ctime > pt->high_time))) {
+			     (arcn->sb.st_ctime > pt->high_time))) {
 				pt = pt->fow;
 				continue;
 			}
@@ -533,9 +533,9 @@ trng_match(ARCHD *arcn)
 			 * user wants only mtime checked for this time range
 			 */
 			if (((pt->flgs & HASLOW) &&
-			        (arcn->sb.st_mtime < pt->low_time)) ||
+			    (arcn->sb.st_mtime < pt->low_time)) ||
 			    ((pt->flgs & HASHIGH) &&
-			        (arcn->sb.st_mtime > pt->high_time))) {
+			     (arcn->sb.st_mtime > pt->high_time))) {
 				pt = pt->fow;
 				continue;
 			}
@@ -612,7 +612,7 @@ str_sec(const char *p, time_t *tval)
 		if ((lt->tm_mon > 12) || !lt->tm_mon)
 			return (-1);
 		--lt->tm_mon; /* time struct is 0 - 11 */
-		              /* FALLTHROUGH */
+			      /* FALLTHROUGH */
 	case 6:               /* dd */
 		lt->tm_mday = ATOI2(p);
 		if ((lt->tm_mday > 31) || !lt->tm_mday)

@@ -173,7 +173,7 @@ MakeButton(button_info *b)
 		if (iw > 0 && ih > 0) {
 			if (!(buttonSwallow(b) & b_NoHints)) {
 				if (!XGetWMNormalHints(
-				        Dpy, b->IconWin, b->hints, &supplied))
+				    Dpy, b->IconWin, b->hints, &supplied))
 					b->hints->flags = 0;
 				ConstrainSize(b->hints, &b->icon_w, &b->icon_h);
 			}
@@ -221,11 +221,10 @@ RedrawButton(button_info *b, int clean)
 	    b == CurrentButton) /* Hanging or held down by user */
 		rev = 1;
 	if (b->flags &
-	    b_Action) /* If this is a Desk button that takes you to here.. */
-	{
+	    b_Action) { /* If this is a Desk button that takes you to here.. */
 		int n = 0;
 		while (n < 4 &&
-		       (!b->action[n] || strncasecmp(b->action[n], "Desk", 4)))
+		    (!b->action[n] || strncasecmp(b->action[n], "Desk", 4)))
 			n++;
 		if (n < 4) {
 			k = sscanf(&b->action[n][4], "%d%d", &i, &j);
@@ -266,8 +265,8 @@ RedrawButton(button_info *b, int clean)
 				XFillRectangle(Dpy, MyWindow, NormalGC, x1,
 				    y1 + h - h2, w, h2);
 		} else if (!(b->flags & b_IconBack) &&
-		           !(b->flags & b_IconParent) &&
-		           !(b->flags & b_Swallow))
+		    !(b->flags & b_IconParent) &&
+		    !(b->flags & b_Swallow))
 			XFillRectangle(Dpy, MyWindow, NormalGC, x + f, y + f,
 			    BW - 2 * f, BH - 2 * f);
 	}
@@ -328,8 +327,7 @@ DrawTitle(button_info *b, Window win, GC gc)
 		if (just == 2) {
 			while (i > iw && *s)
 				i = XTextWidth(font, ++s, --l);
-		} else /* Left or center - cut off its tail */
-		{
+		} else /* Left or center - cut off its tail */ {
 			while (i > iw && l > 0)
 				i = XTextWidth(font, s, --l);
 		}
@@ -342,8 +340,7 @@ DrawTitle(button_info *b, Window win, GC gc)
 		xpos = ix + (iw - i) / 2;
 
 	if (*s && l > 0 &&
-	    BH >= font->descent + font->ascent) /* Clip it somehow? */
-	{
+	    BH >= font->descent + font->ascent) { /* Clip it somehow? */
 		/* If there is more than the title, put it at the bottom */
 		/* Unless stack flag is set, put it to the right of icon */
 		if ((b->flags & b_Icon || (buttonSwallowCount(b) == 3)) &&

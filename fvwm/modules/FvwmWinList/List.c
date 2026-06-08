@@ -229,7 +229,7 @@ PrintList(List *list)
 	ConsoleMessage("   %10s %-15s %-15s %-15s %-15s Flgs\n", "ID", "Name",
 	    "I-Name", "R-Name", "R-Class");
 	ConsoleMessage("   ---------- --------------- --------------- "
-	               "--------------- --------------- ----\n");
+	    "--------------- --------------- ----\n");
 	for (temp = list->head; temp != NULL; temp = temp->next) {
 		ConsoleMessage("   %10ld %-15.15s %4ld\n", temp->id,
 		    (temp->name == NULL) ? "<null>" : temp->name, temp->flags);

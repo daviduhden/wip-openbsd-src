@@ -58,10 +58,10 @@ static XrmOptionDescRec table[] = {
      * to specify the desktop. I have to include dummy options that
      * are meaningless since Xrm seems to allow -w to match -workspace
      * if there would be no ambiguity. */
-    {"-workspacf", "*junk", XrmoptionSepArg, (caddr_t)NULL},
-    {"-workspace", "*desk", XrmoptionSepArg, (caddr_t)NULL},
-    {"-xrn", NULL, XrmoptionResArg, (caddr_t)NULL},
-    {"-xrm", NULL, XrmoptionResArg, (caddr_t)NULL},
+	{"-workspacf", "*junk", XrmoptionSepArg, (caddr_t)NULL},
+	{"-workspace", "*desk", XrmoptionSepArg, (caddr_t)NULL},
+	{"-xrn", NULL, XrmoptionResArg, (caddr_t)NULL},
+	{"-xrm", NULL, XrmoptionResArg, (caddr_t)NULL},
 };
 
 extern char *IconPath;
@@ -126,7 +126,7 @@ AddWindow(Window w)
 
 	if (!PPosOverride)
 		if (XGetGeometry(dpy, tmp_win->w, &JunkRoot, &JunkX, &JunkY,
-		        &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0) {
+		    &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0) {
 			free((char *)tmp_win);
 			return (NULL);
 		}
@@ -220,8 +220,8 @@ AddWindow(Window w)
 		/* an icon was specified */
 		tmp_win->icon_bitmap_file = styles.value;
 	} else if ((tmp_win->wmhints) &&
-	           (tmp_win->wmhints->flags &
-	               (IconWindowHint | IconPixmapHint))) {
+	    (tmp_win->wmhints->flags &
+	     (IconWindowHint | IconPixmapHint))) {
 		/* window has its own icon */
 		tmp_win->icon_bitmap_file = NULL;
 	} else {
@@ -243,7 +243,7 @@ AddWindow(Window w)
 	tmp_win->frame_width =
 	    tmp_win->attr.width + 2 * tmp_win->boundary_width;
 	tmp_win->frame_height = tmp_win->attr.height + tmp_win->title_height +
-	                        2 * tmp_win->boundary_width;
+	    2 * tmp_win->boundary_width;
 
 	ConstrainSize(tmp_win, &tmp_win->frame_width, &tmp_win->frame_height,
 	    False, 0, 0);
@@ -312,7 +312,7 @@ AddWindow(Window w)
 
 	/*  RBW - 11/02/1998  */
 	if (!PlaceWindow(tmp_win, styles.on_flags, styles.Desk, styles.PageX,
-	        styles.PageY))
+	    styles.PageY))
 		return NULL;
 
 	/*
@@ -324,7 +324,7 @@ AddWindow(Window w)
 	 */
 	MyXGrabServer(dpy);
 	if (XGetGeometry(dpy, w, &JunkRoot, &JunkX, &JunkY, &JunkWidth,
-	        &JunkHeight, &JunkBW, &JunkDepth) == 0) {
+	    &JunkHeight, &JunkBW, &JunkDepth) == 0) {
 		free((char *)tmp_win);
 		MyXUngrabServer(dpy);
 		return (NULL);
@@ -349,7 +349,7 @@ AddWindow(Window w)
 		XColor color;
 
 		if ((XParseColor(dpy, Scr.FvwmRoot.attr.colormap,
-		        styles.ForeColor, &color)) &&
+		    styles.ForeColor, &color)) &&
 		    (XAllocColor(dpy, Scr.FvwmRoot.attr.colormap, &color))) {
 			tmp_win->TextPixel = color.pixel;
 		}
@@ -358,10 +358,8 @@ AddWindow(Window w)
 		XColor color;
 
 		if ((XParseColor(dpy, Scr.FvwmRoot.attr.colormap,
-		        styles.BackColor, &color)) &&
-		    (XAllocColor(dpy, Scr.FvwmRoot.attr.colormap, &color)))
-
-		{
+		    styles.BackColor, &color)) &&
+		    (XAllocColor(dpy, Scr.FvwmRoot.attr.colormap, &color))) {
 			tmp_win->BackPixel = color.pixel;
 		}
 		tmp_win->ShadowPixel = GetShadow(tmp_win->BackPixel);
@@ -396,7 +394,7 @@ AddWindow(Window w)
 	tmp_win->frame_width =
 	    tmp_win->attr.width + 2 * tmp_win->boundary_width;
 	tmp_win->frame_height = tmp_win->attr.height + tmp_win->title_height +
-	                        2 * tmp_win->boundary_width;
+	    2 * tmp_win->boundary_width;
 	ConstrainSize(tmp_win, &tmp_win->frame_width, &tmp_win->frame_height,
 	    False, 0, 0);
 
@@ -417,12 +415,12 @@ AddWindow(Window w)
 	attributes.cursor = Scr.FvwmCursors[DEFAULT];
 	attributes.event_mask =
 	    (SubstructureRedirectMask | ButtonPressMask | ButtonReleaseMask |
-	        EnterWindowMask | LeaveWindowMask | ExposureMask |
-	        VisibilityChangeMask);
+	     EnterWindowMask | LeaveWindowMask | ExposureMask |
+	     VisibilityChangeMask);
 
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 	if ((GetDecor(tmp_win, BorderStyle.inactive.style) &
-	        ButtonFaceTypeMask) == TiledPixmapButton)
+	    ButtonFaceTypeMask) == TiledPixmapButton)
 		TexturePixmap =
 		    GetDecor(tmp_win, BorderStyle.inactive.u.p->picture);
 
@@ -460,17 +458,17 @@ AddWindow(Window w)
 	valuemask = valuemask & ~CWBackPixel & ~CWBackPixmap;
 	tmp_win->Parent =
 	    XCreateWindow(dpy, tmp_win->frame, tmp_win->boundary_width,
-	        tmp_win->boundary_width + tmp_win->title_height,
-	        (tmp_win->frame_width - 2 * tmp_win->boundary_width),
-	        (tmp_win->frame_height - 2 * tmp_win->boundary_width -
-	            tmp_win->title_height),
-	        tmp_win->bw, CopyFromParent, InputOutput, CopyFromParent,
-	        valuemask, &attributes);
+	    tmp_win->boundary_width + tmp_win->title_height,
+	    (tmp_win->frame_width - 2 * tmp_win->boundary_width),
+	    (tmp_win->frame_height - 2 * tmp_win->boundary_width -
+	     tmp_win->title_height),
+	    tmp_win->bw, CopyFromParent, InputOutput, CopyFromParent,
+	    valuemask, &attributes);
 	valuemask = valuemask_save;
 
 	attributes.event_mask =
 	    (ButtonPressMask | ButtonReleaseMask | ExposureMask |
-	        EnterWindowMask | LeaveWindowMask);
+	     EnterWindowMask | LeaveWindowMask);
 	tmp_win->title_x = tmp_win->title_y = 0;
 	tmp_win->title_w = 0;
 	tmp_win->title_width =
@@ -519,14 +517,14 @@ AddWindow(Window w)
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 				if (TexturePixmap &&
 				    GetDecor(tmp_win, left_buttons[i].flags) &
-				        UseBorderStyle) {
+				    UseBorderStyle) {
 					TexturePixmapSave =
 					    attributes.background_pixmap;
 					attributes.background_pixmap =
 					    TexturePixmap;
 					valuemask_save = valuemask;
 					valuemask = (valuemask & ~CWBackPixel) |
-					            CWBackPixmap;
+					    CWBackPixmap;
 				}
 #endif
 				tmp_win->left_w[i] = XCreateWindow(dpy,
@@ -538,7 +536,7 @@ AddWindow(Window w)
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 				if (TexturePixmap &&
 				    GetDecor(tmp_win, left_buttons[i].flags) &
-				        UseBorderStyle) {
+				    UseBorderStyle) {
 					attributes.background_pixmap =
 					    TexturePixmapSave;
 					valuemask = valuemask_save;
@@ -552,28 +550,28 @@ AddWindow(Window w)
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 				if (TexturePixmap &&
 				    GetDecor(tmp_win, right_buttons[i].flags) &
-				        UseBorderStyle) {
+				    UseBorderStyle) {
 					TexturePixmapSave =
 					    attributes.background_pixmap;
 					attributes.background_pixmap =
 					    TexturePixmap;
 					valuemask_save = valuemask;
 					valuemask = (valuemask & ~CWBackPixel) |
-					            CWBackPixmap;
+					    CWBackPixmap;
 				}
 #endif
 				tmp_win->right_w[i] =
 				    XCreateWindow(dpy, tmp_win->frame,
-				        tmp_win->title_width -
-				            tmp_win->title_height * (i + 1),
-				        0, tmp_win->title_height,
-				        tmp_win->title_height, 0,
-				        CopyFromParent, InputOutput,
-				        CopyFromParent, valuemask, &attributes);
+				    tmp_win->title_width -
+				    tmp_win->title_height * (i + 1),
+				    0, tmp_win->title_height,
+				    tmp_win->title_height, 0,
+				    CopyFromParent, InputOutput,
+				    CopyFromParent, valuemask, &attributes);
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 				if (TexturePixmap &&
 				    GetDecor(tmp_win, right_buttons[i].flags) &
-				        UseBorderStyle) {
+				    UseBorderStyle) {
 					attributes.background_pixmap =
 					    TexturePixmapSave;
 					valuemask = valuemask_save;
@@ -625,7 +623,7 @@ AddWindow(Window w)
 	valuemask = (CWEventMask | CWDontPropagate);
 	attributes.event_mask =
 	    (StructureNotifyMask | PropertyChangeMask | EnterWindowMask |
-	        LeaveWindowMask | ColormapChangeMask | FocusChangeMask);
+	     LeaveWindowMask | ColormapChangeMask | FocusChangeMask);
 
 	attributes.do_not_propagate_mask = ButtonPressMask | ButtonReleaseMask;
 
@@ -843,7 +841,7 @@ GrabKeys(FvwmWindow *tmp_win)
 	Binding *tmp;
 	for (tmp = Scr.AllBindings; tmp != NULL; tmp = tmp->NextBinding) {
 		if ((tmp->Context &
-		        (C_WINDOW | C_TITLE | C_RALL | C_LALL | C_SIDEBAR)) &&
+		    (C_WINDOW | C_TITLE | C_RALL | C_LALL | C_SIDEBAR)) &&
 		    (tmp->IsMouse == 0)) {
 			XGrabKey(dpy, tmp->Button_Key, tmp->Modifier,
 			    tmp_win->frame, True, GrabModeAsync, GrabModeAsync);
@@ -893,8 +891,8 @@ FetchWmProtocols(FvwmWindow *tmp)
 		/* Next, read it the hard way. mosaic from Coreldraw needs to
 		 * be read in this way. */
 		if ((XGetWindowProperty(dpy, tmp->w, _XA_WM_PROTOCOLS, 0L, 10L,
-		        False, _XA_WM_PROTOCOLS, &atype, &aformat, &nitems,
-		        &bytes_remain, (unsigned char **)&protocols)) ==
+		    False, _XA_WM_PROTOCOLS, &atype, &aformat, &nitems,
+		    &bytes_remain, (unsigned char **)&protocols)) ==
 		    Success) {
 			for (i = 0, ap = protocols; i < nitems; i++, ap++) {
 				if (*ap == (Atom)_XA_WM_TAKE_FOCUS)
@@ -1045,7 +1043,7 @@ LookInList(FvwmWindow *tmp_win, name_list *styles)
 		    TRUE) {
 			merge_styles(styles, nptr);
 		} else if (matchWildcards(
-		               nptr->name, tmp_win->class.res_name) == TRUE) {
+		    nptr->name, tmp_win->class.res_name) == TRUE) {
 			merge_styles(styles, nptr);
 		} else if (matchWildcards(nptr->name, tmp_win->name) == TRUE) {
 			merge_styles(styles, nptr);
@@ -1087,7 +1085,7 @@ merge_styles(name_list *styles, name_list *nptr)
 #endif
 	if (nptr->off_flags & STARTSONDESK_FLAG)
 	/*  RBW - 11/02/1998  */
-	{
+	    {
 		styles->Desk = nptr->Desk;
 		styles->PageX = nptr->PageX;
 		styles->PageY = nptr->PageY;

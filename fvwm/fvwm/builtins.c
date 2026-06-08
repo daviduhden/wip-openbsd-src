@@ -29,12 +29,12 @@ static void FreeMenuFace(Display *dpy, MenuFace *mf);
 static char *exec_shell_name = "/bin/sh";
 /* button state strings must match the enumerated states */
 static char *button_states[MaxButtonState] = {
-    "ActiveUp",
+	"ActiveUp",
 #ifdef ACTIVEDOWN_BTNS
-    "ActiveDown",
+	"ActiveDown",
 #endif
 #ifdef INACTIVE_BTNS
-    "Inactive",
+	"Inactive",
 #endif
 };
 
@@ -58,7 +58,6 @@ static char *button_states[MaxButtonState] = {
 int
 DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
     unsigned long *context, int cursor, int FinishEvent)
-
 {
 	int done;
 	int finished = 0;
@@ -71,7 +70,7 @@ DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
 	    (tmp_win != NULL)) {
 		if ((FinishEvent == ButtonPress) ||
 		    ((FinishEvent == ButtonRelease) &&
-		        (eventp->type != ButtonPress))) {
+		     (eventp->type != ButtonPress))) {
 			return FALSE;
 		}
 	}
@@ -85,8 +84,8 @@ DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
 		/* block until there is an event */
 		XMaskEvent(dpy,
 		    ButtonPressMask | ButtonReleaseMask | ExposureMask |
-		        KeyPressMask | VisibilityChangeMask | ButtonMotionMask |
-		        PointerMotionMask /* | EnterWindowMask |
+		    KeyPressMask | VisibilityChangeMask | ButtonMotionMask |
+		    PointerMotionMask /* | EnterWindowMask |
 		                                            LeaveWindowMask*/
 		    ,
 		    eventp);
@@ -140,7 +139,7 @@ DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
 	if ((*w != original_w) && (original_w != Scr.Root) &&
 	    (original_w != None) && (original_w != Scr.NoFocusWin))
 		if (!((*w == (*tmp_win)->frame) &&
-		        (original_w == (*tmp_win)->w))) {
+		    (original_w == (*tmp_win)->w))) {
 			*context = C_ROOT;
 			XBell(dpy, 0);
 			UngrabEm();
@@ -309,7 +308,7 @@ Maximize(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	int val1, val2, val1_unit, val2_unit, n;
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	if (tmp_win == NULL)
@@ -319,7 +318,7 @@ Maximize(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 #ifdef WINDOWSHADE
 	    || (tmp_win->buttons & WSHADE)
 #endif
-	) {
+	    ) {
 		XBell(dpy, 0);
 		return;
 	}
@@ -392,7 +391,7 @@ WindowShade(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	int n = 0;
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	if (!(tmp_win->flags & TITLE) || (tmp_win->flags & MAXIMIZED)) {
@@ -415,7 +414,7 @@ WindowShade(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		SetupFrame(tmp_win, tmp_win->frame_x, tmp_win->frame_y,
 		    tmp_win->frame_width,
 		    tmp_win->title_height + tmp_win->boundary_width -
-		        tmp_win->bw,
+		    tmp_win->bw,
 		    False);
 		BroadcastPacket(M_WINDOWSHADE, 3, tmp_win->w, tmp_win->frame,
 		    (unsigned long)tmp_win);
@@ -663,12 +662,11 @@ movecursor(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 void
 iconify_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
-
 {
 	int val = 0;
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	GetIntegerArguments(action, NULL, &val, 1);
@@ -694,7 +692,7 @@ raise_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	name_list styles; /* place for merged styles */
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	if (tmp_win)
@@ -712,7 +710,7 @@ lower_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	LowerWindow(tmp_win);
@@ -725,7 +723,7 @@ destroy_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, DESTROY, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, DESTROY, ButtonRelease))
 		return;
 
 	if (check_allowed_function2(F_DESTROY, tmp_win) == 0) {
@@ -734,7 +732,7 @@ destroy_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	if (XGetGeometry(dpy, tmp_win->w, &JunkRoot, &JunkX, &JunkY, &JunkWidth,
-	        &JunkHeight, &JunkBW, &JunkDepth) == 0)
+	    &JunkHeight, &JunkBW, &JunkDepth) == 0)
 		Destroy(tmp_win);
 	else
 		XKillClient(dpy, tmp_win->w);
@@ -746,7 +744,7 @@ delete_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, DESTROY, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, DESTROY, ButtonRelease))
 		return;
 
 	if (check_allowed_function2(F_DELETE, tmp_win) == 0) {
@@ -768,7 +766,7 @@ close_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, DESTROY, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, DESTROY, ButtonRelease))
 		return;
 
 	if (check_allowed_function2(F_CLOSE, tmp_win) == 0) {
@@ -781,7 +779,7 @@ close_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		    dpy, tmp_win->w, _XA_WM_DELETE_WINDOW, CurrentTime);
 		return;
 	} else if (XGetGeometry(dpy, tmp_win->w, &JunkRoot, &JunkX, &JunkY,
-	               &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0)
+	    &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0)
 		Destroy(tmp_win);
 	else
 		XKillClient(dpy, tmp_win->w);
@@ -806,11 +804,9 @@ exec_setup(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 		free(exec_shell_name);
 	shell_set = 1;
 	action = GetNextToken(action, &arg);
-	if (arg) /* specific shell was specified */
-	{
+	if (arg) { /* specific shell was specified */
 		exec_shell_name = arg;
-	} else /* no arg, so use $SHELL -- not working??? */
-	{
+	} else /* no arg, so use $SHELL -- not working??? */ {
 		if (getenv("SHELL"))
 			exec_shell_name = strdup(getenv("SHELL"));
 		else
@@ -837,10 +833,9 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	/* Thought I'd try vfork and _exit() instead of regular fork().
 	 * The man page says that its better. */
 	/* Not everyone has vfork! */
-	if (!(fork())) /* child process */
-	{
+	if (!(fork())) { /* child process */
 		if (execl(exec_shell_name, exec_shell_name, "-c", cmd,
-		        (char *)NULL) == -1) {
+		    (char *)NULL) == -1) {
 			fvwm_msg(ERR, "exec_function", "execl failed (%s)",
 			    strerror(errno));
 			exit(100);
@@ -880,7 +875,7 @@ refresh_win_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	unsigned long valuemask;
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	valuemask =
@@ -904,7 +899,7 @@ stick_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	if (tmp_win->flags & STICKY) {
@@ -930,20 +925,20 @@ wait_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 			DispatchEvent();
 			if (Event.type == MapNotify) {
 				if ((Tmp_win) && (matchWildcards(action,
-				                      Tmp_win->name) == True))
+				    Tmp_win->name) == True))
 					done = True;
 				if ((Tmp_win) && (Tmp_win->class.res_class) &&
 				    (matchWildcards(action,
-				         Tmp_win->class.res_class) == True))
+				     Tmp_win->class.res_class) == True))
 					done = True;
 				if ((Tmp_win) && (Tmp_win->class.res_name) &&
 				    (matchWildcards(action,
-				         Tmp_win->class.res_name) == True))
+				     Tmp_win->class.res_name) == True))
 					done = True;
 			} else if (Event.type == KeyPress &&
-			           XLookupKeysym(&(Event.xkey), 0) ==
-			               XK_Escape &&
-			           Event.xbutton.state & ControlMask) {
+			    XLookupKeysym(&(Event.xkey), 0) ==
+			    XK_Escape &&
+			    Event.xbutton.state & ControlMask) {
 				done = 1;
 			}
 		}
@@ -955,7 +950,7 @@ flip_focus_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	/* Reorder the window list */
@@ -967,7 +962,7 @@ focus_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
     char *action, int *Module)
 {
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	FocusOn(tmp_win, FALSE);
@@ -981,7 +976,7 @@ warp_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	int val1, val2;
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
 	n = GetTwoArguments(action, &val1, &val2, &val1_unit, &val2_unit);
@@ -1028,7 +1023,7 @@ menu_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	else
 		teventp = eventp;
 	if ((do_menu(menu, NULL, &miExecuteAction, 0, fStaysUp, teventp,
-	         &mops) == MENU_DOUBLE_CLICKED) &&
+	    &mops) == MENU_DOUBLE_CLICKED) &&
 	    action) {
 		ExecuteFunction(action, tmp_win, eventp, context, *Module);
 	}
@@ -1089,7 +1084,7 @@ raiselower_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	name_list styles;
 
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 	if (tmp_win == NULL)
 		return;
@@ -1274,8 +1269,8 @@ SetXOR(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	*/
 	/* Xlib programming manual suggestion: */
 	gcv.foreground =
-	    (val) ? (val)
-	          : (BlackPixel(dpy, Scr.screen) ^ WhitePixel(dpy, Scr.screen));
+	    (val) ? (val) :
+	    (BlackPixel(dpy, Scr.screen) ^ WhitePixel(dpy, Scr.screen));
 	gcv.subwindow_mode = IncludeInferiors;
 	if (Scr.DrawGC)
 		XFreeGC(dpy, Scr.DrawGC);
@@ -1310,12 +1305,12 @@ SetDeskSize(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		return;
 	}
 
-	Scr.VxMax = (val[0] <= 0)
-	                ? 0
-	                : val[0] * Scr.MyDisplayWidth - Scr.MyDisplayWidth;
-	Scr.VyMax = (val[1] <= 0)
-	                ? 0
-	                : val[1] * Scr.MyDisplayHeight - Scr.MyDisplayHeight;
+	Scr.VxMax = (val[0] <= 0) ?
+	    0 :
+	    val[0] * Scr.MyDisplayWidth - Scr.MyDisplayWidth;
+	Scr.VyMax = (val[1] <= 0) ?
+	    0 :
+	    val[1] * Scr.MyDisplayHeight - Scr.MyDisplayHeight;
 	BroadcastPacket(M_NEW_PAGE, 5, Scr.Vx, Scr.Vy, Scr.CurrentDesk,
 	    Scr.VxMax, Scr.VyMax);
 
@@ -1421,7 +1416,7 @@ SetHiColor(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	if (hiback)
 		free(hiback);
 	gcm = GCFunction | GCPlaneMask | GCGraphicsExposures | GCLineWidth |
-	      GCForeground | GCBackground;
+	    GCForeground | GCBackground;
 	gcv.foreground = fl->HiRelief.fore;
 	gcv.background = fl->HiRelief.back;
 	gcv.fill_style = FillSolid;
@@ -1650,7 +1645,7 @@ UpdateMenuStyle(MenuStyle *ms)
 	if (ms->look.pStdFont != NULL && ms->look.pStdFont != &Scr.StdFont) {
 		ms->look.pStdFont->y = ms->look.pStdFont->font->ascent;
 		ms->look.pStdFont->height = ms->look.pStdFont->font->ascent +
-		                            ms->look.pStdFont->font->descent;
+		    ms->look.pStdFont->font->descent;
 	}
 	ms->look.EntryHeight = ms->look.pStdFont->height + HEIGHT_EXTRA;
 
@@ -1674,7 +1669,7 @@ UpdateMenuStyle(MenuStyle *ms)
 
 	/* make GC's */
 	gcm = GCFunction | GCPlaneMask | GCFont | GCGraphicsExposures |
-	      GCLineWidth | GCForeground | GCBackground;
+	    GCLineWidth | GCForeground | GCBackground;
 	gcv.fill_style = FillSolid;
 	gcv.font = ms->look.pStdFont->font->fid;
 	gcv.plane_mask = AllPlanes;
@@ -1694,12 +1689,12 @@ UpdateMenuStyle(MenuStyle *ms)
 		XFreeGC(dpy, ms->look.MenuShadowGC);
 	ms->look.MenuShadowGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
-	gcv.foreground = (ms->look.f.hasActiveBack)
-	                     ? ms->look.MenuActiveColors.back
-	                     : ms->look.MenuRelief.back;
-	gcv.background = (ms->look.f.hasActiveFore)
-	                     ? ms->look.MenuActiveColors.fore
-	                     : ms->look.MenuRelief.fore;
+	gcv.foreground = (ms->look.f.hasActiveBack) ?
+	    ms->look.MenuActiveColors.back :
+	    ms->look.MenuRelief.back;
+	gcv.background = (ms->look.f.hasActiveFore) ?
+	    ms->look.MenuActiveColors.fore :
+	    ms->look.MenuRelief.fore;
 	if (ms->look.MenuActiveBackGC != NULL)
 		XFreeGC(dpy, ms->look.MenuActiveBackGC);
 	ms->look.MenuActiveBackGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
@@ -1722,12 +1717,12 @@ UpdateMenuStyle(MenuStyle *ms)
 		gcv.fill_style = FillStippled;
 		gcv.stipple = Scr.gray_bitmap;
 		gcm = GCFunction | GCPlaneMask | GCGraphicsExposures |
-		      GCLineWidth | GCForeground | GCBackground | GCFont |
-		      GCStipple | GCFillStyle;
+		    GCLineWidth | GCForeground | GCBackground | GCFont |
+		    GCStipple | GCFillStyle;
 		ms->look.MenuStippleGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 		gcm = GCFunction | GCPlaneMask | GCGraphicsExposures |
-		      GCLineWidth | GCForeground | GCBackground | GCFont;
+		    GCLineWidth | GCForeground | GCBackground | GCFont;
 		gcv.fill_style = FillSolid;
 	} else {
 		gcv.foreground = ms->look.MenuStippleColors.fore;
@@ -1740,14 +1735,14 @@ static int
 GetMenuStyleIndex(char *option)
 {
 	char *optlist[] = {"fvwm", "mwm", "win", "Foreground", "Background",
-	    "Greyed", "HilightBack", "HilightBackOff", "ActiveFore",
-	    "ActiveForeOff", "Hilight3DThick", "Hilight3DThin", "Hilight3DOff",
-	    "Animation", "AnimationOff", "Font", "MenuFace", "PopupDelay",
-	    "PopupOffset", "TitleWarp", "TitleWarpOff", "TitleUnderlines0",
-	    "TitleUnderlines1", "TitleUnderlines2", "SeparatorsLong",
-	    "SeparatorsShort", "TrianglesSolid", "TrianglesRelief",
-	    "PopupImmediately", "PopupDelayed", "DoubleClickTime", "SidePic",
-	    "SideColor", NULL};
+		"Greyed", "HilightBack", "HilightBackOff", "ActiveFore",
+		"ActiveForeOff", "Hilight3DThick", "Hilight3DThin", "Hilight3DOff",
+		"Animation", "AnimationOff", "Font", "MenuFace", "PopupDelay",
+		"PopupOffset", "TitleWarp", "TitleWarpOff", "TitleUnderlines0",
+		"TitleUnderlines1", "TitleUnderlines2", "SeparatorsLong",
+		"SeparatorsShort", "TrianglesSolid", "TrianglesRelief",
+		"PopupImmediately", "PopupDelayed", "DoubleClickTime", "SidePic",
+		"SideColor", NULL};
 	return GetTokenIndex(option, optlist, 0, NULL);
 }
 
@@ -1846,8 +1841,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				tmpms->look.f.LongSeparators = 1;
 				tmpms->look.f.TriangleRelief = 1;
 				tmpms->look.f.Hilight = 0;
-			} else /* i == 2 */
-			{
+			} else /* i == 2 */ {
 				tmpms->feel.PopupOffsetPercent = 100;
 				tmpms->feel.PopupOffsetAdd = -5;
 				tmpms->feel.f.PopupImmediately = 1;
@@ -2106,7 +2100,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			if (arg1 != NULL) {
 				tmpms->look.sidePic =
 				    CachePicture(dpy, Scr.Root, IconPath,
-				        PixmapPath, arg1, Scr.ColorLimit);
+				    PixmapPath, arg1, Scr.ColorLimit);
 				if (!tmpms->look.sidePic)
 					fvwm_msg(WARN, "NewMenuStyle",
 					    "Couldn't find pixmap %s", arg1);
@@ -2194,9 +2188,9 @@ OldMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		    "* %s, Foreground %s, Background %s, Greyed %s, Font %s, "
 		    "%s",
 		    style, fore, back, stipple, font,
-		    (animated != NULL && StrEquals(animated, "anim"))
-		        ? "Animation"
-		        : "AnimationOff");
+		    (animated != NULL && StrEquals(animated, "anim")) ?
+		    "Animation" :
+		    "AnimationOff");
 		NewMenuStyle(eventp, w, tmp_win, context, buffer, Module);
 		free(buffer);
 	}
@@ -2340,7 +2334,7 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			action = end + 1;
 		} else if (strcmp(parm, "--") == 0) {
 			if (ReadButtonFace(
-			        prev, &fl->BorderStyle.active, -1, True))
+			    prev, &fl->BorderStyle.active, -1, True))
 				ReadButtonFace(
 				    prev, &fl->BorderStyle.inactive, -1, False);
 			free(parm);
@@ -2395,7 +2389,7 @@ AddTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	while (parm) {
 		free(parm);
 		if ((action = ReadTitleButton(
-		         action, &fl->titlebar, True, -1)) == NULL)
+		    action, &fl->titlebar, True, -1)) == NULL)
 			break;
 		GetNextToken(action, &parm);
 	}
@@ -2430,7 +2424,7 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			    height > 4 && height <= 256) {
 				int x, y, w, h, extra_height;
 				FvwmWindow *tmp = Scr.FvwmRoot.next,
-				           *hi = Scr.Hilite;
+					   *hi = Scr.Hilite;
 
 				extra_height = fl->TitleHeight;
 				fl->TitleHeight = height;
@@ -2439,9 +2433,9 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				fl->WindowFont.y =
 				    fl->WindowFont.font->ascent +
 				    (height -
-				        (fl->WindowFont.font->ascent +
-				            fl->WindowFont.font->descent + 3)) /
-				        2;
+				     (fl->WindowFont.font->ascent +
+				      fl->WindowFont.font->descent + 3)) /
+				    2;
 				if (fl->WindowFont.y <
 				    fl->WindowFont.font->ascent)
 					fl->WindowFont.y =
@@ -2454,7 +2448,7 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #ifdef USEDECOR
 					    || (tmp->fl != fl)
 #endif
-					) {
+					    ) {
 						tmp = tmp->next;
 						continue;
 					}
@@ -2479,7 +2473,7 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			action += next;
 		} else {
 			if (!(action = ReadTitleButton(
-			          prev, &fl->titlebar, False, -1))) {
+			    prev, &fl->titlebar, False, -1))) {
 				free(parm);
 				break;
 			}
@@ -2487,7 +2481,7 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #else  /* ! EXTENDED_TITLESTYLE */
 		else if (strcmp(parm, "--") == 0) {
 			if (!(action = ReadTitleButton(
-			          prev, &fl->titlebar, False, -1))) {
+			    prev, &fl->titlebar, False, -1))) {
 				free(parm);
 				break;
 			}
@@ -2514,7 +2508,7 @@ ApplyDefaultFontAndColors(void)
 
 	/* make GC's */
 	gcm = GCFunction | GCPlaneMask | GCFont | GCGraphicsExposures |
-	      GCLineWidth | GCForeground | GCBackground;
+	    GCLineWidth | GCForeground | GCBackground;
 	gcv.fill_style = FillSolid;
 	gcv.font = Scr.StdFont.font->fid;
 	gcv.plane_mask = AllPlanes;
@@ -2711,7 +2705,7 @@ ApplyWindowFont(FvwmDecor *fl)
 #ifdef USEDECOR
 		    || (tmp->fl != fl)
 #endif
-		) {
+		    ) {
 			tmp = tmp->next;
 			continue;
 		}
@@ -2863,7 +2857,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 		}
 #ifdef VECTOR_BUTTONS
 		else if (strncasecmp(style, "Vector", 6) == 0 ||
-		         (strlen(style) <= 2 && isdigit(*style))) {
+		    (strlen(style) <= 2 && isdigit(*style))) {
 			/* normal coordinate list button style */
 			int i, num_coords, num;
 			struct vector_coords *vc = &bf->vector;
@@ -2921,7 +2915,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 		}
 #ifdef GRADIENT_BUTTONS
 		else if (strncasecmp(style, "HGradient", 9) == 0 ||
-		         strncasecmp(style, "VGradient", 9) == 0) {
+		    strncasecmp(style, "VGradient", 9) == 0) {
 			char *item, **s_colors;
 			int npixels, nsegs, i, sum, *perc;
 			Pixel *pixels;
@@ -3025,7 +3019,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 #endif /* GRADIENT_BUTTONS */
 #ifdef PIXMAP_BUTTONS
 		else if (strncasecmp(style, "Pixmap", 6) == 0 ||
-		         strncasecmp(style, "TiledPixmap", 11) == 0) {
+		    strncasecmp(style, "TiledPixmap", 11) == 0) {
 			s = GetNextToken(s, &file);
 			bf->u.p = CachePicture(dpy, Scr.Root, IconPath,
 			    PixmapPath, file, Scr.ColorLimit);
@@ -3199,7 +3193,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 		++s;
 	for (; i < MaxButtonState; ++i)
 		if (strncasecmp(
-		        button_states[i], s, strlen(button_states[i])) == 0) {
+		    button_states[i], s, strlen(button_states[i])) == 0) {
 			bs = i;
 			break;
 		}
@@ -3238,7 +3232,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	if (strncmp(spec, "--", 2) == 0) {
 		/* only change flags */
 		if (ReadButtonFace(
-		        spec, &tb->state[all ? 0 : bs], button, True) &&
+		    spec, &tb->state[all ? 0 : bs], button, True) &&
 		    all) {
 			for (i = 0; i < MaxButtonState; ++i)
 				ReadButtonFace(spec, &tb->state[i], -1, False);
@@ -3359,12 +3353,11 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 			return False;
 		}
 	}
-
 #ifdef GRADIENT_BUTTONS
 	else if (StrEquals(style, "HGradient") ||
-	         StrEquals(style, "VGradient") ||
-	         StrEquals(style, "DGradient") ||
-	         StrEquals(style, "BGradient")) {
+	    StrEquals(style, "VGradient") ||
+	    StrEquals(style, "DGradient") ||
+	    StrEquals(style, "BGradient")) {
 		char *item, **s_colors;
 		int npixels, nsegs, i, sum, perc[128];
 		Pixel *pixels;
@@ -3485,7 +3478,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 
 #ifdef PIXMAP_BUTTONS
 	else if (StrEquals(style, "Pixmap") ||
-	         StrEquals(style, "TiledPixmap")) {
+	    StrEquals(style, "TiledPixmap")) {
 		s = GetNextToken(s, &token);
 		if (token) {
 			mf->u.p = CachePicture(dpy, Scr.Root, IconPath,
@@ -3499,9 +3492,9 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 				return False;
 			}
 			free(token);
-			mf->type = (StrEquals(style, "TiledPixmap"))
-			               ? TiledPixmapMenu
-			               : PixmapMenu;
+			mf->type = (StrEquals(style, "TiledPixmap")) ?
+			    TiledPixmapMenu :
+			    PixmapMenu;
 		} else {
 			if (verbose)
 				fvwm_msg(ERR, "ReadMenuFace",
@@ -3557,7 +3550,7 @@ ChangeDecor(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	int x, y, width, height, old_height, extra_height;
 	FvwmDecor *fl = &Scr.DefaultDecor, *found = NULL;
 	if (DeferExecution(
-	        eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
+	    eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 	action = GetNextToken(action, &item);
 	if (!action || !item) {
@@ -3579,9 +3572,9 @@ ChangeDecor(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 	old_height = tmp_win->fl->TitleHeight;
 	tmp_win->fl = found;
-	extra_height = (tmp_win->flags & TITLE)
-	                   ? (old_height - tmp_win->fl->TitleHeight)
-	                   : 0;
+	extra_height = (tmp_win->flags & TITLE) ?
+	    (old_height - tmp_win->fl->TitleHeight) :
+	    0;
 	x = tmp_win->frame_x;
 	y = tmp_win->frame_y;
 	width = tmp_win->frame_width;
@@ -3734,32 +3727,32 @@ UpdateDecor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
  * Changes a button decoration style (changes by veliaa@rpi.edu)
  *
  ****************************************************************************/
-#define SetButtonFlag(a)                                                       \
-	do {                                                                   \
-		int i;                                                         \
-		if (multi) {                                                   \
-			if (multi & 1)                                         \
-				for (i = 0; i < 5; ++i) {                      \
-					if (set)                               \
-						fl->left_buttons[i].flags |=   \
-						    (a);                       \
-					else                                   \
-						fl->left_buttons[i].flags &=   \
-						    ~(a);                      \
-				}                                              \
-			if (multi & 2)                                         \
-				for (i = 0; i < 5; ++i) {                      \
-					if (set)                               \
-						fl->right_buttons[i].flags |=  \
-						    (a);                       \
-					else                                   \
-						fl->right_buttons[i].flags &=  \
-						    ~(a);                      \
-				}                                              \
-		} else if (set)                                                \
-			tb->flags |= (a);                                      \
-		else                                                           \
-			tb->flags &= ~(a);                                     \
+#define SetButtonFlag(a)						\
+	do {								\
+		int i;							\
+		if (multi) {						\
+			if (multi & 1)					\
+				for (i = 0; i < 5; ++i) {		\
+					if (set)			\
+						fl->left_buttons[i].flags |=\
+						    (a);		\
+					else				\
+						fl->left_buttons[i].flags &=\
+						    ~(a);		\
+				}					\
+			if (multi & 2)					\
+				for (i = 0; i < 5; ++i) {		\
+					if (set)			\
+						fl->right_buttons[i].flags |=\
+						    (a);		\
+					else				\
+						fl->right_buttons[i].flags &=\
+						    ~(a);		\
+				}					\
+		} else if (set)						\
+			tb->flags |= (a);				\
+		else							\
+			tb->flags &= ~(a);				\
 	} while (0)
 
 void
@@ -3848,13 +3841,13 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 								if (set)
 									fl
 									    ->left_buttons
-									        [i]
+									    [i]
 									    .flags =
 									    0;
 								else
 									fl
 									    ->left_buttons
-									        [i]
+									    [i]
 									    .flags =
 									    ~0;
 						}
@@ -3864,13 +3857,13 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 								if (set)
 									fl
 									    ->right_buttons
-									        [i]
+									    [i]
 									    .flags =
 									    0;
 								else
 									fl
 									    ->right_buttons
-									        [i]
+									    [i]
 									    .flags =
 									    ~0;
 							}
@@ -3882,13 +3875,13 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 							tb->flags = ~0;
 					}
 				} else if (strncasecmp(
-				               tok, "MWMDecorMenu", 12) == 0) {
+				    tok, "MWMDecorMenu", 12) == 0) {
 					SetButtonFlag(MWMDecorMenu);
 				} else if (strncasecmp(
-				               tok, "MWMDecorMin", 11) == 0) {
+				    tok, "MWMDecorMin", 11) == 0) {
 					SetButtonFlag(MWMDecorMinimize);
 				} else if (strncasecmp(
-				               tok, "MWMDecorMax", 11) == 0) {
+				    tok, "MWMDecorMax", 11) == 0) {
 					SetButtonFlag(MWMDecorMaximize);
 				} else {
 					fvwm_msg(ERR, "ButtonStyle",
@@ -3918,7 +3911,7 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 						    &fl->right_buttons[i],
 						    False, i * 2);
 			} else if (!(text = ReadTitleButton(
-			                 prev, tb, False, button))) {
+			    prev, tb, False, button))) {
 				free(parm);
 				break;
 			}
@@ -4183,7 +4176,7 @@ CreateConditionMask(char *flags, WindowConditionMask *mask)
 			mask->needsCurrentDesk = 1;
 			mask->needsCurrentPage = 1;
 		} else if (StrEquals(condition, "CurrentPageAnyDesk") ||
-		           StrEquals(condition, "CurrentScreen"))
+		    StrEquals(condition, "CurrentScreen"))
 			mask->needsCurrentPage = 1;
 		else if (StrEquals(condition, "CirculateHit"))
 			mask->useCirculateHit = 1;
@@ -4247,9 +4240,9 @@ MatchesConditionMask(FvwmWindow *fw, WindowConditionMask *mask)
 		return 0;
 
 	if (mask->needsCurrentPage && !(fw->frame_x < Scr.MyDisplayWidth &&
-	                                  fw->frame_y < Scr.MyDisplayHeight &&
-	                                  fw->frame_x + fw->frame_width > 0 &&
-	                                  fw->frame_y + fw->frame_height > 0))
+	    fw->frame_y < Scr.MyDisplayHeight &&
+	    fw->frame_x + fw->frame_width > 0 &&
+	    fw->frame_y + fw->frame_height > 0))
 		return 0;
 
 	/* Yes, I know this could be shorter, but it's hard to understand then
@@ -4257,11 +4250,11 @@ MatchesConditionMask(FvwmWindow *fw, WindowConditionMask *mask)
 	fMatchesName = matchWildcards(mask->name, fw->name);
 	fMatchesIconName = matchWildcards(mask->name, fw->icon_name);
 	fMatchesClass = (fw->class.res_class &&
-	                 matchWildcards(mask->name, fw->class.res_class));
+	    matchWildcards(mask->name, fw->class.res_class));
 	fMatchesResource = (fw->class.res_name &&
-	                    matchWildcards(mask->name, fw->class.res_name));
+	    matchWildcards(mask->name, fw->class.res_name));
 	fMatches = (fMatchesName || fMatchesIconName || fMatchesClass ||
-	            fMatchesResource);
+	    fMatchesResource);
 
 	if (mask->needsName && !fMatches)
 		return 0;
@@ -4309,8 +4302,8 @@ Circulate(char *action, int Direction, char **restofline)
 		fw = NULL;
 
 	while ((pass < 3) && (found == NULL)) {
-		while (
-		    (fw != NULL) && (found == NULL) && (fw != &Scr.FvwmRoot)) {
+		while ((fw != NULL) && (found == NULL) &&
+		    (fw != &Scr.FvwmRoot)) {
 #ifdef FVWM_DEBUG_MSGS
 			fvwm_msg(DBG, "Circulate", "Trying %s", fw->name);
 #endif /* FVWM_DEBUG_MSGS */
@@ -4420,7 +4413,7 @@ DirectionFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	char *directions[] = {"North", "East", "South", "West", "NorthEast",
-	    "SouthEast", "SouthWest", "NorthWest", NULL};
+		"SouthEast", "SouthWest", "NorthWest", NULL};
 	int my_x;
 	int my_y;
 	int his_x;
@@ -4604,9 +4597,9 @@ Recapture(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	 * same moment and the click goes through to the root window. Not goot
 	 */
 	while (XCheckMaskEvent(dpy,
-	           ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
-	               PointerMotionMask | EnterWindowMask | LeaveWindowMask,
-	           &event) != False)
+	    ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
+	    PointerMotionMask | EnterWindowMask | LeaveWindowMask,
+	    &event) != False)
 		;
 	UngrabEm();
 	MyXUngrabServer(dpy);
@@ -4654,10 +4647,10 @@ SetGlobalOptions(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		} else if (StrEquals(opt, "RECAPTUREIGNORESSTARTSONPAGE")) {
 			Scr.go.RecaptureHonorsStartsOnPage = False;
 		} else if (StrEquals(
-		               opt, "ACTIVEPLACEMENTHONORSSTARTSONPAGE")) {
+		    opt, "ACTIVEPLACEMENTHONORSSTARTSONPAGE")) {
 			Scr.go.ActivePlacementHonorsStartsOnPage = True;
 		} else if (StrEquals(
-		               opt, "ACTIVEPLACEMENTIGNORESSTARTSONPAGE")) {
+		    opt, "ACTIVEPLACEMENTIGNORESSTARTSONPAGE")) {
 			Scr.go.ActivePlacementHonorsStartsOnPage = False;
 		} else
 			fvwm_msg(ERR, "SetGlobalOptions",

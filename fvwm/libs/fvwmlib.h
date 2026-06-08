@@ -34,11 +34,11 @@
 #define __FILE__ "?"
 #define __LINE__ 0
 #endif
-#define DB(_x)                                                                 \
-	do {                                                                   \
-		f_db_info.filenm = __FILE__;                                   \
-		f_db_info.lineno = __LINE__;                                   \
-		f_db_print _x;                                                 \
+#define DB(_x)								\
+	do {								\
+		f_db_info.filenm = __FILE__;				\
+		f_db_info.lineno = __LINE__;				\
+		f_db_print _x;						\
 	} while (0)
 struct f_db_info {
 	const char *filenm;
@@ -46,7 +46,7 @@ struct f_db_info {
 };
 extern struct f_db_info f_db_info;
 extern void f_db_print(const char *fmt, ...)
-    __attribute__((__format__(__printf__, 1, 2)));
+	__attribute__((__format__(__printf__, 1, 2)));
 #endif
 
 /***********************************************************************
@@ -66,15 +66,15 @@ int matchWildcards(char *pattern, char *string);
 /***********************************************************************
  * Stuff for consistent parsing
  ***********************************************************************/
-#define EatWS(s)                                                               \
-	do {                                                                   \
-		while ((s) && (isspace(*(s)) || *(s) == ','))                  \
-			(s)++;                                                 \
+#define EatWS(s)							\
+	do {								\
+		while ((s) && (isspace(*(s)) || *(s) == ','))		\
+			(s)++;						\
 	} while (0)
 #define IsQuote(c) ((c) == '"' || (c) == '\'' || (c) == '`')
 #define IsBlockStart(c) ((c) == '[' || (c) == '{' || (c) == '(')
-#define IsBlockEnd(c, cs)                                                      \
-	(((c) == ']' && (cs) == '[') || ((c) == '}' && (cs) == '{') ||         \
+#define IsBlockEnd(c, cs)						\
+	(((c) == ']' && (cs) == '[') || ((c) == '}' && (cs) == '{') ||	\
 	    ((c) == ')' && (cs) == '('))
 #define MAX_TOKEN_LENGTH 255
 

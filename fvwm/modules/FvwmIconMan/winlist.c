@@ -161,7 +161,7 @@ iconmanager_show(
 	for (string = man->dontshow.list; string; string = string->next) {
 		ConsoleDebug(WINLIST, "Matching: %s\n", string->string);
 		if (matches_string(string->type, string->string, tname, iname,
-		        rname, cname)) {
+		    rname, cname)) {
 			ConsoleDebug(WINLIST, "Dont show\n");
 			in_dontshowlist = 1;
 			break;
@@ -177,7 +177,7 @@ iconmanager_show(
 				ConsoleDebug(
 				    WINLIST, "Matching: %s\n", string->string);
 				if (matches_string(string->type, string->string,
-				        tname, iname, rname, cname)) {
+				    tname, iname, rname, cname)) {
 					ConsoleDebug(WINLIST, "Show\n");
 					in_showlist = 1;
 					break;
@@ -278,10 +278,10 @@ check_win_complete(WinData *p)
 		if (p->manager->format_depend & RESOURCE_NAME)
 			need_resname = 1;
 		else if (stringlist_requires_name(
-		             &p->manager->show, RESOURCE_NAME))
+		    &p->manager->show, RESOURCE_NAME))
 			need_resname = 1;
 		else if (stringlist_requires_name(
-		             &p->manager->dontshow, RESOURCE_NAME))
+		    &p->manager->dontshow, RESOURCE_NAME))
 			need_resname = 1;
 	}
 
@@ -303,7 +303,7 @@ check_win_complete(WinData *p)
 	ConsoleDebug(WINLIST, "\tneed_resname: %d\n", need_resname);
 
 	have_required_names = (!need_resname || p->resname) && p->classname &&
-	                      p->iconname && p->titlename;
+	    p->iconname && p->titlename;
 
 	if (p->geometry_set && have_required_names && p->manager &&
 	    p->app_id_set) {

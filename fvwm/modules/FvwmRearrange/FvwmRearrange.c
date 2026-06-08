@@ -185,7 +185,7 @@ window_matches(ModuleState *state, unsigned long *body)
 		int w = (int)body[5];
 		int h = (int)body[6];
 		if (!((x < state->screen_width) && (y < state->screen_height) &&
-		        (x + w > 0) && (y + h > 0))) {
+		    (x + w > 0) && (y + h > 0))) {
 			return 0;
 		}
 	}
@@ -355,7 +355,7 @@ tile_clients(ModuleState *state)
 			limit = state->client_count;
 			state->tile_limit = limit;
 			hdiv = (state->bound_y - state->offset_y + 1) /
-			       state->client_count;
+			    state->client_count;
 		}
 		slots_per_stripe = limit;
 		wdiv = (state->bound_x - state->offset_x + 1) / stripes;
@@ -365,8 +365,8 @@ tile_clients(ModuleState *state)
 			    ++slot) {
 				int new_width = wdiv - cursor->border_width * 2;
 				int new_height = hdiv -
-				                 cursor->border_width * 2 -
-				                 cursor->title_height;
+				    cursor->border_width * 2 -
+				    cursor->title_height;
 
 				if (state->resize_clients) {
 					if (state->avoid_stretch) {
@@ -382,12 +382,12 @@ tile_clients(ModuleState *state)
 						}
 					}
 					send_resize(state, cursor,
-					    (new_width > 0)
-					        ? (unsigned long)new_width
-					        : cursor->width,
-					    (new_height > 0)
-					        ? (unsigned long)new_height
-					        : cursor->height);
+					    (new_width > 0) ?
+					    (unsigned long)new_width :
+					    cursor->width,
+					    (new_height > 0) ?
+					    (unsigned long)new_height :
+					    cursor->height);
 				}
 
 				send_move(state, cursor, current_x, current_y);
@@ -401,8 +401,8 @@ tile_clients(ModuleState *state)
 					int alive =
 					    await_configure(state, cursor);
 					ClientNode *next = state->reverse_order
-					                       ? cursor->prev
-					                       : cursor->next;
+					    ?
+					    cursor->prev : cursor->next;
 					if (!alive) {
 						detach_client(state, cursor);
 					}
@@ -423,7 +423,7 @@ tile_clients(ModuleState *state)
 			limit = state->client_count;
 			state->tile_limit = limit;
 			wdiv = (state->bound_x - state->offset_x + 1) /
-			       state->client_count;
+			    state->client_count;
 		}
 		slots_per_stripe = limit;
 		hdiv = (state->bound_y - state->offset_y + 1) / stripes;
@@ -433,8 +433,8 @@ tile_clients(ModuleState *state)
 			    ++slot) {
 				int new_width = wdiv - cursor->border_width * 2;
 				int new_height = hdiv -
-				                 cursor->border_width * 2 -
-				                 cursor->title_height;
+				    cursor->border_width * 2 -
+				    cursor->title_height;
 
 				if (state->resize_clients) {
 					if (state->avoid_stretch) {
@@ -450,12 +450,12 @@ tile_clients(ModuleState *state)
 						}
 					}
 					send_resize(state, cursor,
-					    (new_width > 0)
-					        ? (unsigned long)new_width
-					        : cursor->width,
-					    (new_height > 0)
-					        ? (unsigned long)new_height
-					        : cursor->height);
+					    (new_width > 0) ?
+					    (unsigned long)new_width :
+					    cursor->width,
+					    (new_height > 0) ?
+					    (unsigned long)new_height :
+					    cursor->height);
 				}
 
 				send_move(state, cursor, current_x, current_y);
@@ -469,8 +469,8 @@ tile_clients(ModuleState *state)
 					int alive =
 					    await_configure(state, cursor);
 					ClientNode *next = state->reverse_order
-					                       ? cursor->prev
-					                       : cursor->next;
+					    ?
+					    cursor->prev : cursor->next;
 					if (!alive) {
 						detach_client(state, cursor);
 					}
@@ -506,13 +506,13 @@ cascade_clients(ModuleState *state)
 			if (state->avoid_stretch) {
 				if (state->limit_width &&
 				    cursor->width >
-				        (unsigned long)state->limit_width) {
+				    (unsigned long)state->limit_width) {
 					target_width =
 					    (unsigned long)state->limit_width;
 				}
 				if (state->limit_height &&
 				    cursor->height >
-				        (unsigned long)state->limit_height) {
+				    (unsigned long)state->limit_height) {
 					target_height =
 					    (unsigned long)state->limit_height;
 				}
@@ -524,8 +524,8 @@ cascade_clients(ModuleState *state)
 			if (target_width || target_height) {
 				send_resize(state, cursor,
 				    target_width ? target_width : cursor->width,
-				    target_height ? target_height
-				                  : cursor->height);
+				    target_height ? target_height :
+				    cursor->height);
 			}
 		}
 
@@ -793,7 +793,7 @@ main(int argc, char *argv[])
 
 	if (strcmp(state->program_name, "FvwmCascade") &&
 	    (!strcmp(state->program_name, "FvwmTile") ||
-	        (argc >= 7 && !strcmp(argv[6], "-tile")))) {
+	     (argc >= 7 && !strcmp(argv[6], "-tile")))) {
 		state->run_tile = 1;
 		state->run_cascade = 0;
 		state->resize_clients = 1;
@@ -810,7 +810,7 @@ main(int argc, char *argv[])
 		char msg[256];
 		snprintf(msg, sizeof(msg), "SET_MASK %lu\n",
 		    (unsigned long)(M_CONFIGURE_WINDOW | M_DESTROY_WINDOW |
-		                    M_END_WINDOWLIST));
+		    M_END_WINDOWLIST));
 		SendInfo(state->pipe_fd, msg, 0);
 
 #ifdef FVWM1_MOVENULL

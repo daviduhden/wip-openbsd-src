@@ -649,11 +649,11 @@ mod_name(ARCHD *arcn)
 		if (rmleadslash < 2) {
 			rmleadslash = 2;
 			paxwarn(0, "Removing leading / from absolute path "
-			           "names in the archive");
+			    "names in the archive");
 		}
 	}
 	while (rmleadslash && arcn->ln_name[0] == '/' &&
-	       PAX_IS_HARDLINK(arcn->type)) {
+	    PAX_IS_HARDLINK(arcn->type)) {
 		if (arcn->ln_name[1] == '\0') {
 			arcn->ln_name[0] = '.';
 		} else {
@@ -664,7 +664,7 @@ mod_name(ARCHD *arcn)
 		if (rmleadslash < 2) {
 			rmleadslash = 2;
 			paxwarn(0, "Removing leading / from absolute path "
-			           "names in the archive");
+			    "names in the archive");
 		}
 	}
 	if (rmleadslash) {
@@ -717,12 +717,12 @@ mod_name(ARCHD *arcn)
 		 * name if any.
 		 */
 		if ((res = rep_name(arcn->name, sizeof(arcn->name),
-		         &(arcn->nlen), 1)) != 0)
+		    &(arcn->nlen), 1)) != 0)
 			return (res);
 
 		if (PAX_IS_LINK(arcn->type)) {
 			if ((res = rep_name(arcn->ln_name,
-			         sizeof(arcn->ln_name), &(arcn->ln_nlen), 0)) !=
+			    sizeof(arcn->ln_name), &(arcn->ln_nlen), 0)) !=
 			    0)
 				return (res);
 		}
@@ -977,7 +977,7 @@ rep_name(char *name, size_t nsize, int *nlen, int prnt)
 			 * final output. If we have problems, skip it.
 			 */
 			if ((res = resub(&(pt->rcmp), pm, pt->nstr, oinpt,
-			         outpt, endpt)) < 0) {
+			    outpt, endpt)) < 0) {
 				if (prnt)
 					paxwarn(1, "Replacement name error %s",
 					    name);

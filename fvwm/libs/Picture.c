@@ -112,7 +112,7 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 
 	/* If no XPM support, or XPM loading failed, try bitmap */
 	if (XReadBitmapFile(dpy, Root, path, &p->width, &p->height, &p->picture,
-	        &l, &l) == BitmapSuccess) {
+	    &l, &l) == BitmapSuccess) {
 		p->depth = 0;
 		p->mask = None;
 		return p;
@@ -165,8 +165,7 @@ CachePicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
 				break;
 
 		if (!*p1 &&
-		    !*p2) /* We have found a picture with the wanted name */
-		{
+		    !*p2) { /* We have found a picture with the wanted name */
 			p->count++; /* Put another weight on the picture */
 			free(path);
 			return p;
@@ -291,33 +290,33 @@ typedef struct {
    Currently 61 colors in this list.
    */
 static Color_Info base_array[] = {
-    {"white"}, {"black"}, {"grey"}, {"green"}, {"blue"}, {"red"}, {"cyan"},
-    {"yellow"}, {"magenta"}, {"DodgerBlue"}, {"SteelBlue"}, {"chartreuse"},
-    {"wheat"}, {"turquoise"}, {"CadetBlue"}, {"gray87"}, {"CornflowerBlue"},
-    {"YellowGreen"}, {"NavyBlue"}, {"MediumBlue"}, {"plum"}, {"aquamarine"},
-    {"orchid"}, {"ForestGreen"}, {"lightyellow"}, {"brown"}, {"orange"},
-    {"red3"}, {"HotPink"}, {"LightBlue"}, {"gray47"}, {"pink"}, {"red4"},
-    {"violet"}, {"purple"}, {"gray63"}, {"gray94"}, {"plum1"}, {"PeachPuff"},
-    {"maroon"}, {"lavender"}, {"salmon"}, /* for peachpuff, orange gap */
-    {"blue4"},                            /* for navyblue/mediumblue gap */
-    {"PaleGreen4"},                       /* for forestgreen, yellowgreen gap */
-    {"#AA7700"},                          /* brick, no close named color */
-    {"#11EE88"}, /* light green, no close named color */
-    {"#884466"}, /* dark brown, no close named color */
-    {"#CC8888"}, /* light brick, no close named color */
-    {"#EECC44"}, /* gold, no close named color */
-    {"#AAAA44"}, /* dull green, no close named color */
-    {"#FF1188"}, /* pinkish red */
-    {"#992299"}, /* purple */
-    {"#CCFFAA"}, /* light green */
-    {"#664400"}, /* dark brown*/
-    {"#AADD99"}, /* light green */
-    {"#66CCFF"}, /* light blue */
-    {"#CC2299"}, /* dark red */
-    {"#FF11CC"}, /* bright pink */
-    {"#11CC99"}, /* grey/green */
-    {"#AA77AA"}, /* purple/red */
-    {"#EEBB77"}  /* orange/yellow */
+	{"white"}, {"black"}, {"grey"}, {"green"}, {"blue"}, {"red"}, {"cyan"},
+	{"yellow"}, {"magenta"}, {"DodgerBlue"}, {"SteelBlue"}, {"chartreuse"},
+	{"wheat"}, {"turquoise"}, {"CadetBlue"}, {"gray87"}, {"CornflowerBlue"},
+	{"YellowGreen"}, {"NavyBlue"}, {"MediumBlue"}, {"plum"}, {"aquamarine"},
+	{"orchid"}, {"ForestGreen"}, {"lightyellow"}, {"brown"}, {"orange"},
+	{"red3"}, {"HotPink"}, {"LightBlue"}, {"gray47"}, {"pink"}, {"red4"},
+	{"violet"}, {"purple"}, {"gray63"}, {"gray94"}, {"plum1"}, {"PeachPuff"},
+	{"maroon"}, {"lavender"}, {"salmon"}, /* for peachpuff, orange gap */
+	{"blue4"},                            /* for navyblue/mediumblue gap */
+	{"PaleGreen4"},                       /* for forestgreen, yellowgreen gap */
+	{"#AA7700"},                          /* brick, no close named color */
+	{"#11EE88"}, /* light green, no close named color */
+	{"#884466"}, /* dark brown, no close named color */
+	{"#CC8888"}, /* light brick, no close named color */
+	{"#EECC44"}, /* gold, no close named color */
+	{"#AAAA44"}, /* dull green, no close named color */
+	{"#FF1188"}, /* pinkish red */
+	{"#992299"}, /* purple */
+	{"#CCFFAA"}, /* light green */
+	{"#664400"}, /* dark brown*/
+	{"#AADD99"}, /* light green */
+	{"#66CCFF"}, /* light blue */
+	{"#CC2299"}, /* dark red */
+	{"#FF11CC"}, /* bright pink */
+	{"#11CC99"}, /* grey/green */
+	{"#AA77AA"}, /* purple/red */
+	{"#EEBB77"}  /* orange/yellow */
 };
 
 #define NColors (sizeof(base_array) / sizeof(Color_Info))
@@ -452,8 +451,8 @@ c400_distance(XColor *target_ptr, XColor *base_ptr)
 {
 	register double dst;
 	dst = SQUARE((double)(base_ptr->red - target_ptr->red) / 655.35) +
-	      SQUARE((double)(base_ptr->green - target_ptr->green) / 655.35) +
-	      SQUARE((double)(base_ptr->blue - target_ptr->blue) / 655.35);
+	    SQUARE((double)(base_ptr->green - target_ptr->green) / 655.35) +
+	    SQUARE((double)(base_ptr->blue - target_ptr->blue) / 655.35);
 	return dst;
 }
 #endif /* XPM */

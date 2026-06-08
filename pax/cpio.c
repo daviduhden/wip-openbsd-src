@@ -401,7 +401,7 @@ cpio_wr(ARCHD *arcn)
 		 * set data size for file data
 		 */
 		if (ull_asc(arcn->sb.st_size, hd->c_filesize,
-		        sizeof(hd->c_filesize), OCT)) {
+		    sizeof(hd->c_filesize), OCT)) {
 			paxwarn(1, "File is too large for cpio format %s",
 			    arcn->org_name);
 			return (1);
@@ -412,7 +412,7 @@ cpio_wr(ARCHD *arcn)
 		 * set data size to hold link name
 		 */
 		if (ul_asc(arcn->ln_nlen, hd->c_filesize,
-		        sizeof(hd->c_filesize), OCT))
+		    sizeof(hd->c_filesize), OCT))
 			goto out;
 		break;
 	default:
@@ -436,7 +436,7 @@ cpio_wr(ARCHD *arcn)
 	    ul_asc(arcn->sb.st_nlink, hd->c_nlink, sizeof(hd->c_nlink), OCT) ||
 	    ul_asc(arcn->sb.st_rdev, hd->c_rdev, sizeof(hd->c_rdev), OCT) ||
 	    ull_asc(arcn->sb.st_mtime < 0 ? 0 : arcn->sb.st_mtime, hd->c_mtime,
-	        sizeof(hd->c_mtime), OCT) ||
+	    sizeof(hd->c_mtime), OCT) ||
 	    ul_asc(nsz, hd->c_namesize, sizeof(hd->c_namesize), OCT))
 		goto out;
 
@@ -641,7 +641,7 @@ off_t
 vcpio_endrd(void)
 {
 	return sizeof(HD_VCPIO) + sizeof(TRAILER) +
-	       (VCPIO_PAD(sizeof(HD_VCPIO) + sizeof(TRAILER)));
+	    (VCPIO_PAD(sizeof(HD_VCPIO) + sizeof(TRAILER)));
 }
 
 /*
@@ -709,7 +709,7 @@ vcpio_wr(ARCHD *arcn)
 		 */
 		arcn->pad = VCPIO_PAD(arcn->sb.st_size);
 		if (ull_asc(arcn->sb.st_size, hd->c_filesize,
-		        sizeof(hd->c_filesize), HEX)) {
+		    sizeof(hd->c_filesize), HEX)) {
 			paxwarn(1, "File is too large for sv4cpio format %s",
 			    arcn->org_name);
 			return (1);
@@ -722,7 +722,7 @@ vcpio_wr(ARCHD *arcn)
 		 */
 		arcn->pad = 0;
 		if (ul_asc(arcn->ln_nlen, hd->c_filesize,
-		        sizeof(hd->c_filesize), HEX))
+		    sizeof(hd->c_filesize), HEX))
 			goto out;
 		break;
 	default:
@@ -743,14 +743,14 @@ vcpio_wr(ARCHD *arcn)
 	    ul_asc(arcn->sb.st_uid, hd->c_uid, sizeof(hd->c_uid), HEX) ||
 	    ul_asc(arcn->sb.st_gid, hd->c_gid, sizeof(hd->c_gid), HEX) ||
 	    ul_asc(arcn->sb.st_mtime < 0 ? 0 : arcn->sb.st_mtime, hd->c_mtime,
-	        sizeof(hd->c_mtime), HEX) ||
+	    sizeof(hd->c_mtime), HEX) ||
 	    ul_asc(arcn->sb.st_nlink, hd->c_nlink, sizeof(hd->c_nlink), HEX) ||
 	    ul_asc(MAJOR(arcn->sb.st_dev), hd->c_maj, sizeof(hd->c_maj), HEX) ||
 	    ul_asc(MINOR(arcn->sb.st_dev), hd->c_min, sizeof(hd->c_min), HEX) ||
 	    ul_asc(
-	        MAJOR(arcn->sb.st_rdev), hd->c_rmaj, sizeof(hd->c_maj), HEX) ||
+	    MAJOR(arcn->sb.st_rdev), hd->c_rmaj, sizeof(hd->c_maj), HEX) ||
 	    ul_asc(
-	        MINOR(arcn->sb.st_rdev), hd->c_rmin, sizeof(hd->c_min), HEX) ||
+	    MINOR(arcn->sb.st_rdev), hd->c_rmin, sizeof(hd->c_min), HEX) ||
 	    ul_asc(nsz, hd->c_namesize, sizeof(hd->c_namesize), HEX))
 		goto out;
 
@@ -864,10 +864,10 @@ bcpio_rd(ARCHD *arcn, char *buf)
 		arcn->sb.st_rdev = (dev_t)(RSHRT_EXT(hd->h_rdev));
 		arcn->sb.st_mtime = (time_t)(RSHRT_EXT(hd->h_mtime_1));
 		arcn->sb.st_mtime = (arcn->sb.st_mtime << 16) |
-		                    ((time_t)(RSHRT_EXT(hd->h_mtime_2)));
+		    ((time_t)(RSHRT_EXT(hd->h_mtime_2)));
 		arcn->sb.st_size = (off_t)(RSHRT_EXT(hd->h_filesize_1));
 		arcn->sb.st_size = (arcn->sb.st_size << 16) |
-		                   ((off_t)(RSHRT_EXT(hd->h_filesize_2)));
+		    ((off_t)(RSHRT_EXT(hd->h_filesize_2)));
 		nsz = (int)(RSHRT_EXT(hd->h_namesize));
 	} else {
 		arcn->sb.st_dev = (dev_t)(SHRT_EXT(hd->h_dev));
@@ -879,10 +879,10 @@ bcpio_rd(ARCHD *arcn, char *buf)
 		arcn->sb.st_rdev = (dev_t)(SHRT_EXT(hd->h_rdev));
 		arcn->sb.st_mtime = (time_t)(SHRT_EXT(hd->h_mtime_1));
 		arcn->sb.st_mtime = (arcn->sb.st_mtime << 16) |
-		                    ((time_t)(SHRT_EXT(hd->h_mtime_2)));
+		    ((time_t)(SHRT_EXT(hd->h_mtime_2)));
 		arcn->sb.st_size = (off_t)(SHRT_EXT(hd->h_filesize_1));
 		arcn->sb.st_size = (arcn->sb.st_size << 16) |
-		                   ((off_t)(SHRT_EXT(hd->h_filesize_2)));
+		    ((off_t)(SHRT_EXT(hd->h_filesize_2)));
 		nsz = (int)(SHRT_EXT(hd->h_namesize));
 	}
 	arcn->sb.st_mtim.tv_nsec = 0;
@@ -939,7 +939,7 @@ off_t
 bcpio_endrd(void)
 {
 	return sizeof(HD_BCPIO) + sizeof(TRAILER) +
-	       (BCPIO_PAD(sizeof(HD_BCPIO) + sizeof(TRAILER)));
+	    (BCPIO_PAD(sizeof(HD_BCPIO) + sizeof(TRAILER)));
 }
 
 /*

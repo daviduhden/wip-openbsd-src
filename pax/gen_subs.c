@@ -215,7 +215,7 @@ listopt_parse_spec(
 				p++;
 				/* Support double h/l modifiers */
 				if ((spec->length[0] == 'h' ||
-				        spec->length[0] == 'l') &&
+				    spec->length[0] == 'l') &&
 				    spec->length[1] == '\0' &&
 				    (*p == spec->length[0])) {
 					if (strlen(spec->length) + 1 <
@@ -451,7 +451,7 @@ ls_list(ARCHD *arcn, time_t now, FILE *fp)
 	if ((tm = localtime(&(sbp->st_mtime))) == NULL)
 		f_date[0] = '\0';
 	else if (strftime(f_date, sizeof(f_date), TIMEFMT(sbp->st_mtime, now),
-	             tm) == 0)
+	    tm) == 0)
 		f_date[0] = '\0';
 	(void)fprintf(fp, "%s%2u %-*.*s %-*.*s ", f_mode, sbp->st_nlink,
 	    NAME_WIDTH, UT_NAMESIZE, user_from_uid(sbp->st_uid, 0), NAME_WIDTH,
@@ -504,7 +504,7 @@ ls_tty(ARCHD *arcn)
 	if ((tm = localtime(&(arcn->sb.st_mtime))) == NULL)
 		f_date[0] = '\0';
 	else if (strftime(
-	             f_date, DATELEN, TIMEFMT(arcn->sb.st_mtime, now), tm) == 0)
+	    f_date, DATELEN, TIMEFMT(arcn->sb.st_mtime, now), tm) == 0)
 		f_date[0] = '\0';
 	strmode(arcn->sb.st_mode, f_mode);
 	tty_prnt("%s%s %s\n", f_mode, f_date, arcn->name);
@@ -677,7 +677,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 			} else if (spec.keyword[0]) {
 				unsigned long long val = 0;
 				if (listopt_keyword_ull(
-				        arcn, spec.keyword, &val) == 0) {
+				    arcn, spec.keyword, &val) == 0) {
 					snprintf(outbuf, sizeof(outbuf), "%llu",
 					    val);
 					use = outbuf;
@@ -702,10 +702,10 @@ listopt_output(ARCHD *arcn, FILE *fp)
 					char *token;
 					int first = 1;
 					while ((token = strsep(&tmp, ",")) !=
-					       NULL) {
+					    NULL) {
 						const char *part =
 						    listopt_keyword_string(
-						        &ctx, arcn, token);
+						    &ctx, arcn, token);
 						if (!first)
 							strlcat(outbuf, "/",
 							    sizeof(outbuf));

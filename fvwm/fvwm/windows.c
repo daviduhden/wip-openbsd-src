@@ -34,8 +34,8 @@
 #define NO_DESK_SORT (1 << 6)
 #define SHOW_ICONNAME (1 << 7)
 #define SHOW_ALPHABETIC (1 << 8)
-#define SHOW_EVERYTHING                                                        \
-	(SHOW_GEOMETRY | SHOW_ALLDESKS | SHOW_NORMAL | SHOW_ICONIC |           \
+#define SHOW_EVERYTHING							\
+	(SHOW_GEOMETRY | SHOW_ALLDESKS | SHOW_NORMAL | SHOW_ICONIC |	\
 	    SHOW_STICKY | SHOW_ONTOP)
 
 /* Function to compare window title names
@@ -215,7 +215,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		for (ii = 0; ii < numWindows; ii++) {
 			t = windowList[ii];
 			if (((t->Desk == next_desk) ||
-			        (flags & NO_DESK_SORT)) &&
+			    (flags & NO_DESK_SORT)) &&
 			    (!(t->flags & WINDOWLISTSKIP))) {
 				if (!(flags & SHOW_ICONIC) &&
 				    (t->flags & ICONIFIED))
@@ -229,8 +229,8 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					             skip */
 				if (!(flags & SHOW_NORMAL) &&
 				    !((t->flags & ICONIFIED) ||
-				        (t->flags & STICKY) ||
-				        (t->flags & ONTOP)))
+				    (t->flags & STICKY) ||
+				    (t->flags & ONTOP)))
 					continue; /* don't want "normal" ones -
 					             skip */
 
@@ -264,10 +264,10 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					strlcat(tname, loc, sizeof(tname));
 
 					dheight = t->frame_height -
-					          t->title_height -
-					          2 * t->boundary_width;
+					    t->title_height -
+					    2 * t->boundary_width;
 					dwidth = t->frame_width -
-					         2 * t->boundary_width;
+					    2 * t->boundary_width;
 
 					dwidth -= t->hints.base_width;
 					dheight -= t->hints.base_height;

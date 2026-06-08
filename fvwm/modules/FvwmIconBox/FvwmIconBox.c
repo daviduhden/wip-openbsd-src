@@ -84,7 +84,7 @@ char NoResource[] = "NoResource";
 Pixel fore_pix, hilite_pix, back_pix, shadow_pix;
 Pixel icon_fore_pix, icon_back_pix, icon_hilite_pix, icon_shadow_pix;
 Pixel act_icon_fore_pix, act_icon_back_pix, act_icon_hilite_pix,
-    act_icon_shadow_pix;
+      act_icon_shadow_pix;
 
 GC NormalGC, ShadowGC, ReliefGC, IconShadowGC, IconReliefGC;
 Window main_win;
@@ -100,21 +100,21 @@ long CurrentDesk;
 int Width, Height;
 int UWidth, UHeight;
 
-#define MW_EVENTS                                                              \
-	(KeyPressMask | ExposureMask | StructureNotifyMask |                   \
+#define MW_EVENTS							\
+	(KeyPressMask | ExposureMask | StructureNotifyMask |		\
 	    ButtonReleaseMask | ButtonPressMask)
-#define SCROLL_EVENTS                                                          \
-	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
+#define SCROLL_EVENTS							\
+	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |	\
 	    ButtonPressMask | PointerMotionMask)
-#define BUTTON_EVENTS                                                          \
-	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
+#define BUTTON_EVENTS							\
+	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |	\
 	    ButtonPressMask | LeaveWindowMask | PointerMotionMask)
 
 unsigned long m_mask = M_CONFIGURE_WINDOW | M_ADD_WINDOW | M_DESTROY_WINDOW |
-                       M_END_WINDOWLIST | M_ICONIFY | M_DEICONIFY |
-                       M_ICON_NAME | M_RES_NAME | M_RES_CLASS | M_WINDOW_NAME |
-                       M_ICON_FILE | M_DEFAULTICON | M_CONFIG_INFO |
-                       M_END_CONFIG_INFO;
+    M_END_WINDOWLIST | M_ICONIFY | M_DEICONIFY |
+    M_ICON_NAME | M_RES_NAME | M_RES_CLASS | M_WINDOW_NAME |
+    M_ICON_FILE | M_DEFAULTICON | M_CONFIG_INFO |
+    M_END_CONFIG_INFO;
 
 struct icon_info *Hilite;
 int main_width, main_height;
@@ -277,8 +277,7 @@ Loop(void)
 								RedrawIcon(
 								    tmp, 1);
 								break;
-							} else if (
-							    Event.xany.window ==
+							} else if (Event.xany.window ==
 							    tmp->IconWin) {
 								RedrawIcon(
 								    tmp, 2);
@@ -357,12 +356,12 @@ Loop(void)
 					    h_scroll_bar)
 						motion = HORIZONTAL;
 					else if (Event.xbutton.window ==
-					         l_button) {
+					    l_button) {
 						Pressed = l_button;
 						RedrawLeftButton(
 						    ShadowGC, ReliefGC);
 					} else if (Event.xbutton.window ==
-					           r_button) {
+					    r_button) {
 						Pressed = r_button;
 						RedrawRightButton(
 						    ShadowGC, ReliefGC);
@@ -373,12 +372,12 @@ Loop(void)
 					    v_scroll_bar)
 						motion = VERTICAL;
 					else if (Event.xbutton.window ==
-					         t_button) {
+					    t_button) {
 						Pressed = t_button;
 						RedrawTopButton(
 						    ShadowGC, ReliefGC);
 					} else if (Event.xbutton.window ==
-					           b_button) {
+					    b_button) {
 						Pressed = b_button;
 						RedrawBottomButton(
 						    ShadowGC, ReliefGC);
@@ -393,20 +392,20 @@ Loop(void)
 			case ButtonRelease:
 				if (!(local_flags & HIDE_H)) {
 					if (Event.xbutton.window ==
-					        h_scroll_bar &&
+					    h_scroll_bar &&
 					    motion == HORIZONTAL)
 						HScroll(Event.xbutton.x *
-						        icon_win_width / Width);
+						    icon_win_width / Width);
 					else if (Event.xbutton.window ==
-					             l_button &&
-					         Pressed == l_button) {
+					    l_button &&
+					    Pressed == l_button) {
 						Pressed = None;
 						RedrawLeftButton(
 						    ReliefGC, ShadowGC);
 						HScroll(icon_win_x - UWidth);
 					} else if (Event.xbutton.window ==
-					               r_button &&
-					           Pressed == r_button) {
+					    r_button &&
+					    Pressed == r_button) {
 						Pressed = None;
 						RedrawRightButton(
 						    ReliefGC, ShadowGC);
@@ -415,21 +414,21 @@ Loop(void)
 				}
 				if (!(local_flags & HIDE_V)) {
 					if (Event.xbutton.window ==
-					        v_scroll_bar &&
+					    v_scroll_bar &&
 					    motion == VERTICAL)
 						VScroll(Event.xbutton.y *
-						        icon_win_height /
-						        Height);
+						    icon_win_height /
+						    Height);
 					else if (Event.xbutton.window ==
-					             t_button &&
-					         Pressed == t_button) {
+					    t_button &&
+					    Pressed == t_button) {
 						Pressed = None;
 						RedrawTopButton(
 						    ReliefGC, ShadowGC);
 						VScroll(icon_win_y - UHeight);
 					} else if (Event.xbutton.window ==
-					               b_button &&
-					           Pressed == b_button) {
+					    b_button &&
+					    Pressed == b_button) {
 						Pressed = None;
 						RedrawBottomButton(
 						    ReliefGC, ShadowGC);
@@ -442,10 +441,10 @@ Loop(void)
 			case MotionNotify:
 				if (motion == VERTICAL) {
 					VScroll(Event.xbutton.y *
-					        icon_win_height / Height);
+					    icon_win_height / Height);
 				} else if (motion == HORIZONTAL) {
 					HScroll(Event.xbutton.x *
-					        icon_win_width / Width);
+					    icon_win_width / Width);
 				}
 				break;
 			case EnterNotify:
@@ -462,7 +461,7 @@ Loop(void)
 
 			case LeaveNotify:
 				if ((tmp = Search(Event.xcrossing.window)) !=
-				        NULL &&
+				    NULL &&
 				    tmp == Hilite) {
 					Hilite = NULL;
 					RedrawIcon(tmp, redraw_flag);
@@ -473,18 +472,18 @@ Loop(void)
 					Pressed = None;
 					RedrawLeftButton(ReliefGC, ShadowGC);
 				} else if (!(local_flags & HIDE_H) &&
-				           Event.xbutton.window == r_button &&
-				           Pressed == r_button) {
+				    Event.xbutton.window == r_button &&
+				    Pressed == r_button) {
 					Pressed = None;
 					RedrawRightButton(ReliefGC, ShadowGC);
 				} else if (!(local_flags & HIDE_V) &&
-				           Event.xbutton.window == t_button &&
-				           Pressed == t_button) {
+				    Event.xbutton.window == t_button &&
+				    Pressed == t_button) {
 					Pressed = None;
 					RedrawTopButton(ReliefGC, ShadowGC);
 				} else if (!(local_flags & HIDE_V) &&
-				           Event.xbutton.window == b_button &&
-				           Pressed == b_button) {
+				    Event.xbutton.window == b_button &&
+				    Pressed == b_button) {
 					Pressed = None;
 					RedrawBottomButton(ReliefGC, ShadowGC);
 				}
@@ -519,7 +518,7 @@ Loop(void)
 					    XGetWMHints(dpy, tmp->id);
 					if (tmp->wmhints &&
 					    (tmp->wmhints->flags &
-					        IconPixmapHint)) {
+					     IconPixmapHint)) {
 #ifdef SHAPE
 						/* turn off "old" shape mask */
 						if (tmp->icon_maskPixmap !=
@@ -1049,7 +1048,7 @@ CreateWindow(void)
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
 		}
-	};
+	}
 
 	if ((local_flags & HIDE_H))
 		v_margin -= bar_width + margin2 + 4;
@@ -1058,7 +1057,7 @@ CreateWindow(void)
 
 	UWidth = max_icon_width + icon_relief + interval;
 	UHeight = font->ascent + font->descent + max_icon_height + icon_relief +
-	          6 + interval;
+	    6 + interval;
 	Width = UWidth * num_columns + interval - 1;
 	Height = UHeight * num_rows + interval - 1;
 
@@ -1140,11 +1139,11 @@ CreateWindow(void)
 	mysizehints.height -= v_margin;
 	holder_win =
 	    XCreateSimpleWindow(dpy, main_win, margin1 + 2, margin1 + 2,
-	        mysizehints.width, mysizehints.height, 0, fore_pix, back_pix);
+	    mysizehints.width, mysizehints.height, 0, fore_pix, back_pix);
 
 	icon_win =
 	    XCreateSimpleWindow(dpy, holder_win, -icon_win_x, -icon_win_y,
-	        icon_win_width, icon_win_height, 0, fore_pix, back_pix);
+	    icon_win_width, icon_win_height, 0, fore_pix, back_pix);
 
 	gcm = GCForeground | GCBackground;
 	gcv.foreground = hilite_pix;
@@ -1223,14 +1222,14 @@ CreateWindow(void)
 		attributes.win_gravity = NorthEastGravity;
 		t_button =
 		    XCreateWindow(dpy, main_win, margin1 + 6 + Width + margin2,
-		        margin1 + 2, bar_width, bar_width, 0, CopyFromParent,
-		        InputOutput, CopyFromParent, mask, &attributes);
+		    margin1 + 2, bar_width, bar_width, 0, CopyFromParent,
+		    InputOutput, CopyFromParent, mask, &attributes);
 		attributes.win_gravity = SouthEastGravity;
 		b_button =
 		    XCreateWindow(dpy, main_win, margin1 + 6 + Width + margin2,
-		        margin1 + 2 + Height - bar_width, bar_width, bar_width,
-		        0, CopyFromParent, InputOutput, CopyFromParent, mask,
-		        &attributes);
+		    margin1 + 2 + Height - bar_width, bar_width, bar_width,
+		    0, CopyFromParent, InputOutput, CopyFromParent, mask,
+		    &attributes);
 		XSelectInput(dpy, t_button, BUTTON_EVENTS);
 		XSelectInput(dpy, b_button, BUTTON_EVENTS);
 	}
@@ -1246,11 +1245,11 @@ GetIconwinSize(int *dx, int *dy)
 		icon_win_width = max(Width, UWidth * Lines + interval - 1);
 		icon_win_height = max(
 		    Height, UHeight * (max(0, (num_icons - 1)) / Lines + 1) -
-		                1 + interval);
+		    1 + interval);
 	} else {
 		icon_win_width =
 		    max(Width, UWidth * (max(0, num_icons - 1) / Lines + 1) +
-		                   interval - 1);
+		    interval - 1);
 		icon_win_height = max(Height, UHeight * Lines - 1 + interval);
 	}
 	*dx = icon_win_width - *dx;
@@ -1480,11 +1479,11 @@ ParseOptions(void)
 
 		if (strlen(&tline[0]) > 1) {
 			if (strncasecmp(tline,
-			        CatString3("*", MyName, "Geometry"),
-			        Clength + 9) == 0) {
+			    CatString3("*", MyName, "Geometry"),
+			    Clength + 9) == 0) {
 				tmp = &tline[Clength + 9];
 				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				       (*tmp != 0))
+				    (*tmp != 0))
 					tmp++;
 				tmp[strlen(tmp) - 1] = 0;
 				flags = XParseGeometry(
@@ -1502,11 +1501,11 @@ ParseOptions(void)
 				if (flags & YNegative)
 					yneg = 1;
 			} else if (strncasecmp(tline,
-			               CatString3("*", MyName, "MaxIconSize"),
-			               Clength + 12) == 0) {
+			    CatString3("*", MyName, "MaxIconSize"),
+			    Clength + 12) == 0) {
 				tmp = &tline[Clength + 12];
 				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				       (*tmp != 0))
+				    (*tmp != 0))
 					tmp++;
 				tmp[strlen(tmp) - 1] = 0;
 
@@ -1522,94 +1521,94 @@ ParseOptions(void)
 					max_icon_width += 4;
 				}
 			} else if (strncasecmp(tline,
-			               CatString3("*", MyName, "Font"),
-			               Clength + 5) == 0)
+			    CatString3("*", MyName, "Font"),
+			    Clength + 5) == 0)
 				CopyString(&font_string, &tline[Clength + 5]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "IconFore"),
-			             Clength + 9) == 0)
+			    CatString3("*", MyName, "IconFore"),
+			    Clength + 9) == 0)
 				CopyString(&IconFore, &tline[Clength + 9]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "IconBack"),
-			             Clength + 9) == 0)
+			    CatString3("*", MyName, "IconBack"),
+			    Clength + 9) == 0)
 				CopyString(&IconBack, &tline[Clength + 9]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "IconHiFore"),
-			             Clength + 11) == 0)
+			    CatString3("*", MyName, "IconHiFore"),
+			    Clength + 11) == 0)
 				CopyString(&ActIconFore, &tline[Clength + 11]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "IconHiBack"),
-			             Clength + 11) == 0)
+			    CatString3("*", MyName, "IconHiBack"),
+			    Clength + 11) == 0)
 				CopyString(&ActIconBack, &tline[Clength + 11]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Fore"),
-			             Clength + 5) == 0)
+			    CatString3("*", MyName, "Fore"),
+			    Clength + 5) == 0)
 				CopyString(&Fore, &tline[Clength + 5]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Back"),
-			             Clength + 5) == 0)
+			    CatString3("*", MyName, "Back"),
+			    Clength + 5) == 0)
 				CopyString(&Back, &tline[Clength + 5]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Pixmap"),
-			             Clength + 7) == 0)
+			    CatString3("*", MyName, "Pixmap"),
+			    Clength + 7) == 0)
 				CopyString(
 				    &IconwinPixmapFile, &tline[Clength + 7]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Padding"),
-			             Clength + 8) == 0)
+			    CatString3("*", MyName, "Padding"),
+			    Clength + 8) == 0)
 				interval = max(0, atoi(&tline[Clength + 8]));
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "FrameWidth"),
-			             Clength + 11) == 0) {
+			    CatString3("*", MyName, "FrameWidth"),
+			    Clength + 11) == 0) {
 				sscanf(&tline[Clength + 11], "%d %d", &margin1,
 				    &margin2);
 				margin1 = max(0, margin1);
 				margin2 = max(0, margin2);
 			} else if (strncasecmp(tline,
-			               CatString3("*", MyName, "Lines"),
-			               Clength + 6) == 0)
+			    CatString3("*", MyName, "Lines"),
+			    Clength + 6) == 0)
 				Lines = max(1, atoi(&tline[Clength + 6]));
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "SBWidth"),
-			             Clength + 8) == 0)
+			    CatString3("*", MyName, "SBWidth"),
+			    Clength + 8) == 0)
 				bar_width = max(5, atoi(&tline[Clength + 8]));
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Placement"),
-			             Clength + 10) == 0)
+			    CatString3("*", MyName, "Placement"),
+			    Clength + 10) == 0)
 				parseplacement(&tline[Clength + 10]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "SetWMIconSize"),
-			             Clength + 14) == 0)
+			    CatString3("*", MyName, "SetWMIconSize"),
+			    Clength + 14) == 0)
 				local_flags |= SETWMICONSIZE;
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "HilightFocusWin"),
-			             Clength + 16) == 0)
+			    CatString3("*", MyName, "HilightFocusWin"),
+			    Clength + 16) == 0)
 				m_mask |= M_FOCUS_CHANGE;
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Resolution"),
-			             Clength + 11) == 0) {
+			    CatString3("*", MyName, "Resolution"),
+			    Clength + 11) == 0) {
 				tmp = &tline[Clength + 11];
 				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				       (*tmp != 0))
+				    (*tmp != 0))
 					tmp++;
 				if (strncasecmp(tmp, "Desk", 4) == 0) {
 					m_mask |= M_NEW_DESK;
 					local_flags |= CURRENT_ONLY;
 				}
 			} else if (strncasecmp(tline,
-			               CatString3("*", MyName, "Mouse"),
-			               Clength + 6) == 0)
+			    CatString3("*", MyName, "Mouse"),
+			    Clength + 6) == 0)
 				parsemouse(&tline[Clength + 6]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "Key"),
-			             Clength + 4) == 0)
+			    CatString3("*", MyName, "Key"),
+			    Clength + 4) == 0)
 				parsekey(&tline[Clength + 4]);
 			else if (strncasecmp(tline,
-			             CatString3("*", MyName, "SortIcons"),
-			             Clength + 10) == 0) {
+			    CatString3("*", MyName, "SortIcons"),
+			    Clength + 10) == 0) {
 				tmp = &tline[Clength + 10];
 				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				       (*tmp != 0))
+				    (*tmp != 0))
 					tmp++;
 				if (strlen(tmp) == 0) { /* the case where no
 					                   argument is given */
@@ -1625,19 +1624,19 @@ ParseOptions(void)
 				else if (strncasecmp(tmp, "ResName", 7) == 0)
 					sortby = RESNAME;
 			} else if (strncasecmp(tline,
-			               CatString3("*", MyName, "HideSC"),
-			               Clength + 7) == 0) {
+			    CatString3("*", MyName, "HideSC"),
+			    Clength + 7) == 0) {
 				tmp = &tline[Clength + 7];
 				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				       (*tmp != 0))
+				    (*tmp != 0))
 					tmp++;
 				if (strncasecmp(tmp, "Horizontal", 10) == 0)
 					local_flags |= HIDE_H;
 				else if (strncasecmp(tmp, "Vertical", 8) == 0)
 					local_flags |= HIDE_V;
 			} else if (strncasecmp(tline,
-			               CatString3("*", MyName, ""),
-			               Clength + 1) == 0)
+			    CatString3("*", MyName, ""),
+			    Clength + 1) == 0)
 				parseicon(&tline[Clength + 1]);
 			else if (strncasecmp(tline, "IconPath", 8) == 0)
 				CopyString(&iconPath, &tline[8]);
@@ -1978,7 +1977,7 @@ process_message(unsigned long type, unsigned long *body)
 						if (olddesk == CurrentDesk ||
 						    tmp->desk == CurrentDesk) {
 							if (tmp->desk ==
-							        CurrentDesk &&
+							    CurrentDesk &&
 							    sortby != UNSORT)
 								SortItem(NULL);
 							num_icons =
@@ -1987,15 +1986,15 @@ process_message(unsigned long type, unsigned long *body)
 							    &diffx, &diffy);
 							if (diffy &&
 							    (primary ==
-							            BOTTOM ||
-							        secondary ==
-							            BOTTOM))
+							     BOTTOM ||
+							     secondary ==
+							     BOTTOM))
 								icon_win_y +=
 								    diffy;
 							if (diffx &&
 							    (primary == RIGHT ||
-							        secondary ==
-							            RIGHT))
+							     secondary ==
+							     RIGHT))
 								icon_win_x +=
 								    diffx;
 							if (icon_win_y < 0)
@@ -2008,7 +2007,7 @@ process_message(unsigned long type, unsigned long *body)
 								    icon_win_width -
 								    Width;
 							if (icon_win_y +
-							        Height >
+							    Height >
 							    icon_win_height)
 								icon_win_y =
 								    icon_win_height -
@@ -2039,21 +2038,21 @@ process_message(unsigned long type, unsigned long *body)
 									    tmp->icon_pixmap_w);
 							}
 							if (!(local_flags &
-							        HIDE_H) &&
+							    HIDE_H) &&
 							    diffx)
 								RedrawHScrollbar();
 							if (!(local_flags &
-							        HIDE_V) &&
+							    HIDE_V) &&
 							    diffy)
 								RedrawVScrollbar();
 						}
 					} else if ((body[8] & STICKY) &&
-					           !(tmp->flags &
-					               STICKY)) /* stick */
+					    !(tmp->flags &
+					    STICKY)) /* stick */
 						tmp->flags |= STICKY;
 					else if (!(body[8] & STICKY) &&
-					         (tmp->flags &
-					             STICKY)) { /* unstick */
+					    (tmp->flags &
+					     STICKY)) { /* unstick */
 						tmp->flags &= ~STICKY;
 						tmp->desk = body[7];
 					}
@@ -2298,7 +2297,7 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 	while (tmp != NULL) {
 		if (tmp->id == id ||
 		    (tmp->wmhints && (tmp->wmhints->flags & IconWindowHint) &&
-		        tmp->wmhints->icon_window == id))
+		     tmp->wmhints->icon_window == id))
 			return False;
 		tmp = tmp->next;
 	}
@@ -2431,7 +2430,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 				if (sortby == RESCLASS &&
 				    strcmp(NoClass, str) == 0 &&
 				    !(ret = XGetClassHint(
-				          dpy, tmp->id, &classhint))) {
+				    dpy, tmp->id, &classhint))) {
 					tmp->extra_flags |= NOCLASS;
 				}
 				if (ret) {
@@ -2447,7 +2446,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 				if (sortby == RESNAME &&
 				    strcmp(NoResource, str) == 0 &&
 				    !(ret = XGetClassHint(
-				          dpy, tmp->id, &classhint)))
+				    dpy, tmp->id, &classhint)))
 					tmp->extra_flags |= NONAME;
 				if (ret) {
 					if (classhint.res_class != NULL)
@@ -2472,7 +2471,7 @@ SortItem(struct icon_info *item)
 		return False;
 
 	if (item != NULL && ((itemcmp(item->prev, item) <= 0) &&
-	                        (itemcmp(item->next, item) >= 0)))
+	    (itemcmp(item->next, item) >= 0)))
 		return False;
 
 	while (tmp1->next != NULL) {
@@ -2651,7 +2650,7 @@ freeitem(struct icon_info *item, int d)
 		XFreePixmap(dpy, item->iconPixmap);
 	if (item->icon_maskPixmap != None &&
 	    (item->wmhints == NULL ||
-	        !(item->wmhints->flags & (IconPixmapHint | IconWindowHint))))
+	     !(item->wmhints->flags & (IconPixmapHint | IconWindowHint))))
 		XFreePixmap(dpy, item->icon_maskPixmap);
 
 	free(item);
@@ -2672,14 +2671,14 @@ IsClick(int x, int y, unsigned EndMask, XEvent *d)
 	xcurrent = x;
 	ycurrent = y;
 	while ((total < ClickTime) && (x - xcurrent < 5) &&
-	       (x - xcurrent > -5) && (y - ycurrent < 5) &&
-	       (y - ycurrent > -5)) {
+	    (x - xcurrent > -5) && (y - ycurrent < 5) &&
+	    (y - ycurrent > -5)) {
 		usleep(10000);
 		total += 10;
 		if (XCheckMaskEvent(dpy, EndMask, d))
 			return True;
 		if (XCheckMaskEvent(
-		        dpy, ButtonMotionMask | PointerMotionMask, d)) {
+		    dpy, ButtonMotionMask | PointerMotionMask, d)) {
 			xcurrent = d->xmotion.x_root;
 			ycurrent = d->xmotion.y_root;
 		}
@@ -2749,9 +2748,9 @@ ExecuteKey(XEvent event)
 		    XGetKeyboardMapping(dpy, event.xkey.keycode, 1, &width);
 		if (mapping != NULL) {
 			KeySym primary = width > 0 ? mapping[0] : NoSymbol;
-			KeyCode canonical = (primary != NoSymbol)
-			                        ? XKeysymToKeycode(dpy, primary)
-			                        : 0;
+			KeyCode canonical = (primary != NoSymbol) ?
+			    XKeysymToKeycode(dpy, primary) :
+			    0;
 			if (canonical != 0)
 				event.xkey.keycode = canonical;
 			XFree(mapping);

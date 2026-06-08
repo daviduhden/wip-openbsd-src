@@ -50,14 +50,14 @@ HandleColormapNotify(void)
 			last_cmap = Tmp_win->attr.colormap;
 		ReInstall = True;
 	} else if ((cevent->state == ColormapUninstalled) &&
-	           (last_cmap == cevent->colormap)) {
+	    (last_cmap == cevent->colormap)) {
 		/* Some window installed its colormap, change it back */
 		ReInstall = True;
 	}
 
 	while (XCheckTypedEvent(dpy, ColormapNotify, &Event)) {
 		if (XFindContext(dpy, cevent->window, FvwmContext,
-		        (caddr_t *)&Tmp_win) == XCNOENT)
+		    (caddr_t *)&Tmp_win) == XCNOENT)
 			Tmp_win = NULL;
 		if ((Tmp_win) && (cevent->new)) {
 			XGetWindowAttributes(dpy, Tmp_win->w, &(Tmp_win->attr));
@@ -66,12 +66,12 @@ HandleColormapNotify(void)
 				last_cmap = Tmp_win->attr.colormap;
 			ReInstall = True;
 		} else if ((Tmp_win) &&
-		           (cevent->state == ColormapUninstalled) &&
-		           (last_cmap == cevent->colormap)) {
+		    (cevent->state == ColormapUninstalled) &&
+		    (last_cmap == cevent->colormap)) {
 			/* Some window installed its colormap, change it back */
 			ReInstall = True;
 		} else if ((Tmp_win) && (cevent->state == ColormapInstalled) &&
-		           (last_cmap == cevent->colormap)) {
+		    (last_cmap == cevent->colormap)) {
 			/* The last color map installed was the correct one.
 			 * Don't change anything */
 			ReInstall = False;
@@ -148,9 +148,9 @@ InstallWindowColormaps(FvwmWindow *tmp)
 			if (last_cmap != attributes.colormap
 #if defined(sun) && defined(TRUECOLOR_ALWAYS_INSTALLED)
 			    && !(attributes.depth == 24 &&
-			           attributes.visual->class == TrueColor)
+			    attributes.visual->class == TrueColor)
 #endif
-			) {
+			    ) {
 				last_cmap = attributes.colormap;
 				XInstallColormap(dpy, attributes.colormap);
 			}
@@ -161,9 +161,9 @@ InstallWindowColormaps(FvwmWindow *tmp)
 		if (last_cmap != tmp->attr.colormap
 #if defined(sun) && defined(TRUECOLOR_ALWAYS_INSTALLED)
 		    && !(tmp->attr.depth == 24 &&
-		           tmp->attr.visual->class == TrueColor)
+		    tmp->attr.visual->class == TrueColor)
 #endif
-		) {
+		    ) {
 			last_cmap = tmp->attr.colormap;
 			XInstallColormap(dpy, tmp->attr.colormap);
 		}
@@ -233,7 +233,7 @@ FetchWmColormapWindows(FvwmWindow *tmp)
 		XFree((void *)tmp->cmap_windows);
 
 	if (!XGetWMColormapWindows(dpy, tmp->w, &(tmp->cmap_windows),
-	        &(tmp->number_cmap_windows))) {
+	    &(tmp->number_cmap_windows))) {
 		tmp->number_cmap_windows = 0;
 		tmp->cmap_windows = NULL;
 	}

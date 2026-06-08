@@ -1212,6 +1212,7 @@ chk_dev(dev_t dev, int add)
 	dtab[indx] = pt;
 	return (pt);
 }
+
 /*
  * map_dev()
  *	given an inode and device storage mask (the mask has a 1 for each bit

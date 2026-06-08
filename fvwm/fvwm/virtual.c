@@ -76,10 +76,10 @@ HandlePaging(int HorWarpSize, int VertWarpSize, int *xl, int *yt, int *delta_x,
 
 	/* need to move the viewport */
 	if ((Scr.VxMax == 0 ||
-	        (*xl >= edge_thickness &&
-	            *xl < Scr.MyDisplayWidth - edge_thickness)) &&
+	    (*xl >= edge_thickness &&
+	     *xl < Scr.MyDisplayWidth - edge_thickness)) &&
 	    (Scr.VyMax == 0 || (*yt >= edge_thickness &&
-	                           *yt < Scr.MyDisplayHeight - edge_thickness)))
+	     *yt < Scr.MyDisplayHeight - edge_thickness)))
 		return;
 
 	total = 0;
@@ -91,22 +91,22 @@ HandlePaging(int HorWarpSize, int VertWarpSize, int *xl, int *yt, int *delta_x,
 		    &JunkX, &JunkY, &JunkMask);
 
 		if (XCheckWindowEvent(
-		        dpy, Scr.PanFrameTop.win, LeaveWindowMask, &Event)) {
+		    dpy, Scr.PanFrameTop.win, LeaveWindowMask, &Event)) {
 			StashEventTime(&Event);
 			return;
 		}
 		if (XCheckWindowEvent(
-		        dpy, Scr.PanFrameBottom.win, LeaveWindowMask, &Event)) {
+		    dpy, Scr.PanFrameBottom.win, LeaveWindowMask, &Event)) {
 			StashEventTime(&Event);
 			return;
 		}
 		if (XCheckWindowEvent(
-		        dpy, Scr.PanFrameLeft.win, LeaveWindowMask, &Event)) {
+		    dpy, Scr.PanFrameLeft.win, LeaveWindowMask, &Event)) {
 			StashEventTime(&Event);
 			return;
 		}
 		if (XCheckWindowEvent(
-		        dpy, Scr.PanFrameRight.win, LeaveWindowMask, &Event)) {
+		    dpy, Scr.PanFrameRight.win, LeaveWindowMask, &Event)) {
 			StashEventTime(&Event);
 			return;
 		}
@@ -289,7 +289,7 @@ checkPanFrames(void)
 		XUnmapWindow(dpy, Scr.PanFrameLeft.win);
 		Scr.PanFrameLeft.isMapped = False;
 	} else if ((Scr.Vx > 0 || wrapX) &&
-	           Scr.PanFrameLeft.isMapped == False) {
+	    Scr.PanFrameLeft.isMapped == False) {
 		XMapRaised(dpy, Scr.PanFrameLeft.win);
 		Scr.PanFrameLeft.isMapped = True;
 	}
@@ -298,7 +298,7 @@ checkPanFrames(void)
 		XUnmapWindow(dpy, Scr.PanFrameRight.win);
 		Scr.PanFrameRight.isMapped = False;
 	} else if ((Scr.Vx < Scr.VxMax || wrapX) &&
-	           Scr.PanFrameRight.isMapped == False) {
+	    Scr.PanFrameRight.isMapped == False) {
 		XMapRaised(dpy, Scr.PanFrameRight.win);
 		Scr.PanFrameRight.isMapped = True;
 	}
@@ -315,7 +315,7 @@ checkPanFrames(void)
 		XUnmapWindow(dpy, Scr.PanFrameBottom.win);
 		Scr.PanFrameBottom.isMapped = False;
 	} else if ((Scr.Vy < Scr.VyMax || wrapY) &&
-	           Scr.PanFrameBottom.isMapped == False) {
+	    Scr.PanFrameBottom.isMapped == False) {
 		XMapRaised(dpy, Scr.PanFrameBottom.win);
 		Scr.PanFrameBottom.isMapped = True;
 	}
@@ -435,7 +435,6 @@ MoveViewport(int newx, int newy, Bool grab)
 	    Scr.VxMax, Scr.VyMax);
 
 	if ((deltax != 0) || (deltay != 0)) {
-
 		/*
 		RBW - 11/13/1998  - new:  chase the chain bidirectionally, all
 		at once! The idea is to move the windows that are moving out of
@@ -459,7 +458,7 @@ MoveViewport(int newx, int newy, Bool grab)
 				txr = t->frame_x + t->frame_width;
 				tyb = t->frame_y + t->frame_height;
 				if ((txr >= PageLeft && txl <= PageRight &&
-				        tyb >= PageTop && tyt <= PageBottom) &&
+				    tyb >= PageTop && tyt <= PageBottom) &&
 				    !t->tmpflags.ViewportMoved) {
 					t->tmpflags.ViewportMoved =
 					    True; /*  Block double move.  */
@@ -467,7 +466,7 @@ MoveViewport(int newx, int newy, Bool grab)
 					 * sticky Icons is set, then the window
 					 * should essentially be sticky */
 					if (!((t->flags & ICONIFIED) &&
-					        (t->flags & StickyIcon)) &&
+					    (t->flags & StickyIcon)) &&
 					    (!(t->flags & STICKY))) {
 						if (!(t->flags & StickyIcon)) {
 							t->icon_x_loc += deltax;
@@ -485,20 +484,20 @@ MoveViewport(int newx, int newy, Bool grab)
 								    t->icon_w,
 								    t->icon_x_loc,
 								    t->icon_y_loc +
-								        t->icon_p_height);
+								    t->icon_p_height);
 							if (!(t->flags &
-							        ICON_UNMAPPED)) {
+							    ICON_UNMAPPED)) {
 								BroadcastPacket(
 								    M_ICON_LOCATION,
 								    7, t->w,
 								    t->frame,
 								    (unsigned long)
-								        t,
+								    t,
 								    t->icon_x_loc,
 								    t->icon_y_loc,
 								    t->icon_w_width,
 								    t->icon_w_height +
-								        t->icon_p_height);
+								    t->icon_p_height);
 							}
 						}
 						SetupFrame(t,
@@ -521,7 +520,7 @@ MoveViewport(int newx, int newy, Bool grab)
 				txr = t1->frame_x + t1->frame_width;
 				tyb = t1->frame_y + t1->frame_height;
 				if (!(txr >= PageLeft && txl <= PageRight &&
-				        tyb >= PageTop && tyt <= PageBottom) &&
+				    tyb >= PageTop && tyt <= PageBottom) &&
 				    !t1->tmpflags.ViewportMoved) {
 					t1->tmpflags.ViewportMoved =
 					    True; /* Block double move.*/
@@ -529,7 +528,7 @@ MoveViewport(int newx, int newy, Bool grab)
 					 * sticky Icons is set, then the window
 					 * should essentially be sticky */
 					if (!((t1->flags & ICONIFIED) &&
-					        (t1->flags & StickyIcon)) &&
+					    (t1->flags & StickyIcon)) &&
 					    (!(t1->flags & STICKY))) {
 						if (!(t1->flags & StickyIcon)) {
 							t1->icon_x_loc +=
@@ -549,20 +548,20 @@ MoveViewport(int newx, int newy, Bool grab)
 								    t1->icon_w,
 								    t1->icon_x_loc,
 								    t1->icon_y_loc +
-								        t1->icon_p_height);
+								    t1->icon_p_height);
 							if (!(t1->flags &
-							        ICON_UNMAPPED)) {
+							    ICON_UNMAPPED)) {
 								BroadcastPacket(
 								    M_ICON_LOCATION,
 								    7, t1->w,
 								    t1->frame,
 								    (unsigned long)
-								        t1,
+								    t1,
 								    t1->icon_x_loc,
 								    t1->icon_y_loc,
 								    t1->icon_w_width,
 								    t1->icon_w_height +
-								        t1->icon_p_height);
+								    t1->icon_p_height);
 							}
 						}
 						SetupFrame(t1,
@@ -716,7 +715,7 @@ changeDesks(int desk)
 	while (t != &Scr.FvwmRoot || t1 != &Scr.FvwmRoot) {
 		if (t != &Scr.FvwmRoot) {
 			if (!((t->flags & ICONIFIED) &&
-			        (t->flags & StickyIcon)) &&
+			    (t->flags & StickyIcon)) &&
 			    (!(t->flags & STICKY)) &&
 			    (!(t->flags & ICON_UNMAPPED))) {
 				if (t->Desk == Scr.CurrentDesk) {
@@ -729,7 +728,7 @@ changeDesks(int desk)
 			/*
 			              Only need to do these in one of the
 			   passes...
-			          */
+				  */
 			{
 				/* Window is sticky */
 				t->Desk = Scr.CurrentDesk;
@@ -743,7 +742,7 @@ changeDesks(int desk)
 		if (t1 != &Scr.FvwmRoot) {
 			/* Only change mapping for non-sticky windows */
 			if (!((t1->flags & ICONIFIED) &&
-			        (t1->flags & StickyIcon)) &&
+			    (t1->flags & StickyIcon)) &&
 			    (!(t1->flags & STICKY)) &&
 			    (!(t1->flags & ICON_UNMAPPED))) {
 				if (t1->Desk == oldDesk) {

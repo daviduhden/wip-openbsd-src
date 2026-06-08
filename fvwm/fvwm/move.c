@@ -33,7 +33,7 @@ Bool NeedToResizeToo;
 /* Animated move stuff added by Greg J. Badros, gjb@cs.washington.edu */
 
 float rgpctMovementDefault[32] = {
-    -.01, 0, .01, .03, .08, .18, .3, .45, .60, .75, .85, .90, .94, .97, .99, 1.0
+	-.01, 0, .01, .03, .08, .18, .3, .45, .60, .75, .85, .90, .94, .97, .99, 1.0
     /* must end in 1.0 */
 };
 
@@ -92,8 +92,8 @@ AnimatedMoveOfWindow(Window w, int startX, int startY, int endX, int endY,
 		   we warn the user when they use > .5 seconds as a
 		   between-frame delay time */
 		if (XCheckMaskEvent(dpy,
-		        ButtonPressMask | ButtonReleaseMask | KeyPressMask,
-		        &Event)) {
+		    ButtonPressMask | ButtonReleaseMask | KeyPressMask,
+		    &Event)) {
 			/* finish the move immediately */
 			XMoveWindow(dpy, w, endX, endY);
 			XFlush(dpy);
@@ -173,8 +173,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		if (fWarp & !fAnimated)
 			XWarpPointer(dpy, None, None, 0, 0, 0, 0, FinalX - x,
 			    FinalY - y);
-	} else /* icon window */
-	{
+	} else /* icon window */ {
 		tmp_win->flags |= ICON_MOVED;
 		tmp_win->icon_x_loc = FinalX;
 		tmp_win->icon_xl_loc =
@@ -276,28 +275,24 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 		self.h = Height + 2 * tmp_win->bw;
 	}
 	while (Scr.SnapAttraction >= 0 && tmp) {
-		if (Scr.SnapMode == 0) /* All */
-		{
+		if (Scr.SnapMode == 0) { /* All */
 			/* NOOP */
 		}
-		if (Scr.SnapMode == 1) /* SameType */
-		{
+		if (Scr.SnapMode == 1) { /* SameType */
 			if ((tmp->flags & ICONIFIED) !=
 			    (tmp_win->flags & ICONIFIED)) {
 				tmp = tmp->next;
 				continue;
 			}
 		}
-		if (Scr.SnapMode == 2) /* Icons */
-		{
+		if (Scr.SnapMode == 2) { /* Icons */
 			if (!(tmp->flags & ICONIFIED) ||
 			    !(tmp_win->flags & ICONIFIED)) {
 				tmp = tmp->next;
 				continue;
 			}
 		}
-		if (Scr.SnapMode == 3) /* Windows */
-		{
+		if (Scr.SnapMode == 3) { /* Windows */
 			if ((tmp->flags & ICONIFIED) ||
 			    (tmp_win->flags & ICONIFIED)) {
 				tmp = tmp->next;
@@ -322,17 +317,17 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 				other.y = tmp->frame_y;
 			}
 			if (!((other.y + other.h) < (*py) ||
-			        (other.y) > (*py + self.h))) {
+			    (other.y) > (*py + self.h))) {
 				dist = abs(other.x - (*px + self.w));
 				if (dist < closestRight) {
 					closestRight = dist;
 					if (((*px + self.w) >= other.x) &&
 					    ((*px + self.w) <
-					        other.x + Scr.SnapAttraction))
+					     other.x + Scr.SnapAttraction))
 						nxl = other.x - self.w;
 
 					if (((*px + self.w) >=
-					        other.x - Scr.SnapAttraction) &&
+					    other.x - Scr.SnapAttraction) &&
 					    ((*px + self.w) < other.x))
 						nxl = other.x - self.w;
 				}
@@ -341,25 +336,25 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 					closestLeft = dist;
 					if ((*px <= other.x + other.w) &&
 					    (*px > other.x + other.w -
-					               Scr.SnapAttraction))
+					     Scr.SnapAttraction))
 						nxl = other.x + other.w;
 					if ((*px <= other.x + other.w +
-					                Scr.SnapAttraction) &&
+					    Scr.SnapAttraction) &&
 					    (*px > other.x + other.w))
 						nxl = other.x + other.w;
 				}
 			}
 			if (!((other.x + other.w) < (*px) ||
-			        (other.x) > (*px + self.w))) {
+			    (other.x) > (*px + self.w))) {
 				dist = abs(other.y - (*py + self.h));
 				if (dist < closestBottom) {
 					closestBottom = dist;
 					if (((*py + self.h) >= other.y) &&
 					    ((*py + self.h) <
-					        other.y + Scr.SnapAttraction))
+					     other.y + Scr.SnapAttraction))
 						nyt = other.y - self.h;
 					if (((*py + self.h) >=
-					        other.y - Scr.SnapAttraction) &&
+					    other.y - Scr.SnapAttraction) &&
 					    ((*py + self.h) < other.y))
 						nyt = other.y - self.h;
 				}
@@ -368,10 +363,10 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 					closestTop = dist;
 					if ((*py <= other.y + other.h) &&
 					    (*py > other.y + other.h -
-					               Scr.SnapAttraction))
+					     Scr.SnapAttraction))
 						nyt = other.y + other.h;
 					if ((*py <= other.y + other.h +
-					                Scr.SnapAttraction) &&
+					    Scr.SnapAttraction) &&
 					    (*py > other.y + other.h))
 						nyt = other.y + other.h;
 				}
@@ -382,7 +377,7 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 	if (nxl == -1) {
 		if (*px != *px / Scr.SnapGridX * Scr.SnapGridX) {
 			*px = (*px + Scr.SnapGridX / 2) / Scr.SnapGridX *
-			      Scr.SnapGridX;
+			    Scr.SnapGridX;
 		}
 	} else {
 		*px = nxl;
@@ -390,7 +385,7 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 	if (nyt == -1) {
 		if (*py != *py / Scr.SnapGridY * Scr.SnapGridY) {
 			*py = (*py + Scr.SnapGridY / 2) / Scr.SnapGridY *
-			      Scr.SnapGridY;
+			    Scr.SnapGridY;
 		}
 	} else {
 		*py = nyt;
@@ -430,7 +425,7 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 		/* block until there is an interesting event */
 		XMaskEvent(dpy,
 		    ButtonPressMask | ButtonReleaseMask | KeyPressMask |
-		        PointerMotionMask | ButtonMotionMask | ExposureMask,
+		    PointerMotionMask | ButtonMotionMask | ExposureMask,
 		    &Event);
 		StashEventTime(&Event);
 
@@ -438,7 +433,7 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 		if (Event.type == MotionNotify) {
 			while (XCheckMaskEvent(dpy,
 			    PointerMotionMask | ButtonMotionMask |
-			        ButtonPressMask | ButtonRelease,
+			    ButtonPressMask | ButtonRelease,
 			    &Event)) {
 				StashEventTime(&Event);
 				if (Event.type == ButtonRelease)
@@ -466,25 +461,25 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 		case ButtonPress:
 			XAllowEvents(dpy, ReplayPointer, CurrentTime);
 			if (((Event.xbutton.button == 1) &&
-			        (button_mask & Button1Mask)) ||
+			    (button_mask & Button1Mask)) ||
 			    ((Event.xbutton.button == 2) &&
-			        (button_mask & Button2Mask)) ||
+			     (button_mask & Button2Mask)) ||
 			    ((Event.xbutton.button == 3) &&
-			        (button_mask & Button3Mask)) ||
+			     (button_mask & Button3Mask)) ||
 			    ((Event.xbutton.button == 4) &&
-			        (button_mask & Button4Mask)) ||
+			     (button_mask & Button4Mask)) ||
 			    ((Event.xbutton.button == 5) &&
-			        (button_mask & Button5Mask))) {
+			     (button_mask & Button5Mask))) {
 				/* No new button was pressed, just a delayed
 				 * event */
 				done = 1;
 				break;
 			}
 			if (((Event.xbutton.button == 2) &&
-			        (!Scr.gs.EmulateMWM)) ||
+			    (!Scr.gs.EmulateMWM)) ||
 			    ((Event.xbutton.button == 1) &&
-			        (Scr.gs.EmulateMWM) &&
-			        (Event.xbutton.state & ShiftMask))) {
+			     (Scr.gs.EmulateMWM) &&
+			     (Event.xbutton.state & ShiftMask))) {
 				NeedToResizeToo = True;
 				/* Fallthrough to button-release */
 			} else {
@@ -517,13 +512,13 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 			/* Resist moving windows over the edge of the screen! */
 			if (((xl + Width) >= Scr.MyDisplayWidth) &&
 			    ((xl + Width) <
-			        Scr.MyDisplayWidth + Scr.MoveResistance))
+			     Scr.MyDisplayWidth + Scr.MoveResistance))
 				xl = Scr.MyDisplayWidth - Width - 2 * bw;
 			if ((xl <= 0) && (xl > -Scr.MoveResistance))
 				xl = 0;
 			if (((yt + Height) >= Scr.MyDisplayHeight) &&
 			    ((yt + Height) <
-			        Scr.MyDisplayHeight + Scr.MoveResistance))
+			     Scr.MyDisplayHeight + Scr.MoveResistance))
 				yt = Scr.MyDisplayHeight - Height - 2 * bw;
 			if ((yt <= 0) && (yt > -Scr.MoveResistance))
 				yt = 0;
@@ -549,13 +544,13 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 			/* Resist moving windows over the edge of the screen! */
 			if (((xl + Width) >= Scr.MyDisplayWidth) &&
 			    ((xl + Width) <
-			        Scr.MyDisplayWidth + Scr.MoveResistance))
+			     Scr.MyDisplayWidth + Scr.MoveResistance))
 				xl = Scr.MyDisplayWidth - Width - 2 * bw;
 			if ((xl <= 0) && (xl > -Scr.MoveResistance))
 				xl = 0;
 			if (((yt + Height) >= Scr.MyDisplayHeight) &&
 			    ((yt + Height) <
-			        Scr.MyDisplayHeight + Scr.MoveResistance))
+			     Scr.MyDisplayHeight + Scr.MoveResistance))
 				yt = Scr.MyDisplayHeight - Height - 2 * bw;
 			if ((yt <= 0) && (yt > -Scr.MoveResistance))
 				yt = 0;
@@ -575,25 +570,25 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 						tmp_win->icon_xl_loc =
 						    xl -
 						    (tmp_win->icon_w_width -
-						        tmp_win->icon_p_width) /
-						        2;
+						     tmp_win->icon_p_width) /
+						    2;
 						tmp_win->icon_y_loc = yt;
 						if (tmp_win->icon_pixmap_w !=
 						    None)
 							XMoveWindow(dpy,
 							    tmp_win
-							        ->icon_pixmap_w,
+							    ->icon_pixmap_w,
 							    tmp_win->icon_x_loc,
 							    yt);
 						else if (tmp_win->icon_w !=
-						         None)
+						    None)
 							XMoveWindow(dpy,
 							    tmp_win->icon_w,
 							    tmp_win
-							        ->icon_xl_loc,
+							    ->icon_xl_loc,
 							    yt +
-							        tmp_win
-							            ->icon_p_height);
+							    tmp_win
+							    ->icon_p_height);
 					} else
 						XMoveWindow(dpy, tmp_win->frame,
 						    xl, yt);
@@ -608,12 +603,12 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 
 					xl = Event.xmotion.x_root;
 					yt = Event.xmotion.y_root;
-					dx = Scr.EdgeScrollX
-					         ? Scr.EdgeScrollX
-					         : Scr.MyDisplayWidth;
-					dy = Scr.EdgeScrollY
-					         ? Scr.EdgeScrollY
-					         : Scr.MyDisplayHeight;
+					dx = Scr.EdgeScrollX ?
+					    Scr.EdgeScrollX :
+					    Scr.MyDisplayWidth;
+					dy = Scr.EdgeScrollY ?
+					    Scr.EdgeScrollY :
+					    Scr.MyDisplayHeight;
 					HandlePaging(dx, dy, &xl, &yt, &delta_x,
 					    &delta_y, False);
 					xl += XOffset;
@@ -677,8 +672,8 @@ DisplayPosition(FvwmWindow *tmp_win, int x, int y, int Init)
 	}
 
 	offset = (Scr.SizeStringWidth + SIZE_HINDENT * 2 -
-	             XTextWidth(Scr.StdFont.font, str, strlen(str))) /
-	         2;
+	    XTextWidth(Scr.StdFont.font, str, strlen(str))) /
+	    2;
 	XDrawString(dpy, Scr.SizeWindow, Scr.StdGC, offset,
 	    Scr.StdFont.font->ascent + SIZE_VINDENT, str, strlen(str));
 }

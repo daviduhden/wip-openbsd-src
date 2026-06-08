@@ -66,7 +66,7 @@
 #include "module.h"
 
 unsigned int mods_used = (ShiftMask | ControlMask | Mod1Mask | Mod2Mask |
-                          Mod3Mask | Mod4Mask | Mod5Mask);
+    Mod3Mask | Mod4Mask | Mod5Mask);
 extern int menuFromFrameOrWindowOrTitlebar;
 
 extern Boolean debugging;
@@ -214,8 +214,8 @@ GetContext(FvwmWindow *t, XEvent *e, Window *w)
 		if (e->type == KeyPress)
 			*w = e->xkey.subwindow;
 		else if ((*w != t->w && *w != t->Parent) ||
-		         e->xbutton.subwindow == t->w ||
-		         e->xbutton.subwindow == t->Parent)
+		    e->xbutton.subwindow == t->w ||
+		    e->xbutton.subwindow == t->Parent)
 			/* domivogt (6-Jan-198): I don't understand what's
 			 * happening here. If the mouse is over the client
 			 * window. The subwindow has an unique id that no
@@ -368,7 +368,7 @@ HandleKeyPress()
 	for (key = Scr.AllBindings; key != NULL; key = key->NextBinding) {
 		if ((key->Button_Key == Event.xkey.keycode) &&
 		    ((key->Modifier == (modifier & (~LockMask))) ||
-		        (key->Modifier == AnyModifier)) &&
+		     (key->Modifier == AnyModifier)) &&
 		    (key->Context & Context) && (key->IsMouse == 0)) {
 			ExecuteFunction(
 			    key->Action, Tmp_win, &Event, Context, -1);
@@ -409,7 +409,7 @@ HandlePropertyNotify()
 
 	if ((!Tmp_win) ||
 	    (XGetGeometry(dpy, Tmp_win->w, &JunkRoot, &JunkX, &JunkY,
-	         &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0))
+	     &JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0))
 		return;
 
 	/*
@@ -418,22 +418,23 @@ HandlePropertyNotify()
 	*/
 	if ((Tmp_win->Desk == Scr.CurrentDesk) &&
 	    (((Tmp_win->frame_x + Tmp_win->frame_width) >= 0 &&
-	         Tmp_win->frame_x < Scr.MyDisplayWidth) &&
-	        ((Tmp_win->frame_y + Tmp_win->frame_height) >= 0 &&
-	            Tmp_win->frame_y < Scr.MyDisplayHeight))) {
+	      Tmp_win->frame_x < Scr.MyDisplayWidth) &&
+	     ((Tmp_win->frame_y + Tmp_win->frame_height) >= 0 &&
+	      Tmp_win->frame_y < Scr.MyDisplayHeight))) {
 		OnThisPage = True;
 	}
 
 	switch (Event.xproperty.atom) {
 	case XA_WM_TRANSIENT_FOR: {
 		if (XGetTransientForHint(
-		        dpy, Tmp_win->w, &Tmp_win->transientfor)) {
+		    dpy, Tmp_win->w, &Tmp_win->transientfor)) {
 			Tmp_win->flags |= TRANSIENT;
 			RaiseWindow(Tmp_win);
 		} else {
 			Tmp_win->flags &= ~TRANSIENT;
 		}
-	} break;
+	}
+		break;
 
 	case XA_WM_NAME:
 		if (!XGetWMName(dpy, Tmp_win->w, &text_prop))
@@ -540,7 +541,7 @@ HandlePropertyNotify()
 						    None)
 							XMapWindow(dpy,
 							    Tmp_win
-							        ->icon_pixmap_w);
+							    ->icon_pixmap_w);
 					}
 				}
 				Tmp_win->flags |= ICONIFIED;
@@ -665,6 +666,7 @@ HandleMapRequest()
 
 	HandleMapRequestKeepRaised(None);
 }
+
 void
 HandleMapRequestKeepRaised(Window KeepRaised)
 {
@@ -675,7 +677,7 @@ HandleMapRequestKeepRaised(Window KeepRaised)
 	Event.xany.window = Event.xmaprequest.window;
 
 	if (XFindContext(dpy, Event.xany.window, FvwmContext,
-	        (caddr_t *)&Tmp_win) == XCNOENT)
+	    (caddr_t *)&Tmp_win) == XCNOENT)
 		Tmp_win = NULL;
 
 	if (!PPosOverride)
@@ -694,9 +696,9 @@ HandleMapRequestKeepRaised(Window KeepRaised)
 	*/
 	if ((Tmp_win->Desk == Scr.CurrentDesk) &&
 	    (((Tmp_win->frame_x + Tmp_win->frame_width) >= 0 &&
-	         Tmp_win->frame_x < Scr.MyDisplayWidth) &&
-	        ((Tmp_win->frame_y + Tmp_win->frame_height) >= 0 &&
-	            Tmp_win->frame_y < Scr.MyDisplayHeight))) {
+	      Tmp_win->frame_x < Scr.MyDisplayWidth) &&
+	     ((Tmp_win->frame_y + Tmp_win->frame_height) >= 0 &&
+	      Tmp_win->frame_y < Scr.MyDisplayHeight))) {
 		OnThisPage = True;
 	}
 
@@ -730,7 +732,7 @@ HandleMapRequestKeepRaised(Window KeepRaised)
 				SetMapStateProp(Tmp_win, NormalState);
 				if ((Tmp_win->flags & ClickToFocus) &&
 				    ((!Scr.Focus) ||
-				        (Scr.Focus->flags & ClickToFocus))) {
+				     (Scr.Focus->flags & ClickToFocus))) {
 					if (OnThisPage) {
 						SetFocus(
 						    Tmp_win->w, Tmp_win, 1);
@@ -797,9 +799,9 @@ HandleMapNotify()
 	*/
 	if ((Tmp_win->Desk == Scr.CurrentDesk) &&
 	    (((Tmp_win->frame_x + Tmp_win->frame_width) >= 0 &&
-	         Tmp_win->frame_x < Scr.MyDisplayWidth) &&
-	        ((Tmp_win->frame_y + Tmp_win->frame_height) >= 0 &&
-	            Tmp_win->frame_y < Scr.MyDisplayHeight))) {
+	      Tmp_win->frame_x < Scr.MyDisplayWidth) &&
+	     ((Tmp_win->frame_y + Tmp_win->frame_height) >= 0 &&
+	      Tmp_win->frame_y < Scr.MyDisplayHeight))) {
 		OnThisPage = True;
 	}
 
@@ -885,7 +887,7 @@ HandleUnmapNotify()
 		Event.xany.window = Event.xunmap.window;
 		weMustUnmap = 1;
 		if (XFindContext(dpy, Event.xany.window, FvwmContext,
-		        (caddr_t *)&Tmp_win) == XCNOENT)
+		    (caddr_t *)&Tmp_win) == XCNOENT)
 			Tmp_win = NULL;
 	}
 
@@ -924,7 +926,7 @@ HandleUnmapNotify()
 	MyXGrabServer(dpy);
 
 	if (XCheckTypedWindowEvent(
-	        dpy, Event.xunmap.window, DestroyNotify, &dummy)) {
+	    dpy, Event.xunmap.window, DestroyNotify, &dummy)) {
 		Destroy(Tmp_win);
 		MyXUngrabServer(dpy);
 		return;
@@ -939,7 +941,7 @@ HandleUnmapNotify()
 	 * that we've received a DestroyNotify).
 	 */
 	if (XTranslateCoordinates(dpy, Event.xunmap.window, Scr.Root, 0, 0,
-	        &dstx, &dsty, &dumwin)) {
+	    &dstx, &dsty, &dumwin)) {
 		XEvent ev;
 		Bool reparented;
 
@@ -952,7 +954,7 @@ HandleUnmapNotify()
 				    dpy, Event.xunmap.window, Tmp_win->old_bw);
 			if ((!(Tmp_win->flags & SUPPRESSICON)) &&
 			    (Tmp_win->wmhints &&
-			        (Tmp_win->wmhints->flags & IconWindowHint)))
+			     (Tmp_win->wmhints->flags & IconWindowHint)))
 				XUnmapWindow(
 				    dpy, Tmp_win->wmhints->icon_window);
 		} else {
@@ -961,10 +963,10 @@ HandleUnmapNotify()
 		XRemoveFromSaveSet(dpy, Event.xunmap.window);
 		XSelectInput(dpy, Event.xunmap.window, NoEventMask);
 		Destroy(Tmp_win); /* do not need to mash event before */
-		                  /*
-		                   * Flush any pending events for the window.
-		                   */
-		                  /* Bzzt! it could be about to re-map */
+				  /*
+				   * Flush any pending events for the window.
+				   */
+				  /* Bzzt! it could be about to re-map */
 		/*      while(XCheckWindowEvent(dpy, Event.xunmap.window,
 		                          StructureNotifyMask |
 		   PropertyChangeMask | ColormapChangeMask |
@@ -997,17 +999,17 @@ HandleButtonPress()
 	if ((Tmp_win) && (Tmp_win->flags & ClickToFocus) &&
 	    (Tmp_win != Scr.Ungrabbed) &&
 	    ((Event.xbutton.state & (ControlMask | Mod1Mask | Mod2Mask |
-	                                Mod3Mask | Mod4Mask | Mod5Mask)) ==
-	        0)) {
+	      Mod3Mask | Mod4Mask | Mod5Mask)) ==
+	     0)) {
 		SetFocus(Tmp_win->w, Tmp_win, 1);
 		/* #ifdef CLICKY_MODE_1 */
 		if (Scr.ClickToFocusRaises ||
 		    ((Event.xany.window != Tmp_win->w) &&
-		        (Event.xbutton.subwindow != Tmp_win->w) &&
-		        (Event.xany.window != Tmp_win->Parent) &&
-		        (Event.xbutton.subwindow != Tmp_win->Parent)))
+		     (Event.xbutton.subwindow != Tmp_win->w) &&
+		     (Event.xany.window != Tmp_win->Parent) &&
+		     (Event.xbutton.subwindow != Tmp_win->Parent)))
 		/* #endif */
-		{
+		      {
 			RaiseWindow(Tmp_win);
 		}
 
@@ -1025,12 +1027,12 @@ HandleButtonPress()
 			return;
 		}
 	} else if ((Tmp_win) && !(Tmp_win->flags & ClickToFocus) &&
-	           (Event.xbutton.window == Tmp_win->frame) &&
-	           Scr.MouseFocusClickRaises) {
+	    (Event.xbutton.window == Tmp_win->frame) &&
+	    Scr.MouseFocusClickRaises) {
 		if (Tmp_win != Scr.LastWindowRaised &&
 		    (Event.xbutton.state &
-		        (ControlMask | Mod1Mask | Mod2Mask | Mod3Mask |
-		            Mod4Mask | Mod5Mask)) == 0 &&
+		     (ControlMask | Mod1Mask | Mod2Mask | Mod3Mask |
+		      Mod4Mask | Mod5Mask)) == 0 &&
 		    GetContext(Tmp_win, &Event, &PressedW) == C_WINDOW) {
 			RaiseWindow(Tmp_win);
 			KeepOnTop();
@@ -1064,10 +1066,10 @@ HandleButtonPress()
 	for (MouseEntry = Scr.AllBindings; MouseEntry != NULL;
 	    MouseEntry = MouseEntry->NextBinding) {
 		if (((MouseEntry->Button_Key == Event.xbutton.button) ||
-		        (MouseEntry->Button_Key == 0)) &&
+		    (MouseEntry->Button_Key == 0)) &&
 		    (MouseEntry->Context & Context) &&
 		    ((MouseEntry->Modifier == AnyModifier) ||
-		        (MouseEntry->Modifier == (modifier & (~LockMask)))) &&
+		     (MouseEntry->Modifier == (modifier & (~LockMask)))) &&
 		    (MouseEntry->IsMouse == 1)) {
 			/* got a match, now process it */
 			ExecuteFunction(
@@ -1131,7 +1133,7 @@ HandleEnterNotify()
 	/* multi screen? */
 	if (Event.xany.window == Scr.Root) {
 		if (!Scr.Focus || (!(Scr.Focus->flags & ClickToFocus) &&
-		                      !(Scr.Focus->flags & SloppyFocus))) {
+		    !(Scr.Focus->flags & SloppyFocus))) {
 			SetFocus(Scr.NoFocusWin, NULL, 1);
 		}
 		if (Scr.ColormapFocus == COLORMAP_FOLLOWS_MOUSE) {
@@ -1222,9 +1224,8 @@ HandleConfigureRequest()
 	 */
 	if (!Tmp_win || cre->window == Tmp_win->icon_w ||
 	    cre->window == Tmp_win->icon_pixmap_w) {
-
 		xwcm = cre->value_mask &
-		       (CWX | CWY | CWWidth | CWHeight | CWBorderWidth);
+		    (CWX | CWY | CWWidth | CWHeight | CWBorderWidth);
 		xwc.x = cre->x;
 		xwc.y = cre->y;
 		if ((Tmp_win) && ((Tmp_win->icon_pixmap_w == cre->window))) {
@@ -1242,7 +1243,7 @@ HandleConfigureRequest()
 				    Tmp_win->icon_x_loc, Tmp_win->icon_y_loc,
 				    Tmp_win->icon_w_width,
 				    Tmp_win->icon_w_height +
-				        Tmp_win->icon_p_height);
+				    Tmp_win->icon_p_height);
 		}
 		xwc.width = cre->width;
 		xwc.height = cre->height;
@@ -1255,7 +1256,7 @@ HandleConfigureRequest()
 			    Tmp_win->icon_pixmap_w != None) {
 				xwc.x = Tmp_win->icon_x_loc;
 				xwc.y = Tmp_win->icon_y_loc -
-				        Tmp_win->icon_p_height;
+				    Tmp_win->icon_p_height;
 				xwcm = cre->value_mask & (CWX | CWY);
 				XConfigureWindow(
 				    dpy, Tmp_win->icon_pixmap_w, xwcm, &xwc);
@@ -1277,10 +1278,10 @@ HandleConfigureRequest()
 
 		otherwin = NULL;
 		xwc.sibling = (((cre->value_mask & CWSibling) &&
-		                   (XFindContext(dpy, cre->above, FvwmContext,
-		                        (caddr_t *)&otherwin) == XCSUCCESS))
-		                   ? otherwin->frame
-		                   : cre->above);
+		    (XFindContext(dpy, cre->above, FvwmContext,
+		     (caddr_t *)&otherwin) == XCSUCCESS)) ?
+		    otherwin->frame :
+		    cre->above);
 		xwc.stack_mode = cre->detail;
 		XConfigureWindow(dpy, Tmp_win->frame,
 		    cre->value_mask & (CWSibling | CWStackMode), &xwc);
@@ -1291,22 +1292,22 @@ HandleConfigureRequest()
 		*/
 		if (xwc.stack_mode == Above || xwc.stack_mode == Below) {
 			FvwmSib =
-			    (otherwin != NULL)
-			        ? otherwin
-			        : Scr.FvwmRoot
-			              .stack_next; /*  Set up for Above.  */
+			    (otherwin != NULL) ?
+			    otherwin :
+			    Scr.FvwmRoot
+			    .stack_next; /*  Set up for Above.  */
 			if (xwc.stack_mode == Below) {
 				/*
 				        If Below-sibling, raise above next lower
 				   window. If no sibling, bottom of stack is
 				   "above" Scr.FvwmRoot in the ring.
 				    */
-				FvwmSib = (FvwmSib == otherwin)
-				              ? FvwmSib->stack_next
-				              : FvwmSib->stack_prev;
+				FvwmSib = (FvwmSib == otherwin) ?
+				    FvwmSib->stack_next :
+				    FvwmSib->stack_prev;
 			}
-			if (Tmp_win != FvwmSib) /* Don't chain it to itself!  */
-			{
+			if (Tmp_win !=
+			    FvwmSib) { /* Don't chain it to itself!  */
 				Tmp_win->stack_prev->stack_next =
 				    Tmp_win->stack_next; /* Pluck from chain. */
 				Tmp_win->stack_next->stack_prev =
@@ -1361,7 +1362,7 @@ HandleConfigureRequest()
 		width = cre->width + 2 * Tmp_win->boundary_width;
 	if (cre->value_mask & CWHeight)
 		height = cre->height + Tmp_win->title_height +
-		         2 * Tmp_win->boundary_width;
+		    2 * Tmp_win->boundary_width;
 
 	/*
 	 * SetupWindow (x,y) are the location of the upper-left outer corner and
@@ -1426,7 +1427,7 @@ HandleVisibilityNotify()
 		 * KeepOnTop(). This complicated set-up saves us from
 		 * continually re-raising every on top window */
 		if (((vevent->state == VisibilityPartiallyObscured) ||
-		        (vevent->state == VisibilityFullyObscured)) &&
+		    (vevent->state == VisibilityFullyObscured)) &&
 		    (Tmp_win->flags & ONTOP) && (Tmp_win->flags & RAISED)) {
 			RaiseWindow(Tmp_win);
 			Tmp_win->flags &= ~RAISED;
@@ -1482,15 +1483,14 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	DBUG("My_XNextEvent", "waiting for module input/output");
 	XFlush(dpy);
 	if (select((SELECT_TYPE_ARG1)fd_width, SELECT_TYPE_ARG234 & in_fdset,
-	        SELECT_TYPE_ARG234 & out_fdset, SELECT_TYPE_ARG234 0,
-	        SELECT_TYPE_ARG5 NULL) > 0) {
-
+	    SELECT_TYPE_ARG234 & out_fdset, SELECT_TYPE_ARG234 0,
+	    SELECT_TYPE_ARG5 NULL) > 0) {
 		/* Check for module input. */
 		for (i = 0; i < npipes; i++) {
 			if (readPipes[i] >= 0) {
 				if (FD_ISSET(readPipes[i], &in_fdset)) {
 					if (read(readPipes[i], &targetWindow,
-					        sizeof(Window)) > 0) {
+					    sizeof(Window)) > 0) {
 						DBUG("My_XNextEvent",
 						    "calling "
 						    "HandleModuleInput");

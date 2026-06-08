@@ -47,8 +47,8 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 			while (total < body_length * sizeof(unsigned long)) {
 				errno = 0;
 				if ((count2 = read(fd, &cbody[total],
-				         body_length * sizeof(unsigned long) -
-				             total)) > 0) {
+				    body_length * sizeof(unsigned long) -
+				    total)) > 0) {
 					total += count2;
 				} else if (count2 < 0) {
 					DeadPipe(errno);

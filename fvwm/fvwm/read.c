@@ -138,7 +138,7 @@ stop_pipe_process(
 	if (timed_out && waited != child->pid) {
 		kill(child->pid, SIGKILL);
 		while ((waited = waitpid(child->pid, &status, 0)) == -1 &&
-		       errno == EINTR)
+		    errno == EINTR)
 			;
 	}
 
@@ -312,7 +312,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		{
 			int l;
 			while ((l = strlen(line)) < sizeof(line) && l >= 2 &&
-			       line[l - 2] == '\\' && line[l - 1] == '\n') {
+			    line[l - 2] == '\\' && line[l - 1] == '\n') {
 				char *cont = fgets(
 				    line + l - 2, sizeof(line) - l + 1, stream);
 				if (cont == NULL)

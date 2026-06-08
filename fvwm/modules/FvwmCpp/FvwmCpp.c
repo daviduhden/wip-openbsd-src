@@ -278,17 +278,17 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 		return -1;
 	}
 
-#define WRITE_DEF(name, value)                                                 \
-	do {                                                                   \
-		char *tmp__ = MkDef((name), (value));                          \
-		fputs(tmp__, cpp_in);                                          \
-		free(tmp__);                                                   \
+#define WRITE_DEF(name, value)						\
+	do {								\
+		char *tmp__ = MkDef((name), (value));			\
+		fputs(tmp__, cpp_in);					\
+		free(tmp__);						\
 	} while (0)
-#define WRITE_NUM(name, value)                                                 \
-	do {                                                                   \
-		char *tmp__ = MkNum((name), (value));                          \
-		fputs(tmp__, cpp_in);                                          \
-		free(tmp__);                                                   \
+#define WRITE_NUM(name, value)						\
+	do {								\
+		char *tmp__ = MkNum((name), (value));			\
+		fputs(tmp__, cpp_in);					\
+		free(tmp__);						\
 	} while (0)
 
 	gethostname(client, MAXHOSTNAME);

@@ -127,8 +127,8 @@ static char *opt_parse_value(const char **, int);
 #define BDEXTR (AF | BF | LF | TF | WF | XF | CBF | CHF | CLF | CPF | CXF)
 #define BDARCH (CF | KF | LF | NF | PF | RF | CDF | CEF | CYF | CZF)
 #define BDCOPY (AF | BF | FF | XF | CBF | CEF)
-#define BDLIST                                                                 \
-	(AF | BF | IF | KF | LF | PF | RF | TF | UF | WF | XF | CBF | CDF |    \
+#define BDLIST								\
+	(AF | BF | IF | KF | LF | PF | RF | TF | UF | WF | XF | CBF | CDF |\
 	    CHF | CLF | CPF | CXF | CYF | CZF)
 
 /*
@@ -175,62 +175,62 @@ static int xz_id(char *_blk, int _size);
 FSUB fsub[] = {
 #ifdef NOCPIO
     /* 0: OLD BINARY CPIO */
-    {},
+	{},
     /* 1: OLD OCTAL CHARACTER CPIO */
-    {},
+	{},
     /* 2: SVR4 HEX CPIO */
-    {},
+	{},
     /* 3: SVR4 HEX CPIO WITH CRC */
-    {},
+	{},
 #else
     /* 0: OLD BINARY CPIO */
-    {"bcpio", 5120, sizeof(HD_BCPIO), 1, 0, 0, 1, bcpio_id, cpio_strd, bcpio_rd,
-        bcpio_endrd, cpio_stwr, bcpio_wr, cpio_endwr, cpio_trail, bad_opt},
+	{"bcpio", 5120, sizeof(HD_BCPIO), 1, 0, 0, 1, bcpio_id, cpio_strd, bcpio_rd,
+	 bcpio_endrd, cpio_stwr, bcpio_wr, cpio_endwr, cpio_trail, bad_opt},
 
     /* 1: OLD OCTAL CHARACTER CPIO */
-    {"cpio", 5120, sizeof(HD_CPIO), 1, 0, 0, 1, cpio_id, cpio_strd, cpio_rd,
-        cpio_endrd, cpio_stwr, cpio_wr, cpio_endwr, cpio_trail, bad_opt},
+	{"cpio", 5120, sizeof(HD_CPIO), 1, 0, 0, 1, cpio_id, cpio_strd, cpio_rd,
+	 cpio_endrd, cpio_stwr, cpio_wr, cpio_endwr, cpio_trail, bad_opt},
 
     /* 2: SVR4 HEX CPIO */
-    {"sv4cpio", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, vcpio_id, cpio_strd,
-        vcpio_rd, vcpio_endrd, cpio_stwr, vcpio_wr, cpio_endwr, cpio_trail,
-        bad_opt},
+	{"sv4cpio", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, vcpio_id, cpio_strd,
+	 vcpio_rd, vcpio_endrd, cpio_stwr, vcpio_wr, cpio_endwr, cpio_trail,
+	 bad_opt},
 
     /* 3: SVR4 HEX CPIO WITH CRC */
-    {"sv4crc", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, crc_id, crc_strd, vcpio_rd,
-        vcpio_endrd, crc_stwr, vcpio_wr, cpio_endwr, cpio_trail, bad_opt},
+	{"sv4crc", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, crc_id, crc_strd, vcpio_rd,
+	 vcpio_endrd, crc_stwr, vcpio_wr, cpio_endwr, cpio_trail, bad_opt},
 #endif
     /* 4: OLD TAR */
-    {"tar", 10240, BLKMULT, 0, 1, BLKMULT, 0, tar_id, no_op, tar_rd, tar_endrd,
-        no_op, tar_wr, tar_endwr, tar_trail, tar_opt},
+	{"tar", 10240, BLKMULT, 0, 1, BLKMULT, 0, tar_id, no_op, tar_rd, tar_endrd,
+	 no_op, tar_wr, tar_endwr, tar_trail, tar_opt},
 
     /* 5: POSIX USTAR */
-    {"ustar", 10240, BLKMULT, 0, 1, BLKMULT, 0, ustar_id, no_op, ustar_rd,
-        tar_endrd, no_op, ustar_wr, tar_endwr, tar_trail, tar_opt},
+	{"ustar", 10240, BLKMULT, 0, 1, BLKMULT, 0, ustar_id, no_op, ustar_rd,
+	 tar_endrd, no_op, ustar_wr, tar_endwr, tar_trail, tar_opt},
 
 #ifdef SMALL
     /* 6: compress, to detect failure to use -Z */
-    {},
+	{},
     /* 7: xz, to detect failure to decompress it */
-    {},
+	{},
     /* 8: bzip2, to detect failure to use -j */
-    {},
+	{},
     /* 9: gzip, to detect failure to use -z */
-    {},
+	{},
     /* 10: POSIX PAX */
-    {},
+	{},
 #else
     /* 6: compress, to detect failure to use -Z */
-    {NULL, 0, 4, 0, 0, 0, 0, compress_id},
+	{NULL, 0, 4, 0, 0, 0, 0, compress_id},
     /* 7: xz, to detect failure to decompress it */
-    {NULL, 0, 4, 0, 0, 0, 0, xz_id},
+	{NULL, 0, 4, 0, 0, 0, 0, xz_id},
     /* 8: bzip2, to detect failure to use -j */
-    {NULL, 0, 4, 0, 0, 0, 0, bzip2_id},
+	{NULL, 0, 4, 0, 0, 0, 0, bzip2_id},
     /* 9: gzip, to detect failure to use -z */
-    {NULL, 0, 4, 0, 0, 0, 0, gzip_id},
+	{NULL, 0, 4, 0, 0, 0, 0, gzip_id},
     /* 10: POSIX PAX */
-    {"pax", 5120, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd, tar_endrd,
-        no_op, pax_wr, tar_endwr, tar_trail, pax_opt},
+	{"pax", 5120, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd, tar_endrd,
+	 no_op, pax_wr, tar_endwr, tar_trail, pax_opt},
 #endif
 };
 #define F_OCPIO 0 /* format when called as cpio -6 */
@@ -313,7 +313,7 @@ pax_options(int argc, char **argv)
 	 * process option flags
 	 */
 	while ((c = getopt(argc, argv,
-	            "ab:cdf:ijklno:p:rs:tuvwx:zB:DE:G:HLOPT:U:XYZ0")) != -1) {
+	    "ab:cdf:ijklno:p:rs:tuvwx:zB:DE:G:HLOPT:U:XYZ0")) != -1) {
 		switch (c) {
 		case 'a':
 			/*
@@ -747,7 +747,7 @@ tar_options(int argc, char **argv)
 	 * process option flags
 	 */
 	while ((c = getoldopt(argc, argv,
-	            "b:cef:hjmopqruts:vwxzBC:F:HI:LNOPXZ014578")) != -1) {
+	    "b:cef:hjmopqruts:vwxzBC:F:HI:LNOPXZ014578")) != -1) {
 		switch (c) {
 		case 'b':
 			/*
@@ -905,7 +905,7 @@ tar_options(int argc, char **argv)
 				    incfiles, n, sizeof(*incfiles));
 				if (p == NULL) {
 					paxwarn(0, "Unable to allocate space "
-					           "for option list");
+					    "for option list");
 					exit(1);
 				}
 				incfiles = p;
@@ -1060,7 +1060,8 @@ tar_options(int argc, char **argv)
 		 */
 		if (sawpat > 0)
 			chdname = NULL;
-	} break;
+	}
+		break;
 	case ARCHIVE:
 	case APPND:
 		frmt = &fsub[format];
@@ -1199,7 +1200,7 @@ cpio_options(int argc, char **argv)
 	swapbytes = 0;
 	swaphalf = 0;
 	while ((c = getopt(
-	            argc, argv, "abcdfijklmoprstuvzABC:E:F:H:I:LO:SZ6")) != -1)
+	    argc, argv, "abcdfijklmoprstuvzABC:E:F:H:I:LO:SZ6")) != -1)
 		switch (c) {
 		case 'a':
 			/*
@@ -1614,11 +1615,11 @@ opt_add(const char *str)
 
 		const char *key_start = src;
 		while (*src != '\0' && *src != '=' && *src != ':' &&
-		       *src != ',' && !isspace((unsigned char)*src))
+		    *src != ',' && !isspace((unsigned char)*src))
 			src++;
 		const char *key_end = src;
-		while (
-		    key_end > key_start && isspace((unsigned char)key_end[-1]))
+		while (key_end > key_start &&
+		    isspace((unsigned char)key_end[-1]))
 			key_end--;
 		if (key_end == key_start) {
 			paxwarn(0, "Invalid option name");

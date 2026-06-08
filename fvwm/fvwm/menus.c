@@ -119,13 +119,13 @@ Time dkp_timestamp;
 #define IS_TITLE_MENU_ITEM(mi) (((mi) ? ((mi)->func_type == F_TITLE) : FALSE))
 #define IS_POPUP_MENU_ITEM(mi) (((mi) ? ((mi)->func_type == F_POPUP) : FALSE))
 #define IS_SEPARATOR_MENU_ITEM(mi) ((mi) ? (mi)->fIsSeparator : FALSE)
-#define IS_REAL_SEPARATOR_MENU_ITEM(mi)                                        \
-	((mi) ? ((mi)->fIsSeparator && StrEquals((mi)->action, "nop") &&       \
-	            !((mi)->strlen) && !((mi)->strlen2))                       \
+#define IS_REAL_SEPARATOR_MENU_ITEM(mi)					\
+	((mi) ? ((mi)->fIsSeparator && StrEquals((mi)->action, "nop") &&\
+	            !((mi)->strlen) && !((mi)->strlen2))		\
 	      : FALSE)
-#define IS_LABEL_MENU_ITEM(mi)                                                 \
-	((mi) ? ((mi)->fIsSeparator && StrEquals((mi)->action, "nop") &&       \
-	            ((mi)->strlen || ((mi)->strlen2)))                         \
+#define IS_LABEL_MENU_ITEM(mi)						\
+	((mi) ? ((mi)->fIsSeparator && StrEquals((mi)->action, "nop") &&\
+	            ((mi)->strlen || ((mi)->strlen2)))			\
 	      : FALSE)
 #define MENU_MIDDLE_OFFSET(menu)                                               \
 	((menu)->xoffset + ((menu)->width - (menu)->xoffset) / 2)
@@ -230,7 +230,7 @@ do_menu(MenuRoot *menu, MenuRoot *menuPrior, MenuItem **pmiExecuteAction,
 		 * nicely */
 		/* it might also move menuPrior out of the way */
 		if (!FPopupMenu(menu, menuPrior, x, y, key_press /*warp*/, pops,
-		        NULL)) {
+		    NULL)) {
 			fFailedPopup = TRUE;
 			XBell(dpy, 0);
 		}
@@ -351,7 +351,7 @@ static int
 PopupPositionOffset(MenuRoot *mr)
 {
 	return (mr->width * mr->ms->feel.PopupOffsetPercent / 100 +
-	        mr->ms->feel.PopupOffsetAdd);
+	    mr->ms->feel.PopupOffsetAdd);
 }
 
 static void
@@ -391,8 +391,8 @@ FMenuMapped(MenuRoot *menu)
 {
 	XWindowAttributes win_attribs;
 	XGetWindowAttributes(dpy, menu->w, &win_attribs);
-	return (menu->w == None) ? False
-	                         : (win_attribs.map_state == IsViewable);
+	return (menu->w == None) ? False :
+	    (win_attribs.map_state == IsViewable);
 }
 
 static MenuItem *
@@ -473,8 +473,7 @@ menuShortcuts(MenuRoot *menu, XEvent *Event, MenuItem **pmiCurrent)
 		}
 	}
 
-	switch (keysym) /* Other special keyboard handling	*/
-	{
+	switch (keysym) { /* Other special keyboard handling	*/
 	case XK_Escape: /* Escape key pressed. Abort		*/
 		return MENU_ABORTED;
 		break;
@@ -633,7 +632,7 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 
 	mops.flags.allflags = 0;
 	fPopupImmediately = (menu->ms->feel.f.PopupImmediately &&
-	                     (Scr.menus.PopupDelay10ms > 0));
+	    (Scr.menus.PopupDelay10ms > 0));
 
 	/* remember where the pointer was so we can tell if it has moved */
 	XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &x_init, &y_init,
@@ -652,11 +651,11 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 			/* handle exposure events first */
 			if (Scr.menus.PopupDelay10ms > 0) {
 				while (XCheckMaskEvent(dpy,
-				           ButtonPressMask | ButtonReleaseMask |
-				               ExposureMask | KeyPressMask |
-				               VisibilityChangeMask |
-				               ButtonMotionMask,
-				           &Event) == FALSE) {
+				    ButtonPressMask | ButtonReleaseMask |
+				    ExposureMask | KeyPressMask |
+				    VisibilityChangeMask |
+				    ButtonMotionMask,
+				    &Event) == FALSE) {
 					usleep(MICRO_S_FOR_10MS);
 					if (c10msDelays++ ==
 					    Scr.menus.PopupDelay10ms) {
@@ -675,8 +674,8 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 			} else { /* block until there is an event */
 				XMaskEvent(dpy,
 				    ButtonPressMask | ButtonReleaseMask |
-				        ExposureMask | KeyPressMask |
-				        VisibilityChangeMask | ButtonMotionMask,
+				    ExposureMask | KeyPressMask |
+				    VisibilityChangeMask | ButtonMotionMask,
 				    &Event);
 			}
 		}
@@ -686,9 +685,9 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 		if (Event.type == MotionNotify) {
 			/* discard any extra motion events before a release */
 			while ((XCheckMaskEvent(dpy,
-			           ButtonMotionMask | ButtonReleaseMask,
-			           &Event)) &&
-			       (Event.type != ButtonRelease))
+			    ButtonMotionMask | ButtonReleaseMask,
+			    &Event)) &&
+			    (Event.type != ButtonRelease))
 				;
 		}
 
@@ -763,7 +762,7 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 		case Expose:
 			/* grab our expose events, let the rest go through */
 			if ((XFindContext(dpy, Event.xany.window, MenuContext,
-			         (caddr_t *)&mrNeedsPainting) != XCNOENT)) {
+			    (caddr_t *)&mrNeedsPainting) != XCNOENT)) {
 				flush_expose(Event.xany.window);
 				PaintMenu(mrNeedsPainting, &Event);
 			}
@@ -902,15 +901,16 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 						if (mops.flags.f.has_poshints) {
 							x = mops.pos_hints.x +
 							    mops.pos_hints
-							            .x_factor *
-							        mrPopup->width;
+							    .x_factor *
+							    mrPopup->width;
 							y = mops.pos_hints.y +
 							    mops.pos_hints
-							            .y_factor *
-							        mrPopup->height;
+							    .y_factor *
+							    mrPopup->height;
 						} else {
 							GetPreferredPopupPosition(
-							    menu, &x, &y);
+							    menu,
+							    &x, &y);
 						}
 						FPopupMenu(mrPopup, menu, x, y,
 						    fPopupAndWarp, &mops,
@@ -922,7 +922,7 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 							fDoMenu = TRUE;
 							fPopdown =
 							    !menu->ms->feel.f
-							         .PopupImmediately;
+							    .PopupImmediately;
 						}
 					} else {
 						/* This menu must be already
@@ -996,8 +996,7 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 				menu->xanimation = 0;
 			}
 
-		} /* if (mi) */
-		else {
+		} /* if (mi) */ else {
 			/* moved off menu, deselect selected item... */
 			if (menu->selected) {
 				SetMenuItemSelected(menu->selected, FALSE);
@@ -1011,12 +1010,12 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 					    &mx, &my, &mw, &mh, &JunkBW,
 					    &JunkDepth);
 					if ((!IS_LEFT_MENU(mrPopup) &&
-					        x < mx) ||
+					    x < mx) ||
 					    (!IS_RIGHT_MENU(mrPopup) &&
-					        x > mx + mw) ||
+					     x > mx + mw) ||
 					    (!IS_UP_MENU(mrPopup) && y < my) ||
 					    (!IS_DOWN_MENU(mrPopup) &&
-					        y > my + mh)) {
+					     y > my + mh)) {
 						PopDownAndRepaintParent(
 						    mrPopup, &fSubmenuOverlaps);
 						mrPopup = NULL;
@@ -1208,7 +1207,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 			    Tmp_win->title_height + 1;
 			x = Tmp_win->frame_x + Tmp_win->boundary_width +
 			    ButtonPosition(Context, Tmp_win) *
-			        Tmp_win->title_height +
+			    Tmp_win->title_height +
 			    1;
 		}
 		if ((Tmp_win) && (menuPrior == NULL) && (Context & C_RALL)) {
@@ -1217,7 +1216,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 			x = Tmp_win->frame_x + Tmp_win->frame_width -
 			    Tmp_win->boundary_width -
 			    ButtonPosition(Context, Tmp_win) *
-			        Tmp_win->title_height -
+			    Tmp_win->title_height -
 			    menu->width + 1;
 		}
 		if ((Tmp_win) && (menuPrior == NULL) && (Context & C_TITLE)) {
@@ -1227,7 +1226,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 				x = Tmp_win->frame_x + Tmp_win->title_x;
 			if ((x + menu->width) >
 			    (Tmp_win->frame_x + Tmp_win->title_x +
-			        Tmp_win->title_width))
+			     Tmp_win->title_width))
 				x = Tmp_win->frame_x + Tmp_win->title_x +
 				    Tmp_win->title_width - menu->width + 1;
 		}
@@ -1258,16 +1257,16 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 		    menuPrior, x, y, menu->width, menu->height, True);
 		if (x_clipped_overlap &&
 		    (!(pops->flags.f.has_poshints) ||
-		        pops->pos_hints.fRelative == FALSE || x_overlap == 0)) {
+		     pops->pos_hints.fRelative == FALSE || x_overlap == 0)) {
 			/* menus do overlap, but do not reposition if overlap
 			   was caused by relative positioning hints */
 			Bool fDefaultLeft;
 			Bool fEmergencyLeft;
 
 			x_offset = prev_width *
-			               menuPrior->ms->feel.PopupOffsetPercent /
-			               100 +
-			           menuPrior->ms->feel.PopupOffsetAdd;
+			    menuPrior->ms->feel.PopupOffsetPercent /
+			    100 +
+			    menuPrior->ms->feel.PopupOffsetAdd;
 			left_x = prev_x - menu->width + 2;
 			right_x = prev_x + x_offset;
 			if (x_offset > prev_width - 2)
@@ -1276,9 +1275,8 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 				fDefaultLeft = TRUE;
 			else
 				fDefaultLeft = FALSE;
-			fEmergencyLeft = (prev_x > Scr.MyDisplayWidth - right_x)
-			                     ? TRUE
-			                     : FALSE;
+			fEmergencyLeft = (prev_x >
+			    Scr.MyDisplayWidth - right_x) ? TRUE : FALSE;
 
 			if (menu->ms->feel.f.Animated) {
 				/* animate previous out of the way */
@@ -1298,14 +1296,14 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 						end_x = left_x;
 					else
 						end_x = Scr.MyDisplayWidth - 2 -
-						        prev_width;
+						    prev_width;
 				} else {
 					/* popup menu is right of old menu, try
 					 * to move prior menu left */
 					if (left_x >= 0)
 						end_x = left_x;
 					else if (right_x + prev_width <=
-					         Scr.MyDisplayWidth - 2)
+					    Scr.MyDisplayWidth - 2)
 						end_x = right_x;
 					else
 						end_x = 0;
@@ -1313,10 +1311,9 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 				menuPrior->xanimation += end_x - prev_x;
 				AnimatedMoveOfWindow(menuPrior->w, prev_x,
 				    prev_y, end_x, prev_y, TRUE, -1, NULL);
-			} /* if (menu->ms->feel.f.Animated) */
-			else if (prev_x + x_offset > x + 3 &&
-			         x_offset + 3 > -menu->width &&
-			         !(pops->flags.f.fixed)) {
+			} /* if (menu->ms->feel.f.Animated) */ else if (prev_x +
+			    x_offset > x + 3 && x_offset + 3 > -menu->width &&
+			    !(pops->flags.f.fixed)) {
 				Bool fLeftIsOK = FALSE;
 				Bool fRightIsOK = FALSE;
 				Bool fUseLeft = FALSE;
@@ -1329,7 +1326,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 				if (!fLeftIsOK && !fRightIsOK)
 					fUseLeft = fEmergencyLeft;
 				else if (fLeftIsOK &&
-				         (fDefaultLeft || !fRightIsOK))
+				    (fDefaultLeft || !fRightIsOK))
 					fUseLeft = TRUE;
 				else
 					fUseLeft = FALSE;
@@ -1341,7 +1338,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 
 				if (x + menu->width >= Scr.MyDisplayWidth - 2) {
 					int d = x + menu->width -
-					        Scr.MyDisplayWidth + 3;
+					    Scr.MyDisplayWidth + 3;
 					int c;
 
 					if (prev_width >= 20)
@@ -1386,9 +1383,9 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 	XMapRaised(dpy, menu->w);
 	if (ret_overlap) {
 		*ret_overlap = DoMenusOverlap(menuPrior, x, y, menu->width,
-		                   menu->height, False)
-		                   ? True
-		                   : False;
+		    menu->height, False) ?
+		    True :
+		    False;
 	}
 
 	if (!fWarpItem) {
@@ -1725,8 +1722,7 @@ PaintEntry(MenuItem *mi)
 #ifdef GRADIENT_BUTTONS
 		if (!fGradient)
 #endif
-		{
-
+		    {
 			if (th == 2 && mi->prev && mi->prev->state)
 				XClearArea(dpy, mr->w, mr->xoffset,
 				    y_offset + 1, mr->width, y_height - 1, 0);
@@ -1866,8 +1862,7 @@ PaintEntry(MenuItem *mi)
 		if (mi->lpicture && x < mr->width0 + 5)
 			x = mr->width0 + 5;
 
-		if (mi->picture->depth > 0) /* pixmap? */
-		{
+		if (mi->picture->depth > 0) { /* pixmap? */
 			Globalgcm = GCClipMask | GCClipXOrigin | GCClipYOrigin;
 			Globalgcv.clip_mask = mi->picture->mask;
 			Globalgcv.clip_x_origin = x;
@@ -1893,8 +1888,7 @@ PaintEntry(MenuItem *mi)
 		else
 			y = y_offset + mi->y_height / 2 -
 			    mi->lpicture->height / 2;
-		if (mi->lpicture->depth > 0) /* pixmap? */
-		{
+		if (mi->lpicture->depth > 0) { /* pixmap? */
 			Globalgcm = GCClipMask | GCClipXOrigin | GCClipYOrigin;
 			Globalgcv.clip_mask = mi->lpicture->mask;
 			Globalgcv.clip_x_origin = lp_offset + mr->xoffset;
@@ -1952,8 +1946,7 @@ PaintSidePic(MenuRoot *mr)
 		    mr->height - 6);
 	}
 
-	if (sidePic->depth > 0) /* pixmap? */
-	{
+	if (sidePic->depth > 0) { /* pixmap? */
 		Globalgcm = GCClipMask | GCClipXOrigin | GCClipYOrigin;
 		Globalgcv.clip_mask = sidePic->mask;
 		Globalgcv.clip_x_origin = 3;
@@ -1990,6 +1983,7 @@ DrawUnderline(MenuRoot *mr, GC gc, int x, int y, char *txt, int posn)
 	int off2 = XTextWidth(mr->ms->look.pStdFont->font, txt, posn + 1) - 1;
 	XDrawLine(dpy, mr->w, gc, x + off1, y + 2, x + off2, y + 2);
 }
+
 /****************************************************************************
  *
  *  Draws two horizontal lines to form a separator
@@ -2096,17 +2090,17 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 
 					bounds.width = mr->width;
 					dw = (float)bounds.width /
-					         ms->look.face.u.grad.npixels +
-					     1;
-					while (
-					    i < ms->look.face.u.grad.npixels) {
+					    ms->look.face.u.grad.npixels +
+					    1;
+					while (i <
+					    ms->look.face.u.grad.npixels) {
 						unsigned short x =
 						    i * bounds.width /
 						    ms->look.face.u.grad
-						        .npixels;
+						    .npixels;
 						XSetForeground(dpy, pmapgc,
 						    ms->look.face.u.grad
-						        .pixels[i++]);
+						    .pixels[i++]);
 						XFillRectangle(dpy, pmap,
 						    pmapgc, x, 0, dw, 5);
 					}
@@ -2122,7 +2116,7 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 					register int i = 0;
 					register int dh =
 					    bounds.height /
-					        ms->look.face.u.grad.npixels +
+					    ms->look.face.u.grad.npixels +
 					    1;
 
 					pmap = XCreatePixmap(dpy, Scr.Root, 5,
@@ -2130,15 +2124,15 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 					pmapgc =
 					    XCreateGC(dpy, pmap, gcm, &gcv);
 
-					while (
-					    i < ms->look.face.u.grad.npixels) {
+					while (i <
+					    ms->look.face.u.grad.npixels) {
 						unsigned short y =
 						    i * bounds.height /
 						    ms->look.face.u.grad
-						        .npixels;
+						    .npixels;
 						XSetForeground(dpy, pmapgc,
 						    ms->look.face.u.grad
-						        .pixels[i++]);
+						    .pixels[i++]);
 						XFillRectangle(dpy, pmap,
 						    pmapgc, 0, y, 5, dh);
 					}
@@ -2149,8 +2143,7 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 					mr->backgroundset = True;
 				}
 				XClearWindow(dpy, mr->w);
-			} else /* D or BGradient */
-			{
+			} else /* D or BGradient */ {
 				register int i = 0, numLines;
 				int cindex = -1;
 
@@ -2158,18 +2151,18 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 				numLines = mr->width + mr->height - 1;
 				for (i = 0; i < numLines; i++) {
 					if ((int)(i *
-					          ms->look.face.u.grad.npixels /
-					          numLines) > cindex) {
+					    ms->look.face.u.grad.npixels /
+					    numLines) > cindex) {
 						/* pick the next colour (skip if
 						 * necc.) */
 						cindex = i *
-						         ms->look.face.u.grad
-						             .npixels /
-						         numLines;
+						    ms->look.face.u.grad
+						    .npixels /
+						    numLines;
 						XSetForeground(dpy,
 						    Scr.TransMaskGC,
 						    ms->look.face.u.grad
-						        .pixels[cindex]);
+						    .pixels[cindex]);
 					}
 					if (type == DGradMenu)
 						XDrawLine(dpy, mr->w,
@@ -2228,11 +2221,11 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 		/* be smart about handling the expose, redraw only the entries
 		 * that we need to */
 		if ((mr->ms->look.face.type != SolidMenu &&
-		        mr->ms->look.face.type != SimpleMenu) ||
+		    mr->ms->look.face.type != SimpleMenu) ||
 		    pevent == NULL ||
 		    (pevent->xexpose.y < (mi->y_offset + mi->y_height) &&
-		        (pevent->xexpose.y + pevent->xexpose.height) >
-		            mi->y_offset)) {
+		     (pevent->xexpose.y + pevent->xexpose.height) >
+		     mi->y_offset)) {
 			PaintEntry(mi);
 		}
 	}
@@ -2414,8 +2407,8 @@ MakeMenu(MenuRoot *mr)
 			/* Title */
 			if (cur->strlen2 == 0)
 				cur->x = (mr->width + mr->width2 + mr->width0 -
-				             width) /
-				         2;
+				    width) /
+				    2;
 
 			if ((cur->strlen > 0) || (cur->strlen2 > 0)) {
 				if (mr->ms->look.TitleUnderlines == 2)
@@ -2441,9 +2434,9 @@ MakeMenu(MenuRoot *mr)
 			/* Titles are separators, too */
 			cur->fIsSeparator = TRUE;
 		} else if ((cur->strlen == 0) && (cur->strlen2 == 0) &&
-		           /* added check for NOP to distinguish from items with
-		            * no text, only pixmap */
-		           StrEquals(cur->action, "nop")) {
+			   /* added check for NOP to distinguish from items with
+			    * no text, only pixmap */
+		    StrEquals(cur->action, "nop")) {
 			/* Separator */
 			cur->y_height = HEIGHT_SEPARATOR;
 			cur->fIsSeparator = TRUE;
@@ -2820,7 +2813,7 @@ AddToMenu(
 		menu->last = tmp;
 		tmp->prev = NULL;
 	} else if (StrEquals(token, "title") && option &&
-	           StrEquals(option, "top")) {
+	    StrEquals(option, "top")) {
 		if (menu->first->action) {
 			GetNextToken(menu->first->action, &token2);
 		}

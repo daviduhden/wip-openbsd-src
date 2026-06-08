@@ -19,17 +19,17 @@ struct charstring {
 
 /* The keys musat be in lower case! */
 struct charstring win_contexts[] = {{'w', C_WINDOW}, {'t', C_TITLE},
-    {'i', C_ICON}, {'r', C_ROOT}, {'f', C_FRAME}, {'s', C_SIDEBAR}, {'1', C_L1},
-    {'2', C_R1}, {'3', C_L2}, {'4', C_R2}, {'5', C_L3}, {'6', C_R3},
-    {'7', C_L4}, {'8', C_R4}, {'9', C_L5}, {'0', C_R5},
-    {'a', C_WINDOW | C_TITLE | C_ICON | C_ROOT | C_FRAME | C_SIDEBAR | C_L1 |
-              C_L2 | C_L3 | C_L4 | C_L5 | C_R1 | C_R2 | C_R3 | C_R4 | C_R5},
-    {0, 0}};
+	{'i', C_ICON}, {'r', C_ROOT}, {'f', C_FRAME}, {'s', C_SIDEBAR}, {'1', C_L1},
+	{'2', C_R1}, {'3', C_L2}, {'4', C_R2}, {'5', C_L3}, {'6', C_R3},
+	{'7', C_L4}, {'8', C_R4}, {'9', C_L5}, {'0', C_R5},
+	{'a', C_WINDOW | C_TITLE | C_ICON | C_ROOT | C_FRAME | C_SIDEBAR | C_L1 |
+	 C_L2 | C_L3 | C_L4 | C_L5 | C_R1 | C_R2 | C_R3 | C_R4 | C_R5},
+	{0, 0}};
 
 /* The keys musat be in lower case! */
 struct charstring key_modifiers[] = {{'s', ShiftMask}, {'c', ControlMask},
-    {'m', Mod1Mask}, {'1', Mod1Mask}, {'2', Mod2Mask}, {'3', Mod3Mask},
-    {'4', Mod4Mask}, {'5', Mod5Mask}, {'a', AnyModifier}, {'n', 0}, {0, 0}};
+	{'m', Mod1Mask}, {'1', Mod1Mask}, {'2', Mod2Mask}, {'3', Mod3Mask},
+	{'4', Mod4Mask}, {'5', Mod5Mask}, {'a', AnyModifier}, {'n', 0}, {0, 0}};
 
 void find_context(
     char *string, int *output, struct charstring *table, char *tline);
@@ -52,16 +52,14 @@ remove_binding(
 		temp2 = temp->NextBinding;
 		if (temp->IsMouse == mouse_binding) {
 			if ((temp->Button_Key ==
-			        ((mouse_binding) ? (button) : (keycode))) &&
+			    ((mouse_binding) ? (button) : (keycode))) &&
 			    (temp->Context == contexts) &&
 			    (temp->Modifier == mods)) {
 				/* we found it, remove it from list */
-				if (prev) /* middle of list */
-				{
+				if (prev) { /* middle of list */
 					prev->NextBinding = temp2;
 				} else /* must have been first one, set new
-				          start */
-				{
+				          start */ {
 					Scr.AllBindings = temp2;
 				}
 				free(temp->key_name);

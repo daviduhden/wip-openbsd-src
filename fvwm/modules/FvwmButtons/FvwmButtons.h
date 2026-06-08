@@ -49,8 +49,8 @@
 #define b_Icon 0x00000080      /* Contains icon */
 #define b_Swallow 0x00000100   /* Contains swallowed window */
 #define b_Action 0x00000200    /* Fvwm action when clicked on */
-#define b_Hangon                                                               \
-	0x00000400              /* Is waiting for a window before turning      \
+#define b_Hangon							\
+	0x00000400              /* Is waiting for a window before turning\
 	                         * active */
 #define b_Justify 0x00000800    /* Has justification info */
 #define b_Size 0x00001000       /* Has a minimum size, don't guess */
@@ -59,8 +59,8 @@
 #define b_TransBack 0x00008000  /* Transparent background */
 #define b_Left 0x00010000       /* Button is left-aligned */
 #define b_Right 0x00020000      /* Button is right-aligned */
-#define b_SizeFixed                                                            \
-	0x00040000             /* User provided rows/columns may not be        \
+#define b_SizeFixed							\
+	0x00040000             /* User provided rows/columns may not be	\
 	                        * altered */
 #define b_PosFixed 0x00080000  /* User provided button position */
 #define b_SizeSmart 0x00100000 /* Improved button box sizing */
