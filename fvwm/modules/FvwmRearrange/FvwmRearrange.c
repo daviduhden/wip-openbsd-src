@@ -1,7 +1,7 @@
 /*
  * FvwmRearrange: fvwm module to tile or cascade windows in a region.
  *
- * Copyright (c) 2025-2026David Uhden Collado <david@uhden.dev>
+ * Copyright (c) 2025-2026 David Uhden Collado <david@uhden.dev>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
