@@ -96,10 +96,24 @@ checkout_selected_repository() {
 # Function to ask if user wants to copy from wip-openbsd-src (optional)
 ask_copy_from_wip() {
 	log "Do you want to copy a directory from 'wip-openbsd-src' into the checked-out tree?"
-	select ANSWER in "Yes" "No"; do
+	select ANSWER in "One directory" "Selected directories" "All directories" "No"; do
 		case "$ANSWER" in
-		Yes)
+		"One directory")
 			DO_COPY=1
+			COPY_ALL=0
+			COPY_LIST=0
+			break
+			;;
+		"Selected directories")
+			DO_COPY=1
+			COPY_ALL=0
+			COPY_LIST=1
+			break
+			;;
+		"All directories")
+			DO_COPY=1
+			COPY_ALL=1
+			COPY_LIST=0
 			break
 			;;
 		No)
@@ -118,7 +132,10 @@ resolve_wip_openbsd_src_dir() {
 		return 0
 	fi
 
-	SCRIPT_DIR=$(unset CDPATH; cd -- "$(dirname -- "$0")" && pwd -P)
+	SCRIPT_DIR=$(
+		unset CDPATH
+		cd -- "$(dirname -- "$0")" && pwd -P
+	)
 	if [ "$(basename "$SCRIPT_DIR")" = "wip-openbsd-src" ] && [ -d "$SCRIPT_DIR/.git" ]; then
 		print "$SCRIPT_DIR"
 		return 0
@@ -155,6 +172,27 @@ list_directories() {
 			warn "Invalid selection. Please try again."
 		fi
 	done
+}
+
+# Function to list all top-level directories in wip-openbsd-src.
+list_all_directories() {
+	set -- */
+	if [ "$1" = "*/" ] || [ ! -d "$1" ]; then
+		error "No directories found in wip-openbsd-src."
+		exit 1
+	fi
+	print "$*"
+}
+
+# Function to prompt for a space-separated list of directories.
+prompt_selected_directories() {
+	log "Enter one or more directories separated by spaces:"
+	print -n "> "
+	read SELECTED_DIRECTORIES
+	[ -n "${SELECTED_DIRECTORIES:-}" ] || {
+		error "No directories entered."
+		exit 1
+	}
 }
 
 # Function to choose between /usr/src or /usr/xenocara as target tree
@@ -203,6 +241,37 @@ copy_directory() {
 	log "Directory $DIRECTORY copied to $SUBDIRECTORY/"
 }
 
+# Function to copy every top-level directory into the chosen target tree.
+copy_all_directories() {
+	dirs=$(list_all_directories)
+	for DIRECTORY in $dirs; do
+		TARGET_DIR="$TARGET_TREE/$DIRECTORY"
+		if [ -d "$TARGET_DIR" ]; then
+			warn "Directory $TARGET_DIR already exists. Removing files except 'CVS' directories."
+			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" -exec rm -rf {} +
+		fi
+		cp -R "$DIRECTORY" "$TARGET_TREE/"
+		log "Directory $DIRECTORY copied to $TARGET_TREE/"
+	done
+}
+
+# Function to copy only the directories explicitly selected by the user.
+copy_selected_directories() {
+	for DIRECTORY in $SELECTED_DIRECTORIES; do
+		if [ ! -d "$DIRECTORY" ]; then
+			warn "Skipping unknown directory: $DIRECTORY"
+			continue
+		fi
+		TARGET_DIR="$TARGET_TREE/$DIRECTORY"
+		if [ -d "$TARGET_DIR" ]; then
+			warn "Directory $TARGET_DIR already exists. Removing files except 'CVS' directories."
+			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" -exec rm -rf {} +
+		fi
+		cp -R "$DIRECTORY" "$TARGET_TREE/"
+		log "Directory $DIRECTORY copied to $TARGET_TREE/"
+	done
+}
+
 # Function to create the user 'user' with a random password
 create_user_with_random_password() {
 	USER_TO_CREATE="user"
@@ -236,10 +305,17 @@ main() {
 	ask_copy_from_wip
 	if [ "${DO_COPY:-0}" -eq 1 ]; then
 		move_to_wip_openbsd_src
-		list_directories
 		choose_target_tree
-		list_tree_subdirectories
-		copy_directory
+		if [ "${COPY_ALL:-0}" -eq 1 ]; then
+			copy_all_directories
+		elif [ "${COPY_LIST:-0}" -eq 1 ]; then
+			prompt_selected_directories
+			copy_selected_directories
+		else
+			list_directories
+			list_tree_subdirectories
+			copy_directory
+		fi
 	else
 		log "Skipping copy from wip-openbsd-src."
 	fi
