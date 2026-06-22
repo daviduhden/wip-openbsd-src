@@ -1,6 +1,7 @@
 #	$OpenBSD: Makefile,v 1.13 2018/09/13 12:33:43 millert Exp $
 
 WARNINGS=Yes
+CFLAGS += -std=c99
 PROG=   pax
 SRCS=	ar_io.c ar_subs.c buf_subs.c cpio.c file_subs.c ftree.c\
 	gen_subs.c getoldopt.c options.c pat_rep.c pax.c sel_subs.c tables.c\

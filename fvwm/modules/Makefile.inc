@@ -7,7 +7,7 @@ FVWM_MAKEFILE_INC = done
 
 X11BASE?=	/usr/X11R6
 
-CFLAGS+=	-I${X11BASE}/include -I${.CURDIR}/../.. -I${.CURDIR}/../../libs
+CFLAGS+=	-std=c99 -I${X11BASE}/include -I${.CURDIR}/../.. -I${.CURDIR}/../../libs
 LDADD+=		-L${X11BASE}/lib
 
 XLIB=		-lX11 -lxcb -lXau -lXdmcp

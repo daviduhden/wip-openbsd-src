@@ -5,7 +5,7 @@
 FVWM_MAKEFILE_INC = done
 .include <bsd.xconf.mk>
 
-CFLAGS+=	-I${X11BASE}/include -I${.CURDIR} -I${.CURDIR}/.. \
+CFLAGS+=	-std=c99 -I${X11BASE}/include -I${.CURDIR} -I${.CURDIR}/.. \
 		-I${.CURDIR}/../libs
 LDADD+=		-L${X11BASE}/lib
 
