@@ -26,9 +26,18 @@ else
 	RESET=""
 fi
 
-log() { print "$(date '+%Y-%m-%d %H:%M:%S') ${GREEN}[INFO]${RESET} ✅ $*"; }
-warn() { print "$(date '+%Y-%m-%d %H:%M:%S') ${YELLOW}[WARN]${RESET} ⚠️ $*" >&2; }
-error() { print "$(date '+%Y-%m-%d %H:%M:%S') ${RED}[ERROR]${RESET} ❌ $*" >&2; }
+log() {
+	print "$(date '+%Y-%m-%d %H:%M:%S')" \
+		"${GREEN}[INFO]${RESET} ✅ $*"
+}
+warn() {
+	print "$(date '+%Y-%m-%d %H:%M:%S')" \
+		"${YELLOW}[WARN]${RESET} ⚠️ $*" >&2
+}
+error() {
+	print "$(date '+%Y-%m-%d %H:%M:%S')" \
+		"${RED}[ERROR]${RESET} ❌ $*" >&2
+}
 
 # Verify that the script is run as root
 check_root() {
@@ -48,10 +57,13 @@ remove_xenocara_content() {
 	rm -rf /usr/xenocara/*
 }
 
-# Function to permanently set the CVSROOT environment variable if not already set
+# Set CVSROOT in .profile if not already configured
 set_cvsroot() {
-	if [ ! -f "$HOME/.profile" ] || ! grep -Fq "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" "$HOME/.profile"; then
-		print "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" >>"$HOME/.profile"
+	if [ ! -f "$HOME/.profile" ] ||
+		! grep -Fq "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" \
+			"$HOME/.profile"; then
+		print "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" \
+			>>"$HOME/.profile"
 		log "CVSROOT variable added to ~/.profile"
 	else
 		log "CVSROOT variable already exists in ~/.profile"
@@ -95,7 +107,8 @@ checkout_selected_repository() {
 
 # Function to ask if user wants to copy from wip-openbsd-src (optional)
 ask_copy_from_wip() {
-	log "Do you want to copy a directory from 'wip-openbsd-src' into the checked-out tree?"
+	log "Copy a directory from 'wip-openbsd-src'" \
+		"into the checked-out tree?"
 	select ANSWER in "One directory" "Selected directories" "All directories" "No"; do
 		case "$ANSWER" in
 		"One directory")
@@ -125,39 +138,95 @@ ask_copy_from_wip() {
 	done
 }
 
-# Resolve local wip-openbsd-src path before expensive filesystem search.
-resolve_wip_openbsd_src_dir() {
-	if [ -n "${WIP_OPENBSD_SRC_DIR:-}" ] && [ -d "$WIP_OPENBSD_SRC_DIR" ]; then
+# Resolve local wip-openbsd-src path. Checks, in order:
+#   1. WIP_OPENBSD_SRC_DIR environment variable
+#   2. Script's own directory (if named wip-openbsd-src)
+#   3. Common locations under $HOME and /usr
+#   4. Current working directory or its parent
+#   5. Limited filesystem search
+resolve_local_src_dir() {
+	local dir
+
+	# 1. Explicit environment variable
+	if [ -n "${WIP_OPENBSD_SRC_DIR:-}" ] &&
+		[ -d "$WIP_OPENBSD_SRC_DIR/.git" ]; then
+		log "Using WIP_OPENBSD_SRC_DIR=$WIP_OPENBSD_SRC_DIR"
 		print "$WIP_OPENBSD_SRC_DIR"
 		return 0
 	fi
 
-	SCRIPT_DIR=$(
+	# 2. Script directory (walk up to find the repo)
+	dir=$(
 		unset CDPATH
-		cd -- "$(dirname -- "$0")" && pwd -P
+		cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P
 	)
-	if [ "$(basename "$SCRIPT_DIR")" = "wip-openbsd-src" ] && [ -d "$SCRIPT_DIR/.git" ]; then
-		print "$SCRIPT_DIR"
+	while [ -n "$dir" ] && [ "$dir" != "/" ]; do
+		if [ "$(basename "$dir")" = "wip-openbsd-src" ] &&
+			[ -d "$dir/.git" ]; then
+			log "Found wip-openbsd-src at $dir"
+			print "$dir"
+			return 0
+		fi
+		dir=$(dirname "$dir")
+	done
+
+	# 3. Common locations
+	for dir in \
+		"${HOME:-}/wip-openbsd-src" \
+		/root/wip-openbsd-src \
+		/usr/wip-openbsd-src \
+		"${HOME:-}/git/wip-openbsd-src"; do
+		if [ -d "$dir/.git" ]; then
+			log "Found wip-openbsd-src at $dir"
+			print "$dir"
+			return 0
+		fi
+	done
+
+	# 4. Scan home directories
+	for dir in /home/*/wip-openbsd-src /home/*/git/wip-openbsd-src; do
+		if [ -d "$dir/.git" ]; then
+			log "Found wip-openbsd-src at $dir"
+			print "$dir"
+			return 0
+		fi
+	done
+
+	# 5. Current directory or parent
+	if [ -d "$PWD/.git" ] &&
+		[ "$(basename "$PWD")" = "wip-openbsd-src" ]; then
+		print "$PWD"
 		return 0
 	fi
-
-	if [ -d "$PWD/wip-openbsd-src" ]; then
+	if [ -d "$PWD/wip-openbsd-src/.git" ]; then
 		print "$PWD/wip-openbsd-src"
 		return 0
 	fi
 
-	warn "Falling back to full filesystem search for wip-openbsd-src."
-	find / -type d -name "wip-openbsd-src" 2>/dev/null | head -n 1
+	# 6. Limited search under /home, /usr, /root
+	warn "Searching /home and /usr for wip-openbsd-src..."
+	dir=$(find /home /usr /root -maxdepth 5 \
+		-type d -name "wip-openbsd-src" \
+		-exec test -d '{}/.git' ';' \
+		-print -quit 2>/dev/null)
+	if [ -n "$dir" ]; then
+		log "Found wip-openbsd-src at $dir"
+		print "$dir"
+		return 0
+	fi
+
+	error "wip-openbsd-src directory not found." \
+		"Set WIP_OPENBSD_SRC_DIR to its location."
+	exit 1
 }
 
-# Function to change directory to the wip-openbsd-src directory
+# Change to the wip-openbsd-src directory.
 move_to_wip_openbsd_src() {
-	wip_openbsd_src_dir=$(resolve_wip_openbsd_src_dir)
-	if [ -z "$wip_openbsd_src_dir" ]; then
-		error "wip-openbsd-src directory not found."
+	wip_openbsd_src_dir=$(resolve_local_src_dir)
+	cd "$wip_openbsd_src_dir" || {
+		error "Could not cd to $wip_openbsd_src_dir"
 		exit 1
-	fi
-	cd "$wip_openbsd_src_dir" || exit 1
+	}
 }
 
 # Function to list directories in the current directory and select one
@@ -196,7 +265,7 @@ prompt_selected_directories() {
 }
 
 # Function to choose between /usr/src or /usr/xenocara as target tree
-# Only offers trees that exist (i.e., the one you cloned, or both if present)
+# Offer trees that exist (the cloned one, or both if present)
 choose_target_tree() {
 	options=""
 	[ -d /usr/src ] && options="$options /usr/src"
@@ -218,7 +287,8 @@ choose_target_tree() {
 
 # Function to list subdirectories in the chosen tree and select one
 list_tree_subdirectories() {
-	log "Select a subdirectory in $TARGET_TREE where the directory will be copied:"
+	log "Select a subdirectory in $TARGET_TREE" \
+		"where the directory will be copied:"
 	select SUBDIRECTORY in "$TARGET_TREE"/*/; do
 		if [ -n "$SUBDIRECTORY" ]; then
 			log "You selected $SUBDIRECTORY"
@@ -230,32 +300,36 @@ list_tree_subdirectories() {
 	done
 }
 
-# Function to copy the selected directory to the chosen subdirectory in target tree
+# Copy the selected directory to the chosen target subdirectory
 copy_directory() {
 	TARGET_DIR="$SUBDIRECTORY/$DIRECTORY"
 	if [ -d "$TARGET_DIR" ]; then
-		warn "Directory $TARGET_DIR already exists. Removing files except 'CVS' directories."
-		find "$TARGET_DIR" -mindepth 1 ! -name "CVS" -exec rm -rf {} +
+		warn "Directory $TARGET_DIR already exists." \
+			"Removing files except 'CVS'."
+		find "$TARGET_DIR" -mindepth 1 ! -name "CVS" \
+			-exec rm -rf {} +
 	fi
 	cp -R "$DIRECTORY" "$SUBDIRECTORY/"
 	log "Directory $DIRECTORY copied to $SUBDIRECTORY/"
 }
 
-# Function to copy every top-level directory into the chosen target tree.
+# Copy every top-level directory into the chosen target tree.
 copy_all_directories() {
 	dirs=$(list_all_directories)
 	for DIRECTORY in $dirs; do
 		TARGET_DIR="$TARGET_TREE/$DIRECTORY"
 		if [ -d "$TARGET_DIR" ]; then
-			warn "Directory $TARGET_DIR already exists. Removing files except 'CVS' directories."
-			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" -exec rm -rf {} +
+			warn "Directory $TARGET_DIR already exists." \
+				"Removing files except 'CVS'."
+			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" \
+				-exec rm -rf {} +
 		fi
 		cp -R "$DIRECTORY" "$TARGET_TREE/"
 		log "Directory $DIRECTORY copied to $TARGET_TREE/"
 	done
 }
 
-# Function to copy only the directories explicitly selected by the user.
+# Copy only the directories explicitly selected by the user.
 copy_selected_directories() {
 	for DIRECTORY in $SELECTED_DIRECTORIES; do
 		if [ ! -d "$DIRECTORY" ]; then
@@ -264,8 +338,10 @@ copy_selected_directories() {
 		fi
 		TARGET_DIR="$TARGET_TREE/$DIRECTORY"
 		if [ -d "$TARGET_DIR" ]; then
-			warn "Directory $TARGET_DIR already exists. Removing files except 'CVS' directories."
-			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" -exec rm -rf {} +
+			warn "Directory $TARGET_DIR already exists." \
+				"Removing files except 'CVS'."
+			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" \
+				-exec rm -rf {} +
 		fi
 		cp -R "$DIRECTORY" "$TARGET_TREE/"
 		log "Directory $DIRECTORY copied to $TARGET_TREE/"
