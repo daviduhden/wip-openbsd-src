@@ -22,9 +22,8 @@
 #define FALSE
 
 #include "config.h"
+#include "../fvwm/fvwm_sandbox.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif
 
 #include <sys/time.h>
@@ -114,6 +113,8 @@ main(int argc, char **argv)
 	snprintf(mask_mesg, sizeof(mask_mesg), "SET_MASK %lu\n",
 	    (unsigned long)(M_FOCUS_CHANGE));
 	SendInfo(fd, mask_mesg, 0);
+
+	sandbox_x11_only("FvwmAuto");
 
 	while (1) {
 		FD_ZERO(&in_fdset);

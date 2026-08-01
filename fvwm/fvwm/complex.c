@@ -228,7 +228,7 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 	}
 
 	outlen = l2 + 1;
-	out = safemalloc(outlen);
+	out = xmalloc(outlen);
 	i = 0;
 	j = 0;
 	while (i < l) {

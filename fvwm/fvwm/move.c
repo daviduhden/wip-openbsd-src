@@ -393,6 +393,21 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 	/* END OF SNAPATTRACTION BLOCK, mirrored in ButtonRelease */
 }
 
+static void
+ClampToScreen(int *x, int *y, int width, int height, int bw)
+{
+	int margin = 32;
+
+	if (*x + width < margin)
+		*x = margin - width + 1;
+	if (*x > Scr.MyDisplayWidth - margin)
+		*x = Scr.MyDisplayWidth - margin;
+	if (*y + height < margin)
+		*y = margin - height + 1;
+	if (*y > Scr.MyDisplayHeight - margin)
+		*y = Scr.MyDisplayHeight - margin;
+}
+
 /****************************************************************************
  *
  * Move the rubberband around, return with the new window location
@@ -454,6 +469,8 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 					MoveOutline(Scr.Root, 0, 0, 0, 0);
 				*FinalX = tmp_win->frame_x;
 				*FinalY = tmp_win->frame_y;
+				ClampToScreen(FinalX, FinalY,
+				    Width, Height, bw);
 				finished = TRUE;
 			}
 			done = TRUE;
@@ -496,6 +513,8 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
 						    Scr.Root, 0, 0, 0, 0);
 					*FinalX = tmp_win->frame_x;
 					*FinalY = tmp_win->frame_y;
+					ClampToScreen(FinalX, FinalY,
+					    Width, Height, bw);
 					finished = TRUE;
 				}
 				done = 1;

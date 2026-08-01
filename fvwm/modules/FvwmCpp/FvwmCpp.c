@@ -39,6 +39,7 @@
 #include "../../fvwm/module.h"
 #include "../../libs/fvwmlib.h"
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
 
 char *MyName;
@@ -55,7 +56,6 @@ static char *MkNum(const char *name, int def);
 static int cpp_process(Display *display, const char *host, char *options,
     const char *config_file, int keep_output);
 static int is_cpp_linemarker(const char *line);
-static void *xrealloc(void *ptr, size_t size);
 #define MAXHOSTNAME 255
 #define EXTRA 20
 
@@ -90,7 +90,7 @@ main(int argc, char **argv)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
-	MyName = safemalloc(name_len + 2);
+	MyName = xmalloc(name_len + 2);
 	strlcpy(MyName, "*", name_len + 2);
 	strlcat(MyName, temp, name_len + 2);
 
@@ -156,6 +156,11 @@ main(int argc, char **argv)
 		    stderr, "%s: no configuration file specified\n", MyName);
 		exit(1);
 	}
+
+	unveil_tempdir("FvwmCpp");
+	unveil_home_read("FvwmCpp");
+	unveil(NULL, NULL);
+	sandbox_cpp_preproc("FvwmCpp");
 
 	if (cpp_process(dpy, display_name, cpp_options, filename, cpp_debug) !=
 	    0)
@@ -390,7 +395,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 #undef WRITE_DEF
 #undef WRITE_NUM
 
-	linebuf = safemalloc(line_cap);
+	linebuf = xmalloc(line_cap);
 	while ((nread = fread(chunk, 1, sizeof(chunk), cpp_out)) > 0) {
 		if (mirror)
 			fwrite(chunk, 1, nread, mirror);
@@ -494,19 +499,6 @@ is_cpp_linemarker(const char *line)
 	return 0;
 }
 
-static void *
-xrealloc(void *ptr, size_t size)
-{
-	void *tmp = realloc(ptr, size);
-
-	if (tmp == NULL) {
-		fprintf(
-		    stderr, "%s: unable to allocate %zu bytes\n", MyName, size);
-		exit(1);
-	}
-	return tmp;
-}
-
 /***********************************************************************
  *
  *  Procedure:
@@ -528,7 +520,7 @@ MkDef(const char *name, const char *def)
 	/* Get space to hold everything, if needed */
 
 	n = EXTRA + strlen(name) + strlen(def);
-	cp = safemalloc(n);
+	cp = xmalloc(n);
 
 	snprintf(cp, n, "#define %s %s\n", name, def);
 

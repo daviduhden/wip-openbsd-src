@@ -303,7 +303,7 @@ envDupExpand(const char *s, int extra)
 	if (bufflen < slen + 1)
 		bufflen = slen + 1;
 
-	ret = safemalloc(bufflen);
+	ret = xmalloc(bufflen);
 
 	/*
 	 *  now do the real expansion.

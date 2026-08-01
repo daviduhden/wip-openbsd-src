@@ -71,7 +71,7 @@ CopyString(char **dest, char *source)
 		len--;
 		source--;
 	}
-	*dest = safemalloc(len + 1);
+	*dest = xmalloc(len + 1);
 	strncpy(*dest, start, len);
 	(*dest)[len] = 0;
 }
@@ -99,7 +99,7 @@ stripcpy(char *source)
 		tmp--;
 		len--;
 	}
-	ptr = safemalloc(len + 1);
+	ptr = xmalloc(len + 1);
 	strncpy(ptr, source, len);
 	ptr[len] = 0;
 	return ptr;

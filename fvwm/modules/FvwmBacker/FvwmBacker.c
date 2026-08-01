@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -42,8 +43,6 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif                    /* Saul */
 
 #include <X11/Xlib.h>
@@ -51,7 +50,6 @@
 
 #include "../../fvwm/module.h"
 #include "FvwmBacker.h"
-#include "Mallocs.h"
 
 unsigned long GetColor(char *color);
 
@@ -124,7 +122,8 @@ main(int argc, char **argv)
 	/* Open a log file if necessary */
 #ifdef LOGFILE
 	logFile = fopen(LOGFILE, "a");
-	fprintf(logFile, "Initialising FvwmBacker\n");
+	if (logFile != NULL)
+		fprintf(logFile, "Initialising FvwmBacker\n");
 #endif
 
 	signal(SIGPIPE, DeadPipe);
@@ -156,6 +155,8 @@ EndLessLoop()
 {
 	fd_set readset;
 	struct timeval tv;
+
+	sandbox_x11_only("FvwmBacker");
 
 	while (1) {
 		FD_ZERO(&readset);
@@ -338,13 +339,13 @@ AddCommand(char *string)
 	while (isspace(*temp))
 		temp++;
 	if (DeskCount < 1) {
-		commands = (Command *)safemalloc((num + 1) * sizeof(Command));
+		commands = (Command *)xmalloc((num + 1) * sizeof(Command));
 		while (DeskCount < num + 1)
 			commands[DeskCount++].type = -1;
 	} else {
 		if (num + 1 > DeskCount) {
-			commands = (Command *)realloc(
-			    commands, (num + 1) * sizeof(Command));
+			commands = (Command *)xrealloc(
+			    (char *)commands, (num + 1) * sizeof(Command));
 			while (DeskCount < num + 1)
 				commands[DeskCount++].type = -1;
 		}
@@ -378,7 +379,7 @@ AddCommand(char *string)
 #endif
 		commands[num].type = 0;
 		size_t cmd_len = strlen(temp);
-		commands[num].cmdStr = (char *)safemalloc(cmd_len + 1);
+		commands[num].cmdStr = (char *)xmalloc(cmd_len + 1);
 		strlcpy(commands[num].cmdStr, temp, cmd_len + 1);
 	}
 }

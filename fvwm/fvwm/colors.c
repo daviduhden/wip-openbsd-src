@@ -104,7 +104,7 @@ FreeColors(Pixel *pixels, int n)
 Pixel *
 AllocNonlinearGradient(char *s_colors[], int clen[], int nsegs, int npixels)
 {
-	Pixel *pixels = (Pixel *)safemalloc(sizeof(Pixel) * npixels);
+	Pixel *pixels = (Pixel *)xmalloc(sizeof(Pixel) * npixels);
 	int i = 0, curpixel = 0, perc = 0;
 	if (nsegs < 1) {
 		fvwm_msg(ERR, "AllocNonlinearGradient",
@@ -170,7 +170,7 @@ AllocLinearGradient(char *s_from, char *s_to, int npixels)
 	dg = (to.green - from.green) / npixels;
 	b = from.blue;
 	db = (to.blue - from.blue) / npixels;
-	pixels = (Pixel *)safemalloc(sizeof(Pixel) * npixels);
+	pixels = (Pixel *)xmalloc(sizeof(Pixel) * npixels);
 	c.flags = DoRed | DoGreen | DoBlue;
 	for (; i < npixels; ++i) {
 		if (!XAllocColor(dpy, Scr.FvwmRoot.attr.colormap, &c))

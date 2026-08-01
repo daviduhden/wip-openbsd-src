@@ -7,7 +7,6 @@ extern int screen;
 extern int d_depth;
 extern int x_fd, fd_width;
 
-char *safemalloc(int length);
 void DeadPipe(int nonsense);
 void GetTargetWindow(Window *app_win);
 void CopyString(char **dest, char *source);

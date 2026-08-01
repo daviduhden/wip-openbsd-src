@@ -145,12 +145,7 @@ InstallWindowColormaps(FvwmWindow *tmp)
 			 * colourmaps. Despite what the server says, these
 			 * colourmaps are always installed.
 			 */
-			if (last_cmap != attributes.colormap
-#if defined(sun) && defined(TRUECOLOR_ALWAYS_INSTALLED)
-			    && !(attributes.depth == 24 &&
-			    attributes.visual->class == TrueColor)
-#endif
-			    ) {
+			if (last_cmap != attributes.colormap) {
 				last_cmap = attributes.colormap;
 				XInstallColormap(dpy, attributes.colormap);
 			}
@@ -158,12 +153,7 @@ InstallWindowColormaps(FvwmWindow *tmp)
 	}
 
 	if (!ThisWinInstalled) {
-		if (last_cmap != tmp->attr.colormap
-#if defined(sun) && defined(TRUECOLOR_ALWAYS_INSTALLED)
-		    && !(tmp->attr.depth == 24 &&
-		    tmp->attr.visual->class == TrueColor)
-#endif
-		    ) {
+		if (last_cmap != tmp->attr.colormap) {
 			last_cmap = tmp->attr.colormap;
 			XInstallColormap(dpy, tmp->attr.colormap);
 		}

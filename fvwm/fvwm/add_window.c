@@ -50,8 +50,9 @@
 #endif /* SHAPE */
 #include "module.h"
 
-/* Used to parse command line of clients for specific desk requests. */
-/* Todo: check for multiple desks. */
+/* Parse client command line for desktop hints (-workspace N, -xrm).
+ * Only a single desk resource is checked; multiple -workspace flags
+ * are not handled. */
 static XrmDatabase db;
 static XrmOptionDescRec table[] = {
     /* Want to accept "-workspace N" or -xrm "fvwm*desk:N" as options

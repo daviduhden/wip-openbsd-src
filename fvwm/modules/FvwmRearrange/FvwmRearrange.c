@@ -27,9 +27,8 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h>
 #endif
 
 #if HAVE_SYS_SELECT_H
@@ -214,7 +213,7 @@ collect_client(ModuleState *state)
 		switch (header[1]) {
 		case M_CONFIGURE_WINDOW:
 			if (window_matches(state, body)) {
-				ClientNode *node = (ClientNode *)safemalloc(
+				ClientNode *node = (ClientNode *)xmalloc(
 				    sizeof(ClientNode));
 				node->frame = (Window)body[1];
 				node->title_height = (int)body[9];
@@ -658,7 +657,7 @@ tokenise_config(char *line, char ***argv_out)
 	}
 
 	if (count > 0) {
-		*argv_out = (char **)safemalloc(sizeof(char *) * count);
+		*argv_out = (char **)xmalloc(sizeof(char *) * count);
 		for (int i = 0; i < count; ++i) {
 			(*argv_out)[i] = tokens[i];
 		}
@@ -681,7 +680,7 @@ LoadConfigLine(const char *filename, const char *match)
 		while (fgets(line, sizeof(line), f)) {
 			if (strncmp(line, match, match_len) == 0) {
 				size_t len = strlen(line);
-				char *copy = (char *)safemalloc(len + 1);
+				char *copy = (char *)xmalloc(len + 1);
 
 				strcpy(copy, line);
 				if (len && copy[len - 1] == '\n') {
@@ -732,7 +731,7 @@ main(int argc, char *argv[])
 		fprintf(stderr, "%s: module should be executed by fvwm2 only\n",
 		    state->program_name);
 #endif
-		exit(-1);
+		exit(1);
 	}
 
 	state->pipe_fd[0] = atoi(argv[1]);
@@ -742,7 +741,7 @@ main(int argc, char *argv[])
 	if (!state->display) {
 		fprintf(state->log, "%s: couldn't open display %s\n",
 		    state->program_name, XDisplayName(NULL));
-		exit(-1);
+		exit(1);
 	}
 
 	signal(SIGPIPE, handle_sigpipe);
@@ -756,8 +755,8 @@ main(int argc, char *argv[])
 	state->fd_width = GetFdWidth();
 
 #ifdef USERC
-	strcpy(match, "*");
-	strcat(match, state->program_name);
+	strlcpy(match, "*", sizeof(match));
+	strlcat(match, state->program_name, sizeof(match));
 
 #ifdef FVWM1
 	config_line = LoadConfigLine(argv[3], match);
@@ -837,6 +836,9 @@ main(int argc, char *argv[])
 	}
 
 	SendInfo(state->pipe_fd, "Send_WindowList", 0);
+
+	sandbox_x11_config("FvwmRearrange");
+
 	while (collect_client(state)) {
 		/* keep reading until the end marker arrives */
 	}

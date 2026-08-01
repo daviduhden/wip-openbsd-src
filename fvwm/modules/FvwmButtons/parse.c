@@ -82,7 +82,7 @@ seekright_command(char **s)
 
 		size_t len_command = strlen(command);
 		size_t len_next = strlen(next);
-		char *combined = mymalloc(len_command + len_next + 2);
+		char *combined = xmalloc(len_command + len_next + 2);
 
 		memcpy(combined, command, len_command);
 		combined[len_command] = ' ';
@@ -647,7 +647,7 @@ match_string(button_info **uberb, char *s)
 					b->swallow |= 1;
 					if (!(b->swallow & b_NoHints))
 						b->hints =
-						    (XSizeHints *)mymalloc(
+						    (XSizeHints *)xmalloc(
 						    sizeof(XSizeHints));
 					if (o) {
 						if (!(buttonSwallow(b) &
@@ -869,7 +869,7 @@ match_string(button_info **uberb, char *s)
 		b->swallow |= 1;
 		s = trimleft(s);
 		if (!(b->swallow & b_NoHints))
-			b->hints = (XSizeHints *)mymalloc(sizeof(XSizeHints));
+			b->hints = (XSizeHints *)xmalloc(sizeof(XSizeHints));
 		if (*s) {
 			if (!(buttonSwallow(b) & b_UseOld))
 				SendText(fd, s, 0);
@@ -975,14 +975,14 @@ ParseConfigLine(button_info **ubb, char *s)
 		break;
 	case 10: /* Panel */
 		s = trimleft(s);
-		CurrentPanel->next = (panel_info *)mymalloc(sizeof(panel_info));
+		CurrentPanel->next = (panel_info *)xmalloc(sizeof(panel_info));
 		CurrentPanel = CurrentPanel->next;
 		memset(CurrentPanel, 0, sizeof(panel_info));
 		CurrentPanel->geom_w = -1;
 		CurrentPanel->geom_h = -1;
 		CurrentPanel->next = NULL;
 		CurrentPanel->uber = UberButton =
-		    (button_info *)mymalloc(sizeof(button_info));
+		    (button_info *)xmalloc(sizeof(button_info));
 		memset(UberButton, 0, sizeof(button_info));
 		UberButton->title = seekright(&s);
 		UberButton->flags = 0;
@@ -1056,7 +1056,7 @@ ParseOptions(button_info *ub)
 	char *items[] = {"iconpath", "pixmappath", "colorlimit", NULL, NULL};
 
 	size_t name_len = strlen(MyName);
-	items[3] = mymalloc(name_len + 2);
+	items[3] = xmalloc(name_len + 2);
 	snprintf(items[3], name_len + 2, "*%s", MyName);
 
 	GetConfigLine(fd, &s);

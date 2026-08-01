@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -76,7 +77,7 @@ main(int argc, char **argv)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
-	MyName = safemalloc(name_len + 2);
+	MyName = xmalloc(name_len + 2);
 	strlcpy(MyName, "*", name_len + 2);
 	strlcat(MyName, temp, name_len + 2);
 	Clength = strlen(MyName);
@@ -136,6 +137,8 @@ main(int argc, char **argv)
 	}
 
 	/* sever our connection with fvwm */
+
+	sandbox_x11_only("FvwmScroll");
 	close(fd[0]);
 	close(fd[1]);
 	if (app_win == 0)

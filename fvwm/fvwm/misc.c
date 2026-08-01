@@ -891,6 +891,34 @@ MapIt(FvwmWindow *t)
 	}
 }
 
+Bool
+IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor)
+{
+	FvwmWindow *p;
+	Window tw;
+
+	if (t == ancestor)
+		return False;
+	if ((t->flags & TRANSIENT) == 0)
+		return False;
+	tw = t->transientfor;
+	while (tw != None && tw != Scr.Root) {
+		if (tw == ancestor->w)
+			return True;
+		for (p = Scr.FvwmRoot.next; p != NULL; p = p->next) {
+			if (p->w == tw) {
+				if ((p->flags & TRANSIENT) == 0)
+					return False;
+				tw = p->transientfor;
+				break;
+			}
+		}
+		if (p == NULL)
+			return False;
+	}
+	return False;
+}
+
 void
 RaiseWindow(FvwmWindow *t)
 {
@@ -911,8 +939,7 @@ RaiseWindow(FvwmWindow *t)
 	    t2 = t2->stack_next) {
 		if (t2->flags & ONTOP)
 			count++;
-		if ((t2->flags & TRANSIENT) && (t2->transientfor == t->w) &&
-		    (t2 != t)) {
+		if (IsTransientDescendantOf(t2, t)) {
 			count++;
 			BroadcastPacket(M_RAISE_WINDOW, 3, t2->w, t2->frame,
 			    (unsigned long)t2);
@@ -926,8 +953,8 @@ RaiseWindow(FvwmWindow *t)
 		count += 2;
 	}
 
-	wins = (Window *)safemalloc(count * sizeof(Window));
-	FvwmTopwins = (FvwmWindow **)safemalloc(count * sizeof(FvwmWindow));
+	wins = (Window *)xmalloc(count * sizeof(Window));
+	FvwmTopwins = (FvwmWindow **)xmalloc(count * sizeof(FvwmWindow));
 
 	i = 0;
 	j = 0;
@@ -948,8 +975,8 @@ RaiseWindow(FvwmWindow *t)
 #ifndef DONT_RAISE_TRANSIENTS
 	for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot;
 	    t2 = t2->stack_next) {
-		if ((t2->flags & TRANSIENT) && (t2->transientfor == t->w) &&
-		    (t2 != t) && (!(t2->flags & ONTOP))) {
+		if (IsTransientDescendantOf(t2, t) &&
+		    (!(t2->flags & ONTOP))) {
 			wins[i++] = t2->frame;
 			FvwmTopwins[j++] = t2;
 			if ((t2->flags & ICONIFIED) &&

@@ -16,8 +16,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif
 
 #include <X11/Intrinsic.h>
@@ -170,13 +168,19 @@ MakeButton(button_info *b)
 		b->icon_w = iw;
 		b->icon_h = ih;
 
-		if (iw > 0 && ih > 0) {
+		if (iw > 8 && ih > 8) {
 			if (!(buttonSwallow(b) & b_NoHints)) {
 				if (!XGetWMNormalHints(
 				    Dpy, b->IconWin, b->hints, &supplied))
 					b->hints->flags = 0;
 				ConstrainSize(b->hints, &b->icon_w, &b->icon_h);
+				if (b->icon_w < 1)
+					b->icon_w = 1;
+				if (b->icon_h < 1)
+					b->icon_h = 1;
 			}
+			b->icon_w = max(b->icon_w, 8);
+			b->icon_h = max(b->icon_h, 8);
 			if (b->flags & b_Right)
 				ix += iw - b->icon_w;
 			else if (!(b->flags & b_Left))

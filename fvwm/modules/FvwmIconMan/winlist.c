@@ -80,9 +80,9 @@ add_to_stringlist(StringList *list, char *s)
 	ConsoleDebug(WINLIST, "add_to_stringlist: %s %s\n",
 	    type == ALL_NAME ? "all" : s, pat);
 
-	new = (StringEl *)safemalloc(sizeof(StringEl));
+	new = (StringEl *)xmalloc(sizeof(StringEl));
 	size_t pat_len = strlen(pat);
-	new->string = (char *)safemalloc((pat_len + 1) * sizeof(char));
+	new->string = (char *)xmalloc((pat_len + 1) * sizeof(char));
 	new->type = type;
 
 	strlcpy(new->string, pat, pat_len + 1);
@@ -195,7 +195,7 @@ iconmanager_show(
 WinData *
 new_windata(void)
 {
-	WinData *new = (WinData *)safemalloc(sizeof(WinData));
+	WinData *new = (WinData *)xmalloc(sizeof(WinData));
 	new->desknum = ULONG_MAX;
 	new->x = ULONG_MAX;
 	new->y = ULONG_MAX;

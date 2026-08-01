@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "fvwm_sandbox.h"
 #include "menus.h"
 #include "misc.h"
 #include "module.h"
@@ -33,11 +34,6 @@
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
 #endif /* SHAPE */
-
-#if defined(HAVE_SYS_SYSTEMINFO_H)
-/* Solaris has sysinfo instead of gethostname.  */
-#include <sys/systeminfo.h>
-#endif
 
 #define MAXHOSTNAME 255
 
@@ -311,7 +307,7 @@ main(int argc, char **argv)
 	 */
 	len = strlen(XDisplayString(dpy));
 	buflen = len + 10;
-	display_string = safemalloc(buflen);
+	display_string = xmalloc(buflen);
 	snprintf(display_string, buflen, "DISPLAY=%s", XDisplayString(dpy));
 	putenv(display_string);
 	/* Add a HOSTDISPLAY environment variable, which is the same as
@@ -323,7 +319,7 @@ main(int argc, char **argv)
 		char client[MAXHOSTNAME], *rdisplay_string;
 		gethostname(client, MAXHOSTNAME);
 		buflen = len + 14 + strlen(client);
-		rdisplay_string = safemalloc(buflen);
+		rdisplay_string = xmalloc(buflen);
 		snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s:%s", client,
 		    &display_string[9]);
 		putenv(rdisplay_string);
@@ -331,14 +327,14 @@ main(int argc, char **argv)
 		char client[MAXHOSTNAME], *rdisplay_string;
 		gethostname(client, MAXHOSTNAME);
 		buflen = len + 14 + strlen(client);
-		rdisplay_string = safemalloc(buflen);
+		rdisplay_string = xmalloc(buflen);
 		snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s:%s", client,
 		    &display_string[13]);
 		putenv(rdisplay_string);
 	} else {
 		char *rdisplay_string;
 		buflen = len + 14;
-		rdisplay_string = safemalloc(buflen);
+		rdisplay_string = xmalloc(buflen);
 		snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s",
 		    XDisplayString(dpy));
 		putenv(rdisplay_string);
@@ -465,6 +461,15 @@ main(int argc, char **argv)
 		Scr.ClickTime = -Scr.ClickTime;
 	fFvwmInStartup = False;
 	DBUG("main", "Entering HandleEvents loop...");
+
+	if (unveil(FVWMLIBDIR, "rx") == -1)
+		err(1, "unveil %s", FVWMLIBDIR);
+	if (unveil("/etc/X11/fvwm", "r") == -1)
+		err(1, "unveil /etc/X11/fvwm");
+	if (unveil("/tmp", "rwc") == -1)
+		err(1, "unveil /tmp");
+	if (unveil(NULL, NULL) == -1)
+		err(1, "unveil");
 
 	if (pledge("stdio rpath proc exec", NULL) == -1)
 		err(1, "pledge");
@@ -1421,26 +1426,27 @@ Done(int restart, char *command)
 
 		{
 			char *my_argv[10];
-			int i, done, j;
+			int i, j;
 
-			i = 0;
-			j = 0;
-			done = 0;
-			while ((g_argv[j] != NULL) && (i < 8)) {
-				if (strcmp(g_argv[j], "-s") != 0) {
-					my_argv[i] = g_argv[j];
-					i++;
-					j++;
-				} else
-					j++;
-			}
-			if (strstr(command, "fvwm") != NULL)
+			if (strstr(command, "fvwm") != NULL) {
+				i = 0;
+				j = 0;
+				while ((g_argv[j] != NULL) && (i < 8)) {
+					if (strcmp(g_argv[j], "-s") != 0) {
+						my_argv[i] = g_argv[j];
+						i++;
+						j++;
+					} else
+						j++;
+				}
 				my_argv[i++] = "-s";
-			while (i < 10)
-				my_argv[i++] = NULL;
+				while (i < 10)
+					my_argv[i++] = NULL;
+			} else {
+				my_argv[0] = command;
+				my_argv[1] = NULL;
+			}
 
-			/* really need to destroy all windows, explicitly,
-			 * not sleep, but this is adequate for now */
 			sleep(1);
 			ReapChildren();
 			execvp(command, my_argv);

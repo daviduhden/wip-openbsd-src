@@ -34,6 +34,16 @@ struct charstring key_modifiers[] = {{'s', ShiftMask}, {'c', ControlMask},
 void find_context(
     char *string, int *output, struct charstring *table, char *tline);
 
+static void
+RegrabAllKeys(void)
+{
+	FvwmWindow *t;
+
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+		GrabKeys(t);
+	}
+}
+
 /*
 ** to remove a binding from the global list (probably needs more processing
 ** for mouse binding lines though, like when context is a title bar button).
@@ -235,7 +245,7 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			if (!fKey || current == keysym) {
 				temp = Scr.AllBindings;
 				Scr.AllBindings =
-				    (Binding *)safemalloc(sizeof(Binding));
+				    (Binding *)xmalloc(sizeof(Binding));
 				Scr.AllBindings->IsMouse = !fKey;
 				Scr.AllBindings->Button_Key = i;
 				Scr.AllBindings->key_name =
@@ -250,6 +260,8 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		if (mapping)
 			XFree(mapping);
 	}
+	if (fKey)
+		RegrabAllKeys();
 	return;
 }
 

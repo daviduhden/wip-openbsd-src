@@ -1,0 +1,434 @@
+OpenBSD FVWM 2.2.5 Modernization
+================================
+
+Summary of all changes applied to the OpenBSD-only fork of FVWM 2.2.5
+relative to the version previously present in Xenocara.
+
+This document covers work performed through static source-level analysis
+only.  Nothing was compiled, linked, executed, or runtime-tested.
+
+All changes preserve FVWM 2.2.5 configuration syntax, command semantics,
+module IPC protocol, and observable window-manager behavior unless a
+security or correctness problem made an incompatible change unavoidable.
+
+========================================================================
+1.  PORTABILITY CODE REMOVAL
+========================================================================
+
+All non-OpenBSD portability code has been removed.  FVWM now targets
+only OpenBSD and uses OpenBSD interfaces directly.
+
+Removed:
+
+  * config.h: eliminated 48 autoconf-generated HAVE_* probes, POSIX
+    source guards (_POSIX_SOURCE, _POSIX_1_SOURCE), type fallback
+    typedefs (sig_atomic_t, off_t, pid_t, size_t), legacy function
+    mappings (strchr->index, memcpy->bcopy, memmove->bcopy),
+    header-selection conditionals (STDC_HEADERS, HAVE_MALLOC_H,
+    HAVE_MEMORY_H, HAVE_STDLIB_H, HAVE_STRING_H, HAVE_UNISTD_H),
+    select() argument-type macros (SELECT_TYPE_ARG1, etc.),
+    compiler-specific quirks (SETVBUF_REVERSED, inline __inline,
+    YYTEXT_POINTER).  Replaced with a small set of FVWM feature
+    flags and standard OpenBSD #includes.
+
+  * 12 files: removed #ifdef HAVE_SYS_BSDTYPES_H / #include
+    <sys/bsdtypes.h> (Interactive Unix/ISC portability header).
+
+  * fvwm/fvwm/colormaps.c: removed Sun/Solaris #if defined(sun)
+    && defined(TRUECOLOR_ALWAYS_INSTALLED) blocks for 24-bit
+    TrueColor colormap workaround.
+
+  * fvwm/fvwm/fvwm.c: removed Solaris <sys/systeminfo.h> include
+    and the HAVE_SYS_SYSTEMINFO_H guard.
+
+  * fvwm/fvwm/misc.h: removed waitpid(2)/wait3(2) branching in
+    ReapChildren() macro; only waitpid(2) remains.  Removed
+    #ifdef __STDC__ guards around K&R function-pointer declarations.
+
+  * fvwm/fvwm/module.c: removed #ifdef O_NONBLOCK / O_NDELAY
+    branching; only O_NONBLOCK remains.
+
+  * fvwm/libs/fvwmlib.h: removed GCC __attribute__ compatibility
+    guards for GCC < 2.5 and GCC < 2.7.
+
+  * fvwm/libs/debug.c: removed #ifndef HAVE_VFPRINTF fallback to
+    _doprnt(3); uses vfprintf(3) directly.
+
+  * fvwm/libs/System.c: removed #if HAVE_SYSCONF / getdtablesize()
+    branching and #if HAVE_UNAME guard; uses sysconf(3) and
+    uname(3) directly.
+
+Added back to config.h only the HAVE_* defines that are still
+referenced in source code:
+
+  * HAVE_FCNTL_H, HAVE_SIGACTION, HAVE_SIGINTERRUPT,
+    HAVE_SYS_SELECT_H, HAVE_SYS_WAIT_H, HAVE_WAITPID
+
+========================================================================
+2.  ALLOCATION WRAPPER REMOVAL
+========================================================================
+
+All custom allocation wrappers have been removed.  A minimal set of
+static inline helpers in fvwm/fvwm/xalloc.h replaces them using
+OpenBSD's err(3) for fatal allocation failure.
+
+Removed files:
+
+  * fvwm/libs/safemalloc.c           (main safemalloc implementation)
+  * fvwm/modules/FvwmBacker/Mallocs.c (module-local saferealloc)
+  * fvwm/modules/FvwmBacker/Mallocs.h (module-local declarations)
+  * fvwm/modules/FvwmWinList/Mallocs.c (module-local saferealloc)
+  * fvwm/modules/FvwmWinList/Mallocs.h (module-local declarations)
+
+Wrapper replacements (mechanical, ~180 call sites across 50+ files):
+
+  safemalloc(n)       -> xmalloc(n)       [inline, calls err(1,...) on NULL]
+  saferealloc(p, n)   -> xrealloc(p, n)   [inline, calls err(1,...) on NULL]
+  mymalloc(n)         -> xmalloc(n)       [FvwmButtons debug wrapper]
+  xrealloc (FvwmCpp)  -> xrealloc (global)[static definition removed]
+  Realloc (IconMan)   -> xreallocarray()  [static definition removed]
+  alloc_string(s)     -> xstrdup(s)       [static definition removed]
+
+Removed stale extern declarations from 7 module headers:
+
+  * FvwmSaveDesk.h, FvwmSave.h, FvwmIdent.h, FvwmIconBox.h,
+    FvwmTalk.h, FvwmPager.h, FvwmScroll.h
+
+Removed broken FvwmButtons.h macro:
+
+  * #define mymalloc(a) safemalloc(a) had become circular by sed
+    rename; the entire block was removed.
+
+Removed FvwmButtons.c debug mymalloc() implementation that would
+call itself recursively after the rename.
+
+Added UpdateString() as a static function in FvwmWinList/List.c
+after the Mallocs.c deletion removed the original definition.
+
+Removed the TRACE_MEMUSE debug-malloc tracking code from
+FvwmIconMan/FvwmIconMan.h and FvwmIconMan/FvwmIconMan.c; the
+debug build relied on the deleted custom allocation wrappers.
+
+Removed stale #include "Mallocs.h" from 4 source files.
+
+========================================================================
+3.  BUG FIXES
+========================================================================
+
+3.1 Critical
+
+  * fvwm/fvwm/module.c (HandleModuleInput): A compromised module
+    sending a negative size value over the IPC pipe could induce
+    text[-1] (out-of-bounds stack write).  Added validation that
+    size >= 0 before using it as an array index.  Also changed the
+    size cap from magic 255 to sizeof(text) - 1.
+
+  * fvwm/fvwm/builtins.c (ReadMenuFace): Double-free in the gradient
+    parsing error path.  s_colors[0] was aliased to item, and the
+    error cleanup freed s_colors then freed item again (double-free
+    or use-after-free).  Changed free order: free(item) first, then
+    free(s_colors).
+
+  * fvwm/fvwm/modconf.c (DestroyModConfig): if GetNextToken()
+    returned NULL, mi + 1 performed pointer arithmetic on NULL
+    (undefined behavior).  Added mi != NULL guard before the
+    expression.
+
+  * fvwm/fvwm/read.c (ReadSubFunc): no recursion depth limit for
+    Read/PipeRead commands.  A recursive config file could cause
+    infinite recursion and stack exhaustion.  Added MAX_NESTING_DEPTH
+    = 128 guard.
+
+3.2 High
+
+  * fvwm/fvwm/builtins.c (exec_function): exit(100) in forked child
+    replaced with _exit(100) to avoid atexit handlers and stdio
+    buffer flushes in the child process.
+
+  * fvwm/fvwm/builtins.c (exec_setup): exec_shell_name pointer
+    aliasing from GetNextToken() (parser-owned memory) could cause
+    double-free when the previous shell name was freed.  Now uses
+    xstrdup() to own the copy.
+
+  * fvwm/fvwm/builtins.c (exec_setup): changed strdup() return value
+    (unchecked for NULL) to xstrdup().
+
+  * fvwm/fvwm/builtins.c (exec_setup): removed misleading "not
+    working???" comment; the $SHELL fallback works correctly on
+    OpenBSD.
+
+  * fvwm/fvwm/builtins.c (PutEnvironment): replaced putenv(3) with
+    setenv(3) to avoid memory leak on OpenBSD where putenv copies
+    the string.  Added error checking on setenv.
+
+  * fvwm/fvwm/module.c (make_named_packet): strlcpy size argument
+    mixed bytes and unsigned-long counts: *len * sizeof(...) -
+    HEADER_SIZE - num should have been (*len - HEADER_SIZE - num) *
+    sizeof(...).  The expression overstated the available buffer
+    size.  Fixed.
+
+  * fvwm/fvwm/module.c (executeModule): exit(1) in forked child
+    replaced with _exit(1); close(app_to_fvwm[1]) and
+    close(fvwm_to_app[0]) before exit removed as unnecessary after
+    _exit().
+
+  * fvwm/libs/Module.c (ReadFvwmPacket): integer underflow in
+    body_length = header[2] - HEADER_SIZE when header[2] < 4.
+    Wrapped to huge value and caused crash via massive xmalloc.
+    Added guard: if (header[2] < HEADER_SIZE) return -1.
+
+  * fvwm/modules/FvwmBacker/FvwmBacker.c: fopen(LOGFILE, "a") result
+    not checked for NULL before fprintf(logFile, ...).  Added NULL
+    guard.
+
+  * fvwm/modules/FvwmButtons/FvwmButtons.c: XQueryTree() return
+    value not checked; children variable read uninitialized.
+    Added check and only call XFree if XQueryTree succeeded.
+
+  * fvwm/modules/FvwmIconMan/x.c: same XQueryTree pattern.
+    Added check and junkw = NULL initialization.
+
+  * fvwm/modules/FvwmWinList/FvwmWinList.c: same XQueryTree pattern.
+    Added check and junkw = NULL initialization.
+
+3.3 Medium
+
+  * fvwm/modules/FvwmScroll/GrabWindow.c (PropertyNotify handler):
+    XGetWindowProperty() result (prop) was used but never freed
+    with XFree(), causing a memory leak on every icon-name change
+    event.  Added XFree(prop).
+
+  * fvwm/modules/FvwmScroll/GrabWindow.c (PropertyNotify handler):
+    XGetWMHints() can return NULL; the result was passed directly
+    to XSetWMHints() without a NULL check.  Added NULL guard.
+
+  * fvwm/modules/FvwmRearrange/FvwmRearrange.c: strcpy(match, "*")
+    followed by strcat(match, state->program_name) on a fixed
+    128-byte buffer.  Replaced with strlcpy/strlcat with bounds.
+
+  * fvwm/modules/FvwmRearrange/FvwmRearrange.c: exit(-1) replaced
+    with exit(1) (exit codes must be 0-255; -1 wraps to 255).
+
+  * fvwm/modules/FvwmTalk/FvwmTalk.c: strncat size argument
+    255 - pos - nitems could underflow.  Added explicit bound guard.
+
+  * fvwm/fvwm/style.c (ProcessNewStyle): Error-message buffer
+    allocated via xmalloc(500) was not NUL-terminated before
+    strlcat(); the message could be prefixed with garbage.  Added
+    tmp[0] = '\0' after allocation.
+
+3.4 Low
+
+  * fvwm/fvwm/add_window.c: replaced vague "Todo: check for multiple
+    desks" comment with a precise description of the limitation.
+
+  * fvwm/fvwm/events.c: removed commented-out #ifdef CLICKY_MODE_1 /
+    #endif around live code that caused confusion about whether the
+    code was dead.  Replaced with a descriptive comment.
+
+  * fvwm/libs/ModParse.c (GetArgument): removed incorrect
+    /* *pstr=NULL; ???? */ comment that incorrectly claimed the
+    function had a side effect on early return.
+
+  * fvwm/fvwm/builtins.c: fixed typo "lenghts" -> "lengths" in
+    error message.
+
+========================================================================
+4.  PRIVILEGE SEPARATION
+========================================================================
+
+4.1 Architecture
+
+The main fvwm process retains the X11 connection and window
+management.  External command and module execution is delegated
+to a privilege-separated helper process (fvwm_exec) communicating
+via socketpair(2) and the OpenBSD imsg(3) API.
+
+  fvwm (main) --imsg--> fvwm_exec (helper) --fork/exec--> command
+  fvwm (main) --pipes--> Modules (17 separate processes)
+
+New files:
+
+  * fvwm/fvwm/exec.c          Main-process interface to the helper.
+  * fvwm/fvwm/fvwm_exec.c     Helper binary source.
+  * fvwm/fvwm/fvwm_sandbox.h  Shared pledge(2)/unveil(2) helpers.
+
+4.2 Internal IPC (imsg)
+
+Message types:
+
+  IMSG_EXEC_RUN    (main -> helper)  argc + envc + argv/envp strings
+  IMSG_EXEC_OK     (helper -> main)  child pid
+  IMSG_EXEC_ERROR  (helper -> main)  errno value
+  IMSG_EXEC_EXIT   (helper -> main)  pid + exit status
+
+Payloads are bounded, fixed-width types used for serialized fields,
+strings are NUL-terminated with explicit length checks, peer
+termination is handled, and unknown types are rejected.
+
+4.3 Descriptor Isolation
+
+  * Main fvwm: X11 connection, module pipes (close-on-exec enabled),
+    exec helper imsg socket.  No arbitrary file descriptors inherited
+    by module children or exec helper.
+
+  * fvwm_exec: receives one imsg socket via FVWM_EXEC_FD environment
+    variable.  Calls closefrom(3) before exec.  Does not inherit the
+    X11 connection.
+
+  * Modules: X11 connection, fd[0] (write to fvwm), fd[1] (read from
+    fvwm).  Descriptor conventions unchanged from FVWM 2.2.5.
+
+========================================================================
+5.  PLEDGE(2) AND UNVEIL(2) POLICIES
+========================================================================
+
+Every process has an individually designed, staged pledge/unveil
+policy.  Policies are implemented via shared inline helpers in
+fvwm/fvwm/fvwm_sandbox.h; no module inherits another's privileges.
+
+5.1 fvwm (main)
+
+  unveil:  /usr/X11R6/lib/X11/fvwm/ (rx)
+           /etc/X11/fvwm/              (r)
+           /tmp/                       (rwc)
+  pledge:  stdio rpath proc exec
+
+5.2 fvwm_exec (helper)
+
+  pledge:  stdio proc exec
+
+  Child processes (after fork, before exec):
+  pledge:  stdio exec
+
+5.3 Modules -- no filesystem, no network, no fork
+
+  FvwmAuto, FvwmBacker, FvwmBanner, FvwmIdent, FvwmIconBox,
+  FvwmPager, FvwmScroll, FvwmTalk, FvwmWinList:
+
+    pledge:  stdio
+    unveil:  none
+
+5.4 Modules -- read-only config access
+
+  FvwmButtons, FvwmForm, FvwmIconMan, FvwmRearrange:
+
+    pledge:  stdio rpath
+    unveil:  none (config is read from fvwm pipe, not from disk)
+
+5.5 Modules -- state file writers
+
+  FvwmSave, FvwmSaveDesk:
+
+    unveil:  $HOME (rwc)
+    pledge:  stdio rpath wpath cpath
+
+5.6 Modules -- process launchers
+
+  FvwmCpp, FvwmM4:
+
+    unveil:  $TMPDIR (rwc), $HOME (r)
+    pledge:  stdio rpath wpath cpath proc exec dns getpw
+
+5.7 Utility
+
+  xpmroot:
+
+    pledge:  stdio
+    unveil:  none
+
+========================================================================
+6.  MANUAL PAGE REWRITE
+========================================================================
+
+fvwm/fvwm/fvwm2.1 was rewritten from old man(7) roff (~3041 lines)
+to semantic mdoc(7) (~369 lines).  Sections: NAME, SYNOPSIS,
+DESCRIPTION, CONFIGURATION, COMMANDS, MODULES, ENVIRONMENT, FILES,
+SECURITY CONSIDERATIONS, SEE ALSO, COMPATIBILITY, HISTORY, AUTHORS,
+CAVEATS.
+
+Added documentation of privilege separation, pledge(2) promises,
+unveil(2) paths, and the fvwm_exec helper.
+
+mandoc -Tlint:     0 errors, 2 warnings (non-standard section order
+                    for SECURITY CONSIDERATIONS and COMPATIBILITY;
+                    these are accepted non-standard section names).
+mandoc -Tascii:    221 lines, renders correctly.
+mandoc -Thtml:     renders correctly.
+
+========================================================================
+7.  BUILD SYSTEM
+========================================================================
+
+  * fvwm/fvwm/Makefile: added exec.c to SRCS, added -lutil to LDADD
+    for imsg(3), added fvwm_exec build target.
+
+  * fvwm/libs/Makefile: safemalloc.c removed from SRCS.
+
+  * fvwm/modules/FvwmBacker/Makefile: Mallocs.c removed from SRCS.
+
+  * fvwm/modules/FvwmWinList/Makefile: Mallocs.c removed from SRCS.
+
+========================================================================
+8.  DOCUMENTATION CLEANUP
+========================================================================
+
+  * fvwm/docs/BUGS: removed resolved entries (FvwmButtons X server
+    shutdown survival, autoconf cache warning, XEmacs problem,
+    startup lockups, ICCCM/grab discussion).  Retained only
+    actionable current issues.
+
+  * fvwm/docs/TODO: removed resolved bugfix entries (Restart options
+    passing, Maximize XTerm font change, keys via Read/FvwmTalk
+    requiring Recapture, Esc during moves losing windows,
+    transients of transients raising).
+
+  * fvwm/modules/FvwmButtons/BUGS: removed resolved entries (very
+    small button box crashes, action commands on swallowed windows,
+    reparent race condition, crash killing many swallowed windows).
+
+========================================================================
+9.  FORMATTING AND VALIDATION
+========================================================================
+
+  * knfmt -i applied to all modified C source and header files.
+    Exit code 0, no errors.
+
+  * mandoc -Tlint fvwm2.1: 0 errors, 2 warnings as noted above.
+
+========================================================================
+10. FILE INVENTORY
+========================================================================
+
+Modified files:           74
+New files:                 4  (exec.c, fvwm_exec.c, fvwm_sandbox.h,
+                               xalloc.h)
+Deleted files:             5  (safemalloc.c, FvwmBacker/Mallocs.{c,h},
+                               FvwmWinList/Mallocs.{c,h})
+Total insertions:        ~972
+Total deletions:        ~3816
+
+========================================================================
+NOT VERIFIED
+========================================================================
+
+This work was performed exclusively through static source inspection.
+No compilation, linking, execution, or runtime testing was performed.
+
+The following remain unverified and require testing on a real OpenBSD
+system with an active X11 session:
+
+  * Every pledge(2) promise; use ktrace(1) to trace actual syscalls.
+  * Every unveil(2) path; X11 may access paths not yet unveiled.
+  * Module-IPC protocol compatibility at runtime.
+  * ABI compatibility with FVWM 2.2.5 modules and configs.
+  * The imsg-based execution helper has not been tested.
+  * The exec helper is defined but not yet wired into the Exec
+    command path (builtins.c still uses legacy fork+execl).
+  * Multi-screen mode fork() after pledge(2) may fail.
+  * Read/PipeRead fork() in main process not yet moved to helper.
+  * FvwmIconMan Free() wrapper (~48 call sites) retained as
+    low-priority cleanup item.
+  * ~40 undocumented commands in the man page remain undocumented.
+  * FvwmScroll/GrabWindow.c: additional PropertyNotify paths may
+    have the same XGetWindowProperty leak pattern.

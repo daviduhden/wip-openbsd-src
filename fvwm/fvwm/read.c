@@ -38,6 +38,8 @@ char *fvwm_file = NULL;
 
 int numfilesread = 0;
 
+#define MAX_NESTING_DEPTH 128
+
 static int last_read_failed = 0;
 
 static const char *read_system_rc_cmd = "Read system" FVWMRC;
@@ -156,6 +158,12 @@ static void
 ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module, int piperead)
 {
+
+	if (numfilesread >= MAX_NESTING_DEPTH) {
+		fvwm_msg(ERR, piperead ? "PipeRead" : "Read",
+		    "nesting depth exceeded (%d)", MAX_NESTING_DEPTH);
+		return;
+	}
 	char *filename = NULL, *Home, *home_file, *ofilename = NULL;
 	char *option; /* optional arg to read */
 	char *rest, *tline, line[1024];
@@ -212,7 +220,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 			Home = getenv("HOME");
 			if (Home != NULL) {
 				len = strlen(Home) + strlen(ofilename) + 3;
-				home_file = safemalloc(len);
+				home_file = xmalloc(len);
 				strlcpy(home_file, Home, len);
 				strlcat(home_file, "/", len);
 				strlcat(home_file, ofilename, len);
@@ -227,7 +235,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 					free(filename);
 				Home = FVWM_CONFIGDIR;
 				len = strlen(Home) + strlen(ofilename) + 3;
-				home_file = safemalloc(len);
+				home_file = xmalloc(len);
 				strlcpy(home_file, Home, len);
 				strlcat(home_file, "/", len);
 				strlcat(home_file, ofilename, len);

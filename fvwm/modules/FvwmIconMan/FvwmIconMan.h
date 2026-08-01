@@ -36,23 +36,11 @@
 
 #define MAX_ARGS 3
 
-#ifdef TRACE_MEMUSE
-
-#define MALLOC_MAGIC 0xdeadbeaf
-
 #define SET_BIT(field, bit) ((field) |= (bit))
 #define CLEAR_BIT(field, bit) ((field) &= ~(bit))
 
 #define SET_BIT_TO_VAL(field, bit, val)                                        \
 	((val) ? SET_BIT(field, bit) : CLEAR_BIT(field, bit))
-
-extern long MemUsed;
-
-struct malloc_header {
-	unsigned long magic, len;
-};
-
-#endif
 
 #ifdef DMALLOC
 /*  What the heck is this??  */

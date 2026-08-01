@@ -81,7 +81,7 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 	XpmImage my_image = {0};
 #endif
 
-	p = (FvwmPicture *)safemalloc(sizeof(FvwmPicture));
+	p = (FvwmPicture *)xmalloc(sizeof(FvwmPicture));
 	p->count = 1;
 	p->name = path;
 	p->next = NULL;
@@ -237,7 +237,7 @@ findIconFile(char *icon, char *pathlist, int type)
 
 	l = (pathlist) ? strlen(pathlist) : 0;
 	pathlen = strlen(icon) + l + 10;
-	path = safemalloc(pathlen);
+	path = xmalloc(pathlen);
 	*path = '\0';
 	if (*icon == '/' || pathlist == NULL || *pathlist == '\0') {
 		/* No search if icon begins with a slash */
@@ -426,7 +426,7 @@ c200_substitute_color(char **my_color, int color_limit)
 	 * string */
 	free(*my_color); /* free old color */
 	len = strlen(base_array[minind].c_color) + 1;
-	*my_color = safemalloc(len); /* area for new color */
+	*my_color = xmalloc(len); /* area for new color */
 	strlcpy(*my_color, base_array[minind].c_color, len); /* put it there */
 	return;                                              /* all done */
 }

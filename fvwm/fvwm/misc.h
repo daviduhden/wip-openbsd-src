@@ -14,17 +14,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#if HAVE_WAITPID
-#define ReapChildren()							\
-	while ((waitpid(-1, NULL, WNOHANG)) > 0)			\
+#define ReapChildren()					\
+	while ((waitpid(-1, NULL, WNOHANG)) > 0)	\
 		;
-#elif HAVE_WAIT3
-#define ReapChildren()							\
-	while ((wait3(NULL, WNOHANG, NULL)) > 0)			\
-		;
-#else
-#error One of waitpid or wait3 is needed.
-#endif
 
 typedef struct name_list_struct {
 	struct name_list_struct *next; /* pointer to the next name */
@@ -55,11 +47,7 @@ typedef struct name_list_struct {
 /* used for parsing configuration */
 struct config {
 	char *keyword;
-#ifdef __STDC__
 	void (*action)(char *, FILE *, char **, int *);
-#else
-	void (*action)();
-#endif
 	char **arg;
 	int *arg2;
 };
@@ -67,12 +55,8 @@ struct config {
 /* used for parsing commands*/
 struct functions {
 	char *keyword;
-#ifdef __STDC__
 	void (*action)(XEvent *, Window, FvwmWindow *, unsigned long, char *,
 	    int *);
-#else
-	void (*action)();
-#endif
 	short func_type;
 	Bool func_needs_window;
 };
@@ -232,6 +216,7 @@ void WindowShade(F_CMD_ARGS);
 #endif
 extern void RaiseWindow(FvwmWindow *t);
 extern void LowerWindow(FvwmWindow *t);
+extern Bool IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor);
 extern Bool GrabEm(int);
 extern void UngrabEm(void);
 extern MenuRoot *NewMenuRoot(char *name, Bool function_or_popup);

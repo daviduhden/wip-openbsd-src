@@ -15,9 +15,8 @@
 #define PROP_SIZE 1024
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif
 
 #include <sys/time.h>
@@ -112,7 +111,7 @@ main(int argc, char **argv)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
-	MyName = safemalloc(name_len + 2);
+	MyName = xmalloc(name_len + 2);
 	strlcpy(MyName, "*", name_len + 2);
 	strlcat(MyName, temp, name_len + 2);
 
@@ -227,6 +226,9 @@ Loop(int *fd)
 
 	pos = 0;
 	Text[0] = 0;
+
+	sandbox_x11_only("FvwmTalk");
+	sandbox_x11_only("FvwmTalk");
 
 	while (1) {
 		if (My_XNextEvent(dpy, &event)) {
@@ -418,7 +420,9 @@ paste_primary(int window, int property, int Delete)
 		}
 
 		if (255 - pos > 0) {
-			strncat(Text, (char *)data2, 255 - pos - nitems);
+			if (pos + (int)nitems < 255)
+				strncat(Text, (char *)data2,
+				    255 - pos - (int)nitems);
 			pos = strlen(Text);
 			DrawWindow(UPDATE_ONLY);
 		}

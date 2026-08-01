@@ -1,0 +1,2334 @@
+OpenBSD FVWM 2.2.5: Modules Rewrite
+====================================
+
+Per-module pledge(2) and unveil(2) policies, bug fixes, and cleanup.
+
+  Policies added:
+    FvwmAuto, FvwmBacker, FvwmBanner, FvwmIdent, FvwmIconBox,
+    FvwmPager, FvwmScroll, FvwmTalk, FvwmWinList: pledge stdio
+    FvwmButtons, FvwmForm, FvwmIconMan, FvwmRearrange: pledge stdio rpath
+    FvwmSave, FvwmSaveDesk: pledge stdio rpath wpath cpath + unveil /home/david
+    FvwmCpp, FvwmM4: pledge stdio rpath wpath cpath proc exec dns getpw
+                       + unveil  and /home/david
+
+  Bug fixes:
+    FvwmBacker:        fopen(NULL) unchecked (HIGH)
+    FvwmButtons:       XQueryTree unchecked (HIGH)
+    FvwmIconMan/x.c:   XQueryTree unchecked (HIGH)
+    FvwmWinList:       XQueryTree unchecked (HIGH)
+    FvwmScroll/Grab:   XGetWindowProperty leak + XSetWMHints(NULL) (MEDIUM)
+    FvwmRearrange:     strcpy/strcat overflow + exit(-1) (MEDIUM)
+    FvwmTalk:          strncat integer underflow (MEDIUM)
+
+  Cleanup:
+    DELETED: Mallocs.c/h in FvwmBacker and FvwmWinList
+    Removed: TRACE_MEMUSE, Realloc, alloc_string from FvwmIconMan
+    Removed: static xrealloc from FvwmCpp
+    Removed: mymalloc debug wrapper from FvwmButtons
+    Removed: stale #include Mallocs.h from 4 source files
+    Updated: FvwmBacker/Makefile, FvwmWinList/Makefile (removed Mallocs.c)
+    Removed: BUGS from FvwmButtons (fixed issues)
+
+Apply with:  patch -p0 < 0003-modules-rewrite.patch
+From the CVS repository root directory containing fvwm/
+
+NOT VERIFIED: No compilation or runtime testing performed.
+
+diff --git fvwm/modules/FvwmAuto/FvwmAuto.c fvwm/modules/FvwmAuto/FvwmAuto.c
+index 06b10da..512cfba 100644
+--- fvwm/modules/FvwmAuto/FvwmAuto.c
++++ fvwm/modules/FvwmAuto/FvwmAuto.c
+@@ -22,9 +22,8 @@
+ #define FALSE
+ 
+ #include "config.h"
++#include "../fvwm/fvwm_sandbox.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <sys/time.h>
+@@ -115,6 +114,8 @@ main(int argc, char **argv)
+ 	    (unsigned long)(M_FOCUS_CHANGE));
+ 	SendInfo(fd, mask_mesg, 0);
+ 
++	sandbox_x11_only("FvwmAuto");
++
+ 	while (1) {
+ 		FD_ZERO(&in_fdset);
+ 		FD_SET(fd[1], &in_fdset);
+diff --git fvwm/modules/FvwmBacker/FvwmBacker.c fvwm/modules/FvwmBacker/FvwmBacker.c
+index 37edc49..cc5679c 100644
+--- fvwm/modules/FvwmBacker/FvwmBacker.c
++++ fvwm/modules/FvwmBacker/FvwmBacker.c
+@@ -34,6 +34,7 @@
+ #include <string.h>
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ #ifdef HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+@@ -42,8 +43,6 @@
+ #include <ctype.h>
+ #include <unistd.h>
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif                    /* Saul */
+ 
+ #include <X11/Xlib.h>
+@@ -51,7 +50,6 @@
+ 
+ #include "../../fvwm/module.h"
+ #include "FvwmBacker.h"
+-#include "Mallocs.h"
+ 
+ unsigned long GetColor(char *color);
+ 
+@@ -124,7 +122,8 @@ main(int argc, char **argv)
+ 	/* Open a log file if necessary */
+ #ifdef LOGFILE
+ 	logFile = fopen(LOGFILE, "a");
+-	fprintf(logFile, "Initialising FvwmBacker\n");
++	if (logFile != NULL)
++		fprintf(logFile, "Initialising FvwmBacker\n");
+ #endif
+ 
+ 	signal(SIGPIPE, DeadPipe);
+@@ -157,6 +156,8 @@ EndLessLoop()
+ 	fd_set readset;
+ 	struct timeval tv;
+ 
++	sandbox_x11_only("FvwmBacker");
++
+ 	while (1) {
+ 		FD_ZERO(&readset);
+ 		FD_SET(Fvwm_fd[1], &readset);
+@@ -338,13 +339,13 @@ AddCommand(char *string)
+ 	while (isspace(*temp))
+ 		temp++;
+ 	if (DeskCount < 1) {
+-		commands = (Command *)safemalloc((num + 1) * sizeof(Command));
++		commands = (Command *)xmalloc((num + 1) * sizeof(Command));
+ 		while (DeskCount < num + 1)
+ 			commands[DeskCount++].type = -1;
+ 	} else {
+ 		if (num + 1 > DeskCount) {
+-			commands = (Command *)realloc(
+-			    commands, (num + 1) * sizeof(Command));
++			commands = (Command *)xrealloc(
++			    (char *)commands, (num + 1) * sizeof(Command));
+ 			while (DeskCount < num + 1)
+ 				commands[DeskCount++].type = -1;
+ 		}
+@@ -378,7 +379,7 @@ AddCommand(char *string)
+ #endif
+ 		commands[num].type = 0;
+ 		size_t cmd_len = strlen(temp);
+-		commands[num].cmdStr = (char *)safemalloc(cmd_len + 1);
++		commands[num].cmdStr = (char *)xmalloc(cmd_len + 1);
+ 		strlcpy(commands[num].cmdStr, temp, cmd_len + 1);
+ 	}
+ }
+diff --git fvwm/modules/FvwmBacker/Makefile fvwm/modules/FvwmBacker/Makefile
+index aaf8f4e..11e22c5 100644
+--- fvwm/modules/FvwmBacker/Makefile
++++ fvwm/modules/FvwmBacker/Makefile
+@@ -5,7 +5,7 @@
+ .PATH: ${DIST}/modules/FvwmBacker
+ 
+ PROG=	FvwmBacker
+-SRCS=	FvwmBacker.c Mallocs.c root_bits.c
++SRCS=	FvwmBacker.c root_bits.c
+ 
+ LDADD+= -lXpm ${XLIB}
+ BINDIR= ${FVWMLIBDIR}
+diff --git fvwm/modules/FvwmBacker/Mallocs.c fvwm/modules/FvwmBacker/Mallocs.c
+deleted file mode 100644
+index fd82dc3..0000000
+--- fvwm/modules/FvwmBacker/Mallocs.c
++++ /dev/null
+@@ -1,64 +0,0 @@
+-/* FvwmWinList Module for Fvwm.
+- *
+- *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
+- *                               Mike_Finger@atk.com)
+- *
+- * The author makes not guarantees or warantees, either express or
+- * implied.  Feel free to use any contained here for any purpose, as long
+- * and this and any other applicible copyrights are kept intact.
+-
+- * The functions in this source file that are based on part of the FvwmIdent
+- * module for Fvwm are noted by a small copyright atop that function, all others
+- * are copyrighted by Mike Finger.  For those functions modified/used, here is
+- * the full, original copyright:
+- *
+- * Copyright 1994, Robert Nation and Nobutaka Suzuki.
+- * No guarantees or warantees or anything
+- * are provided or implied in any way whatsoever. Use this program at your
+- * own risk. Permission to use this program for any purpose is given,
+- * as long as the copyright is kept intact. */
+-
+-#include <sys/time.h>
+-
+-#include <ctype.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <string.h>
+-
+-#include "../../libs/fvwmlib.h"
+-#include "config.h"
+-
+-extern char *Module;
+-
+-/******************************************************************************
+-  saferealloc - safely reallocate memory or exit if fails. (Doesn't work right)
+-******************************************************************************/
+-char *
+-saferealloc(char *ptr, int length)
+-{
+-	char *newptr;
+-
+-	if (length <= 0)
+-		length = 1;
+-
+-	newptr = realloc(ptr, length);
+-	if (ptr == (char *)0) {
+-		fprintf(stderr, "%s:realloc failed", Module);
+-		exit(1);
+-	}
+-	return ptr;
+-}
+-
+-void
+-UpdateString(char **string, char *value)
+-{
+-	if (value == NULL)
+-		return;
+-
+-	size_t value_len = strlen(value);
+-	if (*string == NULL)
+-		*string = safemalloc(value_len + 1);
+-	else
+-		*string = saferealloc(*string, value_len + 1);
+-	strlcpy(*string, value, value_len + 1);
+-}
+diff --git fvwm/modules/FvwmBacker/Mallocs.h fvwm/modules/FvwmBacker/Mallocs.h
+deleted file mode 100644
+index 8672e04..0000000
+--- fvwm/modules/FvwmBacker/Mallocs.h
++++ /dev/null
+@@ -1,24 +0,0 @@
+-/* FvwmBacker Module for Fvwm.
+- *
+- *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
+- *                               Mike_Finger@atk.com)
+- *
+- * The author makes not guarantees or warantees, either express or
+- * implied.  Feel free to use any contained here for any purpose, as long
+- * and this and any other applicible copyrights are kept intact.
+-
+- * The functions in this source file that are based on part of the FvwmIdent
+- * module for Fvwm are noted by a small copyright atop that function, all others
+- * are copyrighted by Mike Finger.  For those functions modified/used, here is
+- * the full, original copyright:
+- *
+- * Copyright 1994, Robert Nation and Nobutaka Suzuki.
+- * No guarantees or warantees or anything
+- * are provided or implied in any way whatsoever. Use this program at your
+- * own risk. Permission to use this program for any purpose is given,
+- * as long as the copyright is kept intact. */
+-
+-/* Function Prototypes */
+-char *safemalloc(int length);
+-char *saferealloc(char *ptr, int length);
+-void UpdateString(char **string, char *value);
+diff --git fvwm/modules/FvwmBanner/FvwmBanner.c fvwm/modules/FvwmBanner/FvwmBanner.c
+index 4919bee..f0707b4 100644
+--- fvwm/modules/FvwmBanner/FvwmBanner.c
++++ fvwm/modules/FvwmBanner/FvwmBanner.c
+@@ -6,8 +6,7 @@
+  ***************************************************************************/
+ 
+ #include "config.h"
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
++#include "../../fvwm/fvwm_sandbox.h"
+ #endif
+ 
+ #include <sys/time.h>
+@@ -99,7 +98,7 @@ main(int argc, char **argv)
+ 		string = argv[0];
+ 
+ 	size_t name_len = strlen(string);
+-	myName = safemalloc(name_len + 1);
++	myName = xmalloc(name_len + 1);
+ 	strlcpy(myName, string, name_len + 1);
+ 
+ 	if (argc >= 3) {
+@@ -115,7 +114,7 @@ main(int argc, char **argv)
+ 
+ 	if (argc > 6) {
+ 		size_t pixmap_len = strlen(argv[6]);
+-		pixmapName = safemalloc(pixmap_len + 1);
++		pixmapName = xmalloc(pixmap_len + 1);
+ 		strlcpy(pixmapName, argv[6], pixmap_len + 1);
+ 	}
+ 
+@@ -184,6 +183,8 @@ main(int argc, char **argv)
+ 	/* Display the window */
+ 	value.tv_usec = timeout % 1000000;
+ 	value.tv_sec = timeout / 1000000;
++	sandbox_x11_only("FvwmBanner");
++
+ 	while (1) {
+ 		FD_ZERO(&in_fdset);
+ 		FD_SET(x_fd, &in_fdset);
+diff --git fvwm/modules/FvwmButtons/BUGS fvwm/modules/FvwmButtons/BUGS
+index a782df4..eeafa7b 100644
+--- fvwm/modules/FvwmButtons/BUGS
++++ fvwm/modules/FvwmButtons/BUGS
+@@ -16,30 +16,3 @@ Known bugs as of FvwmButtons-080396:
+    debug on this; DEBUG_HANGON.
+    There has also been reported problems with buttons hanging forever after
+    being pressed, this might be related.
+-
+- * When you make the buttonbox small enough (= very small, less than 1x1
+-   pixel inside relief and padding) it exits. Should make it silently suffer
+-   with grace instead. Update: actually this is a problem with the swallowed
+-   windows, some crash when made 1x1. Otherwise the rest is fixed.
+-
+-Known bugs as of FvwmButtons-070396:
+-
+- * Action commands are supposed to work also on swallowed windows, but there
+-   is a problem with X. After reparenting, XSelectInput is called with a mask
+-   including ButtonPressMask|ButtonReleaseMask, but evidently no buttonpresses
+-   are received, even though the program (like xload) doesn't use them for
+-   itself. So where is the bottleneck? Send the solution if you got it.
+-   OK, so I need to do SubstructureRedirectMask, and shuffle all the events
+-   onwards... really? No better way? Mmm.. 
+-
+-Known bugs as of FvwmButtons-040396:
+-
+- * There are still some problems related to swallowed windows, but I haven't
+-   found a reliable way to reproduce them. What probably happens is that a
+-   window is created, FvwmButtons gets its name and desides to swallow it, it
+-   is mapped, but before it gets swallowed it fails, thus the reparent code
+-   does a BadWindow. 
+-
+- * When you kill many swallowed windows quickly, FvwmButtons crashes probably
+-   because after gracefully removing one of it's children it tries to redraw
+-   some other before handling more destroy_requests.
+diff --git fvwm/modules/FvwmButtons/FvwmButtons.c fvwm/modules/FvwmButtons/FvwmButtons.c
+index abda685..b60500f 100644
+--- fvwm/modules/FvwmButtons/FvwmButtons.c
++++ fvwm/modules/FvwmButtons/FvwmButtons.c
+@@ -14,9 +14,8 @@
+ 
+ /* ------------------------------- includes -------------------------------- */
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <sys/stat.h>
+@@ -62,7 +61,7 @@
+ /* SW_EVENTS are for swallowed windows... */
+ #define SW_EVENTS							\
+ 	(PropertyChangeMask | StructureNotifyMask | ResizeRedirectMask |\
+-	    SubstructureNotifyMask)
++	    SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask)
+ 
+ #ifdef DEBUG_FVWM
+ #define MySendText(a, b, c)						\
+@@ -147,20 +146,9 @@ int dpw, dph;
+ int save_color_limit; /* Color limit, if any */
+ 
+ static volatile sig_atomic_t isTerminated = False;
++static volatile sig_atomic_t connection_dead = False;
+ /* ------------------------------ Misc functions ----------------------------*/
+ 
+-#ifdef DEBUG
+-char *
+-mymalloc(int length)
+-{
+-	int i = length;
+-	char *p = safemalloc(length);
+-	while (i)
+-		p[--i] = 255;
+-	return p;
+-}
+-#endif
+-
+ /**
+ *** Some fancy routines straight out of the manual :-) Used in DeadPipe.
+ **/
+@@ -213,6 +201,9 @@ DeadPipeCleanup(void)
+ 	button_info *b, *ub = UberButton;
+ 	int button = -1;
+ 
++	if (connection_dead)
++		return;
++
+ 	signal(SIGPIPE, SIG_IGN); /* Xsync may cause SIGPIPE */
+ 
+ 	XSync(Dpy, 0);    /* Wait for thing to settle down a bit */
+@@ -343,7 +334,7 @@ AddButtonAction(button_info *b, int n, char *action)
+ 			free(b->action[n]);
+ 	} else {
+ 		int i;
+-		b->action = (char **)mymalloc(4 * sizeof(char *));
++		b->action = (char **)xmalloc(4 * sizeof(char *));
+ 		for (i = 0; i < 4; b->action[i++] = NULL)
+ 			;
+ 		b->flags |= b_Action;
+@@ -368,7 +359,7 @@ AddButtonAction(button_info *b, int n, char *action)
+ 			break;
+ 		}
+ 	}
+-	t = (char *)mymalloc(l + 1);
++	t = (char *)xmalloc(l + 1);
+ 	memmove(t, action, l);
+ 	t[l] = 0;
+ 	b->action[n] = t;
+@@ -474,8 +465,8 @@ static int
+ IOErrorHandler(Display *dpy)
+ {
+ 	(void)dpy;
+-	DeadPipe(0);
+-	return 0;
++	connection_dead = True;
++	_exit(1);
+ }
+ 
+ /* ---------------------------------- main ----------------------------------*/
+@@ -499,7 +490,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 	{
+ 		size_t name_len = strlen(temp) + 1;
+-		MyName = mymalloc((int)name_len);
++		MyName = xmalloc((int)name_len);
+ 		strlcpy(MyName, temp, name_len);
+ 	}
+ 
+@@ -566,7 +557,7 @@ main(int argc, char **argv)
+ 
+ 	oldErrorHandler = XSetErrorHandler(myErrorHandler);
+ 
+-	UberButton = (button_info *)mymalloc(sizeof(button_info));
++	UberButton = (button_info *)xmalloc(sizeof(button_info));
+ 	memset(UberButton, 0, sizeof(button_info));
+ 	UberButton->flags = 0;
+ 	UberButton->parent = NULL;
+@@ -585,7 +576,7 @@ main(int argc, char **argv)
+ 	fprintf(stderr, "%s: Parsing...", MyName);
+ #endif
+ 
+-	CurrentPanel = MainPanel = (panel_info *)mymalloc(sizeof(panel_info));
++	CurrentPanel = MainPanel = (panel_info *)xmalloc(sizeof(panel_info));
+ 	memset(MainPanel, 0, sizeof(panel_info));
+ 	MainPanel->next = NULL;
+ 	MainPanel->uber = UberButton;
+@@ -724,6 +715,9 @@ Loop(void)
+ 	int ex = 10000, ey = 10000, ex2 = 0, ey2 = 0;
+ #endif
+ 
++	sandbox_x11_config("FvwmButtons");
++	sandbox_x11_config("FvwmButtons");
++
+ 	while (!isTerminated) {
+ 		if (My_XNextEvent(Dpy, &Event)) {
+ 			switch (Event.type) {
+@@ -822,27 +816,56 @@ Loop(void)
+ 				    keysym != XK_KP_Enter &&
+ 				    keysym != XK_Linefeed)
+ 					break; /* fall through to ButtonPress */
+-			case ButtonPress:
+-				PanelIndex = MainPanel;
+-				b = NULL;
+-				do
+-					if (PanelIndex->uber
+-					    ->swallow) { /* is the panel
+-					                      shown? */
+-						UberButton = PanelIndex->uber;
+-						MyWindow =
+-						    UberButton->IconWinParent;
+-						if (Event.xany.window ==
+-						    MyWindow)
+-							CurrentButton = b =
+-							    select_button(
+-							    UberButton,
+-							    Event.xbutton.x,
+-							    Event.xbutton
+-							    .y);
++			case ButtonPress: {
++				button_info *ub2, *b2;
++				int b2num = -1;
++
++				ub2 = UberButton;
++				while (NextButton(&ub2, &b2, &b2num, 0))
++					if ((buttonSwallowCount(b2) == 3) &&
++					    Event.xany.window == b2->IconWin) {
++						b = b2;
++						CurrentButton = b;
++						break;
+ 					}
+-				while (!b && PanelIndex->next &&
+-				    (PanelIndex = PanelIndex->next));
++			}
++				if (!b) {
++					PanelIndex = MainPanel;
++					b = NULL;
++					do
++						if (PanelIndex->uber
++						    ->swallow) { /* is the panel
++					                      shown? */
++							UberButton = PanelIndex->uber;
++							MyWindow =
++							    UberButton->IconWinParent;
++							if (Event.xany.window ==
++							    MyWindow)
++								CurrentButton = b =
++								    select_button(
++								    UberButton,
++								    Event.xbutton.x,
++								    Event.xbutton
++								    .y);
++						}
++					while (!b && PanelIndex->next &&
++					    (PanelIndex = PanelIndex->next));
++				} else {
++					button_info *btn;
++
++					btn = b;
++					PanelIndex = MainPanel;
++					while (PanelIndex &&
++					    PanelIndex->uber !=
++					    btn->uber)
++						PanelIndex =
++						    PanelIndex->next;
++					UberButton = CurrentPanel ?
++					    CurrentPanel->uber :
++					    PanelIndex ? PanelIndex->uber :
++					    UberButton;
++					MyWindow = UberButton->IconWinParent;
++				}
+ 
+ 				if (!b || !(b->flags & b_Action) ||
+ 				    ((act = GetButtonAction(
+@@ -914,7 +937,7 @@ Loop(void)
+ 								b->flags |=
+ 								    b_Hangon;
+ 								b->hangon =
+-								    mymalloc(
++								    xmalloc(
+ 								    i2 - i);
+ 								strncpy(
+ 								    b->hangon,
+@@ -932,7 +955,7 @@ Loop(void)
+ 						{
+ 							size_t tmp_len =
+ 							    strlen(act) + 1;
+-							tmp = mymalloc(
++							tmp = xmalloc(
+ 							    (int)tmp_len);
+ 							strlcpy(tmp, "Exec ",
+ 							    tmp_len);
+@@ -1074,6 +1097,34 @@ Loop(void)
+ 	}
+ }
+ 
++static void
++DrainDestroyEvents(void)
++{
++	XEvent dummy;
++	int button;
++	button_info *ub, *b;
++
++	while (XCheckTypedEvent(Dpy, DestroyNotify, &dummy)) {
++		ub = UberButton;
++		button = -1;
++		while (NextButton(&ub, &b, &button, 0))
++			if ((buttonSwallowCount(b) == 3) &&
++			    dummy.xany.window == b->IconWin) {
++				b->swallow &= ~b_Count;
++				b->IconWin = None;
++				if (buttonSwallow(b) & b_Respawn &&
++				    b->hangon && b->spawn) {
++					b->swallow |= 1;
++					b->flags |= b_Swallow | b_Hangon;
++					MySendText(fd, b->spawn, 0);
++				} else {
++					b->flags &= ~b_Swallow;
++				}
++				break;
++			}
++	}
++}
++
+ /**
+ *** RedrawWindow()
+ *** Draws the window by traversing the button tree, draws all if NULL is given,
+@@ -1175,8 +1226,10 @@ RecursiveLoadData(button_info *b, int *maxx, int *maxy)
+ 		fprintf(stderr, ", font \"%s\"", b->font_string);
+ #endif
+ 
++#ifdef DEBUG_LOADDATA
+ 		fprintf(stderr, "b=0x%lx, font_string=%s\n", (unsigned long)b,
+ 		    b ? b->font_string : "(NULL)");
++#endif
+ 		if (strncasecmp(b->font_string, "none", 4) == 0)
+ 			b->font = NULL;
+ 		else if (!(b->font = XLoadQueryFont(Dpy, b->font_string))) {
+@@ -1435,7 +1488,7 @@ CreateWindow(button_info *ub, int maxx, int maxy)
+ 		myclasshints.res_name = strdup(MyName);
+ 	} else {
+ 		size_t total_len = strlen(MyName) + sizeof("Panel");
+-		myclasshints.res_name = (char *)safemalloc(total_len);
++		myclasshints.res_name = (char *)xmalloc(total_len);
+ 		strlcpy(myclasshints.res_name, MyName, total_len);
+ 		strlcat(myclasshints.res_name, "Panel", total_len);
+ 	}
+@@ -1688,10 +1741,12 @@ process_message(unsigned long type, unsigned long *body)
+ 		switch (type) {
+ 		case M_NEW_DESK:
+ 			new_desk = body[0];
++			DrainDestroyEvents();
+ 			RedrawWindow(NULL);
+ 			break;
+ 		case M_END_WINDOWLIST:
+ 			SpawnSome();
++			DrainDestroyEvents();
+ 			RedrawWindow(NULL);
+ 			break;
+ 		case M_MAP:
+@@ -1793,8 +1848,7 @@ GetRealGeometry(Display *dpy, Window win, int *x, int *y, ushort *w, ushort *h,
+ 
+ 	XTranslateCoordinates(dpy, win, root, *x, *y, x, y, &rp);
+ 
+-	XQueryTree(dpy, win, &root, &rp, &children, &n);
+-	if (children)
++	if (XQueryTree(dpy, win, &root, &rp, &children, &n) && children)
+ 		XFree(children);
+ 
+ 	return rp;
+@@ -1872,20 +1926,32 @@ swallow(unsigned long *body)
+ 
+ 			/* "Swallow" the window! Place it in the void so we
+ 			   don't see it until it's MoveResize'd */
+-			XReparentWindow(
+-			    Dpy, b->IconWin, MyWindow, -1500, -1500);
+-			XSelectInput(Dpy, b->IconWin, SW_EVENTS);
+-			if (buttonSwallow(b) & b_UseTitle) {
+-				if (b->flags & b_Title)
+-					free(b->title);
+-				b->flags |= b_Title;
+-				XFetchName(Dpy, b->IconWin, &temp);
+-				CopyString(&b->title, temp);
+-				XFree(temp);
++			XGrabServer(Dpy);
++			p = GetRealGeometry(Dpy, b->IconWin, &b->x,
++			    &b->y, &b->w, &b->h, &b->bw, &d);
++			if (p != None) {
++				XReparentWindow(Dpy, b->IconWin, MyWindow,
++				    -1500, -1500);
++				XSync(Dpy, False);
++				XSelectInput(Dpy, b->IconWin, SW_EVENTS);
++				if (buttonSwallow(b) & b_UseTitle) {
++					if (b->flags & b_Title)
++						free(b->title);
++					b->flags |= b_Title;
++					XFetchName(Dpy, b->IconWin, &temp);
++					CopyString(&b->title, temp);
++					XFree(temp);
++				}
++				XMapWindow(Dpy, b->IconWin);
++				MakeButton(b);
++				RedrawButton(b, 1);
++			} else {
++				fprintf(stderr,
++				    "%s: Window 0x%lx disappeared during %s\n",
++				    MyName, b->IconWin, "swallow");
++				b->flags &= ~(b_Hangon | b_Swallow);
+ 			}
+-			XMapWindow(Dpy, b->IconWin);
+-			MakeButton(b);
+-			RedrawButton(b, 1);
++			XUngrabServer(Dpy);
+ 			break;
+ 		}
+ }
+diff --git fvwm/modules/FvwmButtons/FvwmButtons.h fvwm/modules/FvwmButtons/FvwmButtons.h
+index a08f025..eb74657 100644
+--- fvwm/modules/FvwmButtons/FvwmButtons.h
++++ fvwm/modules/FvwmButtons/FvwmButtons.h
+@@ -164,11 +164,6 @@ struct panel_info_struct {
+ /* -------------------------------- prototypes ----------------------------- */
+ void AddButtonAction(button_info *, int, char *);
+ void MakeContainer(button_info *);
+-#ifdef DEBUG
+-char *mymalloc(int);
+-#else
+-#define mymalloc(a) safemalloc(a)
+-#endif
+ 
+ /* ----------------------------- global variables -------------------------- */
+ 
+diff --git fvwm/modules/FvwmButtons/button.c fvwm/modules/FvwmButtons/button.c
+index 8422934..ff05ec1 100644
+--- fvwm/modules/FvwmButtons/button.c
++++ fvwm/modules/FvwmButtons/button.c
+@@ -296,7 +296,7 @@ alloc_buttonlist(button_info *ub, int num)
+ 		}
+ 		while (ub->c->allocated_buttons <= num)
+ 			ub->c->allocated_buttons += 32;
+-		bb = (button_info **)mymalloc(
++		bb = (button_info **)xmalloc(
+ 		    ub->c->allocated_buttons * sizeof(button_info *));
+ 		for (i = old; i < ub->c->allocated_buttons; i++)
+ 			bb[i] = NULL;
+@@ -326,7 +326,7 @@ alloc_button(button_info *ub, int num)
+ 		exit(2);
+ 	}
+ 
+-	b = (button_info *)mymalloc(sizeof(button_info));
++	b = (button_info *)xmalloc(sizeof(button_info));
+ 	ub->c->buttons[num] = b;
+ 
+ 	memset((void *)b, 0, sizeof(*b));
+@@ -355,7 +355,7 @@ alloc_button(button_info *ub, int num)
+ void
+ MakeContainer(button_info *b)
+ {
+-	b->c = (container_info *)mymalloc(sizeof(container_info));
++	b->c = (container_info *)xmalloc(sizeof(container_info));
+ 	b->flags |= b_Container;
+ 	b->c->buttons = NULL;
+ 	b->c->num_buttons = 0;
+@@ -512,7 +512,7 @@ ShuffleButtons(button_info *ub)
+ 	/* make local copy of buttons in ub */
+ 	num_items = c->num_buttons;
+ 	local_buttons =
+-	    (button_info **)mymalloc(sizeof(button_info) * num_items);
++	    (button_info **)xmalloc(sizeof(button_info) * num_items);
+ 	for (i = 0; i < num_items; i++) {
+ 		local_buttons[i] = c->buttons[i];
+ 		c->buttons[i] = NULL;
+diff --git fvwm/modules/FvwmButtons/draw.c fvwm/modules/FvwmButtons/draw.c
+index 2e37e33..e24b4e7 100644
+--- fvwm/modules/FvwmButtons/draw.c
++++ fvwm/modules/FvwmButtons/draw.c
+@@ -16,8 +16,6 @@
+ 
+ #include "config.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <X11/Intrinsic.h>
+@@ -170,13 +168,19 @@ MakeButton(button_info *b)
+ 		b->icon_w = iw;
+ 		b->icon_h = ih;
+ 
+-		if (iw > 0 && ih > 0) {
++		if (iw > 8 && ih > 8) {
+ 			if (!(buttonSwallow(b) & b_NoHints)) {
+ 				if (!XGetWMNormalHints(
+ 				    Dpy, b->IconWin, b->hints, &supplied))
+ 					b->hints->flags = 0;
+ 				ConstrainSize(b->hints, &b->icon_w, &b->icon_h);
++				if (b->icon_w < 1)
++					b->icon_w = 1;
++				if (b->icon_h < 1)
++					b->icon_h = 1;
+ 			}
++			b->icon_w = max(b->icon_w, 8);
++			b->icon_h = max(b->icon_h, 8);
+ 			if (b->flags & b_Right)
+ 				ix += iw - b->icon_w;
+ 			else if (!(b->flags & b_Left))
+diff --git fvwm/modules/FvwmButtons/icons.c fvwm/modules/FvwmButtons/icons.c
+index 9f2af03..10c56f2 100644
+--- fvwm/modules/FvwmButtons/icons.c
++++ fvwm/modules/FvwmButtons/icons.c
+@@ -162,7 +162,10 @@ ConfigureIconWindow(button_info *b)
+ 		h = min(h, BH - 2 * (ypad + framew));
+ 
+ 	if (w < 1 || h < 1) {
+-		XMoveResizeWindow(Dpy, b->IconWin, 2000, 2000, 1, 1);
++		if (buttonSwallowCount(b) == 3)
++			XMoveWindow(Dpy, b->IconWin, 2000, 2000);
++		else
++			XMoveResizeWindow(Dpy, b->IconWin, 2000, 2000, 1, 1);
+ 		return; /* No need drawing to this */
+ 	}
+ 
+diff --git fvwm/modules/FvwmButtons/parse.c fvwm/modules/FvwmButtons/parse.c
+index c517203..e1f773b 100644
+--- fvwm/modules/FvwmButtons/parse.c
++++ fvwm/modules/FvwmButtons/parse.c
+@@ -82,7 +82,7 @@ seekright_command(char **s)
+ 
+ 		size_t len_command = strlen(command);
+ 		size_t len_next = strlen(next);
+-		char *combined = mymalloc(len_command + len_next + 2);
++		char *combined = xmalloc(len_command + len_next + 2);
+ 
+ 		memcpy(combined, command, len_command);
+ 		combined[len_command] = ' ';
+@@ -647,7 +647,7 @@ match_string(button_info **uberb, char *s)
+ 					b->swallow |= 1;
+ 					if (!(b->swallow & b_NoHints))
+ 						b->hints =
+-						    (XSizeHints *)mymalloc(
++						    (XSizeHints *)xmalloc(
+ 						    sizeof(XSizeHints));
+ 					if (o) {
+ 						if (!(buttonSwallow(b) &
+@@ -869,7 +869,7 @@ match_string(button_info **uberb, char *s)
+ 		b->swallow |= 1;
+ 		s = trimleft(s);
+ 		if (!(b->swallow & b_NoHints))
+-			b->hints = (XSizeHints *)mymalloc(sizeof(XSizeHints));
++			b->hints = (XSizeHints *)xmalloc(sizeof(XSizeHints));
+ 		if (*s) {
+ 			if (!(buttonSwallow(b) & b_UseOld))
+ 				SendText(fd, s, 0);
+@@ -975,14 +975,14 @@ ParseConfigLine(button_info **ubb, char *s)
+ 		break;
+ 	case 10: /* Panel */
+ 		s = trimleft(s);
+-		CurrentPanel->next = (panel_info *)mymalloc(sizeof(panel_info));
++		CurrentPanel->next = (panel_info *)xmalloc(sizeof(panel_info));
+ 		CurrentPanel = CurrentPanel->next;
+ 		memset(CurrentPanel, 0, sizeof(panel_info));
+ 		CurrentPanel->geom_w = -1;
+ 		CurrentPanel->geom_h = -1;
+ 		CurrentPanel->next = NULL;
+ 		CurrentPanel->uber = UberButton =
+-		    (button_info *)mymalloc(sizeof(button_info));
++		    (button_info *)xmalloc(sizeof(button_info));
+ 		memset(UberButton, 0, sizeof(button_info));
+ 		UberButton->title = seekright(&s);
+ 		UberButton->flags = 0;
+@@ -1056,7 +1056,7 @@ ParseOptions(button_info *ub)
+ 	char *items[] = {"iconpath", "pixmappath", "colorlimit", NULL, NULL};
+ 
+ 	size_t name_len = strlen(MyName);
+-	items[3] = mymalloc(name_len + 2);
++	items[3] = xmalloc(name_len + 2);
+ 	snprintf(items[3], name_len + 2, "*%s", MyName);
+ 
+ 	GetConfigLine(fd, &s);
+diff --git fvwm/modules/FvwmCpp/FvwmCpp.c fvwm/modules/FvwmCpp/FvwmCpp.c
+index ba7a5d4..d4623ab 100644
+--- fvwm/modules/FvwmCpp/FvwmCpp.c
++++ fvwm/modules/FvwmCpp/FvwmCpp.c
+@@ -39,6 +39,7 @@
+ #include "../../fvwm/module.h"
+ #include "../../libs/fvwmlib.h"
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
+ 
+ char *MyName;
+@@ -55,7 +56,6 @@ static char *MkNum(const char *name, int def);
+ static int cpp_process(Display *display, const char *host, char *options,
+     const char *config_file, int keep_output);
+ static int is_cpp_linemarker(const char *line);
+-static void *xrealloc(void *ptr, size_t size);
+ #define MAXHOSTNAME 255
+ #define EXTRA 20
+ 
+@@ -90,7 +90,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 
+ 	size_t name_len = strlen(temp);
+-	MyName = safemalloc(name_len + 2);
++	MyName = xmalloc(name_len + 2);
+ 	strlcpy(MyName, "*", name_len + 2);
+ 	strlcat(MyName, temp, name_len + 2);
+ 
+@@ -157,6 +157,11 @@ main(int argc, char **argv)
+ 		exit(1);
+ 	}
+ 
++	unveil_tempdir("FvwmCpp");
++	unveil_home_read("FvwmCpp");
++	unveil(NULL, NULL);
++	sandbox_cpp_preproc("FvwmCpp");
++
+ 	if (cpp_process(dpy, display_name, cpp_options, filename, cpp_debug) !=
+ 	    0)
+ 		exit(1);
+@@ -390,7 +395,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
+ #undef WRITE_DEF
+ #undef WRITE_NUM
+ 
+-	linebuf = safemalloc(line_cap);
++	linebuf = xmalloc(line_cap);
+ 	while ((nread = fread(chunk, 1, sizeof(chunk), cpp_out)) > 0) {
+ 		if (mirror)
+ 			fwrite(chunk, 1, nread, mirror);
+@@ -494,19 +499,6 @@ is_cpp_linemarker(const char *line)
+ 	return 0;
+ }
+ 
+-static void *
+-xrealloc(void *ptr, size_t size)
+-{
+-	void *tmp = realloc(ptr, size);
+-
+-	if (tmp == NULL) {
+-		fprintf(
+-		    stderr, "%s: unable to allocate %zu bytes\n", MyName, size);
+-		exit(1);
+-	}
+-	return tmp;
+-}
+-
+ /***********************************************************************
+  *
+  *  Procedure:
+@@ -528,7 +520,7 @@ MkDef(const char *name, const char *def)
+ 	/* Get space to hold everything, if needed */
+ 
+ 	n = EXTRA + strlen(name) + strlen(def);
+-	cp = safemalloc(n);
++	cp = xmalloc(n);
+ 
+ 	snprintf(cp, n, "#define %s %s\n", name, def);
+ 
+diff --git fvwm/modules/FvwmForm/FvwmForm.c fvwm/modules/FvwmForm/FvwmForm.c
+index de9659f..e8b38da 100644
+--- fvwm/modules/FvwmForm/FvwmForm.c
++++ fvwm/modules/FvwmForm/FvwmForm.c
+@@ -16,6 +16,7 @@
+ 
+ #include "../../libs/fvwmlib.h"
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ #if HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+@@ -265,6 +266,8 @@ CopyQuotedString(char *cp)
+ {
+ 	char *dp, *bp, c;
+ 	bp = dp = (char *)malloc(strlen(cp) + 1);
++	sandbox_x11_config("FvwmForm");
++
+ 	while (1) {
+ 		switch (c = *(cp++)) {
+ 		case '\\':
+diff --git fvwm/modules/FvwmIconBox/FvwmIconBox.c fvwm/modules/FvwmIconBox/FvwmIconBox.c
+index fd11765..5d70783 100644
+--- fvwm/modules/FvwmIconBox/FvwmIconBox.c
++++ fvwm/modules/FvwmIconBox/FvwmIconBox.c
+@@ -18,9 +18,8 @@
+ #define HORIZONTAL 2
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <sys/time.h>
+@@ -186,7 +185,7 @@ main(int argc, char **argv)
+ 
+ 	{
+ 		size_t name_len = strlen(temp) + 1;
+-		MyName = safemalloc(name_len);
++		MyName = xmalloc(name_len);
+ 		strlcpy(MyName, temp, name_len);
+ 	}
+ 
+@@ -262,6 +261,8 @@ Loop(void)
+ 	int diffx, diffy;
+ 	int oldw, oldh;
+ 
++	sandbox_x11_only("FvwmIconBox");
++
+ 	while (1) {
+ 		if (My_XNextEvent(dpy, &Event)) {
+ 			switch (Event.type) {
+@@ -1661,7 +1662,7 @@ parseicon(char *tline)
+ 	struct iconfile *tmp;
+ 	char *ptr, *start, *end;
+ 
+-	tmp = (struct iconfile *)safemalloc(sizeof(struct iconfile));
++	tmp = (struct iconfile *)xmalloc(sizeof(struct iconfile));
+ 
+ 	/* windowname */
+ 	tmp->name = stripcpy2(tline);
+@@ -1692,7 +1693,7 @@ parseicon(char *tline)
+ 	while (!isspace(*end) && (*end != '\n') && (*end != 0))
+ 		end++;
+ 	len = end - start;
+-	ptr = safemalloc(len + 1);
++	ptr = xmalloc(len + 1);
+ 	strncpy(ptr, start, len);
+ 	ptr[len] = 0;
+ 	tmp->iconfile = ptr;
+@@ -1743,7 +1744,7 @@ parsemouse(char *tline)
+ 	int len;
+ 	char *ptr, *start, *end, *tmp;
+ 
+-	f = (struct mousefunc *)safemalloc(sizeof(struct mousefunc));
++	f = (struct mousefunc *)xmalloc(sizeof(struct mousefunc));
+ 	f->next = NULL;
+ 	f->mouse = 0;
+ 
+@@ -1789,7 +1790,7 @@ parsemouse(char *tline)
+ 	}
+ 	end++;
+ 	len = end - start;
+-	ptr = safemalloc(len + 1);
++	ptr = xmalloc(len + 1);
+ 	strncpy(ptr, start, len);
+ 	ptr[len] = 0;
+ 	f->action = ptr;
+@@ -1821,7 +1822,7 @@ parsekey(char *tline)
+ 	while ((!isspace(*end)) && (*end != '\n') && (*end != 0))
+ 		end++;
+ 	nlen = end - start;
+-	nptr = safemalloc(nlen + 1);
++	nptr = xmalloc(nlen + 1);
+ 	strncpy(nptr, start, nlen);
+ 	nptr[nlen] = 0;
+ 
+@@ -1840,7 +1841,7 @@ parsekey(char *tline)
+ 	}
+ 	end++;
+ 	alen = end - start;
+-	aptr = safemalloc(alen + 1);
++	aptr = xmalloc(alen + 1);
+ 	strncpy(aptr, start, alen);
+ 	aptr[alen] = 0;
+ 
+@@ -1865,7 +1866,7 @@ parsekey(char *tline)
+ 
+ 			for (int col = 0; col < width; col++) {
+ 				if (mapping[col] == keysym) {
+-					k = (struct keyfunc *)safemalloc(
++					k = (struct keyfunc *)xmalloc(
+ 					    sizeof(struct keyfunc));
+ 					k->name = nptr;
+ 					k->keycode = i;
+@@ -2140,7 +2141,7 @@ process_message(unsigned long type, unsigned long *body)
+ 			RedrawIcon(tmp, 2);
+ 		break;
+ 	case M_DEFAULTICON:
+-		str = (char *)safemalloc(strlen((char *)&body[3]) + 1);
++		str = (char *)xmalloc(strlen((char *)&body[3]) + 1);
+ 		strlcpy(str, (char *)&body[3], strlen((char *)&body[3]) + 1);
+ 		FvwmDefaultIcon = str;
+ 		break;
+@@ -2302,7 +2303,7 @@ AddItem(unsigned long id, long desk, unsigned long flags)
+ 		tmp = tmp->next;
+ 	}
+ 
+-	new = (struct icon_info *)safemalloc(sizeof(struct icon_info));
++	new = (struct icon_info *)xmalloc(sizeof(struct icon_info));
+ 	new->name = NULL;
+ 	new->window_name = NULL;
+ 	new->res_class = NULL;
+@@ -2406,7 +2407,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
+ 	while (tmp != NULL) {
+ 		if (tmp->id == id) {
+ 			size_t item_len = strlen(item) + 1;
+-			str = (char *)safemalloc(item_len);
++			str = (char *)xmalloc(item_len);
+ 			strlcpy(str, item, item_len);
+ 
+ 			switch (type) {
+@@ -2850,7 +2851,7 @@ stripcpy2(char *source)
+ 		ptr++;
+ 		count++;
+ 	}
+-	ptr = safemalloc(count + 1);
++	ptr = xmalloc(count + 1);
+ 	strncpy(ptr, source, count);
+ 	ptr[count] = 0;
+ 	return ptr;
+diff --git fvwm/modules/FvwmIconBox/FvwmIconBox.h fvwm/modules/FvwmIconBox/FvwmIconBox.h
+index 787ce32..6eed2ee 100644
+--- fvwm/modules/FvwmIconBox/FvwmIconBox.h
++++ fvwm/modules/FvwmIconBox/FvwmIconBox.h
+@@ -15,7 +15,6 @@ extern void RedrawWindow(void);
+ extern void match_string(char *tline);
+ extern void Loop(void);
+ extern void ParseOptions(void);
+-extern char *safemalloc(int length);
+ extern int My_XNextEvent(Display *dpy, XEvent *event);
+ extern void CopyString(char **dest, char *source);
+ extern void RelieveWindow(
+diff --git fvwm/modules/FvwmIconMan/FvwmIconMan.c fvwm/modules/FvwmIconMan/FvwmIconMan.c
+index d2e1388..2fec5b7 100644
+--- fvwm/modules/FvwmIconMan/FvwmIconMan.c
++++ fvwm/modules/FvwmIconMan/FvwmIconMan.c
+@@ -36,45 +36,12 @@ copy_string(char **target, char *src)
+ 		Free(*target);
+ 
+ 	ConsoleDebug(CORE, "copy_string: 2\n");
+-	*target = (char *)safemalloc((len + 1) * sizeof(char));
++	*target = (char *)xmalloc((len + 1) * sizeof(char));
+ 	strlcpy(*target, src, len + 1);
+ 	ConsoleDebug(CORE, "copy_string: 3\n");
+ 	return *target;
+ }
+ 
+-#ifdef TRACE_MEMUSE
+-
+-long MemUsed = 0;
+-
+-void
+-Free(void *p)
+-{
+-	struct malloc_header *head = (struct malloc_header *)p;
+-
+-	if (p != NULL) {
+-		head--;
+-		if (head->magic != MALLOC_MAGIC) {
+-			fprintf(stderr, "Corrupted memory found in Free\n");
+-			abort();
+-			return;
+-		}
+-		if (head->len > MemUsed) {
+-			fprintf(stderr, "Free block too big\n");
+-			return;
+-		}
+-		MemUsed -= head->len;
+-		free(head);
+-	}
+-}
+-
+-void
+-PrintMemuse(void)
+-{
+-	ConsoleDebug(CORE, "Memory used: %d\n", MemUsed);
+-}
+-
+-#else
+-
+ void
+ Free(void *p)
+ {
+@@ -82,13 +49,6 @@ Free(void *p)
+ 		free(p);
+ }
+ 
+-void
+-PrintMemuse(void)
+-{
+-}
+-
+-#endif
+-
+ static void
+ TerminateHandler(int sig)
+ {
+@@ -114,10 +74,12 @@ SendFvwmPipe(char *message, unsigned long window)
+ 	char *hold, *temp, *temp_msg;
+ 	hold = message;
+ 
++	sandbox_x11_config("FvwmIconMan");
++
+ 	while (1) {
+ 		temp = strchr(hold, ',');
+ 		if (temp != NULL) {
+-			temp_msg = (char *)safemalloc(temp - hold + 1);
++			temp_msg = (char *)xmalloc(temp - hold + 1);
+ 			strncpy(temp_msg, hold, (temp - hold));
+ 			temp_msg[(temp - hold)] = '\0';
+ 			hold = temp + 1;
+@@ -142,6 +104,7 @@ main_loop(void)
+ 	FD_SET(Fvwm_fd[1], &saveset);
+ 	FD_SET(x_fd, &saveset);
+ 
++	sandbox_x11_config("FvwmIconMan");
+ 	while (!isTerminated) {
+ 		/* Check the pipes for anything to read, and block if
+ 		 * there is nothing there yet ...
+diff --git fvwm/modules/FvwmIconMan/FvwmIconMan.h fvwm/modules/FvwmIconMan/FvwmIconMan.h
+index 3c4ae07..6676d68 100644
+--- fvwm/modules/FvwmIconMan/FvwmIconMan.h
++++ fvwm/modules/FvwmIconMan/FvwmIconMan.h
+@@ -36,24 +36,12 @@
+ 
+ #define MAX_ARGS 3
+ 
+-#ifdef TRACE_MEMUSE
+-
+-#define MALLOC_MAGIC 0xdeadbeaf
+-
+ #define SET_BIT(field, bit) ((field) |= (bit))
+ #define CLEAR_BIT(field, bit) ((field) &= ~(bit))
+ 
+ #define SET_BIT_TO_VAL(field, bit, val)                                        \
+ 	((val) ? SET_BIT(field, bit) : CLEAR_BIT(field, bit))
+ 
+-extern long MemUsed;
+-
+-struct malloc_header {
+-	unsigned long magic, len;
+-};
+-
+-#endif
+-
+ #ifdef DMALLOC
+ /*  What the heck is this??  */
+ #include <dmalloc.h>
+diff --git fvwm/modules/FvwmIconMan/functions.c fvwm/modules/FvwmIconMan/functions.c
+index a3b46d7..fc2fc30 100644
+--- fvwm/modules/FvwmIconMan/functions.c
++++ fvwm/modules/FvwmIconMan/functions.c
+@@ -203,7 +203,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
+ 		n = globals.num_managers;
+ 		if (n) {
+ 			if (wa == NULL) {
+-				wa = (WinManager **)safemalloc(
++				wa = (WinManager **)xmalloc(
+ 				    n * sizeof(WinManager *));
+ 			}
+ 			for (i = 0, num_mapped = 0; i < n; i++) {
+diff --git fvwm/modules/FvwmIconMan/globals.c fvwm/modules/FvwmIconMan/globals.c
+index 01859bb..eee2da6 100644
+--- fvwm/modules/FvwmIconMan/globals.c
++++ fvwm/modules/FvwmIconMan/globals.c
+@@ -22,18 +22,6 @@ int x_fd;
+ char *Module = "*FvwmIconMan";
+ int ModuleLen = 12;
+ 
+-/* This is solely so that we can turn a string constant into something
+-   which can be freed */
+-
+-static char *
+-alloc_string(char *string)
+-{
+-	int len = strlen(string);
+-	char *ret = (char *)safemalloc((len + 1) * sizeof(char));
+-	strcpy(ret, string);
+-	return ret;
+-}
+-
+ static void
+ init_win_manager(int id)
+ {
+@@ -49,9 +37,9 @@ init_win_manager(int id)
+ 	globals.managers[id].can_draw = 0;
+ 	globals.managers[id].window_mapped = 0;
+ 	globals.managers[id].fontname = NULL;
+-	globals.managers[id].titlename = alloc_string("FvwmIconMan");
+-	globals.managers[id].iconname = alloc_string("FvwmIconMan");
+-	globals.managers[id].formatstring = alloc_string("%c: %i");
++	globals.managers[id].titlename = xstrdup("FvwmIconMan");
++	globals.managers[id].iconname = xstrdup("FvwmIconMan");
++	globals.managers[id].formatstring = xstrdup("%c: %i");
+ 	globals.managers[id].format_depend = CLASS_NAME | ICON_NAME;
+ 	globals.managers[id].geometry.dir = 0;
+ 	globals.managers[id].geometry.boxwidth = 0;
+@@ -136,7 +124,7 @@ allocate_managers(int num)
+ 	}
+ 
+ 	globals.num_managers = num;
+-	globals.managers = (WinManager *)safemalloc(num * sizeof(WinManager));
++	globals.managers = (WinManager *)xmalloc(num * sizeof(WinManager));
+ 
+ 	for (i = 0; i < num; i++) {
+ 		init_win_manager(i);
+diff --git fvwm/modules/FvwmIconMan/readconfig.c fvwm/modules/FvwmIconMan/readconfig.c
+index f13aef8..c788f81 100644
+--- fvwm/modules/FvwmIconMan/readconfig.c
++++ fvwm/modules/FvwmIconMan/readconfig.c
+@@ -437,7 +437,7 @@ static int JmpArgs = 0;
+ static Function *
+ parse_function(char **line, char *pstop_char)
+ {
+-	Function *ftype = (Function *)safemalloc(sizeof(Function));
++	Function *ftype = (Function *)xmalloc(sizeof(Function));
+ 	char *ptr, *name, *tok;
+ 	int j, flag;
+ 	FunctionType *builtin_functions_i;
+@@ -711,7 +711,7 @@ ParseMouseEntry(char *tline)
+ 		    "too. Excess modifiers will be ignored.");
+ 	}
+ 
+-	new = (Binding *)safemalloc(sizeof(Binding));
++	new = (Binding *)xmalloc(sizeof(Binding));
+ 	new->IsMouse = 1;
+ 	new->Button_Key = button;
+ 	new->key_name = NULL;
+@@ -809,7 +809,7 @@ ParseKeyEntry(char *tline)
+ 						keystring = stripcpy(key);
+ 					}
+ 					temp = new;
+-					new = (Binding *)safemalloc(
++					new = (Binding *)xmalloc(
+ 					    sizeof(Binding));
+ 					new->IsMouse = 0;
+ 					new->Button_Key = i;
+@@ -853,7 +853,7 @@ ParseSimpleEntry(char *tline)
+ 	if (func == NULL)
+ 		return NULL;
+ 
+-	new = (Binding *)safemalloc(sizeof(Binding));
++	new = (Binding *)xmalloc(sizeof(Binding));
+ 	new->IsMouse = 0;
+ 	new->Button_Key = 0;
+ 	new->key_name = "select";
+@@ -1465,7 +1465,7 @@ read_in_resources(char *file)
+ 				}
+ 				DoGetNextToken(p, &token, NULL, ",", NULL);
+ 				if (!token) {
+-					token = (char *)safemalloc(1);
++					token = (char *)xmalloc(1);
+ 					*token = 0;
+ 				}
+ 
+@@ -1491,7 +1491,7 @@ read_in_resources(char *file)
+ 				}
+ 				DoGetNextToken(p, &token, NULL, ",", NULL);
+ 				if (!token) {
+-					token = (char *)safemalloc(1);
++					token = (char *)xmalloc(1);
+ 					*token = 0;
+ 				}
+ 
+@@ -1650,7 +1650,7 @@ read_in_resources(char *file)
+ 				}
+ 				DoGetNextToken(p, &token, NULL, ",", NULL);
+ 				if (!token) {
+-					token = (char *)safemalloc(1);
++					token = (char *)xmalloc(1);
+ 					*token = 0;
+ 				}
+ 
+diff --git fvwm/modules/FvwmIconMan/winlist.c fvwm/modules/FvwmIconMan/winlist.c
+index 90790dc..0bd12c6 100644
+--- fvwm/modules/FvwmIconMan/winlist.c
++++ fvwm/modules/FvwmIconMan/winlist.c
+@@ -80,9 +80,9 @@ add_to_stringlist(StringList *list, char *s)
+ 	ConsoleDebug(WINLIST, "add_to_stringlist: %s %s\n",
+ 	    type == ALL_NAME ? "all" : s, pat);
+ 
+-	new = (StringEl *)safemalloc(sizeof(StringEl));
++	new = (StringEl *)xmalloc(sizeof(StringEl));
+ 	size_t pat_len = strlen(pat);
+-	new->string = (char *)safemalloc((pat_len + 1) * sizeof(char));
++	new->string = (char *)xmalloc((pat_len + 1) * sizeof(char));
+ 	new->type = type;
+ 
+ 	strlcpy(new->string, pat, pat_len + 1);
+@@ -195,7 +195,7 @@ iconmanager_show(
+ WinData *
+ new_windata(void)
+ {
+-	WinData *new = (WinData *)safemalloc(sizeof(WinData));
++	WinData *new = (WinData *)xmalloc(sizeof(WinData));
+ 	new->desknum = ULONG_MAX;
+ 	new->x = ULONG_MAX;
+ 	new->y = ULONG_MAX;
+diff --git fvwm/modules/FvwmIconMan/x.c fvwm/modules/FvwmIconMan/x.c
+index ca8714b..9983f97 100644
+--- fvwm/modules/FvwmIconMan/x.c
++++ fvwm/modules/FvwmIconMan/x.c
+@@ -138,8 +138,9 @@ find_frame_window(Window win, int *off_x, int *off_y)
+ 	ConsoleDebug(X11, "In find_frame_window: 0x%x\n", (unsigned int)win);
+ 
+ 	while (1) {
+-		XQueryTree(theDisplay, win, &root, &parent, &junkw, &junki);
+-		if (junkw)
++		junkw = NULL;
++		if (XQueryTree(theDisplay, win, &root, &parent, &junkw,
++		    &junki) && junkw)
+ 			XFree(junkw);
+ 		if (parent == root)
+ 			break;
+diff --git fvwm/modules/FvwmIconMan/xmanager.c fvwm/modules/FvwmIconMan/xmanager.c
+index e5b9e6f..d46a487 100644
+--- fvwm/modules/FvwmIconMan/xmanager.c
++++ fvwm/modules/FvwmIconMan/xmanager.c
+@@ -522,15 +522,6 @@ set_window_button(WinData *win, int index)
+ 	win->button = b;
+ }
+ 
+-static void *
+-Realloc(void *ptr, int size)
+-{
+-	if (ptr == NULL)
+-		return safemalloc(size);
+-	else
+-		return realloc(ptr, size);
+-}
+-
+ static void
+ set_num_buttons(ButtonArray *buttons, int n)
+ {
+@@ -541,15 +532,12 @@ set_num_buttons(ButtonArray *buttons, int n)
+ 	if (n > buttons->num_buttons) {
+ 		buttons->dirty_flags |= NUM_BUTTONS_CHANGED;
+ 		buttons->buttons =
+-		    (Button **)Realloc(buttons->buttons, n * sizeof(Button *));
+-		if (buttons->buttons == NULL) {
+-			ConsoleMessage("Realloc failed! Bailing out\n");
+-			ShutMeDown(1);
+-		}
++		    (Button **)xreallocarray(buttons->buttons, n,
++		    sizeof(Button *));
+ 
+ 		for (i = buttons->num_buttons; i < n; i++) {
+ 			buttons->buttons[i] =
+-			    (Button *)safemalloc(sizeof(Button));
++			    (Button *)xmalloc(sizeof(Button));
+ 			buttons->buttons[i]->index = i;
+ 			buttons->buttons[i]->drawn_state.dirty_flags = 0;
+ 			buttons->buttons[i]->drawn_state.w = 0;
+@@ -1640,8 +1628,10 @@ insert_windows_button(WinData *win)
+ 
+ 	ConsoleDebug(X11, "insert_windows_button: %s\n", win->titlename);
+ 
+-	assert(man);
+-	selected_index = selected_button_in_man(man);
++	if (!win || !win->complete || !man) {
++		ConsoleMessage("Internal error in insert_windows_button\n");
++		ShutMeDown(1);
++	}
+ 
+ 	if (win->button) {
+ 		ConsoleDebug(X11, "insert_windows_button: POSSIBLE BUG: "
+@@ -1649,10 +1639,8 @@ insert_windows_button(WinData *win)
+ 		return;
+ 	}
+ 
+-	if (!win || !win->complete || !man) {
+-		ConsoleMessage("Internal error in insert_windows_button\n");
+-		ShutMeDown(1);
+-	}
++	assert(man);
++	selected_index = selected_button_in_man(man);
+ 
+ 	buttons = &man->buttons;
+ 
+diff --git fvwm/modules/FvwmIdent/FvwmIdent.c fvwm/modules/FvwmIdent/FvwmIdent.c
+index 37aaa33..7b7990f 100644
+--- fvwm/modules/FvwmIdent/FvwmIdent.c
++++ fvwm/modules/FvwmIdent/FvwmIdent.c
+@@ -23,6 +23,7 @@
+ #include <string.h>
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ #if HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+@@ -99,7 +100,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 
+ 	size_t name_len = strlen(temp);
+-	MyName = safemalloc(name_len + 2);
++	MyName = xmalloc(name_len + 2);
+ 	strlcpy(MyName, "*", name_len + 2);
+ 	strlcat(MyName, temp, name_len + 2);
+ 	Clength = strlen(MyName);
+@@ -184,6 +185,9 @@ Loop(int *fd)
+ {
+ 	unsigned long header[4], *body;
+ 
++	sandbox_x11_only("FvwmIdent");
++	sandbox_x11_only("FvwmIdent");
++
+ 	while (1) {
+ 		if (ReadFvwmPacket(fd[1], header, &body) > 0) {
+ 			process_message(header[1], body);
+@@ -418,6 +422,7 @@ list_end(void)
+ 	XMapWindow(dpy, main_win);
+ 
+ 	/* Window is created. Display it until the user clicks or deletes it. */
++	sandbox_x11_only("FvwmIdent");
+ 	while (1) {
+ 		XNextEvent(dpy, &Event);
+ 		switch (Event.type) {
+@@ -535,7 +540,7 @@ AddToList(char *s1, char *s2)
+ 	max_col1 = max_col1 > tw1 ? max_col1 : tw1;
+ 	max_col2 = max_col2 > tw2 ? max_col2 : tw2;
+ 
+-	item = (struct Item *)safemalloc(sizeof(struct Item));
++	item = (struct Item *)xmalloc(sizeof(struct Item));
+ 
+ 	item->col1 = s1;
+ 	item->col2 = s2;
+diff --git fvwm/modules/FvwmIdent/FvwmIdent.h fvwm/modules/FvwmIdent/FvwmIdent.h
+index 5a4b12f..1dccd6c 100644
+--- fvwm/modules/FvwmIdent/FvwmIdent.h
++++ fvwm/modules/FvwmIdent/FvwmIdent.h
+@@ -40,7 +40,6 @@ struct Item {
+  *************************************************************************/
+ void Loop(int *fd);
+ void SendInfo(int *fd, char *message, unsigned long window);
+-char *safemalloc(int length);
+ void DeadPipe(int nonsense);
+ void process_message(unsigned long type, unsigned long *body);
+ void GetTargetWindow(Window *app_win);
+diff --git fvwm/modules/FvwmM4/FvwmM4.c fvwm/modules/FvwmM4/FvwmM4.c
+index 5ae8664..db1def2 100644
+--- fvwm/modules/FvwmM4/FvwmM4.c
++++ fvwm/modules/FvwmM4/FvwmM4.c
+@@ -39,6 +39,7 @@
+ #include "../../fvwm/module.h"
+ #include "../../libs/fvwmlib.h"
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
+ 
+ char *MyName;
+@@ -95,7 +96,7 @@ main(int argc, char **argv)
+ 
+ 	{
+ 		size_t name_len = strlen(temp) + 2;
+-		MyName = safemalloc(name_len);
++		MyName = xmalloc(name_len);
+ 		strlcpy(MyName, "*", name_len);
+ 		strlcat(MyName, temp, name_len);
+ 	}
+@@ -167,6 +168,11 @@ main(int argc, char **argv)
+ 		exit(1);
+ 	}
+ 
++	unveil_tempdir("FvwmM4");
++	unveil_home_read("FvwmM4");
++	unveil(NULL, NULL);
++	sandbox_m4_preproc("FvwmM4");
++
+ 	tmp_file = m4_defs(dpy, display_name, m4_options, filename);
+ 
+ 	snprintf(read_string, sizeof(read_string), "read %s\n", tmp_file);
+diff --git fvwm/modules/FvwmPager/FvwmPager.c fvwm/modules/FvwmPager/FvwmPager.c
+index a546675..53eb23e 100644
+--- fvwm/modules/FvwmPager/FvwmPager.c
++++ fvwm/modules/FvwmPager/FvwmPager.c
+@@ -22,9 +22,8 @@
+ #include <unistd.h>
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif                    /* Saul */
+ 
+ #include <stdlib.h>
+@@ -125,7 +124,7 @@ main(int argc, char **argv)
+ 
+ 	{
+ 		size_t name_len = strlen(temp) + 1;
+-		MyName = safemalloc(name_len);
++		MyName = xmalloc(name_len);
+ 		strlcpy(MyName, temp, name_len);
+ 	}
+ 
+@@ -199,7 +198,7 @@ main(int argc, char **argv)
+ 	HilightC = strdup("black");
+ 	BalloonFont = strdup("fixed");
+ 	BalloonBorderColor = strdup("black");
+-	Desks = (DeskInfo *)safemalloc(ndesks * sizeof(DeskInfo));
++	Desks = (DeskInfo *)xmalloc(ndesks * sizeof(DeskInfo));
+ 	for (i = 0; i < ndesks; i++) {
+ 		snprintf(line, sizeof(line), "Desk %d", i + desk1);
+ 		CopyString(&Desks[i].label, line);
+@@ -257,8 +256,7 @@ main(int argc, char **argv)
+ 	fprintf(stderr, "[main]: back from getting window list, looping\n");
+ #endif
+ 
+-	if (pledge("stdio", NULL) == -1)
+-		err(1, "pledge");
++	sandbox_x11_only("FvwmPager");
+ 
+ 	Loop(fd);
+ 	return 0;
+@@ -386,7 +384,7 @@ list_add(unsigned long *body)
+ 		t = t->next;
+ 		i++;
+ 	}
+-	*prev = (PagerWindow *)safemalloc(sizeof(PagerWindow));
++	*prev = (PagerWindow *)xmalloc(sizeof(PagerWindow));
+ 	(*prev)->w = body[0];
+ 	(*prev)->t = (char *)body[2];
+ 	(*prev)->frame = body[1];
+@@ -948,12 +946,12 @@ ParseOptions(void)
+ 			continue;
+ 		tline2 = GetNextToken(tline2, &arg1);
+ 		if (!arg1) {
+-			arg1 = (char *)safemalloc(1);
++			arg1 = (char *)xmalloc(1);
+ 			arg1[0] = 0;
+ 		}
+ 		tline2 = GetNextToken(tline2, &arg2);
+ 		if (!arg2) {
+-			arg2 = (char *)safemalloc(1);
++			arg2 = (char *)xmalloc(1);
+ 			arg2[0] = 0;
+ 		}
+ 
+@@ -1203,7 +1201,7 @@ NewPagerStringItem(PagerStringList *last, int desk)
+ {
+ 	PagerStringList *newitem;
+ 
+-	newitem = (PagerStringList *)safemalloc(sizeof(PagerStringList));
++	newitem = (PagerStringList *)xmalloc(sizeof(PagerStringList));
+ 	last->next = newitem;
+ 	newitem->desk = desk;
+ 	newitem->next = NULL;
+diff --git fvwm/modules/FvwmPager/FvwmPager.h fvwm/modules/FvwmPager/FvwmPager.h
+index 981dc2c..d29789d 100644
+--- fvwm/modules/FvwmPager/FvwmPager.h
++++ fvwm/modules/FvwmPager/FvwmPager.h
+@@ -101,7 +101,6 @@ typedef struct pager_string_list {
+ char *GetNextToken(char *indata, char **token);
+ void Loop(int *fd);
+ void SendInfo(int *fd, char *message, unsigned long window);
+-char *safemalloc(int length);
+ void DeadPipe(int nonsense);
+ void process_message(unsigned long type, unsigned long *body);
+ void ParseOptions(void);
+diff --git fvwm/modules/FvwmRearrange/FvwmRearrange.c fvwm/modules/FvwmRearrange/FvwmRearrange.c
+index 3f90d23..3ca859e 100644
+--- fvwm/modules/FvwmRearrange/FvwmRearrange.c
++++ fvwm/modules/FvwmRearrange/FvwmRearrange.c
+@@ -27,9 +27,8 @@
+ #include <unistd.h>
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h>
+ #endif
+ 
+ #if HAVE_SYS_SELECT_H
+@@ -214,7 +213,7 @@ collect_client(ModuleState *state)
+ 		switch (header[1]) {
+ 		case M_CONFIGURE_WINDOW:
+ 			if (window_matches(state, body)) {
+-				ClientNode *node = (ClientNode *)safemalloc(
++				ClientNode *node = (ClientNode *)xmalloc(
+ 				    sizeof(ClientNode));
+ 				node->frame = (Window)body[1];
+ 				node->title_height = (int)body[9];
+@@ -658,7 +657,7 @@ tokenise_config(char *line, char ***argv_out)
+ 	}
+ 
+ 	if (count > 0) {
+-		*argv_out = (char **)safemalloc(sizeof(char *) * count);
++		*argv_out = (char **)xmalloc(sizeof(char *) * count);
+ 		for (int i = 0; i < count; ++i) {
+ 			(*argv_out)[i] = tokens[i];
+ 		}
+@@ -681,7 +680,7 @@ LoadConfigLine(const char *filename, const char *match)
+ 		while (fgets(line, sizeof(line), f)) {
+ 			if (strncmp(line, match, match_len) == 0) {
+ 				size_t len = strlen(line);
+-				char *copy = (char *)safemalloc(len + 1);
++				char *copy = (char *)xmalloc(len + 1);
+ 
+ 				strcpy(copy, line);
+ 				if (len && copy[len - 1] == '\n') {
+@@ -732,7 +731,7 @@ main(int argc, char *argv[])
+ 		fprintf(stderr, "%s: module should be executed by fvwm2 only\n",
+ 		    state->program_name);
+ #endif
+-		exit(-1);
++		exit(1);
+ 	}
+ 
+ 	state->pipe_fd[0] = atoi(argv[1]);
+@@ -742,7 +741,7 @@ main(int argc, char *argv[])
+ 	if (!state->display) {
+ 		fprintf(state->log, "%s: couldn't open display %s\n",
+ 		    state->program_name, XDisplayName(NULL));
+-		exit(-1);
++		exit(1);
+ 	}
+ 
+ 	signal(SIGPIPE, handle_sigpipe);
+@@ -756,8 +755,8 @@ main(int argc, char *argv[])
+ 	state->fd_width = GetFdWidth();
+ 
+ #ifdef USERC
+-	strcpy(match, "*");
+-	strcat(match, state->program_name);
++	strlcpy(match, "*", sizeof(match));
++	strlcat(match, state->program_name, sizeof(match));
+ 
+ #ifdef FVWM1
+ 	config_line = LoadConfigLine(argv[3], match);
+@@ -837,6 +836,9 @@ main(int argc, char *argv[])
+ 	}
+ 
+ 	SendInfo(state->pipe_fd, "Send_WindowList", 0);
++
++	sandbox_x11_config("FvwmRearrange");
++
+ 	while (collect_client(state)) {
+ 		/* keep reading until the end marker arrives */
+ 	}
+diff --git fvwm/modules/FvwmSave/FvwmSave.c fvwm/modules/FvwmSave/FvwmSave.c
+index 8ff4374..dd089d3 100644
+--- fvwm/modules/FvwmSave/FvwmSave.c
++++ fvwm/modules/FvwmSave/FvwmSave.c
+@@ -28,6 +28,7 @@
+ 
+ #include "../../fvwm/module.h"
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ char *MyName;
+ int fd[2];
+@@ -60,7 +61,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 
+ 	size_t name_len = strlen(temp);
+-	MyName = safemalloc(name_len + 2);
++	MyName = xmalloc(name_len + 2);
+ 	strlcpy(MyName, "*", name_len + 2);
+ 	strlcat(MyName, temp, name_len + 2);
+ 
+@@ -108,6 +109,10 @@ Loop(int *fd)
+ 	unsigned long header[HEADER_SIZE], *body;
+ 	int count;
+ 
++	unveil_home_write("FvwmSave");
++	unveil(NULL, NULL);
++	sandbox_save_state("FvwmSave");
++
+ 	while (1) {
+ 		/* read a packet */
+ 		if ((count = ReadFvwmPacket(fd[1], header, &body)) > 0) {
+@@ -178,7 +183,7 @@ add_window(unsigned long new_win, unsigned long *body)
+ 	if (new_win == 0)
+ 		return;
+ 
+-	t = (struct list *)safemalloc(sizeof(struct list));
++	t = (struct list *)xmalloc(sizeof(struct list));
+ 	t->id = new_win;
+ 	t->next = list_root;
+ 	t->frame_height = (int)body[6];
+@@ -189,9 +194,7 @@ add_window(unsigned long new_win, unsigned long *body)
+ 	t->height_inc = (int)body[14];
+ 	t->frame_x = (int)body[3];
+ 	t->frame_y = (int)body[4];
+-	;
+ 	t->title_height = (int)body[9];
+-	;
+ 	t->boundary_width = (int)body[10];
+ 	t->flags = (unsigned long)body[8];
+ 	t->gravity = body[21];
+@@ -238,7 +241,7 @@ write_string(FILE *out, char *line)
+ 	len = strlen(line);
+ 
+ 	for (i = 0; i < len; i++) {
+-		if (isspace(line[i]))
++		if (isspace((unsigned char)line[i]))
+ 			space = 1;
+ 		if (line[i] == '\"')
+ 			qoute = 1;
+@@ -278,8 +281,14 @@ do_save(void)
+ 	int x1, x2, y1, y2, i, command_count;
+ 	long tVx, tVy;
+ 
+-	snprintf(tname, sizeof(tname), "%s/new.xinitrc", getenv("HOME"));
++	snprintf(tname, sizeof(tname), "%s/new.xinitrc",
++	    getenv("HOME") ? getenv("HOME") : ".");
+ 	out = fopen(tname, "w+");
++	if (out == NULL) {
++		fprintf(stderr, "%s: couldn't open %s for writing\n",
++		    Myname, tname);
++		return;
++	}
+ 	for (t = list_root; t != NULL; t = t->next) {
+ 		tname[0] = 0;
+ 
+@@ -296,8 +305,10 @@ do_save(void)
+ 		dwidth = t->frame_width - 2 * t->boundary_width;
+ 		dwidth -= t->base_width;
+ 		dheight -= t->base_height;
+-		dwidth /= t->width_inc;
+-		dheight /= t->height_inc;
++		if (t->width_inc != 0)
++			dwidth /= t->width_inc;
++		if (t->height_inc != 0)
++			dheight /= t->height_inc;
+ 
+ 		if (t->flags & STICKY) {
+ 			tVx = 0;
+diff --git fvwm/modules/FvwmSave/FvwmSave.h fvwm/modules/FvwmSave/FvwmSave.h
+index 3a9f675..0beecb6 100644
+--- fvwm/modules/FvwmSave/FvwmSave.h
++++ fvwm/modules/FvwmSave/FvwmSave.h
+@@ -27,7 +27,6 @@ struct list {
+  *************************************************************************/
+ void Loop(int *fd);
+ void SendInfo(int *fd, char *message, unsigned long window);
+-char *safemalloc(int length);
+ struct list *find_window(unsigned long id);
+ void add_window(unsigned long new_win, unsigned long *body);
+ void DeadPipe(int nonsense);
+diff --git fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.c fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.c
+index 9886d14..7546160 100644
+--- fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.c
++++ fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.c
+@@ -42,6 +42,7 @@
+ 
+ #include "../../fvwm/module.h"
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ char *MyName;
+ int fd[2];
+@@ -76,7 +77,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 
+ 	size_t name_len = strlen(temp);
+-	MyName = safemalloc(name_len + 2);
++	MyName = xmalloc(name_len + 2);
+ 	strlcpy(MyName, "*", name_len + 2);
+ 	strlcat(MyName, temp, name_len + 2);
+ 
+@@ -124,6 +125,10 @@ Loop(int *fd)
+ 	unsigned long header[HEADER_SIZE], *body;
+ 	int count;
+ 
++	unveil_home_write("FvwmSaveDesk");
++	unveil(NULL, NULL);
++	sandbox_save_state("FvwmSaveDesk");
++
+ 	while (1) {
+ 		/* read a packet */
+ 		if ((count = ReadFvwmPacket(fd[1], header, &body)) > 0) {
+@@ -152,7 +157,8 @@ process_message(unsigned long type, unsigned long *body)
+ 		struct list *l;
+ 		if ((l = find_window(body[0])) != 0) {
+ 			size_t name_len = strlen((char *)&body[3]);
+-			l->name = (char *)safemalloc(name_len + 1);
++			free(l->name);
++			l->name = (char *)xmalloc(name_len + 1);
+ 			strlcpy(l->name, (char *)&body[3], name_len + 1);
+ 		}
+ 	}
+@@ -206,7 +212,7 @@ add_window(unsigned long new_win, unsigned long *body)
+ 	if (new_win == 0)
+ 		return;
+ 
+-	t = (struct list *)safemalloc(sizeof(struct list));
++	t = (struct list *)xmalloc(sizeof(struct list));
+ 	t->id = new_win;
+ 	t->next = list_root;
+ 	t->frame_height = (int)body[6];
+@@ -217,9 +223,7 @@ add_window(unsigned long new_win, unsigned long *body)
+ 	t->height_inc = (int)body[14];
+ 	t->frame_x = (int)body[3];
+ 	t->frame_y = (int)body[4];
+-	;
+ 	t->title_height = (int)body[9];
+-	;
+ 	t->boundary_width = (int)body[10];
+ 	t->flags = (unsigned long)body[8];
+ 	t->gravity = body[21];
+@@ -268,7 +272,7 @@ write_string(FILE *out, char *line)
+ 	len = strlen(line);
+ 
+ 	for (i = 0; i < len; i++) {
+-		if (isspace(line[i]))
++		if (isspace((unsigned char)line[i]))
+ 			space = 1;
+ 		if (line[i] == '\"')
+ 			qoute = 1;
+@@ -314,8 +318,10 @@ do_save_command(
+ 	dwidth = t->frame_width - 2 * t->boundary_width;
+ 	dwidth -= t->base_width;
+ 	dheight -= t->base_height;
+-	dwidth /= t->width_inc;
+-	dheight /= t->height_inc;
++	if (t->width_inc != 0)
++		dwidth /= t->width_inc;
++	if (t->height_inc != 0)
++		dheight /= t->height_inc;
+ 
+ 	if (t->flags & STICKY) {
+ 		tVx = 0;
+@@ -386,7 +392,7 @@ do_save_command(
+ 		if (emit_wait) {
+ 			if (t->name)
+ 				fprintf(out, "+\t\t\"I\" Wait %s\n", t->name);
+-			else
++			else if (command_count > 0)
+ 				fprintf(out, "+\t\t\"I\" Wait %s\n",
+ 				    command_list[0]);
+ 			fflush(out);
+@@ -418,8 +424,14 @@ do_save(void)
+ 		if (t->desk > maxdesk)
+ 			maxdesk = t->desk;
+ 
+-	snprintf(fnbuf, sizeof(fnbuf), "%s/.fvwm2desk", getenv("HOME"));
++	snprintf(fnbuf, sizeof(fnbuf), "%s/.fvwm2desk",
++	    getenv("HOME") ? getenv("HOME") : ".");
+ 	out = fopen(fnbuf, "w");
++	if (out == NULL) {
++		fprintf(stderr, "%s: couldn't open %s for writing\n",
++		    Myname, fnbuf);
++		return;
++	}
+ 
+ 	fprintf(out, "AddToFunc InitFunction");
+ 	fflush(out);
+diff --git fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.h fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.h
+index 6ae06c0..893a989 100644
+--- fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.h
++++ fvwm/modules/FvwmSaveDesk/FvwmSaveDesk.h
+@@ -29,7 +29,6 @@ struct list {
+  *************************************************************************/
+ void Loop(int *fd);
+ void SendInfo(int *fd, char *message, unsigned long window);
+-char *safemalloc(int length);
+ struct list *find_window(unsigned long id);
+ void add_window(unsigned long new_win, unsigned long *body);
+ void DeadPipe(int nonsense);
+diff --git fvwm/modules/FvwmScroll/FvwmScroll.c fvwm/modules/FvwmScroll/FvwmScroll.c
+index fe15b65..87604d4 100644
+--- fvwm/modules/FvwmScroll/FvwmScroll.c
++++ fvwm/modules/FvwmScroll/FvwmScroll.c
+@@ -20,6 +20,7 @@
+ #include <string.h>
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ #if HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+@@ -76,7 +77,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 
+ 	size_t name_len = strlen(temp);
+-	MyName = safemalloc(name_len + 2);
++	MyName = xmalloc(name_len + 2);
+ 	strlcpy(MyName, "*", name_len + 2);
+ 	strlcat(MyName, temp, name_len + 2);
+ 	Clength = strlen(MyName);
+@@ -136,6 +137,8 @@ main(int argc, char **argv)
+ 	}
+ 
+ 	/* sever our connection with fvwm */
++
++	sandbox_x11_only("FvwmScroll");
+ 	close(fd[0]);
+ 	close(fd[1]);
+ 	if (app_win == 0)
+diff --git fvwm/modules/FvwmScroll/FvwmScroll.h fvwm/modules/FvwmScroll/FvwmScroll.h
+index df6503f..aa2f386 100644
+--- fvwm/modules/FvwmScroll/FvwmScroll.h
++++ fvwm/modules/FvwmScroll/FvwmScroll.h
+@@ -7,7 +7,6 @@ extern int screen;
+ extern int d_depth;
+ extern int x_fd, fd_width;
+ 
+-char *safemalloc(int length);
+ void DeadPipe(int nonsense);
+ void GetTargetWindow(Window *app_win);
+ void CopyString(char **dest, char *source);
+diff --git fvwm/modules/FvwmScroll/GrabWindow.c fvwm/modules/FvwmScroll/GrabWindow.c
+index 596b188..0aaadd9 100644
+--- fvwm/modules/FvwmScroll/GrabWindow.c
++++ fvwm/modules/FvwmScroll/GrabWindow.c
+@@ -13,8 +13,6 @@
+ 
+ #include "config.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <sys/time.h>
+@@ -582,14 +580,18 @@ Loop(Window target)
+ 				    &actual, &actual_format, &nitems,
+ 				    &bytesafter,
+ 				    (unsigned char **)&prop) == Success &&
+-				    (prop != NULL))
++				    (prop != NULL)) {
+ 					change_icon_name(prop);
++					XFree(prop);
++				}
+ 			} else if (Event.xproperty.atom == XA_WM_HINTS) {
+ 				XWMHints *wmhints;
+ 
+ 				wmhints = XGetWMHints(dpy, target);
+-				XSetWMHints(dpy, main_win, wmhints);
+-				XFree(wmhints);
++				if (wmhints != NULL) {
++					XSetWMHints(dpy, main_win, wmhints);
++					XFree(wmhints);
++				}
+ 			} else if (Event.xproperty.atom == XA_WM_NORMAL_HINTS) {
+ 				/* don't do Normal Hints. They alter the size of
+ 				 * the window */
+diff --git fvwm/modules/FvwmTalk/FvwmTalk.c fvwm/modules/FvwmTalk/FvwmTalk.c
+index f437672..e1e779a 100644
+--- fvwm/modules/FvwmTalk/FvwmTalk.c
++++ fvwm/modules/FvwmTalk/FvwmTalk.c
+@@ -15,9 +15,8 @@
+ #define PROP_SIZE 1024
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <sys/time.h>
+@@ -112,7 +111,7 @@ main(int argc, char **argv)
+ 		temp = s + 1;
+ 
+ 	size_t name_len = strlen(temp);
+-	MyName = safemalloc(name_len + 2);
++	MyName = xmalloc(name_len + 2);
+ 	strlcpy(MyName, "*", name_len + 2);
+ 	strlcat(MyName, temp, name_len + 2);
+ 
+@@ -228,6 +227,9 @@ Loop(int *fd)
+ 	pos = 0;
+ 	Text[0] = 0;
+ 
++	sandbox_x11_only("FvwmTalk");
++	sandbox_x11_only("FvwmTalk");
++
+ 	while (1) {
+ 		if (My_XNextEvent(dpy, &event)) {
+ 			switch (event.type) {
+@@ -418,7 +420,9 @@ paste_primary(int window, int property, int Delete)
+ 		}
+ 
+ 		if (255 - pos > 0) {
+-			strncat(Text, (char *)data2, 255 - pos - nitems);
++			if (pos + (int)nitems < 255)
++				strncat(Text, (char *)data2,
++				    255 - pos - (int)nitems);
+ 			pos = strlen(Text);
+ 			DrawWindow(UPDATE_ONLY);
+ 		}
+diff --git fvwm/modules/FvwmTalk/FvwmTalk.h fvwm/modules/FvwmTalk/FvwmTalk.h
+index 7fffe1d..1e85482 100644
+--- fvwm/modules/FvwmTalk/FvwmTalk.h
++++ fvwm/modules/FvwmTalk/FvwmTalk.h
+@@ -18,7 +18,6 @@ struct list {
+  *************************************************************************/
+ void Loop(int *fd);
+ void SendInfo(int *fd, char *message, unsigned long window);
+-char *safemalloc(int length);
+ struct list *find_window(unsigned long id);
+ void remove_window(unsigned long id);
+ void add_window(unsigned long new_win);
+diff --git fvwm/modules/FvwmWinList/ButtonArray.c fvwm/modules/FvwmWinList/ButtonArray.c
+index c88fcdb..e639312 100644
+--- fvwm/modules/FvwmWinList/ButtonArray.c
++++ fvwm/modules/FvwmWinList/ButtonArray.c
+@@ -20,7 +20,6 @@
+ 
+ #include "../../libs/fvwmlib.h"
+ #include "FvwmWinList.h"
+-#include "Mallocs.h"
+ #include "config.h"
+ 
+ extern XFontStruct *ButtonFont;
+@@ -47,9 +46,9 @@ ButtonNew(char *title, FvwmPicture *p, int up)
+ {
+ 	Button *new;
+ 
+-	new = (Button *)safemalloc(sizeof(Button));
++	new = (Button *)xmalloc(sizeof(Button));
+ 	size_t title_len = strlen(title);
+-	new->title = safemalloc(title_len + 1);
++	new->title = xmalloc(title_len + 1);
+ 	strlcpy(new->title, title, title_len + 1);
+ 	if (p != NULL) {
+ 		new->p.picture = p->picture;
+@@ -144,7 +143,7 @@ UpdateButton(ButtonArray *array, int butnum, char *title, int up)
+ 		if (title != NULL) {
+ 			size_t title_len = strlen(title);
+ 			temp->title =
+-			    (char *)saferealloc(temp->title, title_len + 1);
++			    (char *)xrealloc(temp->title, title_len + 1);
+ 			strlcpy(temp->title, title, title_len + 1);
+ 			temp->tw = XTextWidth(ButtonFont, title, strlen(title));
+ 			temp->truncatewidth = 0;
+diff --git fvwm/modules/FvwmWinList/FvwmWinList.c fvwm/modules/FvwmWinList/FvwmWinList.c
+index 3415e2e..9037b62 100644
+--- fvwm/modules/FvwmWinList/FvwmWinList.c
++++ fvwm/modules/FvwmWinList/FvwmWinList.c
+@@ -43,6 +43,7 @@
+ #include <string.h>
+ 
+ #include "config.h"
++#include "../../fvwm/fvwm_sandbox.h"
+ 
+ #if HAVE_SYS_SELECT_H
+ #include <sys/select.h>
+@@ -51,8 +52,6 @@
+ #include <ctype.h>
+ #include <unistd.h>
+ 
+-#ifdef HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h> /* Saul */
+ #endif
+ 
+ #include <X11/Intrinsic.h>
+@@ -68,7 +67,6 @@
+ #include "Colors.h"
+ #include "FvwmWinList.h"
+ #include "List.h"
+-#include "Mallocs.h"
+ 
+ #define GRAB_EVENTS							\
+ 	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |	\
+@@ -156,7 +154,7 @@ main(int argc, char **argv)
+ 
+ 	/* Setup my name */
+ 	size_t name_len = strlen(temp);
+-	Module = safemalloc(name_len + 2);
++	Module = xmalloc(name_len + 2);
+ 	strlcpy(Module, "*", name_len + 2);
+ 	strlcat(Module, temp, name_len + 2);
+ 	Clength = strlen(Module);
+@@ -242,6 +240,9 @@ MainEventLoop(void)
+ {
+ 	fd_set readset;
+ 
++	sandbox_x11_only("FvwmWinList");
++	sandbox_x11_only("FvwmWinList");
++
+ 	while (!isTerminated) {
+ 		FD_ZERO(&readset);
+ 		FD_SET(Fvwm_fd[1], &readset);
+@@ -425,7 +426,7 @@ SendFvwmPipe(char *message, unsigned long window)
+ 	while (1) {
+ 		temp = strchr(hold, ',');
+ 		if (temp != NULL) {
+-			temp_msg = safemalloc(temp - hold + 1);
++			temp_msg = xmalloc(temp - hold + 1);
+ 			strncpy(temp_msg, hold, (temp - hold));
+ 			temp_msg[(temp - hold)] = '\0';
+ 			hold = temp + 1;
+@@ -477,24 +478,21 @@ WaitForExpose(void)
+ 	XEvent Event;
+ 
+ 	while (1) {
+-		/*
+-		 * Temporary solution to stop the process blocking
+-		 * in XNextEvent once we have been asked to quit.
+-		 * There is still a small race condition between
+-		 * checking the flag and calling the X-Server, but
+-		 * we can fix that ...
+-		 */
+ 		if (isTerminated) {
+-			/* Just exit - the installed exit-procedure will clean
+-			 * up */
+ 			exit(0);
+ 		}
+-		/**/
+ 
+-		XNextEvent(dpy, &Event);
+-		if (Event.type == Expose) {
++		if (XCheckTypedEvent(dpy, Expose, &Event)) {
+ 			if (Event.xexpose.count == 0)
+ 				break;
++		} else if (isTerminated) {
++			exit(0);
++		} else {
++			XNextEvent(dpy, &Event);
++			if (Event.type == Expose) {
++				if (Event.xexpose.count == 0)
++					break;
++			}
+ 		}
+ 	}
+ }
+@@ -767,8 +765,9 @@ find_frame_window(Window win, int *off_x, int *off_y)
+ 	XWindowAttributes attr;
+ 
+ 	while (1) {
+-		XQueryTree(dpy, win, &root, &parent, &junkw, &junki);
+-		if (junkw)
++		junkw = NULL;
++		if (XQueryTree(dpy, win, &root, &parent, &junkw, &junki) &&
++		    junkw)
+ 			XFree(junkw);
+ 		if (parent == root)
+ 			break;
+@@ -861,7 +860,7 @@ makename(const char *string, long flags)
+ 	char *ptr;
+ 	size_t name_len = strlen(string);
+ 	size_t extra = (flags & ICONIFIED) ? 2 : 1;
+-	ptr = safemalloc(name_len + extra);
++	ptr = xmalloc(name_len + extra);
+ 	ptr[0] = '\0';
+ 	if (flags & ICONIFIED)
+ 		strlcpy(ptr, "(", name_len + extra);
+diff --git fvwm/modules/FvwmWinList/List.c fvwm/modules/FvwmWinList/List.c
+index ef0858e..e3177bc 100644
+--- fvwm/modules/FvwmWinList/List.c
++++ fvwm/modules/FvwmWinList/List.c
+@@ -19,9 +19,23 @@
+ 
+ #include "../../fvwm/module.h"
+ #include "FvwmWinList.h"
+-#include "Mallocs.h"
+ #include "config.h"
+ 
++static void
++UpdateString(char **string, char *value)
++{
++	size_t value_len;
++
++	if (value == NULL)
++		return;
++	value_len = strlen(value);
++	if (*string == NULL)
++		*string = xmalloc(value_len + 1);
++	else
++		*string = xrealloc(*string, value_len + 1);
++	strlcpy(*string, value, value_len + 1);
++}
++
+ /******************************************************************************
+   InitList - Initialize the list
+ ******************************************************************************/
+@@ -39,7 +53,7 @@ void
+ AddItem(List *list, long id, long flags, long desk)
+ {
+ 	Item *new;
+-	new = (Item *)safemalloc(sizeof(Item));
++	new = (Item *)xmalloc(sizeof(Item));
+ 	new->id = id;
+ 	new->name = NULL;
+ 	new->flags = flags;
+diff --git fvwm/modules/FvwmWinList/Makefile fvwm/modules/FvwmWinList/Makefile
+index 4003cb2..d4a6098 100644
+--- fvwm/modules/FvwmWinList/Makefile
++++ fvwm/modules/FvwmWinList/Makefile
+@@ -5,7 +5,7 @@
+ .PATH: ${DIST}/modules/FvwmWinList
+ 
+ PROG=	FvwmWinList
+-SRCS=	ButtonArray.c Colors.c FvwmWinList.c List.c Mallocs.c 
++SRCS=	ButtonArray.c Colors.c FvwmWinList.c List.c 
+ 
+ LDADD+= -lXpm ${XLIB}
+ BINDIR= ${FVWMLIBDIR}
+diff --git fvwm/modules/FvwmWinList/Mallocs.c fvwm/modules/FvwmWinList/Mallocs.c
+deleted file mode 100644
+index 2d0cb22..0000000
+--- fvwm/modules/FvwmWinList/Mallocs.c
++++ /dev/null
+@@ -1,66 +0,0 @@
+-/* FvwmWinList Module for Fvwm.
+- *
+- *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
+- *                               Mike_Finger@atk.com)
+- *
+- * The author makes not guarantees or warantees, either express or
+- * implied.  Feel free to use any contained here for any purpose, as long
+- * and this and any other applicible copyrights are kept intact.
+-
+- * The functions in this source file that are based on part of the FvwmIdent
+- * module for Fvwm are noted by a small copyright atop that function, all others
+- * are copyrighted by Mike Finger.  For those functions modified/used, here is
+- * the full, original copyright:
+- *
+- * Copyright 1994, Robert Nation and Nobutaka Suzuki.
+- * No guarantees or warantees or anything
+- * are provided or implied in any way whatsoever. Use this program at your
+- * own risk. Permission to use this program for any purpose is given,
+- * as long as the copyright is kept intact. */
+-
+-#include <sys/time.h>
+-
+-#include <ctype.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <string.h>
+-
+-#include "../../libs/fvwmlib.h"
+-#include "config.h"
+-
+-extern char *Module;
+-
+-char *
+-saferealloc(char *ptr, size_t length)
+-{
+-	char *newptr;
+-	const char *name;
+-
+-	if (length == 0) {
+-		length = 1;
+-	}
+-
+-	newptr = realloc(ptr, length);
+-	if (newptr == NULL) {
+-		name = (Module && *Module) ? Module : "FvwmWinList";
+-		fprintf(
+-		    stderr, "%s: realloc failed for %zu bytes\n", name, length);
+-		exit(1);
+-	}
+-
+-	return newptr;
+-}
+-
+-void
+-UpdateString(char **string, const char *value)
+-{
+-	if (value == NULL)
+-		return;
+-
+-	size_t value_len = strlen(value);
+-	if (*string == NULL)
+-		*string = safemalloc(value_len + 1);
+-	else
+-		*string = saferealloc(*string, value_len + 1);
+-	strlcpy(*string, value, value_len + 1);
+-}
+diff --git fvwm/modules/FvwmWinList/Mallocs.h fvwm/modules/FvwmWinList/Mallocs.h
+deleted file mode 100644
+index 4010ec8..0000000
+--- fvwm/modules/FvwmWinList/Mallocs.h
++++ /dev/null
+@@ -1,25 +0,0 @@
+-/* FvwmWinList Module for Fvwm.
+- *
+- *  Copyright 1994,  Mike Finger (mfinger@mermaid.micro.umn.edu or
+- *                               Mike_Finger@atk.com)
+- *
+- * The author makes not guarantees or warantees, either express or
+- * implied.  Feel free to use any contained here for any purpose, as long
+- * and this and any other applicible copyrights are kept intact.
+-
+- * The functions in this source file that are based on part of the FvwmIdent
+- * module for Fvwm are noted by a small copyright atop that function, all others
+- * are copyrighted by Mike Finger.  For those functions modified/used, here is
+- * the full, original copyright:
+- *
+- * Copyright 1994, Robert Nation and Nobutaka Suzuki.
+- * No guarantees or warantees or anything
+- * are provided or implied in any way whatsoever. Use this program at your
+- * own risk. Permission to use this program for any purpose is given,
+- * as long as the copyright is kept intact. */
+-#include <stddef.h>
+-
+-/* Function Prototypes */
+-char *safemalloc(int length);
+-char *saferealloc(char *ptr, size_t length);
+-void UpdateString(char **string, const char *value);

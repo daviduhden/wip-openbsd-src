@@ -6,8 +6,7 @@
  ***************************************************************************/
 
 #include "config.h"
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
+#include "../../fvwm/fvwm_sandbox.h"
 #endif
 
 #include <sys/time.h>
@@ -99,7 +98,7 @@ main(int argc, char **argv)
 		string = argv[0];
 
 	size_t name_len = strlen(string);
-	myName = safemalloc(name_len + 1);
+	myName = xmalloc(name_len + 1);
 	strlcpy(myName, string, name_len + 1);
 
 	if (argc >= 3) {
@@ -115,7 +114,7 @@ main(int argc, char **argv)
 
 	if (argc > 6) {
 		size_t pixmap_len = strlen(argv[6]);
-		pixmapName = safemalloc(pixmap_len + 1);
+		pixmapName = xmalloc(pixmap_len + 1);
 		strlcpy(pixmapName, argv[6], pixmap_len + 1);
 	}
 
@@ -184,6 +183,8 @@ main(int argc, char **argv)
 	/* Display the window */
 	value.tv_usec = timeout % 1000000;
 	value.tv_sec = timeout / 1000000;
+	sandbox_x11_only("FvwmBanner");
+
 	while (1) {
 		FD_ZERO(&in_fdset);
 		FD_SET(x_fd, &in_fdset);

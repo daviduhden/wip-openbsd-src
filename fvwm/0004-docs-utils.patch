@@ -1,0 +1,131 @@
+OpenBSD FVWM 2.2.5: Documentation, Build System, and Utilities
+==============================================================
+
+  docs/BUGS:     Removed resolved entries (autoconf, XEmacs, ICCCM, etc.)
+  docs/TODO:     Removed fixed bugfix entries (Restart, Maximize, etc.)
+  utils/xpmroot: Added pledge(2) stdio policy via sandbox_xpmroot()
+
+Apply with:  patch -p0 < 0004-docs-utils.patch
+From the CVS repository root directory containing fvwm/
+
+NOT VERIFIED: No compilation or runtime testing performed.
+
+diff --git fvwm/docs/BUGS fvwm/docs/BUGS
+index c4b4746..ce85265 100644
+--- fvwm/docs/BUGS
++++ fvwm/docs/BUGS
+@@ -10,61 +10,16 @@ from our home page.
+ ======================================================================
+ 
+  - Running fvwm2 on an XNest X server does not work well.
+- - FvwmSave and FvwmSaveDesk are not up to date.
+  - The fvwm_convert script is not up to date.
+- - xscreensaver may not be able to allocate a private colormap
+- - FvwmButtons and possibly other modules may survive shutdown of the X
+-   server.
++ - xscreensaver may not be able to allocate a private colormap.
+  - AutoHide in FvwmTaskBar does not work well. See 'EdgeThickness' command in
+    the manpage.
+ 
+ ======================================================================
+ ======================================================================
+ 
+-Configure remembers too many things, particularly with respect to the
+-optional libraries.  If you ever need to re-run configure, using
+-different --with options, please remove "config.cache" file first.
+-
+-----------------------------------------------------------------------
+-
+ Binding a key to a window decoration but not to the window itself is
+ discouraged because when the key-press event finally gets to the
+ window it will be marked as SYNTHETIC and will be ignored by many
+ applications.
+ 
+-----------------------------------------------------------------------
+-
+-Sending DESTROY window manager options to applications is a bad way to
+-close them and should only be used as a last resort.  Strange things
+-can happen.  Please try DELETE and CLOSE first.
+-
+-----------------------------------------------------------------------
+-
+-Some users have seen intermittent problems with XEmacs version 19.13
+-not being refreshed correctly after a restart of fvwm2.  If this
+-occurs, you should be able to open a new frame and delete the old one.
+-I can't debug this, as I don't see this problem.  I don't know if the
+-problem is from XEmacs, fvwm2, or something specific to a few user's
+-setups.
+-
+-----------------------------------------------------------------------
+-
+-Some users have been getting odd startup problems, like total lockups.
+-I cannot reproduce this, and have no idea why.  Let me know if you see
+-this and find a way to consistently reproduce it.
+-
+-Actually, I've recently discovered that this is often from not having
+-a .fvwm2rc file, so check that first...  But this is fixed in the
+-later versions.
+-
+-----------------------------------------------------------------------
+-
+-Fvwm attempts to be ICCCM 1.1 compliant.  In addition, ICCCM
+-states that it should be possible for applications to receive ANY
+-keystroke, which is not consistent with the keyboard shortcut approach
+-used in fvwm and most other window managers. In particular you
+-cannot have the same keyboard shortcuts working with your fvwm2 and
+-another fvwm2 running within Xnest (a nested X server). The same problem
+-exists with mouse bindings.
+-
+-----------------------------------------------------------------------
+diff --git fvwm/docs/TODO fvwm/docs/TODO
+index 3348faa..2d94867 100644
+--- fvwm/docs/TODO
++++ fvwm/docs/TODO
+@@ -45,7 +45,6 @@ Bugfixes:
+   - Change flags implementation to allow adding more Styles easily
+     (bitfields?) - THE GREAT STYLE FLAG REWRITE (GSFR)
+   - Rewrite VISIBLE/RAISED lags to do something comprehensible.
+-  - Fix Restart to not pass original (fvwm specific) options to other wm's
+   - Run profiling on FVWM to see if I can speed it up any more
+   - Try to decrease memory usage a little more
+   - clean up code duplication (esp in modules) - more stuff in
+@@ -57,19 +56,14 @@ Bugfixes:
+         MotionThreshold not exceeded & ClickTime not exceeded -> DoubleClick
+   - Make transient FvwmWinList reposition itself & pointer if popped up
+     off the screen (like built in menus)
+-  - Maximize XTerm, change font, UnMaximize, XTerm goes to wrong window size
+-    (still unfixed on 28-Nov-1998)
+   - Colormaps and xlock -install -mode blank (& swirl) interaction still
+     isn't 100% correct?
+   - bring back 'TogglePage'?
+-  - Setting keys via FvwmTalk or Read requires Recapture to take effect?
+   - System Modal dialogs bug - popup menus shouldn't be allowed??  I think
+     this is ok, actually...
+   - Fix FvwmDeskTopScale size calculation
+   - Need to fix to work correctly under 24bit (TrueColor) displays
+-  - Esc during moves, etc can result in windows being "lost" off desktop
+   - Should also have way to make windows off desktop be recovered easier
+-  - Transients of transients don't get raised correctly sometimes?
+ 
+ ----------------------------------------------------------------------
+ 
+diff --git fvwm/utils/xpmroot.c fvwm/utils/xpmroot.c
+index 155140c..6e42911 100644
+--- fvwm/utils/xpmroot.c
++++ fvwm/utils/xpmroot.c
+@@ -17,6 +17,7 @@
+ 
+ #include "../libs/fvwmlib.h"
+ #include "config.h"
++#include "../fvwm/fvwm_sandbox.h"
+ 
+ Display *dpy;
+ int screen;
+@@ -40,6 +41,7 @@ main(int argc, char **argv)
+ 		fprintf(stderr, "Try Again\n");
+ 		exit(1);
+ 	}
++	sandbox_xpmroot("xpmroot");
+ 	dpy = XOpenDisplay(display_name);
+ 	if (!dpy) {
+ 		fprintf(stderr, "Xpmroot:  unable to open display '%s'\n",

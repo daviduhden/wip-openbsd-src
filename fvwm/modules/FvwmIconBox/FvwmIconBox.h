@@ -15,7 +15,6 @@ extern void RedrawWindow(void);
 extern void match_string(char *tline);
 extern void Loop(void);
 extern void ParseOptions(void);
-extern char *safemalloc(int length);
 extern int My_XNextEvent(Display *dpy, XEvent *event);
 extern void CopyString(char **dest, char *source);
 extern void RelieveWindow(

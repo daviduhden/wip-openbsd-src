@@ -1,0 +1,5212 @@
+OpenBSD FVWM 2.2.5: Core Program Rewrite
+=========================================
+
+Changes to the main fvwm window manager, its headers, and config.
+
+  config.h:        Rewrote for OpenBSD-only (48 autoconf probes removed)
+  fvwm.c:          Privilege separation, staged pledge(2)/unveil(2)
+  builtins.c:      Fixed double-free, exit()->_exit(), pointer aliasing,
+                   putenv() leak, typo; removed shell comment
+  module.c:        Fixed negative-size text[-1] write (CRITICAL),
+                   exit()->_exit(), wrong strlcpy size
+  modconf.c:       Fixed NULL pointer arithmetic in DestroyModConfig
+  read.c:          Added recursion depth guard (MAX_NESTING_DEPTH=128)
+  style.c:         Fixed uninitialized error-message buffer
+  events.c:        Removed commented-out CLICKY_MODE_1 #ifdef/#endif
+  add_window.c:    Replaced vague TODO with precise limitation description
+  colormaps.c:     Removed Sun/Solaris TrueColor workaround
+  misc.h:          Removed waitpid(2)/wait3(2) branching, __STDC__ guards
+  move.c:          Added ClampToScreen() for Escape/abort during moves
+  fvwm2.1:         Rewrote man page in semantic mdoc(7) (3041->369 lines)
+  Makefile:        Added exec.c, fvwm_exec target, -lutil
+
+  NEW: exec.c              Main-process imsg(3) interface to exec helper
+  NEW: fvwm_exec.c         Privilege-separated execution helper
+  NEW: fvwm_sandbox.h      Shared pledge(2)/unveil(2) inline helpers
+  NEW: xalloc.h            xmalloc/xrealloc/xcalloc/xstrdup inline helpers
+
+Apply with:  patch -p0 < 0001-core-rewrite.patch
+From the CVS repository root directory containing fvwm/
+
+NOT VERIFIED: No compilation or runtime testing performed.
+
+diff --git fvwm/config.h fvwm/config.h
+index e946644..6264574 100644
+--- fvwm/config.h
++++ fvwm/config.h
+@@ -1,352 +1,35 @@
+-/* config.h.  Generated automatically by configure.  */
+-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+-/** Compatibility stuff **/
++/* config.h -- OpenBSD fvwm configuration */
+ 
+-/* Where to search for the fvwm icons.  */
+-#define FVWM_ICONDIR "/usr/include/X11/bitmaps:/usr/include/X11/pixmaps"
++#define FVWM_ICONDIR "/usr/X11R6/lib/X11/fvwm/icons"
+ 
+-/* Define if Xpm library is used.  */
+ #define XPM 1
+-
+-/* Define if rplay library is used.  */
+-/* #undef HAVE_RPLAY */
+-
+-/* Define if readline is available.  */
+-#define HAVE_READLINE 1
+-
+-/* Define to disable motif applications ability to have modal dialogs.
+- * Use with care.  */
+-/* #undef MODALITY_IS_EVIL */
+-
+-/* Tells the WM not to request save unders for pop-up
+- * menus. A quick test using monochrome X11 shows that save
+- * unders cost about 4Kbytes RAM, but saves a lot of
+- * window redraws if you have windows that take a while
+- * to refresh. For xcolor, I assume the cost is more like
+- * 4Kbytesx8 = 32kbytes (256 color).  */
+-/* #undef NO_SAVEUNDERS */
+-
+-/* Define if you want the Shaped window extensions.
+- * Shaped window extensions seem to increase the window managers RSS
+- * by about 60 Kbytes. They provide for leaving a title-bar on the window
+- * without a border.
+- * If you don't use shaped window extension, you can either make your
+- * shaped windows undecorated, or live with a border and backdrop around
+- * all your shaped windows (oclock, xeyes)
+- *
+- * If you normally use a shaped window (xeyes or oclock), you might as
+- * well compile this extension in, since the memory cost is  minimal in
+- * this case (The shaped window shared libs will be loaded anyway). If you
+- * don't normally use a shaped window, you have to decide for yourself.
+- *
+- * Note: if it is compiled in, run time detection is used to make sure that
+- * the currently running X server supports it.  */
+ #define SHAPE 1
+-
+-/* Enables the ActiveDown button state.  This allows different button
+- * styles for pressed down buttons on active windows (also for the
+- * title-bar if EXTENDED_TITLESTYLE is enabled below).  The man page
+- * refers to this button state as "ActiveDown."  If not defined, the
+- * "ActiveUp" state is used instead.  Disabling this reduces memory
+- * usage.  */
+ #define ACTIVEDOWN_BTNS 1
+-
+-/* Enables the Inactive button state.  This allows different button
+- * styles for inactive windows (also for the title-bar if
+- * EXTENDED_TITLESTYLE is enabled below).  The man page refers to this
+- * button state as "Inactive."  If not defined, the "ActiveUp" state
+- * is used instead.  Disabling this reduces memory usage.  */
+ #define INACTIVE_BTNS 1
+-
+-/* Enables the "MiniIcon" Style option to specify a small pixmap which
+- * can be used as one of the title-bar buttons, shown in window list,
+- * utilized by modules, etc.  Requires PIXMAP_BUTTONS to be defined
+- * (see below).  */
+ #define MINI_ICONS 1
+-
+-/* Enables the vector button style.  This button type is considered
+- * "standard," so it is recommended that you leave it in.  */
+ #define VECTOR_BUTTONS 1
+-
+-/* Enables the pixmap button style.  You must have Xpm support to use
+- * color pixmaps.  See the man page button style entries for "Pixmap"
+- * and "TiledPixmap" for usage information.  */
+ #define PIXMAP_BUTTONS 1
+-
+-/* Enables the gradient button style.  See the man page button style
+- * entries for "HGradient" and "VGradient" for usage information.  */
+ #define GRADIENT_BUTTONS 1
+-
+-/* Enables stacked button styles (also for the title-bar if
+- * EXTENDED_TITLESTYLE is enabled below).  There is a slight memory
+- * penalty for each additional style. See the man page entries for
+- * AddButtonStyle and AddTitleStyle for usage information.  */
+ #define MULTISTYLE 1
+-
+-/* Enables styled title-bars (specified with the TitleStyle command in
+- * a similar fashion to the ButtonStyle command).  It also compiles in
+- * support to change the title-bar height.  */
+ #define EXTENDED_TITLESTYLE 1
+-
+-/* Enables the BorderStyle command.  Not all button styles are
+- * available.  See the man page entry for BorderStyle for usage
+- * information.  If you are also using PIXMAP_BUTTONS, you can also
+- * texture your borders with tiled pixmaps.  The BorderStyle command
+- * has Active and Inactive states, regardless of the -DACTIVEDOWN_BTNS
+- * and -DINACTIVE_BTNS defines.  */
+ #define BORDERSTYLE 1
+-
+-/* Enables tagged general decoration styles which can be assigned to
+- * windows using the UseDecor Style option, or dynamically updated
+- * with ChangeDecor.  To create and destroy "decor" definitions, see
+- * the man page entries for AddToDecor and DestroyDecor.  There is a
+- * slight memory penalty for each additionally defined decor.  */
+ #define USEDECOR 1
+-
+-/* Enables the WindowShade function.  This function "rolls" the window
+- * up so only the title-bar remains.  See the man page entry for
+- * "WindowShade" for more information.  */
+ #define WINDOWSHADE 1
+ 
+-/* Specify a type for sig_atomic_t if it's not available.  */
+-/* #undef sig_atomic_t */
+-
+-/* Define to empty if the keyword does not work.  */
+-/* #undef const */
+-
+-/* Define if you have the strftime function.  */
+-#define HAVE_STRFTIME 1
+-
+-/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
+-#define HAVE_SYS_WAIT_H 1
+-
+-/* Define as __inline if that's what the C compiler calls it.  */
+-#define inline __inline
+-
+-/* Define if on MINIX.  */
+-/* #undef _MINIX */
+-
+-/* Define to `long' if <sys/types.h> doesn't define.  */
+-/* #undef off_t */
+-
+-/* Define to `int' if <sys/types.h> doesn't define.  */
+-/* #undef pid_t */
+-
+-/* Define if the system does not provide POSIX.1 features except
+-   with this defined.  */
+-/* #undef _POSIX_1_SOURCE */
+-
+-/* Define if you need to in order for stat and other things to work.  */
+-/* #undef _POSIX_SOURCE */
+-
+-/* Define to the type of arg1 for select(). */
+-#define SELECT_TYPE_ARG1 int
+-
+-/* Define to the type of args 2, 3 and 4 for select(). */
+-#define SELECT_TYPE_ARG234 (fd_set *)
+-
+-/* Define to the type of arg5 for select(). */
+-#define SELECT_TYPE_ARG5 (struct timeval *)
+-
+-/* Define if the setvbuf function takes the buffering type as its second
+-   argument and the buffer pointer as the third, as on System V
+-   before release 3.  */
+-/* #undef SETVBUF_REVERSED */
+-
+-/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+-/* #undef size_t */
+-
+-/* Define if you have the ANSI C header files.  */
+-#define STDC_HEADERS 1
+-
+-/* Define if the X Window System is missing or not being used.  */
+-/* #undef X_DISPLAY_MISSING */
+-
+-/* Define if lex declares yytext as a char * by default, not a char[].  */
+-#define YYTEXT_POINTER 1
+-
+-/*
+-** if you would like to see lots of debug messages from fvwm, for debugging
+-** purposes, uncomment the next line
+-*/
+-/* #undef FVWM_DEBUG_MSGS */
+-
+-#ifdef FVWM_DEBUG_MSGS
+-#define DBUG(x, y) fvwm_msg(DBG, x, y)
+-#else
+-#define DBUG(x, y) /* no messages */
+-#endif
+-
+-/* Define if you have the atexit function.  */
+-#define HAVE_ATEXIT 1
+-
+-/* Define if you have the div function.  */
+-#define HAVE_DIV 1
+-
+-/* Define if you have the gethostname function.  */
+-#define HAVE_GETHOSTNAME 1
+-
+-/* Define if you have the gettimeofday function.  */
+-#define HAVE_GETTIMEOFDAY 1
+-
+-/* Define if you have the memcpy function.  */
+-#define HAVE_MEMCPY 1
+-
+-/* Define if you have the memmove function.  */
+-#define HAVE_MEMMOVE 1
+-
+-/* Define if you have the mkfifo function.  */
+-#define HAVE_MKFIFO 1
+-
+-/* Define if you have the on_exit function.  */
+-/* #undef HAVE_ON_EXIT */
+-
+-/* Define if you have the putenv function.  */
+-#define HAVE_PUTENV 1
+-
+-/* Define if you have the select function.  */
+-#define HAVE_SELECT 1
+-
+-/* Define if you have the setvbuf function.  */
+-#define HAVE_SETVBUF 1
++#define PACKAGE "fvwm"
++#define VERSION "2.2.5"
+ 
+-/* Define if you have the sigaction function.  */
++#define HAVE_FCNTL_H 1
+ #define HAVE_SIGACTION 1
+-
+-/* Define if you have the siginterrupt function.  */
+ #define HAVE_SIGINTERRUPT 1
+-
+-/* Define if you have the socket function.  */
+-#define HAVE_SOCKET 1
+-
+-/* Define if you have the strcasecmp function.  */
+-#define HAVE_STRCASECMP 1
+-
+-/* Define if you have the strchr function.  */
+-#define HAVE_STRCHR 1
+-
+-/* Define if you have the strdup function.  */
+-#define HAVE_STRDUP 1
+-
+-/* Define if you have the strerror function.  */
+-#define HAVE_STRERROR 1
+-
+-/* Define if you have the strncasecmp function.  */
+-#define HAVE_STRNCASECMP 1
+-
+-/* Define if you have the strstr function.  */
+-#define HAVE_STRSTR 1
+-
+-/* Define if you have the strtol function.  */
+-#define HAVE_STRTOL 1
+-
+-/* Define if you have the sysconf function.  */
+-#define HAVE_SYSCONF 1
+-
+-/* Define if you have the uname function.  */
+-#define HAVE_UNAME 1
+-
+-/* Define if you have the usleep function.  */
+-#define HAVE_USLEEP 1
+-
+-/* Define if you have the vfprintf function.  */
+-#define HAVE_VFPRINTF 1
+-
+-/* Define if you have the wait3 function.  */
+-/* #undef HAVE_WAIT3 */
+-
+-/* Define if you have the wait4 function.  */
+-/* #undef HAVE_WAIT4 */
+-
+-/* Define if you have the waitpid function.  */
+-#define HAVE_WAITPID 1
+-
+-/* Define if you have the <fcntl.h> header file.  */
+-#define HAVE_FCNTL_H 1
+-
+-/* Define if you have the <getopt.h> header file.  */
+-/* #undef HAVE_GETOPT_H */
+-
+-/* Define if you have the <limits.h> header file.  */
+-#define HAVE_LIMITS_H 1
+-
+-/* Define if you have the <malloc.h> header file.  */
+-/* #undef HAVE_MALLOC_H */
+-
+-/* Define if you have the <memory.h> header file.  */
+-#define HAVE_MEMORY_H 1
+-
+-/* Define if you have the <stdarg.h> header file.  */
+-#define HAVE_STDARG_H 1
+-
+-/* Define if you have the <stdlib.h> header file.  */
+-#define HAVE_STDLIB_H 1
+-
+-/* Define if you have the <string.h> header file.  */
+-#define HAVE_STRING_H 1
+-
+-/* Define if you have the <sys/select.h> header file.  */
+ #define HAVE_SYS_SELECT_H 1
++#define HAVE_SYS_WAIT_H 1
++#define HAVE_WAITPID 1
+ 
+-/* Define if you have the <sys/socket.h> header file.  */
+-#define HAVE_SYS_SOCKET_H 1
+-
+-/* Define if you have the <sys/systeminfo.h> header file.  */
+-/* #undef HAVE_SYS_SYSTEMINFO_H */
+-
+-/* Define if you have the <sys/time.h> header file.  */
+-#define HAVE_SYS_TIME_H 1
+-
+-/* Define if you have the <sys/types.h> header file.  */
+-#define HAVE_SYS_TYPES_H 1
+-
+-/* Define if you have the <unistd.h> header file.  */
+-#define HAVE_UNISTD_H 1
+-
+-/* Name of package */
+-#define PACKAGE "fvwm"
+-
+-/* Version number of package */
+-#define VERSION "2.2.5"
+-
+-#ifdef STDC_HEADERS
+ #include <stdlib.h>
+ #include <string.h>
+-#else
+-#ifdef HAVE_STRING_H
+-#include <string.h>
+-#else
+-#include <strings.h>
+-#endif
+-#ifdef HAVE_MEMORY_H
+-#include <memory.h>
+-#endif
+-#ifdef HAVE_STDLIB_H
+-#include <stdlib.h>
+-#endif
+-#ifdef HAVE_MALLOC_H
+-#include <malloc.h>
+-#endif
+-#ifndef HAVE_STRCHR
+-#define strchr(_s, _c) index((_s), (_c))
+-#define strrchr(_s, _c) rindex((_s), (_c))
+-#endif
+-#endif
+-
+-#ifndef HAVE_MEMCPY
+-#define memcpy(_d, _s, _l) bcopy((_s), (_d), (_l))
+-#endif
+-#ifndef HAVE_MEMMOVE
+-#define memmove(_d, _s, _l) bcopy((_s), (_d), (_l))
+-#endif
+-
+-#if HAVE_SYS_TYPES_H
+ #include <sys/types.h>
+-#endif
+-
+-#if HAVE_UNISTD_H
+ #include <unistd.h>
+-#endif
+ 
+ #ifndef min
+ #define min(a, b) (((a) < (b)) ? (a) : (b))
+diff --git fvwm/fvwm/Makefile fvwm/fvwm/Makefile
+index 631a24e..4c74bee 100644
+--- fvwm/fvwm/Makefile
++++ fvwm/fvwm/Makefile
+@@ -5,7 +5,7 @@
+ PROG= fvwm
+ SRCS= add_window.c bindings.c borders.c \
+ 	builtins.c colormaps.c colors.c complex.c decorations.c \
+-	events.c focus.c functions.c fvwm.c fvwmdebug.c icons.c \
++	events.c exec.c focus.c functions.c fvwm.c fvwmdebug.c icons.c \
+ 	menus.c misc.c modconf.c module.c move.c \
+ 	placement.c read.c resize.c style.c \
+ 	virtual.c windows.c
+@@ -14,12 +14,20 @@ CPPFLAGS+= -DFVWM_MODULEDIR=\"$(FVWMLIBDIR)\" \
+ 	-DFVWMRC=\".fvwmrc\" \
+ 	-DFVWM_CONFIGDIR=\"$(FVWMLIBDIR)\"
+ 
+-LDADD+= -lXpm -lXt -lICE -lSM -lXext -lX11 -lxcb -lXdmcp -lXau
++LDADD+= -lXpm -lXt -lICE -lSM -lXext -lX11 -lxcb -lXdmcp -lXau -lutil
+ 
+ fvwm.1: fvwm2.1
+ 	sed -e "s,__projectroot__,${X11BASE}," ${.CURDIR}/fvwm2.1 > fvwm.1
+ 
+ CLEANFILES= fvwm.1
+ 
++SCRIPTS= fvwm_exec
++SCRIPTSDIR= $(FVWMLIBDIR)
++
++.all: fvwm_exec
++
++fvwm_exec: fvwm_exec.c ${.CURDIR}/../config.h
++	${CC} ${CFLAGS} ${CPPFLAGS} -o fvwm_exec fvwm_exec.c -lutil
++
+ .include <bsd.prog.mk>
+ .include <bsd.xorg.mk>
+diff --git fvwm/fvwm/add_window.c fvwm/fvwm/add_window.c
+index 4d5e33f..52a1a67 100644
+--- fvwm/fvwm/add_window.c
++++ fvwm/fvwm/add_window.c
+@@ -50,8 +50,9 @@
+ #endif /* SHAPE */
+ #include "module.h"
+ 
+-/* Used to parse command line of clients for specific desk requests. */
+-/* Todo: check for multiple desks. */
++/* Parse client command line for desktop hints (-workspace N, -xrm).
++ * Only a single desk resource is checked; multiple -workspace flags
++ * are not handled. */
+ static XrmDatabase db;
+ static XrmOptionDescRec table[] = {
+     /* Want to accept "-workspace N" or -xrm "fvwm*desk:N" as options
+diff --git fvwm/fvwm/bindings.c fvwm/fvwm/bindings.c
+index f42e7fd..5bbf4e6 100644
+--- fvwm/fvwm/bindings.c
++++ fvwm/fvwm/bindings.c
+@@ -34,6 +34,16 @@ struct charstring key_modifiers[] = {{'s', ShiftMask}, {'c', ControlMask},
+ void find_context(
+     char *string, int *output, struct charstring *table, char *tline);
+ 
++static void
++RegrabAllKeys(void)
++{
++	FvwmWindow *t;
++
++	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
++		GrabKeys(t);
++	}
++}
++
+ /*
+ ** to remove a binding from the global list (probably needs more processing
+ ** for mouse binding lines though, like when context is a title bar button).
+@@ -235,7 +245,7 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 			if (!fKey || current == keysym) {
+ 				temp = Scr.AllBindings;
+ 				Scr.AllBindings =
+-				    (Binding *)safemalloc(sizeof(Binding));
++				    (Binding *)xmalloc(sizeof(Binding));
+ 				Scr.AllBindings->IsMouse = !fKey;
+ 				Scr.AllBindings->Button_Key = i;
+ 				Scr.AllBindings->key_name =
+@@ -250,6 +260,8 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 		if (mapping)
+ 			XFree(mapping);
+ 	}
++	if (fKey)
++		RegrabAllKeys();
+ 	return;
+ }
+ 
+diff --git fvwm/fvwm/builtins.c fvwm/fvwm/builtins.c
+index 0b458e9..4779273 100644
+--- fvwm/fvwm/builtins.c
++++ fvwm/fvwm/builtins.c
+@@ -331,9 +331,13 @@ Maximize(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
+ 	}
+ 
+ 	if (tmp_win->flags & MAXIMIZED) {
++		int orig_wd = tmp_win->orig_wd;
++		int orig_ht = tmp_win->orig_ht;
++
+ 		tmp_win->flags &= ~MAXIMIZED;
++		ConstrainSize(tmp_win, &orig_wd, &orig_ht, False, 0, 0);
+ 		SetupFrame(tmp_win, tmp_win->orig_x, tmp_win->orig_y,
+-		    tmp_win->orig_wd, tmp_win->orig_ht, TRUE);
++		    orig_wd, orig_ht, TRUE);
+ 		SetBorder(tmp_win, True, True, True, None);
+ 	} else {
+ 		new_width = tmp_win->frame_width;
+@@ -804,14 +808,13 @@ exec_setup(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
+ 		free(exec_shell_name);
+ 	shell_set = 1;
+ 	action = GetNextToken(action, &arg);
+-	if (arg) { /* specific shell was specified */
+-		exec_shell_name = arg;
+-	} else /* no arg, so use $SHELL -- not working??? */ {
++	if (arg) {
++		exec_shell_name = xstrdup(arg);
++	} else {
+ 		if (getenv("SHELL"))
+-			exec_shell_name = strdup(getenv("SHELL"));
++			exec_shell_name = xstrdup(getenv("SHELL"));
+ 		else
+-			/* if $SHELL not set, use default */
+-			exec_shell_name = strdup("/bin/sh");
++			exec_shell_name = xstrdup("/bin/sh");
+ 	}
+ }
+ 
+@@ -838,7 +841,7 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 		    (char *)NULL) == -1) {
+ 			fvwm_msg(ERR, "exec_function", "execl failed (%s)",
+ 			    strerror(errno));
+-			exit(100);
++			_exit(100);
+ 		}
+ 	}
+ 	free(cmd);
+@@ -1594,8 +1597,7 @@ FreeMenuStyle(MenuStyle *ms)
+ 	if (ms->look.f.hasSideColor == 1)
+ 		FreeColors(&ms->look.sideColor, 1);
+ 
+-	while (before->next != ms)
+-		/* Not too many checks, may segfaults in race conditions */
++	while (before != NULL && before->next != ms)
+ 		before = before->next;
+ 
+ 	before->next = ms->next;
+@@ -1773,7 +1775,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 		return;
+ 	}
+ 
+-	tmpms = (MenuStyle *)safemalloc(sizeof(MenuStyle));
++	tmpms = (MenuStyle *)xmalloc(sizeof(MenuStyle));
+ 	memset(tmpms, 0, sizeof(MenuStyle));
+ 	ms = FindMenuStyle(name);
+ 	if (ms != NULL) {
+@@ -1992,7 +1994,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				tmpms->look.pStdFont = &Scr.StdFont;
+ 			} else {
+ 				tmpms->look.pStdFont =
+-				    (MyFont *)safemalloc(sizeof(MyFont));
++				    (MyFont *)xmalloc(sizeof(MyFont));
+ 				tmpms->look.pStdFont->font = xfs;
+ 			}
+ 			gc_changed = True;
+@@ -2183,7 +2185,7 @@ OldMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 		    action);
+ 	} else {
+ 		len = strlen(action) + 100;
+-		buffer = (char *)safemalloc(len);
++		buffer = (char *)xmalloc(len);
+ 		snprintf(buffer, len,
+ 		    "* %s, Foreground %s, Background %s, Greyed %s, Font %s, "
+ 		    "%s",
+@@ -2326,7 +2328,7 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				return;
+ 			}
+ 			len = end - action + 1;
+-			tmp = safemalloc(len);
++			tmp = xmalloc(len);
+ 			strncpy(tmp, action, len - 1);
+ 			tmp[len - 1] = 0;
+ 			ReadButtonFace(tmp, bf, -1, True);
+@@ -2943,8 +2945,8 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
+ 
+ 			if (!(isdigit(*item))) {
+ 				s_colors =
+-				    (char **)safemalloc(sizeof(char *) * 2);
+-				perc = (int *)safemalloc(sizeof(int));
++				    (char **)xmalloc(sizeof(char *) * 2);
++				perc = (int *)xmalloc(sizeof(int));
+ 				nsegs = 1;
+ 				s_colors[0] = item;
+ 				s = GetNextToken(s, &s_colors[1]);
+@@ -2956,9 +2958,9 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
+ 					nsegs = 1;
+ 				if (nsegs > 128)
+ 					nsegs = 128;
+-				s_colors = (char **)safemalloc(
++				s_colors = (char **)xmalloc(
+ 				    sizeof(char *) * (nsegs + 1));
+-				perc = (int *)safemalloc(sizeof(int) * nsegs);
++				perc = (int *)xmalloc(sizeof(int) * nsegs);
+ 				for (i = 0; i <= nsegs; ++i) {
+ 					s = GetNextToken(s, &s_colors[i]);
+ 					if (i < nsegs) {
+@@ -3212,7 +3214,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
+ 			return NULL;
+ 		}
+ 		len = end - s + 1;
+-		spec = safemalloc(len);
++		spec = xmalloc(len);
+ 		strncpy(spec, s, len - 1);
+ 		spec[len - 1] = 0;
+ 	} else
+@@ -3245,14 +3247,14 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
+ 			while (tail->next)
+ 				tail = tail->next;
+ 			tail->next =
+-			    (ButtonFace *)safemalloc(sizeof(ButtonFace));
++			    (ButtonFace *)xmalloc(sizeof(ButtonFace));
+ 			*tail->next = tmpbf;
+ 			if (all)
+ 				for (i = 1; i < MaxButtonState; ++i) {
+ 					tail = &tb->state[i];
+ 					while (tail->next)
+ 						tail = tail->next;
+-					tail->next = (ButtonFace *)safemalloc(
++					tail->next = (ButtonFace *)xmalloc(
+ 					    sizeof(ButtonFace));
+ 					tail->next->style = SimpleButton;
+ 					tail->next->next = NULL;
+@@ -3385,7 +3387,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
+ 		}
+ 
+ 		if (!(isdigit(*item))) {
+-			s_colors = (char **)safemalloc(sizeof(char *) * 2);
++			s_colors = (char **)xmalloc(sizeof(char *) * 2);
+ 			nsegs = 1;
+ 			s_colors[0] = item;
+ 			s = GetNextToken(s, &s_colors[1]);
+@@ -3393,8 +3395,8 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
+ 				if (verbose)
+ 					fvwm_msg(ERR, "ReadMenuFace",
+ 					    "incomplete gradient style");
+-				free(s_colors);
+ 				free(item);
++				free(s_colors);
+ 				free(style);
+ 				return False;
+ 			}
+@@ -3407,7 +3409,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
+ 			if (nsegs > 128)
+ 				nsegs = 128;
+ 			s_colors =
+-			    (char **)safemalloc(sizeof(char *) * (nsegs + 1));
++			    (char **)xmalloc(sizeof(char *) * (nsegs + 1));
+ 			for (i = 0; i <= nsegs; ++i) {
+ 				s = GetNextToken(s, &s_colors[i]);
+ 				if (i < nsegs) {
+@@ -3425,7 +3427,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
+ 		if (sum != 100) {
+ 			if (verbose)
+ 				fvwm_msg(ERR, "ReadMenuFace",
+-				    "multi gradient lenghts must sum to 100");
++				    "multi gradient lengths must sum to 100");
+ 			for (i = 0; i <= nsegs; ++i)
+ 				if (s_colors[i])
+ 					free(s_colors[i]);
+@@ -3662,7 +3664,7 @@ add_item_to_decor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
+ 				break;
+ 			}
+ 	if (!found) { /* then make a new one */
+-		found = (FvwmDecor *)safemalloc(sizeof(FvwmDecor));
++		found = (FvwmDecor *)xmalloc(sizeof(FvwmDecor));
+ 		InitFvwmDecor(found);
+ 		found->tag = item; /* tag it */
+ 		/* add it to list */
+@@ -4037,9 +4039,11 @@ SetEnv(XEvent *eventp, Window junk, FvwmWindow *tmp_win, unsigned long context,
+ 	}
+ 
+ 	len = strlen(szVar) + strlen(szValue) + 2;
+-	szPutenv = safemalloc(len);
++	szPutenv = xmalloc(len);
+ 	snprintf(szPutenv, len, "%s=%s", szVar, szValue);
+-	putenv(szPutenv);
++	if (setenv(szVar, szValue, 1) == -1)
++		fvwm_msg(WARN, "PutEnvironment", "setenv failed");
++	free(szPutenv);
+ 	free(szVar);
+ 	free(szValue);
+ }
+@@ -4086,7 +4090,7 @@ CreateFlagString(char *string, char **restptr)
+ 		/* We must allocate a new string because we null terminate the
+ 		 * string between the [ ] or ( ) characters.
+ 		 */
+-		retval = safemalloc(length + 1);
++		retval = xmalloc(length + 1);
+ 		strncpy(retval, start, length);
+ 		retval[length] = 0;
+ 
+diff --git fvwm/fvwm/colormaps.c fvwm/fvwm/colormaps.c
+index 6cbbe55..902fa7b 100644
+--- fvwm/fvwm/colormaps.c
++++ fvwm/fvwm/colormaps.c
+@@ -145,12 +145,7 @@ InstallWindowColormaps(FvwmWindow *tmp)
+ 			 * colourmaps. Despite what the server says, these
+ 			 * colourmaps are always installed.
+ 			 */
+-			if (last_cmap != attributes.colormap
+-#if defined(sun) && defined(TRUECOLOR_ALWAYS_INSTALLED)
+-			    && !(attributes.depth == 24 &&
+-			    attributes.visual->class == TrueColor)
+-#endif
+-			    ) {
++			if (last_cmap != attributes.colormap) {
+ 				last_cmap = attributes.colormap;
+ 				XInstallColormap(dpy, attributes.colormap);
+ 			}
+@@ -158,12 +153,7 @@ InstallWindowColormaps(FvwmWindow *tmp)
+ 	}
+ 
+ 	if (!ThisWinInstalled) {
+-		if (last_cmap != tmp->attr.colormap
+-#if defined(sun) && defined(TRUECOLOR_ALWAYS_INSTALLED)
+-		    && !(tmp->attr.depth == 24 &&
+-		    tmp->attr.visual->class == TrueColor)
+-#endif
+-		    ) {
++		if (last_cmap != tmp->attr.colormap) {
+ 			last_cmap = tmp->attr.colormap;
+ 			XInstallColormap(dpy, tmp->attr.colormap);
+ 		}
+diff --git fvwm/fvwm/colors.c fvwm/fvwm/colors.c
+index 96d6d4a..defd0f1 100644
+--- fvwm/fvwm/colors.c
++++ fvwm/fvwm/colors.c
+@@ -104,7 +104,7 @@ FreeColors(Pixel *pixels, int n)
+ Pixel *
+ AllocNonlinearGradient(char *s_colors[], int clen[], int nsegs, int npixels)
+ {
+-	Pixel *pixels = (Pixel *)safemalloc(sizeof(Pixel) * npixels);
++	Pixel *pixels = (Pixel *)xmalloc(sizeof(Pixel) * npixels);
+ 	int i = 0, curpixel = 0, perc = 0;
+ 	if (nsegs < 1) {
+ 		fvwm_msg(ERR, "AllocNonlinearGradient",
+@@ -170,7 +170,7 @@ AllocLinearGradient(char *s_from, char *s_to, int npixels)
+ 	dg = (to.green - from.green) / npixels;
+ 	b = from.blue;
+ 	db = (to.blue - from.blue) / npixels;
+-	pixels = (Pixel *)safemalloc(sizeof(Pixel) * npixels);
++	pixels = (Pixel *)xmalloc(sizeof(Pixel) * npixels);
+ 	c.flags = DoRed | DoGreen | DoBlue;
+ 	for (; i < npixels; ++i) {
+ 		if (!XAllocColor(dpy, Scr.FvwmRoot.attr.colormap, &c))
+diff --git fvwm/fvwm/complex.c fvwm/fvwm/complex.c
+index 414f958..fa3c61b 100644
+--- fvwm/fvwm/complex.c
++++ fvwm/fvwm/complex.c
+@@ -228,7 +228,7 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
+ 	}
+ 
+ 	outlen = l2 + 1;
+-	out = safemalloc(outlen);
++	out = xmalloc(outlen);
+ 	i = 0;
+ 	j = 0;
+ 	while (i < l) {
+diff --git fvwm/fvwm/events.c fvwm/fvwm/events.c
+index 5f647a6..2355151 100644
+--- fvwm/fvwm/events.c
++++ fvwm/fvwm/events.c
+@@ -37,8 +37,6 @@
+ 
+ #include "config.h"
+ 
+-#if HAVE_SYS_BSDTYPES_H
+-#include <sys/bsdtypes.h>
+ #endif
+ 
+ #include <sys/time.h>
+@@ -1002,14 +1000,12 @@ HandleButtonPress()
+ 	      Mod3Mask | Mod4Mask | Mod5Mask)) ==
+ 	     0)) {
+ 		SetFocus(Tmp_win->w, Tmp_win, 1);
+-		/* #ifdef CLICKY_MODE_1 */
++		/* CLICKY_MODE_1: raise window on click */
+ 		if (Scr.ClickToFocusRaises ||
+ 		    ((Event.xany.window != Tmp_win->w) &&
+ 		     (Event.xbutton.subwindow != Tmp_win->w) &&
+ 		     (Event.xany.window != Tmp_win->Parent) &&
+-		     (Event.xbutton.subwindow != Tmp_win->Parent)))
+-		/* #endif */
+-		      {
++		     (Event.xbutton.subwindow != Tmp_win->Parent))) {
+ 			RaiseWindow(Tmp_win);
+ 		}
+ 
+diff --git fvwm/fvwm/fvwm.c fvwm/fvwm/fvwm.c
+index 4f6619b..a762207 100644
+--- fvwm/fvwm/fvwm.c
++++ fvwm/fvwm/fvwm.c
+@@ -24,6 +24,7 @@
+ #include <unistd.h>
+ 
+ #include "config.h"
++#include "fvwm_sandbox.h"
+ #include "menus.h"
+ #include "misc.h"
+ #include "module.h"
+@@ -34,11 +35,6 @@
+ #include <X11/extensions/shape.h>
+ #endif /* SHAPE */
+ 
+-#if defined(HAVE_SYS_SYSTEMINFO_H)
+-/* Solaris has sysinfo instead of gethostname.  */
+-#include <sys/systeminfo.h>
+-#endif
+-
+ #define MAXHOSTNAME 255
+ 
+ #ifndef lint
+@@ -311,7 +307,7 @@ main(int argc, char **argv)
+ 	 */
+ 	len = strlen(XDisplayString(dpy));
+ 	buflen = len + 10;
+-	display_string = safemalloc(buflen);
++	display_string = xmalloc(buflen);
+ 	snprintf(display_string, buflen, "DISPLAY=%s", XDisplayString(dpy));
+ 	putenv(display_string);
+ 	/* Add a HOSTDISPLAY environment variable, which is the same as
+@@ -323,7 +319,7 @@ main(int argc, char **argv)
+ 		char client[MAXHOSTNAME], *rdisplay_string;
+ 		gethostname(client, MAXHOSTNAME);
+ 		buflen = len + 14 + strlen(client);
+-		rdisplay_string = safemalloc(buflen);
++		rdisplay_string = xmalloc(buflen);
+ 		snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s:%s", client,
+ 		    &display_string[9]);
+ 		putenv(rdisplay_string);
+@@ -331,14 +327,14 @@ main(int argc, char **argv)
+ 		char client[MAXHOSTNAME], *rdisplay_string;
+ 		gethostname(client, MAXHOSTNAME);
+ 		buflen = len + 14 + strlen(client);
+-		rdisplay_string = safemalloc(buflen);
++		rdisplay_string = xmalloc(buflen);
+ 		snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s:%s", client,
+ 		    &display_string[13]);
+ 		putenv(rdisplay_string);
+ 	} else {
+ 		char *rdisplay_string;
+ 		buflen = len + 14;
+-		rdisplay_string = safemalloc(buflen);
++		rdisplay_string = xmalloc(buflen);
+ 		snprintf(rdisplay_string, buflen, "HOSTDISPLAY=%s",
+ 		    XDisplayString(dpy));
+ 		putenv(rdisplay_string);
+@@ -466,6 +462,15 @@ main(int argc, char **argv)
+ 	fFvwmInStartup = False;
+ 	DBUG("main", "Entering HandleEvents loop...");
+ 
++	if (unveil(FVWMLIBDIR, "rx") == -1)
++		err(1, "unveil %s", FVWMLIBDIR);
++	if (unveil("/etc/X11/fvwm", "r") == -1)
++		err(1, "unveil /etc/X11/fvwm");
++	if (unveil("/tmp", "rwc") == -1)
++		err(1, "unveil /tmp");
++	if (unveil(NULL, NULL) == -1)
++		err(1, "unveil");
++
+ 	if (pledge("stdio rpath proc exec", NULL) == -1)
+ 		err(1, "pledge");
+ 
+@@ -1421,26 +1426,27 @@ Done(int restart, char *command)
+ 
+ 		{
+ 			char *my_argv[10];
+-			int i, done, j;
+-
+-			i = 0;
+-			j = 0;
+-			done = 0;
+-			while ((g_argv[j] != NULL) && (i < 8)) {
+-				if (strcmp(g_argv[j], "-s") != 0) {
+-					my_argv[i] = g_argv[j];
+-					i++;
+-					j++;
+-				} else
+-					j++;
+-			}
+-			if (strstr(command, "fvwm") != NULL)
++			int i, j;
++
++			if (strstr(command, "fvwm") != NULL) {
++				i = 0;
++				j = 0;
++				while ((g_argv[j] != NULL) && (i < 8)) {
++					if (strcmp(g_argv[j], "-s") != 0) {
++						my_argv[i] = g_argv[j];
++						i++;
++						j++;
++					} else
++						j++;
++				}
+ 				my_argv[i++] = "-s";
+-			while (i < 10)
+-				my_argv[i++] = NULL;
++				while (i < 10)
++					my_argv[i++] = NULL;
++			} else {
++				my_argv[0] = command;
++				my_argv[1] = NULL;
++			}
+ 
+-			/* really need to destroy all windows, explicitly,
+-			 * not sleep, but this is adequate for now */
+ 			sleep(1);
+ 			ReapChildren();
+ 			execvp(command, my_argv);
+diff --git fvwm/fvwm/fvwm2.1 fvwm/fvwm/fvwm2.1
+index db7a0fd..87893b0 100644
+--- fvwm/fvwm/fvwm2.1
++++ fvwm/fvwm/fvwm2.1
+@@ -1,2674 +1,369 @@
+-.\" $OpenBSD: fvwm2.1,v 1.2 2019/10/19 16:39:49 matthieu Exp $
+-.\" t
+-.\" @(#)fvwm2.1 8/11/1998
+-.de EX		\"Begin example
+-.ne 5
+-.if n .sp 1
+-.if t .sp .5
+-.nf
+-.in +.5i
+-..
+-.de EE
+-.fi
+-.in -.5i
+-.if n .sp 1
+-.if t .sp .5
+-..
+-.ta .3i .6i .9i 1.2i 1.5i 1.8i
+-.TH FVWM 1 "August 11, 1998" "FVWM 2.xx" "FVWM Manual"
+-.UC
+-.SH NAME
+-fvwm \- F(?) Virtual Window Manager (version 2.xx) for X11
+-.SH SYNOPSIS
+-\fBfvwm\fP [ \fIoptions\fP ]
+-.SH DESCRIPTION
+-\fIFvwm\fP is a window manager for X11.  It is a derivative of
+-\fItwm\fP, redesigned to minimize memory consumption, provide a 3-D
+-look to window frames, and provide a simple virtual desktop.  Version
+-2.xx uses only slightly more memory than 1.xx, mostly due to some
+-global options being able to be window specific now.
+-.PP
+-Fvwm provides both a large virtual desktop and multiple disjoint
+-desktops which can be used separately or together.  The virtual desktop
+-allows you to pretend that your video screen is really quite large,
+-and you can scroll around within the desktop.  The multiple disjoint
+-desktops allow you to pretend that you really have several screens to
+-work at, but each screen is completely unrelated to the others.
+-.PP
+-Fvwm provides keyboard accelerators which allow you to perform most
+-window-manager functions, including moving and resizing windows, and
+-operating the window-manager's menus, using keyboard shortcuts.
+-.PP
+-Fvwm has also blurred the distinction between configuration commands
+-and built-in commands that most window-managers make.  Configuration
+-commands typically set fonts, colors, menu contents, key and mouse
+-function bindings, while built-in commands typically do things like
+-raise and lower windows.  Fvwm makes no such distinction, and allows,
+-to the extent that is practical, anything to be changed at any time.
+-.PP
+-Other noteworthy differences between Fvwm and other X11 window managers
+-are the introduction of the SloppyFocus and per-window focus methods.
+-SloppyFocus is focus-follows-mouse, but focus is not removed from
+-windows when the mouse leaves a window and enters the root window.
+-When sloppy focus is used as the default focus style, it is nice to
+-make windows in which you do not typically type into (xmag,
+-xload, xclock, xbiff, etc) click-to-focus, so that your terminal
+-window doesn't lose focus unnecessarily.
+-.SH COPYRIGHTS
+-Since \fIfvwm\fP is derived from \fItwm\fP code it shares \fItwm\fP's
+-copyrights.  Since nearly every line of twm code has been changed, the
+-twm copyright has been removed from most of the individual code files.
+-I do still recognize the influence of twm code in the overall package,
+-so fvwm's copyright is still considered to be the same as twm's.
+-.PP
+-Please consult the COPYING file that has come with your distribution
+-for details.
+-.SH ANATOMY OF A WINDOW
+-\fIFvwm\fP puts a decorative border around most windows.  This border
+-consists of a bar on each side and a small "L" shaped section on each
+-corner.  There is an additional top bar called the title bar which is
+-used to display the name of the window.  In addition, there are up to
+-10 title-bar buttons.  The top, side, and bottom bars are collectively
+-known as the side-bars.  The corner pieces are called the frame.
+-.PP
+-Unless the standard defaults files are modified, pressing mouse button
+-1 in the title or side-bars will begin a move operation on the
+-window.  Pressing button 1 in the corner frame pieces will begin a
+-resize operation.  Pressing button 2 anywhere in the border brings up
+-an extensive list of window operations.
+-.PP
+-Up to ten title-bar buttons may exist.  Their use is completely user
+-definable.  The default configuration has a title-bar button on each
+-side of the title-bar.  The one on the left is used to bring up a list
+-of window options, regardless of which mouse button is used.  The one
+-on the right is used to iconify the window.  The number of title-bar
+-buttons used depends on which ones have mouse actions bound to
+-them.  See the section on the "Mouse" configuration parameter below.
+-.SH THE VIRTUAL DESKTOP
+-\fIFvwm\fP provides multiple virtual desktops for users who wish to
+-use them.  The screen is a viewport onto a desktop which may be larger
+-than the screen.  Several distinct desktops can be accessed (concept:
+-one desktop for each project, or one desktop for each application,
+-when view applications are distinct).  Since each desktop can be
+-larger than the physical screen, divided into m by n pages which are
+-each the size of the physical screen, windows which are larger than
+-the screen or large groups of related windows can easily be viewed.
+-.PP
+-The (m by n) size (i.e. number of pages) of the virtual desktops can be
+-changed any time, by using the DeskTopSize built-in command.  All
+-virtual desktops must be (are) the same size.  The total number of
+-distinct desktops need not be specified, but is limited to
+-approximately 4 billion total.  All windows on a range of desktops can
+-be viewed in the Pager, a miniature view of the desktops.  The pager
+-is an accessory program, called a module, which is not essential for
+-the window manager to operate.  Windows may also be listed, along with
+-their geometries, in a window list, accessible as a pop-up menu, or as
+-a separate window, called the FvwmWinList (another module).
+-.PP
+-"Sticky" windows are windows which transcend the virtual desktop by
+-"Sticking to the screen's glass."  They always stay put on the screen.
+-This is convenient for things like clocks and xbiff's, so you only need
+-to run one such gadget and it always stays with you.  Icons can also be
+-made to stick to the glass, if desired.
+-.PP
+-Window geometries are specified relative to the current viewport.  That
+-is:
+-.EX
+-xterm -geometry +0+0
+-.EE
+-will always show up in the upper-left hand
+-corner of the visible portion of the screen.  It is permissible to
+-specify geometries which place windows on the virtual desktop, but off
+-the screen.  For example, if the visible screen is 1000 by 1000 pixels,
+-and the desktop size is 3x3, and the current viewport is at the upper
+-left hand corner of the desktop, then invoking:
+-.EX
+-xterm -geometry +1000+1000
+-.EE
+-will place the window just off of the lower right hand corner of the
+-screen.  It can be found by moving the mouse to the lower right hand
+-corner of the screen and waiting for it to scroll into view.
+-.PP
+-A geometry specified as something like:
+-.EX
+-xterm -geometry -5-5
+-.EE
+-will
+-generally place the window's lower right hand corner 5 pixels from the
+-lower right corner of the visible portion of the screen. Not all
+-applications support window geometries with negative offsets. Some will
+-place the window's upper right hand corner 5 pixels above and to the left
+-of the upper left hand corner of the screen; others may do just plain
+-bizarre things.
+-.PP
+-There are several ways to cause a window to map onto a desktop or page
+-other than the currently active one. The geometry technique mentioned above
+-(specifying x,y coordinates larger than the physical screen size), however,
+-suffers from the limitation of being interpreted relative to the current
+-viewport: the window will not consistently appear on a specific page, unless
+-you always invoke the application from the same page.
+-.PP
+-A better way to place windows on a different page or desk from the
+-currently mapped viewport is to use the StartsOnPage style specification
+-(the successor to the older StartsOnDesk style) in the .fvwmrc configuration
+-file. The placement is consistent: it does not depend on your current location
+-on the virtual desktop.
+-.PP
+-Some applications that understand standard Xt command line arguments
+-and X resources, like xterm and xfontsel, allow the user to specify
+-the start-up desk or page on the command line:
+-.EX
+-xterm -xrm "*Desk:1"
+-.EE
+-will start an xterm on desk number 1;
+-.EX
+-xterm -xrm "*Page:3 2 1"
+-.EE
+-will start an xterm two pages to the right and one down from the upper
+-left hand page of desk number 3. Not all applications understand the use
+-of these options, however.
+-.PP
+-You could achieve the same results with the following lines in your
+-\fB.Xdefaults\fP file:
+-.EX
+-XTerm*Desk: 1
+-.EE
+-or
+-.EX
+-XTerm*Page: 3 2 1
+-.EE
+-.SH INITIALIZATION
+-During initialization, \fIfvwm\fP will search for a configuration file
+-which describes key and button bindings, and a few other things.  The
+-format of these files will be described later.  First, \fIfvwm\fP will
+-search for a file named .fvwmrc in the user's home directory, then in
+-${sysconfdir} (typically __projectroot__/lib/X11/fvwm).
+-Failing that, it will look for system.fvwmrc in ${sysconfdir} for
+-system-wide defaults.  If that file is not found, \fIfvwm\fP will be
+-basically useless.
+-.PP
+-\fIFvwm\fP will set two environment variables which will be inherited
+-by its children.  These are $DISPLAY which describes the display on
+-which \fIfvwm\fP is running.  $DISPLAY may be unix:0.0 or :0.0, which
+-doesn't work too well when passed through rsh to another machine, so
+-$HOSTDISPLAY will also be set and will use a network-ready description
+-of the display.  $HOSTDISPLAY will always use the TCP/IP transport
+-protocol (even for a local connection) so $DISPLAY should be used for
+-local connections, as it may use Unix-domain sockets, which are
+-faster.
+-.PP
+-Fvwm has three special functions for initialization:
+-StartFunction, which is executed on startups and restarts; InitFunction
+-and RestartFunction, which are executed during Initialization and Restarts
+-(respectively) just after StartFunction.  These may be customized
+-in a user's rc file via the AddToFunc facility (described later) to start up
+-modules, xterms, or whatever you'd like to have started by fvwm.
+-.PP
+-\fIFvwm\fP also has a special exit function: ExitFunction, executed
+-when exiting or restarting before actually quitting or anything else.
+-It could be used to explicitly kill modules, etc.
+-.SH COMPILATION OPTIONS
+-\fIFvwm\fP has a number of compile-time options to reduce memory usage
+-by limiting the use of certain features.  If you
+-have trouble using a certain command or feature, check to see if
+-support for it was included at compile time.  Optional features are
+-described in the config.h file.
+-.SH ICONS
+-The basic \fIFvwm\fP configuration uses monochrome bitmap icons,
+-similar to \fItwm\fP.  If XPM extensions are compiled in, then color
+-icons similar to ctwm, MS-Windows, or the Macintosh icons can be used.
+-In order to use these options you will need the XPM package, as
+-described in the INSTALL.fvwm file.
+-.PP
+-If both the SHAPE and XPM options are compiled in you will get shaped
+-color icons, which are very spiffy.
+-.SH MODULES
+-A module is a separate program which runs as a separate Unix process
+-but transmits commands to \fIfvwm\fP to execute.  Users can write
+-their own modules to do any weird or bizarre manipulations without
+-bloating or affecting the integrity of \fIfvwm\fP itself.
+-.PP
+-Modules MUST be spawned by \fIfvwm\fP so that it can set up two pipes for
+-\fIfvwm\fP and the module to communicate with.  The pipes will already be
+-open for the module when it starts and the file descriptors for the
+-pipes are provided as command line arguments.
+-.PP
+-Modules can be spawned during \fIfvwm\fP at any time during the X
+-session by use of the Module built-in command.  Modules can exist for
+-the duration of the X session, or can perform a single task and exit.
+-If the module is still active when \fIfvwm\fP is told to quit, then
+-\fIfvwm\fP will close the communication pipes and wait to receive a
+-SIGCHLD from the module, indicating that it has detected the pipe
+-closure and has exited.  If modules fail to detect the pipe closure
+-\fIfvwm\fP will exit after approximately 30 seconds anyway.  The
+-number of simultaneously executing modules is limited by the operating
+-system's maximum number of simultaneously open files, usually between
+-60 and 256.
+-.PP
+-Modules simply transmit text commands to the \fIfvwm\fP built-in
+-command engine.  Text commands are formatted just as in the case of a
+-mouse binding in the .fvwmrc setup file.  Certain auxiliary
+-information is also transmitted, as in the sample module FvwmButtons.
+-The FvwmButtons module is documented in its own man page.
+-.SH ICCCM COMPLIANCE
+-\fIFvwm\fP attempts to be ICCCM 1.1 compliant.  In addition, ICCCM
+-states that it should be possible for applications to receive ANY
+-keystroke, which is not consistent with the keyboard shortcut approach
+-used in \fIfvwm\fP and most other window managers. In particular you
+-cannot have the same keyboard shortcuts working with your fvwm2 and
+-another fvwm2 running within Xnest (a nested X server). The same problem
+-exists with mouse bindings.
+-.PP
+-The ICCCM states that windows possessing the property
+-.EX
+-WM_HINTS(WM_HINTS):
+-    Client accepts input or input focus: False
+-.EE
+-should not be given the keyboard input focus by the window manager.
+-These windows can take the input focus by themselves, however.  A
+-number of applications set this property, and yet expect the
+-window-manager to give them the keyboard focus anyway, so fvwm
+-provides a window-style, "Lenience", which will allow fvwm to overlook
+-this ICCCM rule.
+-.SH M4 PREPROCESSING
+-M4 pre-processing is handled by a module in fvwm-2.0.  To get more
+-details, try man FvwmM4.  In short, if you want fvwm to parse your
+-files with m4, then replace the word "Read" with "FvwmM4" in
+-your .fvwmrc file (if it appears at all), and start fvwm with the
+-command
+-.EX
+-fvwm -cmd "FvwmM4 .fvwmrc"
+-.EE
+-.SH CPP PREPROCESSING
+-Cpp is the C-language pre-processor.  fvwm-2.0 offers cpp processing
+-which mirrors the m4 pre-processing.  To find out about it, re-read
+-the M4 section above, but replace "m4" with "cpp".
+-.SH AUTO-RAISE
+-Windows can be automatically raised when it receives focus, or some
+-number of milliseconds after it receives focus, by using the
+-auto-raise module, FvwmAuto.
+-.SH OPTIONS
+-These are the command line options that are recognized by \fIfvwm\fP:
+-.IP "\fB-blackout\fP"
+-The screen is blacked out during window recaptures and startup. This option
+-is provided for backwards compatibility only.
+-.IP "\fB-cmd\fP \fIconfig_command\fP"
+-Causes \fIfvwm\fP to use \fIconfig_command\fP instead of "Read .fvwmrc"
+-as its initialization command.
+-(Note that up to 10 \fB-f\fP and \fB-cmd\fP parameters can be given,
+-and they are executed in the order specified.)
+-.IP "\fB-d\fP \fIdisplayname\fP"
+-Manage the display called "displayname" instead of the name obtained from
+-the environment variable $DISPLAY.
+-.IP "\fB-debug\fP"
+-Puts X transactions in synchronous mode, which dramatically slows things
+-down, but guarantees that \fIfvwm\fP's internal error messages are correct.
+-Also causes \fIfvwm\fP to output debug messages while running.
+-.IP "\fB-f\fP \fIconfig_file\fP"
+-Causes \fIfvwm\fP to Read \fIconfig_file\fP instead of ".fvwmrc"
+-as its initialization file.  This is equivalent to
+-\fB-cmd\fP "Read \fIconfig_file\fP".
+-.IP "\fB-h\fP"
+-A short usage description is printed.
+-.IP "\fB-s\fP"
+-On a multi-screen display, run \fIfvwm\fP only on the screen named in
+-the $DISPLAY environment variable or provided through the -d
+-option. Normally, \fIfvwm\fP will attempt to start up on all screens
+-of a multi-screen display.
+-.IP "\fB-version\fP"
+-Print the version of \fIfvwm\fP to stderr.
+-.SH CONFIGURATION FILES
+-The configuration file is used to describe mouse and button bindings,
+-colors, the virtual display size, and related items.  The
+-initialization configuration file is typically called ".fvwmrc".  By
+-using the "Read" built-in, it is easy to read in new configuration
+-files as you go.
+-.PP
+-Lines beginning with '#' will be ignored by \fIfvwm\fP.  Lines
+-starting with '*' are expected to contain module configuration
+-commands (rather than configuration commands for \fIfvwm\fP itself).
+-.PP
+-Fvwm makes no distinction between configuration commands and built-in
+-commands, so anything mentioned in the built-in commands section  can
+-be placed on a line by itself for fvwm to execute as it reads the
+-configuration file, or it can be placed as an executable command in a
+-menu or bound to a mouse button or a keyboard key.  It is left as an
+-exercise for the user to decide which function make sense for
+-initialization and which ones make sense for run-time.
+-.SH BUILT IN FUNCTIONS
+-\fIFvwm\fP supports a set of built-in functions which can be bound to
+-keyboard or mouse buttons.  If fvwm expects to find a built-in function
+-in a command, but fails, it will check to see if the specified command
+-should have been "Function (rest of command)" or "Module (rest of
+-command)".  This allows complex functions or modules to be invoked in a
+-manner which is fairly transparent to the configuration file.
+-.PP
+-Example: the .fvwmrc file contains the line "HelpMe".  Fvwm will look
+-for a built-in command called "HelpMe", and will fail. Next it will
+-look for a user-defined complex function called "HelpMe".  If no such
+-user defined function exists, Fvwm will try to execute a module called
+-"HelpMe".
+-.PP
+-In previous versions of fvwm, quoting was critical and irrational in
+-the .fvwmrc file.  As of fvwm-2, most of this has been cleared up.
+-Quotes are required only when needed to make fvwm consider two or more
+-words to be a single argument.  Unnecessary quoting is allowed.  If you
+-want a quote character in your text, you must escape it by using the
+-backslash character.  For example, if you have a pop-up menu called
+-Window-Ops, then you don't need quotes: Popup Window-Ops, but if you
+-replace the dash with a space, then you need quotes: Popup "Window
+-Ops".
+-.IP "AddButtonStyle \fIbutton\fP"
+-Accepts optional arguments [\fIstate\fP], [\fIstyle\fP],
+-and [-- \fI[!]flag ...\fP].
+-Adds a button style to \fIbutton\fP.  \fIbutton\fP can be a button
+-number, or one of "All," "Left," or "Right."  \fIstate\fP can be
+-"ActiveUp," "ActiveDown" or "Inactive."  If \fIstate\fP is omitted,
+-then the style is added to every state.  If the button style and flags
+-are enclosed in parentheses, then multiple state definitions can be
+-placed on a single line.  Flags for additional button styles cannot be
+-changed after definition.
+-.PP
+-Buttons are drawn in the order of definition, beginning with the most
+-recent ButtonStyle, followed by those added with AddButtonStyle.  To
+-clear the button style stack, change style flags, or for descriptions
+-of available styles and flags, see the ButtonStyle command.  Examples:
+-.EX
+-ButtonStyle 1 Pixmap led.xpm -- Top Left
+-ButtonStyle 1 ActiveDown HGradient 8 grey \\
+-  black
+-ButtonStyle All --  UseTitleStyle
+-AddButtonStyle 1 ActiveUp (Pixmap a.xpm)  \\
+-  ActiveDown (Pixmap b.xpm -- Top)
+-AddButtonStyle 1 Vector 4 50x30@1 70x70@0 \\
+-  30x70@0 50x30@1
+-.EE
+-Initially for this example all button states are set to a pixmap.  The
+-second line replaces the ActiveDown state with a gradient (it
+-overrides the pixmap assigned to it in the line before, which assigned
+-the same style to every state).  Then, the UseTitleStyle flag is set
+-for all buttons, which causes \fIfvwm\fP to draw any styles set with
+-TitleStyle before drawing the buttons.  Finally, AddButtonStyle is
+-used to place additional pixmaps for both ActiveUp and ActiveDown
+-states and a Vector button style is drawn on top of all state.
+-.IP "AddTitleStyle [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
+-Adds a title style to the title bar.  \fIstate\fP should be one of
+-"ActiveUp," "ActiveDown," or "Inactive."  If \fIstate\fP is omitted,
+-then the style is added to every state.  If the style and flags are
+-enclosed in parentheses, then multiple state definitions can be placed
+-on a single line.  This command is quite similar to the AddButtonStyle
+-command (see above).
+-.PP
+-Title bars are drawn in the order of definition, beginning with the
+-most recent TitleStyle, followed by those added with AddTitleStyle.
+-To clear the title style stack, change style flags, or for the
+-descriptions of available styles and flags, see the TitleStyle and
+-ButtonStyle commands.
+-.IP "AddToDecor \fIdecor\fP"
+-Add or divert commands to the decor named \fIdecor\fP.  A decor is a
+-name given to the set of commands which affect button styles,
+-title-bar styles, border styles, hilight colors, and window fonts.  If
+-\fIdecor\fP does not exist it is created; otherwise the existing
+-\fIdecor\fP is modified.
+-.PP
+-Created decors start out exactly like the default fvwm decor without
+-any style definitions.  A given decor may be applied to a set of
+-windows with the UseDecor option of the Style command.  Modifying an
+-existing decor will affect windows which are currently assigned to it.
+-.PP
+-AddToDecor is similar in usage to the AddToMenu and AddToFunc
+-commands, except that menus and functions are replaced by ButtonStyle,
+-AddButtonStyle, TitleStyle, AddTitleStyle, BorderStyle, HilightColor
+-and WindowFont commands.  Decors created with AddToDecor can be
+-manipulated with ChangeDecor, DestroyDecor, UpdateDecor, and the
+-UseDecor Style option.
+-.PP
+-The following example creates a decor and style, both named
+-"flatness."  Despite having the same name, they are distinct entities:
+-.EX
+-AddToDecor flatness
+- + ButtonStyle All ActiveUp (-- flat) \\
+-   Inactive (-- flat)
+- + TitleStyle -- flat
+- + BorderStyle -- HiddenHandles NoInset
+- + HilightColor white navy
+-Style "flatness" UseDecor flatness, \\
+-  Color white/grey40,HandleWidth 4
+-
+-Style "xterm" UseStyle flatness
+-.EE
+-An existing window's decor may be reassigned with ChangeDecor, or a
+-Style command followed by a Recapture.  The decorations of all windows
+-or of a specific decor can be updated with UpdateDecor (useful after
+-decorations are modified; changing Style options requires a Recapture
+-instead).  A decor can be destroyed with DestroyDecor.
+-.IP "AddToFunc [ \fIname\fP [ \fItrigger\fP \fIaction\fP] ]"
+-Begins or add to a function definition.  Here's an example:
+-.EX
+-AddToFunc Move-or-Raise "I" Raise
+- + "M" Move
+- + "D" Lower
+-.EE
+-The function name is Move-or-Raise, and could be invoked from a menu
+-or a mouse binding or key binding:
+-.EX
+-Mouse 1 TS A Move-or-Raise
+-.EE
+-The quoted portion of the function tells what kind of action will
+-trigger the command which follows it.  "I" stands for Immediate, and is
+-executed as soon as the function is invoked.  "M" stands for Motion, i.e.
+-if the user starts moving the mouse.  "C" stands for Click, i.e., if the
+-user presses and releases the mouse in a short period of time
+-(ClickTime milliseconds).  "D" stands for double-click.  The action "I"
+-will cause an action to be performed on the button-press, if the
+-function is invoked with prior knowledge of which window to act on.
+-.PP
+-The special symbols $d, $w and $0 through $9 are available in the
+-ComplexFunctions or Macros, or whatever you want to call them.  Within
+-a macro, $w is expanded to the window-id (expressed in
+-hex, i.e. 0x10023c) of the window for which the macro was called
+-and $d is expanded to the current desk number. $0
+-through $9 are the arguments to the macro, so if you call
+-.EX
+-Key F10 R A Function MailFunction \\
+-  xmh "-font fixed"
+-.EE
+-and MailFunction is
+-.EX
+-AddToFunc MailFunction
+- + "I" Next ($0) Iconify -1
+- + "I" Next ($0) focus
+- + "I" None ($0) Exec exec $0 $1
+-.EE
+-Then the last line of the function becomes
+-.EX
+- + "I" None (xmh) Exec exec xmh -font fixed
+-.EE
+-The expansion is performed as the function is executed, so you can use the
+-same function with all sorts of different arguments.  I could use
+-.EX
+-Key F11 R A Function MailFunction \\
+-  zmail "-bg pink"
+-.EE
+-in the same .fvwmrc, if I wanted.  An example of using $w is:
+-.EX
+-AddToFunc PrintFunction
+- + "I" Raise
+- + "I" Exec xdpr -id $w
+-.EE
+-Note that $$ is expanded to $.
+-.IP "AddToMenu \fImenu-name\fP [ \fImenu-label\fP \fIaction\fP ]"
+-Begins or adds to a menu definition.  Typically a menu definition looks
+-like this:
+-.EX
+-AddToMenu Utilities "Utilities" Title
+- + "Xterm"         Exec  exec xterm -e tcsh
+- + "Rxvt"          Exec  exec rxvt
+- + "Remote Logins" Popup Remote-Logins
+- + "Top"           Exec  exec rxvt -T Top -n \\
+-                   Top -e top
+- + "Calculator"    Exec  exec xcalc
+- + "Xmag"          Exec  exec xmag
+- + "emacs"         Exec  exec xemacs
+- + "Mail"          MailFunction \\
+-                   xmh "-font fixed"
+- + ""              Nop
+- + "Modules"       Popup Module-Popup
+- + ""              Nop
+- + "Exit Fvwm"     Popup Quit-Verify
+-.EE
+-The menu could be invoked via
+-.EX
+-Mouse 1 R A Menu Utilities Nop
+-.EE
+-or
+-.EX
+-Mouse 1 R A Popup Utilities
+-.EE
+-There is no end-of-menu symbol.  Menus do not have to be defined in a
+-contiguous region of the .fvwmrc file.  The quoted portion in the
+-above examples is the menu-label, which will appear in the menu when
+-the user pops it up.  The remaining portion is a built-in command
+-which should be executed if the user selects that menu item.  An empty
+-menu-label ("") and the Nop function can be used to insert a separator
+-into the menu.
+-.PP
+-Titles can be used within the menu. If you add the option "top" behind
+-the keyword "Title", the title will be added to the top of the menu.
+-If there was a title already, it is overwritten.
+-.EX
+-AddToMenu Utilities "Tools" Title top
+-.EE
+-.PP
+-All text up to the first TAB in the menu label is aligned to the
+-left side of the menu, all text right of the first TAB is aligned
+-to the right side. All other TABs are replaced by spaces.
+-.PP
+-If the menu-label contains an ampersand ('&'), the next character
+-is taken as a hotkey for the menu item. Hotkeys are underlined in
+-the label. To get a literal '&', insert '&&'.
+-.PP
+-If the menu-label contains a sub-string which is set off by stars,
+-then the text between the stars is expected to be the name of an
+-xpm-icon or bitmap-file to insert in the menu.  To get a literal '*',
+-insert '**'.For example
+-.EX
+- + "Calculator*xcalc.xpm*" Exec exec xcalc
+-.EE
+-inserts a menu item labeled "calculator" with a picture of a
+-calculator above it.  The following:
+-.EX
+- + "*xcalc.xpm*"           Exec exec xcalc
+-.EE
+-Omits the "Calculator" label, but leaves the picture.
+-.PP
+-If the menu-label contains a sub-string which is set off by percent signs,
+-then the text between the percent signs is expected to be the name of an
+-xpm-icon or bitmap-file to insert to the left of the menu label.
+-To get a literal '%', insert '%%'. For example
+-.EX
+- + "Calculator%xcalc.xpm%" Exec exec xcalc
+-.EE
+-inserts a menu item labeled "calculator" with a picture of a
+-calculator to the left.  The following:
+-.EX
+- + "%xcalc.xpm%"           Exec exec xcalc
+-.EE
+-Omits the "Calculator" label, but leaves the picture.  The pictures
+-used with this feature should be small (perhaps 16x16).
+-.PP
+-If the menu-name (not the label) contains a sub-string which is set
+-off by at signs ("@"), then the text between them is expected to be
+-the name of an xpm or bitmap file to draw along the left side of the
+-menu (a "side pixmap"). You will probably want to use the SidePic
+-option of the \fIMenuStyle\fP command instead.  To get a literal '@',
+-insert '@@'.  For example
+-.EX
+-AddToMenu "StartMenu@linux-menu.xpm@"
+-.EE
+-creates a menu with a picture in its bottom left corner.
+-.PP
+-If the menu-name contains also a sub-string set of by '^'s, then the
+-text between '^'s is expected to be the name a of X11 color and the
+-column containing the side picture will be colorized with that
+-color. You can set this color for a menu style using the SideColor
+-option of the \fIMenuStyle\fP command.  To get a literal '^', insert
+-\fB^^\fP.  For example:
+-.EX
+-AddToMenu "StartMenu@linux-menu.xpm@^blue^"
+-.EE
+-creates a menu with a picture in its bottom left corner and colorizes
+-with blue the region of the menu containing the picture.
+-.PP
+-In all the above cases, the name of the resulting menu is name specified,
+-stripped of the substrings between the various delimiters.
+-.IP "AnimatedMove \fIx y\fP [ \fIWarp\fP ]"
+-.PP
+-Move a window in an animated way. Similar to Move command, below.
+-Options are the same, except they are required, since it doesn't make
+-sense to have a user move the window interactively and animatedly. If
+-the optional argument \fIWarp\fP is specified the pointer is warped with
+-the window.
+-.IP "Beep"
+-As might be expected, this makes the terminal beep.
+-.IP "BorderStyle [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
+-Defines a border style for windows.  \fIstate\fP can be either
+-"Active" or "Inactive."  If \fIstate\fP is omitted, then the style is
+-set for both states.  If the style and flags are enclosed in
+-parentheses, then multiple state definitions can be specified per
+-line.
+-.PP
+-\fIstyle\fP is a subset of the available ButtonStyles, and can only be
+-TiledPixmap (uniform pixmaps which match the bevel colors work best
+-this way).  If an "!"  is prefixed to any flag, flag behavior is
+-negated.  If \fIstyle\fP is not specified, then one can change flags
+-without resetting the style.
+-.PP
+-The "HiddenHandles" flag hides the corner handle dividing lines on
+-windows with handles (this option has no effect for NoHandle windows).
+-By default, HiddenHandles is disabled.
+-.PP
+-The "NoInset" flag supplements HiddenHandles.  If given, the inner
+-bevel around the window frame is not drawn.  If HiddenHandles is not
+-specified, this flag has no effect.
+-.PP
+-To decorate the active and inactive window borders with a textured
+-pixmap, one might specify:
+-.EX
+-BorderStyle Active TiledPixmap marble.xpm
+-BorderStyle Inactive TiledPixmap granite.xpm
+-BorderStyle Active -- HiddenHandles NoInset
+-.EE
+-To clear the style for both states:
+-.EX
+-BorderStyle Simple
+-.EE
+-To clear for a single state:
+-.EX
+-BorderStyle Active Simple
+-.EE
+-To unset a flag for a given state:
+-.EX
+-BorderStyle Inactive -- !NoInset
+-.EE
+-Title-bar buttons can inherit the border style with the UseBorderStyle
+-flag (see ButtonStyle).
+-.IP "ButtonStyle \fIbutton\fP"
+-Optional arguments include [\fIstate\fP], [\fIstyle\fP],
+-and [-- \fI[!]flag ...\fP].
+-Sets the button style for a title-bar button.  \fIbutton\fP is the
+-title-bar button number between 0 and 9, or one of "All," "Left,"
+-"Right," or "Reset."  Button numbering is described in the Mouse
+-section (see below).  If the style and flags are enclosed in
+-parentheses, then multiple state definitions can be specified per
+-line.
+-.PP
+-\fIstate\fP refers to which button state should be set.  Button states
+-are defined as follows: "ActiveUp" and "ActiveDown" refer to the
+-unpressed and pressed states for buttons on active windows; while the
+-"Inactive" state denotes buttons on inactive windows.
+-.PP
+-If \fIstate\fP is ActiveUp, ActiveDown, or Inactive, that particular
+-button state is set.  If \fIstate\fP is omitted, every state is set.
+-Specifying a style destroys the current style (use AddButtonStyle to
+-avoid this).
+-.PP
+-If \fIstyle\fP is omitted, then state-dependent flags can be set for
+-the primary button style without destroying the current style.
+-Examples (each line should be considered independent):
+-.EX
+-ButtonStyle Left -- flat
+-ButtonStyle All ActiveUp (-- flat) \\
+-  Inactive (-- flat)
+-.EE
+-The first line sets every state of the left buttons to flat, while the
+-second sets only the ActiveUp and Inactive states of every button to
+-flat (only flags are changed; the buttons' individual styles are not
+-changed).
+-.PP
+-If you want to reset all buttons to their defaults:
+-.EX
+-ButtonStyle Reset
+-.EE
+-To reset the ActiveUp button state of button 1 to the default:
+-.EX
+-ButtonStyle 1 ActiveUp Default
+-.EE
+-To reset all button states of button 1 to the default of
+-button number 2:
+-.EX
+-ButtonStyle 1 Default 2
+-.EE
+-.PP
+-For any given button, multiple state definitions can be given on one
+-line by enclosing the style and flags in parentheses.  If only one
+-definition per line is given the parentheses can be omitted.
+-.PP
+-\fIflags\fP affect the specified \fIstate\fP.  If an "!" is prefixed
+-to any \fIflag\fP, its behavior is negated.  The available
+-state-dependent flags for all styles are described here (the next
+-ButtonStyle entry deals with state-independent flags).
+-.PP
+-"Raised" causes a raised relief pattern to be drawn.
+-.PP
+-"Sunk" causes a sunken relief pattern to be drawn.
+-.PP
+-"Flat" inhibits the relief pattern from being drawn.
+-.PP
+-"UseTitleStyle" causes the given button state to render the current
+-title style before rendering the button's own styles.  The Raised,
+-Flat, and Sunk TitleStyle flags are ignored since they are redundant
+-in this context.
+-.PP
+-"UseBorderStyle" causes the button to inherit the decorated
+-BorderStyle options.
+-.PP
+-Raised, Sunk, and Flat are mutually exclusive, and can be specified
+-for the initial ButtonStyle only.  UseTitleStyle and UseBorderStyle
+-are also mutually exclusive (both can be off however).  The default is
+-Raised with both UseBorderStyle and UseTitleStyle left unset.
+-.PP
+-There is an \fBimportant note\fP for the ActiveDown state.  When a
+-button is pressed, the relief is inverted.  Because of this, to obtain
+-a sunken ActiveDown state you must specify the opposite of the desired
+-relief (i.e. to obtain a pressed-in look which is raised, specify Sunk
+-for ActiveDown).  This behavior is consistent, but may seem confusing
+-at first.
+-.PP
+-Button styles are classified as non-destructive, partially destructive,
+-or fully destructive.  Non-destructive styles do not affect the image.
+-Partially destructive styles can obscure some or all parts of the
+-underlying image (i.e. Pixmap).  Fully destructive styles obscure the
+-entire underlying image (i.e. Solid or one of the gradient styles).
+-Thus, if stacking styles with AddButtonStyle (or AddTitleStyle for
+-title bars), use care in sequencing styles to minimize redraw.
+-.PP
+-The available styles and their arguments now follow (depending on
+-compilation options, some button styles may be unavailable).
+-.PP
+-The "Simple" style does nothing.  There are no arguments, and this
+-style is an example of a non-destructive button style.
+-.PP
+-The "Default" style conditionally accepts one argument: a number which
+-specifies the default button number to load.  If the style command
+-given is ButtonStyle or AddButtonStyle, the argument is optional (if
+-given, will override the current button).  If a command other than
+-ButtonStyle or AddButtonStyle is used, the number must be specified.
+-.PP
+-The "Solid" style fills the button with a solid color.  The relief
+-border color is not affected.  The color should be specified as a
+-single argument.  This style is fully destructive.
+-.PP
+-The "Vector" style draws a line pattern.  Since this is a standard
+-button style, the keyword "Vector" is optional.  The specification is
+-a little cumbersome:
+-.EX
+-ButtonStyle 2 Vector 4 50x30@1 70x70@0 \\
+-  30x70@0 50x30@1
+-.EE
+-then the button 2 decoration will use a 4-point pattern consisting of
+-a line from (x=50,y=30) to (70,70) in the shadow color (@0), and then
+-to (30,70) in the shadow color, and finally to (50,30) in the
+-highlight color (@1).  Is that too confusing? See the sample .fvwmrc
+-for a few examples.  This style is partially destructive.
+-.PP
+-The "VGradient" and "HGradient" styles denote gradient styles.  The H
+-and V prefixes denote both horizontal and vertical directions.
+-.PP
+-This style has two forms:
+-.in +2
+-The first form specifies a linear gradient.  Arguments: total number
+-of colors to allocate (between 2 and 128), the initial color, and the
+-final color.
+-.PP
+-The second form specifies a nonlinear gradient.  Arguments: total
+-number of colors to allocate (between 2 and 128), then the number of
+-segments.  For each segment, specify the starting color, percentage to
+-increment, then ending color.  Each subsequent segment begins with the
+-color of the last segment.  All of the percentages must add up to 100.
+-.in -2
+-.PP
+-Example:
+-.EX
+-TitleStyle VGradient 16 3 Red 20 Blue 30 \\
+-  Black 50 Grey
+-.EE
+-The gradient styles are fully destructive.
+-.PP
+-The "Pixmap" style displays a pixmap.  A pixmap should be specified as
+-an argument.  For example, the following would give button 2 the same
+-pixmap for both states, and button 4 different pixmaps for the up,
+-down and inactive states.
+-.EX
+-ButtonStyle 2 Pixmap my_pixmap.xpm
+-ButtonStyle 4 ActiveUp (Pixmap up.xpm) \\
+-  ActiveDown (Pixmap down.xpm)
+-ButtonStyle 4 Inactive Pixmap inactive.xpm
+-.EE
+-The pixmap specification can be given as an absolute or relative
+-pathname (see PixmapPath).  If the pixmap cannot be found, the button
+-style reverts to Simple.  Flags specific to the Pixmap style are
+-"Left," "Right," "Top," and "Bottom."  These can be used to justify
+-the pixmap (default is centered for both directions).  Pixmap
+-transparency is used for the color "None."  This style is partially
+-destructive.
+-.PP
+-The "MiniIcon" style draws the window's miniature icon in the button,
+-which is specified with the MiniIcon option of the Style command. This
+-button style accepts no arguments.  Example:
+-.EX
+-Style "*"     MiniIcon mini-bx2.xpm
+-Style "xterm" MiniIcon mini-term.xpm
+-Style "Emacs" MiniIcon mini-doc.xpm
+-
+-ButtonStyle 1 MiniIcon
+-.EE
+-.PP
+-The "TiledPixmap" style accepts a pixmap to be tiled as the button
+-background.  One pixmap is specified as an argument.  Pixmap
+-transparency is not used.  This style is fully destructive.
+-.IP "ButtonStyle \fIbutton\fP - \fI[!]flag ...\fP"
+-Sets state-independent flags for the specified \fIbutton\fP.
+-State-independent flags affect button behavior.  Each flag is
+-separated by a space.  If an "!" is prefixed to the flag then the flag
+-behavior is negated.  The special flag "Clear" clears any existing
+-flags.
+-.PP
+-The following flags are usually used to tell fvwm which buttons should
+-be affected by MWM function hints.  This is not done automatically
+-since you might have buttons bound to complex functions, for instance.
+-.PP
+-"MWMDecorMenu" should be assigned to title bar buttons which display a
+-menu.  The default assignment is the leftmost button.  When a window
+-with the MWMFunctions Style option requests not to show this button,
+-it will be hidden.
+-.PP
+-"MWMDecorMin" should be assigned to title bar buttons which minimize
+-or iconify the window.  The default assignment is the second button
+-over from the rightmost button.  When a window with the MWMFunctions
+-Style option requests not to show this button, it will be hidden.
+-.PP
+-"MWMDecorMax" should be assigned to title bar buttons which maximize
+-the window.  The default assignment is the rightmost button.  When a
+-window with the MWMFunctions Style option requests not to show this
+-button, it will be hidden.
+-.IP "ChangeDecor \fIdecor\fP"
+-Changes the decor of a window to \fIdecor\fP.  \fIdecor\fP is
+-"Default," or the name of a decor defined with AddToDecor.  If
+-\fIdecor\fP is invalid, nothing occurs.  If called from somewhere in a
+-window or its border, then that window is affected.  If called from
+-the root window the user will be allowed to select the target window.
+-ChangeDecor only affects attributes which can be set using the
+-AddToDecor command.
+-.EX
+-ChangeDecor "CustomDecor1"
+-.EE
+-.IP "ChangeMenuStyle \fImenustyle menu ...\fP"
+-Changes the menu style of "menu" to "menustyle", you may specified more
+-than one menu in each \fIChangeMenuStyle\fP.
+-.EX
+-ChangeMenuStyle  pixmap1 Screensavers ScreenLock
+-.EE
+-.IP "ClickTime [ \fIdelay\fP ]"
+-Specifies the maximum delay (in milliseconds) between a button press
+-and a button release for the Function built-in to consider the action
+-a mouse click.  The default delay is 150 milliseconds.  Omitting the
+-delay value resets the ClickTime to the default.
+-.IP "Close"
+-If the window accepts the delete window protocol a message is sent to
+-the window asking it to gracefully remove itself.  If the window does
+-not understand the delete window protocol then the window is
+-destroyed.
+-.IP "ColorLimit \fIlimit\fP"
+-Specifies a limit  on the colors used in  pixmaps used  by fvwm.  Zero
+-(the   default)  sets no     limit.   Fvwm uses  pixmaps  for  icons,
+-mini-icons, and pixmap borders and titles.  This command limits pixmap
+-colors  to a set  of colors that  starts out with  common colors.  The
+-current  list contains about 60 colors  and  starts with white, black,
+-grey,   green,  blue, red, cyan,  yellow,  and   magenta.  The command
+-"ColorLimit 9" would limit pixmaps to these 9 colors.
+-.PP
+-It makes the most sense to put this command at the front of the
+-\fB.fvwmrc\fP file.  This command should appear before any menu
+-definitions that contain mini-icons.
+-.PP
+-Solid frame and title colors (including shadows and gradients) are not
+-controlled by this command.
+-.IP "ColormapFocus \fIFollowsMouse\fP|\fIFollowsFocus\fP"
+-By default, fvwm installs the colormap of the window that the cursor
+-is in.  If you use ColormapFocus FollowsFocus, then the installed
+-colormap will be the one for the window that currently has the
+-keyboard focus.
+-.IP "Current (\fIconditions\fP) \fIcommand\fP"
+-Performs \fIcommand\fP on the current window if it satisfies all
+-\fIconditions\fP.  Conditions include "Iconic", "!Iconic", "Visible",
+-"!Visible", "Sticky", "!Sticky", "Maximized", "!Maximized",
+-"Transient", "!Transient", "Raised", "!Raised", "CurrentDesk",
+-"CurrentPage", and "CurrentPageAnyDesk".  In addition, the condition
+-may include a window name to match to.  The window name may include
+-the wildcards * and ?.  The window name, icon name, class, and
+-resource will be considered when attempting to find a match.  The
+-window name can begin with ! which will prevent \fIcommand\fP if any
+-of the window name, icon name, class or resource match.
+-.PP
+-Note that earlier versions of fvwm2 required the conditions to be
+-enclosed in brackets instead of parentheses (this is still supported
+-for backwards compatibility).
+-.IP "CursorMove \fIhorizontal vertical\fP"
+-Moves the mouse pointer by \fIhorizontal\fP pages in the X direction
+-and \fIvertical\fP pages in the Y direction.  Either or both entries
+-may be negative.  Both horizontal and vertical values are expressed in
+-percent of pages, so "CursorMove 100 100" means to move down and right
+-by one full page.  "CursorMove 50 25" means to move right half a page
+-and down a quarter of a page.  Alternatively, the distance can be
+-specified in pixels by appending a 'p' to the horizontal and/or vertical
+-specification.  For example "CursorMove -10p -10p" means move ten
+-pixels up and ten pixels left.  The CursorMove function should not be
+-called from pop-up menus.
+-.IP "CursorStyle \fIcontext cursornum\fP"
+-Defines a new cursor for the specified context.  The various contexts
+-are:
+-.in +.5i
+-POSITION (XC_top_left_corner)
+-.in +.3i
+-used when initially placing windows
+-.in -.3i
+-.PP
+-TITLE (XC_top_left_arrow)
+-.in +.3i
+-used in a window title-bar
+-.in -.3i
+-.PP
+-DEFAULT (XC_top_left_arrow)
+-.in +.3i
+-used in windows that don't set their cursor
+-.in -.3i
+-.PP
+-SYS (XC_hand2)
+-.in +.3i
+-used in one of the title-bar buttons
+-.in -.3i
+-.PP
+-MOVE (XC_fleur)
+-.in +.3i
+-used when moving or resizing windows
+-.in -.3i
+-.PP
+-WAIT (XC_watch)
+-.in +.3i
+-used during an EXEC builtin command
+-.in -.3i
+-.PP
+-MENU (XC_sb_left_arrow)
+-.in +.3i
+-used in menus
+-.in -.3i
+-.PP
+-SELECT (XC_dot)
+-.in +.3i
+-used for various builtin commands such as iconify
+-.in -.3i
+-.PP
+-DESTROY (XC_pirate)
+-.in +.3i
+-used for DESTROY, CLOSE, and DELETE built-ins
+-.in -.3i
+-.PP
+-TOP (XC_top_side)
+-.in +.3i
+-used in the top side-bar of a window
+-.in -.3i
+-.PP
+-RIGHT (XC_right_side)
+-.in +.3i
+-used in the right side-bar of a window
+-.in -.3i
+-.PP
+-BOTTOM (XC_bottom_side)
+-.in +.3i
+-used in the bottom side-bar of a window
+-.in -.3i
+-.PP
+-LEFT (XC_left_side)
+-.in +.3i
+-used in the left side-bar of a window
+-.in -.3i
+-.PP
+-TOP_LEFT (XC_top_left_corner)
+-.in +.3i
+-used in the top left corner of a window
+-.in -.3i
+-.PP
+-TOP_RIGHT (XC_top_right_corner)
+-.in +.3i
+-used in the top right corner of a window
+-.in -.3i
+-.PP
+-BOTTOM_LEFT (XC_bottom_left_corner)
+-.in +.3i
+-used in the bottom left corner of a window
+-.in -.3i
+-.PP
+-BOTTOM_RIGHT (XC_bottom_right_corner)
+-.in +.3i
+-used in the bottom right corner of a window
+-.in -.3i
+-.in -.5i
+-.PP
+-And the cursornum is the numeric value of the cursor as defined in the
+-include file X11/cursorfont.h.  An example:
+-.EX
+-\&# make the kill cursor be XC_gumby:
+-CursorStyle DESTROY 56
+-.EE
+-The defaults are shown in parenthesis above.
+-.IP "DefaultColors [ \fI foreground background\fP ]"
+-\fIDefaultColors\fP sets the default forground and background
+-colors used in miscellaneous windows created by fvwm, for example
+-in the geometry feedback windows during a move or resize operation.
+-If you don't want to change one color or the other, use - as its
+-color name. To revert to the builtin default colors omit both
+-color names. Note that the default colors are not used in menus,
+-window titles or icon titles.
+-.IP "DefaultFont [ \fIfontname\fP ]"
+-\fIDefaultFont\fP sets the default font to font \fIfontname\fP.
+-The default font is used by fvwm2 whenever no other font has been
+-specified. To reset the default font to the built in default, omit
+-the argument. The default font is used for menus, window titles,
+-icon titles as well as the geometry feedback windows during a move
+-or resize operation. To override the default font in a specific
+-context, use the \fIWindowFont\fP, \fIIconFont\fP or \fIMenuStyle\fP
+-commands.
+-.IP "Delete"
+-Sends a message to a window asking that it remove itself, frequently
+-causing the application to exit.
+-.IP "Desk \fIarg1\fP [ \fIarg2\fP ] [ \fImin max\fP ]"
+-Switches the current viewport to another desktop (workspace, room).
+-.PP
+-The command takes 1, 2, 3, or 4 arguments. A single argument is
+-interpreted as a relative desk number. Two arguments are understood
+-as a relative and an absolute desk number. Three arguments specify
+-a relative desk and the minimum and maximum of the allowable range.
+-Four arguments specify the relative, absolute, minimum and maximum
+-values. (Desktop numbers can be negative.)
+-.PP
+-If \fIarg1\fP is non zero then the next desktop number will be the
+-current desktop number plus \fIarg1\fP.
+-.PP
+-If \fIarg1\fP is zero then the new desktop number will be \fIarg2\fP.
+-(If \fIarg2\fP is not present, then the command has no effect.)
+-.PP
+-If \fImin\fP and \fImax\fP are given, the new desktop number will
+-be no smaller than min and no bigger than max. Values out of this
+-range are truncated (if you gave an absolute desk number) or wrapped
+-around (if you gave a relative desk number).
+-.PP
+-The syntax is the same as for \fIMoveToDesk\fP, which moves a window
+-to a different desktop.
+-.PP
+-The number of active desktops is determined dynamically.  Only
+-desktops which contain windows or are currently being displayed are
+-active.  Desktop numbers must be between 2147483647 and -2147483648
+-(is that enough?).
+-.IP "DeskTopSize \fIHorizontal\fPx\fIVertical\fP"
+-Defines the virtual desktop size in units of the physical screen size.
+-.IP "Destroy"
+-Destroys an application window, which usually causes the application
+-to crash and burn.
+-.IP "DestroyDecor \fIdecor\fP"
+-Deletes the \fIdecor\fP defined with AddToDecor, so that subsequent
+-references to it are no longer valid.  Windows using this \fIdecor\fP
+-revert to the default fvwm decor.  The decor named "Default" cannot be
+-destroyed.
+-.EX
+-DestroyDecor "CustomDecor1"
+-.EE
+-.IP "DestroyFunc"
+-Deletes a function, so that subsequent references to it are no longer
+-valid.  You can use this to change the contents of a function during an
+-fvwm session.  The function can be rebuilt using AddToFunc.
+-.EX
+-DestroyFunc "PrintFunction"
+-.EE
+-.IP "DestroyMenu"
+-Deletes a menu, so that subsequent references to it are no longer
+-valid.  You can use this to change the contents of a menu during an
+-fvwm session.  The menu can be rebuilt using AddToMenu.
+-.EX
+-DestroyMenu "Utilities"
+-.EE
+-.IP "DestroyMenuStyle \fImenustyle\fP"
+-Deletes the menu style named "menustyle" and changes all menus using
+-this style to the default style, you cannot destroy the default menu.
+-.EX
+-DestroyMenuStyle pixamp1
+-.EE
+-.IP "DestroyModuleConfig"
+-Deletes module configuration entries, so that new configuration lines
+-may be entered instead.  You can use this to change the the way a
+-module runs during an fvwm session without restarting.  Wildcards can
+-be used for portions of the name as well.
+-.EX
+-DestroyModuleConfig FvwmFormFore
+-DestroyModuleConfig FvwmButtons*
+-.EE
+-.IP "Direction \fIdirection\fP (\fIconditions\fP) \fIcommand\fP"
+-Performs \fIcommand\fP (typically Focus) on a window in the given
+-direction which satisfies all \fIconditions\fP.  Conditions are the same
+-as for \fICurrent\fP. The \fIdirection\fP may be one of North, Northeast,
+-East, Southeast, South, Southwest, West and Northwest. Which window
+-Direction selects depends on angle and distance between the centerpoints
+-of the windows. Closer windows are considered a better match than
+-those farther away.
+-.IP "Echo \fIstring\fP"
+-Prints a message to stderr.  Potentially useful for debugging things
+-in your .fvwmrc.
+-.EX
+-Echo Beginning style defs...
+-.EE
+-.IP "EdgeResistance \fIscrolling moving\fP"
+-Tells how hard it should be to change the desktop viewport by moving
+-the mouse over the edge of the screen and how hard it should be to
+-move a window over the edge of the screen.
+-.PP
+-The first parameter tells how milliseconds the pointer must spend on
+-the screen edge before \fIfvwm\fP will move the viewport.  This is
+-intended for people who use "EdgeScroll 100 100" but find themselves
+-accidentally flipping pages when they don't want to.
+-.PP
+-The second parameter tells how many pixels over the edge of the screen
+-a window's edge must move before it actually moves partially off the
+-screen. By default the viewport is moved a full page in the requested
+-direction, but if you used \fIEdgeScroll\fP and set any values other
+-than zero they will be used instead.
+-.PP
+-Note that, with "EdgeScroll 0 0", it is still possible to move or
+-resize windows across the edge of the current screen.  By making the
+-first parameter to EdgeResistance 10000 this type of motion is
+-impossible.  With EdgeResistance less than 10000 but greater than 0
+-moving over pages becomes difficult but not impossible.
+-See also, EdgeThickness.
+-.IP "EdgeScroll \fIhorizontal vertical\fP"
+-Specifies the percentage of a page to scroll when the cursor hits the
+-edge of a page.  A trailing "p" changes the interpretation to mean "pixels".
+-If you don't want any paging or scrolling when you hit the edge of a
+-page include "EdgeScroll 0 0" in your .fvwmrc file,
+-or possibly better, set the EdgeThickness to zero.
+-See the EdgeThickness command. If you want whole
+-pages, use "EdgeScroll 100 100".  Both horizontal and vertical should
+-be positive numbers.
+-.PP
+-If the horizontal and vertical percentages are multiplied by 1000 then
+-scrolling will wrap around at the edge of the desktop.  If "EdgeScroll
+-100000 100000" is used \fIfvwm\fP will scroll by whole pages, wrapping
+-around at the edge of the desktop.
+-.IP "EdgeThickness \fI0\fP|\fI1\fP|\fI2\fP"
+-This is the width or height of the invisible window that fvwm2 creates
+-on the edges of the screen that are used for the edgescrolling feature.
+-.PP
+-A value of  zero completely disables  mouse edge scrolling, even while
+-dragging a window.
+-.PP
+-1 gives the  smallest pan frames,  which seem to  work best  except on
+-some servers.
+-.PP
+-2 is the default.
+-.PP
+-Pan frames of 1 or 2 pixels can sometimes be confusing, for example,
+-if you drag a window over the edge of the screen, so that it stradles
+-aa pan frame, clicks on the window, near the edge of the screen are
+-treated as clicks on the root window.
+-.IP "Emulate \fIfvwm\fP|\fImwm\fP|\fIwin\fP"
+-This command affects how miscellaneous things are done by fvwm.
+-For example where the move/resize feedback window appears depends
+-on this command. To have more MWM- or WIN-like behavior you can call
+-Emulate with "MWM" or "WIN" as its argument.
+-.IP "Exec \fIcommand\fP"
+-Executes \fIcommand\fP.  You should not use an ampersand ``&'' at the
+-end of the command.  You probably want to use an additional ``exec'' at
+-the beginning of \fIcommand\fP.  Without that, the shell that fvwm
+-invokes to run your command will stay until the command exits.  In
+-effect, you'll have twice as many processes running as you need.
+-Note that some shells are smart enough to avoid this, but it never hurts
+-to include the ``exec'' anyway.
+-.PP
+-The following example binds function key F1 in the root window, with
+-no modifiers, to the exec function.  The program rxvt will be started
+-with an assortment of options.
+-.EX
+-Key F1 R N Exec exec rxvt -fg yellow -bg blue \\
+-  -e /bin/tcsh
+-.EE
+-.PP
+-Note that this function doesn't wait for \fIcommand\fP to complete, so
+-things like:
+-.EX
+-Exec "echo AddToMenu ... > /tmp/file"
+-Read /tmp/file
+-.EE
+-won't work reliably.
+-.IP "ExecUseShell [ \fIshell\fP ]"
+-Makes the Exec command use the specified shell, or the value of the
+-$SHELL environment variable if no shell is specified, instead of the
+-default Bourne shell (/bin/sh).
+-.EX
+-ExecUseShell
+-ExecUseShell /usr/local/bin/tcsh
+-.EE
+-.IP "FlipFocus"
+-Executes a \fIFocus\fP command as if the user had used the pointer to
+-select the window.  This command alters the order of the windowlist in
+-the same way as clicking in a window to focus, i.e. the target window is
+-removed from the windowlist and placed at the start. This command is
+-recommended for use with the \fIDirection\fP command and in the function
+-invoked from \fIWindowList\fP.
+-.IP "Focus"
+-Moves the viewport or window as needed to make the selected window
+-visible.  Sets the keyboard focus to the selected window.  Does not
+-automatically raise the window.  Does not warp the pointer into
+-the selected window (see WarpToWindow function).  Does not de-iconify.
+-This command does not alter the order of the windowlist, it rotates the
+-windowlist around so that the target window is at the start.
+-.PP
+-To raise and warp a pointer together with Focus or FlipFocus, use a function:
+-.EX
+-AddToFunc SelectWindow
+-+ I Focus
+-+ I Raise
+-+ I WarpToWindow 50 8p
+-.EE
+-.IP "Function \fI\FunctionName\\fP"
+-Used to bind a previously defined function to a key or mouse button.
+-.PP
+-The following example binds mouse button 1 to a function called
+-"Move-or-Raise", whose definition was provided as an example earlier
+-in this man page.  After performing this binding \fIfvwm\fP will
+-execute to move-or-raise function whenever button 1 is pressed in a
+-window title-bar.
+-.EX
+-Mouse 1 T A Function Move-or-Raise
+-.EE
+-The keyword "Function" may be omitted if "FunctionName" does not
+-coincide with an fvwm built-in function name
+-.IP "GlobalOpts [ \fIoptions\fP ]"
+-This is a TEMPORARY command used to set some global options which will
+-later be handled as Style parms (or options to Style parms).  It
+-currently handles the following:
+-SmartPlacementIsReallySmart/SmartPlacementIsNormal,
+-ClickToFocusDoesntPassClick/ClickToFocusPassesClick,
+-ClickToFocusDoesntRaise/ClickToFocusRaises,
+-MouseFocusClickDoesntRaise/MouseFocusClickRaises,
+-CaptureHonorsStartsOnPage/CaptureIgnoresStartsOnPage,
+-RecaptureHonorsStartsOnPage/RecaptureIgnoresStartsOnPage,
+-ActivePlacementHonorsStartsOnPage/ActivePlacementIgnoresStartsOnPage,
+-NoStipledTitles/StipledTitles
+-.PP
+-Example:
+-.EX
+-GlobalOpts ClickToFocusDoesntPassClick, \\
+-  ClickToFocusDoesntRaise
+-.EE
+-.PP
+-RecaptureHonorsStartsOnPage causes a window to be placed according to, or
+-revert to, the StartsOnPage desk and page specification on Restart or
+-Recapture. RecaptureIgnoresStartsOnPage causes fvwm to respect the current
+-window position on Restart or Recapture. The default is
+-RecaptureIgnoresStartsOnPage.
+-.PP
+-CaptureHonorsStartsOnPage causes the initial capture (of an already
+-existing window) at startup to place the window according to the
+-StartsOnPage desk and page specification. CaptureIgnoresStartsOnPage
+-causes fvwm to ignore these settings (including StartsOnDesk) on
+-initial capture. The default is CaptureHonorsStartsOnPage.
+-.PP
+-ActivePlacementIgnoresStartsOnPage suppresses StartsOnPage or StartsOnDesk
+-placement in the event that both ActivePlacement and SkipMapping are in
+-effect when a window is created. This prevents you from interactively
+-placing a window and then wondering where it disappeared to, because it got
+-placed on a different desk or page. ActivePlacementHonorsStartsOnPage
+-allows this to happen anyway. The option has no effect if SkipMapping is
+-not in effect, because fvwm will switch to the proper desk/page to perform
+-interactive placement. The default is ActivePlacementHonorsStartsOnPage,
+-which matches the way StartsOnDesk handled the situation.
+-.IP "GotoPage x y"
+-Moves the desktop viewport to page (x,y).  The upper left page is
+-(0,0), the upper right is (M,0), where M is one less than the current
+-number of horizontal pages specified in the DeskTopSize command.  The
+-lower left page is (0,N), and the lower right page is (M,N), where N
+-is the desktop's vertical size as specified in the DeskTopSize
+-command.  The GotoPage function should not be used in a pop-up menu.
+-.IP "HilightColor \fItextcolor backgroundcolor\fP"
+-Specifies the text and background colors for the decorations on the
+-window which currently has the keyboard focus.
+-.IP "IconFont [ \fIfontname\fP ]"
+-Makes \fIfvwm\fP use font \fIfontname\fP for icon labels. To reset
+-this font to the default font (see \fIDefaultFont\fP) you may omit
+-\fIfontname\fP.
+-.IP "Iconify [ \fIvalue\fP ]"
+-Iconifies a window if it is not already iconified or de-iconifies it
+-if it is already iconified.  If the optional argument \fIvalue\fP is
+-positive only iconification will be allowed.  If the optional
+-argument is negative only de-iconification will be allowed.
+-.IP "IconPath \fIpath\fP"
+-Specifies a colon separated list of full path names of directories
+-where bitmap (monochrome) icons can be found.  Each path should start
+-with a slash.  Environment variables can be used here as well (i.e.
+-$HOME or ${HOME}).
+-.PP
+-Note: if the FvwmM4 is used to parse your rc files, then \fIm4\fP may
+-want to mangle the word "include" which will frequently show up in the
+-IconPath or PixmapPath command.  To fix this add undefine(`include')
+-prior to the IconPath command, or better use the '-m4-prefix' option
+-to force all m4 directives to have a prefix of "m4_" (see the
+-\fIFvwmM4\fP man page).
+-.IP "ImagePath \fIpath\fP"
+-Specifies a colon separated list of directories in which to search
+-for images (both monochrome and pixmap).
+-.PP
+-\fINOTE\fP: ImagePath makes obsolete IconPath and PixmapPath commands in the
+-next fvwm versions. In this version all of the three commands are allowed.
+-.PP
+-The ImagePath may contain environment variables such as $HOME (or
+-${HOME}).  Further, a '+' in the path is expanded to the previous
+-value of the path, allowing easy appending or prepending to the path.
+-.PP
+-For example:
+-.EX
+-ImagePath $HOME/icons:+:__projectroot__/include/bitmaps
+-.EE
+-.IP "Key \fIkeyname Context Modifiers Function\fP"
+-Binds a keyboard key to a specified \fIfvwm\fP built-in function, or
+-removes the binding if \fIFunction\fP is '-'.  Definition is the same
+-as for a mouse binding except that the mouse button number is replaced
+-with a key name.  The \fIkeyname\fP is one of the entries from
+-__projectroot__/include/X11/keysymdef.h, with the leading XK_ omitted.  The
+-\fIContext\fP and \fIModifiers\fP fields are defined as in the Mouse
+-binding. However, when you press a key the context window is the
+-window that has the keyboard focus. That is not necessarily the
+-same as the window the pointer is over (with SloppyFocus or
+-ClickToFocus).
+-.PP
+-The following example binds the built in window list to pop up when
+-Alt-Ctrl-Shift-F11 is hit, no matter where the mouse pointer is:
+-.EX
+-Key F11 A SCM WindowList
+-.EE
+-.PP
+-Binding a key to a title-bar button will not cause that button to
+-appear unless a mouse binding also exists.
+-.IP "KillModule \fIname\fP"
+-Causes the module which was invoked with name \fIname\fP to be killed.
+-\fIname\fP may include wild-cards.
+-.IP "Lower"
+-Allows the user to lower a window.
+-.IP "Maximize [ \fI horizontal vertical\fP ]"
+-Without its optional arguments Maximize causes the window to
+-alternately switch from a full-screen size to its normal size.
+-.PP
+-With the optional arguments horizontal and vertical, which are
+-expressed as percentage of a full screen, the user can control the new
+-size of the window.  If horizontal is greater than 0 then the
+-horizontal dimension of the window will be set to
+-horizontal*screen_width/100.  The vertical resizing is similar.  For
+-example, the following will add a title-bar button to switch a window
+-to the full vertical size of the screen:
+-.EX
+-Mouse 0 4 A Maximize 0 100
+-.EE
+-The following causes windows to be stretched to the full width:
+-.EX
+-Mouse 0 4 A Maximize 100 0
+-.EE
+-This makes a window that is half the screen size in each direction:
+-.EX
+-Mouse 0 4 A Maximize 50 50
+-.EE
+-Values larger than 100 can be used with caution.
+-.PP
+-If the letter "p" is appended to each coordinate (horizontal and/or
+-vertical), then the scroll amount will be measured in pixels.
+-.IP "Menu \fImenu-name\fP [ \fIposition\fP ] [ \fIdouble-click-action\fP ]"
+-Causes a previously defined menu to be popped up in a "sticky" manner.
+-That is, if the user invokes the menu with a click action instead of a
+-drag action, the menu will stay up.  The command
+-\fIdouble-click-action\fP will be invoked if the user double-clicks
+-(or hits the key rapidly twice if the menu is bound to a key) when
+-bringing the menu up.
+-.PP
+-Several other commands affect menu operation.  See \fIMenuStyle\fP
+-and \fISetAnimation\fP.  When in a menu, keyboard
+-shortcuts work as expected.  Cursor keystrokes are also allowed.
+-Specifically, Cursor-Down, Ctrl-N, and Ctrl-J all move to the next
+-item;  Cursor-Up, Ctrl-P, and Ctrl-K all move to the prior item;
+-Cursor-Left and Ctrl-B return to the prior menu;  Cursor-Right and
+-Ctrl-F popup the next menu; Ctrl-Cursor-Up and Ctrl-Cursor-Down move
+-up and down five items, respectively;  Shift-Cursor-Up and
+-Shift-Cursor-Down move to the first and last items, respectively; Enter
+-executes the current item; Escape exits the current sequence of menus.
+-.PP
+-The pointer will be warped to where it was when the menu was invoked if
+-it was both invoked and terminated with a keystroke.
+-.PP
+-The \fIposition\fP arguments allow to place the menu somewhere on the
+-screen, for example centered on the visible screen or above a title
+-bar.  Basically it works like this: you specify a \fIcontext-rectangle\fP
+-and an offset to this rectangle by which the upper left corner of the menu
+-is moved from the upper left corner of the rectangle.  The \fIposition\fP
+-arguments consist of several parts:
+-.EX
+-[ [context-rectangle] x y ] [ special-options ]
+-.EE
+-The \fIcontext-rectangle\fP can be one of:
+-.in +.5i
+-Root
+-.in +.3i
+-the root window.
+-.in -.3i
+-Mouse
+-.in +.3i
+-a 1x1 rectangle at the mouse position.
+-.in -.3i
+-Window
+-.in +.3i
+-the window with the focus.
+-.in -.3i
+-Interior
+-.in +.3i
+-the inside of the focused window.
+-.in -.3i
+-Title
+-.in +.3i
+-the title of the focused window or icon.
+-.in -.3i
+-Button<n>
+-.in +.3i
+-button #n of the focused window.
+-.in -.3i
+-Icon
+-.in +.3i
+-the focused icon.
+-.in -.3i
+-Menu
+-.in +.3i
+-the current menu.
+-.in -.3i
+-Item
+-.in +.3i
+-the current menu item.
+-.in -.3i
+-Context
+-.in +.3i
+-the current window, menu or icon.
+-.in -.3i
+-This
+-.in +.3i
+-whatever widget the pointer is on (e.g. a corner of a window or the
+-root window).
+-.in -.3i
+-Rectangle <geometry>
+-.in +.3i
+-the rectangle defined by <\fIgeometry\fP> in X geometry format.
+-Width and height default to 1 if omitted.
+-.in -.3i
+-.in -.5i
+-.PP
+-If the context-rectangle is omitted "Mouse" is the default.
+-Note that not all of these make sense under all circumstances
+-(e.g. "Icon" if the pointer is on a menu).
+-.PP
+-The offset values \fIx\fP and \fIy\fP specify how far the menu is
+-moved from it's default position. By default, the numeric value given
+-is interpreted as a percentage of the context rectangle's width (height),
+-but with a trailing "m" the menu's width (height) is used instead.
+-Furthermore a trailing "p" changes the interpretation to mean "pixels".
+-.PP
+-Instead of a single value you can use a list of values. All additional
+-numbers after the first one are separated from threir predecessor but
+-their sign. Do not use any other separators.
+-.PP
+-If x or y are prefixed with 'o<number>' where <number> is an integer, the
+-menu and the rectangle will be moved to overlap at the specified position
+-before any other offsets are applied. The menu and the rectangle will be
+-placed so that the pixel at <number> percent of the rectangle's width/height
+-is right over the pixel at <number> percent of the menu's width/height.
+-So 'o0' means that the top/left borders of the menu and the rectangle
+-overlap, with 'o100' it's the bottom/right borders and if you use 'o50'
+-they are centered upon each other (try it and you will see it is much
+-simpler than this description). The default is 'o0'. The prefix
+-\fBo<number>\fP is an abbreviation for "+<number>-<number>m".
+-.PP
+-A prefix of 'c' is equivalent of 'o50'.  Examples:
+-.EX
+-\&# window list in the middle of the screen
+-WindowList Root c c
+-
+-\&# menu to the left of a window
+-Menu name window -100m c+0
+-
+-\&# popup menu 8 pixels above the mouse pointer
+-Popup name mouse c -100m-8p
+-
+-\&# somewhere on the screen
+-Menu name rectangle 512x384+1+1 +0 +0
+-
+-\&# centered vertially around a menu item
+-AddToMenu foobar-menu
+- + "first item" Nop
+- + "special item" Popup "another menu" item \\
+-                  +100 c
+- + "last item" Nop
+-
+-\&# above the first menu item
+-AddToMenu foobar-menu
+- + "first item" Popup "another menu" item +0 -100m
+-.EE
+-Note that you can put a submenu far off the current menu so you could
+-not reach it with the mouse without leaving the menu. If the pointer
+-leaves the current menu in the general direction of the submenu the
+-menu will stay up.
+-.PP
+-The \fIspecial-options\fP:
+-.in +.5i
+-The "animated" and "mwm" or "win" meny styles may move a menu somewhere
+-else on the screen.  If you do not want this you can add \fIFixed\fP
+-as an option. This might happen for example if you want the menu always
+-in the top right corner of the screen.
+-.PP
+-Where do you want a submenu to appear when you click on it's menu item?
+-The default is to place the title under the cursor, but if you want it
+-where the position arguments say, use the \fISelectInPlace\fP option.
+-If you want the pointer on the title of the menu, use \fISelectWarp\fP
+-too.
+-.PP
+-The pointer is warped to the title of a submenu whenever the pointer
+-would be on an item when the submenu is popped up ("fvwm" menu style) or
+-never warped to thetitle at all ("mwm" or "win" menu styles). You can
+-force (forbid) warping whenever the submenu is opened with the
+-\fIWarpTitle\fP (\fINoWarp\fP) option.
+-.PP
+-Note that the \fIspecial-options\fP do work with a normal menu that has
+-no other position arguments.
+-.in -.5i
+-.IP "MenuStyle \fIstylename options\fP"
+-Sets a new menu style or changes a previously defined style.
+-The \fIstylename\fP is the style name; if it contains spaces or tabs it
+-has to be quoted. The name "*" is reserved for the default menu style.
+-The default menu style is used for every menu-like object (e.g. the
+-window created by the \fIWindowList\fP command) that had not be assigned
+-a style using the \fIChangeMenuStyle\fP. See also \fIDestroyMenuStyle\fP.
+-When using monochrome color options are ignored.
+-.PP
+-\fIoptions\fP is a comma separated list containing some of the
+-keywords FVWM/MWM/WIN,
+-Foreground,
+-Background,
+-Greyed,
+-HilightBack/HilightBackOff,
+-ActiveFore/ActiveForeOff,
+-Hilight3DThick/Hilight3DThin/Hilight3DOff,
+-Animation/AnimationOff,
+-Font,
+-MenuFace,
+-PopupDelay,
+-PopupOffset,
+-TitleWarp/TitleWarpOff,
+-TitleUnderlines0/TitleUnderlines1/TitleUnderlines2,
+-SeparatorsLong/SeparatorsShort,
+-TrianglesSolid/TrianglesRelief,
+-PopupImmediately/PopupDelayed,
+-DoubleClickTime,
+-SidePic,
+-SideColor.
+-.PP
+-In the above list some options are listed as option pairs or triples
+-with a / in between. These options exclude each other.
+-.PP
+-\fIFVWM\fP, \fIMWM\fP, \fIWIN\fP reset all options to the style with
+-the same name in former versions of fvwm2. The default for new menu
+-styles is FVWM style. These options override all others except
+-Foreground, Background, Greyed, HilightBack, HilightFore and
+-PopupDelay, so they should be used only as the first option
+-specified for a menu style or to reset the style to defined bahavior.
+-The same effect can be created by setting all the other options one
+-by one.
+-.PP
+-\fIMWM\fP and \fIWIN\fP style menus popup sub-menus automatically.
+-WIN menus indicate the current menu item by changing the
+-background to dark. \fIFVWM\fP sub-menus overlap the parent menu,
+-MWM and WIN style menus never overlap the parent menu.
+-.PP
+-\fIFVWM\fP style is equivalent to HilightBackOff, Hilight3DThin,
+-ActiveForeOff, AnimationOff, Font, MenuFace, PopupOffset 0 67, TitleWarp,
+-TitleUnderlines1, SeparatorsShort, TriangleRelief, PopupDelayed.
+-.PP
+-\fIMWM\fP style is equivalent to HilightBackOff, Hilight3DThick,
+-ActiveForeOff, AnimationOff, Font, MenuFace, PopupOffset -3 100,
+-TitleWarpOff, TitleUnderlines2, SeparatorsLong, TriangleRelief,
+-PopupImmediately.
+-.PP
+-\fIWIN\fP style is equivalent to HilightBack, Hilight3DOff,
+-ActiveForeOff, AnimationOff, Font, MenuFace, PopupOffset -5 100,
+-TitleWarpOff, TitleUnderlines1, SeparatorsShort, TriangleSolid,
+-PopupImmediately.
+-.PP
+-\fIForeground\fP and \fIBackground\fP may have a color name as an
+-argument. This color is used for menu text or the menu's background.
+-You can omit the color name to reset these colors to the built in default.
+-.PP
+-\fIGreyed\fP may have a color name as an argument. This color is the
+-one used to draw a menu-selection which is prohibited (or not
+-recommended) by the mwm-hints which an application has specified.
+-If the color is omitted the color of "greyed" menu entries is based
+-on the background color of the menu.
+-.PP
+-\fIHilightBack\fP and \fIHilightBackOff\fP switch hilighting the background
+-of the selected menu item on and off. A specific background color
+-may be used by providing the color name as an argument to
+-\fIHilightBack\fP. If you use this option without an argument the
+-color is based on the menu's background color.
+-.PP
+-\fIActiveFore\fP and \fIActiveForeOff\fP switch hilighting the foreground
+-of the selected menu item on and off. A specific foreground color
+-may be used by providing the color name as an argument to
+-ActiveFore. Omitting the color name has the same effet as
+-using ActiveForeOff.
+-.PP
+-\fIHilight3DThick\fP, \fIHilight3DThin\fP and \fIHilight3DOff\fP
+-determine if the selected menu item is hilighted with a 3D relief.
+-Thick reliefs are two pixels wide, thin reliefs are one pixel wide.
+-.PP
+-\fIAnimation\fP and \fIAnimationOff\fP turn menu animation on or off.
+-When animation is on, sub-menus that don't fit on the screen cause
+-the parent menu to be shifted to the left so the sub-menu can be seen.
+-.PP
+-\fIFont\fP takes a font name as an argument. If a font by this name
+-exists it is used for the text of all menu items. If it does not
+-exist or if the name is left blank the built in default is used.
+-.PP
+-\fIMenuFace\fP enforces a fancy background upon the menus. You can
+-use the same options for MenuFace as for ButtonStyle plus DGradient,
+-(top-left to down-right) and BGradient (down-left to top-right). See
+-\fIButtonStyle\fP for more info. If you use MenuFace without arguments
+-the style is reverted back to normal.
+-.PP
+-Some examples of MenuFaces are:
+-.EX
+-MenuFace DGradient 128 2 lightgrey 50 blue 50 white
+-MenuFace TiledPixmap texture10.xpm
+-MenuFace HGradient 128 2 Red 40 Maroon 60 White
+-MenuFace Solid Maroon
+-.EE
+-.PP
+-If you encounter performance problems with gradient backgrounds
+-you can try one or all of the following:
+-.PP
+-Turn Hilighting of the active menu item other than forground color
+-off:
+-.EX
+-MenuStyle <stylename> Hilight3DOff, HilightBackOff
+-MenuStyle ActiveFore <preferred color>
+-.EE
+-.PP
+-Make sure submenus do not overlap the parent menu. This can prevent
+-menus being redrawn every time a submenu pops up or down.
+-.EX
+-MenuStyle <stylename> PopupOffset 1 100
+-.EE
+-.PP
+-Run you X server with backing storage. If your Xserver is started
+-with the -bs option, turn it off. If not try the -wm option.
+-.EX
+-startx -- -wm
+-.EE
+-.PP
+-You may have to adapt this example to your system (e.g. if you
+-use xinit to start X).
+-.PP
+-\fIPopupDelay\fP requires one numeric argument. This value is the
+-delay in milliseconds before a sub-menu is popped up when the
+-pointer moves over a menu item that has a sub-menu. If the value
+-is zero no automatical pop up is done. If the argument is omitted
+-the built in default is used. Note that the popup delay has no
+-effect if the \fIPopupImmediately\fP option is used since sub-menus pop
+-up immediately then. The PopupDelay option should only be applied to the
+-default style ('*') since it is a global setting and affects all
+-menus.
+-.PP
+-\fIPopupImmediately\fP makes menu items with sub menus pop up it up as
+-soon as the pointer enters the item. The PopupDelay is ignored then.
+-If \fIPopupDelayed\fP is used fvwm2 looks at the \fIPopupDelay\fP option
+-if or when this automatic popup happens.
+-.PP
+-\fIPopupOffset\fP requires two integer arguments. Both values affect
+-where sub-menus are placed relative to the parent menu. If both
+-values are zero, the left edge of the sub-menu overlaps the left edge
+-of the parent menu. If the first value is non-zero the sub-menu is
+-shifted that many pixels to the right (or left if negative). If the
+-second value is non-zero the menu is moved by that many percent of
+-the parent menu's width to the right or left.
+-.PP
+-\fITitleWarp\fP and \fITitleWarpOff\fP affect if the pointer warps to
+-the menu title when a sub-menu is opened or not. Not that regardless of
+-this setting the pointer will not be warped if the menu does not pop up
+-under the pointer.
+-.PP
+-\fITitleUnderlines0\fP, \fITitleUnderlines1\fP and \fITitleUnderlines2\fP
+-specify how many lines are drawn below a menu title.
+-.PP
+-\fISeparatorsLong\fP and \fISeparatorsShort\fP set the length of
+-menu separators. Long separators run from the left edge all the
+-way to the right edge. Short separators leave a few pixels to
+-the edges of the menu.
+-.PP
+-\fITrianglesSolid\fP and \fITrianglesRelief\fP affect how the
+-small triangles for sub-menus is drawn. Solid triangles are
+-filled with a color while relief triangles are hollow.
+-.PP
+-\fIDoubleClickTime\fP requires one numeric argument. This value is the
+-time in milliseconds between two mouse clicks in a menu to be
+-considered as a double click. The default is 450 milliseconds.
+-If the argument is omitted the doucle click time is reset to this
+-default. The DoubleClickTime option should only be applied to the
+-default style ('*') since it is a global setting and affects all
+-menus.
+-.PP
+-\fISidePic\fP takes the name of an xpm or bitmap file as an argument.
+-The picture is drawn along the left side of the menu. The SidePic
+-option can be overridden by a menu specific side pixmap (see
+-\fIAddToMenu\fP). If the file name is omitted an existing side
+-pixmap is remove from the menu style.
+-.PP
+-\fISideColor\fP takes the name of an X11 color as an argument. This
+-color is used to colorize the column containing the side picture
+-(see above). The SideColor option can be overridden by a menu
+-specific side color (see \fIAddToMenu\fP). If the color name is
+-omitted the side color option is switched off.
+-.PP
+-Examples:
+-.EX
+-MenuStyle * mwm
+-MenuStyle * Foreground Black, Background gray40
+-MenuStyle * Greyed gray70, ActiveFore White
+-MenuStyle * HilightBackOff, Hilight3DOff
+-MenuStyle * Font lucidasanstypewriter-14
+-MenuStyle * MenuFace DGradient 64 darkgray MidnightBlue
+-
+-MenuStyle gred mwm
+-MenuStyle gred Foreground Yellow, Background Maroon
+-MenuStyle gred Greyed Red, ActiveFore Red
+-MenuStyle gred HilightBackOff, Hilight3DOff
+-MenuStyle gred Font lucidasanstypewriter-12
+-MenuStyle gred MenuFace DGradient 64 Red Black
+-.EE
+-.PP
+-Note that all style options could be placed on a single line for each
+-style name.
+-.IP "MenuStyle \fIforecolor backcolor shadecolor font style\fP [ \fIanim\fP ]"
+-This is the old syntax of the MenuStyle command. It is obsolete and
+-may be removed in the future. Please use the new syntax as described
+-above.
+-.PP
+-Sets the menu style.  When using monochrome the colors are ignored.
+-The shade-color is the one used to draw a menu-selection which is
+-prohibited (or not recommended) by the mwm-hints which an application
+-has specified.  The style option is either "fvwm" "mwm" or "win",
+-which changes the appearance and operation of the menus
+-and where the feedback window appears during resizes and moves.
+-.PP
+-"mwm" and "win" style menus popup sub-menus automatically.
+-"win" menus indicate the current menu item by changing the
+-background to black.
+-"fvwm" sub-menus overlap the parent menu, "mwm" and "win" style menus
+-never overlap the parent menu.
+-"mwm" resize and move feedback windows are in the center of the
+-screen, instead of the upper left corner.
+-.PP
+-The "anim" option is either "anim" or blank.  When this option
+-is "anim", sub-menus that don't fit on the screen cause the parent menu
+-to be shifted to the left so the sub-menu can be seen.
+-.PP
+-See also \fISetAnimation\fP command.
+-.IP "Module \fIModuleName\fP"
+-Specifies a module which should be spawned during initialization.  At
+-the current time the available modules (included with fvwm) are
+-FvwmAnimate (fancy animation of (de)iconification) FvwmAudio (makes
+-sounds to go with window manager actions), FvwmAuto
+-(an auto raise module), FvwmBacker (to change the background when you
+-change desktops), FvwmBanner (to display a spiffy XPM), FvwmButtons
+-(brings up a customizable tool bar), FvwmCpp (to preprocess your .fvwmrc
+-with cpp), FvwmEvent (trigger various actions by events), FvwmForm
+-(to bring up dialogs), FvwmIconBox (like the mwm IconBox), FvwmIconMan
+-(like the twm icon manager), FvwmIdent (to get window info), FvwmM4
+-(to preprocess your .fvwmrc with m4), FvwmPager (a mini version of
+-the desktop), FvwmSave (saves the desktop state in .xinitrc style),
+-FvwmSaveDesk (saves the desktop state in fvwm commands), FvwmScroll
+-(puts scrollbars on any window), FvwmTalk (to interactively run fvwm
+-commands), and FvwmWinList (a window list), FvwmAnimate (produces
+-animation effects when a window is iconified or deiconifed).
+-.\" Note: The "Optional Module Name" description is missing.
+-These modules have their own man pages.  There are other modules out
+-on there as well.
+-.PP
+-Modules can be short lived transient programs or, like FvwmButtons,
+-can remain for the duration of the X session.  Modules will be
+-terminated by the window manager prior to restarts and quits, if
+-possible.  See the introductory section on modules.  The keyword
+-"module" may be omitted if \fIModuleName\fP is distinct from all
+-built-in and function names.
+-.IP "ModulePath"
+-Specifies a colon separated list of paths for \fIfvwm\fP to search
+-when looking for a module to load.  Individual directories do not need
+-trailing slashes.  Environment variables can be used here as well (i.e.
+-$HOME or ${HOME}).  The builtin module path is available via the
+-environment variable $FVWM_MODULEDIR.
+-.IP "Mouse \fIButton Context Modifiers Function\fP"
+-Defines a mouse binding, or removes the binding if \fIFunction\fP is
+-\fB-\fP. \fIButton\fP is the mouse button number.  If \fIButton\fP is
+-zero then any button will perform the specified function.
+-\fIContext\fP describes where the binding applies.  Valid contexts are
+-R for the root window, W for an application window, T for a window
+-title bar, S for a window side, top, or bottom bar, F for a window
+-frame (the corners), I for an Icon window, or 0 through 9 for
+-title-bar buttons, or any combination of these letters.  A is for any
+-context except for title-bar buttons.  For instance, a context of FST
+-will apply when the mouse is anywhere in a window's border except the
+-title-bar buttons.
+-.PP
+-\fIModifiers\fP is any combination of N for no modifiers, C for
+-control, S for shift, M for Meta, or A for any modifier.  For example,
+-a modifier of SM will apply when both the Meta and Shift keys are
+-down.  X11 modifiers mod1 through mod5 are represented as the digits
+-1 through 5.
+-.PP
+-\fIFunction\fP is one of \fIfvwm\fP's built-in functions.
+-.PP
+-The title bar buttons are numbered with odd numbered buttons on the
+-left side of the title bar and even numbers on the right.
+-Smaller-numbered buttons are displayed toward the outside of the
+-window while larger-numbered buttons appear toward the middle of the
+-window (0 is short for 10).  In summary, the buttons are numbered:
+-.EX
+-1 3 5 7 9    0 8 6 4 2
+-.EE
+-The highest odd numbered button which has an action bound to it
+-determines the number of buttons drawn on the left side of the title
+-bar.  The highest even number determines the number or right side
+-buttons which are drawn.  Actions can be bound to either mouse buttons
+-or keyboard keys.
+-.IP "Move [ \fIx y\fP [ \fIWarp\fP ] ]"
+-Allows the user to move a window.  If called from somewhere in a
+-window or its border, then that window will be moved.  If called from
+-the root window then the user will be allowed to select the target
+-window. If the optional argument \fIWarp\fP is specified the pointer is warped
+-with the window.
+-.PP
+-The operation can be aborted with Escape or by pressing any mouse button
+-(except button 1 which confirms the move).
+-.PP
+-If the optional arguments x and y are provided, then the window will
+-be moved immediately without user interaction.  Each argument can
+-specify an absolute or relative position from either the left (top) or
+-right (bottom) of the screen.  By default, the numeric value given is
+-interpreted as a percentage of the screen width (height), but a trailing
+-"p" changes the interpretation to mean "pixels".
+-.PP
+-Simple Examples:
+-.EX
+-\&# Interactive move
+-Mouse 1 T A Move
+-\&# Move window so top left is at (10%,10%)
+-Mouse 2 T A Move 10 10
+-\&# Move top left to (10pixels,10pixels)
+-Mouse 3 T A Move 10p 10p
+-.EE
+-.PP
+-More complex examples (these can be bound as actions to keystrokes,
+-etc.; only the command is shown, though):
+-.EX
+-\&# Move window so bottom right is at bottom
+-\&# right of screen
+-Move -0 -0
+-
+-\&# Move window 5% to the right, and to the
+-\&# middle vertically
+-Move w+5 50
+-
+-\&# Move window up 10 pixels, and so left edge
+-\&# is at x=40 pixels
+-Move 40p w-10p
+-.EE
+-.PP
+-See also the "AnimatedMove" command, above.
+-.IP "MoveToDesk \fIarg1\fP [ \fIarg2\fP ] [ \fImin max\fP ]"
+-Moves the selected window to another desktop (workspace, room).
+-.PP
+-The arguments are the same as for the \fIDesk\fP command. MoveToDesk
+-is a replacement for the old WindowsDesk command, which can no longer
+-be used.
+-.IP "MoveToPage [ \fIx y\fP ]"
+-Moves the selected window to another page (x,y). The upper left page is
+-(0,0), the upper right is (M,0), where M is one less than the current
+-number of horizontal pages specified in the DeskTopSize command.  The
+-lower left page is (0,N), and the lower right page is (M,N), where N
+-is the desktop's vertical size as specified in the DeskTopSize
+-command. If \fIx\fP and \fIy\fP are not given, the window is moved to
+-the current page (a window that has the focus but is off-screen can
+-be retrieved with this).
+-.IP "Next (\fIconditions\fP) \fIcommand\fP"
+-Performs \fIcommand\fP (typically Focus) on the next window which
+-satisfies all \fIconditions\fP.  Conditions are the same as for \fICurrent\fP
+-with the addition of CirculateHit which overrides the CirculateSkip style
+-attribute and CirculateHitIcon which overrides the CirculateSkipIcon style
+-attribute for iconified windows.
+-.IP "None (\fIconditions\fP) \fIcommand\fP"
+-Performs \fIcommand\fP if no window which satisfies all
+-\fIconditions\fP exists.  Conditions are the same as for \fINext\fP.
+-.IP "Nop"
+-Does nothing.  This is used to insert a blank line or separator in a
+-menu.  If the menu item specification is Nop " ", then a blank line is
+-inserted.  If it looks like Nop "", then a separator line is inserted.
+-Can also be used as the double-click action for Menu.
+-.IP "OpaqueMoveSize \fIpercentage\fP"
+-Tells \fIfvwm\fP the maximum size window with which opaque window
+-movement should be used.  The percentage is percent of the total
+-screen area.  With "OpaqueMoveSize 0" all windows will be moved using the
+-traditional rubber-band outline.  With "OpaqueMoveSize 100" all windows
+-will be move as solid windows.  The default is "OpaqueMoveSize 5", which
+-allows small windows to be moved in an opaque manner but large windows
+-are moved as rubber-bands.
+-.IP "PipeRead \fIcmd option\fP"
+-Causes fvwm to read commands output from the program named
+-\fIcmd\fP.  Useful for building up dynamic menu entries based on a
+-directories contents, for example.
+-.IP "PixmapPath \fIpath\fP"
+-Specifies a colon separated list of full path names of directories
+-where pixmap (color) icons can be found.  Each path should start with
+-a slash.  Environment variables can be used here as well (i.e.  $HOME
+-or ${HOME}).
+-.IP "Popup \fIPopupName\fP [ \fIposition\fP ] [ \fIdefault-action\fP ]"
+-This built-in has two purposes: to bind a menu to a key or mouse
+-button, and to bind a sub-menu into a menu.  The formats for the two
+-purposes differ slightly.  The \fIposition\fP arguments are the same
+-as for \fIMenu\fP.  The command \fIdefault-action\fP will be invoked
+-if the user clicks a button to invoke the menu and releases it
+-immediately again (or hits the key rapidly twice if the menu is bound
+-to a key).
+-.PP
+-To bind a previously defined pop-up menu to a key or mouse button:
+-.sp
+-.in +.25i
+-The following example binds mouse buttons 2 and 3 to a pop-up called
+-"Window Ops".  The menu will pop up if the buttons 2 or 3 are pressed
+-in the window frame, side-bar, or title-bar, with no modifiers (none
+-of shift, control, or meta).
+-.EX
+-Mouse 2 FST N Popup "Window Ops"
+-Mouse 3 FST N Popup "Window Ops"
+-.EE
+-Pop-ups can be bound to keys through the use of the Key built in.
+-Pop-ups can be operated without using the mouse by binding to keys and
+-operating via the up arrow, down arrow, and enter keys.
+-.in -.25i
+-.sp
+-To bind a previously defined pop-up menu to another menu, for use as a
+-sub-menu:
+-.sp
+-.in +.25i
+-The following example defines a sub menu, "Quit-Verify" and binds it into a
+-main menu, called "RootMenu":
+-.EX
+-AddToMenu Quit-Verify
+- + "Really Quit Fvwm?" Title
+- + "Yes, Really Quit"  Quit
+- + "Restart Fvwm2"     Restart fvwm2
+- + "Restart Fvwm 1.xx" Restart fvwm
+- + ""                  Nop
+- + "No, Don't Quit"    Nop
+-
+-AddToMenu RootMenu "Root Menu" Title
+- + "Open XTerm Window" Popup NewWindowMenu
+- + "Login as Root"     Exec exec xterm \\
+-                                 -fg green -T Root \\
+-                                 -n Root -e su -
+- + "Login as Anyone"   Popup AnyoneMenu
+- + "Remote Hosts"      Popup HostMenu
+- + ""                  Nop
+- + "X utilities"       Popup Xutils
+- + ""                  Nop
+- + "Fvwm Modules"      Popup Module-Popup
+- + "Fvwm Window Ops"   Popup Window-Ops
+- + ""                  Nop
+- + "Previous Focus"    Prev (*) Focus
+- + "Next Focus"        Next (*) Focus
+- + ""                  Nop
+- + "Refresh screen"    Refresh
+- + "Recapture screen"  Recapture
+- + ""                  Nop
+- + "Reset X defaults"  Exec xrdb -load \\
+-                       $HOME/.Xdefaults
+- + ""                  Nop
+- + ""                  Nop
+- + "Quit"              Popup Quit-Verify
+-.EE
+-.in -.25i
+-.sp
+-Popup differs from Menu in that pop-ups do not stay up if the user
+-simply clicks.  These are Twm style popup-menus, which are a little
+-hard on the wrist.  Menu provides Motif or Microsoft-Windows style
+-menus which will stay up on a click action.  See menu for an explanation
+-of the interactive behaviour of menus.
+-.IP "Prev (\fIconditions\fP) \fIcommand\fP"
+-Performs \fIcommand\fP (typically Focus) on the previous window which
+-satisfies all \fIconditions\fP.  Conditions are the same as for \fINext\fP.
+-.IP "Quit"
+-Exits fvwm, generally causing X to exit too.
+-.IP "QuitScreen"
+-Causes fvwm to stop managing the screen on which the command was issued.
+-.IP "Raise"
+-Allows the user to raise a window.
+-.IP "RaiseLower"
+-Alternately raises and lowers a window.
+-.IP "Read \fIfilename\fP [ \fIoption\fP ]"
+-Causes fvwm to read commands from the file named \fIfilename\fP.
+-If the option following the filename is "Quiet", no message is
+-produced if the file is not found.
+-.IP "Recapture"
+-Causes fvwm to recapture all of its windows.  This ensures that the
+-latest style parameters will be used.  The recapture operation is
+-visually disturbing.
+-.IP "Refresh"
+-Causes all windows on the screen to redraw themselves.
+-.IP "RefreshWindow"
+-Causes current (or chosen) window to redraw itself.
+-.IP "Resize [ \fIx y\fP ]"
+-Allows the user to resize a window.  If called from somewhere in a
+-window or its border, then that window will be resized.  If called from
+-the root window then the user will be allowed to select the target
+-window.
+-.PP
+-The operation can be aborted with Escape or by pressing any mouse button
+-(except button 1 which confirms the resize).
+-.PP
+-If the optional arguments x and y are provided, then the window will
+-be resized so that its dimensions are \fIx\fP by \fIy\fP).  The units
+-of x and y are percent-of-screen, unless a letter "p" is appended to
+-each coordinate, in which case the location is specified in pixels.
+-.IP "Restart  \fIWindowManagerName\fP "
+-Causes \fIfvwm\fP to restart itself if WindowManagerName is "fvwm2",
+-or to switch to an alternate window manager if WindowManagerName is
+-other than "fvwm2".  If the window manager is not in your default
+-search path, then you should use the full path name for
+-\fIWindowManagerName\fP.
+-.PP
+-This command should not have a trailing ampersand or any command line
+-arguments and should not make use of any environmental variables.  Of
+-the following examples, the first two are sure losers, but the third
+-is OK:
+-.EX
+-Key F1 R N Restart fvwm &
+-Key F1 R N Restart $(HOME)/bin/fvwm
+-Key F1 R N Restart /home/nation/bin/fvwm
+-.EE
+-.IP "Scroll \fIhorizonal vertical\fP"
+-Scrolls the virtual desktop's viewport by \fIhorizontal\fP pages in
+-the x-direction and \fIvertical\fP pages in the y-direction.  Either
+-or both entries may be negative.  Both horizontal and vertical values
+-are expressed in percent of pages, so "Scroll 100 100" means to scroll
+-down and left by one full page.  "Scroll 50 25" means to scroll left
+-half a page and down a quarter of a page.  The scroll function should
+-not be called from pop-up menus. Normally, scrolling stops at the edge
+-of the desktop.
+-.PP
+-If the horizontal and vertical percentages are multiplied by 1000 then
+-scrolling will wrap around at the edge of the desktop.  If "Scroll
+-100000 0" is executed over and over \fIfvwm\fP will move to the next
+-desktop page on each execution and will wrap around at the edge of the
+-desktop, so that every page is hit in turn.
+-.PP
+-If the letter "p" is appended to each coordinate (horizontal and/or
+-vertical), then the scroll amount will be measured in pixels.
+-.IP "SendToModule \fImodulename string\fP"
+-Sends an arbitrary string (no quotes required) to all modules matching
+-\fImodulename\fP, which may contain wildcards.  This only makes sense
+-if the module is set up to understand and deal with these strings
+-though...  Can be used for module to module communication, or
+-implementation of more complex commands in modules.
+-.IP "SetAnimation \fImilliseconds-delay\fP [ \fIfractions-to-move-list\fP ]"
+-Sets the time between frames and the list of fractional offsets to
+-customize the animated moves of the \fIAnimatedMove\fP command and
+-the animation of menus (if the menu style is set to animated).  If
+-the \fIfractions-to-move-list\fP is omitted, only the time between frames
+-is altered.  The fractions-to-move-list specifies how far the window
+-should be offset at each successive frame as a fraction of the difference
+-between the starting location and the ending location.  e.g.:
+-.EX
+-SetAnimation 10 -.01 0 .01 .03 .08 .18 .3 \\
+-  .45 .6 .75 .85 .90 .94 .97 .99 1.0
+-.EE
+-.PP
+-Sets the delay between frames to 10ms, and sets the positions of the 16
+-frames of the animation motion.  Notice that negative values are allowed,
+-and in particular can be used to make the motion appear more cartoonish, by
+-briefly moving slightly in the opposite direction of the main motion.  The
+-above settings are the default.
+-.IP "SetEnv \fIvarname stringvalue\fP"
+-Set an environment variable to a new value, similar to shell's export
+-or setenv command.  The variable and its value are inherited by processes
+-started directly by fvwm2.  This can be especially useful in conjunction
+-with the FvwmM4 module; e.g.  "SetEnv height HEIGHT" will make the FvwmM4-set
+-variable "HEIGHT" usable by processes started by fvwm2 as the environment
+-variable "$height".  If \fIstringvalue\fP includes whitespace, you should
+-enclose it in quotes.
+-.IP "SnapAttraction \fIproximity\fP [ \fIbehavior\fP ]"
+-If during an interactive move the window (or icon) comes within \fIproximity\fP
+-pixels of another the window (or icon) will be moved to make the borders
+-adjoin. The default of -1 means that no snapping will happen.  A setting of
+-0 does indeed snap when the distance is zero pixels.  This is relevant when
+-the \fISnapGrid\fP command is used.
+-.PP
+-The \fIbehavior\fP argument is optional and may be set to one of the four
+-following values:
+-.PP
+-With \fIAll\fP both icons and windows snap to other windows and other
+-icons.
+-.PP
+-\fISameType\fP lets snap windows only to other windows and icons
+-only to other icons.
+-.PP
+-With \fIWindows\fP windows snap only to other windows.  Icons do not
+-snap.
+-.PP
+-Similarly with \fIIcons\fP icons snap to only other icons and
+-windows do not snap.
+-.PP
+-The default SnapAttraction setting for behavior is "All".
+-.IP "SnapGrid \fIx-grid-size y-grid-size\fP"
+-During an interactive move a window (or icon) will be positioned such that
+-its location (top left corner) will be coincindent with the nearest grid point.
+-The default \fIx-grid-size\fP and \fIy-grid-size\fP setting are both 1, which
+-is effectively no grid all.  An interactive move with both \fISnapGrid\fP
+-and \fISnapAttraction\fP in effect will result in the window being moved to be
+-adjacent to the nearest window border (if within snap proximity) or grid
+-position.  In other words, the window will move the shortest distance possible
+-to satisfy both \fISnapGrid\fP and \fISnapAttraction\fP.  Note that the X and
+-Y coordinates are not coupled.  For example, a window may snap to another window
+-on the X axis while snapping to a grid point on the Y axis.
+-.IP "Stick"
+-Makes a window sticky if it is not already sticky, or non-sticky if it
+-is already sticky.
+-.IP "Style \fIwindowname options\fP"
+-This command is intended to replace the old fvwm 1.xx global commands
+-NoBorder, NoTitle, StartsOnDesk, Sticky, StaysOnTop, Icon,
+-WindowListSkip, CirculateSkip, SuppressIcons, BoundaryWidth,
+-NoBoundaryWidth, StdForeColor, and StdBackColor with a single flexible
+-and comprehensive window(s) specific command.  This command is used to
+-set attributes of a window to values other than the default or to set
+-the window manager default styles.
+-.PP
+-\fIwindowname\fP can be a window's name, class, or resource string.
+-It can contain the wildcards * and/or ?, which are matched in the
+-usual Unix filename manner.  They are searched in the reverse order
+-stated, so that Style commands based on the name override or augment
+-those based on the class, which override or augment those based on the
+-resource string.
+-.PP
+-Note - windows that have no name (WM_NAME) are given a name of
+-"Untitled", and windows that don't have a class (WM_CLASS, res_class)
+-are given Class = "NoClass" and those that don't have a resource
+-(WM_CLASS, res_name) are given Resource = "NoResource".
+-.PP
+-\fIoptions\fP is a comma separated list containing some or all of the
+-keywords BorderWidth, HandleWidth, NoIcon/Icon, MiniIcon, IconBox,
+-IconGrid, IconFill,
+-NoTitle/Title, NoHandles/Handles, WindowListSkip/WindowListHit,
+-CirculateSkip/CirculateHit, StaysOnTop/StaysPut, Sticky/Slippery,
+-StartIconic/StartNormal, Color, ForeColor, BackColor,
+-StartsOnDesk/StartsOnPage/StartsAnyWhere, IconTitle/NoIconTitle,
+-MWMButtons/FvwmButtons, MWMBorder/FvwmBorder, MWMDecor/NoDecorHint,
+-MWMFunctions/NoFuncHint, HintOverride/NoOverride, NoButton/Button,
+-OLDecor/NoOLDecor, StickyIcon/SlipperyIcon,
+-SmartPlacement/DumbPlacement, RandomPlacement/ActivePlacement,
+-DecorateTransient/NakedTransient, SkipMapping/ShowMapping, UseDecor,
+-UseStyle, NoPPosition/UsePPosition, Lenience/NoLenience,
+-ClickToFocus/SloppyFocus/MouseFocus|FocusFollowsMouse.
+-.PP
+-In the above list some options are listed as
+-style-option/opposite-style-option.  The opposite-style-option for
+-entries that have them describes the \fIfvwm\fP default behavior and
+-can be used if you want to change the \fIfvwm\fP default behavior.
+-.PP
+-\fIDecorateTransient\fP causes transient windows, which are normally
+-left undecorated, to be given the usual \fIfvwm\fP decorations (title
+-bar, buttons, etc.). Note that some pop-up windows, such as the xterm
+-menus, are not managed by the window manager and still do not receive
+-decorations. \fINakedTransient\fP (the default) causes transient windows
+-not to be given the standard decorations.
+-.PP
+-\fIIcon\fP takes an (optional) unquoted string argument which is the icon
+-bitmap or pixmap to use.
+-.PP
+-\fIIconBox\fP takes four numeric arguments or an X11 geometry string:
+-.EX
+-IconBox l t r b
+-.EE
+-or
+-.EX
+-IconBox geometry
+-.EE
+-.PP
+-Where l is the left coordinate, t is the top, r is right and b is
+-bottom. Negative coordinates indicate distance from the right or
+-bottom of the screen.
+-Perhaps easier to use is an X11 Geometry string:
+-.EX
+-IconBox -80x200-1-1
+-.EE
+-Which would place an 80 by 240 pixel iconbox in the lower right hand
+-corner of the screen.
+-The iconbox is a region of the screen where fvwm
+-attempts to put icons for any matching window, as long as they do not
+-overlap other icons.
+-Multiple icon boxes can be defined as overflow areas.  When the first
+-icon box is filled, the second one is filled.  All the icon boxes for
+-one style must be defined in one command.  For example:
+-.EX
+-Style "*" IconBox -80x200-1-1, \\
+-          IconBox 1000x70-1-1
+-.EE
+-.PP
+-\fIIconGrid\fP takes 2 numeric arguments greater than zero.
+-.EX
+-IconGrid x y
+-.EE
+-Icons are placed in an icon box by stepping thru the icon box using
+-the x and y values for the icon grid, looking for a free space.
+-The default grid is 3 by 3 pixels which gives a tightly packed appearance.
+-To get a more regular appearance use a grid larger than your largest icon.
+-Currently there is no way to clip an icon to a maximum size.
+-An IconGrid definition must follow the IconBox definition that it
+-applies to:
+-.EX
+-Style "*" IconBox -80x240-1-1, IconGrid 90 90
+-.EE
+-.PP
+-\fIIconFill\fP takes 2 arguments.
+-.EX
+-IconFill Bottom Right
+-.EE
+-Icons are placed in an icon box by stepping thru the icon box using
+-these arguments to control the direction the box is filled in.
+-By default the direction is left to right, then top to bottom.
+-This would be expressed as:
+-.EX
+-IconFill left bottom
+-.EE
+-To fill an icon box in columns instead of rows, specify the
+-vertical direction (top or bottom) first.
+-The directions can be abbreviated or spelled out as follows: "t", "top",
+-"b", "bot", "bottom", "l", "lft", "left", "r", "rgt", "right".
+-An IconFill definition must follow the IconBox definition that it
+-applies to:
+-.EX
+-Style "*" IconBox -80x240-1-1, IconFill b r
+-.EE
+-.PP
+-\fIMiniIcon\fP specifies a pixmap to use as the miniature icon for the
+-window.  This miniature icon can be drawn in a title-bar button (see
+-ButtonStyle), and can be used by various fvwm modules (FvwmWinList,
+-FvwmIconMan, and FvwmTaskBar). It takes the name of a pixmap as an
+-argument.
+-.PP
+-\fIStartsOnDesk\fP takes a numeric argument which is the desktop number on
+-which the window should be initially placed.  Note that standard Xt
+-programs can also specify this via a resource (e.g. "-xrm '*Desk: 1'").
+-.PP
+-\fIStartsOnPage\fP takes 1, 2, or 3 numeric arguments. If one or three
+-arguments are givem, the first (or only) argument is the desktop number.  If
+-three arguments are given, the 2nd and 3rd arguments identify the x,y page
+-position on the virtual window. If two arguments are given, they specify the
+-page position, and indicate no desk preference. If only one argument is given,
+-StartsOnPage functions exactly like StartsOnDesk. For those standard Xt
+-programs which understand this usage, the starting desk/page can also be
+-specified via a resource (e.g., "-xrm 'Fvwm.Page: 1 0 2'").
+-.PP
+-StartsOnPage in conjunction with SkipMapping is a useful technique when you
+-want to start an app on some other page and continue with what you were
+-doing, rather than waiting for it to appear.
+-.PP
+-\fIStaysOnTop\fP makes the window always try to stay on top of the other
+-windows.  This might be handy for clocks or mailboxes that you would
+-always like to be visible.  If the window is explicitly lowered it
+-will not try to force its way back to the top until it is explicitly
+-raised.  StaysPut (the default) allows the window to be obscured and
+-stay that way.
+-.PP
+-\fIBorderWidth\fP takes a numeric argument which is the width of the border
+-to place the window if it does not have resize-handles.
+-.PP
+-\fIHandleWidth\fP takes a numeric argument which is the width of the border
+-to place the window if it does have resize-handles.
+-.PP
+-\fIButton\fP and \fINoButton\fP take a numeric argument which is the
+-number of the title-bar button which is to be included/omitted.
+-.PP
+-\fIStickyIcon\fP makes the window sticky when its iconified.  It will
+-deiconify on top the active desktop.
+-.PP
+-\fIMWMButtons\fP makes the Maximize button look pressed-in when the window
+-is maximized.  See the MWMButton flag in ButtonStyle for more
+-information.
+-.PP
+-\fIMWMBorder\fP makes the 3-D bevel more closely match mwm's.
+-.PP
+-\fIMWMDecor\fP makes fvwm attempt to recognize and respect the mwm
+-decoration hints that applications occasionally use.
+-.PP
+-\fIMWMFunctions\fP makes fvwm attempt to recognize and respect the mwm
+-prohibited operations hints that applications occasionally use.
+-HintOverride makes fvwm shade out operations that mwm would prohibit,
+-but it lets you perform the operation anyway.
+-.PP
+-\fIOLDecor\fP makes fvwm attempt to recognize and respect the olwm and olvwm
+-hints that many older XView and OLIT applications use.
+-.PP
+-\fIColor\fP takes two arguments.  The first is the window-label text color
+-and the second is the window decoration's normal background color.
+-The two colors are separated with a slash.  If the use of a slash
+-causes problems then the separate ForeColor and BackColor options can
+-be used.
+-.PP
+-\fIUseDecor\fP accepts one argument: the name of a decor created with
+-AddToDecor.  If UseDecor is not specified, the "Default" decor is
+-used.  Windows do not actually contain decors, but are always assigned
+-to one.  If the decor is later modified with AddToDecor, the changes
+-will be visible for all windows which are assigned to it.  The decor
+-for a window can be reassigned with ChangeDecor.
+-.PP
+-\fIUseStyle\fP takes one arg, which is the name of another style.  That way
+-you can have unrelated window names easily inherit similar traits
+-without retyping.  For example: 'Style "rxvt" UseStyle "XTerm"'.
+-.PP
+-\fISkipMapping\fP tells fvwm not to switch to the desk the window is on when
+-it gets mapped initially (useful with StartsOnDesk or StartsOnPage).
+-.PP
+-\fILenience\fP instructs fvwm to ignore the convention in the ICCCM which
+-states that if an application sets the input field of the wm_hints
+-structure to False, then it never wants the window manager to give it
+-the input focus.  The only application that I know of which needs this
+-is sxpm, and that is a silly bug with a trivial fix and has no overall
+-effect on the program anyway.  Rumor is that some older applications
+-have problems too.
+-.PP
+-\fIClickToFocus\fP instructs fvwm to give the focus to the window when it is
+-clicked in.  The default \fIMouseFocus\fP (or its alias
+-\fIFocusFollowsMouse\fP) tells fvwm to give the window the focus as soon as
+-the pointer enters the window, and take it away when the pointer leaves the
+-window. \fISloppyFocus\fP is similar, but doesn't give up the focus if the
+-pointer leaves the window to pass over the root window or a ClickToFocus
+-window (unless you click on it, that is), which makes it possible to
+-move the mouse out of the way without losing focus.
+-.PP
+-\fINoPPosition\fP instructs fvwm to ignore the PPosition field when adding
+-new windows.  Adherence to the PPosition field is required for some
+-applications, but if you don't have one of those its a real headache.
+-.PP
+-\fIRandomPlacement\fP causes windows which would normally require user
+-placement to be automatically placed in ever-so-slightly random
+-locations.  For the best of all possible worlds use both
+-RandomPlacement and SmartPlacement.
+-.PP
+-\fISmartPlacement\fP causes windows which would normally require user
+-placement to be automatically placed in a smart location - a location
+-in which they do not overlap any other windows on the screen.  If no
+-such position can be found user placement or random placement (if
+-specified) will be used as a fall-back method.  For the best of all
+-possible worlds use both RandomPlacement and SmartPlacement.
+-.PP
+-An example:
+-.EX
+-\&# Change default fvwm behavior to no title-
+-\&# bars on windows! Also define a default icon.
+-Style "*"           NoTitle,                 \\
+-                    Icon unknown1.xpm,       \\
+-                    BorderWidth 4,           \\
+-                    HandleWidth 5
+-
+-\&# now, window specific changes:
+-Style "Fvwm*"       NoHandles, Sticky,       \\
+-                    WindowListSkip,          \\
+-                    BorderWidth 0
+-Style "Fvwm Pager"  StaysOnTop, BorderWidth 0
+-Style "*lock"       NoHandles, Sticky,       \\
+-                    StaysOnTop, WindowListSkip
+-Style "xbiff"       Sticky, WindowListSkip
+-Style "FvwmButtons" NoHandles, Sticky,       \\
+-                    WindowListSkip
+-Style "sxpm"        NoHandles
+-Style "makerkit"
+-
+-\&# Put title-bars back on xterms only!
+-Style "xterm"     Title, Color black/grey
+-
+-Style "rxvt"        Icon term.xpm
+-Style "xterm"       Icon rterm.xpm
+-Style "xcalc"       Icon xcalc.xpm
+-Style "xbiff"       Icon mail1.xpm
+-Style "xmh"         Icon mail1.xpm,         \\
+-                    StartsOnDesk 2
+-Style "matlab"      Icon math4.xpm,         \\
+-                    StartsOnDesk 3
+-Style "xmag"        Icon magnifying_glass2.xpm
+-Style "xgraph"      Icon graphs.xpm
+-Style "FvwmButtons" Icon toolbox.xpm
+-Style "Maker"       StartsOnDesk 1
+-Style "signal"      StartsOnDesk 3
+-
+-\&# Fire up Netscape on the second desk, in the
+-\&# middle of my 3x3 virtual desktop, and don't
+-\&# bother me with it...
+-Style "Netscape*" SkipMapping,              \\
+-                  StartsOnPage 1 1 1
+-.EE
+-Note that all properties for a window will be OR'ed together.  In the
+-above example "FvwmPager" gets the property StaysOnTop via an exact
+-window name match but also gets NoHandles, Sticky, and WindowListSkip
+-by a match to "Fvwm*".  It will get NoTitle by virtue of a match to
+-"*".  If conflicting styles are specified for a window, then the last
+-style specified will be used.
+-.PP
+-If the NoIcon attribute is set then the specified window will simply
+-disappear when it is iconified.  The window can be recovered through
+-the window-list.  If Icon is set without an argument then the NoIcon
+-attribute is cleared but no icon is specified.  An example which
+-allows only the FvwmPager module icon to exist:
+-.EX
+-Style "*" NoIcon
+-Style "Fvwm Pager" Icon
+-.EE
+-.IP "Title"
+-Does nothing.  This is used to insert a title line in a popup or menu.
+-.IP "TitleStyle [ \fIjustification\fP ] [ \fIheight num\fP ]"
+-Sets attributes for the title bar.  Justifications can be "Centered",
+-"RightJustified," or "LeftJustified."  \fIheight\fP sets the title
+-bar's height to an amount in pixels.  Defaults are Centered and
+-WindowFont height.  The \fIheight\fP parameter must be set after a
+-WindowFont command since WindowFont resets the height to the default
+-for the specified font.  Example:
+-.EX
+-TitleStyle LeftJustified Height 24
+-.EE
+-.IP "TitleStyle [ \fIstate\fP ] [ \fIstyle\fP ] [ -- \fI[!]flag ...\fP ]"
+-Sets the style for the title bar.  \fIstate\fP can be one of
+-"ActiveUp," "ActiveDown," or "Inactive."  If \fIstate\fP is omitted,
+-then the style is added to every state.  If parentheses are placed
+-around the style and flags, then multiple state definitions can be
+-given per line.  \fIstyle\fP can be omitted so that flags can be set
+-while not destroying the current style.
+-.PP
+-If an "!" is prefixed to any \fIflag\fP, its behavior is negated.
+-Valid flags for each state include "Raised," "Flat," and "Sunk" (these
+-are mutually exclusive).  The default is Raised.  See the note in
+-ButtonStyle regarding the ActiveDown state.  Examples:
+-.EX
+-TitleStyle ActiveUp HGradient 16 navy black
+-TitleStyle ActiveDown (Solid red -- flat) \\
+-  Inactive (TiledPixmap wood.xpm)
+-TitleStyle ActiveUp (-- Flat) ActiveDown  \\
+-  (-- Raised) Inactive (-- Flat)
+-.EE
+-This sets the ActiveUp state to a horizontal gradient, the ActiveDown
+-state to solid red, and the Inactive state to a tiled wood pixmap.
+-Finally, ActiveUp is set to look flat, while ActiveDown set to be sunk
+-(the Raised flag for the ActiveDown state causes it to appear Sunk due
+-to relief inversion), and Inactive is set to flat as well.  An example
+-which sets flags for all states:
+-.EX
+-TitleStyle -- flat
+-.EE
+-For a flattened look:
+-.EX
+-TitleStyle -- flat
+-ButtonStyle All ActiveUp (-- flat) Inactive \\
+-  (-- flat)
+-.EE
+-.IP "UpdateDecor [ \fIdecor\fP ]"
+-Updates window decorations.  \fIdecor\fP is an optional argument which
+-specifies the \fIdecor\fP to update.  If given, only windows which are
+-assigned to that particular \fIdecor\fP will be updated.  This command
+-is useful, for instance, after a ButtonStyle, TitleStyle or
+-BorderStyle (possibly used in conjunction with AddToDecor).
+-Specifying an invalid decor results in all windows being updated.
+-This command is less disturbing than Recapture, but does not affect
+-window style options as Recapture does.
+-.IP "Wait \fIname\fP"
+-This built-in is intended to be used in \fIfvwm\fP functions only.  It
+-causes execution of a function to pause until a new window name
+-\fIname\fP appears. \fIFvwm\fP remains fully functional during a wait.
+-This is particularly useful in the InitFunction if you are trying to
+-start windows on specific desktops:
+-.EX
+-AddToFunc InitFunction
+- + "I" exec xterm -geometry 80x64+0+0
+- + "I" Wait xterm
+- + "I" Desk 0 2
+- + "I" Exec exec xmh -font fixed -geometry \\
+-       507x750+0+0
+- + "I" Wait xmh
+- + "I" Desk 0 0
+-.EE
+-The above function starts an xterm on the current desk, waits for it
+-to map itself, then switches to desk 2 and starts an xmh.  After the
+-xmh window appears control moves to desk 0.
+-.IP "WarpToWindow \fIx y\fP"
+-Warps the cursor to the associated window.  The parameters x and y
+-default to percentage of window down and in from the upper left hand
+-corner (or number of pixels down and in if 'p' is appended to the
+-numbers).
+-.IP "WindowFont [ \fIfontname\fP ]"
+-Makes \fIfvwm\fP use font \fIfontname\fP instead of "fixed" for window
+-title-bars. To reset this font to the default font (see \fIDefaultFont\fP)
+-you may omit \fIfontname\fP.
+-.IP "WindowId \fIid func\fP"
+-The WindowId function is similar to the Next and Prev funcs, except
+-that it looks for a specific window \fIid\fP and runs the specified
+-\fIfunc\fP on it.
+-.EX
+-WindowId 0x34567890 Raise
+-WindowId 0x34567890 WarpToWindow 50 50
+-.EE
+-Mostly this is useful for functions used with the WindowList builtin.
+-.IP "WindowList [\fIposition\fP] [\fIoptions\fP] [\fIdouble-click-action\fP]"
+-Generates a pop-up menu (and pops it up) in which the title and
+-geometry of each of the windows currently on the desk top are shown.
+-The geometry of iconified windows is shown in parenthesis.  Selecting
+-an item from the window list pop-up menu will by default cause the
+-interpreted function WindowListFunc to be run with the window id of
+-that window passed in as $0.  By default the WindowListFunc looks like
+-this:
+-.EX
+-AddToFunc WindowListFunc
+- + "I" WindowId $0 Iconify -1
+- + "I" WindowId $0 FlipFocus
+- + "I" WindowId $0 Raise
+- + "I" WindowId $0 WarpToWindow 5p 5p
+-.EE
+-You can Destroy the builtin WindowListFunc and create your own if
+-these defaults do not suit you.
+-.PP
+-The \fIposition\fP arguments are the same as for \fIMenu\fP. The
+-command \fIdouble-click-action\fP will be invoked if the user
+-double-clicks (or hits the key rapidly twice if the menu is bound
+-to a key) when bringing the window list.  The double-click-action
+-must be quoted if it consists of more than one word.
+-.PP
+-The double-click-action is useful to define a default window if you
+-have bound the window list to a key (or button) like this:
+-.EX
+-Key Tab A M WindowList "Prev FlipFocus"
+-.EE
+-Hitting Alt-Tab once it brings up the window list, if you hit it
+-twice the focus is flipped between the current and the last focused
+-window.
+-.PP
+-The \fIoptions\fP passed to WindowList can be "NoGeometry", "Function
+-<funcname>", "Desk <desknum>", "CurrentDesk", "NoIcons", "Icons",
+-"OnlyIcons", "NoNormal", "Normal", "OnlyNormal", "NoSticky", "Sticky",
+-"OnlySticky", "NoOnTop", "OnTop", "OnlyOnTop", "NoDeskSort", "UseIconName",
+-"Alphabetic", "NotAlphabetic".
+-.PP
+-(Note - normal means not iconic, sticky, or ontop)
+-.PP
+-If you pass in a function via "Function <funcname>", $0 is the window
+-id:
+-.EX
+-AddToFunc IFunc "I" WindowId $0 Iconify
+-WindowList Function IFunc, NoSticky, \\
+-  CurrentDesk, NoIcons
+-.EE
+-.PP
+-If you wanted to use the WindowList as an icon manager, you could invoke
+-the following:
+-.EX
+-WindowList OnlyIcons, Sticky, OnTop, Geometry
+-.EE
+-(Note - the "Only" options essentially wipe out all other ones...)
+-.IP "WindowsDesk \fIarg1\fP [ \fIarg2\fP ]"
+-Moves the selected window to another desktop (workspace, room).
+-.PP
+-This command has been removed and must be replaced by \fIMoveToDesk\fP,
+-the arguments for which are the same as for the \fIDesk\fP command.
+-\fINote:\fP You cannot simply change the name of the command: the
+-syntax has changed. If you used "WindowsDesk n" to move a window to
+-desk n, you will have to change it to "MoveToDesk 0 n".
+-.IP "WindowShade [ \fIopt\fP ]"
+-Toggles the window shade feature for titled windows.  Windows in the
+-shaded state only display a title bar.  If \fIopt\fP is not given, the
+-window shade state is toggled.  If \fIopt\fP is 1, the window is
+-forced to the shaded state.  If \fIopt\fP is 2, then the window is
+-forced to the non-shaded state.  Maximized windows and windows without
+-titles cannot be shaded.
+-.IP "XORvalue \fInumber\fP"
+-Changes the value with which bits are XOR'ed when doing rubber-band
+-window moving or resizing.  Setting this value is a trial-and-error
++.Dd $Mdocdate$
++.Dt FVWM2 1
++.Os OpenBSD
++.Sh NAME
++.Nm fvwm2
++.Nd F Virtual Window Manager for X11
++.Sh SYNOPSIS
++.Nm fvwm2
++.Op Fl s
++.Op Fl f Ar config-file
++.Op Fl cmd Ar config-command
++.Op Fl display Ar display
++.Op Fl debug
++.Sh DESCRIPTION
++.Nm
++is the F Virtual Window Manager, a highly configurable ICCCM-compliant
++window manager for the X Window System.
++.Pp
++.Nm
++provides virtual desktops, complex function definitions, extensive
++styling capabilities, and a modular architecture.
++.Pp
++The options are as follows:
++.Bl -tag -width Ds
++.It Fl s
++Single-screen mode.
++Do not manage multiple screens on a multi-headed display.
++Each screen must then be managed by a separate
++.Nm
+ process.
+-.IP "+"
+-Used to continue adding to the last specified decor, function or menu.
+-See the discussion for AddToDecor, AddToFunc, and AddToMenu.
+-.SH KEYBOARD SHORTCUTS
+-All (I think) window manager operations can be performed from the
+-keyboard so mouseless operation should be possible.  In addition to
+-scrolling around the virtual desktop by binding the Scroll built-in to
+-appropriate keys, pop-ups, move, resize, and most other built-ins can
+-be bound to keys.  Once a built-in function is started the pointer is
+-moved by using the up, down, left, and right arrows, and the action is
+-terminated by pressing return.  Holding down the shift key will cause
+-the pointer movement to go in larger steps and holding down the
+-control key will cause the cursor movement to go in smaller steps.
+-Standard emacs and vi cursor movement controls (^n, ^p, ^f, ^b, and
+-^j, ^k, ^h, ^l) can be used instead of the arrow keys.
+-.SH SUPPLIED CONFIGURATION
+-A sample configuration file, .fvwmrc, is supplied with the \fIfvwm\fP
+-distribution.  It is well commented and can be used as a source of
+-examples for \fIfvwm\fP configuration.
+-.SH USE ON MULTI-SCREEN DISPLAYS
+-If the -s command line argument is not given, \fIfvwm\fP will
+-automatically start up on every screen on the specified display.
+-After \fIfvwm\fP starts each screen is treated independently.
+-Restarts of \fIfvwm\fP need to be performed separately on each screen.
+-The use of EdgeScroll 0 0 is strongly recommended for multi-screen
+-displays.
+-.PP
+-You may need to quit on each screen to quit from the X session
+-completely.
+-.SH ENVIRONMENT
+-.TP
+-DISPLAY
+-Fvwm starts on this display unless the
+-.I -display
+-option is given.
+-.TP
+-FVWM_MODULEDIR
+-Set by \fIfvwm\fP to the directory containing the standard \fIfvwm\fP
+-modules.
+-.SH BUGS
+-As of fvwm 2.2 there were exactly 46.144 unidentified bugs.
+-Identified bugs have mostly been fixed, though.  Since then 12.25 bugs
+-have been fixed.  Assuming that there are at least 10 unidentified
+-bugs for every identified one, that leaves us with 46.144 - 12.25 + 10
+-* 12.25 = 156.395 unidentified bugs.  If we follow this to its logical
+-conclusion we will have an infinite number of unidentified bugs before
+-the number of bugs can start to diminish, at which point the program
+-will be bug-free.  Since this is a computer program infinity =
+-3.4028e+38 if you don't insist on double-precision.  At the current
+-rate of bug discovery we should expect to achieve this point in
+-4.27e+27 years.  I guess I better plan on passing this thing on to my
+-children....
+-.PP
+-Known bugs can be found in the BUGS file and TO-DO list in the
+-distribution.
+-.SH AUTHOR
+-Robert Nation with help from many people, based on \fItwm\fP code,
+-which was written by Tom LaStrange.  After Robert Nation came Charles
+-Hines, followed by Brady Montz. Currently fvwm is maintained by a long
+-list of people (Dan Espen, Steve Robbins, Paul Smith, Jason Tibbitts,
+-Dominik Vogt, Bob Woodside and others).
++.It Fl f Ar config-file
++Read
++.Ar config-file
++instead of the default
++.Pa ~/.fvwmrc
++or the system-wide
++.Pa /etc/X11/fvwm/system.fvwm2rc .
++.It Fl cmd Ar config-command
++Execute
++.Ar config-command
++after reading the configuration file.
++.It Fl display Ar display
++Connect to the X display
++.Ar display .
++.It Fl debug
++Enable synchronous X11 protocol debugging.
++.El
++.Sh CONFIGURATION
++.Nm
++reads configuration from
++.Pa ~/.fvwmrc
++by default.
++If that file does not exist, the system configuration at
++.Pa /etc/X11/fvwm/system.fvwm2rc
++is used.
++.Pp
++The configuration language supports:
++.Bl -dash
++.It
++Style rules for window appearance and behavior.
++.It
++Key and mouse bindings for interactive control.
++.It
++Complex functions with conditional logic.
++.It
++Menu definitions.
++.It
++Module invocations.
++.It
++Environment variable expansion.
++.It
++File inclusion with
++.Ic Read
++and
++.Ic PipeRead .
++.El
++.Sh COMMANDS
++The following built-in commands are available in configuration
++files and from modules:
++.Pp
++.Bl -tag -width "ButtonStyle" -compact
++.It Ic AddToFunc
++Define or extend a complex function.
++.It Ic AddToMenu
++Define or extend a menu.
++.It Ic ButtonStyle
++Set button decoration style.
++.It Ic ChangeDecor
++Change window decoration at runtime.
++.It Ic ClickTime
++Set double-click timeout.
++.It Ic CursorMove
++Move the cursor relative to its current position.
++.It Ic Desk
++Switch to a different desktop.
++.It Ic DestroyDecor
++Destroy a named decoration set.
++.It Ic DestroyMenu
++Destroy a menu definition.
++.It Ic DestroyMenuStyle
++Destroy a menu style.
++.It Ic EdgeResistance
++Set resistance to moving windows past screen edges.
++.It Ic EdgeScroll
++Set edge-triggered viewport scrolling.
++.It Ic Exec
++Execute an external command.
++.It Ic Function
++Execute a named complex function.
++.It Ic GlobalOpts
++Set global window manager options.
++.It Ic GotoPage
++Move the viewport to a specific page.
++.It Ic HilightColor
++Set the highlight color for the focus window.
++.It Ic IconFont
++Set the font for icon labels.
++.It Ic IconPath
++Set the icon search path.
++.It Ic Key
++Define a keyboard binding.
++.It Ic Lower
++Lower a window.
++.It Ic Maximize
++Maximize or restore a window.
++.It Ic MenuStyle
++Set menu appearance and behavior.
++.It Ic Module
++Launch a module.
++.It Ic ModulePath
++Set the module search path.
++.It Ic Mouse
++Define a mouse binding.
++.It Ic Move
++Move a window.
++.It Ic Next
++Focus the next window.
++.It Ic NoBoundaryWidth
++Remove window boundary width.
++.It Ic OpaqueMove
++Set opaque window moving.
++.It Ic OpaqueResize
++Set opaque window resizing.
++.It Ic PipeRead
++Read configuration from a pipe.
++.It Ic PixmapPath
++Set the pixmap search path.
++.It Ic Popup
++Display a popup menu.
++.It Ic Prev
++Focus the previous window.
++.It Ic Quit
++Exit
++.Nm .
++.It Ic Raise
++Raise a window.
++.It Ic RaiseLower
++Toggle raise/lower state.
++.It Ic Read
++Read configuration from a file.
++.It Ic Recapture
++Re-capture all windows on the display.
++.It Ic Refresh
++Refresh all window decorations.
++.It Ic Resize
++Resize a window.
++.It Ic Restart
++Restart
++.Nm .
++.It Ic Scroll
++Scroll the viewport.
++.It Ic SetEnv
++Set an environment variable.
++.It Ic Style
++Set window style options.
++.It Ic TitleStyle
++Set title bar decoration style.
++.It Ic UseDecor
++Apply a named decoration set to a window.
++.It Ic Wait
++Wait for a named window.
++.It Ic WindowFont
++Set the font for window titles.
++.It Ic WindowList
++Invoke the built-in window list.
++.It Ic WindowShade
++Shade or unshade a window.
++.It Ic XORvalue
++Set XOR drawing value.
++.El
++.Sh MODULES
++.Nm
++supports loadable modules that communicate with the window manager
++via a binary packet protocol over Unix pipes.
++Modules typically provide additional functionality such as:
++.Bl -dash
++.It
++Desktop pagers
++.Pq Xr FvwmPager 1 .
++.It
++Button bars and docks
++.Pq Xr FvwmButtons 1 .
++.It
++Window lists
++.Pq Xr FvwmWinList 1 .
++.It
++Icon management
++.Pq Xr FvwmIconBox 1 , Xr FvwmIconMan 1 .
++.It
++Desktop background management
++.Pq Xr FvwmBacker 1 .
++.It
++Session state saving
++.Pq Xr FvwmSave 1 , Xr FvwmSaveDesk 1 .
++.It
++Configuration preprocessors
++.Pq Xr FvwmCpp 1 , Xr FvwmM4 1 .
++.El
++.Sh ENVIRONMENT
++.Bl -tag -width "FVWM_MODULEDIR" -compact
++.It Ev DISPLAY
++X11 display to connect to.
++.It Ev HOME
++User home directory, used for configuration file location.
++.It Ev FVWM_MODULEDIR
++Override the module installation directory.
++.It Ev FVWM_EXEC_FD
++Internal: file descriptor for the execution helper IPC (not user-settable).
++.El
++.Sh FILES
++.Bl -tag -width "~/.fvwm2rc" -compact
++.It Pa ~/.fvwmrc
++Per-user configuration file.
++.It Pa ~/.fvwm2rc
++Alternative per-user configuration file.
++.It Pa /etc/X11/fvwm/system.fvwm2rc
++System-wide configuration file.
++.It Pa /usr/X11R6/lib/X11/fvwm/
++System module and resource directory.
++.El
++.Sh SECURITY CONSIDERATIONS
++.Nm
++runs with privilege separation:
++.Bl -dash
++.It
++The main window manager process owns the X11 connection and
++manages windows.
++.It
++The
++.Nm fvwm_exec
++helper process executes external commands without access
++to the X11 connection.
++.It
++After initialization, the main process drops privileges via
++.Xr pledge 2
++and
++.Xr unveil 2 .
++.El
++.Pp
++The main
++.Nm
++process runs with the following
++.Xr pledge 2
++promises after startup:
++.Bl -dash -compact
++.It
++.Va stdio
++(memory allocation, logging)
++.It
++.Va rpath
++(read configuration and resources)
++.It
++.Va proc
++(fork for module launching)
++.It
++.Va exec
++(launch the execution helper)
++.El
++.Pp
++The execution helper runs with the following
++.Xr pledge 2
++promises:
++.Bl -dash -compact
++.It
++.Va stdio
++.It
++.Va proc
++.It
++.Va exec
++.El
++.Pp
++.Nm
++uses
++.Xr unveil 2
++to restrict filesystem access to:
++.Bl -dash -compact
++.It
++.Pa /usr/X11R6/lib/X11/fvwm/
++(read + execute)
++.It
++.Pa /etc/X11/fvwm/
++(read)
++.It
++.Pa /tmp/
++(read, write, create)
++.El
++.Pp
++.Nm
++modules are separate processes.
++Each module opens its own X11 connection and communicates
++with the main
++.Nm
++process via Unix pipes.
++Module binaries are executed by the helper process, preventing
++the main window manager from directly executing user commands.
++.Sh SEE ALSO
++.Xr fvwm_exec 1 ,
++.Xr FvwmAuto 1 ,
++.Xr FvwmBacker 1 ,
++.Xr FvwmBanner 1 ,
++.Xr FvwmButtons 1 ,
++.Xr FvwmCpp 1 ,
++.Xr FvwmForm 1 ,
++.Xr FvwmIconBox 1 ,
++.Xr FvwmIconMan 1 ,
++.Xr FvwmIdent 1 ,
++.Xr FvwmM4 1 ,
++.Xr FvwmPager 1 ,
++.Xr FvwmRearrange 1 ,
++.Xr FvwmSave 1 ,
++.Xr FvwmSaveDesk 1 ,
++.Xr FvwmScroll 1 ,
++.Xr FvwmTalk 1 ,
++.Xr FvwmWinList 1 ,
++.Xr xpmroot 1 ,
++.Xr pledge 2 ,
++.Xr unveil 2
++.Sh COMPATIBILITY
++.Nm
++is compatible with FVWM 2.2.5 configuration syntax.
++Existing
++.Pa .fvwm2rc
++files should work without modification.
++.Pp
++Module IPC protocol semantics are preserved from FVWM 2.2.5.
++The binary packet format and message type numbering are unchanged.
++Module descriptor conventions are unchanged.
++.Sh HISTORY
++.Nm
++was originally written by Robert Nation in 1993.
++This is the OpenBSD fork of FVWM 2.2.5.
++.Sh AUTHORS
++.An Robert Nation
++and many contributors.
++.Ox
++fork maintained by the
++.Ox
++project.
++.Sh CAVEATS
++Privilege separation,
++.Xr pledge 2 ,
++and
++.Xr unveil 2
++policies in this version have not been verified through runtime testing.
++.Pp
++The execution helper and imsg IPC have not been tested against real
++X11 workloads.
++Module protocol compatibility has been preserved through static
++inspection of message layouts but has not been empirically verified.
+diff --git fvwm/fvwm/icons.c fvwm/fvwm/icons.c
+index e48894e..48bfa24 100644
+--- fvwm/fvwm/icons.c
++++ fvwm/fvwm/icons.c
+@@ -887,8 +887,8 @@ DeIconify(FvwmWindow *tmp_win)
+ 	/* AS dje  RaiseWindow(tmp_win); */
+ 	/* now de-iconify transients */
+ 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+-		if ((t == tmp_win) || ((t->flags & TRANSIENT) &&
+-		    (t->transientfor == tmp_win->w))) {
++		if ((t == tmp_win) ||
++		    IsTransientDescendantOf(t, tmp_win)) {
+ 			t->flags |= MAPPED;
+ 			t->tmpflags.IconifiedByParent = 0;
+ 			if (Scr.Hilite == t)
+@@ -966,8 +966,8 @@ Iconify(FvwmWindow *tmp_win, int def_x, int def_y)
+ 
+ 	/* iconify transients first */
+ 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+-		if ((t == tmp_win) || ((t->flags & TRANSIENT) &&
+-		    (t->transientfor == tmp_win->w))) {
++		if ((t == tmp_win) ||
++		    IsTransientDescendantOf(t, tmp_win)) {
+ 			/*
+ 			 * Prevent the receipt of an UnmapNotify, since that
+ 			 * would cause a transition to the Withdrawn state.
+diff --git fvwm/fvwm/menus.c fvwm/fvwm/menus.c
+index c2fa713..dbfd9a6 100644
+--- fvwm/fvwm/menus.c
++++ fvwm/fvwm/menus.c
+@@ -2345,8 +2345,9 @@ MakeMenu(MenuRoot *mr)
+ 
+ 		if (mr->first == mr->last) {
+ 			fvwm_msg(ERR, "MakeMenu",
+-			    "BUG: Menu contains only contionuation");
+-			break;
++			    "BUG: Menu contains only continuation");
++			mr->continuation = cont->continuation;
++			continue;
+ 		}
+ 		/* link first item of continuation to item before 'more...' */
+ 		mr->last->prev->next = cont->first;
+@@ -2473,7 +2474,7 @@ MakeMenu(MenuRoot *mr)
+ 			}
+ 			len = 8 + strlen(mr->name);
+ 			szMenuContinuationActionAndName =
+-			    (char *)safemalloc(len);
++			    (char *)xmalloc(len);
+ 			strlcpy(szMenuContinuationActionAndName, "Popup ", len);
+ 			strlcat(szMenuContinuationActionAndName, mr->name, len);
+ 			strlcat(szMenuContinuationActionAndName, "$", len);
+@@ -2627,9 +2628,9 @@ scanForColor(char *instring, Pixel *p, Bool *c, char identifier)
+ 	*c = False;
+ 
+ 	/* save instring in case can't find pixmap */
+-	save_instring = (char *)safemalloc(strlen(instring) + 1);
++	save_instring = (char *)xmalloc(strlen(instring) + 1);
+ 	len = strlen(instring) + 1;
+-	name = (char *)safemalloc(len);
++	name = (char *)xmalloc(len);
+ 	strlcpy(save_instring, instring, len);
+ 
+ 	/* Scan whole string        */
+@@ -2692,10 +2693,10 @@ scanForPixmap(char *instring, FvwmPicture **p, char identifier)
+ #ifdef UGLY_WHEN_PIXMAPS_MISSING
+ 	/* save instring in case can't find pixmap */
+ 	len = strlen(instring) + 1;
+-	save_instring = (char *)safemalloc(len);
++	save_instring = (char *)xmalloc(len);
+ 	strlcpy(save_instring, instring, len);
+ #endif
+-	name = (char *)safemalloc(strlen(instring) + 1);
++	name = (char *)xmalloc(strlen(instring) + 1);
+ 
+ 	/* Scan whole string	*/
+ 	for (txt = instring; *txt != '\0'; txt++) {
+@@ -2803,7 +2804,7 @@ AddToMenu(
+ 		action = "Nop";
+ 	GetNextToken(GetNextToken(action, &token), &option);
+ 
+-	tmp = (MenuItem *)safemalloc(sizeof(MenuItem));
++	tmp = (MenuItem *)xmalloc(sizeof(MenuItem));
+ 	tmp->chHotkey = '\0';
+ 	tmp->next = NULL;
+ 	tmp->mr = menu; /* this gets updated in MakeMenu if we split the menu
+@@ -2849,7 +2850,7 @@ AddToMenu(
+ 	end = item;
+ 	while ((*end != '\t') && (*end != 0))
+ 		end++;
+-	tmp->item = safemalloc(end - start + 1);
++	tmp->item = xmalloc(end - start + 1);
+ 	strncpy(tmp->item, start, end - start);
+ 	tmp->item[end - start] = 0;
+ 	tmp->item2 = NULL;
+@@ -2863,7 +2864,7 @@ AddToMenu(
+ 		if (end > start) {
+ 			char *s;
+ 
+-			tmp->item2 = safemalloc(end - start + 1);
++			tmp->item2 = xmalloc(end - start + 1);
+ 			strncpy(tmp->item2, start, end - start);
+ 			tmp->item2[end - start] = 0;
+ 			s = tmp->item2;
+@@ -2948,7 +2949,7 @@ NewMenuRoot(char *name, Bool fFunction)
+ {
+ 	MenuRoot *tmp;
+ 
+-	tmp = (MenuRoot *)safemalloc(sizeof(MenuRoot));
++	tmp = (MenuRoot *)xmalloc(sizeof(MenuRoot));
+ 
+ 	tmp->first = NULL;
+ 	tmp->last = NULL;
+diff --git fvwm/fvwm/misc.c fvwm/fvwm/misc.c
+index 04babcc..c9d8d91 100644
+--- fvwm/fvwm/misc.c
++++ fvwm/fvwm/misc.c
+@@ -891,6 +891,34 @@ MapIt(FvwmWindow *t)
+ 	}
+ }
+ 
++Bool
++IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor)
++{
++	FvwmWindow *p;
++	Window tw;
++
++	if (t == ancestor)
++		return False;
++	if ((t->flags & TRANSIENT) == 0)
++		return False;
++	tw = t->transientfor;
++	while (tw != None && tw != Scr.Root) {
++		if (tw == ancestor->w)
++			return True;
++		for (p = Scr.FvwmRoot.next; p != NULL; p = p->next) {
++			if (p->w == tw) {
++				if ((p->flags & TRANSIENT) == 0)
++					return False;
++				tw = p->transientfor;
++				break;
++			}
++		}
++		if (p == NULL)
++			return False;
++	}
++	return False;
++}
++
+ void
+ RaiseWindow(FvwmWindow *t)
+ {
+@@ -911,8 +939,7 @@ RaiseWindow(FvwmWindow *t)
+ 	    t2 = t2->stack_next) {
+ 		if (t2->flags & ONTOP)
+ 			count++;
+-		if ((t2->flags & TRANSIENT) && (t2->transientfor == t->w) &&
+-		    (t2 != t)) {
++		if (IsTransientDescendantOf(t2, t)) {
+ 			count++;
+ 			BroadcastPacket(M_RAISE_WINDOW, 3, t2->w, t2->frame,
+ 			    (unsigned long)t2);
+@@ -926,8 +953,8 @@ RaiseWindow(FvwmWindow *t)
+ 		count += 2;
+ 	}
+ 
+-	wins = (Window *)safemalloc(count * sizeof(Window));
+-	FvwmTopwins = (FvwmWindow **)safemalloc(count * sizeof(FvwmWindow));
++	wins = (Window *)xmalloc(count * sizeof(Window));
++	FvwmTopwins = (FvwmWindow **)xmalloc(count * sizeof(FvwmWindow));
+ 
+ 	i = 0;
+ 	j = 0;
+@@ -948,8 +975,8 @@ RaiseWindow(FvwmWindow *t)
+ #ifndef DONT_RAISE_TRANSIENTS
+ 	for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot;
+ 	    t2 = t2->stack_next) {
+-		if ((t2->flags & TRANSIENT) && (t2->transientfor == t->w) &&
+-		    (t2 != t) && (!(t2->flags & ONTOP))) {
++		if (IsTransientDescendantOf(t2, t) &&
++		    (!(t2->flags & ONTOP))) {
+ 			wins[i++] = t2->frame;
+ 			FvwmTopwins[j++] = t2;
+ 			if ((t2->flags & ICONIFIED) &&
+diff --git fvwm/fvwm/misc.h fvwm/fvwm/misc.h
+index 43fad1d..b31b130 100644
+--- fvwm/fvwm/misc.h
++++ fvwm/fvwm/misc.h
+@@ -14,17 +14,9 @@
+ #include <sys/types.h>
+ #include <sys/wait.h>
+ 
+-#if HAVE_WAITPID
+-#define ReapChildren()							\
+-	while ((waitpid(-1, NULL, WNOHANG)) > 0)			\
++#define ReapChildren()					\
++	while ((waitpid(-1, NULL, WNOHANG)) > 0)	\
+ 		;
+-#elif HAVE_WAIT3
+-#define ReapChildren()							\
+-	while ((wait3(NULL, WNOHANG, NULL)) > 0)			\
+-		;
+-#else
+-#error One of waitpid or wait3 is needed.
+-#endif
+ 
+ typedef struct name_list_struct {
+ 	struct name_list_struct *next; /* pointer to the next name */
+@@ -55,11 +47,7 @@ typedef struct name_list_struct {
+ /* used for parsing configuration */
+ struct config {
+ 	char *keyword;
+-#ifdef __STDC__
+ 	void (*action)(char *, FILE *, char **, int *);
+-#else
+-	void (*action)();
+-#endif
+ 	char **arg;
+ 	int *arg2;
+ };
+@@ -67,12 +55,8 @@ struct config {
+ /* used for parsing commands*/
+ struct functions {
+ 	char *keyword;
+-#ifdef __STDC__
+ 	void (*action)(XEvent *, Window, FvwmWindow *, unsigned long, char *,
+ 	    int *);
+-#else
+-	void (*action)();
+-#endif
+ 	short func_type;
+ 	Bool func_needs_window;
+ };
+@@ -232,6 +216,7 @@ void WindowShade(F_CMD_ARGS);
+ #endif
+ extern void RaiseWindow(FvwmWindow *t);
+ extern void LowerWindow(FvwmWindow *t);
++extern Bool IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor);
+ extern Bool GrabEm(int);
+ extern void UngrabEm(void);
+ extern MenuRoot *NewMenuRoot(char *name, Bool function_or_popup);
+diff --git fvwm/fvwm/modconf.c fvwm/fvwm/modconf.c
+index d9c491d..2dbf2ee 100644
+--- fvwm/fvwm/modconf.c
++++ fvwm/fvwm/modconf.c
+@@ -97,9 +97,9 @@ AddToModList(char *tline)
+ 	}
+ 
+ 	this =
+-	    (struct moduleInfoList *)safemalloc(sizeof(struct moduleInfoList));
++	    (struct moduleInfoList *)xmalloc(sizeof(struct moduleInfoList));
+ 	len = strlen(tline) + 1;
+-	this->data = (char *)safemalloc(len);
++	this->data = (char *)xmalloc(len);
+ 	this->next = NULL;
+ 	strlcpy(this->data, tline, len);
+ 	if (prev == NULL) {
+@@ -139,7 +139,7 @@ DestroyModConfig(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
+ 	while (current != NULL) {
+ 		GetNextToken(current->data, &mi);
+ 		next = current->next;
+-		if (matchWildcards(info, mi + 1)) {
++		if (mi != NULL && matchWildcards(info, mi + 1)) {
+ 			free(current->data);
+ 			free(current);
+ 			if (prev) {
+@@ -169,7 +169,7 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 
+ 	if (IconPath && strlen(IconPath)) {
+ 		len = strlen(IconPath) + 11;
+-		message = safemalloc(len);
++		message = xmalloc(len);
+ 		snprintf(message, len, "IconPath %s\n", IconPath);
+ 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, message);
+ 		free(message);
+@@ -177,7 +177,7 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ #ifdef XPM
+ 	if (PixmapPath && strlen(PixmapPath)) {
+ 		len = strlen(PixmapPath) + 13;
+-		message = safemalloc(len);
++		message = xmalloc(len);
+ 		snprintf(message, len, "PixmapPath %s\n", PixmapPath);
+ 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, message);
+ 		snprintf(message, len, "ColorLimit %d\n", Scr.ColorLimit);
+diff --git fvwm/fvwm/module.c fvwm/fvwm/module.c
+index ed6a274..1747cc8 100644
+--- fvwm/fvwm/module.c
++++ fvwm/fvwm/module.c
+@@ -53,12 +53,12 @@ initModules(void)
+ 
+ 	npipes = GetFdWidth();
+ 
+-	writePipes = (int *)safemalloc(sizeof(int) * npipes);
+-	readPipes = (int *)safemalloc(sizeof(int) * npipes);
+-	pipeOn = (int *)safemalloc(sizeof(int) * npipes);
+-	PipeMask = (unsigned long *)safemalloc(sizeof(unsigned long) * npipes);
+-	pipeName = (char **)safemalloc(sizeof(char *) * npipes);
+-	pipeQueue = (struct queue_buff_struct **)safemalloc(
++	writePipes = (int *)xmalloc(sizeof(int) * npipes);
++	readPipes = (int *)xmalloc(sizeof(int) * npipes);
++	pipeOn = (int *)xmalloc(sizeof(int) * npipes);
++	PipeMask = (unsigned long *)xmalloc(sizeof(unsigned long) * npipes);
++	pipeName = (char **)xmalloc(sizeof(char *) * npipes);
++	pipeQueue = (struct queue_buff_struct **)xmalloc(
+ 	    sizeof(struct queue_buff_struct *) * npipes);
+ 
+ 	for (i = 0; i < npipes; i++) {
+@@ -209,13 +209,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 
+ 		/* make the PositiveWrite pipe non-blocking. Don't want to jam
+ 		   up fvwm because of an uncooperative module */
+-#ifdef O_NONBLOCK
+-		fcntl(writePipes[i], F_SETFL,
+-		    O_NONBLOCK); /* POSIX, better behavior */
+-#else
+-		fcntl(writePipes[i], F_SETFL,
+-		    O_NDELAY); /* early SYSV, bad behavior */
+-#endif
++		fcntl(writePipes[i], F_SETFL, O_NONBLOCK);
+ 		/* Mark the pipes close-on exec so other programs
+ 		 * won`t inherit them */
+ 		if (fcntl(readPipes[i], F_SETFD, 1) == -1)
+@@ -238,9 +232,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 		fvwm_msg(ERR, "executeModule", "Execution of module failed: %s",
+ 		    arg1);
+ 		perror("");
+-		close(app_to_fvwm[1]);
+-		close(fvwm_to_app[0]);
+-		exit(1);
++		_exit(1);
+ 	} else {
+ 		fvwm_msg(ERR, "executeModule", "Fork failed");
+ 		free(arg1);
+@@ -268,10 +260,16 @@ HandleModuleInput(Window w, int channel)
+ 		return 0;
+ 	}
+ 
+-	if (size > 255) {
++	if (size < 0) {
++		fvwm_msg(ERR, "HandleModuleInput",
++		    "Module sent negative command size (%d)", size);
++		KillModule(channel, 5);
++		return 0;
++	}
++	if (size > (int)(sizeof(text) - 1)) {
+ 		fvwm_msg(ERR, "HandleModuleInput",
+ 		    "Module command is too big (%d)", size);
+-		size = 255;
++		size = (int)(sizeof(text) - 1);
+ 	}
+ 
+ 	pipeOn[channel] = 1;
+@@ -469,7 +467,7 @@ make_named_packet(
+ 	   name string.  */
+ 	*len = HEADER_SIZE + num + (strlen(name) / sizeof(unsigned long)) + 1;
+ 
+-	body = (unsigned long *)safemalloc(*len * sizeof(unsigned long));
++	body = (unsigned long *)xmalloc(*len * sizeof(unsigned long));
+ 	body[*len - 1] =
+ 	    0; /* Zero out end of memory to avoid uninit memory access. */
+ 
+@@ -478,7 +476,7 @@ make_named_packet(
+ 	va_end(ap);
+ 
+ 	strlcpy((char *)&body[HEADER_SIZE + num], name,
+-	    *len * sizeof(unsigned long) - HEADER_SIZE - num);
++	    (*len - HEADER_SIZE - num) * sizeof(unsigned long));
+ 	body[2] = *len;
+ 
+ 	/* DB(("Packet (%lu): %lu %lu %lu `%s'", *len,
+@@ -641,12 +639,12 @@ AddToQueue(int module, unsigned long *ptr, int size, int done)
+ 	struct queue_buff_struct *c, *e;
+ 	unsigned long *d;
+ 
+-	c = (struct queue_buff_struct *)safemalloc(
++	c = (struct queue_buff_struct *)xmalloc(
+ 	    sizeof(struct queue_buff_struct));
+ 	c->next = NULL;
+ 	c->size = size;
+ 	c->done = done;
+-	d = (unsigned long *)safemalloc(size);
++	d = (unsigned long *)xmalloc(size);
+ 	c->data = d;
+ 	memcpy((void *)d, (const void *)ptr, size);
+ 
+diff --git fvwm/fvwm/move.c fvwm/fvwm/move.c
+index 88e0775..e7af139 100644
+--- fvwm/fvwm/move.c
++++ fvwm/fvwm/move.c
+@@ -393,6 +393,21 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
+ 	/* END OF SNAPATTRACTION BLOCK, mirrored in ButtonRelease */
+ }
+ 
++static void
++ClampToScreen(int *x, int *y, int width, int height, int bw)
++{
++	int margin = 32;
++
++	if (*x + width < margin)
++		*x = margin - width + 1;
++	if (*x > Scr.MyDisplayWidth - margin)
++		*x = Scr.MyDisplayWidth - margin;
++	if (*y + height < margin)
++		*y = margin - height + 1;
++	if (*y > Scr.MyDisplayHeight - margin)
++		*y = Scr.MyDisplayHeight - margin;
++}
++
+ /****************************************************************************
+  *
+  * Move the rubberband around, return with the new window location
+@@ -454,6 +469,8 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
+ 					MoveOutline(Scr.Root, 0, 0, 0, 0);
+ 				*FinalX = tmp_win->frame_x;
+ 				*FinalY = tmp_win->frame_y;
++				ClampToScreen(FinalX, FinalY,
++				    Width, Height, bw);
+ 				finished = TRUE;
+ 			}
+ 			done = TRUE;
+@@ -496,6 +513,8 @@ moveLoop(FvwmWindow *tmp_win, int XOffset, int YOffset, int Width, int Height,
+ 						    Scr.Root, 0, 0, 0, 0);
+ 					*FinalX = tmp_win->frame_x;
+ 					*FinalY = tmp_win->frame_y;
++					ClampToScreen(FinalX, FinalY,
++					    Width, Height, bw);
+ 					finished = TRUE;
+ 				}
+ 				done = 1;
+diff --git fvwm/fvwm/read.c fvwm/fvwm/read.c
+index 5e8817f..c3b67ff 100644
+--- fvwm/fvwm/read.c
++++ fvwm/fvwm/read.c
+@@ -38,6 +38,8 @@ char *fvwm_file = NULL;
+ 
+ int numfilesread = 0;
+ 
++#define MAX_NESTING_DEPTH 128
++
+ static int last_read_failed = 0;
+ 
+ static const char *read_system_rc_cmd = "Read system" FVWMRC;
+@@ -156,6 +158,12 @@ static void
+ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
+     unsigned long context, char *action, int *Module, int piperead)
+ {
++
++	if (numfilesread >= MAX_NESTING_DEPTH) {
++		fvwm_msg(ERR, piperead ? "PipeRead" : "Read",
++		    "nesting depth exceeded (%d)", MAX_NESTING_DEPTH);
++		return;
++	}
+ 	char *filename = NULL, *Home, *home_file, *ofilename = NULL;
+ 	char *option; /* optional arg to read */
+ 	char *rest, *tline, line[1024];
+@@ -212,7 +220,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
+ 			Home = getenv("HOME");
+ 			if (Home != NULL) {
+ 				len = strlen(Home) + strlen(ofilename) + 3;
+-				home_file = safemalloc(len);
++				home_file = xmalloc(len);
+ 				strlcpy(home_file, Home, len);
+ 				strlcat(home_file, "/", len);
+ 				strlcat(home_file, ofilename, len);
+@@ -227,7 +235,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
+ 					free(filename);
+ 				Home = FVWM_CONFIGDIR;
+ 				len = strlen(Home) + strlen(ofilename) + 3;
+-				home_file = safemalloc(len);
++				home_file = xmalloc(len);
+ 				strlcpy(home_file, Home, len);
+ 				strlcat(home_file, "/", len);
+ 				strlcat(home_file, ofilename, len);
+diff --git fvwm/fvwm/style.c fvwm/fvwm/style.c
+index 9aebf7e..8ef2d8e 100644
+--- fvwm/fvwm/style.c
++++ fvwm/fvwm/style.c
+@@ -134,7 +134,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				SKIP("BACKCOLOR");
+ 				GETWORD;
+ 				if (len > 0) {
+-					tname.BackColor = safemalloc(len + 1);
++					tname.BackColor = xmalloc(len + 1);
+ 					strncpy(
+ 					    tname.BackColor, restofline, len);
+ 					tname.BackColor[len] = 0;
+@@ -174,7 +174,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 					len++;
+ 				}
+ 				if (len > 0) {
+-					tname.ForeColor = safemalloc(len + 1);
++					tname.ForeColor = xmalloc(len + 1);
+ 					strncpy(
+ 					    tname.ForeColor, restofline, len);
+ 					tname.ForeColor[len] = 0;
+@@ -197,7 +197,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 					}
+ 					if (len > 0) {
+ 						tname.BackColor =
+-						    safemalloc(len + 1);
++						    xmalloc(len + 1);
+ 						strncpy(tname.BackColor,
+ 						    restofline, len);
+ 						tname.BackColor[len] = 0;
+@@ -240,7 +240,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				SKIP("FORECOLOR");
+ 				GETWORD;
+ 				if (len > 0) {
+-					tname.ForeColor = safemalloc(len + 1);
++					tname.ForeColor = xmalloc(len + 1);
+ 					strncpy(
+ 					    tname.ForeColor, restofline, len);
+ 					tname.ForeColor[len] = 0;
+@@ -284,7 +284,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 			} else if (ITIS("IconBox")) {
+ 				icon_boxes *IconBoxes = 0;
+ 				SKIP("IconBox"); /* Skip over word "IconBox" */
+-				IconBoxes = (icon_boxes *)safemalloc(
++				IconBoxes = (icon_boxes *)xmalloc(
+ 				    sizeof(icon_boxes));
+ 				memset(IconBoxes, 0,
+ 				    sizeof(icon_boxes));    /* clear it */
+@@ -562,7 +562,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				SKIP("ICON");
+ 				GETWORD;
+ 				if (len > 0) {
+-					tname.value = safemalloc(len + 1);
++					tname.value = xmalloc(len + 1);
+ 					strncpy(tname.value, restofline, len);
+ 					tname.value[len] = 0;
+ 					tname.off_flags |= ICON_FLAG;
+@@ -592,7 +592,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				SKIP("MINIICON");
+ 				GETWORD;
+ 				if (len > 0) {
+-					tname.mini_value = safemalloc(len + 1);
++					tname.mini_value = xmalloc(len + 1);
+ 					strncpy(
+ 					    tname.mini_value, restofline, len);
+ 					tname.mini_value[len] = 0;
+@@ -820,7 +820,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				SKIP("UseDecor");
+ 				GETQUOTEDWORD;
+ 				if (len > 0) {
+-					tname.Decor = safemalloc(len + 1);
++					tname.Decor = xmalloc(len + 1);
+ 					strncpy(tname.Decor, restofline, len);
+ 					tname.Decor[len] = 0;
+ 				}
+@@ -940,7 +940,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 					restofline =
+ 					    tmp; /* move forward one word */
+ 					if (!hit) {
+-						tmp = safemalloc(500);
++						tmp = xmalloc(500);
++						tmp[0] = '\0';
+ 						strlcat(tmp, "UseStyle: ", 500);
+ 						strlcat(
+ 						    tmp, restofline - len, 500);
+@@ -1034,7 +1035,7 @@ AddToList(name_list *tname)
+ 		lastptr = nptr; /* find end of style list */
+ 	}
+ 
+-	nptr = (name_list *)safemalloc(sizeof(name_list)); /* malloc area */
++	nptr = (name_list *)xmalloc(sizeof(name_list)); /* malloc area */
+ 	memcpy((void *)nptr, (const void *)tname,
+ 	    sizeof(name_list));       /* copy term area into list */
+ 	if (lastptr != NULL)          /* If not first entry in list */
+diff --git fvwm/fvwm/windows.c fvwm/fvwm/windows.c
+index 93836cc..3fe4263 100644
+--- fvwm/fvwm/windows.c
++++ fvwm/fvwm/windows.c
+@@ -248,7 +248,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 				else
+ 					name = t->name;
+ 				hotlen = strlen(name) + strlen(tname) + 48;
+-				t_hot = safemalloc(hotlen);
++				t_hot = xmalloc(hotlen);
+ 				snprintf(t_hot, hotlen, "&%c.  %s", scut,
+ 				    name); /* Generate label */
+ 				if (scut++ == '9')
+@@ -309,12 +309,12 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
+ 					strlcat(t_hot, tname, hotlen);
+ 				}
+ 				if (!func) {
+-					tfunc = safemalloc(40);
++					tfunc = xmalloc(40);
+ 					snprintf(tfunc, 40,
+ 					    "WindowListFunc %ld", t->w);
+ 				} else {
+ 					size_t funclen = strlen(func) + 32;
+-					tfunc = safemalloc(funclen);
++					tfunc = xmalloc(funclen);
+ 					snprintf(tfunc, funclen, "%s %ld", func,
+ 					    t->w);
+ 					free(func);
+
+--- /dev/null
++++ fvwm/fvwm/exec.c
+@@ -0,0 +1,208 @@
++/*
++ * exec.c -- interface to the privilege-separated execution helper.
++ *
++ * The main fvwm process communicates with fvwm_exec via imsg(3)
++ * over a socketpair(2).  The helper executes external commands
++ * without inheriting the X11 connection.
++ */
++
++#include <sys/socket.h>
++#include <sys/wait.h>
++
++#include <imsg.h>
++
++#include <err.h>
++#include <errno.h>
++#include <signal.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++
++#include "config.h"
++#include "fvwm.h"
++#include "misc.h"
++
++enum imsg_exec_type {
++	IMSG_EXEC_RUN = 0,
++	IMSG_EXEC_OK,
++	IMSG_EXEC_ERROR,
++	IMSG_EXEC_EXIT,
++};
++
++static struct imsgbuf	*exec_ibuf;
++static int		 exec_fd = -1;
++static pid_t		 exec_pid = -1;
++
++/*
++ * exec_helper_start -- fork and exec the execution helper.
++ * The helper receives one end of a socketpair for imsg communication.
++ */
++void
++exec_helper_start(void)
++{
++	int sv[2];
++
++	if (socketpair(AF_UNIX, SOCK_STREAM, PF_UNSPEC, sv) == -1)
++		err(1, "socketpair");
++
++	exec_pid = fork();
++	if (exec_pid == -1)
++		err(1, "fork");
++
++	if (exec_pid == 0) {
++		char fdstr[32];
++
++		close(sv[0]);
++		snprintf(fdstr, sizeof(fdstr), "%d", sv[1]);
++		setenv("FVWM_EXEC_FD", fdstr, 1);
++
++		if (pledge("stdio proc exec", NULL) == -1)
++			err(1, "pledge");
++
++		execl(FVWMLIBDIR "/fvwm_exec", "fvwm_exec", NULL);
++		err(1, "execl %s/fvwm_exec", FVWMLIBDIR);
++	}
++
++	close(sv[1]);
++	exec_fd = sv[0];
++
++	exec_ibuf = malloc(sizeof(struct imsgbuf));
++	if (exec_ibuf == NULL)
++		err(1, "malloc");
++	imsg_init(exec_ibuf, exec_fd);
++}
++
++/*
++ * exec_helper_stop -- request helper shutdown and reap.
++ */
++void
++exec_helper_stop(void)
++{
++	if (exec_ibuf == NULL)
++		return;
++
++	imsg_clear(exec_ibuf);
++	close(exec_fd);
++	free(exec_ibuf);
++	exec_ibuf = NULL;
++	exec_fd = -1;
++
++	if (exec_pid > 0) {
++		kill(exec_pid, SIGTERM);
++		waitpid(exec_pid, NULL, 0);
++		exec_pid = -1;
++	}
++}
++
++/*
++ * exec_helper_handle -- process imsg responses from the helper.
++ * Called from the event loop when exec_fd is readable.
++ */
++void
++exec_helper_handle(void)
++{
++	struct imsg imsg;
++	ssize_t n;
++
++	if (exec_ibuf == NULL)
++		return;
++
++	if ((n = imsg_read(exec_ibuf)) == -1 && errno != EAGAIN)
++		warn("imsg_read");
++	if (n == 0) {
++		warnx("exec helper disconnected");
++		exec_helper_stop();
++		return;
++	}
++
++	while ((n = imsg_get(exec_ibuf, &imsg)) != -1) {
++		if (n == 0)
++			break;
++
++		switch (imsg.hdr.type) {
++		case IMSG_EXEC_OK: {
++			pid_t pid;
++
++			if (imsg.hdr.len < (IMSG_HEADER_SIZE + sizeof(pid_t)))
++				break;
++			memcpy(&pid, imsg.data, sizeof(pid_t));
++			break;
++		}
++		case IMSG_EXEC_ERROR: {
++			int errnum;
++
++			if (imsg.hdr.len < (IMSG_HEADER_SIZE + sizeof(int)))
++				break;
++			memcpy(&errnum, imsg.data, sizeof(int));
++			warnc(errnum, "exec helper reported error");
++			break;
++		}
++		case IMSG_EXEC_EXIT: {
++			/* Module/command exit; handled by signal watching */
++			break;
++		}
++		default:
++			break;
++		}
++		imsg_free(&imsg);
++	}
++}
++
++/*
++ * exec_helper_launch -- request the helper to execute a command.
++ * On success, returns 0. On failure (fork error in helper), returns -1.
++ */
++int
++exec_helper_launch(int argc, char **argv, char **envp)
++{
++	struct ibuf *buf;
++	size_t datalen, total;
++	int cargc = argc - 1; /* skip argv[0] which is the path */
++	int envc = 0;
++	int i, ret = -1;
++	int fd;
++
++	if (exec_ibuf == NULL)
++		return -1;
++
++	/* Calculate total payload size: sizeof(int)*2 + all strings */
++	datalen = sizeof(int) * 2;
++	for (i = 1; i < argc; i++)
++		datalen += strlen(argv[i]) + 1;
++	if (envp) {
++		for (i = 0; envp[i] != NULL; i++) {
++			datalen += strlen(envp[i]) + 1;
++			envc++;
++		}
++	}
++
++	if (datalen > MAX_BODY_SIZE * sizeof(unsigned long)) {
++		warnx("exec argument too large");
++		return -1;
++	}
++
++	/* Compose and send the request */
++	buf = imsg_create(exec_ibuf, IMSG_EXEC_RUN, 0, 0, datalen);
++	if (buf == NULL)
++		return -1;
++
++	/* argc */
++	buf->wpos += imsg_add(buf, &cargc, sizeof(int));
++	/* envc */
++	buf->wpos += imsg_add(buf, &envc, sizeof(int));
++	/* strings */
++	for (i = 1; i < argc; i++) {
++		buf->wpos += imsg_add(buf, argv[i], strlen(argv[i]) + 1);
++	}
++	if (envp) {
++		for (i = 0; envp[i] != NULL; i++) {
++			buf->wpos += imsg_add(buf, envp[i],
++			    strlen(envp[i]) + 1);
++		}
++	}
++	imsg_close(exec_ibuf, buf);
++	imsg_flush(exec_ibuf);
++
++	return 0;
++}
+--- /dev/null
++++ fvwm/fvwm/fvwm_exec.c
+@@ -0,0 +1,169 @@
++/*
++ * fvwm_exec.c -- privilege-separated execution helper for fvwm(1)
++ *
++ * Runs as a separate process that receives exec requests via imsg(3)
++ * from the main fvwm process, executes them, and reports results.
++ */
++
++#include <sys/socket.h>
++
++#include <imsg.h>
++
++#include <err.h>
++#include <limits.h>
++#include <stdlib.h>
++#include <string.h>
++#include <signal.h>
++#include <unistd.h>
++
++#include "config.h"
++
++/*
++ * imsg_exec -- structured IPC message types for execution requests.
++ *
++ * Message flow:
++ *   fvwm -> helper:  IMSG_EXEC_RUN       (path + argv + envp)
++ *   helper -> fvwm:  IMSG_EXEC_OK        (pid of launched child)
++ *                    IMSG_EXEC_ERROR     (errno + message)
++ *                    IMSG_EXEC_EXIT      (pid + status, sent on child exit)
++ */
++
++enum imsg_exec_type {
++	IMSG_EXEC_RUN = 0,
++	IMSG_EXEC_OK,
++	IMSG_EXEC_ERROR,
++	IMSG_EXEC_EXIT,
++};
++
++__dead static void
++usage(void)
++{
++	extern char *__progname;
++
++	fprintf(stderr, "usage: %s\n", __progname);
++	exit(1);
++}
++
++static void
++exec_child(int argc, char **argv, char **envp)
++{
++	if (pledge("stdio exec", NULL) == -1)
++		err(1, "pledge");
++
++	closefrom(3);
++
++	if (envp)
++		execve(argv[0], argv, envp);
++	else
++		execv(argv[0], argv);
++
++	err(1, "execv: %s", argv[0]);
++}
++
++int
++main(int argc, char **argv)
++{
++	struct imsgbuf ibuf;
++	struct imsg imsg;
++	ssize_t n;
++	int s;
++
++	if (argc != 1)
++		usage();
++
++	if (getenv("FVWM_EXEC_FD") == NULL)
++		errx(1, "FVWM_EXEC_FD not set");
++
++	s = (int)strtonum(getenv("FVWM_EXEC_FD"), 0, INT_MAX, NULL);
++
++	signal(SIGPIPE, SIG_IGN);
++
++	imsg_init(&ibuf, s);
++
++	if (pledge("stdio proc exec", NULL) == -1)
++		err(1, "pledge");
++
++	for (;;) {
++		if ((n = imsg_read(&ibuf)) == -1 && errno != EAGAIN)
++			err(1, "imsg_read");
++		if (n == 0)
++			break;
++
++		while ((n = imsg_get(&ibuf, &imsg)) != -1) {
++			if (n == 0)
++				break;
++
++			switch (imsg.hdr.type) {
++			case IMSG_EXEC_RUN: {
++				pid_t pid;
++				char **child_argv;
++				char **child_envp;
++				int cargc, envc;
++				char *data = imsg.data;
++
++				if (imsg.hdr.len < sizeof(int) * 2) {
++					warnx("short IMSG_EXEC_RUN");
++					break;
++				}
++				memcpy(&cargc, data, sizeof(int));
++				memcpy(&envc, data + sizeof(int), sizeof(int));
++				data += sizeof(int) * 2;
++
++				/* Reconstruct argv */
++				child_argv = malloc(
++				    (cargc + 1) * sizeof(char *));
++				if (child_argv == NULL)
++					err(1, "malloc");
++				for (int i = 0; i < cargc; i++) {
++					size_t len = strlen(data);
++					child_argv[i] = data;
++					data += len + 1;
++				}
++				child_argv[cargc] = NULL;
++
++				/* Reconstruct envp */
++				child_envp = malloc(
++				    (envc + 1) * sizeof(char *));
++				if (child_envp == NULL)
++					err(1, "malloc");
++				for (int i = 0; i < envc; i++) {
++					size_t len = strlen(data);
++					child_envp[i] = data;
++					data += len + 1;
++				}
++				child_envp[envc] = NULL;
++
++				pid = fork();
++				if (pid == -1) {
++					warn("fork");
++					imsg_compose(&ibuf, IMSG_EXEC_ERROR,
++					    0, 0, -1, &errno, sizeof(int));
++					free(child_argv);
++					free(child_envp);
++					break;
++				}
++				if (pid == 0)
++					exec_child(cargc, child_argv,
++					    child_envp);
++
++				free(child_argv);
++				free(child_envp);
++
++				imsg_compose(&ibuf, IMSG_EXEC_OK,
++				    0, 0, -1, &pid, sizeof(pid_t));
++				imsg_flush(&ibuf);
++				break;
++			}
++			default:
++				warnx("unknown imsg type %d",
++				    imsg.hdr.type);
++				break;
++			}
++			imsg_free(&imsg);
++		}
++	}
++
++	imsg_clear(&ibuf);
++	close(s);
++	return 0;
++}
+--- /dev/null
++++ fvwm/fvwm/fvwm_sandbox.h
+@@ -0,0 +1,187 @@
++/*
++ * fvwm_sandbox.h -- common sandbox helper for fvwm processes.
++ *
++ * Provides pledge/unveil setup patterns used across the fvwm module set.
++ * Each module calls only the helpers it needs; there is no "one size fits
++ * all" policy.
++ *
++ * All pledge/unveil calls check return values and fail with diagnostics.
++ *
++ * IMPORTANT: Every policy declared here requires verification on a real
++ * OpenBSD system with ktrace(1) and a full X11 session.
++ */
++
++#ifndef FVWM_SANDBOX_H
++#define FVWM_SANDBOX_H
++
++#ifndef FVWMLIBDIR
++#define FVWMLIBDIR "/usr/X11R6/lib/X11/fvwm"
++#endif
++
++/*
++ * sandbox_x11_only -- process that only needs X11 + stdio + fvwm pipes.
++ * No filesystem access, no network, no process creation.
++ * Used by: FvwmAuto, FvwmBanner, FvwmBacker, FvwmIdent, FvwmIconBox,
++ *          FvwmPager, FvwmScroll, FvwmTalk, FvwmWinList
++ */
++static inline void
++sandbox_x11_only(const char *progname)
++{
++	if (pledge("stdio", NULL) == -1)
++		err(1, "%s: pledge stdio", progname);
++}
++
++/*
++ * sandbox_x11_config -- X11 + read-only config file access.
++ * No write, no network, no process creation.
++ * Used by: FvwmButtons, FvwmIconMan (after config read),
++ *          FvwmForm (after /dev/null open)
++ */
++static inline void
++sandbox_x11_config(const char *progname)
++{
++	if (pledge("stdio rpath", NULL) == -1)
++		err(1, "%s: pledge stdio rpath", progname);
++}
++
++/*
++ * sandbox_save_state -- X11 + write to home directory.
++ * No network, no process creation.
++ * Used by: FvwmSave, FvwmSaveDesk
++ *
++ * Unveil is set up BEFORE calling this to restrict to the exact file.
++ */
++static inline void
++sandbox_save_state(const char *progname)
++{
++	if (pledge("stdio rpath wpath cpath", NULL) == -1)
++		err(1, "%s: pledge stdio rpath wpath cpath", progname);
++}
++
++/*
++ * sandbox_cpp_preproc -- X11 + fork/exec cpp + tmp + dns.
++ * Used by: FvwmCpp
++ *
++ * Unveil is set up BEFORE calling this.
++ */
++static inline void
++sandbox_cpp_preproc(const char *progname)
++{
++	if (pledge("stdio rpath wpath cpath proc exec dns getpw",
++	    NULL) == -1)
++		err(1, "%s: pledge", progname);
++}
++
++/*
++ * sandbox_m4_preproc -- X11 + popen m4 + tmp + dns.
++ * Used by: FvwmM4
++ *
++ * Unveil is set up BEFORE calling this.
++ */
++static inline void
++sandbox_m4_preproc(const char *progname)
++{
++	if (pledge("stdio rpath wpath cpath proc exec dns getpw",
++	    NULL) == -1)
++		err(1, "%s: pledge", progname);
++}
++
++/*
++ * sandbox_xpmroot -- X11-only utility, no filesystem writes.
++ */
++static inline void
++sandbox_xpmroot(const char *progname)
++{
++	if (pledge("stdio", NULL) == -1)
++		err(1, "%s: pledge stdio", progname);
++}
++
++/*
++ * sandbox_main_fvwm -- main window manager process.
++ * After startup: retains proc for module fork, exec for helper launch,
++ * rpath for config reads.
++ */
++static inline void
++sandbox_main_fvwm(const char *progname)
++{
++	if (unveil(FVWMLIBDIR, "rx") == -1)
++		err(1, "%s: unveil %s", progname, FVWMLIBDIR);
++	if (unveil("/etc/X11/fvwm", "r") == -1)
++		err(1, "%s: unveil /etc/X11/fvwm", progname);
++	if (unveil("/tmp", "rwc") == -1)
++		err(1, "%s: unveil /tmp", progname);
++	if (unveil(NULL, NULL) == -1)
++		err(1, "%s: unveil lock", progname);
++
++	if (pledge("stdio rpath proc exec", NULL) == -1)
++		err(1, "%s: pledge", progname);
++}
++
++/*
++ * sandbox_exec_helper -- fvwm_exec helper process.
++ * Receives imsg requests, forks children, and execs them.
++ */
++static inline void
++sandbox_exec_helper(const char *progname)
++{
++	if (pledge("stdio proc exec", NULL) == -1)
++		err(1, "%s: pledge", progname);
++}
++
++/*
++ * sandbox_exec_child -- child of the execution helper, about to exec.
++ */
++static inline void
++sandbox_exec_child(const char *progname)
++{
++	if (pledge("stdio exec", NULL) == -1)
++		err(1, "%s: pledge", progname);
++}
++
++/*
++ * unveil_tempdir -- unveil the temporary directory (from $TMPDIR or /tmp).
++ * For modules that create temp files (FvwmCpp, FvwmM4).
++ */
++static inline void
++unveil_tempdir(const char *progname)
++{
++	const char *tmp;
++
++	tmp = getenv("TMPDIR");
++	if (tmp == NULL)
++		tmp = "/tmp";
++	if (unveil(tmp, "rwc") == -1)
++		err(1, "%s: unveil %s", progname, tmp);
++}
++
++/*
++ * unveil_home_read -- unveil $HOME for reading only.
++ */
++static inline void
++unveil_home_read(const char *progname)
++{
++	const char *home;
++
++	home = getenv("HOME");
++	if (home == NULL)
++		home = ".";
++	if (unveil(home, "r") == -1)
++		err(1, "%s: unveil %s", progname, home);
++}
++
++/*
++ * unveil_home_write -- unveil $HOME for read/write/create.
++ */
++static inline void
++unveil_home_write(const char *progname)
++{
++	const char *home;
++
++	home = getenv("HOME");
++	if (home == NULL)
++		home = ".";
++	if (unveil(home, "rwc") == -1)
++		err(1, "%s: unveil %s", progname, home);
++}
++
++#endif /* FVWM_SANDBOX_H */
+--- /dev/null
++++ fvwm/fvwm/xalloc.h
+@@ -0,0 +1,77 @@
++#ifndef FVWM_XALLOC_H
++#define FVWM_XALLOC_H
++
++#include <err.h>
++#include <stdlib.h>
++#include <string.h>
++
++static inline void *
++xmalloc(size_t size)
++{
++	void *ptr;
++
++	if (size == 0)
++		size = 1;
++	ptr = malloc(size);
++	if (ptr == NULL)
++		err(1, "malloc");
++	return ptr;
++}
++
++static inline void *
++xcalloc(size_t nmemb, size_t size)
++{
++	void *ptr;
++
++	if (nmemb == 0 || size == 0) {
++		nmemb = 1;
++		size = 1;
++	}
++	ptr = calloc(nmemb, size);
++	if (ptr == NULL)
++		err(1, "calloc");
++	return ptr;
++}
++
++static inline void *
++xrealloc(void *ptr, size_t size)
++{
++	void *newptr;
++
++	if (size == 0)
++		size = 1;
++	newptr = realloc(ptr, size);
++	if (newptr == NULL)
++		err(1, "realloc");
++	return newptr;
++}
++
++static inline void *
++xreallocarray(void *ptr, size_t nmemb, size_t size)
++{
++	return xrealloc(ptr, nmemb * size);
++}
++
++static inline char *
++xstrdup(const char *s)
++{
++	char *copy;
++
++	copy = strdup(s);
++	if (copy == NULL)
++		err(1, "strdup");
++	return copy;
++}
++
++static inline char *
++xstrndup(const char *s, size_t n)
++{
++	char *copy;
++
++	copy = strndup(s, n);
++	if (copy == NULL)
++		err(1, "strndup");
++	return copy;
++}
++
++#endif /* FVWM_XALLOC_H */

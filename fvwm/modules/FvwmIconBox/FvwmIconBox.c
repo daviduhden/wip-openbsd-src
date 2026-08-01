@@ -18,9 +18,8 @@
 #define HORIZONTAL 2
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif
 
 #include <sys/time.h>
@@ -186,7 +185,7 @@ main(int argc, char **argv)
 
 	{
 		size_t name_len = strlen(temp) + 1;
-		MyName = safemalloc(name_len);
+		MyName = xmalloc(name_len);
 		strlcpy(MyName, temp, name_len);
 	}
 
@@ -261,6 +260,8 @@ Loop(void)
 	int tw, th;
 	int diffx, diffy;
 	int oldw, oldh;
+
+	sandbox_x11_only("FvwmIconBox");
 
 	while (1) {
 		if (My_XNextEvent(dpy, &Event)) {
@@ -1661,7 +1662,7 @@ parseicon(char *tline)
 	struct iconfile *tmp;
 	char *ptr, *start, *end;
 
-	tmp = (struct iconfile *)safemalloc(sizeof(struct iconfile));
+	tmp = (struct iconfile *)xmalloc(sizeof(struct iconfile));
 
 	/* windowname */
 	tmp->name = stripcpy2(tline);
@@ -1692,7 +1693,7 @@ parseicon(char *tline)
 	while (!isspace(*end) && (*end != '\n') && (*end != 0))
 		end++;
 	len = end - start;
-	ptr = safemalloc(len + 1);
+	ptr = xmalloc(len + 1);
 	strncpy(ptr, start, len);
 	ptr[len] = 0;
 	tmp->iconfile = ptr;
@@ -1743,7 +1744,7 @@ parsemouse(char *tline)
 	int len;
 	char *ptr, *start, *end, *tmp;
 
-	f = (struct mousefunc *)safemalloc(sizeof(struct mousefunc));
+	f = (struct mousefunc *)xmalloc(sizeof(struct mousefunc));
 	f->next = NULL;
 	f->mouse = 0;
 
@@ -1789,7 +1790,7 @@ parsemouse(char *tline)
 	}
 	end++;
 	len = end - start;
-	ptr = safemalloc(len + 1);
+	ptr = xmalloc(len + 1);
 	strncpy(ptr, start, len);
 	ptr[len] = 0;
 	f->action = ptr;
@@ -1821,7 +1822,7 @@ parsekey(char *tline)
 	while ((!isspace(*end)) && (*end != '\n') && (*end != 0))
 		end++;
 	nlen = end - start;
-	nptr = safemalloc(nlen + 1);
+	nptr = xmalloc(nlen + 1);
 	strncpy(nptr, start, nlen);
 	nptr[nlen] = 0;
 
@@ -1840,7 +1841,7 @@ parsekey(char *tline)
 	}
 	end++;
 	alen = end - start;
-	aptr = safemalloc(alen + 1);
+	aptr = xmalloc(alen + 1);
 	strncpy(aptr, start, alen);
 	aptr[alen] = 0;
 
@@ -1865,7 +1866,7 @@ parsekey(char *tline)
 
 			for (int col = 0; col < width; col++) {
 				if (mapping[col] == keysym) {
-					k = (struct keyfunc *)safemalloc(
+					k = (struct keyfunc *)xmalloc(
 					    sizeof(struct keyfunc));
 					k->name = nptr;
 					k->keycode = i;
@@ -2140,7 +2141,7 @@ process_message(unsigned long type, unsigned long *body)
 			RedrawIcon(tmp, 2);
 		break;
 	case M_DEFAULTICON:
-		str = (char *)safemalloc(strlen((char *)&body[3]) + 1);
+		str = (char *)xmalloc(strlen((char *)&body[3]) + 1);
 		strlcpy(str, (char *)&body[3], strlen((char *)&body[3]) + 1);
 		FvwmDefaultIcon = str;
 		break;
@@ -2302,7 +2303,7 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 		tmp = tmp->next;
 	}
 
-	new = (struct icon_info *)safemalloc(sizeof(struct icon_info));
+	new = (struct icon_info *)xmalloc(sizeof(struct icon_info));
 	new->name = NULL;
 	new->window_name = NULL;
 	new->res_class = NULL;
@@ -2406,7 +2407,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 	while (tmp != NULL) {
 		if (tmp->id == id) {
 			size_t item_len = strlen(item) + 1;
-			str = (char *)safemalloc(item_len);
+			str = (char *)xmalloc(item_len);
 			strlcpy(str, item, item_len);
 
 			switch (type) {
@@ -2850,7 +2851,7 @@ stripcpy2(char *source)
 		ptr++;
 		count++;
 	}
-	ptr = safemalloc(count + 1);
+	ptr = xmalloc(count + 1);
 	strncpy(ptr, source, count);
 	ptr[count] = 0;
 	return ptr;

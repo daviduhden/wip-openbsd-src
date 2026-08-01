@@ -87,7 +87,7 @@ GetQuotedString(char *sin, char **sout, const char *delims, const char *qlong,
 	while (*t && !strchr(delims, *t))
 		t = SkipQuote(t, qlong, qstart, qend);
 	len = t - sin;
-	*sout = (char *)safemalloc(len + 1);
+	*sout = (char *)xmalloc(len + 1);
 	memcpy(*sout, sin, len);
 	(*sout)[len] = 0;
 	if (*t)
@@ -283,7 +283,7 @@ DoGetNextToken(
 	if (out_delim)
 		*out_delim = *end;
 
-	text = safemalloc(end - start + 1);
+	text = xmalloc(end - start + 1);
 	*token = text;
 
 	/* copy token */

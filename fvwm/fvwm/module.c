@@ -53,12 +53,12 @@ initModules(void)
 
 	npipes = GetFdWidth();
 
-	writePipes = (int *)safemalloc(sizeof(int) * npipes);
-	readPipes = (int *)safemalloc(sizeof(int) * npipes);
-	pipeOn = (int *)safemalloc(sizeof(int) * npipes);
-	PipeMask = (unsigned long *)safemalloc(sizeof(unsigned long) * npipes);
-	pipeName = (char **)safemalloc(sizeof(char *) * npipes);
-	pipeQueue = (struct queue_buff_struct **)safemalloc(
+	writePipes = (int *)xmalloc(sizeof(int) * npipes);
+	readPipes = (int *)xmalloc(sizeof(int) * npipes);
+	pipeOn = (int *)xmalloc(sizeof(int) * npipes);
+	PipeMask = (unsigned long *)xmalloc(sizeof(unsigned long) * npipes);
+	pipeName = (char **)xmalloc(sizeof(char *) * npipes);
+	pipeQueue = (struct queue_buff_struct **)xmalloc(
 	    sizeof(struct queue_buff_struct *) * npipes);
 
 	for (i = 0; i < npipes; i++) {
@@ -209,13 +209,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 		/* make the PositiveWrite pipe non-blocking. Don't want to jam
 		   up fvwm because of an uncooperative module */
-#ifdef O_NONBLOCK
-		fcntl(writePipes[i], F_SETFL,
-		    O_NONBLOCK); /* POSIX, better behavior */
-#else
-		fcntl(writePipes[i], F_SETFL,
-		    O_NDELAY); /* early SYSV, bad behavior */
-#endif
+		fcntl(writePipes[i], F_SETFL, O_NONBLOCK);
 		/* Mark the pipes close-on exec so other programs
 		 * won`t inherit them */
 		if (fcntl(readPipes[i], F_SETFD, 1) == -1)
@@ -238,9 +232,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		fvwm_msg(ERR, "executeModule", "Execution of module failed: %s",
 		    arg1);
 		perror("");
-		close(app_to_fvwm[1]);
-		close(fvwm_to_app[0]);
-		exit(1);
+		_exit(1);
 	} else {
 		fvwm_msg(ERR, "executeModule", "Fork failed");
 		free(arg1);
@@ -268,10 +260,16 @@ HandleModuleInput(Window w, int channel)
 		return 0;
 	}
 
-	if (size > 255) {
+	if (size < 0) {
+		fvwm_msg(ERR, "HandleModuleInput",
+		    "Module sent negative command size (%d)", size);
+		KillModule(channel, 5);
+		return 0;
+	}
+	if (size > (int)(sizeof(text) - 1)) {
 		fvwm_msg(ERR, "HandleModuleInput",
 		    "Module command is too big (%d)", size);
-		size = 255;
+		size = (int)(sizeof(text) - 1);
 	}
 
 	pipeOn[channel] = 1;
@@ -469,7 +467,7 @@ make_named_packet(
 	   name string.  */
 	*len = HEADER_SIZE + num + (strlen(name) / sizeof(unsigned long)) + 1;
 
-	body = (unsigned long *)safemalloc(*len * sizeof(unsigned long));
+	body = (unsigned long *)xmalloc(*len * sizeof(unsigned long));
 	body[*len - 1] =
 	    0; /* Zero out end of memory to avoid uninit memory access. */
 
@@ -478,7 +476,7 @@ make_named_packet(
 	va_end(ap);
 
 	strlcpy((char *)&body[HEADER_SIZE + num], name,
-	    *len * sizeof(unsigned long) - HEADER_SIZE - num);
+	    (*len - HEADER_SIZE - num) * sizeof(unsigned long));
 	body[2] = *len;
 
 	/* DB(("Packet (%lu): %lu %lu %lu `%s'", *len,
@@ -641,12 +639,12 @@ AddToQueue(int module, unsigned long *ptr, int size, int done)
 	struct queue_buff_struct *c, *e;
 	unsigned long *d;
 
-	c = (struct queue_buff_struct *)safemalloc(
+	c = (struct queue_buff_struct *)xmalloc(
 	    sizeof(struct queue_buff_struct));
 	c->next = NULL;
 	c->size = size;
 	c->done = done;
-	d = (unsigned long *)safemalloc(size);
+	d = (unsigned long *)xmalloc(size);
 	c->data = d;
 	memcpy((void *)d, (const void *)ptr, size);
 

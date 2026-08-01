@@ -16,6 +16,7 @@
 
 #include "../../libs/fvwmlib.h"
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -265,6 +266,8 @@ CopyQuotedString(char *cp)
 {
 	char *dp, *bp, c;
 	bp = dp = (char *)malloc(strlen(cp) + 1);
+	sandbox_x11_config("FvwmForm");
+
 	while (1) {
 		switch (c = *(cp++)) {
 		case '\\':

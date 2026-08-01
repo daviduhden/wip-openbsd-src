@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -99,7 +100,7 @@ main(int argc, char **argv)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
-	MyName = safemalloc(name_len + 2);
+	MyName = xmalloc(name_len + 2);
 	strlcpy(MyName, "*", name_len + 2);
 	strlcat(MyName, temp, name_len + 2);
 	Clength = strlen(MyName);
@@ -183,6 +184,9 @@ void
 Loop(int *fd)
 {
 	unsigned long header[4], *body;
+
+	sandbox_x11_only("FvwmIdent");
+	sandbox_x11_only("FvwmIdent");
 
 	while (1) {
 		if (ReadFvwmPacket(fd[1], header, &body) > 0) {
@@ -418,6 +422,7 @@ list_end(void)
 	XMapWindow(dpy, main_win);
 
 	/* Window is created. Display it until the user clicks or deletes it. */
+	sandbox_x11_only("FvwmIdent");
 	while (1) {
 		XNextEvent(dpy, &Event);
 		switch (Event.type) {
@@ -535,7 +540,7 @@ AddToList(char *s1, char *s2)
 	max_col1 = max_col1 > tw1 ? max_col1 : tw1;
 	max_col2 = max_col2 > tw2 ? max_col2 : tw2;
 
-	item = (struct Item *)safemalloc(sizeof(struct Item));
+	item = (struct Item *)xmalloc(sizeof(struct Item));
 
 	item->col1 = s1;
 	item->col2 = s2;

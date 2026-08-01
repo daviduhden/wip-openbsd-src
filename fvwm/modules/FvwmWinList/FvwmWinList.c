@@ -43,6 +43,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -51,8 +52,6 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif
 
 #include <X11/Intrinsic.h>
@@ -68,7 +67,6 @@
 #include "Colors.h"
 #include "FvwmWinList.h"
 #include "List.h"
-#include "Mallocs.h"
 
 #define GRAB_EVENTS							\
 	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |	\
@@ -156,7 +154,7 @@ main(int argc, char **argv)
 
 	/* Setup my name */
 	size_t name_len = strlen(temp);
-	Module = safemalloc(name_len + 2);
+	Module = xmalloc(name_len + 2);
 	strlcpy(Module, "*", name_len + 2);
 	strlcat(Module, temp, name_len + 2);
 	Clength = strlen(Module);
@@ -241,6 +239,9 @@ void
 MainEventLoop(void)
 {
 	fd_set readset;
+
+	sandbox_x11_only("FvwmWinList");
+	sandbox_x11_only("FvwmWinList");
 
 	while (!isTerminated) {
 		FD_ZERO(&readset);
@@ -425,7 +426,7 @@ SendFvwmPipe(char *message, unsigned long window)
 	while (1) {
 		temp = strchr(hold, ',');
 		if (temp != NULL) {
-			temp_msg = safemalloc(temp - hold + 1);
+			temp_msg = xmalloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
 			hold = temp + 1;
@@ -477,24 +478,21 @@ WaitForExpose(void)
 	XEvent Event;
 
 	while (1) {
-		/*
-		 * Temporary solution to stop the process blocking
-		 * in XNextEvent once we have been asked to quit.
-		 * There is still a small race condition between
-		 * checking the flag and calling the X-Server, but
-		 * we can fix that ...
-		 */
 		if (isTerminated) {
-			/* Just exit - the installed exit-procedure will clean
-			 * up */
 			exit(0);
 		}
-		/**/
 
-		XNextEvent(dpy, &Event);
-		if (Event.type == Expose) {
+		if (XCheckTypedEvent(dpy, Expose, &Event)) {
 			if (Event.xexpose.count == 0)
 				break;
+		} else if (isTerminated) {
+			exit(0);
+		} else {
+			XNextEvent(dpy, &Event);
+			if (Event.type == Expose) {
+				if (Event.xexpose.count == 0)
+					break;
+			}
 		}
 	}
 }
@@ -767,8 +765,9 @@ find_frame_window(Window win, int *off_x, int *off_y)
 	XWindowAttributes attr;
 
 	while (1) {
-		XQueryTree(dpy, win, &root, &parent, &junkw, &junki);
-		if (junkw)
+		junkw = NULL;
+		if (XQueryTree(dpy, win, &root, &parent, &junkw, &junki) &&
+		    junkw)
 			XFree(junkw);
 		if (parent == root)
 			break;
@@ -861,7 +860,7 @@ makename(const char *string, long flags)
 	char *ptr;
 	size_t name_len = strlen(string);
 	size_t extra = (flags & ICONIFIED) ? 2 : 1;
-	ptr = safemalloc(name_len + extra);
+	ptr = xmalloc(name_len + extra);
 	ptr[0] = '\0';
 	if (flags & ICONIFIED)
 		strlcpy(ptr, "(", name_len + extra);

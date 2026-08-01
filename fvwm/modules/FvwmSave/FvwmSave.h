@@ -27,7 +27,6 @@ struct list {
  *************************************************************************/
 void Loop(int *fd);
 void SendInfo(int *fd, char *message, unsigned long window);
-char *safemalloc(int length);
 struct list *find_window(unsigned long id);
 void add_window(unsigned long new_win, unsigned long *body);
 void DeadPipe(int nonsense);

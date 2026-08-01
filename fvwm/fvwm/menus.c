@@ -2345,8 +2345,9 @@ MakeMenu(MenuRoot *mr)
 
 		if (mr->first == mr->last) {
 			fvwm_msg(ERR, "MakeMenu",
-			    "BUG: Menu contains only contionuation");
-			break;
+			    "BUG: Menu contains only continuation");
+			mr->continuation = cont->continuation;
+			continue;
 		}
 		/* link first item of continuation to item before 'more...' */
 		mr->last->prev->next = cont->first;
@@ -2473,7 +2474,7 @@ MakeMenu(MenuRoot *mr)
 			}
 			len = 8 + strlen(mr->name);
 			szMenuContinuationActionAndName =
-			    (char *)safemalloc(len);
+			    (char *)xmalloc(len);
 			strlcpy(szMenuContinuationActionAndName, "Popup ", len);
 			strlcat(szMenuContinuationActionAndName, mr->name, len);
 			strlcat(szMenuContinuationActionAndName, "$", len);
@@ -2627,9 +2628,9 @@ scanForColor(char *instring, Pixel *p, Bool *c, char identifier)
 	*c = False;
 
 	/* save instring in case can't find pixmap */
-	save_instring = (char *)safemalloc(strlen(instring) + 1);
+	save_instring = (char *)xmalloc(strlen(instring) + 1);
 	len = strlen(instring) + 1;
-	name = (char *)safemalloc(len);
+	name = (char *)xmalloc(len);
 	strlcpy(save_instring, instring, len);
 
 	/* Scan whole string        */
@@ -2692,10 +2693,10 @@ scanForPixmap(char *instring, FvwmPicture **p, char identifier)
 #ifdef UGLY_WHEN_PIXMAPS_MISSING
 	/* save instring in case can't find pixmap */
 	len = strlen(instring) + 1;
-	save_instring = (char *)safemalloc(len);
+	save_instring = (char *)xmalloc(len);
 	strlcpy(save_instring, instring, len);
 #endif
-	name = (char *)safemalloc(strlen(instring) + 1);
+	name = (char *)xmalloc(strlen(instring) + 1);
 
 	/* Scan whole string	*/
 	for (txt = instring; *txt != '\0'; txt++) {
@@ -2803,7 +2804,7 @@ AddToMenu(
 		action = "Nop";
 	GetNextToken(GetNextToken(action, &token), &option);
 
-	tmp = (MenuItem *)safemalloc(sizeof(MenuItem));
+	tmp = (MenuItem *)xmalloc(sizeof(MenuItem));
 	tmp->chHotkey = '\0';
 	tmp->next = NULL;
 	tmp->mr = menu; /* this gets updated in MakeMenu if we split the menu
@@ -2849,7 +2850,7 @@ AddToMenu(
 	end = item;
 	while ((*end != '\t') && (*end != 0))
 		end++;
-	tmp->item = safemalloc(end - start + 1);
+	tmp->item = xmalloc(end - start + 1);
 	strncpy(tmp->item, start, end - start);
 	tmp->item[end - start] = 0;
 	tmp->item2 = NULL;
@@ -2863,7 +2864,7 @@ AddToMenu(
 		if (end > start) {
 			char *s;
 
-			tmp->item2 = safemalloc(end - start + 1);
+			tmp->item2 = xmalloc(end - start + 1);
 			strncpy(tmp->item2, start, end - start);
 			tmp->item2[end - start] = 0;
 			s = tmp->item2;
@@ -2948,7 +2949,7 @@ NewMenuRoot(char *name, Bool fFunction)
 {
 	MenuRoot *tmp;
 
-	tmp = (MenuRoot *)safemalloc(sizeof(MenuRoot));
+	tmp = (MenuRoot *)xmalloc(sizeof(MenuRoot));
 
 	tmp->first = NULL;
 	tmp->last = NULL;

@@ -162,7 +162,10 @@ ConfigureIconWindow(button_info *b)
 		h = min(h, BH - 2 * (ypad + framew));
 
 	if (w < 1 || h < 1) {
-		XMoveResizeWindow(Dpy, b->IconWin, 2000, 2000, 1, 1);
+		if (buttonSwallowCount(b) == 3)
+			XMoveWindow(Dpy, b->IconWin, 2000, 2000);
+		else
+			XMoveResizeWindow(Dpy, b->IconWin, 2000, 2000, 1, 1);
 		return; /* No need drawing to this */
 	}
 

@@ -522,15 +522,6 @@ set_window_button(WinData *win, int index)
 	win->button = b;
 }
 
-static void *
-Realloc(void *ptr, int size)
-{
-	if (ptr == NULL)
-		return safemalloc(size);
-	else
-		return realloc(ptr, size);
-}
-
 static void
 set_num_buttons(ButtonArray *buttons, int n)
 {
@@ -541,15 +532,12 @@ set_num_buttons(ButtonArray *buttons, int n)
 	if (n > buttons->num_buttons) {
 		buttons->dirty_flags |= NUM_BUTTONS_CHANGED;
 		buttons->buttons =
-		    (Button **)Realloc(buttons->buttons, n * sizeof(Button *));
-		if (buttons->buttons == NULL) {
-			ConsoleMessage("Realloc failed! Bailing out\n");
-			ShutMeDown(1);
-		}
+		    (Button **)xreallocarray(buttons->buttons, n,
+		    sizeof(Button *));
 
 		for (i = buttons->num_buttons; i < n; i++) {
 			buttons->buttons[i] =
-			    (Button *)safemalloc(sizeof(Button));
+			    (Button *)xmalloc(sizeof(Button));
 			buttons->buttons[i]->index = i;
 			buttons->buttons[i]->drawn_state.dirty_flags = 0;
 			buttons->buttons[i]->drawn_state.w = 0;
@@ -1640,8 +1628,10 @@ insert_windows_button(WinData *win)
 
 	ConsoleDebug(X11, "insert_windows_button: %s\n", win->titlename);
 
-	assert(man);
-	selected_index = selected_button_in_man(man);
+	if (!win || !win->complete || !man) {
+		ConsoleMessage("Internal error in insert_windows_button\n");
+		ShutMeDown(1);
+	}
 
 	if (win->button) {
 		ConsoleDebug(X11, "insert_windows_button: POSSIBLE BUG: "
@@ -1649,10 +1639,8 @@ insert_windows_button(WinData *win)
 		return;
 	}
 
-	if (!win || !win->complete || !man) {
-		ConsoleMessage("Internal error in insert_windows_button\n");
-		ShutMeDown(1);
-	}
+	assert(man);
+	selected_index = selected_button_in_man(man);
 
 	buttons = &man->buttons;
 

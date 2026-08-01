@@ -17,6 +17,7 @@
 
 #include "../libs/fvwmlib.h"
 #include "config.h"
+#include "../fvwm/fvwm_sandbox.h"
 
 Display *dpy;
 int screen;
@@ -40,6 +41,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "Try Again\n");
 		exit(1);
 	}
+	sandbox_xpmroot("xpmroot");
 	dpy = XOpenDisplay(display_name);
 	if (!dpy) {
 		fprintf(stderr, "Xpmroot:  unable to open display '%s'\n",

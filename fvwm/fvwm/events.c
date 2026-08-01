@@ -37,8 +37,6 @@
 
 #include "config.h"
 
-#if HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h>
 #endif
 
 #include <sys/time.h>
@@ -1002,14 +1000,12 @@ HandleButtonPress()
 	      Mod3Mask | Mod4Mask | Mod5Mask)) ==
 	     0)) {
 		SetFocus(Tmp_win->w, Tmp_win, 1);
-		/* #ifdef CLICKY_MODE_1 */
+		/* CLICKY_MODE_1: raise window on click */
 		if (Scr.ClickToFocusRaises ||
 		    ((Event.xany.window != Tmp_win->w) &&
 		     (Event.xbutton.subwindow != Tmp_win->w) &&
 		     (Event.xany.window != Tmp_win->Parent) &&
-		     (Event.xbutton.subwindow != Tmp_win->Parent)))
-		/* #endif */
-		      {
+		     (Event.xbutton.subwindow != Tmp_win->Parent))) {
 			RaiseWindow(Tmp_win);
 		}
 

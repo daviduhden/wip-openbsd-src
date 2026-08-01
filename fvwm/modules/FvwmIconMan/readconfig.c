@@ -437,7 +437,7 @@ static int JmpArgs = 0;
 static Function *
 parse_function(char **line, char *pstop_char)
 {
-	Function *ftype = (Function *)safemalloc(sizeof(Function));
+	Function *ftype = (Function *)xmalloc(sizeof(Function));
 	char *ptr, *name, *tok;
 	int j, flag;
 	FunctionType *builtin_functions_i;
@@ -711,7 +711,7 @@ ParseMouseEntry(char *tline)
 		    "too. Excess modifiers will be ignored.");
 	}
 
-	new = (Binding *)safemalloc(sizeof(Binding));
+	new = (Binding *)xmalloc(sizeof(Binding));
 	new->IsMouse = 1;
 	new->Button_Key = button;
 	new->key_name = NULL;
@@ -809,7 +809,7 @@ ParseKeyEntry(char *tline)
 						keystring = stripcpy(key);
 					}
 					temp = new;
-					new = (Binding *)safemalloc(
+					new = (Binding *)xmalloc(
 					    sizeof(Binding));
 					new->IsMouse = 0;
 					new->Button_Key = i;
@@ -853,7 +853,7 @@ ParseSimpleEntry(char *tline)
 	if (func == NULL)
 		return NULL;
 
-	new = (Binding *)safemalloc(sizeof(Binding));
+	new = (Binding *)xmalloc(sizeof(Binding));
 	new->IsMouse = 0;
 	new->Button_Key = 0;
 	new->key_name = "select";
@@ -1465,7 +1465,7 @@ read_in_resources(char *file)
 				}
 				DoGetNextToken(p, &token, NULL, ",", NULL);
 				if (!token) {
-					token = (char *)safemalloc(1);
+					token = (char *)xmalloc(1);
 					*token = 0;
 				}
 
@@ -1491,7 +1491,7 @@ read_in_resources(char *file)
 				}
 				DoGetNextToken(p, &token, NULL, ",", NULL);
 				if (!token) {
-					token = (char *)safemalloc(1);
+					token = (char *)xmalloc(1);
 					*token = 0;
 				}
 
@@ -1650,7 +1650,7 @@ read_in_resources(char *file)
 				}
 				DoGetNextToken(p, &token, NULL, ",", NULL);
 				if (!token) {
-					token = (char *)safemalloc(1);
+					token = (char *)xmalloc(1);
 					*token = 0;
 				}
 

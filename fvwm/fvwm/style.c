@@ -134,7 +134,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIP("BACKCOLOR");
 				GETWORD;
 				if (len > 0) {
-					tname.BackColor = safemalloc(len + 1);
+					tname.BackColor = xmalloc(len + 1);
 					strncpy(
 					    tname.BackColor, restofline, len);
 					tname.BackColor[len] = 0;
@@ -174,7 +174,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					len++;
 				}
 				if (len > 0) {
-					tname.ForeColor = safemalloc(len + 1);
+					tname.ForeColor = xmalloc(len + 1);
 					strncpy(
 					    tname.ForeColor, restofline, len);
 					tname.ForeColor[len] = 0;
@@ -197,7 +197,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					}
 					if (len > 0) {
 						tname.BackColor =
-						    safemalloc(len + 1);
+						    xmalloc(len + 1);
 						strncpy(tname.BackColor,
 						    restofline, len);
 						tname.BackColor[len] = 0;
@@ -240,7 +240,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIP("FORECOLOR");
 				GETWORD;
 				if (len > 0) {
-					tname.ForeColor = safemalloc(len + 1);
+					tname.ForeColor = xmalloc(len + 1);
 					strncpy(
 					    tname.ForeColor, restofline, len);
 					tname.ForeColor[len] = 0;
@@ -284,7 +284,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			} else if (ITIS("IconBox")) {
 				icon_boxes *IconBoxes = 0;
 				SKIP("IconBox"); /* Skip over word "IconBox" */
-				IconBoxes = (icon_boxes *)safemalloc(
+				IconBoxes = (icon_boxes *)xmalloc(
 				    sizeof(icon_boxes));
 				memset(IconBoxes, 0,
 				    sizeof(icon_boxes));    /* clear it */
@@ -562,7 +562,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIP("ICON");
 				GETWORD;
 				if (len > 0) {
-					tname.value = safemalloc(len + 1);
+					tname.value = xmalloc(len + 1);
 					strncpy(tname.value, restofline, len);
 					tname.value[len] = 0;
 					tname.off_flags |= ICON_FLAG;
@@ -592,7 +592,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIP("MINIICON");
 				GETWORD;
 				if (len > 0) {
-					tname.mini_value = safemalloc(len + 1);
+					tname.mini_value = xmalloc(len + 1);
 					strncpy(
 					    tname.mini_value, restofline, len);
 					tname.mini_value[len] = 0;
@@ -820,7 +820,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIP("UseDecor");
 				GETQUOTEDWORD;
 				if (len > 0) {
-					tname.Decor = safemalloc(len + 1);
+					tname.Decor = xmalloc(len + 1);
 					strncpy(tname.Decor, restofline, len);
 					tname.Decor[len] = 0;
 				}
@@ -940,7 +940,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					restofline =
 					    tmp; /* move forward one word */
 					if (!hit) {
-						tmp = safemalloc(500);
+						tmp = xmalloc(500);
+						tmp[0] = '\0';
 						strlcat(tmp, "UseStyle: ", 500);
 						strlcat(
 						    tmp, restofline - len, 500);
@@ -1034,7 +1035,7 @@ AddToList(name_list *tname)
 		lastptr = nptr; /* find end of style list */
 	}
 
-	nptr = (name_list *)safemalloc(sizeof(name_list)); /* malloc area */
+	nptr = (name_list *)xmalloc(sizeof(name_list)); /* malloc area */
 	memcpy((void *)nptr, (const void *)tname,
 	    sizeof(name_list));       /* copy term area into list */
 	if (lastptr != NULL)          /* If not first entry in list */

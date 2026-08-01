@@ -45,7 +45,6 @@ Bugfixes:
   - Change flags implementation to allow adding more Styles easily
     (bitfields?) - THE GREAT STYLE FLAG REWRITE (GSFR)
   - Rewrite VISIBLE/RAISED lags to do something comprehensible.
-  - Fix Restart to not pass original (fvwm specific) options to other wm's
   - Run profiling on FVWM to see if I can speed it up any more
   - Try to decrease memory usage a little more
   - clean up code duplication (esp in modules) - more stuff in
@@ -57,19 +56,14 @@ Bugfixes:
         MotionThreshold not exceeded & ClickTime not exceeded -> DoubleClick
   - Make transient FvwmWinList reposition itself & pointer if popped up
     off the screen (like built in menus)
-  - Maximize XTerm, change font, UnMaximize, XTerm goes to wrong window size
-    (still unfixed on 28-Nov-1998)
   - Colormaps and xlock -install -mode blank (& swirl) interaction still
     isn't 100% correct?
   - bring back 'TogglePage'?
-  - Setting keys via FvwmTalk or Read requires Recapture to take effect?
   - System Modal dialogs bug - popup menus shouldn't be allowed??  I think
     this is ok, actually...
   - Fix FvwmDeskTopScale size calculation
   - Need to fix to work correctly under 24bit (TrueColor) displays
-  - Esc during moves, etc can result in windows being "lost" off desktop
   - Should also have way to make windows off desktop be recovered easier
-  - Transients of transients don't get raised correctly sometimes?
 
 ----------------------------------------------------------------------
 

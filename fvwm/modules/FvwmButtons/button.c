@@ -296,7 +296,7 @@ alloc_buttonlist(button_info *ub, int num)
 		}
 		while (ub->c->allocated_buttons <= num)
 			ub->c->allocated_buttons += 32;
-		bb = (button_info **)mymalloc(
+		bb = (button_info **)xmalloc(
 		    ub->c->allocated_buttons * sizeof(button_info *));
 		for (i = old; i < ub->c->allocated_buttons; i++)
 			bb[i] = NULL;
@@ -326,7 +326,7 @@ alloc_button(button_info *ub, int num)
 		exit(2);
 	}
 
-	b = (button_info *)mymalloc(sizeof(button_info));
+	b = (button_info *)xmalloc(sizeof(button_info));
 	ub->c->buttons[num] = b;
 
 	memset((void *)b, 0, sizeof(*b));
@@ -355,7 +355,7 @@ alloc_button(button_info *ub, int num)
 void
 MakeContainer(button_info *b)
 {
-	b->c = (container_info *)mymalloc(sizeof(container_info));
+	b->c = (container_info *)xmalloc(sizeof(container_info));
 	b->flags |= b_Container;
 	b->c->buttons = NULL;
 	b->c->num_buttons = 0;
@@ -512,7 +512,7 @@ ShuffleButtons(button_info *ub)
 	/* make local copy of buttons in ub */
 	num_items = c->num_buttons;
 	local_buttons =
-	    (button_info **)mymalloc(sizeof(button_info) * num_items);
+	    (button_info **)xmalloc(sizeof(button_info) * num_items);
 	for (i = 0; i < num_items; i++) {
 		local_buttons[i] = c->buttons[i];
 		c->buttons[i] = NULL;

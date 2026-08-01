@@ -248,7 +248,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				else
 					name = t->name;
 				hotlen = strlen(name) + strlen(tname) + 48;
-				t_hot = safemalloc(hotlen);
+				t_hot = xmalloc(hotlen);
 				snprintf(t_hot, hotlen, "&%c.  %s", scut,
 				    name); /* Generate label */
 				if (scut++ == '9')
@@ -309,12 +309,12 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					strlcat(t_hot, tname, hotlen);
 				}
 				if (!func) {
-					tfunc = safemalloc(40);
+					tfunc = xmalloc(40);
 					snprintf(tfunc, 40,
 					    "WindowListFunc %ld", t->w);
 				} else {
 					size_t funclen = strlen(func) + 32;
-					tfunc = safemalloc(funclen);
+					tfunc = xmalloc(funclen);
 					snprintf(tfunc, funclen, "%s %ld", func,
 					    t->w);
 					free(func);

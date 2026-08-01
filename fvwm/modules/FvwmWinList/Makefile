@@ -5,7 +5,7 @@
 .PATH: ${DIST}/modules/FvwmWinList
 
 PROG=	FvwmWinList
-SRCS=	ButtonArray.c Colors.c FvwmWinList.c List.c Mallocs.c 
+SRCS=	ButtonArray.c Colors.c FvwmWinList.c List.c 
 
 LDADD+= -lXpm ${XLIB}
 BINDIR= ${FVWMLIBDIR}

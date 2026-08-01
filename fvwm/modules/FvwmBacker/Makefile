@@ -5,7 +5,7 @@
 .PATH: ${DIST}/modules/FvwmBacker
 
 PROG=	FvwmBacker
-SRCS=	FvwmBacker.c Mallocs.c root_bits.c
+SRCS=	FvwmBacker.c root_bits.c
 
 LDADD+= -lXpm ${XLIB}
 BINDIR= ${FVWMLIBDIR}

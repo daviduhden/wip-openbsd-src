@@ -13,8 +13,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif
 
 #include <sys/time.h>
@@ -582,14 +580,18 @@ Loop(Window target)
 				    &actual, &actual_format, &nitems,
 				    &bytesafter,
 				    (unsigned char **)&prop) == Success &&
-				    (prop != NULL))
+				    (prop != NULL)) {
 					change_icon_name(prop);
+					XFree(prop);
+				}
 			} else if (Event.xproperty.atom == XA_WM_HINTS) {
 				XWMHints *wmhints;
 
 				wmhints = XGetWMHints(dpy, target);
-				XSetWMHints(dpy, main_win, wmhints);
-				XFree(wmhints);
+				if (wmhints != NULL) {
+					XSetWMHints(dpy, main_win, wmhints);
+					XFree(wmhints);
+				}
 			} else if (Event.xproperty.atom == XA_WM_NORMAL_HINTS) {
 				/* don't do Normal Hints. They alter the size of
 				 * the window */

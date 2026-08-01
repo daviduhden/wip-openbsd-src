@@ -887,8 +887,8 @@ DeIconify(FvwmWindow *tmp_win)
 	/* AS dje  RaiseWindow(tmp_win); */
 	/* now de-iconify transients */
 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
-		if ((t == tmp_win) || ((t->flags & TRANSIENT) &&
-		    (t->transientfor == tmp_win->w))) {
+		if ((t == tmp_win) ||
+		    IsTransientDescendantOf(t, tmp_win)) {
 			t->flags |= MAPPED;
 			t->tmpflags.IconifiedByParent = 0;
 			if (Scr.Hilite == t)
@@ -966,8 +966,8 @@ Iconify(FvwmWindow *tmp_win, int def_x, int def_y)
 
 	/* iconify transients first */
 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
-		if ((t == tmp_win) || ((t->flags & TRANSIENT) &&
-		    (t->transientfor == tmp_win->w))) {
+		if ((t == tmp_win) ||
+		    IsTransientDescendantOf(t, tmp_win)) {
 			/*
 			 * Prevent the receipt of an UnmapNotify, since that
 			 * would cause a transition to the Withdrawn state.

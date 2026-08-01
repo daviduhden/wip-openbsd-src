@@ -164,11 +164,6 @@ struct panel_info_struct {
 /* -------------------------------- prototypes ----------------------------- */
 void AddButtonAction(button_info *, int, char *);
 void MakeContainer(button_info *);
-#ifdef DEBUG
-char *mymalloc(int);
-#else
-#define mymalloc(a) safemalloc(a)
-#endif
 
 /* ----------------------------- global variables -------------------------- */
 

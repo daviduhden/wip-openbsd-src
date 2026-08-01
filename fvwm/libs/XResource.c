@@ -139,13 +139,13 @@ MergeConfigLineResource(
 
 	/* prefix*suffix: value */
 	reslen = len + (end - line) + 2;
-	resource = (char *)safemalloc(reslen);
+	resource = (char *)xmalloc(reslen);
 	strlcpy(resource, prefix, reslen);
 	strlcat(resource, bindstr, reslen);
 	strncat(resource, line, end - line);
 
 	len = strlen(value);
-	myvalue = (char *)safemalloc(len + 1);
+	myvalue = (char *)xmalloc(len + 1);
 	strlcpy(myvalue, value, len + 1);
 	for (len--; len >= 0 && isspace(myvalue[len]); len--)
 		myvalue[len] = 0;
@@ -185,7 +185,7 @@ GetResourceString(
 	size_t len;
 
 	len = strlen(resource) + strlen(prefix) + 2;
-	name = (char *)safemalloc(len);
+	name = (char *)xmalloc(len);
 	strlcpy(name, prefix, len);
 	strlcat(name, ".", len);
 	strlcat(name, resource, len);

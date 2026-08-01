@@ -36,44 +36,11 @@ copy_string(char **target, char *src)
 		Free(*target);
 
 	ConsoleDebug(CORE, "copy_string: 2\n");
-	*target = (char *)safemalloc((len + 1) * sizeof(char));
+	*target = (char *)xmalloc((len + 1) * sizeof(char));
 	strlcpy(*target, src, len + 1);
 	ConsoleDebug(CORE, "copy_string: 3\n");
 	return *target;
 }
-
-#ifdef TRACE_MEMUSE
-
-long MemUsed = 0;
-
-void
-Free(void *p)
-{
-	struct malloc_header *head = (struct malloc_header *)p;
-
-	if (p != NULL) {
-		head--;
-		if (head->magic != MALLOC_MAGIC) {
-			fprintf(stderr, "Corrupted memory found in Free\n");
-			abort();
-			return;
-		}
-		if (head->len > MemUsed) {
-			fprintf(stderr, "Free block too big\n");
-			return;
-		}
-		MemUsed -= head->len;
-		free(head);
-	}
-}
-
-void
-PrintMemuse(void)
-{
-	ConsoleDebug(CORE, "Memory used: %d\n", MemUsed);
-}
-
-#else
 
 void
 Free(void *p)
@@ -81,13 +48,6 @@ Free(void *p)
 	if (p != NULL)
 		free(p);
 }
-
-void
-PrintMemuse(void)
-{
-}
-
-#endif
 
 static void
 TerminateHandler(int sig)
@@ -114,10 +74,12 @@ SendFvwmPipe(char *message, unsigned long window)
 	char *hold, *temp, *temp_msg;
 	hold = message;
 
+	sandbox_x11_config("FvwmIconMan");
+
 	while (1) {
 		temp = strchr(hold, ',');
 		if (temp != NULL) {
-			temp_msg = (char *)safemalloc(temp - hold + 1);
+			temp_msg = (char *)xmalloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
 			hold = temp + 1;
@@ -142,6 +104,7 @@ main_loop(void)
 	FD_SET(Fvwm_fd[1], &saveset);
 	FD_SET(x_fd, &saveset);
 
+	sandbox_x11_config("FvwmIconMan");
 	while (!isTerminated) {
 		/* Check the pipes for anything to read, and block if
 		 * there is nothing there yet ...

@@ -22,9 +22,8 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
-#ifdef HAVE_SYS_BSDTYPES_H
-#include <sys/bsdtypes.h> /* Saul */
 #endif                    /* Saul */
 
 #include <stdlib.h>
@@ -125,7 +124,7 @@ main(int argc, char **argv)
 
 	{
 		size_t name_len = strlen(temp) + 1;
-		MyName = safemalloc(name_len);
+		MyName = xmalloc(name_len);
 		strlcpy(MyName, temp, name_len);
 	}
 
@@ -199,7 +198,7 @@ main(int argc, char **argv)
 	HilightC = strdup("black");
 	BalloonFont = strdup("fixed");
 	BalloonBorderColor = strdup("black");
-	Desks = (DeskInfo *)safemalloc(ndesks * sizeof(DeskInfo));
+	Desks = (DeskInfo *)xmalloc(ndesks * sizeof(DeskInfo));
 	for (i = 0; i < ndesks; i++) {
 		snprintf(line, sizeof(line), "Desk %d", i + desk1);
 		CopyString(&Desks[i].label, line);
@@ -257,8 +256,7 @@ main(int argc, char **argv)
 	fprintf(stderr, "[main]: back from getting window list, looping\n");
 #endif
 
-	if (pledge("stdio", NULL) == -1)
-		err(1, "pledge");
+	sandbox_x11_only("FvwmPager");
 
 	Loop(fd);
 	return 0;
@@ -386,7 +384,7 @@ list_add(unsigned long *body)
 		t = t->next;
 		i++;
 	}
-	*prev = (PagerWindow *)safemalloc(sizeof(PagerWindow));
+	*prev = (PagerWindow *)xmalloc(sizeof(PagerWindow));
 	(*prev)->w = body[0];
 	(*prev)->t = (char *)body[2];
 	(*prev)->frame = body[1];
@@ -948,12 +946,12 @@ ParseOptions(void)
 			continue;
 		tline2 = GetNextToken(tline2, &arg1);
 		if (!arg1) {
-			arg1 = (char *)safemalloc(1);
+			arg1 = (char *)xmalloc(1);
 			arg1[0] = 0;
 		}
 		tline2 = GetNextToken(tline2, &arg2);
 		if (!arg2) {
-			arg2 = (char *)safemalloc(1);
+			arg2 = (char *)xmalloc(1);
 			arg2[0] = 0;
 		}
 
@@ -1203,7 +1201,7 @@ NewPagerStringItem(PagerStringList *last, int desk)
 {
 	PagerStringList *newitem;
 
-	newitem = (PagerStringList *)safemalloc(sizeof(PagerStringList));
+	newitem = (PagerStringList *)xmalloc(sizeof(PagerStringList));
 	last->next = newitem;
 	newitem->desk = desk;
 	newitem->next = NULL;

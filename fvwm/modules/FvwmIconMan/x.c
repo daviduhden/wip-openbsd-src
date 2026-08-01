@@ -138,8 +138,9 @@ find_frame_window(Window win, int *off_x, int *off_y)
 	ConsoleDebug(X11, "In find_frame_window: 0x%x\n", (unsigned int)win);
 
 	while (1) {
-		XQueryTree(theDisplay, win, &root, &parent, &junkw, &junki);
-		if (junkw)
+		junkw = NULL;
+		if (XQueryTree(theDisplay, win, &root, &parent, &junkw,
+		    &junki) && junkw)
 			XFree(junkw);
 		if (parent == root)
 			break;

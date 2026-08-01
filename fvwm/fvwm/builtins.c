@@ -331,9 +331,13 @@ Maximize(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	}
 
 	if (tmp_win->flags & MAXIMIZED) {
+		int orig_wd = tmp_win->orig_wd;
+		int orig_ht = tmp_win->orig_ht;
+
 		tmp_win->flags &= ~MAXIMIZED;
+		ConstrainSize(tmp_win, &orig_wd, &orig_ht, False, 0, 0);
 		SetupFrame(tmp_win, tmp_win->orig_x, tmp_win->orig_y,
-		    tmp_win->orig_wd, tmp_win->orig_ht, TRUE);
+		    orig_wd, orig_ht, TRUE);
 		SetBorder(tmp_win, True, True, True, None);
 	} else {
 		new_width = tmp_win->frame_width;
@@ -804,14 +808,13 @@ exec_setup(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 		free(exec_shell_name);
 	shell_set = 1;
 	action = GetNextToken(action, &arg);
-	if (arg) { /* specific shell was specified */
-		exec_shell_name = arg;
-	} else /* no arg, so use $SHELL -- not working??? */ {
+	if (arg) {
+		exec_shell_name = xstrdup(arg);
+	} else {
 		if (getenv("SHELL"))
-			exec_shell_name = strdup(getenv("SHELL"));
+			exec_shell_name = xstrdup(getenv("SHELL"));
 		else
-			/* if $SHELL not set, use default */
-			exec_shell_name = strdup("/bin/sh");
+			exec_shell_name = xstrdup("/bin/sh");
 	}
 }
 
@@ -838,7 +841,7 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		    (char *)NULL) == -1) {
 			fvwm_msg(ERR, "exec_function", "execl failed (%s)",
 			    strerror(errno));
-			exit(100);
+			_exit(100);
 		}
 	}
 	free(cmd);
@@ -1594,8 +1597,7 @@ FreeMenuStyle(MenuStyle *ms)
 	if (ms->look.f.hasSideColor == 1)
 		FreeColors(&ms->look.sideColor, 1);
 
-	while (before->next != ms)
-		/* Not too many checks, may segfaults in race conditions */
+	while (before != NULL && before->next != ms)
 		before = before->next;
 
 	before->next = ms->next;
@@ -1773,7 +1775,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		return;
 	}
 
-	tmpms = (MenuStyle *)safemalloc(sizeof(MenuStyle));
+	tmpms = (MenuStyle *)xmalloc(sizeof(MenuStyle));
 	memset(tmpms, 0, sizeof(MenuStyle));
 	ms = FindMenuStyle(name);
 	if (ms != NULL) {
@@ -1992,7 +1994,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				tmpms->look.pStdFont = &Scr.StdFont;
 			} else {
 				tmpms->look.pStdFont =
-				    (MyFont *)safemalloc(sizeof(MyFont));
+				    (MyFont *)xmalloc(sizeof(MyFont));
 				tmpms->look.pStdFont->font = xfs;
 			}
 			gc_changed = True;
@@ -2183,7 +2185,7 @@ OldMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		    action);
 	} else {
 		len = strlen(action) + 100;
-		buffer = (char *)safemalloc(len);
+		buffer = (char *)xmalloc(len);
 		snprintf(buffer, len,
 		    "* %s, Foreground %s, Background %s, Greyed %s, Font %s, "
 		    "%s",
@@ -2326,7 +2328,7 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				return;
 			}
 			len = end - action + 1;
-			tmp = safemalloc(len);
+			tmp = xmalloc(len);
 			strncpy(tmp, action, len - 1);
 			tmp[len - 1] = 0;
 			ReadButtonFace(tmp, bf, -1, True);
@@ -2943,8 +2945,8 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 
 			if (!(isdigit(*item))) {
 				s_colors =
-				    (char **)safemalloc(sizeof(char *) * 2);
-				perc = (int *)safemalloc(sizeof(int));
+				    (char **)xmalloc(sizeof(char *) * 2);
+				perc = (int *)xmalloc(sizeof(int));
 				nsegs = 1;
 				s_colors[0] = item;
 				s = GetNextToken(s, &s_colors[1]);
@@ -2956,9 +2958,9 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 					nsegs = 1;
 				if (nsegs > 128)
 					nsegs = 128;
-				s_colors = (char **)safemalloc(
+				s_colors = (char **)xmalloc(
 				    sizeof(char *) * (nsegs + 1));
-				perc = (int *)safemalloc(sizeof(int) * nsegs);
+				perc = (int *)xmalloc(sizeof(int) * nsegs);
 				for (i = 0; i <= nsegs; ++i) {
 					s = GetNextToken(s, &s_colors[i]);
 					if (i < nsegs) {
@@ -3212,7 +3214,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 			return NULL;
 		}
 		len = end - s + 1;
-		spec = safemalloc(len);
+		spec = xmalloc(len);
 		strncpy(spec, s, len - 1);
 		spec[len - 1] = 0;
 	} else
@@ -3245,14 +3247,14 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 			while (tail->next)
 				tail = tail->next;
 			tail->next =
-			    (ButtonFace *)safemalloc(sizeof(ButtonFace));
+			    (ButtonFace *)xmalloc(sizeof(ButtonFace));
 			*tail->next = tmpbf;
 			if (all)
 				for (i = 1; i < MaxButtonState; ++i) {
 					tail = &tb->state[i];
 					while (tail->next)
 						tail = tail->next;
-					tail->next = (ButtonFace *)safemalloc(
+					tail->next = (ButtonFace *)xmalloc(
 					    sizeof(ButtonFace));
 					tail->next->style = SimpleButton;
 					tail->next->next = NULL;
@@ -3385,7 +3387,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 		}
 
 		if (!(isdigit(*item))) {
-			s_colors = (char **)safemalloc(sizeof(char *) * 2);
+			s_colors = (char **)xmalloc(sizeof(char *) * 2);
 			nsegs = 1;
 			s_colors[0] = item;
 			s = GetNextToken(s, &s_colors[1]);
@@ -3393,8 +3395,8 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 				if (verbose)
 					fvwm_msg(ERR, "ReadMenuFace",
 					    "incomplete gradient style");
-				free(s_colors);
 				free(item);
+				free(s_colors);
 				free(style);
 				return False;
 			}
@@ -3407,7 +3409,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 			if (nsegs > 128)
 				nsegs = 128;
 			s_colors =
-			    (char **)safemalloc(sizeof(char *) * (nsegs + 1));
+			    (char **)xmalloc(sizeof(char *) * (nsegs + 1));
 			for (i = 0; i <= nsegs; ++i) {
 				s = GetNextToken(s, &s_colors[i]);
 				if (i < nsegs) {
@@ -3425,7 +3427,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 		if (sum != 100) {
 			if (verbose)
 				fvwm_msg(ERR, "ReadMenuFace",
-				    "multi gradient lenghts must sum to 100");
+				    "multi gradient lengths must sum to 100");
 			for (i = 0; i <= nsegs; ++i)
 				if (s_colors[i])
 					free(s_colors[i]);
@@ -3662,7 +3664,7 @@ add_item_to_decor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 				break;
 			}
 	if (!found) { /* then make a new one */
-		found = (FvwmDecor *)safemalloc(sizeof(FvwmDecor));
+		found = (FvwmDecor *)xmalloc(sizeof(FvwmDecor));
 		InitFvwmDecor(found);
 		found->tag = item; /* tag it */
 		/* add it to list */
@@ -4037,9 +4039,11 @@ SetEnv(XEvent *eventp, Window junk, FvwmWindow *tmp_win, unsigned long context,
 	}
 
 	len = strlen(szVar) + strlen(szValue) + 2;
-	szPutenv = safemalloc(len);
+	szPutenv = xmalloc(len);
 	snprintf(szPutenv, len, "%s=%s", szVar, szValue);
-	putenv(szPutenv);
+	if (setenv(szVar, szValue, 1) == -1)
+		fvwm_msg(WARN, "PutEnvironment", "setenv failed");
+	free(szPutenv);
 	free(szVar);
 	free(szValue);
 }
@@ -4086,7 +4090,7 @@ CreateFlagString(char *string, char **restptr)
 		/* We must allocate a new string because we null terminate the
 		 * string between the [ ] or ( ) characters.
 		 */
-		retval = safemalloc(length + 1);
+		retval = xmalloc(length + 1);
 		strncpy(retval, start, length);
 		retval[length] = 0;
 

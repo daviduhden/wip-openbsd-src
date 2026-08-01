@@ -97,9 +97,9 @@ AddToModList(char *tline)
 	}
 
 	this =
-	    (struct moduleInfoList *)safemalloc(sizeof(struct moduleInfoList));
+	    (struct moduleInfoList *)xmalloc(sizeof(struct moduleInfoList));
 	len = strlen(tline) + 1;
-	this->data = (char *)safemalloc(len);
+	this->data = (char *)xmalloc(len);
 	this->next = NULL;
 	strlcpy(this->data, tline, len);
 	if (prev == NULL) {
@@ -139,7 +139,7 @@ DestroyModConfig(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	while (current != NULL) {
 		GetNextToken(current->data, &mi);
 		next = current->next;
-		if (matchWildcards(info, mi + 1)) {
+		if (mi != NULL && matchWildcards(info, mi + 1)) {
 			free(current->data);
 			free(current);
 			if (prev) {
@@ -169,7 +169,7 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	if (IconPath && strlen(IconPath)) {
 		len = strlen(IconPath) + 11;
-		message = safemalloc(len);
+		message = xmalloc(len);
 		snprintf(message, len, "IconPath %s\n", IconPath);
 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, message);
 		free(message);
@@ -177,7 +177,7 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #ifdef XPM
 	if (PixmapPath && strlen(PixmapPath)) {
 		len = strlen(PixmapPath) + 13;
-		message = safemalloc(len);
+		message = xmalloc(len);
 		snprintf(message, len, "PixmapPath %s\n", PixmapPath);
 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, message);
 		snprintf(message, len, "ColorLimit %d\n", Scr.ColorLimit);

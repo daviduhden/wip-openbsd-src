@@ -39,6 +39,7 @@
 #include "../../fvwm/module.h"
 #include "../../libs/fvwmlib.h"
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
 
 char *MyName;
@@ -95,7 +96,7 @@ main(int argc, char **argv)
 
 	{
 		size_t name_len = strlen(temp) + 2;
-		MyName = safemalloc(name_len);
+		MyName = xmalloc(name_len);
 		strlcpy(MyName, "*", name_len);
 		strlcat(MyName, temp, name_len);
 	}
@@ -166,6 +167,11 @@ main(int argc, char **argv)
 		    XDisplayName(display_name));
 		exit(1);
 	}
+
+	unveil_tempdir("FvwmM4");
+	unveil_home_read("FvwmM4");
+	unveil(NULL, NULL);
+	sandbox_m4_preproc("FvwmM4");
 
 	tmp_file = m4_defs(dpy, display_name, m4_options, filename);
 

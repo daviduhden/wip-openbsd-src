@@ -19,8 +19,22 @@
 
 #include "../../fvwm/module.h"
 #include "FvwmWinList.h"
-#include "Mallocs.h"
 #include "config.h"
+
+static void
+UpdateString(char **string, char *value)
+{
+	size_t value_len;
+
+	if (value == NULL)
+		return;
+	value_len = strlen(value);
+	if (*string == NULL)
+		*string = xmalloc(value_len + 1);
+	else
+		*string = xrealloc(*string, value_len + 1);
+	strlcpy(*string, value, value_len + 1);
+}
 
 /******************************************************************************
   InitList - Initialize the list
@@ -39,7 +53,7 @@ void
 AddItem(List *list, long id, long flags, long desk)
 {
 	Item *new;
-	new = (Item *)safemalloc(sizeof(Item));
+	new = (Item *)xmalloc(sizeof(Item));
 	new->id = id;
 	new->name = NULL;
 	new->flags = flags;

@@ -28,6 +28,7 @@
 
 #include "../../fvwm/module.h"
 #include "config.h"
+#include "../../fvwm/fvwm_sandbox.h"
 
 char *MyName;
 int fd[2];
@@ -60,7 +61,7 @@ main(int argc, char **argv)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
-	MyName = safemalloc(name_len + 2);
+	MyName = xmalloc(name_len + 2);
 	strlcpy(MyName, "*", name_len + 2);
 	strlcat(MyName, temp, name_len + 2);
 
@@ -107,6 +108,10 @@ Loop(int *fd)
 {
 	unsigned long header[HEADER_SIZE], *body;
 	int count;
+
+	unveil_home_write("FvwmSave");
+	unveil(NULL, NULL);
+	sandbox_save_state("FvwmSave");
 
 	while (1) {
 		/* read a packet */
@@ -178,7 +183,7 @@ add_window(unsigned long new_win, unsigned long *body)
 	if (new_win == 0)
 		return;
 
-	t = (struct list *)safemalloc(sizeof(struct list));
+	t = (struct list *)xmalloc(sizeof(struct list));
 	t->id = new_win;
 	t->next = list_root;
 	t->frame_height = (int)body[6];
@@ -189,9 +194,7 @@ add_window(unsigned long new_win, unsigned long *body)
 	t->height_inc = (int)body[14];
 	t->frame_x = (int)body[3];
 	t->frame_y = (int)body[4];
-	;
 	t->title_height = (int)body[9];
-	;
 	t->boundary_width = (int)body[10];
 	t->flags = (unsigned long)body[8];
 	t->gravity = body[21];
@@ -238,7 +241,7 @@ write_string(FILE *out, char *line)
 	len = strlen(line);
 
 	for (i = 0; i < len; i++) {
-		if (isspace(line[i]))
+		if (isspace((unsigned char)line[i]))
 			space = 1;
 		if (line[i] == '\"')
 			qoute = 1;
@@ -278,8 +281,14 @@ do_save(void)
 	int x1, x2, y1, y2, i, command_count;
 	long tVx, tVy;
 
-	snprintf(tname, sizeof(tname), "%s/new.xinitrc", getenv("HOME"));
+	snprintf(tname, sizeof(tname), "%s/new.xinitrc",
+	    getenv("HOME") ? getenv("HOME") : ".");
 	out = fopen(tname, "w+");
+	if (out == NULL) {
+		fprintf(stderr, "%s: couldn't open %s for writing\n",
+		    Myname, tname);
+		return;
+	}
 	for (t = list_root; t != NULL; t = t->next) {
 		tname[0] = 0;
 
@@ -296,8 +305,10 @@ do_save(void)
 		dwidth = t->frame_width - 2 * t->boundary_width;
 		dwidth -= t->base_width;
 		dheight -= t->base_height;
-		dwidth /= t->width_inc;
-		dheight /= t->height_inc;
+		if (t->width_inc != 0)
+			dwidth /= t->width_inc;
+		if (t->height_inc != 0)
+			dheight /= t->height_inc;
 
 		if (t->flags & STICKY) {
 			tVx = 0;

@@ -22,18 +22,6 @@ int x_fd;
 char *Module = "*FvwmIconMan";
 int ModuleLen = 12;
 
-/* This is solely so that we can turn a string constant into something
-   which can be freed */
-
-static char *
-alloc_string(char *string)
-{
-	int len = strlen(string);
-	char *ret = (char *)safemalloc((len + 1) * sizeof(char));
-	strcpy(ret, string);
-	return ret;
-}
-
 static void
 init_win_manager(int id)
 {
@@ -49,9 +37,9 @@ init_win_manager(int id)
 	globals.managers[id].can_draw = 0;
 	globals.managers[id].window_mapped = 0;
 	globals.managers[id].fontname = NULL;
-	globals.managers[id].titlename = alloc_string("FvwmIconMan");
-	globals.managers[id].iconname = alloc_string("FvwmIconMan");
-	globals.managers[id].formatstring = alloc_string("%c: %i");
+	globals.managers[id].titlename = xstrdup("FvwmIconMan");
+	globals.managers[id].iconname = xstrdup("FvwmIconMan");
+	globals.managers[id].formatstring = xstrdup("%c: %i");
 	globals.managers[id].format_depend = CLASS_NAME | ICON_NAME;
 	globals.managers[id].geometry.dir = 0;
 	globals.managers[id].geometry.boxwidth = 0;
@@ -136,7 +124,7 @@ allocate_managers(int num)
 	}
 
 	globals.num_managers = num;
-	globals.managers = (WinManager *)safemalloc(num * sizeof(WinManager));
+	globals.managers = (WinManager *)xmalloc(num * sizeof(WinManager));
 
 	for (i = 0; i < num; i++) {
 		init_win_manager(i);

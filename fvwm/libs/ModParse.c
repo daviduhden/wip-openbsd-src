@@ -73,7 +73,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 		}
 
 		if (len) {
-			tok = (char *)safemalloc(len + 1);
+			tok = (char *)xmalloc(len + 1);
 			strncpy(tok, tmptok, len);
 			tok[len] = '\0';
 		}
@@ -103,7 +103,7 @@ GetArgument(char **pstr)
 	const char *next = NULL;
 
 	if (!pstr || !*pstr || !(tok = DoPeekArgument(*pstr, &next)))
-		return NULL; /* *pstr=NULL; ???? */
+		return NULL;
 
 	*pstr = (char *)next;
 	/* skip tok and following whitespace/separators in pstr & DON'T realloc
@@ -192,7 +192,7 @@ GetNextArgument(char *indata, char **token)
 	}
 	end = t;
 
-	text = safemalloc(end - start + 1);
+	text = xmalloc(end - start + 1);
 	*token = text;
 
 	while (start < end) {
