@@ -17,10 +17,11 @@ compatible with the OpenBSD base system.
 
 To apply:  cd <xenocara-root>  &&  patch -p0 < this-file
 
-NOT VERIFIED: No compilation or runtime testing performed.
-
-diff --git fvwm/COPYING fvwm/COPYING
-index 7f75af8..7490799 100644
+Index: fvwm/COPYING
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/COPYING,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/COPYING
 --- fvwm/COPYING
 +++ fvwm/COPYING
 @@ -1,3 +1,8 @@
@@ -401,8 +402,11 @@ index 7f75af8..7490799 100644
 +WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 +ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-diff --git fvwm/fvwm/fvwm2.1 fvwm/fvwm/fvwm2.1
-index 76ef689..87893b0 100644
+Index: fvwm/fvwm/fvwm2.1
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm2.1,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm2.1
 --- fvwm/fvwm/fvwm2.1
 +++ fvwm/fvwm/fvwm2.1
 @@ -1,2899 +1,369 @@
@@ -3673,8 +3677,11 @@ index 76ef689..87893b0 100644
 +X11 workloads.
 +Module protocol compatibility has been preserved through static
 +inspection of message layouts but has not been empirically verified.
-diff --git fvwm/libs/ColorUtils.c fvwm/libs/ColorUtils.c
-index 4cf5dbb..110de1d 100644
+Index: fvwm/libs/ColorUtils.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/ColorUtils.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/ColorUtils.c
 --- fvwm/libs/ColorUtils.c
 +++ fvwm/libs/ColorUtils.c
 @@ -1,261 +1,133 @@
@@ -4040,8 +4047,11 @@ index 4cf5dbb..110de1d 100644
 +{
 +	return adjust_pixel_brightness(background, BRIGHTNESS_FACTOR);
  }
-diff --git fvwm/modules/FvwmBacker/root_bits.c fvwm/modules/FvwmBacker/root_bits.c
-index 17bcbfe..098d71d 100644
+Index: fvwm/modules/FvwmBacker/root_bits.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/modules/FvwmBacker/root_bits.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/modules/FvwmBacker/root_bits.c
 --- fvwm/modules/FvwmBacker/root_bits.c
 +++ fvwm/modules/FvwmBacker/root_bits.c
 @@ -1,19 +1,17 @@
@@ -4114,8 +4124,11 @@ index 17bcbfe..098d71d 100644
 -  return color.pixel;
 +	return spec.pixel;
  }
-diff --git fvwm/modules/FvwmRearrange/FvwmRearrange.1 fvwm/modules/FvwmRearrange/FvwmRearrange.1
-index fa08e19..afaf6de 100644
+Index: fvwm/modules/FvwmRearrange/FvwmRearrange.1
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/modules/FvwmRearrange/FvwmRearrange.1,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/modules/FvwmRearrange/FvwmRearrange.1
 --- fvwm/modules/FvwmRearrange/FvwmRearrange.1
 +++ fvwm/modules/FvwmRearrange/FvwmRearrange.1
 @@ -1,7 +1,8 @@
@@ -4351,8 +4364,11 @@ index fa08e19..afaf6de 100644
 -Dominik Vogt (merged FvwmTile and FvwmCascade to FvwmRearrange)
 +Dominik Vogt (merged FvwmTile and FvwmCascade into FvwmRearrange)
 +David Uhden Collado (Complete rewrite and modernization)
-diff --git fvwm/modules/FvwmRearrange/FvwmRearrange.c fvwm/modules/FvwmRearrange/FvwmRearrange.c
-index 5e154aa..3ca859e 100644
+Index: fvwm/modules/FvwmRearrange/FvwmRearrange.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/modules/FvwmRearrange/FvwmRearrange.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/modules/FvwmRearrange/FvwmRearrange.c
 --- fvwm/modules/FvwmRearrange/FvwmRearrange.c
 +++ fvwm/modules/FvwmRearrange/FvwmRearrange.c
 @@ -1,40 +1,34 @@

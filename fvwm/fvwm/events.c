@@ -37,8 +37,6 @@
 
 #include "config.h"
 
-#endif
-
 #include <sys/time.h>
 #include <sys/types.h>
 
@@ -1478,9 +1476,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 
 	DBUG("My_XNextEvent", "waiting for module input/output");
 	XFlush(dpy);
-	if (select((SELECT_TYPE_ARG1)fd_width, SELECT_TYPE_ARG234 & in_fdset,
-	    SELECT_TYPE_ARG234 & out_fdset, SELECT_TYPE_ARG234 0,
-	    SELECT_TYPE_ARG5 NULL) > 0) {
+	if (select(fd_width, &in_fdset, &out_fdset, NULL, NULL) > 0) {
 		/* Check for module input. */
 		for (i = 0; i < npipes; i++) {
 			if (readPipes[i] >= 0) {

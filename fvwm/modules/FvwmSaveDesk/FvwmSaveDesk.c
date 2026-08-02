@@ -429,7 +429,7 @@ do_save(void)
 	out = fopen(fnbuf, "w");
 	if (out == NULL) {
 		fprintf(stderr, "%s: couldn't open %s for writing\n",
-		    Myname, fnbuf);
+                    MyName, fnbuf);
 		return;
 	}
 

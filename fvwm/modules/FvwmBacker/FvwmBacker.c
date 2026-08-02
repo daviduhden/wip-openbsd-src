@@ -43,8 +43,6 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#endif                    /* Saul */
-
 #include <X11/Xlib.h>
 #include <stdlib.h>
 
@@ -164,11 +162,11 @@ EndLessLoop()
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
 
-		if (!select(fd_width, SELECT_TYPE_ARG234 & readset, NULL, NULL,
+		if (!select(fd_width, & readset, NULL, NULL,
 		    &tv)) {
 			FD_ZERO(&readset);
 			FD_SET(Fvwm_fd[1], &readset);
-			select(fd_width, SELECT_TYPE_ARG234 & readset, NULL,
+			select(fd_width, & readset, NULL,
 			    NULL, NULL);
 		}
 

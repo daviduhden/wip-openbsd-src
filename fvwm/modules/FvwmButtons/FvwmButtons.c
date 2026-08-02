@@ -16,7 +16,6 @@
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
 
-#endif
 
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -857,7 +856,7 @@ Loop(void)
 					PanelIndex = MainPanel;
 					while (PanelIndex &&
 					    PanelIndex->uber !=
-					    btn->uber)
+					    btn->parent)
 						PanelIndex =
 						    PanelIndex->next;
 					UberButton = CurrentPanel ?
@@ -1668,7 +1667,7 @@ My_XNextEvent(Display *Dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	if (select(fd_width, SELECT_TYPE_ARG234 & in_fdset, 0, 0, NULL) > 0) {
+	if (select(fd_width, & in_fdset, 0, 0, NULL) > 0) {
 		if (FD_ISSET(x_fd, &in_fdset)) {
 			if (XPending(Dpy)) {
 				XNextEvent(Dpy, event);

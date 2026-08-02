@@ -13,8 +13,6 @@
 
 #include "config.h"
 
-#endif
-
 #include <sys/time.h>
 #include <sys/wait.h>
 

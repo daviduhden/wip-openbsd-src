@@ -47,7 +47,6 @@
 #include <dmalloc.h>
 #endif
 
-extern void PrintMemuse(void);
 
 typedef unsigned long Ulong;
 typedef unsigned char Uchar;

@@ -31,7 +31,6 @@ init_win_manager(int id)
 	globals.managers[id].index = id;
 #ifdef MINI_ICONS
 	globals.managers[id].draw_icons = 0;
-#endif
 	globals.managers[id].res = SHOW_PAGE;
 	globals.managers[id].window_up = 0;
 	globals.managers[id].can_draw = 0;
@@ -71,6 +70,7 @@ init_win_manager(int id)
 	globals.managers[id].we_are_drawing = 1;
 	globals.managers[id].configures_expected = 0;
 }
+#endif
 
 void
 print_managers(void)

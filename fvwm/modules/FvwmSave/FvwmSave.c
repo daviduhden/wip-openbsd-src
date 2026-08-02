@@ -286,7 +286,7 @@ do_save(void)
 	out = fopen(tname, "w+");
 	if (out == NULL) {
 		fprintf(stderr, "%s: couldn't open %s for writing\n",
-		    Myname, tname);
+                    MyName, tname);
 		return;
 	}
 	for (t = list_root; t != NULL; t = t->next) {

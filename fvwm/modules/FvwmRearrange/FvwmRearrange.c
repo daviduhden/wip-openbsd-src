@@ -29,7 +29,6 @@
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
 
-#endif
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>

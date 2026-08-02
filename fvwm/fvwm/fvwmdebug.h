@@ -27,4 +27,8 @@ void DB_WI_ALL(char *label, FvwmWindow *fw);
 #define DB_WI_ALL(x, y)
 #endif
 
+#ifndef DBUG
+#define DBUG(x, y) do { (void)(x); (void)(y); } while (0)
+#endif
+
 #endif /* _DEBUG_ */

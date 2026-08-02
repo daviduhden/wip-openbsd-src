@@ -10,7 +10,9 @@
 #include <imsg.h>
 
 #include <err.h>
+#include <errno.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
@@ -78,14 +80,15 @@ main(int argc, char **argv)
 
 	signal(SIGPIPE, SIG_IGN);
 
-	imsg_init(&ibuf, s);
+	if (imsgbuf_init(&ibuf, s) == -1)
+		err(1, "imsgbuf_init");
 
 	if (pledge("stdio proc exec", NULL) == -1)
 		err(1, "pledge");
 
 	for (;;) {
-		if ((n = imsg_read(&ibuf)) == -1 && errno != EAGAIN)
-			err(1, "imsg_read");
+		if ((n = imsgbuf_read(&ibuf)) == -1 && errno != EAGAIN)
+			err(1, "imsgbuf_read");
 		if (n == 0)
 			break;
 
@@ -151,7 +154,7 @@ main(int argc, char **argv)
 
 				imsg_compose(&ibuf, IMSG_EXEC_OK,
 				    0, 0, -1, &pid, sizeof(pid_t));
-				imsg_flush(&ibuf);
+				imsgbuf_flush(&ibuf);
 				break;
 			}
 			default:
@@ -163,7 +166,7 @@ main(int argc, char **argv)
 		}
 	}
 
-	imsg_clear(&ibuf);
+	imsgbuf_clear(&ibuf);
 	close(s);
 	return 0;
 }

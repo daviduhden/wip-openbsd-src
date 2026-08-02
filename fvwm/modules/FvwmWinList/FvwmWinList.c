@@ -28,7 +28,6 @@
 
 #ifndef NO_CONSOLE
 #define NO_CONSOLE
-#endif
 
 #define YES "Yes"
 #define NO "No"
@@ -48,11 +47,10 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#endif
 
 #include <ctype.h>
 #include <unistd.h>
-
-#endif
 
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
@@ -253,7 +251,7 @@ MainEventLoop(void)
 		 * having one fewer select statements
 		 */
 		XFlush(dpy);
-		if (select(fd_width, SELECT_TYPE_ARG234 & readset, NULL, NULL,
+		if (select(fd_width, & readset, NULL, NULL,
 		    NULL) > 0) {
 			if (FD_ISSET(x_fd, &readset) || XPending(dpy))
 				LoopOnEvents();

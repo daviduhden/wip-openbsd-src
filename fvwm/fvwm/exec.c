@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "fvwm.h"
+#include "module.h"
 #include "misc.h"
 
 enum imsg_exec_type {
@@ -70,7 +71,8 @@ exec_helper_start(void)
 	exec_ibuf = malloc(sizeof(struct imsgbuf));
 	if (exec_ibuf == NULL)
 		err(1, "malloc");
-	imsg_init(exec_ibuf, exec_fd);
+	if (imsgbuf_init(exec_ibuf, exec_fd) == -1)
+		err(1, "imsgbuf_init");
 }
 
 /*
@@ -82,7 +84,7 @@ exec_helper_stop(void)
 	if (exec_ibuf == NULL)
 		return;
 
-	imsg_clear(exec_ibuf);
+	imsgbuf_clear(exec_ibuf);
 	close(exec_fd);
 	free(exec_ibuf);
 	exec_ibuf = NULL;
@@ -108,8 +110,8 @@ exec_helper_handle(void)
 	if (exec_ibuf == NULL)
 		return;
 
-	if ((n = imsg_read(exec_ibuf)) == -1 && errno != EAGAIN)
-		warn("imsg_read");
+	if ((n = imsgbuf_read(exec_ibuf)) == -1 && errno != EAGAIN)
+		warn("imsgbuf_read");
 	if (n == 0) {
 		warnx("exec helper disconnected");
 		exec_helper_stop();
@@ -202,7 +204,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 		}
 	}
 	imsg_close(exec_ibuf, buf);
-	imsg_flush(exec_ibuf);
+	imsgbuf_flush(exec_ibuf);
 
 	return 0;
 }

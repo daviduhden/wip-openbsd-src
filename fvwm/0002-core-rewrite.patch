@@ -28,10 +28,11 @@ Major changes:
 Apply after 0001-gpl-removal.patch
 To apply:  cd <xenocara-root>  &&  patch -p0 < this-file
 
-NOT VERIFIED: No compilation or runtime testing performed.
-
-diff --git fvwm/config.h fvwm/config.h
-index 44d4acf..6264574 100644
+Index: fvwm/config.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/config.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/config.h
 --- fvwm/config.h
 +++ fvwm/config.h
 @@ -1,366 +1,42 @@
@@ -415,8 +416,11 @@ index 44d4acf..6264574 100644
 +#define abs(a) (((a) >= 0) ? (a) : -(a))
  #endif
 -
-diff --git fvwm/fvwm/Makefile fvwm/fvwm/Makefile
-index 631a24e..4c74bee 100644
+Index: fvwm/fvwm/Makefile
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/Makefile,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/Makefile
 --- fvwm/fvwm/Makefile
 +++ fvwm/fvwm/Makefile
 @@ -5,7 +5,7 @@
@@ -450,8 +454,11 @@ index 631a24e..4c74bee 100644
 +
  .include <bsd.prog.mk>
  .include <bsd.xorg.mk>
-diff --git fvwm/fvwm/add_window.c fvwm/fvwm/add_window.c
-index 6bb094d..52a1a67 100644
+Index: fvwm/fvwm/add_window.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/add_window.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/add_window.c
 --- fvwm/fvwm/add_window.c
 +++ fvwm/fvwm/add_window.c
 @@ -29,40 +29,40 @@
@@ -2391,8 +2398,11 @@ index 6bb094d..52a1a67 100644
 +	}
 +	return; /* return */
  }
-diff --git fvwm/fvwm/bindings.c fvwm/fvwm/bindings.c
-index f2f1458..5bbf4e6 100644
+Index: fvwm/fvwm/bindings.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/bindings.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/bindings.c
 --- fvwm/fvwm/bindings.c
 +++ fvwm/fvwm/bindings.c
 @@ -1,109 +1,87 @@
@@ -2997,8 +3007,11 @@ index f2f1458..5bbf4e6 100644
 +	}
 +	return;
 +}
-diff --git fvwm/fvwm/borders.c fvwm/fvwm/borders.c
-index 9201780..f260c6c 100644
+Index: fvwm/fvwm/borders.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/borders.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/borders.c
 --- fvwm/fvwm/borders.c
 +++ fvwm/fvwm/borders.c
 @@ -6,55 +6,42 @@
@@ -5989,8 +6002,11 @@ index 9201780..f260c6c 100644
 +	}
  #endif
  }
-diff --git fvwm/fvwm/builtins.c fvwm/fvwm/builtins.c
-index a645b27..4779273 100644
+Index: fvwm/fvwm/builtins.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/builtins.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/builtins.c
 --- fvwm/fvwm/builtins.c
 +++ fvwm/fvwm/builtins.c
 @@ -6,36 +6,35 @@
@@ -14849,8 +14865,11 @@ index a645b27..4779273 100644
 +		rgpctMovementDefault[i++] = 1.0;
 +	}
  }
-diff --git fvwm/fvwm/colormaps.c fvwm/fvwm/colormaps.c
-index 7adeb53..902fa7b 100644
+Index: fvwm/fvwm/colormaps.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/colormaps.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/colormaps.c
 --- fvwm/fvwm/colormaps.c
 +++ fvwm/fvwm/colormaps.c
 @@ -9,16 +9,16 @@
@@ -15200,8 +15219,11 @@ index 7adeb53..902fa7b 100644
  }
 -
 -
-diff --git fvwm/fvwm/colors.c fvwm/fvwm/colors.c
-index e32309d..defd0f1 100644
+Index: fvwm/fvwm/colors.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/colors.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/colors.c
 --- fvwm/fvwm/colors.c
 +++ fvwm/fvwm/colors.c
 @@ -10,22 +10,18 @@
@@ -15507,8 +15529,11 @@ index e32309d..defd0f1 100644
 +	fvwm_msg(
 +	    ERR, "nocolor", "can't %s color %s", note, name ? name : "<NONE>");
  }
-diff --git fvwm/fvwm/complex.c fvwm/fvwm/complex.c
-index f84c645..fa3c61b 100644
+Index: fvwm/fvwm/complex.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/complex.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/complex.c
 --- fvwm/fvwm/complex.c
 +++ fvwm/fvwm/complex.c
 @@ -5,20 +5,19 @@
@@ -16030,8 +16055,11 @@ index f84c645..fa3c61b 100644
 +	out[j] = 0;
 +	return out;
  }
-diff --git fvwm/fvwm/decorations.c fvwm/fvwm/decorations.c
-index c9c8674..4108dc5 100644
+Index: fvwm/fvwm/decorations.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/decorations.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/decorations.c
 --- fvwm/fvwm/decorations.c
 +++ fvwm/fvwm/decorations.c
 @@ -33,65 +33,65 @@
@@ -17004,8 +17032,11 @@ index c9c8674..4108dc5 100644
 -
 -
 -
-diff --git fvwm/fvwm/defaults.h fvwm/fvwm/defaults.h
-index db18b1d..310c480 100644
+Index: fvwm/fvwm/defaults.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/defaults.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/defaults.h
 --- fvwm/fvwm/defaults.h
 +++ fvwm/fvwm/defaults.h
 @@ -7,6 +7,6 @@
@@ -17018,8 +17049,11 @@ index db18b1d..310c480 100644
 +#define DEFAULT_CLICKTIME 150  /* ms */
 +#define DEFAULT_POPUP_DELAY 15 /* ms*10 */
 +#define DEFAULT_MENU_CLICKTIME (3 * DEFAULT_CLICKTIME)
-diff --git fvwm/fvwm/events.c fvwm/fvwm/events.c
-index 6d664e9..2355151 100644
+Index: fvwm/fvwm/events.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/events.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/events.c
 --- fvwm/fvwm/events.c
 +++ fvwm/fvwm/events.c
 @@ -29,7 +29,6 @@
@@ -19893,9 +19927,11 @@ index 6d664e9..2355151 100644
  
 +	XFree(children);
 +}
-diff --git fvwm/fvwm/exec.c fvwm/fvwm/exec.c
-new file mode 100644
-index 0000000..621012c
+Index: fvwm/fvwm/exec.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/exec.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/exec.c
 --- /dev/null
 +++ fvwm/fvwm/exec.c
 @@ -0,0 +1,208 @@
@@ -20107,8 +20143,11 @@ index 0000000..621012c
 +
 +	return 0;
 +}
-diff --git fvwm/fvwm/focus.c fvwm/fvwm/focus.c
-index 670a00c..e801a98 100644
+Index: fvwm/fvwm/focus.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/focus.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/focus.c
 --- fvwm/fvwm/focus.c
 +++ fvwm/fvwm/focus.c
 @@ -1,6 +1,6 @@
@@ -20491,8 +20530,11 @@ index 670a00c..e801a98 100644
 +
 +	XSync(dpy, 0);
 +}
-diff --git fvwm/fvwm/functions.c fvwm/fvwm/functions.c
-index 11d25f1..83bd2c1 100644
+Index: fvwm/fvwm/functions.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/functions.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/functions.c
 --- fvwm/fvwm/functions.c
 +++ fvwm/fvwm/functions.c
 @@ -12,20 +12,19 @@
@@ -21090,8 +21132,11 @@ index 11d25f1..83bd2c1 100644
 +	*func_needs_window = False;
 +	return;
  }
-diff --git fvwm/fvwm/fvwm.c fvwm/fvwm/fvwm.c
-index 5c4f6c9..a762207 100644
+Index: fvwm/fvwm/fvwm.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm.c
 --- fvwm/fvwm/fvwm.c
 +++ fvwm/fvwm/fvwm.c
 @@ -1,4 +1,3 @@
@@ -23857,8 +23902,11 @@ index 5c4f6c9..a762207 100644
 +		BlackoutWin = None;
 +	}
  } /* UnBlackoutScreen */
-diff --git fvwm/fvwm/fvwm.h fvwm/fvwm/fvwm.h
-index e1102de..68f461e 100644
+Index: fvwm/fvwm/fvwm.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm.h
 --- fvwm/fvwm/fvwm.h
 +++ fvwm/fvwm/fvwm.h
 @@ -29,7 +29,6 @@
@@ -24415,9 +24463,11 @@ index e1102de..68f461e 100644
  extern void Done(int, char *) __attribute__((__noreturn__));
  extern void BlackoutScreen(void);
  extern void UnBlackoutScreen(void);
-diff --git fvwm/fvwm/fvwm_exec.c fvwm/fvwm/fvwm_exec.c
-new file mode 100644
-index 0000000..325a212
+Index: fvwm/fvwm/fvwm_exec.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm_exec.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm_exec.c
 --- /dev/null
 +++ fvwm/fvwm/fvwm_exec.c
 @@ -0,0 +1,169 @@
@@ -24590,9 +24640,11 @@ index 0000000..325a212
 +	close(s);
 +	return 0;
 +}
-diff --git fvwm/fvwm/fvwm_sandbox.h fvwm/fvwm/fvwm_sandbox.h
-new file mode 100644
-index 0000000..5e14fa2
+Index: fvwm/fvwm/fvwm_sandbox.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm_sandbox.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm_sandbox.h
 --- /dev/null
 +++ fvwm/fvwm/fvwm_sandbox.h
 @@ -0,0 +1,187 @@
@@ -24783,8 +24835,11 @@ index 0000000..5e14fa2
 +}
 +
 +#endif /* FVWM_SANDBOX_H */
-diff --git fvwm/fvwm/fvwmdebug.c fvwm/fvwm/fvwmdebug.c
-index 0e0b7b1..4983d5c 100644
+Index: fvwm/fvwm/fvwmdebug.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwmdebug.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwmdebug.c
 --- fvwm/fvwm/fvwmdebug.c
 +++ fvwm/fvwm/fvwmdebug.c
 @@ -10,9 +10,10 @@
@@ -24994,8 +25049,11 @@ index 0e0b7b1..4983d5c 100644
  }
  
  #endif
-diff --git fvwm/fvwm/fvwmdebug.h fvwm/fvwm/fvwmdebug.h
-index 76b5160..293fddf 100644
+Index: fvwm/fvwm/fvwmdebug.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwmdebug.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwmdebug.h
 --- fvwm/fvwm/fvwmdebug.h
 +++ fvwm/fvwm/fvwmdebug.h
 @@ -14,17 +14,17 @@ void DB_WI_BORDER(char *label, FvwmWindow *fw);
@@ -25027,8 +25085,11 @@ index 76b5160..293fddf 100644
  #endif
  
  #endif /* _DEBUG_ */
-diff --git fvwm/fvwm/icons.c fvwm/fvwm/icons.c
-index 5f583d8..48bfa24 100644
+Index: fvwm/fvwm/icons.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/icons.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/icons.c
 --- fvwm/fvwm/icons.c
 +++ fvwm/fvwm/icons.c
 @@ -11,12 +11,12 @@
@@ -26905,8 +26966,11 @@ index 5f583d8..48bfa24 100644
 +	    PropModeReplace, (unsigned char *)data, 2);
 +	return;
  }
-diff --git fvwm/fvwm/menus.c fvwm/fvwm/menus.c
-index 20b55a8..dbfd9a6 100644
+Index: fvwm/fvwm/menus.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/menus.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/menus.c
 --- fvwm/fvwm/menus.c
 +++ fvwm/fvwm/menus.c
 @@ -43,47 +43,47 @@
@@ -32257,8 +32321,11 @@ index 20b55a8..dbfd9a6 100644
 +	/* you never know... */
 +	return 0;
  }
-diff --git fvwm/fvwm/menus.h fvwm/fvwm/menus.h
-index fb61853..c15e84c 100644
+Index: fvwm/fvwm/menus.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/menus.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/menus.h
 --- fvwm/fvwm/menus.h
 +++ fvwm/fvwm/menus.h
 @@ -29,7 +29,6 @@
@@ -32737,8 +32804,11 @@ index fb61853..c15e84c 100644
  
  #endif /* _MENUS_ */
 -
-diff --git fvwm/fvwm/misc.c fvwm/fvwm/misc.c
-index 5fcf456..c9d8d91 100644
+Index: fvwm/fvwm/misc.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/misc.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/misc.c
 --- fvwm/fvwm/misc.c
 +++ fvwm/fvwm/misc.c
 @@ -12,30 +12,30 @@
@@ -34858,8 +34928,11 @@ index 5fcf456..c9d8d91 100644
 +		Tmp_win = None;
 +	}
  }
-diff --git fvwm/fvwm/misc.h fvwm/fvwm/misc.h
-index baa5dcb..b31b130 100644
+Index: fvwm/fvwm/misc.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/misc.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/misc.h
 --- fvwm/fvwm/misc.h
 +++ fvwm/fvwm/misc.h
 @@ -2,9 +2,11 @@
@@ -35455,8 +35528,11 @@ index baa5dcb..b31b130 100644
  
  #endif /* MISC_H */
 -
-diff --git fvwm/fvwm/modconf.c fvwm/fvwm/modconf.c
-index 4246183..2dbf2ee 100644
+Index: fvwm/fvwm/modconf.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/modconf.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/modconf.c
 --- fvwm/fvwm/modconf.c
 +++ fvwm/fvwm/modconf.c
 @@ -24,40 +24,38 @@
@@ -35768,8 +35844,11 @@ index 4246183..2dbf2ee 100644
 +	}
 +	SendPacket(*Module, M_END_CONFIG_INFO, 0, 0, 0, 0, 0, 0, 0, 0);
  }
-diff --git fvwm/fvwm/module.c fvwm/fvwm/module.c
-index b5a3f68..1747cc8 100644
+Index: fvwm/fvwm/module.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/module.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/module.c
 --- fvwm/fvwm/module.c
 +++ fvwm/fvwm/module.c
 @@ -12,27 +12,26 @@
@@ -37222,8 +37301,11 @@ index b5a3f68..1747cc8 100644
 +	GetIntegerArguments(action, NULL, &val, 1);
 +	PipeMask[*Module] = (unsigned long)val;
  }
-diff --git fvwm/fvwm/module.h fvwm/fvwm/module.h
-index ab3fa09..36b0bb9 100644
+Index: fvwm/fvwm/module.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/module.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/module.h
 --- fvwm/fvwm/module.h
 +++ fvwm/fvwm/module.h
 @@ -1,12 +1,11 @@
@@ -37354,8 +37436,11 @@ index ab3fa09..36b0bb9 100644
 +    unsigned long data8, const char *name);
  
  #endif /* MODULE_H */
-diff --git fvwm/fvwm/move.c fvwm/fvwm/move.c
-index 120c96a..e7af139 100644
+Index: fvwm/fvwm/move.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/move.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/move.c
 --- fvwm/fvwm/move.c
 +++ fvwm/fvwm/move.c
 @@ -12,19 +12,19 @@
@@ -38923,8 +39008,11 @@ index 120c96a..e7af139 100644
 +		MyXUngrabServer(dpy);
 +	UngrabEm();
  }
-diff --git fvwm/fvwm/parse.h fvwm/fvwm/parse.h
-index 36ef67c..c1da034 100644
+Index: fvwm/fvwm/parse.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/parse.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/parse.h
 --- fvwm/fvwm/parse.h
 +++ fvwm/fvwm/parse.h
 @@ -18,113 +18,112 @@
@@ -39143,8 +39231,11 @@ index 36ef67c..c1da034 100644
  
  #endif /* _PARSE_ */
 -
-diff --git fvwm/fvwm/placement.c fvwm/fvwm/placement.c
-index 78f9c0c..5c3a61f 100644
+Index: fvwm/fvwm/placement.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/placement.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/placement.c
 --- fvwm/fvwm/placement.c
 +++ fvwm/fvwm/placement.c
 @@ -9,12 +9,11 @@
@@ -40686,8 +40777,11 @@ index 78f9c0c..5c3a61f 100644
 +	}
 +	return;
  }
-diff --git fvwm/fvwm/read.c fvwm/fvwm/read.c
-index 254f036..c3b67ff 100644
+Index: fvwm/fvwm/read.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/read.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/read.c
 --- fvwm/fvwm/read.c
 +++ fvwm/fvwm/read.c
 @@ -11,21 +11,26 @@
@@ -41286,8 +41380,11 @@ index 254f036..c3b67ff 100644
 +		StartupStuff();
 +	}
 +}
-diff --git fvwm/fvwm/resize.c fvwm/fvwm/resize.c
-index 0634666..7c44765 100644
+Index: fvwm/fvwm/resize.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/resize.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/resize.c
 --- fvwm/fvwm/resize.c
 +++ fvwm/fvwm/resize.c
 @@ -1,4 +1,3 @@
@@ -42454,8 +42551,11 @@ index 0634666..7c44765 100644
 +			break;
 +	}
  }
-diff --git fvwm/fvwm/screen.h fvwm/fvwm/screen.h
-index a7c9990..a2a7d07 100644
+Index: fvwm/fvwm/screen.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/screen.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/screen.h
 --- fvwm/fvwm/screen.h
 +++ fvwm/fvwm/screen.h
 @@ -35,28 +35,28 @@
@@ -42974,8 +43074,11 @@ index a7c9990..a2a7d07 100644
  
  /* Have to declare this here because FvwmDecor isn't declared in misc.h when
   * this gets parsed :( */
-diff --git fvwm/fvwm/style.c fvwm/fvwm/style.c
-index 8d21903..8ef2d8e 100644
+Index: fvwm/fvwm/style.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/style.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/style.c
 --- fvwm/fvwm/style.c
 +++ fvwm/fvwm/style.c
 @@ -21,14 +21,13 @@
@@ -44866,8 +44969,11 @@ index 8d21903..8ef2d8e 100644
 +		Scr.TheList = nptr;   /* set the list root pointer. */
  } /* end function */
 -
-diff --git fvwm/fvwm/virtual.c fvwm/fvwm/virtual.c
-index bf1d145..370a983 100644
+Index: fvwm/fvwm/virtual.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/virtual.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/virtual.c
 --- fvwm/fvwm/virtual.c
 +++ fvwm/fvwm/virtual.c
 @@ -1,17 +1,16 @@
@@ -46510,8 +46616,11 @@ index bf1d145..370a983 100644
 +	y = val[1] * Scr.MyDisplayHeight;
 +	MoveViewport(x, y, True);
 +}
-diff --git fvwm/fvwm/windows.c fvwm/fvwm/windows.c
-index 56b471f..3fe4263 100644
+Index: fvwm/fvwm/windows.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/windows.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/windows.c
 --- fvwm/fvwm/windows.c
 +++ fvwm/fvwm/windows.c
 @@ -11,341 +11,351 @@
@@ -47160,9 +47269,11 @@ index 56b471f..3fe4263 100644
 +		free(default_action);
  }
 -
-diff --git fvwm/fvwm/xalloc.h fvwm/fvwm/xalloc.h
-new file mode 100644
-index 0000000..13c562e
+Index: fvwm/fvwm/xalloc.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/xalloc.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/xalloc.h
 --- /dev/null
 +++ fvwm/fvwm/xalloc.h
 @@ -0,0 +1,77 @@
@@ -47244,8 +47355,11 @@ index 0000000..13c562e
 +
 +#endif /* FVWM_XALLOC_H */
 
-diff --git fvwm/libs/ClientMsg.c fvwm/libs/ClientMsg.c
-index 8c59638..754f1f6 100644
+Index: fvwm/libs/ClientMsg.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/ClientMsg.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/ClientMsg.c
 --- fvwm/libs/ClientMsg.c
 +++ fvwm/libs/ClientMsg.c
 @@ -11,24 +11,25 @@
@@ -47286,8 +47400,11 @@ index 8c59638..754f1f6 100644
 +	ev.data.l[1] = timestamp;
 +	XSendEvent(disp, w, False, 0L, (XEvent *)&ev);
  }
-diff --git fvwm/libs/GetFont.c fvwm/libs/GetFont.c
-index 46cbea6..8c70e82 100644
+Index: fvwm/libs/GetFont.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/GetFont.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/GetFont.c
 --- fvwm/libs/GetFont.c
 +++ fvwm/libs/GetFont.c
 @@ -1,32 +1,30 @@
@@ -47342,8 +47459,11 @@ index 46cbea6..8c70e82 100644
 +	return fnt;
  }
 -
-diff --git fvwm/libs/GetFontSet.c fvwm/libs/GetFontSet.c
-index 47c198a..10db2e0 100644
+Index: fvwm/libs/GetFontSet.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/GetFontSet.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/GetFontSet.c
 --- fvwm/libs/GetFontSet.c
 +++ fvwm/libs/GetFontSet.c
 @@ -1,38 +1,38 @@
@@ -47410,8 +47530,11 @@ index 47c198a..10db2e0 100644
 +	return fontset;
  }
 -
-diff --git fvwm/libs/Grab.c fvwm/libs/Grab.c
-index 6d41628..22e50a0 100644
+Index: fvwm/libs/Grab.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/Grab.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/Grab.c
 --- fvwm/libs/Grab.c
 +++ fvwm/libs/Grab.c
 @@ -7,25 +7,23 @@
@@ -47455,8 +47578,11 @@ index 6d41628..22e50a0 100644
 +	}
  }
 -
-diff --git fvwm/libs/ModParse.c fvwm/libs/ModParse.c
-index 2c4ca28..d79ceab 100644
+Index: fvwm/libs/ModParse.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/ModParse.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/ModParse.c
 --- fvwm/libs/ModParse.c
 +++ fvwm/libs/ModParse.c
 @@ -9,9 +9,9 @@
@@ -47944,8 +48070,11 @@ index 2c4ca28..d79ceab 100644
 +		return toupper((unsigned char)*s) -
 +		    toupper((unsigned char)*w); /* smaller/greater */
 +}
-diff --git fvwm/libs/ModParse.h fvwm/libs/ModParse.h
-index 173e4db..1a82957 100644
+Index: fvwm/libs/ModParse.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/ModParse.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/ModParse.h
 --- fvwm/libs/ModParse.h
 +++ fvwm/libs/ModParse.h
 @@ -13,16 +13,15 @@
@@ -48020,8 +48149,11 @@ index 173e4db..1a82957 100644
  
 -#endif  /* MODPARSE_H */
 +#endif /* MODPARSE_H */
-diff --git fvwm/libs/Module.c fvwm/libs/Module.c
-index aefe055..fcb5fa1 100644
+Index: fvwm/libs/Module.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/Module.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/Module.c
 --- fvwm/libs/Module.c
 +++ fvwm/libs/Module.c
 @@ -1,17 +1,15 @@
@@ -48272,8 +48404,11 @@ index aefe055..fcb5fa1 100644
 +		}
 +	}
  }
-diff --git fvwm/libs/Parse.c fvwm/libs/Parse.c
-index 633153b..6bf6b36 100644
+Index: fvwm/libs/Parse.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/Parse.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/Parse.c
 --- fvwm/libs/Parse.c
 +++ fvwm/libs/Parse.c
 @@ -2,11 +2,11 @@
@@ -49185,8 +49320,11 @@ index 633153b..6bf6b36 100644
 +		free(tok2);
 +	return n;
  }
-diff --git fvwm/libs/Picture.c fvwm/libs/Picture.c
-index afcbaef..7ce2293 100644
+Index: fvwm/libs/Picture.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/Picture.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/Picture.c
 --- fvwm/libs/Picture.c
 +++ fvwm/libs/Picture.c
 @@ -1,4 +1,4 @@
@@ -49970,8 +50108,11 @@ index afcbaef..7ce2293 100644
 +	return dst;
  }
  #endif /* XPM */
-diff --git fvwm/libs/Strings.c fvwm/libs/Strings.c
-index 6675819..e75e406 100644
+Index: fvwm/libs/Strings.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/Strings.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/Strings.c
 --- fvwm/libs/Strings.c
 +++ fvwm/libs/Strings.c
 @@ -2,10 +2,10 @@
@@ -50165,8 +50306,11 @@ index 6675819..e75e406 100644
 +		return 0;
 +	return (strcasecmp(s1, s2) == 0);
  }
-diff --git fvwm/libs/System.c fvwm/libs/System.c
-index ca76560..f9ed0e5 100644
+Index: fvwm/libs/System.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/System.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/System.c
 --- fvwm/libs/System.c
 +++ fvwm/libs/System.c
 @@ -1,44 +1,27 @@
@@ -50229,8 +50373,11 @@ index ca76560..f9ed0e5 100644
 +	strlcpy(buf, "", max);
 +	return -1;
  }
-diff --git fvwm/libs/XResource.c fvwm/libs/XResource.c
-index 8248e88..586af88 100644
+Index: fvwm/libs/XResource.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/XResource.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/XResource.c
 --- fvwm/libs/XResource.c
 +++ fvwm/libs/XResource.c
 @@ -5,107 +5,34 @@
@@ -50565,8 +50712,11 @@ index 8248e88..586af88 100644
 +
 +	return True;
  }
-diff --git fvwm/libs/debug.c fvwm/libs/debug.c
-index 9020e7c..c1e4046 100644
+Index: fvwm/libs/debug.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/debug.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/debug.c
 --- fvwm/libs/debug.c
 +++ fvwm/libs/debug.c
 @@ -8,25 +8,14 @@
@@ -50619,8 +50769,11 @@ index 9020e7c..c1e4046 100644
  }
  
  #endif
-diff --git fvwm/libs/envvar.c fvwm/libs/envvar.c
-index 35d5f88..ee374da 100644
+Index: fvwm/libs/envvar.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/envvar.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/envvar.c
 --- fvwm/libs/envvar.c
 +++ fvwm/libs/envvar.c
 @@ -13,9 +13,9 @@
@@ -50966,8 +51119,11 @@ index 35d5f88..ee374da 100644
 -    return ret;
 +	return ret;
  }
-diff --git fvwm/libs/fvwmlib.h fvwm/libs/fvwmlib.h
-index 4018f25..aa36d80 100644
+Index: fvwm/libs/fvwmlib.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/fvwmlib.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/fvwmlib.h
 --- fvwm/libs/fvwmlib.h
 +++ fvwm/libs/fvwmlib.h
 @@ -1,47 +1,38 @@
@@ -51202,8 +51358,11 @@ index 4018f25..aa36d80 100644
 +    XrmDatabase db, const char *resource, const char *prefix, char **val);
  
  #endif
-diff --git fvwm/libs/lang-strings.h fvwm/libs/lang-strings.h
-index 8680423..4db18de 100644
+Index: fvwm/libs/lang-strings.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/lang-strings.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/lang-strings.h
 --- fvwm/libs/lang-strings.h
 +++ fvwm/libs/lang-strings.h
 @@ -1,9 +1,9 @@
@@ -51219,9 +51378,11 @@ index 8680423..4db18de 100644
   * menu item and the strings below.
   ***************************************************************************/
  #define MOVE_STRING "move"
-diff --git fvwm/libs/safemalloc.c fvwm/libs/safemalloc.c
-deleted file mode 100644
-index 2aea3b9..0000000
+Index: fvwm/libs/safemalloc.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/safemalloc.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/safemalloc.c
 --- fvwm/libs/safemalloc.c
 +++ /dev/null
 @@ -1,27 +0,0 @@
@@ -51252,8 +51413,11 @@ index 2aea3b9..0000000
 -}
 -
 -
-diff --git fvwm/libs/wild.c fvwm/libs/wild.c
-index a76ea0c..0b59baa 100644
+Index: fvwm/libs/wild.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/wild.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/wild.c
 --- fvwm/libs/wild.c
 +++ fvwm/libs/wild.c
 @@ -1,9 +1,9 @@
@@ -52034,3 +52198,243 @@ index a76ea0c..0b59baa 100644
 +}
 +
 +#endif /* FVWM_XALLOC_H */
+
+
+Index: fvwm/fvwm/Makefile
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/Makefile,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/Makefile
+--- fvwm/fvwm/Makefile
++++ fvwm/fvwm/Makefile
+@@ -11,6 +11,7 @@ SRCS= add_window.c bindings.c borders.c \
+ 	virtual.c windows.c
+ 
+ CPPFLAGS+= -DFVWM_MODULEDIR=\"$(FVWMLIBDIR)\" \
++	-DFVWMLIBDIR=\"$(FVWMLIBDIR)\" \
+ 	-DFVWMRC=\".fvwmrc\" \
+ 	-DFVWM_CONFIGDIR=\"$(FVWMLIBDIR)\"
+ 
+
+Index: fvwm/fvwm/events.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/events.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/events.c
+--- fvwm/fvwm/events.c
++++ fvwm/fvwm/events.c
+@@ -37,8 +37,6 @@
+ 
+ #include "config.h"
+ 
+-#endif
+-
+ #include <sys/time.h>
+ #include <sys/types.h>
+ 
+@@ -1478,9 +1476,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
+ 
+ 	DBUG("My_XNextEvent", "waiting for module input/output");
+ 	XFlush(dpy);
+-	if (select((SELECT_TYPE_ARG1)fd_width, SELECT_TYPE_ARG234 & in_fdset,
+-	    SELECT_TYPE_ARG234 & out_fdset, SELECT_TYPE_ARG234 0,
+-	    SELECT_TYPE_ARG5 NULL) > 0) {
++	if (select(fd_width, &in_fdset, &out_fdset, NULL, NULL) > 0) {
+ 		/* Check for module input. */
+ 		for (i = 0; i < npipes; i++) {
+ 			if (readPipes[i] >= 0) {
+
+Index: fvwm/fvwm/exec.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/exec.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/exec.c
+--- fvwm/fvwm/exec.c
++++ fvwm/fvwm/exec.c
+@@ -21,6 +21,7 @@
+ 
+ #include "config.h"
+ #include "fvwm.h"
++#include "module.h"
+ #include "misc.h"
+ 
+ enum imsg_exec_type {
+@@ -70,7 +71,8 @@ exec_helper_start(void)
+ 	exec_ibuf = malloc(sizeof(struct imsgbuf));
+ 	if (exec_ibuf == NULL)
+ 		err(1, "malloc");
+-	imsg_init(exec_ibuf, exec_fd);
++	if (imsgbuf_init(exec_ibuf, exec_fd) == -1)
++		err(1, "imsgbuf_init");
+ }
+ 
+ /*
+@@ -82,7 +84,7 @@ exec_helper_stop(void)
+ 	if (exec_ibuf == NULL)
+ 		return;
+ 
+-	imsg_clear(exec_ibuf);
++	imsgbuf_clear(exec_ibuf);
+ 	close(exec_fd);
+ 	free(exec_ibuf);
+ 	exec_ibuf = NULL;
+@@ -108,8 +110,8 @@ exec_helper_handle(void)
+ 	if (exec_ibuf == NULL)
+ 		return;
+ 
+-	if ((n = imsg_read(exec_ibuf)) == -1 && errno != EAGAIN)
+-		warn("imsg_read");
++	if ((n = imsgbuf_read(exec_ibuf)) == -1 && errno != EAGAIN)
++		warn("imsgbuf_read");
+ 	if (n == 0) {
+ 		warnx("exec helper disconnected");
+ 		exec_helper_stop();
+@@ -202,7 +204,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
+ 		}
+ 	}
+ 	imsg_close(exec_ibuf, buf);
+-	imsg_flush(exec_ibuf);
++	imsgbuf_flush(exec_ibuf);
+ 
+ 	return 0;
+ }
+
+Index: fvwm/fvwm/fvwm.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm.h
+--- fvwm/fvwm/fvwm.h
++++ fvwm/fvwm/fvwm.h
+@@ -40,6 +40,8 @@
+ #include <X11/Xutil.h>
+ #include <X11/cursorfont.h>
+ 
++#include "xalloc.h"
++
+ #ifndef WithdrawnState
+ #define WithdrawnState 0
+ #endif
+
+Index: fvwm/fvwm/fvwm_exec.c
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm_exec.c,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm_exec.c
+--- fvwm/fvwm/fvwm_exec.c
++++ fvwm/fvwm/fvwm_exec.c
+@@ -10,7 +10,9 @@
+ #include <imsg.h>
+ 
+ #include <err.h>
++#include <errno.h>
+ #include <limits.h>
++#include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <signal.h>
+@@ -78,14 +80,15 @@ main(int argc, char **argv)
+ 
+ 	signal(SIGPIPE, SIG_IGN);
+ 
+-	imsg_init(&ibuf, s);
++	if (imsgbuf_init(&ibuf, s) == -1)
++		err(1, "imsgbuf_init");
+ 
+ 	if (pledge("stdio proc exec", NULL) == -1)
+ 		err(1, "pledge");
+ 
+ 	for (;;) {
+-		if ((n = imsg_read(&ibuf)) == -1 && errno != EAGAIN)
+-			err(1, "imsg_read");
++		if ((n = imsgbuf_read(&ibuf)) == -1 && errno != EAGAIN)
++			err(1, "imsgbuf_read");
+ 		if (n == 0)
+ 			break;
+ 
+@@ -151,7 +154,7 @@ main(int argc, char **argv)
+ 
+ 				imsg_compose(&ibuf, IMSG_EXEC_OK,
+ 				    0, 0, -1, &pid, sizeof(pid_t));
+-				imsg_flush(&ibuf);
++				imsgbuf_flush(&ibuf);
+ 				break;
+ 			}
+ 			default:
+@@ -163,7 +166,7 @@ main(int argc, char **argv)
+ 		}
+ 	}
+ 
+-	imsg_clear(&ibuf);
++	imsgbuf_clear(&ibuf);
+ 	close(s);
+ 	return 0;
+ }
+
+Index: fvwm/fvwm/fvwm_sandbox.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwm_sandbox.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwm_sandbox.h
+--- fvwm/fvwm/fvwm_sandbox.h
++++ fvwm/fvwm/fvwm_sandbox.h
+@@ -14,6 +14,8 @@
+ #ifndef FVWM_SANDBOX_H
+ #define FVWM_SANDBOX_H
+ 
++#include <err.h>
++
+ #ifndef FVWMLIBDIR
+ #define FVWMLIBDIR "/usr/X11R6/lib/X11/fvwm"
+ #endif
+
+Index: fvwm/fvwm/fvwmdebug.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/fvwmdebug.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/fvwmdebug.h
+--- fvwm/fvwm/fvwmdebug.h
++++ fvwm/fvwm/fvwmdebug.h
+@@ -27,4 +27,8 @@ void DB_WI_ALL(char *label, FvwmWindow *fw);
+ #define DB_WI_ALL(x, y)
+ #endif
+ 
++#ifndef DBUG
++#define DBUG(x, y) do { (void)(x); (void)(y); } while (0)
++#endif
++
+ #endif /* _DEBUG_ */
+
+Index: fvwm/fvwm/module.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/fvwm/module.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/fvwm/module.h
+--- fvwm/fvwm/module.h
++++ fvwm/fvwm/module.h
+@@ -1,6 +1,8 @@
+ #ifndef MODULE_H
+ #define MODULE_H
+ 
++#include "xalloc.h"
++
+ struct queue_buff_struct {
+ 	struct queue_buff_struct *next;
+ 	unsigned long *data;
+
+Index: fvwm/libs/fvwmlib.h
+===================================================================
+RCS file: /cvs/src/xenocara/app/fvwm/libs/fvwmlib.h,v
+retrieving revision 1.1
+diff -u -r1.1 fvwm/libs/fvwmlib.h
+--- fvwm/libs/fvwmlib.h
++++ fvwm/libs/fvwmlib.h
+@@ -7,6 +7,8 @@
+ #include <X11/Xutil.h>
+ #include <ctype.h>
+ 
++#include "../fvwm/xalloc.h"
++
+ /***********************************************************************
+  * Generic debugging
+  ***********************************************************************/

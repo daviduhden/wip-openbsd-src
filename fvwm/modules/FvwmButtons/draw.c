@@ -16,8 +16,6 @@
 
 #include "config.h"
 
-#endif
-
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>

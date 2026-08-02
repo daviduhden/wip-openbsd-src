@@ -11,6 +11,7 @@ SRCS= add_window.c bindings.c borders.c \
 	virtual.c windows.c
 
 CPPFLAGS+= -DFVWM_MODULEDIR=\"$(FVWMLIBDIR)\" \
+	-DFVWMLIBDIR=\"$(FVWMLIBDIR)\" \
 	-DFVWMRC=\".fvwmrc\" \
 	-DFVWM_CONFIGDIR=\"$(FVWMLIBDIR)\"
 

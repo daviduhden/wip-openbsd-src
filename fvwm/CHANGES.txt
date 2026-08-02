@@ -5,7 +5,7 @@ Summary of all changes applied to the OpenBSD-only fork of FVWM 2.2.5
 relative to the version previously present in Xenocara.
 
 This document covers work performed through static source-level analysis
-only.  Nothing was compiled, linked, executed, or runtime-tested.
+and compile/link verification. Runtime testing remains pending.
 
 All changes preserve FVWM 2.2.5 configuration syntax, command semantics,
 module IPC protocol, and observable window-manager behavior unless a
@@ -409,11 +409,8 @@ Total insertions:        ~972
 Total deletions:        ~3816
 
 ========================================================================
-NOT VERIFIED
+RUNTIME VERIFICATION
 ========================================================================
-
-This work was performed exclusively through static source inspection.
-No compilation, linking, execution, or runtime testing was performed.
 
 The following remain unverified and require testing on a real OpenBSD
 system with an active X11 session:

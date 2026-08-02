@@ -577,8 +577,6 @@ ReadFvwmPipe(void)
 	FvwmPacketHeader header;
 	FvwmPacketBody *body;
 
-	PrintMemuse();
-
 	ConsoleDebug(FVWM, "DEBUG: entering ReadFvwmPipe\n");
 	body_length = ReadFvwmPacket(
 	    Fvwm_fd[1], (unsigned long *)&header, (unsigned long **)&body);

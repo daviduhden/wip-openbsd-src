@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "../../fvwm/module.h"
+#include "../../fvwm/fvwm_sandbox.h"
 #include "readconfig.h"
 #include "x.h"
 #include "xmanager.h"

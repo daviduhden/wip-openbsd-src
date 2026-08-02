@@ -40,6 +40,8 @@
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
 
+#include "xalloc.h"
+
 #ifndef WithdrawnState
 #define WithdrawnState 0
 #endif

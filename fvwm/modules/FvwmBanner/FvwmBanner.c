@@ -7,7 +7,6 @@
 
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
-#endif
 
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -190,7 +189,7 @@ main(int argc, char **argv)
 		FD_SET(x_fd, &in_fdset);
 
 		if (!XPending(dpy))
-			retval = select(fd_width, SELECT_TYPE_ARG234 & in_fdset,
+			retval = select(fd_width, & in_fdset,
 			    0, 0, &value);
 
 		if (retval == 0) {

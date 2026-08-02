@@ -14,6 +14,8 @@
 #ifndef FVWM_SANDBOX_H
 #define FVWM_SANDBOX_H
 
+#include <err.h>
+
 #ifndef FVWMLIBDIR
 #define FVWMLIBDIR "/usr/X11R6/lib/X11/fvwm"
 #endif
