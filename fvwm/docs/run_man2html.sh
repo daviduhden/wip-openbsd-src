@@ -24,7 +24,8 @@ echo "<html>
     bgcolor=\"#000000\" text=\"#ffffff\"
     link=\"#FFFF88\" vlink=\"#EEDDDD\" alink=\"#ff0000\">
 <center>
-<h1><font color=\"pink\">The Official FVWM Homepage - $name Man Page</font></h1>
+<h1><font color=\"pink\">The Official FVWM Homepage - \
+$name Man Page</font></h1>
 </center>
 <pre>
 " >"$outfile"
