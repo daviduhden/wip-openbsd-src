@@ -2,7 +2,7 @@
 
 .include "../Makefile.inc"
 
-RM?=rm
+RM ?= rm
 
 depend:
 
@@ -28,5 +28,5 @@ clean:
 
 cleandir: clean
 
-.include <bsd.own.mk>
+	.include <bsd.own.mk>
 .include <bsd.xorg.mk>

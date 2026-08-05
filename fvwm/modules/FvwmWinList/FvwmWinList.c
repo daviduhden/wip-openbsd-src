@@ -251,7 +251,7 @@ MainEventLoop(void)
 		 * having one fewer select statements
 		 */
 		XFlush(dpy);
-		if (select(fd_width, & readset, NULL, NULL,
+		if (select(fd_width, &readset, NULL, NULL,
 		    NULL) > 0) {
 			if (FD_ISSET(x_fd, &readset) || XPending(dpy))
 				LoopOnEvents();
@@ -1072,7 +1072,20 @@ ShutMeDown(void)
 {
 	FreeList(&windows);
 	FreeAllButtons(&buttons);
-	/*  XFreeGC(dpy,graph);*/
+	{
+		int i;
+
+		for (i = 0; i < MAX_COLOUR_SETS; i++) {
+			if (graph[i])
+				XFreeGC(dpy, graph[i]);
+			if (shadow[i])
+				XFreeGC(dpy, shadow[i]);
+			if (hilite[i])
+				XFreeGC(dpy, hilite[i]);
+			if (background[i])
+				XFreeGC(dpy, background[i]);
+		}
+	}
 	if (WindowIsUp)
 		XDestroyWindow(dpy, win);
 	XCloseDisplay(dpy);

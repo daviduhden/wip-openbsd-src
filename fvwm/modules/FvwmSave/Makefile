@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmSave
 
-PROG=	FvwmSave
-SRCS=	FvwmSave.c
+PROG = FvwmSave
+SRCS = FvwmSave.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

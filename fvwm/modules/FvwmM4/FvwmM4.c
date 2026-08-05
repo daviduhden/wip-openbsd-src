@@ -285,9 +285,16 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 	fputs(MkDef("OSTYPE", ostype), tmpf);
 
 	pwent = getpwuid(geteuid());
-	fputs(MkDef("USER", pwent->pw_name), tmpf);
+	if (pwent != NULL && pwent->pw_name != NULL)
+		fputs(MkDef("USER", pwent->pw_name), tmpf);
+	else
+		fputs(MkDef("USER", ""), tmpf);
 
-	fputs(MkDef("HOME", getenv("HOME")), tmpf);
+	{
+		const char *home = getenv("HOME");
+
+		fputs(MkDef("HOME", (home != NULL) ? home : ""), tmpf);
+	}
 	fputs(MkNum("VERSION", ProtocolVersion(display)), tmpf);
 	fputs(MkNum("REVISION", ProtocolRevision(display)), tmpf);
 	fputs(MkDef("VENDOR", ServerVendor(display)), tmpf);

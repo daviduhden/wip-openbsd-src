@@ -2,9 +2,9 @@
 
 .include "../Makefile.inc"
 
-NOOBJ= Yes
+NOOBJ = Yes
 
-BITMAPS= \
+BITMAPS = \
 	fvwm.bitmap \
 	ccode.icon \
 	hcode.icon \
@@ -12,7 +12,7 @@ BITMAPS= \
 	prog.icon \
 	default.xbm
 
-PIXMAPS= \
+PIXMAPS = \
 	Jlock.xpm Jnews.xpm Jrecycle.xpm Jxlock.xpm Monitor.xpm \
 	Mosaic.xpm arrdown2.xpm arrows2.xpm arrup2.xpm bomb.xpm \
 	button-close.xpm button-horiz.xpm button-max.xpm button-vert.xpm \
@@ -45,7 +45,6 @@ PIXMAPS= \
 	xterm-sgi.xpm xterm-sol.xpm xterm-sun.xpm xterm.xpm \
 	xv.xpm xv2.xpm
 
-
 depend:
 
 all:
@@ -53,20 +52,20 @@ all:
 install:
 	@for f in ${BITMAPS}; do \
 		echo "${INSTALL_DATA} $$f \
-			${DESTDIR}${INCSDIR}/X11/bitmaps" ; \
+		${DESTDIR}${INCSDIR}/X11/bitmaps" ; \
 		${INSTALL_DATA} ${.CURDIR}/$$f \
-			${DESTDIR}${INCSDIR}/X11/bitmaps ; \
-	done 
+		${DESTDIR}${INCSDIR}/X11/bitmaps ; \
+	done
 	@for f in ${PIXMAPS}; do \
 		echo "${INSTALL_DATA} $$f \
-			${DESTDIR}${INCSDIR}/X11/pixmaps" ; \
+		${DESTDIR}${INCSDIR}/X11/pixmaps" ; \
 		${INSTALL_DATA} ${.CURDIR}/$$f \
-			${DESTDIR}${INCSDIR}/X11/pixmaps ; \
-	done 
+		${DESTDIR}${INCSDIR}/X11/pixmaps ; \
+	done
 
 clean:
 
 cleandir:
 
-.include <bsd.own.mk>
+	.include <bsd.own.mk>
 .include <bsd.xorg.mk>

@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmBanner
 
-PROG=	FvwmBanner
-SRCS=	FvwmBanner.c
+PROG = FvwmBanner
+SRCS = FvwmBanner.c
 
-LDADD+= -lXpm -lXext ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm -lXext ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

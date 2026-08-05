@@ -249,14 +249,25 @@ char *
 CopyNString(char *cp, int n)
 {
 	char *dp, *bp;
+	size_t len;
+
 	if (n == 0)
 		n = strlen(cp);
+	if (n <= 0) {
+		bp = malloc(1);
+		if (bp != NULL)
+			*bp = '\0';
+		return bp;
+	}
 	bp = dp = (char *)malloc(n + 1);
-	while (n-- > 0)
+	if (bp == NULL)
+		return NULL;
+	len = n;
+	while (len-- > 0)
 		*dp++ = *cp++;
-	while (isspace(*(--dp)))
-		;
-	*(++dp) = '\0';
+	while (dp > bp && isspace(*(dp - 1)))
+		dp--;
+	*dp = '\0';
 	return bp;
 }
 

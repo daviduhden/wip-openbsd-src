@@ -158,7 +158,7 @@ main(int argc, char **argv)
 			if (num_config_commands < MAX_CFG_CMDS) {
 				buflen = 6 + strlen(argv[i]);
 				config_commands[num_config_commands] =
-				    (char *)malloc(buflen);
+				    xmalloc(buflen);
 				strlcpy(config_commands[num_config_commands],
 				    "Read ", buflen);
 				strlcat(config_commands[num_config_commands],

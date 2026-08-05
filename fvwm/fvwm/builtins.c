@@ -1077,7 +1077,7 @@ echo_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 		if (action[len - 1] == '\n')
 			action[len - 1] = '\0';
 	}
-	fvwm_msg(INFO, "Echo", action);
+	fvwm_msg(INFO, "Echo", "%s", action);
 }
 
 void

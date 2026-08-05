@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmPager
 
-PROG=	FvwmPager
-SRCS=	FvwmPager.c x_pager.c
+PROG = FvwmPager
+SRCS = FvwmPager.c x_pager.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

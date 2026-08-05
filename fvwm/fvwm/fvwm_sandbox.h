@@ -53,7 +53,7 @@ sandbox_x11_only(const char *progname)
  * sandbox_x11_config -- X11 + read-only config file access.
  * No write, no network, no process creation.
  * Used by: FvwmButtons, FvwmIconMan (after config read),
- *          FvwmForm (after /dev/null open)
+ *          FvwmForm (after /dev/null open), FvwmRearrange
  */
 static inline void
 sandbox_x11_config(const char *progname)
@@ -105,13 +105,13 @@ sandbox_m4_preproc(const char *progname)
 }
 
 /*
- * sandbox_xpmroot -- X11-only utility, no filesystem writes.
+ * sandbox_xpmroot -- X11-only utility, needs rpath to read image.
  */
 static inline void
 sandbox_xpmroot(const char *progname)
 {
-	if (pledge("stdio", NULL) == -1)
-		err(1, "%s: pledge stdio", progname);
+	if (pledge("stdio rpath", NULL) == -1)
+		err(1, "%s: pledge stdio rpath", progname);
 }
 
 /*
@@ -181,8 +181,10 @@ unveil_home_read(const char *progname)
 	const char *home;
 
 	home = getenv("HOME");
-	if (home == NULL)
-		home = ".";
+	if (home == NULL || *home == '\0') {
+		warnx("%s: HOME not set, cannot unveil", progname);
+		return;
+	}
 	if (unveil(home, "r") == -1)
 		err(1, "%s: unveil %s", progname, home);
 }
@@ -196,8 +198,10 @@ unveil_home_write(const char *progname)
 	const char *home;
 
 	home = getenv("HOME");
-	if (home == NULL)
-		home = ".";
+	if (home == NULL || *home == '\0') {
+		warnx("%s: HOME not set, cannot unveil", progname);
+		return;
+	}
 	if (unveil(home, "rwc") == -1)
 		err(1, "%s: unveil %s", progname, home);
 }

@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmButtons
 
-PROG=	FvwmButtons
-SRCS=	FvwmButtons.c button.c draw.c icons.c misc.c output.c parse.c
+PROG = FvwmButtons
+SRCS = FvwmButtons.c button.c draw.c icons.c misc.c output.c parse.c
 
-LDADD+= -lXpm -lXext ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm -lXext ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

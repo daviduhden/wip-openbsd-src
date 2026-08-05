@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmForm
 
-PROG=	FvwmForm
-SRCS=	FvwmForm.c
+PROG = FvwmForm
+SRCS = FvwmForm.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

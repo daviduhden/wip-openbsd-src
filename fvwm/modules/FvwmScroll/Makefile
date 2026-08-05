@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmScroll
 
-PROG=	FvwmScroll
-SRCS=	FvwmScroll.c GrabWindow.c
+PROG = FvwmScroll
+SRCS = FvwmScroll.c GrabWindow.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

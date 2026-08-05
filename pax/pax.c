@@ -89,7 +89,7 @@ int pmtime = 1;             /* preserve file modification times */
 int nodirs;                 /* do not create directories as needed */
 int pmode;                  /* preserve file mode bits */
 int pids;                   /* preserve file uid/gid */
-int rmleadslash = 0;        /* remove leading '/' from pathnames */
+int rmleadslash = 1;        /* remove leading '/' from pathnames */
 int exit_val;               /* exit value */
 int docrc;                  /* check/create file crc */
 int swapbytes;              /* swap bytes when extracting */
@@ -116,7 +116,7 @@ char *tempbase;             /* basename of tempfile to use for mkstemp(3) */
  *		binary cpio - old cpio with binary header format
  *		sysVR4 cpio -  with and without CRC
  *
- * This version is a superset of IEEE Std 1003.2b-d3
+ * This version is a superset of IEEE Std 1003.1-2024
  *
  * Summary of Extensions to the IEEE Standard:
  *
@@ -272,44 +272,99 @@ main(int argc, char **argv)
 		return (exit_val);
 
 	/*
-	 * pmode needs to restore setugid bits when extracting or copying,
-	 * so can't pledge at all then.
+	 * Unveil the filesystem to restrict access to known paths.
+	 * We know the archive file path from option parsing, the
+	 * working directory, the temp file directory, and the
+	 * compressor paths.  Non-existent paths (e.g. default tape
+	 * device) are silently ignored since unveil on them would
+	 * fail without being a real problem.
 	 */
-	if (pmode == 0 || (act != EXTRACT && act != COPY)) {
-		/* Copy mode, or no gzip -- don't need to fork/exec. */
-		if (gzip_program == NULL || act == COPY) {
-			/* List mode -- don't need to write/create/modify files.
-			 */
-			if (act == LIST) {
-				if (pledge("stdio rpath getpw tape", NULL) ==
-				    -1)
-					err(1, "pledge");
-				/* Append mode -- don't need to create/modify
-				 * files. */
-			} else if (act == APPND) {
-				if (pledge("stdio rpath wpath getpw tape",
-				    NULL) == -1)
-					err(1, "pledge");
-			} else {
-				if (pledge("stdio rpath wpath cpath fattr "
-				    "dpath getpw tape",
-				    NULL) == -1)
-					err(1, "pledge");
-			}
-		} else {
-			if (act == LIST) {
-				if (pledge("stdio rpath getpw proc exec tape",
-				    NULL) == -1)
-					err(1, "pledge");
-				/* can not gzip while appending */
-			} else {
-				if (pledge("stdio rpath wpath cpath fattr "
-				    "dpath getpw proc "
-				    "exec tape",
-				    NULL) == -1)
-					err(1, "pledge");
-			}
+
+	/* Unveil the archive file if explicitly specified. */
+	if (arcname != NULL && *arcname != '\0') {
+		const char *perm;
+
+		switch (act) {
+		case LIST:
+		case EXTRACT:
+			perm = "r";
+			break;
+		case APPND:
+			perm = "rw";
+			break;
+		case ARCHIVE:
+		default:
+			perm = "rwc";
+			break;
 		}
+		(void)unveil(arcname, perm);
+	}
+
+	/* Unveil the current working directory or -C target. */
+	if (chdname != NULL) {
+		if (unveil(chdname, "rwc") == -1)
+			err(1, "unveil");
+	} else if (act == EXTRACT || act == COPY) {
+		if (unveil(".", "rwc") == -1)
+			err(1, "unveil");
+	}
+
+	/* Unveil the temporary file directory. */
+	{
+		char *tmpcopy = strdup(tempfile);
+		char *slash;
+
+		if (tmpcopy != NULL) {
+			slash = strrchr(tmpcopy, '/');
+			if (slash != NULL) {
+				*slash = '\0';
+				(void)unveil(tmpcopy, "rwc");
+			}
+			free(tmpcopy);
+		}
+	}
+
+	/* If using compression, unveil compressor paths. */
+	if (gzip_program != NULL && act != COPY && act != APPND) {
+		(void)unveil("/usr/bin", "rx");
+		(void)unveil("/usr/local/bin", "rx");
+	}
+
+	/* Lock unveil. */
+	if (unveil(NULL, NULL) == -1)
+		err(1, "unveil");
+
+	/*
+	 * fchmod, fchown, and fchownat are covered by the "fattr"
+	 * promise, so setuid/setgid file mode restoration during
+	 * extract/copy works even with pledge active.  The old guard
+	 * that skipped pledge when pmode was set during
+	 * extract/copy was overly conservative and left these modes
+	 * without sandboxing.
+	 */
+	{
+		int need_proc = (gzip_program != NULL &&
+		    act != COPY && act != APPND);
+		const char *promises;
+
+		if (act == LIST) {
+			if (need_proc)
+				promises = "stdio rpath getpw proc exec";
+			else
+				promises = "stdio rpath getpw";
+		} else if (act == APPND) {
+			promises = "stdio rpath wpath getpw";
+		} else {
+			if (need_proc)
+				promises = "stdio rpath wpath cpath fattr "
+				    "dpath getpw proc exec";
+			else
+				promises = "stdio rpath wpath cpath fattr "
+				    "dpath getpw";
+		}
+
+		if (pledge(promises, NULL) == -1)
+			err(1, "pledge");
 	}
 
 	/*

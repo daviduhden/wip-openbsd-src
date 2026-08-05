@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmTalk
 
-PROG=	FvwmTalk
-SRCS=	FvwmTalk.c
+PROG = FvwmTalk
+SRCS = FvwmTalk.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

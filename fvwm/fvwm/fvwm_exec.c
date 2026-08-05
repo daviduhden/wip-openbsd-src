@@ -65,6 +65,15 @@ usage(void)
 static void
 exec_child(int argc, char **argv, char **envp)
 {
+	(void)unveil("/usr/bin", "rx");
+	(void)unveil("/usr/local/bin", "rx");
+	(void)unveil("/usr/X11R6/bin", "rx");
+	(void)unveil("/bin", "rx");
+	(void)unveil("/sbin", "rx");
+	(void)unveil("/usr/sbin", "rx");
+	if (unveil(NULL, NULL) == -1)
+		err(1, "unveil");
+
 	if (pledge("stdio exec", NULL) == -1)
 		err(1, "pledge");
 

@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmIconBox
 
-PROG=	FvwmIconBox
-SRCS=	FvwmIconBox.c icons.c
+PROG = FvwmIconBox
+SRCS = FvwmIconBox.c icons.c
 
-LDADD+= -lXpm -lXext ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm -lXext ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

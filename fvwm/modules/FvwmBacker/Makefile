@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmBacker
 
-PROG=	FvwmBacker
-SRCS=	FvwmBacker.c root_bits.c
+PROG = FvwmBacker
+SRCS = FvwmBacker.c root_bits.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

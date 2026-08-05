@@ -4,14 +4,14 @@
 
 .PATH: ${DIST}/modules/FvwmM4
 
-PROG=	FvwmM4
-SRCS=	FvwmM4.c
+PROG = FvwmM4
+SRCS = FvwmM4.c
 
-CPPFLAGS+= -DFVWM_MODULEDIR=\"$(FVWMLIBDIR)\" \
+CPPFLAGS += -DFVWM_MODULEDIR=\"$(FVWMLIBDIR)\" \
 	-DFVWM_CONFIGDIR=\"$(FVWMLIBDIR)\" \
 
-LDADD+= ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

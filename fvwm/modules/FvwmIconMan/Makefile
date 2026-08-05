@@ -4,12 +4,12 @@
 
 .PATH: ${DIST}/modules/FvwmIconMan
 
-PROG=	FvwmIconMan
-SRCS=	FvwmIconMan.c debug.c functions.c fvwm.c globals.c readconfig.c \
+PROG = FvwmIconMan
+SRCS = FvwmIconMan.c debug.c functions.c fvwm.c globals.c readconfig.c \
 	winlist.c x.c xmanager.c
 
-LDADD+= -lXpm -lXext ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm -lXext ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

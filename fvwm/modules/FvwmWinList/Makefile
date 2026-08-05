@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmWinList
 
-PROG=	FvwmWinList
-SRCS=	ButtonArray.c Colors.c FvwmWinList.c List.c 
+PROG = FvwmWinList
+SRCS = ButtonArray.c Colors.c FvwmWinList.c List.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

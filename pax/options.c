@@ -229,7 +229,7 @@ FSUB fsub[] = {
     /* 9: gzip, to detect failure to use -z */
 	{NULL, 0, 4, 0, 0, 0, 0, gzip_id},
     /* 10: POSIX PAX */
-	{"pax", 5120, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd, tar_endrd,
+	{"pax", 10240, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd, tar_endrd,
 	 no_op, pax_wr, tar_endwr, tar_trail, pax_opt},
 #endif
 };
@@ -1341,7 +1341,8 @@ cpio_options(int argc, char **argv)
 				cpio_usage();
 			}
 			while ((str = get_line(fp)) != NULL) {
-				pat_add(str, NULL);
+				if (pat_add(str, NULL) < 0)
+					cpio_usage();
 			}
 			if (ferror(fp)) {
 				syswarn(
@@ -1737,40 +1738,54 @@ opt_common(void)
 static off_t
 str_offt(char *val)
 {
+	static int depth = 0;
 	char *expr;
 	off_t num, t;
 
-	num = strtoll(val, &expr, 0);
-	if ((num == LLONG_MAX) || (num <= 0) || (expr == val))
+	if (++depth > 32)
 		return (0);
+
+	num = strtoll(val, &expr, 0);
+	if ((num == LLONG_MAX) || (num <= 0) || (expr == val)) {
+		--depth;
+		return (0);
+	}
 
 	switch (*expr) {
 	case 'b':
 		t = num;
 		num *= 512;
-		if (t > num)
+		if (t > num) {
+			--depth;
 			return (0);
+		}
 		++expr;
 		break;
 	case 'k':
 		t = num;
 		num *= 1024;
-		if (t > num)
+		if (t > num) {
+			--depth;
 			return (0);
+		}
 		++expr;
 		break;
 	case 'm':
 		t = num;
 		num *= 1048576;
-		if (t > num)
+		if (t > num) {
+			--depth;
 			return (0);
+		}
 		++expr;
 		break;
 	case 'w':
 		t = num;
 		num *= sizeof(int);
-		if (t > num)
+		if (t > num) {
+			--depth;
 			return (0);
+		}
 		++expr;
 		break;
 	}
@@ -1782,12 +1797,16 @@ str_offt(char *val)
 	case 'x':
 		t = num;
 		num *= str_offt(expr + 1);
-		if (t > num)
+		if (t > num) {
+			--depth;
 			return (0);
+		}
 		break;
 	default:
+		--depth;
 		return (0);
 	}
+	--depth;
 	return (num);
 }
 

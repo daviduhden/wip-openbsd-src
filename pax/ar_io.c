@@ -1271,18 +1271,17 @@ ar_start_gzip(int fd, const char *path, int wr)
 		close(fds[0]);
 		close(fds[1]);
 
-		if (pmode == 0 || (act != EXTRACT && act != COPY)) {
-			if (act == LIST) {
-				if (pledge("stdio rpath getpw proc tape",
-				    NULL) == -1)
-					err(1, "pledge");
-				/* can not gzip while appending */
-			} else {
-				if (pledge("stdio rpath wpath cpath fattr "
-				    "dpath getpw proc tape",
-				    NULL) == -1)
-					err(1, "pledge");
-			}
+		{
+			const char *promises;
+
+			if (act == LIST)
+				promises = "stdio rpath getpw proc exec";
+			else
+				promises = "stdio rpath wpath cpath fattr "
+				    "dpath getpw proc exec";
+
+			if (pledge(promises, NULL) == -1)
+				err(1, "pledge");
 		}
 	} else {
 		if (wr) {
@@ -1297,8 +1296,10 @@ ar_start_gzip(int fd, const char *path, int wr)
 		close(fds[0]);
 		close(fds[1]);
 
-		/* System compressors are more likely to use pledge(2) */
-		putenv("PATH=/usr/bin:/usr/local/bin");
+		closefrom(STDERR_FILENO + 1);
+
+		if (pledge("stdio exec", NULL) == -1)
+			err(1, "pledge");
 
 		if (execlp(path, path, gzip_flags, (char *)NULL) == -1)
 			err(1, "could not exec %s", path);

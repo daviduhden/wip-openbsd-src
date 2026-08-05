@@ -207,7 +207,6 @@ cmp_file_times(int mtime_flag, int ctime_flag, ARCHD *arcn, const char *path)
 		/* not a POSIX compliant FS */
 		res /= 1000000000;
 		return ((arcn->sb.st_mtime / res) * res) <= sb.st_mtime;
-		return arcn->sb.st_mtime <= ((sb.st_mtime / res) * res);
 	}
 }
 

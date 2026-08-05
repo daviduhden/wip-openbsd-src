@@ -4,11 +4,11 @@
 
 .PATH: ${DIST}/modules/FvwmRearrange
 
-PROG=	FvwmRearrange
-SRCS=	FvwmRearrange.c
+PROG = FvwmRearrange
+SRCS = FvwmRearrange.c
 
-LDADD+= -lXpm ${XLIB}
-BINDIR= ${FVWMLIBDIR}
+LDADD += -lXpm ${XLIB}
+BINDIR = ${FVWMLIBDIR}
 
 .include <bsd.prog.mk>
 .include <bsd.xorg.mk>

@@ -39,7 +39,8 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 	if ((count = read(fd, header, HEADER_SIZE * sizeof(unsigned long))) >
 	    0) {
 		if (header[0] == START_FLAG) {
-			if (header[2] < HEADER_SIZE)
+			if (header[2] < HEADER_SIZE ||
+			    header[2] > HEADER_SIZE + MAX_BODY_SIZE)
 				return -1;
 			body_length = header[2] - HEADER_SIZE;
 			*body = (unsigned long *)xmalloc(
