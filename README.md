@@ -19,6 +19,14 @@ FVWM 2.2.5 window manager with privilege separation (fvwm_exec
 helper via imsg(3)), per-process pledge(2)/unveil(2) policies,
 and OpenBSD-specific hardening.
 
+### ext4fs
+
+Fourth Extended Filesystem kernel driver (read/write, journal
+recovery, extents, metadata checksums) and mount_ext4fs(8).
+Not built here; the component stores the new files at
+OpenBSD-relative paths plus the original patch and the hunks
+for modified tree files, for copying into an OpenBSD checkout.
+
 ## Build
 
 Requires OpenBSD 7.9 or 8.0-beta with X11 development files.

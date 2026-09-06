@@ -1,0 +1,287 @@
+diff --git a/sys/conf/GENERIC b/sys/conf/GENERIC
+index f9f615912..86e3e597c 100644
+--- a/sys/conf/GENERIC
++++ b/sys/conf/GENERIC
+@@ -32,6 +32,7 @@ option		FFS2		# UFS2
+ option		UFS_DIRHASH	# hash large directories
+ option		QUOTA		# UFS quotas
+ option		EXT2FS		# Second Extended Filesystem
++option		EXT4FS		# Fourth Extended Filesystem
+ option		MFS		# memory file system
+ option		NFSCLIENT	# Network File System client
+ option		NFSSERVER	# Network File System server
+diff --git a/sys/conf/files b/sys/conf/files
+index e5e66dca6..873653e75 100644
+--- a/sys/conf/files
++++ b/sys/conf/files
+@@ -994,15 +994,15 @@ file ufs/ffs/ffs_vfsops.c		ffs | mfs
+ file ufs/ffs/ffs_vnops.c		ffs | mfs
+ file ufs/mfs/mfs_vfsops.c		mfs
+ file ufs/mfs/mfs_vnops.c		mfs
+-file ufs/ufs/ufs_bmap.c			ffs | mfs | ext2fs
++file ufs/ufs/ufs_bmap.c			ffs | mfs | ext2fs | ext4fs
+ file ufs/ufs/ufs_dirhash.c		ufs_dirhash & (ffs | mfs)
+-file ufs/ufs/ufs_ihash.c		ffs | mfs | ext2fs | fuse
+-file ufs/ufs/ufs_inode.c		ffs | mfs | ext2fs
+-file ufs/ufs/ufs_lookup.c		ffs | mfs | ext2fs
+-file ufs/ufs/ufs_quota.c		quota & ( ffs | mfs | ext2fs )
++file ufs/ufs/ufs_ihash.c		ffs | mfs | ext2fs | ext4fs | fuse
++file ufs/ufs/ufs_inode.c		ffs | mfs | ext2fs | ext4fs
++file ufs/ufs/ufs_lookup.c		ffs | mfs | ext2fs | ext4fs
++file ufs/ufs/ufs_quota.c		quota & ( ffs | mfs | ext2fs | ext4fs )
+ file ufs/ufs/ufs_quota_stub.c		ffs | mfs
+-file ufs/ufs/ufs_vfsops.c		ffs | mfs | ext2fs
+-file ufs/ufs/ufs_vnops.c		ffs | mfs | ext2fs
++file ufs/ufs/ufs_vfsops.c		ffs | mfs | ext2fs | ext4fs
++file ufs/ufs/ufs_vnops.c		ffs | mfs | ext2fs | ext4fs
+ file ufs/ext2fs/ext2fs_alloc.c		ext2fs
+ file ufs/ext2fs/ext2fs_balloc.c		ext2fs
+ file ufs/ext2fs/ext2fs_bmap.c		ext2fs
+@@ -1014,6 +1014,10 @@ file ufs/ext2fs/ext2fs_readwrite.c	ext2fs
+ file ufs/ext2fs/ext2fs_subr.c		ext2fs
+ file ufs/ext2fs/ext2fs_vfsops.c		ext2fs
+ file ufs/ext2fs/ext2fs_vnops.c		ext2fs
++file ufs/ext4fs/ext4fs_crc32c.c		ext4fs
++file ufs/ext4fs/ext4fs_journal.c	ext4fs
++file ufs/ext4fs/ext4fs_vfsops.c		ext4fs
++file ufs/ext4fs/ext4fs_vnops.c		ext4fs
+ file uvm/uvm_addr.c
+ file uvm/uvm_amap.c
+ file uvm/uvm_anon.c
+diff --git a/sys/kern/vfs_init.c b/sys/kern/vfs_init.c
+index 8d31047ac..4045a0bd5 100644
+--- a/sys/kern/vfs_init.c
++++ b/sys/kern/vfs_init.c
+@@ -100,6 +100,11 @@ static struct vfsconf vfsconflist[] = {
+ 	{ &tmpfs_vfsops, MOUNT_TMPFS, 19, 0, MNT_LOCAL,
+ 	    sizeof(struct tmpfs_args) },
+ #endif
++
++#ifdef EXT4FS
++	{ &ext4fs_vfsops, MOUNT_EXT4FS, 22, 0, MNT_LOCAL,
++	    sizeof(struct ufs_args) },
++#endif
+ };
+ 
+ 
+diff --git a/sys/sys/disklabel.h b/sys/sys/disklabel.h
+index 3d938666e..86a0fb267 100644
+--- a/sys/sys/disklabel.h
++++ b/sys/sys/disklabel.h
+@@ -275,6 +275,7 @@ static const char * const dktypenames[] = {
+ #define FS_RAID		19		/* RAIDframe or softraid */
+ #define FS_NTFS		20		/* Windows/NT file system */
+ #define FS_UDF		21		/* UDF (DVD) filesystem */
++#define FS_EXT4FS	22		/* ext4fs */
+ 
+ #ifdef DKTYPENAMES
+ static const char * const fstypenames[] = {
+@@ -300,6 +301,7 @@ static const char * const fstypenames[] = {
+ 	"RAID",
+ 	"NTFS",
+ 	"UDF",
++	"ext4fs",
+ 	NULL
+ };
+ 
+@@ -327,6 +329,7 @@ static char *fstypesnames[] = {
+ 	"",		/* 19 */
+ 	"ntfs",		/* 20 */
+ 	"udf",		/* 21 */
++	"ext4fs",	/* 22 */
+ 	NULL
+ };
+ 
+diff --git a/sys/sys/mount.h b/sys/sys/mount.h
+index a0010c55f..9cbe4607e 100644
+--- a/sys/sys/mount.h
++++ b/sys/sys/mount.h
+@@ -320,6 +320,7 @@ struct statfs {
+ #define	MOUNT_AFS	"afs"		/* Andrew Filesystem */
+ #define	MOUNT_CD9660	"cd9660"	/* ISO9660 (aka CDROM) Filesystem */
+ #define	MOUNT_EXT2FS	"ext2fs"	/* Second Extended Filesystem */
++#define	MOUNT_EXT4FS	"ext4fs"	/* Fourth Extended Filesystem */
+ #define	MOUNT_NCPFS	"ncpfs"		/* NetWare Network File System */
+ #define	MOUNT_NTFS	"ntfs"		/* NTFS */
+ #define	MOUNT_UDF	"udf"		/* UDF */
+@@ -556,6 +557,7 @@ extern	const struct vfsops msdosfs_vfsops;
+ extern	const struct vfsops nfs_vfsops;
+ extern	const struct vfsops cd9660_vfsops;
+ extern	const struct vfsops ext2fs_vfsops;
++extern	const struct vfsops ext4fs_vfsops;
+ extern	const struct vfsops ntfs_vfsops;
+ extern	const struct vfsops udf_vfsops;
+ extern	const struct vfsops fusefs_vfsops;
+diff --git a/sys/sys/vnode.h b/sys/sys/vnode.h
+index 6f1664ce1..c9970f6a9 100644
+--- a/sys/sys/vnode.h
++++ b/sys/sys/vnode.h
+@@ -67,12 +67,14 @@ enum vtagtype	{
+ 	VT_NON, VT_UFS, VT_NFS, VT_MFS, VT_MSDOSFS,
+ 	VT_PORTAL, VT_PROCFS, VT_AFS, VT_ISOFS, VT_ADOSFS,
+ 	VT_EXT2FS, VT_VFS, VT_NTFS, VT_UDF, VT_FUSEFS, VT_TMPFS,
++	VT_EXT4FS,
+ };
+ 
+ #define	VTAG_NAMES \
+     "NON", "UFS", "NFS", "MFS", "MSDOSFS",			\
+     "unused", "unused", "unused", "ISOFS", "unused",		\
+-    "EXT2FS", "VFS", "NTFS", "UDF", "FUSEFS", "TMPFS"
++    "EXT2FS", "VFS", "NTFS", "UDF", "FUSEFS", "TMPFS",		\
++    "EXT4FS"
+ 
+ /*
+  * Each underlying filesystem allocates its own private area and hangs
+diff --git a/sys/ufs/ufs/inode.h b/sys/ufs/ufs/inode.h
+index 16aaac8b7..2d9224f0f 100644
+--- a/sys/ufs/ufs/inode.h
++++ b/sys/ufs/ufs/inode.h
+@@ -43,6 +43,7 @@
+ #include <ufs/ufs/dir.h>
+ #include <ufs/ext2fs/ext2fs_dinode.h>
+ #include <ufs/ext2fs/ext2fs_extents.h>
++#include <ufs/ext4fs/ext4fs_dinode.h>
+ 
+ 
+ /*
+@@ -76,11 +77,13 @@ struct inode {
+ 
+ 	union {			/* Associated filesystem. */
+ 		struct	fs *fs;			/* FFS */
+-		struct  m_ext2fs *e2fs;		/* EXT2FS */
++		struct	m_ext2fs *e2fs;		/* EXT2FS */
++		struct	m_ext4fs *e4fs;		/* EXT4FS */
+ 	} inode_u;
+ 
+ #define	i_fs	inode_u.fs
+ #define	i_e2fs	inode_u.e2fs
++#define	i_e4fs	inode_u.e4fs
+ 
+ 	struct   cluster_info i_ci;
+ 	struct	 dquot *i_dquot[MAXQUOTAS]; /* Dquot structures. */
+@@ -117,14 +120,16 @@ struct inode {
+ 	 * The on-disk dinode itself.
+ 	 */
+ 	union {
+-		struct ufs1_dinode     *ffs1_din;
+-		struct ufs2_dinode     *ffs2_din;
+-		struct ext2fs_dinode   *e2fs_din;
++		struct ufs1_dinode	 *ffs1_din;
++		struct ufs2_dinode	 *ffs2_din;
++		struct ext2fs_dinode	 *e2fs_din;
++		struct ext4fs_dinode_256 *e4fs_din;
+ 	} dinode_u;
+ 
+ #define i_din1	dinode_u.ffs1_din
+ #define i_din2	dinode_u.ffs2_din
+ #define	i_e2din	dinode_u.e2fs_din
++#define	i_e4din	dinode_u.e4fs_din
+ 
+ 	struct inode_vtbl *i_vtbl;
+ };
+@@ -224,6 +229,8 @@ struct inode_vtbl {
+ #define	i_uid			i_din1->di_uid
+ #endif	/* _KERNEL */
+ 
++#define i_e4fs_nlink		i_e4din->dinode.i_links_count
++
+ #define i_e2fs_mode		i_e2din->e2di_mode
+ #define i_e2fs_size		i_e2din->e2di_size
+ #define i_e2fs_atime		i_e2din->e2di_atime
+diff --git a/sys/ufs/ufs/ufs_ihash.c b/sys/ufs/ufs/ufs_ihash.c
+index f470326e5..a192c9a0b 100644
+--- a/sys/ufs/ufs/ufs_ihash.c
++++ b/sys/ufs/ufs/ufs_ihash.c
+@@ -43,6 +43,7 @@
+ #include <ufs/ufs/ufs_extern.h>
+ #include <ufs/ufs/ufsmount.h>
+ #include <ufs/ext2fs/ext2fs_extern.h>
++#include <ufs/ext4fs/ext4fs_extern.h>
+ 
+ #include <crypto/siphash.h>
+ 
+@@ -119,6 +120,11 @@ loop:
+ 			     */
+ 			    IS_EXT2_VNODE(vp) ? ip->i_e2fs_nlink <= 0 :
+ #endif
++			    /*
++			     * XXX DIP does not cover ext4fs either;
++			     * use i_e4din directly like ext2fs uses i_e2din.
++			     */
++			    vp->v_tag == VT_EXT4FS ? ip->i_e4fs_nlink <= 0 :
+ 			    DIP(ip, nlink) <= 0) &&
+ 			     (vp->v_mount->mnt_flag & MNT_RDONLY) == 0)) {
+ 				/*
+diff --git a/sys/ufs/ufs/ufs_vnops.c b/sys/ufs/ufs/ufs_vnops.c
+index 80f403861..8c2345021 100644
+--- a/sys/ufs/ufs/ufs_vnops.c
++++ b/sys/ufs/ufs/ufs_vnops.c
+@@ -68,6 +68,9 @@
+ #include <ufs/ufs/dirhash.h>
+ #endif
+ #include <ufs/ext2fs/ext2fs_extern.h>
++#ifdef EXT4FS
++#include <ufs/ext4fs/ext4fs.h>
++#endif
+ 
+ #include <uvm/uvm_extern.h>
+ 
+@@ -108,6 +111,12 @@ ufs_itimes(struct vnode *vp)
+ 		goto out;
+ 	}
+ #endif
++#ifdef EXT4FS
++	if (vp->v_tag == VT_EXT4FS) {
++		EXT4FS_ITIMES(ip);
++		goto out;
++	}
++#endif
+ 
+ 	if ((vp->v_type == VBLK || vp->v_type == VCHR))
+ 		ip->i_flag |= IN_LAZYMOD;
+@@ -1864,6 +1873,14 @@ filt_ufsread(struct knote *kn, long hint)
+ 	if (IS_EXT2_VNODE(ip->i_vnode))
+ 		kn->kn_data = ext2fs_size(ip) - foffset(kn->kn_fp);
+ 	else
++#endif
++#ifdef EXT4FS
++	if (ip->i_vnode->v_tag == VT_EXT4FS) {
++		struct ext4fs_dinode *din = &ip->i_e4din->dinode;
++		kn->kn_data = ((off_t)letoh32(din->i_size_lo) |
++		    ((off_t)letoh32(din->i_size_hi) << 32)) -
++		    foffset(kn->kn_fp);
++	} else
+ #endif
+ 		kn->kn_data = DIP(ip, size) - foffset(kn->kn_fp);
+ 	if (kn->kn_data == 0 && kn->kn_sfflags & NOTE_EOF) {
+diff --git a/sys/ufs/ufs/ufsmount.h b/sys/ufs/ufs/ufsmount.h
+index 3ad8938e4..40ea54993 100644
+--- a/sys/ufs/ufs/ufsmount.h
++++ b/sys/ufs/ufs/ufsmount.h
+@@ -51,10 +51,13 @@ struct ufsmount {
+ 	union {					/* pointer to superblock */
+ 		struct	fs *fs;			/* FFS */
+ 		struct  m_ext2fs *e2fs;		/* EXT2FS */
++		struct  m_ext4fs *e4fs;		/* EXT4FS */
+ 	} ufsmount_u;
+ #define	um_fs		ufsmount_u.fs
+ #define	um_e2fs		ufsmount_u.e2fs
+ #define	um_e2fsb	ufsmount_u.e2fs->s_es
++#define	um_e4fs		ufsmount_u.e4fs
++//#define	um_e4fsb	ufsmount_u.e4fs->s_es
+ 
+ 	struct	vnode *um_quotas[MAXQUOTAS];	/* pointer to quota files */
+ 	struct	ucred *um_cred[MAXQUOTAS];	/* quota file access cred */
+@@ -72,9 +75,10 @@ struct ufsmount {
+ /*
+  * Filesystem types
+  */
+-#define	UM_UFS1	1
+-#define	UM_UFS2	2
++#define	UM_UFS1		1
++#define	UM_UFS2		2
+ #define	UM_EXT2FS	3
++#define	UM_EXT4FS	4
+ 
+ /*
+  * Flags describing the state of quotas.

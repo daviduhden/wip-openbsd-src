@@ -17,7 +17,7 @@
 
 log() {
 	print "$(date '+%Y-%m-%d %H:%M:%S')" \
-		"[INFO] $*"
+		"[INFO] $*" >&2
 }
 warn() {
 	print "$(date '+%Y-%m-%d %H:%M:%S')" \
@@ -136,7 +136,7 @@ ask_copy_from_wip() {
 #   4. Current working directory or its parent
 #   5. Limited filesystem search
 resolve_local_src_dir() {
-	local dir
+	typeset dir
 
 	# 1. Explicit environment variable
 	if [ -n "${WIP_OPENBSD_SRC_DIR:-}" ] &&
@@ -222,8 +222,10 @@ move_to_wip_openbsd_src() {
 
 # Function to list directories in the current directory and select one
 list_directories() {
+	typeset directories
+	directories=$(list_all_directories) || return 1
 	log "Select a directory to copy from wip-openbsd-src:"
-	select DIRECTORY in */; do
+	select DIRECTORY in $directories; do
 		if [ -n "$DIRECTORY" ]; then
 			log "You selected $DIRECTORY"
 			DIRECTORY=${DIRECTORY%/} # Remove the trailing slash
@@ -234,19 +236,22 @@ list_directories() {
 	done
 }
 
-# Function to list all top-level directories in wip-openbsd-src.
+# List known components by their canonical upstream destinations.
+# Keep the standalone source/build layout in this repository unchanged.
 list_all_directories() {
-	set -- */
-	if [ "$1" = "*/" ] || [ ! -d "$1" ]; then
-		error "No directories found in wip-openbsd-src."
-		exit 1
-	fi
-	print "$*"
+	typeset component
+	for component in src/bin/pax xenocara/app/fvwm; do
+		resolve_component "$component" || return 1
+		if [ -z "${TARGET_KIND:-}" ] ||
+			[ "$TARGET_KIND" = "$COMPONENT_TREE" ]; then
+			print -r -- "$component"
+		fi
+	done
 }
 
 # Function to prompt for a space-separated list of directories.
 prompt_selected_directories() {
-	log "Enter one or more directories separated by spaces:"
+	log "Enter component paths separated by spaces (src/bin/pax or xenocara/app/fvwm):"
 	print -n "> "
 	read -r SELECTED_DIRECTORIES
 	[ -n "${SELECTED_DIRECTORIES:-}" ] || {
@@ -276,66 +281,106 @@ choose_target_tree() {
 	done
 }
 
-# Function to list subdirectories in the chosen tree and select one
-list_tree_subdirectories() {
-	log "Select a subdirectory in $TARGET_TREE" \
-		"where the directory will be copied:"
-	select SUBDIRECTORY in "$TARGET_TREE"/*/; do
-		if [ -n "$SUBDIRECTORY" ]; then
-			log "You selected $SUBDIRECTORY"
-			SUBDIRECTORY=${SUBDIRECTORY%/} # Remove the trailing slash
-			break
-		else
-			warn "Invalid selection. Please try again."
-		fi
-	done
-}
-
-# Copy the selected directory to the chosen target subdirectory
-copy_directory() {
-	TARGET_DIR="$SUBDIRECTORY/$DIRECTORY"
-	if [ -d "$TARGET_DIR" ]; then
-		warn "Directory $TARGET_DIR already exists." \
-			"Removing files except 'CVS'."
-		find "$TARGET_DIR" -mindepth 1 ! -name "CVS" \
-			-exec rm -rf {} +
+# Exact mapping avoids placing pax at the src root, or FVWM in src.
+resolve_component() {
+	case "$1" in
+	pax | src/bin/pax)
+		COMPONENT_TREE=src
+		COMPONENT_PATH=bin/pax
+		COMPONENT_DIR="pax" ;;
+	fvwm | xenocara/app/fvwm)
+		COMPONENT_TREE=xenocara
+		COMPONENT_PATH=app/fvwm
+		COMPONENT_DIR=fvwm ;;
+	*) error "Unknown component: $1"; return 1 ;;
+	esac
+	if [ -L "$COMPONENT_DIR" ] || [ -L "$COMPONENT_DIR/Makefile" ] ||
+		[ ! -f "$COMPONENT_DIR/Makefile" ]; then
+		error "Missing or symlinked component: $COMPONENT_DIR"
+		return 1
 	fi
-	cp -R "$DIRECTORY" "$SUBDIRECTORY/"
-	log "Directory $DIRECTORY copied to $SUBDIRECTORY/"
 }
 
-# Copy every top-level directory into the chosen target tree.
-copy_all_directories() {
-	dirs=$(list_all_directories)
-	for DIRECTORY in $dirs; do
-		TARGET_DIR="$TARGET_TREE/$DIRECTORY"
-		if [ -d "$TARGET_DIR" ]; then
-			warn "Directory $TARGET_DIR already exists." \
-				"Removing files except 'CVS'."
-			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" \
-				-exec rm -rf {} +
+detect_target_tree() {
+	[ -f "$TARGET_TREE/Makefile" ] || {
+		error "Not a source checkout: $TARGET_TREE"; return 1
+	}
+	if [ -d "$TARGET_TREE/bin" ] && [ -d "$TARGET_TREE/sys" ]; then
+		TARGET_KIND=src
+	elif [ -d "$TARGET_TREE/app" ] && [ -d "$TARGET_TREE/lib" ]; then
+		TARGET_KIND=xenocara
+	else
+		error "Cannot identify src or xenocara tree: $TARGET_TREE"
+		return 1
+	fi
+}
+
+validate_selection() {
+	resolve_component "$1" || return 1
+	if [ "$COMPONENT_TREE" != "$TARGET_KIND" ]; then
+		error "$1 belongs in $COMPONENT_TREE, not $TARGET_KIND"
+		return 1
+	fi
+}
+
+# Replace a single component, keeping a recoverable backup and all nested
+# CVS metadata. Sibling components and parent Makefiles are never removed.
+copy_directory() {
+	typeset target parent stage backup="" cvs
+	validate_selection "$DIRECTORY" || return 1
+	parent=${COMPONENT_PATH%/*}
+	target="$TARGET_TREE/$COMPONENT_PATH"
+	if [ ! -d "$TARGET_TREE/$parent" ] ||
+		[ -L "$TARGET_TREE/$parent" ] || [ -L "$target" ] ||
+		{ [ -e "$target" ] && [ ! -d "$target" ]; }; then
+		error "Invalid component destination: $target"
+		return 1
+	fi
+	stage=$(mktemp -d "$TARGET_TREE/.wip-src.XXXXXXXX") || return 1
+	cp -Rp "$COMPONENT_DIR" "$stage/component" || return 1
+	find "$stage/component" -type d -exec chmod a+rx,go-w {} + || return 1
+	find "$stage/component" -type f -exec chmod a+r,go-w {} + || return 1
+	find "$stage/component" -type f -perm -0100 -exec chmod a+x {} + || return 1
+	if [ -d "$target" ]; then
+		(cd "$target" && find . -type d -name CVS -prune) |
+			while IFS= read -r cvs; do
+				mkdir -p "$stage/component/${cvs%/*}" || exit 1
+				cp -Rp "$target/$cvs" "$stage/component/$cvs" || exit 1
+			done || return 1
+		if [ -L "$TARGET_TREE/.wip-backups" ]; then
+			error "Refusing symlinked backup directory"
+			return 1
 		fi
-		cp -R "$DIRECTORY" "$TARGET_TREE/"
-		log "Directory $DIRECTORY copied to $TARGET_TREE/"
+		mkdir -p "$TARGET_TREE/.wip-backups" || return 1
+		backup=$(mktemp -d "$TARGET_TREE/.wip-backups/$COMPONENT_DIR.XXXXXXXX") ||
+			return 1
+		mv "$target" "$backup/component" || return 1
+		log "Previous $COMPONENT_PATH saved in $backup/component"
+	fi
+	if ! mv "$stage/component" "$target"; then
+		[ -z "$backup" ] || mv "$backup/component" "$target"
+		error "Copy failed; staging directory: $stage"
+		return 1
+	fi
+	rmdir "$stage" || return 1
+	log "$COMPONENT_DIR copied to $target"
+}
+
+copy_all_directories() {
+	typeset directories
+	directories=$(list_all_directories) || return 1
+	for DIRECTORY in $directories; do
+		copy_directory || return 1
 	done
 }
 
-# Copy only the directories explicitly selected by the user.
 copy_selected_directories() {
+	# Validate the complete selection before changing any destination.
 	for DIRECTORY in $SELECTED_DIRECTORIES; do
-		if [ ! -d "$DIRECTORY" ]; then
-			warn "Skipping unknown directory: $DIRECTORY"
-			continue
-		fi
-		TARGET_DIR="$TARGET_TREE/$DIRECTORY"
-		if [ -d "$TARGET_DIR" ]; then
-			warn "Directory $TARGET_DIR already exists." \
-				"Removing files except 'CVS'."
-			find "$TARGET_DIR" -mindepth 1 ! -name "CVS" \
-				-exec rm -rf {} +
-		fi
-		cp -R "$DIRECTORY" "$TARGET_TREE/"
-		log "Directory $DIRECTORY copied to $TARGET_TREE/"
+		validate_selection "$DIRECTORY" || return 1
+	done
+	for DIRECTORY in $SELECTED_DIRECTORIES; do
+		copy_directory || return 1
 	done
 }
 
@@ -363,8 +408,50 @@ configure_doas() {
 	log "doas configured successfully. /etc/doas.conf updated."
 }
 
+# Resolve a user-selected checkout without CDPATH output or a symlinked root.
+canonical_target_tree() {
+	typeset path=$1
+	while [ "${path%/}" != "$path" ] && [ "$path" != "/" ]; do
+		path=${path%/}
+	done
+	if [ -L "$path" ]; then
+		error "Refusing symlinked checkout root: $path"
+		return 1
+	fi
+	(unset CDPATH; cd -- "$path" && pwd -P)
+}
+
 # Main function
 main() {
+	TARGET_KIND=""
+	case "${1:-}" in
+	--list)
+		move_to_wip_openbsd_src
+		list_all_directories
+		return $? ;;
+	--copy-only)
+		[ "$#" -ge 2 ] || {
+			error "Usage: $0 --copy-only TREE [component ...]"
+			return 1
+		}
+		TARGET_TREE=$(canonical_target_tree "$2") || return 1
+		shift 2
+		detect_target_tree || return 1
+		move_to_wip_openbsd_src
+		if [ "$#" -eq 0 ]; then
+			copy_all_directories
+		else
+			for DIRECTORY in "$@"; do
+				validate_selection "$DIRECTORY" || return 1
+			done
+			SELECTED_DIRECTORIES="$*"
+			copy_selected_directories
+		fi
+		return $? ;;
+	"") ;;
+	*) error "Usage: $0 [--list | --copy-only TREE [component ...]]"
+		return 1 ;;
+	esac
 	check_root
 	set_cvsroot
 	select_repository_to_checkout
@@ -373,15 +460,16 @@ main() {
 	if [ "${DO_COPY:-0}" -eq 1 ]; then
 		move_to_wip_openbsd_src
 		choose_target_tree
+		TARGET_TREE=$(canonical_target_tree "$TARGET_TREE") || return 1
+		detect_target_tree || return 1
 		if [ "${COPY_ALL:-0}" -eq 1 ]; then
-			copy_all_directories
+			copy_all_directories || return 1
 		elif [ "${COPY_LIST:-0}" -eq 1 ]; then
 			prompt_selected_directories
-			copy_selected_directories
+			copy_selected_directories || return 1
 		else
 			list_directories
-			list_tree_subdirectories
-			copy_directory
+			copy_directory || return 1
 		fi
 	else
 		log "Skipping copy from wip-openbsd-src."
@@ -391,4 +479,4 @@ main() {
 }
 
 # Execute the main function
-main
+main "$@"
