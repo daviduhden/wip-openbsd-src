@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-# Copyright (c) 2025-2026 David Uhden Collado <david@uhden.dev>
+# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,33 +19,45 @@
 # utilities that compiles standalone on OpenBSD 7.9 or 8.0-beta and
 # produces binaries intended to replace the system versions.
 #
+# This is a thin wrapper around make(1).  The Makefiles are the single
+# definition of the build graph; this script only adds environment
+# checks and a friendly interface.
+#
 # Usage:
 #   ./build.ksh [pax|fvwm|all] [install|clean]
 #
-# The resulting binaries are placed in ./build/ and can be installed
-# to system paths with:
-#   ./build.ksh install
+#   all      Build pax and fvwm (default)
+#   pax      Build pax only
+#   fvwm     Build fvwm only
+#   install  Install built binaries and man pages to system paths;
+#            run as root or via doas.  DESTDIR is honored if set.
+#   clean    Remove build artifacts
+#
+# Examples:
+#   ./build.ksh all
+#   ./build.ksh all install
+#   doas ./build.ksh install
+#   DESTDIR=/tmp/stage ./build.ksh all install
 
-set -e
+set -eu
 
 log() {
-	print "$(date '+%Y-%m-%d %H:%M:%S')" \
-		"[INFO] $*"
+	print "$(date '+%Y-%m-%d %H:%M:%S')" "[INFO] $*"
 }
 warn() {
-	print "$(date '+%Y-%m-%d %H:%M:%S')" \
-		"[WARN] $*" >&2
+	print "$(date '+%Y-%m-%d %H:%M:%S')" "[WARN] $*" >&2
 }
 error() {
-	print "$(date '+%Y-%m-%d %H:%M:%S')" \
-		"[ERROR] $*" >&2
+	print "$(date '+%Y-%m-%d %H:%M:%S')" "[ERROR] $*" >&2
 }
 
 SCRIPT_DIR=$(
 	unset CDPATH
 	cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P
 )
-BUILD_DIR="$SCRIPT_DIR/build"
+
+# The active make implementation; overridable via the environment.
+MAKE=${MAKE:-make}
 
 check_openbsd() {
 	if [ "$(uname -s)" != "OpenBSD" ]; then
@@ -63,7 +75,7 @@ check_openbsd() {
 
 check_deps() {
 	missing=""
-	for dep in cc make install; do
+	for dep in cc "$MAKE" install; do
 		if ! command -v "$dep" >/dev/null 2>&1; then
 			missing="$missing $dep"
 		fi
@@ -74,71 +86,36 @@ check_deps() {
 	fi
 }
 
+make_args() {
+	if [ -n "${DESTDIR:-}" ]; then
+		print -- "DESTDIR=$DESTDIR"
+	fi
+}
+
 build_pax() {
 	log "Building pax..."
-	mkdir -p "$BUILD_DIR/pax"
-	cd "$SCRIPT_DIR/pax"
-	make -f Makefile BINDIR="$BUILD_DIR/pax" \
-		MANDIR="$BUILD_DIR/pax/man" \
-		obj 2>/dev/null || true
-	make -f Makefile BINDIR="$BUILD_DIR/pax" \
-		MANDIR="$BUILD_DIR/pax/man"
+	"$MAKE" -C "$SCRIPT_DIR/pax" $(make_args)
 	log "pax built successfully."
 }
 
 build_fvwm() {
 	log "Building fvwm..."
-	mkdir -p "$BUILD_DIR/fvwm"
-	cd "$SCRIPT_DIR/fvwm"
-	make -f Makefile X11BASE="${X11BASE:-/usr/X11R6}" \
-		BINDIR="$BUILD_DIR/fvwm" \
-		MANDIR="$BUILD_DIR/fvwm/man" \
-		obj 2>/dev/null || true
-	make -f Makefile X11BASE="${X11BASE:-/usr/X11R6}" \
-		BINDIR="$BUILD_DIR/fvwm" \
-		MANDIR="$BUILD_DIR/fvwm/man"
+	"$MAKE" -C "$SCRIPT_DIR/fvwm" $(make_args)
 	log "fvwm built successfully."
 }
 
-install_bin() {
-	local src="$1"
-	local dst="$2"
-	if [ -f "$src" ]; then
-		install -m 0555 -o root -g bin "$src" "$dst"
-		log "Installed $src -> $dst"
-	else
-		warn "Binary not found: $src"
+do_install() {
+	if [ "$(id -u)" -ne 0 ] && [ -z "${DESTDIR:-}" ]; then
+		warn "Installing to system paths needs root; use doas or DESTDIR."
 	fi
+	log "Installing pax and fvwm..."
+	"$MAKE" -C "$SCRIPT_DIR" $(make_args) install
+	log "Install complete."
 }
 
-install_pax() {
-	log "Installing pax to system paths..."
-	install_bin "$BUILD_DIR/pax/pax" "/bin/pax"
-	ln -sf /bin/pax /bin/tar 2>/dev/null || true
-	ln -sf /bin/pax /bin/cpio 2>/dev/null || true
-	log "pax installed. Symlinks tar/cpio created."
-}
-
-install_fvwm() {
-	log "Installing fvwm to system paths..."
-	local fvwmdir="${FVWMLIBDIR:-/usr/X11R6/lib/X11/fvwm}"
-	mkdir -p "$fvwmdir"
-	install_bin "$BUILD_DIR/fvwm/fvwm" "/usr/X11R6/bin/fvwm"
-	install_bin "$BUILD_DIR/fvwm/fvwm_exec" "$fvwmdir/fvwm_exec"
-	for m in "$BUILD_DIR"/fvwm/modules/*; do
-		[ -f "$m" ] || continue
-		install_bin "$m" "$fvwmdir/$(basename "$m")"
-	done
-	log "fvwm installed."
-}
-
-clean() {
+do_clean() {
 	log "Cleaning build artifacts..."
-	rm -rf "$BUILD_DIR"
-	cd "$SCRIPT_DIR/pax"
-	make -f Makefile clean 2>/dev/null || true
-	cd "$SCRIPT_DIR/fvwm"
-	make -f Makefile clean 2>/dev/null || true
+	"$MAKE" -C "$SCRIPT_DIR" clean
 	log "Clean complete."
 }
 
@@ -172,11 +149,10 @@ main() {
 			build_fvwm
 			;;
 		install)
-			[ -d "$BUILD_DIR/pax" ] && install_pax
-			[ -d "$BUILD_DIR/fvwm" ] && install_fvwm
+			do_install
 			;;
 		clean)
-			clean
+			do_clean
 			;;
 		*)
 			usage

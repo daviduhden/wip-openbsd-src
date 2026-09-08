@@ -85,8 +85,8 @@ main(int argc, char **argv)
 	/* We should exit if our fvwm pipes die */
 	signal(SIGPIPE, DeadPipe);
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	/* Create a list of all windows */
 	/* Request a list of all windows,
@@ -233,7 +233,7 @@ DeadPipe(int nonsense)
  *      checks for qoutes and stuff
  *
  ***********************************************************************/
-void
+static void
 write_string(FILE *out, char *line)
 {
 	int len, space = 0, qoute = 0, i;
@@ -286,7 +286,7 @@ do_save(void)
 	out = fopen(tname, "w+");
 	if (out == NULL) {
 		fprintf(stderr, "%s: couldn't open %s for writing\n",
-                    MyName, tname);
+		    MyName, tname);
 		return;
 	}
 	for (t = list_root; t != NULL; t = t->next) {

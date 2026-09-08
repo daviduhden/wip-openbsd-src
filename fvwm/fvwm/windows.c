@@ -41,7 +41,7 @@
 /* Function to compare window title names
  */
 static int globalFlags;
-int
+static int
 winCompare(const FvwmWindow **a, const FvwmWindow **b)
 {
 	if (globalFlags & SHOW_ICONNAME)
@@ -102,7 +102,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				free(tok);
 				line = GetNextOption(line, &tok);
 				if (tok) {
-					desk = atoi(tok);
+					desk = FvwmParseInteger(tok);
 					flags &= ~SHOW_ALLDESKS;
 				}
 			} else if (StrEquals(tok, "CurrentDesk")) {

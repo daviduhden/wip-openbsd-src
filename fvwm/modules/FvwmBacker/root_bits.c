@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "FvwmBacker.h"
+
 extern Display *dpy;
 extern int screen;
 extern char *Module;

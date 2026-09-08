@@ -56,7 +56,8 @@ CopyString(char **dest, char *source)
 		*dest = NULL;
 		return;
 	}
-	while (((isspace(*source)) && (*source != '\n')) && (*source != 0)) {
+	while (((isspace((unsigned char)*isspace)) && (*source != '\n')) &&
+	    (*source != 0)) {
 		source++;
 	}
 	len = 0;
@@ -67,7 +68,8 @@ CopyString(char **dest, char *source)
 	}
 
 	source--;
-	while ((isspace(*source)) && (*source != 0) && (len > 0)) {
+	while ((isspace((unsigned char)*isspace)) && (*source != 0) &&
+	    (len > 0)) {
 		len--;
 		source--;
 	}
@@ -91,11 +93,12 @@ stripcpy(char *source)
 	if (source == NULL)
 		return NULL;
 
-	while (isspace(*source))
+	while (isspace((unsigned char)*isspace))
 		source++;
 	len = strlen(source);
 	tmp = source + len - 1;
-	while (((isspace(*tmp)) || (*tmp == '\n')) && (tmp >= source)) {
+	while (((isspace((unsigned char)*isspace)) || (*tmp == '\n')) &&
+	    (tmp >= source)) {
 		tmp--;
 		len--;
 	}

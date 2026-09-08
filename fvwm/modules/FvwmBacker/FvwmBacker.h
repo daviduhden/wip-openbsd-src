@@ -22,10 +22,12 @@
 
 /* Function Prototypes */
 
-void EndLessLoop();
-void ReadFvwmPipe();
+void EndLessLoop(void);
+void ReadFvwmPipe(void);
 void ProcessMessage(unsigned long type, unsigned long *body);
 void SendFvwmPipe(char *message, unsigned long window);
 void DeadPipe(int nonsense);
 void ParseConfig(void);
 void AddCommand(char *string);
+
+unsigned long GetColor(char *color);

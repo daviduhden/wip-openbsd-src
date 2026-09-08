@@ -24,7 +24,7 @@
 **         to MAX_TOKEN_LENGTH in size.
 */
 
-char *
+static char *
 DoPeekArgument(const char *pstr, const char **pret)
 {
 	char *tok = NULL;
@@ -54,7 +54,8 @@ DoPeekArgument(const char *pstr, const char **pret)
 					break;
 				}
 			} else /* normal token */ {
-				if (isspace(*p) || *p == ',')
+				if (isspace((unsigned char)*isspace) ||
+				    *p == ',')
 					break;
 			}
 
@@ -158,7 +159,7 @@ MatchArgument(const char *pstr, char *tok)
  * space, and must be freed after use.
  *
  **************************************************************************/
-char *
+static char *
 GetNextArgument(char *indata, char **token)
 {
 	char *t, *start, *end, *text;
@@ -168,10 +169,10 @@ GetNextArgument(char *indata, char **token)
 		*token = NULL;
 		return NULL;
 	}
-	while (isspace(*t) && (*t != 0))
+	while (isspace((unsigned char)*isspace) && (*t != 0))
 		t++;
 	start = t;
-	while (!isspace(*t) && (*t != 0)) {
+	while (!isspace((unsigned char)*isspace) && (*t != 0)) {
 		/* Check for qouted text */
 		if (*t == '"') {
 			t++;

@@ -170,13 +170,13 @@ main(int argc, char **argv)
 	signal(SIGHUP, TerminateHandler);
 #endif
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	fd_width = GetFdWidth();
 
-	desk1 = atoi(argv[6]);
-	desk2 = atoi(argv[7]);
+	desk1 = FvwmParseInteger(argv[6]);
+	desk2 = FvwmParseInteger(argv[7]);
 
 	if (desk2 < desk1) {
 		itemp = desk1;
@@ -877,7 +877,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	if (select(fd_width, & in_fdset, 0, 0, NULL) > 0) {
+	if (select(fd_width, &in_fdset, 0, 0, NULL) > 0) {
 		if (FD_ISSET(x_fd, &in_fdset)) {
 			if (XPending(dpy)) {
 				XNextEvent(dpy, event);

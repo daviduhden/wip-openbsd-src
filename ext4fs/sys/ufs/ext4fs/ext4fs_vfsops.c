@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 2025 kmx.io.
  * Copyright (c) 1997 Manuel Bouyer.
  * Copyright (c) 1989, 1991, 1993, 1994
@@ -63,7 +64,6 @@
 #include <ufs/ext4fs/ext4fs_journal.h>
 
 struct pool ext4fs_inode_pool;
-struct pool ext4fs_dinode_pool;
 
 #define PRINTF_FEATURES(mask, features)				\
 	for (i = 0; i < nitems(features); i++)			\
@@ -149,9 +149,7 @@ ext4fs_init(struct vfsconf *vfsp)
 	int result;
 	(void)vfsp;
 	pool_init(&ext4fs_inode_pool, sizeof(struct inode), 0,
-		  IPL_NONE, PR_WAITOK, "ext4inopl", NULL);
-	pool_init(&ext4fs_dinode_pool, sizeof(struct ext4fs_dinode_256), 0,
-		  IPL_NONE, PR_WAITOK, "ext4dinopl", NULL);
+	    IPL_NONE, PR_WAITOK, "ext4inopl", NULL);
 	if ((result = ufs_init(vfsp))) {
 		return result;
 	}
@@ -160,7 +158,7 @@ ext4fs_init(struct vfsconf *vfsp)
 
 int
 ext4fs_mount(struct mount *mp, const char *path, void *data,
-	struct nameidata *ndp, struct proc *p)
+    struct nameidata *ndp, struct proc *p)
 {
 	struct ufs_args *args;
 	struct vnode *devvp;
@@ -206,9 +204,9 @@ ext4fs_mount(struct mount *mp, const char *path, void *data,
 	mfs = ump->um_e4fs;
 
 	strlcpy(mp->mnt_stat.f_mntfromname, fname,
-		sizeof(mp->mnt_stat.f_mntfromname));
+	    sizeof(mp->mnt_stat.f_mntfromname));
 	strlcpy(mp->mnt_stat.f_mntonname, path,
-		sizeof(mp->mnt_stat.f_mntonname));
+	    sizeof(mp->mnt_stat.f_mntonname));
 
 	goto success;
 
@@ -264,8 +262,8 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	 * Read the superblock from disk.
 	 */
 	error = bread(devvp, (daddr_t)(EXT4FS_SUPER_BLOCK_OFFSET /
-				       DEV_BSIZE),
-		      EXT4FS_SUPER_BLOCK_SIZE, &bp);
+	    DEV_BSIZE),
+	    EXT4FS_SUPER_BLOCK_SIZE, &bp);
 	if (error)
 		goto out;
 	sble = (struct ext4fs *)bp->b_data;
@@ -454,9 +452,17 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 		return (EIO);		/* XXX needs translation */
 	}
 
-	tmp = letoh16(sble->sb_inode_size);
-	if (tmp != 256) {
-		printf("ext4fs: unsupported inode size: %d\n", tmp);
+	/*
+	 * Validate the serialized inode size.  The ext4 format allows
+	 * any power of two between 128 and the block size.  Anything
+	 * else is a corrupt superblock: the inode table geometry and
+	 * every inode I/O below is derived from this value.
+	 */
+	if (ext4fs_sb_inode_size_check(sble) != 0) {
+		printf("ext4fs: invalid inode size: %u "
+		    "(must be a power of two in [%u, blocksize])\n",
+		    letoh16(sble->sb_inode_size),
+		    EXT4FS_GOOD_OLD_INODE_SIZE);
 		return (EINVAL);
 	}
 
@@ -469,7 +475,7 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 	tmp = letoh32(sble->sb_block_group_descriptor_size);
 	if (tmp != sizeof(struct ext4fs_block_group_descriptor)) {
 		printf("ext4fs: block group descriptor size is 0x%x\n",
-		       tmp);
+		    tmp);
 		return (EINVAL);
 	}
 
@@ -493,7 +499,7 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 	}
 
 	tmp = letoh32(sble->sb_feature_ro_compat) &
-		~EXT4FS_FEATURE_RO_COMPAT_SUPPORTED;
+	    ~EXT4FS_FEATURE_RO_COMPAT_SUPPORTED;
 	if (!ronly && tmp) {
 		printf("ext4fs: unsupported R/O compat features: ");
 		PRINTF_FEATURES(tmp, ext4fs_feature_ro_compat);
@@ -503,7 +509,7 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 
 	if (!ronly &&
 	    !(letoh32(sble->sb_feature_incompat) &
-	      EXT4FS_FEATURE_INCOMPAT_RECOVER) &&
+	    EXT4FS_FEATURE_INCOMPAT_RECOVER) &&
 	    !(letoh16(sble->sb_state) & EXT4FS_STATE_VALID)) {
 		printf("ext4fs: file system not clean, run e2fsck\n");
 		return (EROFS);
@@ -524,22 +530,39 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	int error, i;
 
 	mfs->m_block_group_count = howmany(mfs->m_blocks_count -
-					   mfs->m_first_data_block,
-					   mfs->m_blocks_per_group);
+	    mfs->m_first_data_block,
+	    mfs->m_blocks_per_group);
 
 	mfs->m_block_size_shift = EXT4FS_LOG_MIN_BLOCK_SIZE +
-		mfs->m_log_block_size;
+	    mfs->m_log_block_size;
 	mfs->m_block_size = 1 << mfs->m_block_size_shift;
 	mfs->m_block_group_descriptor_blocks_count =
-		howmany(mfs->m_block_group_count,
-			mfs->m_block_size /
-			sizeof(struct ext4fs_block_group_descriptor));
+	    howmany(mfs->m_block_group_count,
+	    mfs->m_block_size /
+	    sizeof(struct ext4fs_block_group_descriptor));
 	mfs->m_fs_block_to_disk_block = mfs->m_log_block_size + 1;
+	/*
+	 * The inode size was validated against the block size in
+	 * ext4fs_sbcheck(): it is a power of two in
+	 * [128, m_block_size], so the geometry below cannot divide
+	 * by zero or overflow the block-size arithmetic.
+	 */
 	mfs->m_inodes_per_block = mfs->m_block_size / mfs->m_inode_size;
 	mfs->m_inode_table_blocks_per_group = mfs->m_inodes_per_group /
-		mfs->m_inodes_per_block;
+	    mfs->m_inodes_per_block;
 
-	gd_size = mfs->m_block_group_count * sizeof(struct ext4fs_block_group_descriptor);
+	gd_size = mfs->m_block_group_count *
+	    sizeof(struct ext4fs_block_group_descriptor);
+	/*
+	 * Reject descriptor tables that cannot be represented: the
+	 * count comes from on-disk fields and the multiplication
+	 * must not wrap the address space before allocation.
+	 */
+	if (mfs->m_block_group_count >
+	    SIZE_MAX / sizeof(struct ext4fs_block_group_descriptor)) {
+		printf("ext4fs_sbfill: block group count too large\n");
+		return (EIO);
+	}
 	mfs->m_gd = malloc(gd_size, M_UFSMNT, M_WAITOK);
 
 	dblk = (mfs->m_first_data_block + 1) << mfs->m_fs_block_to_disk_block;
@@ -551,10 +574,12 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 		if (off + n > gd_size)
 			n = gd_size - off;
 
-		error = bread(devvp, dblk + (i << mfs->m_fs_block_to_disk_block),
+		error = bread(devvp,
+		    dblk + (i << mfs->m_fs_block_to_disk_block),
 		    mfs->m_block_size, &bp);
 		if (error) {
-			printf("ext4fs_sbfill: failed to read block group descriptors: %d\n", error);
+			printf("ext4fs_sbfill: failed to read block group descriptors: %d\n",
+			    error);
 			free(mfs->m_gd, M_UFSMNT, gd_size);
 			mfs->m_gd = NULL;
 			return (error);
@@ -583,8 +608,17 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	rgroup = (7 - 1) / mfs->m_inodes_per_group;
 	rindex = (7 - 1) % mfs->m_inodes_per_group;
 	ritb = letoh32(mfs->m_gd[rgroup].bgd_inode_table_block_lo);
-	rblk = ritb + (rindex * mfs->m_inode_size) / mfs->m_block_size;
-	roff = (rindex * mfs->m_inode_size) % mfs->m_block_size;
+	if (mfs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
+		ritb |= (u_int64_t)letoh32(
+		    mfs->m_gd[rgroup].bgd_inode_table_block_hi) << 32;
+	/*
+	 * inode_size is at most the block size (validated in
+	 * ext4fs_sbcheck), so the byte offset of any inode inside its
+	 * group is bounded by the group's inode table and cannot wrap.
+	 */
+	rblk = ritb +
+	    ((u_int64_t)rindex * mfs->m_inode_size) / mfs->m_block_size;
+	roff = ((u_int64_t)rindex * mfs->m_inode_size) % mfs->m_block_size;
 	error = bread(devvp, (daddr_t)EXT4FS_FSBTODB(mfs, rblk),
 	    mfs->m_block_size, &bp);
 	if (error) {
@@ -604,15 +638,15 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 {
 	int feature_incompat_64bit;
 	feature_incompat_64bit = letoh32(sble->sb_feature_incompat) &
-		EXT4FS_FEATURE_INCOMPAT_64BIT;
+	    EXT4FS_FEATURE_INCOMPAT_64BIT;
 	/* Keep a copy of the raw little-endian superblock */
 	memcpy(&dest->m_sble, sble, sizeof(dest->m_sble));
 	dest->m_inodes_count = letoh32(sble->sb_inodes_count);
 	dest->m_blocks_count = letoh32(sble->sb_blocks_count_lo);
 	dest->m_reserved_blocks_count =
-		letoh32(sble->sb_reserved_blocks_count_lo);
+	    letoh32(sble->sb_reserved_blocks_count_lo);
 	dest->m_free_blocks_count =
-		letoh32(sble->sb_free_blocks_count_lo);
+	    letoh32(sble->sb_free_blocks_count_lo);
 	dest->m_free_inodes_count = letoh32(sble->sb_free_inodes_count);
 	dest->m_first_data_block = letoh32(sble->sb_first_data_block);
 	dest->m_log_block_size = letoh32(sble->sb_log_block_size);
@@ -623,7 +657,8 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_mount_time = letoh32(sble->sb_mount_time_lo);
 	dest->m_write_time = letoh32(sble->sb_write_time_lo);
 	dest->m_mount_count = letoh16(sble->sb_mount_count);
-	dest->m_max_mount_count_before_fsck = (int16_t)letoh16(sble->sb_max_mount_count_before_fsck);
+	dest->m_max_mount_count_before_fsck = (int16_t)letoh16(
+	    sble->sb_max_mount_count_before_fsck);
 	dest->m_state = letoh16(sble->sb_state);
 	dest->m_errors = letoh16(sble->sb_errors);
 	dest->m_revision_level_minor = letoh16(sble->sb_revision_level_minor);
@@ -633,28 +668,34 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_revision_level = letoh32(sble->sb_revision_level);
 	dest->m_default_reserved_uid = letoh16(sble->sb_default_reserved_uid);
 	dest->m_default_reserved_gid = letoh16(sble->sb_default_reserved_gid);
-	dest->m_first_non_reserved_inode = letoh32(sble->sb_first_non_reserved_inode);
+	dest->m_first_non_reserved_inode = letoh32(
+	    sble->sb_first_non_reserved_inode);
 	dest->m_inode_size = letoh16(sble->sb_inode_size);
 	dest->m_block_group_id = letoh16(sble->sb_block_group_id);
 	dest->m_feature_compat = letoh32(sble->sb_feature_compat);
 	dest->m_feature_incompat = letoh32(sble->sb_feature_incompat);
 	dest->m_feature_ro_compat = letoh32(sble->sb_feature_ro_compat);
-	dest->m_algorithm_usage_bitmap = letoh32(sble->sb_algorithm_usage_bitmap);
+	dest->m_algorithm_usage_bitmap = letoh32(
+	    sble->sb_algorithm_usage_bitmap);
 	dest->m_reserved_bgdt_blocks = letoh16(sble->sb_reserved_bgdt_blocks);
 	dest->m_journal_inode_number = letoh32(sble->sb_journal_inode_number);
 	dest->m_journal_device_number = letoh32(sble->sb_journal_device_number);
 	dest->m_last_orphan = letoh32(sble->sb_last_orphan);
-	dest->m_block_group_descriptor_size = letoh16(sble->sb_block_group_descriptor_size);
+	dest->m_block_group_descriptor_size = letoh16(
+	    sble->sb_block_group_descriptor_size);
 	dest->m_default_mount_opts = letoh32(sble->sb_default_mount_opts);
-	dest->m_first_meta_block_group = letoh32(sble->sb_first_meta_block_group);
+	dest->m_first_meta_block_group = letoh32(
+	    sble->sb_first_meta_block_group);
 	dest->m_newfs_time = letoh32(sble->sb_newfs_time_lo);
 	dest->m_inode_size_extra_min = letoh16(sble->sb_inode_size_extra_min);
 	dest->m_inode_size_extra_want = letoh16(sble->sb_inode_size_extra_want);
 	dest->m_flags = letoh32(sble->sb_flags);
-	dest->m_raid_stride_block_count = letoh16(sble->sb_raid_stride_block_count);
+	dest->m_raid_stride_block_count = letoh16(
+	    sble->sb_raid_stride_block_count);
 	dest->m_mmp_interval = letoh16(sble->sb_mmp_interval);
 	dest->m_mmp_block = letoh64(sble->sb_mmp_block);
-	dest->m_raid_stripe_width_block_count = letoh32(sble->sb_raid_stripe_width_block_count);
+	dest->m_raid_stripe_width_block_count = letoh32(
+	    sble->sb_raid_stripe_width_block_count);
 	dest->m_kilobytes_written = letoh64(sble->sb_kilobytes_written);
 	dest->m_error_count = letoh32(sble->sb_error_count);
 	dest->m_first_error_time = letoh32(sble->sb_first_error_time_lo);
@@ -668,8 +709,10 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_user_quota_inode = letoh32(sble->sb_user_quota_inode);
 	dest->m_group_quota_inode = letoh32(sble->sb_group_quota_inode);
 	dest->m_overhead_clusters = letoh32(sble->sb_overhead_clusters);
-	dest->m_backup_block_groups[0] = letoh32(sble->sb_backup_block_groups[0]);
-	dest->m_backup_block_groups[1] = letoh32(sble->sb_backup_block_groups[1]);
+	dest->m_backup_block_groups[0] = letoh32(
+	    sble->sb_backup_block_groups[0]);
+	dest->m_backup_block_groups[1] = letoh32(
+	    sble->sb_backup_block_groups[1]);
 	dest->m_lost_and_found_inode = letoh32(sble->sb_lost_and_found_inode);
 	dest->m_project_quota_inode = letoh32(sble->sb_project_quota_inode);
 	dest->m_checksum_seed = letoh32(sble->sb_checksum_seed);
@@ -678,22 +721,22 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_orphan_file_inode = letoh16(sble->sb_orphan_file_inode);
 	if (feature_incompat_64bit) {
 		dest->m_blocks_count |= (u_int64_t)
-			letoh32(sble->sb_blocks_count_hi) << 32;
-		dest->m_reserved_blocks_count |=	(u_int64_t)
-			letoh32(sble->sb_reserved_blocks_count_hi)
-			<< 32;
+		    letoh32(sble->sb_blocks_count_hi) << 32;
+		dest->m_reserved_blocks_count |= (u_int64_t)
+		    letoh32(sble->sb_reserved_blocks_count_hi) <<
+		    32;
 		dest->m_free_blocks_count |= (u_int64_t)
-			letoh32(sble->sb_free_blocks_count_hi) << 32;
+		    letoh32(sble->sb_free_blocks_count_hi) << 32;
 		dest->m_mount_time |= (u_int64_t)
-			letoh32(sble->sb_mount_time_hi) << 32;
+		    letoh32(sble->sb_mount_time_hi) << 32;
 		dest->m_check_time |= (u_int64_t)
-			letoh32(sble->sb_check_time_hi) << 32;
+		    letoh32(sble->sb_check_time_hi) << 32;
 		dest->m_newfs_time |= (u_int64_t)
-			letoh32(sble->sb_newfs_time_hi) << 32;
+		    letoh32(sble->sb_newfs_time_hi) << 32;
 		dest->m_first_error_time |= (u_int64_t)
-			letoh32(sble->sb_first_error_time_hi) << 32;
+		    letoh32(sble->sb_first_error_time_hi) << 32;
 		dest->m_last_error_time |= (u_int64_t)
-			letoh32(sble->sb_last_error_time_hi) << 32;
+		    letoh32(sble->sb_last_error_time_hi) << 32;
 	}
 }
 
@@ -712,10 +755,10 @@ ext4fs_statfs(struct mount *mp, struct statfs *sbp, struct proc *p)
 	mfs = ump->um_e4fs;
 
 	overhead_per_group = overhead_per_group_block_bitmap +
-		overhead_per_group_inode_bitmap +
-		mfs->m_inode_table_blocks_per_group;
+	    overhead_per_group_inode_bitmap +
+	    mfs->m_inode_table_blocks_per_group;
 	overhead = mfs->m_first_data_block +
-		mfs->m_block_group_count * overhead_per_group;
+	    mfs->m_block_group_count * overhead_per_group;
 	if (mfs->m_feature_ro_compat &
 	    EXT4FS_FEATURE_RO_COMPAT_SPARSE_SUPER) {
 		int i;
@@ -727,7 +770,7 @@ ext4fs_statfs(struct mount *mp, struct statfs *sbp, struct proc *p)
 		ngroups = mfs->m_block_group_count;
 	}
 	overhead += ngroups *
-		(1 + mfs->m_block_group_descriptor_blocks_count);
+	    (1 + mfs->m_block_group_descriptor_blocks_count);
 
 	sbp->f_bsize = mfs->m_block_size;
 	sbp->f_iosize = mfs->m_block_size;
@@ -876,8 +919,8 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 		free_inodes = letoh16(gd->bgd_free_inodes_count_lo);
 		if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
 			free_inodes |=
-			    (u_int32_t)letoh16(gd->bgd_free_inodes_count_hi)
-			    << 16;
+			    (u_int32_t)letoh16(gd->bgd_free_inodes_count_hi) <<
+			    16;
 		if (free_inodes == 0)
 			continue;
 
@@ -980,8 +1023,8 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 					if (fs->m_feature_incompat &
 					    EXT4FS_FEATURE_INCOMPAT_64BIT)
 						dirs |= (u_int32_t)letoh16(
-						    gd->bgd_used_dirs_count_hi)
-						    << 16;
+						    gd->bgd_used_dirs_count_hi) <<
+						    16;
 					dirs++;
 					gd->bgd_used_dirs_count_lo =
 					    htole16(dirs & 0xFFFF);
@@ -1018,8 +1061,7 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 				ip = VTOI(*vpp);
 
 				/* Zero the dinode */
-				memset(ip->i_e4din, 0,
-				    sizeof(struct ext4fs_dinode_256));
+				memset(ip->i_e4din, 0, fs->m_inode_size);
 
 				/* Initialize extent header */
 				ip->i_e4din->dinode.i_extent_header.eh_magic =
@@ -1033,10 +1075,16 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 				ip->i_e4din->dinode.i_flags =
 				    htole32(EXTFS_INODE_FLAG_EXTENTS);
 
-				/* Set extra_isize */
-				ip->i_e4din->dinode.i_extra_isize =
-				    htole16(sizeof(struct ext4fs_dinode) -
-				    128);
+				/*
+				 * Set extra_isize.  The field only
+				 * exists when the inode is larger than
+				 * 128 bytes.
+				 */
+				if (fs->m_inode_size >
+				    EXT4FS_GOOD_OLD_INODE_SIZE)
+					ip->i_e4din->dinode.i_extra_isize =
+					    htole16(sizeof(struct ext4fs_dinode) -
+					    EXT4FS_GOOD_OLD_INODE_SIZE);
 
 				/* Set generation number */
 				if (++ext4fs_gennumber <
@@ -1336,9 +1384,15 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 		return (ESTALE);
 	}
 	inode_index = (ino - 1) % fs->m_inodes_per_group;
+	/*
+	 * inode_size was validated in ext4fs_sbcheck() as a power of
+	 * two within [128, m_block_size], so m_inodes_per_block is
+	 * nonzero, the byte offset below cannot wrap, and no inode
+	 * ever crosses a block boundary.
+	 */
 	block_in_table = inode_index / fs->m_inodes_per_block;
-	offset_in_block = (inode_index % fs->m_inodes_per_block) *
-	    fs->m_inode_size;
+	offset_in_block = (u_int32_t)(((u_int64_t)inode_index %
+	    fs->m_inodes_per_block) * fs->m_inode_size);
 
 	gd = &fs->m_gd[inode_group];
 	inode_table_block = letoh32(gd->bgd_inode_table_block_lo);
@@ -1359,8 +1413,11 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 
 	dp = (struct ext4fs_dinode *)((char *)bp->b_data + offset_in_block);
 
-	/* Allocate space for on-disk inode */
-	ip->i_e4din = pool_get(&ext4fs_dinode_pool, PR_WAITOK|PR_ZERO);
+	/*
+	 * Allocate space for the full serialized inode; the size was
+	 * validated against the filesystem geometry above.
+	 */
+	ip->i_e4din = malloc(fs->m_inode_size, M_TEMP, M_WAITOK | M_ZERO);
 
 	/*
 	 * If the group has INODE_UNINIT set, or the inode is in the
@@ -1377,7 +1434,7 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 		memset(dp, 0, fs->m_inode_size);
 		error = bwrite(bp);
 		if (error) {
-			pool_put(&ext4fs_dinode_pool, ip->i_e4din);
+			free(ip->i_e4din, M_TEMP, fs->m_inode_size);
 			ip->i_e4din = NULL;
 			vput(vp);
 			*vpp = NULL;
@@ -1391,11 +1448,29 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 		if (letoh16(ip->i_e4din->dinode.i_mode) != 0 ||
 		    letoh16(ip->i_e4din->dinode.i_links_count) != 0 ||
 		    letoh32(ip->i_e4din->dinode.i_dtime) != 0) {
+			/*
+			 * An in-use inode with a malformed extra_isize
+			 * has no defined extended field layout; reject
+			 * it before interpreting anything at the tail
+			 * of the inode (the checksum verification
+			 * itself would read past the valid region).
+			 */
+			if (!ext4fs_inode_extra_isize_valid(fs,
+			    ip->i_e4din)) {
+				printf("ext4fs: inode %llu has invalid "
+				    "extra_isize 0x%x\n",
+				    (unsigned long long)ino,
+				    letoh16(ip->i_e4din->dinode.i_extra_isize));
+				free(ip->i_e4din, M_TEMP, fs->m_inode_size);
+				ip->i_e4din = NULL;
+				vput(vp);
+				*vpp = NULL;
+				return (EINVAL);
+			}
 			error = ext4fs_inode_csum_verify(fs,
 			    ip->i_e4din, ino);
 			if (error) {
-				pool_put(&ext4fs_dinode_pool,
-				    ip->i_e4din);
+				free(ip->i_e4din, M_TEMP, fs->m_inode_size);
 				ip->i_e4din = NULL;
 				vput(vp);
 				*vpp = NULL;

@@ -48,7 +48,7 @@ RegrabAllKeys(void)
 ** to remove a binding from the global list (probably needs more processing
 ** for mouse binding lines though, like when context is a title bar button).
 */
-void
+static void
 remove_binding(
     int contexts, int mods, int button, KeySym keysym, int mouse_binding)
 {
@@ -89,7 +89,7 @@ remove_binding(
  *  Parses a mouse or key binding
  *
  ****************************************************************************/
-void
+static void
 ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long junk, char *tline, int *Module, Bool fKey)
 {

@@ -27,6 +27,7 @@
 */
 
 #include "FvwmButtons.h"
+#include "parse.h"
 #include "button.h"
 
 extern int w, h, x, y, xneg, yneg; /* used in ParseConfigLine */
@@ -37,10 +38,10 @@ static char terminator = '\0';
 
 /* ----------------------------------- macros ------------------------------ */
 
-char *
+static char *
 trimleft(char *s)
 {
-	while (s && isspace(*s))
+	while (s && isspace((unsigned char)*s))
 		s++;
 	return s;
 }
@@ -52,7 +53,7 @@ trimleft(char *s)
 *** string and move the old pointer forward. Accepts and strips quoting with
 *** '," or `, and the current quote q can be escaped inside the string with \q.
 **/
-char *
+static char *
 seekright(char **s)
 {
 	char *token = NULL;
@@ -100,7 +101,7 @@ seekright_command(char **s)
 *** ParseBack()
 *** Parses the options possible to Back
 **/
-int
+static int
 ParseBack(char **ss)
 {
 	char *opts[] = {"icon", NULL};
@@ -138,7 +139,7 @@ ParseBack(char **ss)
 *** ParseBoxSize()
 *** Parses the options possible to BoxSize
 **/
-void
+static void
 ParseBoxSize(char **ss, unsigned long *flags)
 {
 	char *opts[] = {"dumb", "fixed", "smart", NULL};
@@ -173,7 +174,7 @@ ParseBoxSize(char **ss, unsigned long *flags)
 *** ParseTitle()
 *** Parses the options possible to Title
 **/
-void
+static void
 ParseTitle(char **ss, byte *flags, byte *mask)
 {
 	char *titleopts[] = {"left", "right", "center", "side", NULL};
@@ -221,7 +222,7 @@ ParseTitle(char **ss, byte *flags, byte *mask)
 *** ParseSwallow()
 *** Parses the options possible to Swallow
 **/
-void
+static void
 ParseSwallow(char **ss, byte *flags, byte *mask)
 {
 	char *swallowopts[] = {"nohints", "hints", "nokill", "kill", "noclose",
@@ -301,7 +302,7 @@ ParseSwallow(char **ss, byte *flags, byte *mask)
 *** ParseContainer()
 *** Parses the options possible to Container
 **/
-void
+static void
 ParseContainer(char **ss, button_info *b)
 {
 	char *conts[] = {"columns", "rows", "font", "frame", "back", "fore",
@@ -458,7 +459,7 @@ ParseContainer(char **ss, button_info *b)
 *** *FvwmButtons(option[ options]) title iconname command
 **/
 /*#define DEBUG_PARSER*/
-void
+static void
 match_string(button_info **uberb, char *s)
 {
 	button_info *b, *ub = *uberb;
@@ -883,7 +884,7 @@ match_string(button_info **uberb, char *s)
 /**
 *** ParseConfigLine
 **/
-void
+static void
 ParseConfigLine(button_info **ubb, char *s)
 {
 	button_info *ub = *ubb;
@@ -1009,7 +1010,7 @@ ParseConfigLine(button_info **ubb, char *s)
 *** ParseConfigFile()
 *** Parses optional separate configuration file for FvwmButtons
 **/
-void
+static void
 ParseConfigFile(button_info *ub)
 {
 	char s[1024], *t;

@@ -16,7 +16,6 @@
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
 
-
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -151,7 +150,7 @@ static volatile sig_atomic_t connection_dead = False;
 /**
 *** Some fancy routines straight out of the manual :-) Used in DeadPipe.
 **/
-Bool
+static Bool
 DestroyedWindow(Display *d, XEvent *e, char *a)
 {
 	if (e->xany.window == (Window)a)
@@ -162,7 +161,7 @@ DestroyedWindow(Display *d, XEvent *e, char *a)
 	return False;
 }
 
-int
+static int
 IsThereADestroyEvent(button_info *b)
 {
 	XEvent event;
@@ -339,7 +338,7 @@ AddButtonAction(button_info *b, int n, char *action)
 		b->flags |= b_Action;
 	}
 
-	while (*action && isspace(*action))
+	while (*action && isspace((unsigned char)*isspace))
 		action++;
 	l = strlen(action);
 	if (l > 1) {
@@ -381,7 +380,7 @@ GetButtonAction(button_info *b, int n)
 *** use the Shape extension to create a transparent background.
 ***   Patrice Fortier
 **/
-void
+static void
 SetTransparentBackground(button_info *ub, int w, int h)
 {
 	Pixmap pmap_mask;
@@ -452,7 +451,7 @@ SetTransparentBackground(button_info *ub, int w, int h)
 *** Shows X errors made by FvwmButtons.
 **/
 XErrorHandler oldErrorHandler = NULL;
-int
+static int
 myErrorHandler(Display *dpy, XErrorEvent *event)
 {
 	fprintf(stderr, "%s: Cause of next X Error.\n", MyName);
@@ -535,8 +534,8 @@ main(int argc, char **argv)
 		config_file = strdup(argv[7]);
 	}
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 	if (!(Dpy = XOpenDisplay(display_name))) {
 		fprintf(stderr, "%s: Can't open display %s", MyName,
 		    XDisplayName(display_name));
@@ -1157,7 +1156,7 @@ RedrawWindow(button_info *b)
 /**
 *** LoadIconFile()
 **/
-int
+static int
 LoadIconFile(char *s, FvwmPicture **p)
 {
 	*p = CachePicture(Dpy, Root, iconPath, pixmapPath, s, save_color_limit);
@@ -1542,7 +1541,7 @@ CreateWindow(button_info *ub, int maxx, int maxy)
 *** space.
 **/
 #ifdef XPM
-int
+static int
 PleaseAllocColor(XColor *color)
 {
 	char *xpm[] = {"1 1 1 1", NULL, "x"};
@@ -1667,7 +1666,7 @@ My_XNextEvent(Display *Dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	if (select(fd_width, & in_fdset, 0, 0, NULL) > 0) {
+	if (select(fd_width, &in_fdset, 0, 0, NULL) > 0) {
 		if (FD_ISSET(x_fd, &in_fdset)) {
 			if (XPending(Dpy)) {
 				XNextEvent(Dpy, event);
@@ -1698,8 +1697,8 @@ My_XNextEvent(Display *Dpy, XEvent *event)
 *** Is run after the windowlist is checked. If any button hangs on UseOld,
 *** it has failed, so we try to spawn a window for them.
 **/
-void
-SpawnSome()
+static void
+SpawnSome(void)
 {
 	static char first = 1;
 	button_info *b, *ub = UberButton;

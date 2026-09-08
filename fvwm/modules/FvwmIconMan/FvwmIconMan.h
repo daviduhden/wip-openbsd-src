@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "../../libs/fvwmlib.h"
+
 #include "config.h"
 
 #ifndef FVWM_VERSION
@@ -46,7 +48,6 @@
 /*  What the heck is this??  */
 #include <dmalloc.h>
 #endif
-
 
 typedef unsigned long Ulong;
 typedef unsigned char Uchar;

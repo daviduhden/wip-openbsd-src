@@ -115,8 +115,8 @@ main(int argc, char **argv)
 	/* Dead pipe == dead fvwm */
 	signal(SIGPIPE, DeadPipe);
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	/* An application window may have already been selected - look for it */
 	sscanf(argv[4], "%x", (unsigned int *)&app_win);

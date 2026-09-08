@@ -1,7 +1,8 @@
-/*	$OpenBSD: sel_subs.c,v 1.29 2024/04/28 16:43:15 florian Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: sel_subs.c,v 1.5 1995/03/21 09:07:42 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -45,8 +46,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * data structure for storing uid/grp selects (-U, -G non standard options)

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 2025 kmx.io.
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -244,17 +245,30 @@ ext4fs_bgd_csum_verify(struct m_ext4fs *fs,
 /*
  * Compute the CRC32C checksum of an inode.
  *
- * The checksum covers the inode number, generation, and the full
- * 256-byte inode with checksum fields zeroed.
+ * Follows the ext4 metadata checksum definition exactly (Linux
+ * ext4_inode_csum()):
+ *
+ *   seed  = crc32c(~0, uuid) or sb_checksum_seed (CSUM_SEED)
+ *   crc   = seed, then le32(inode number), then the raw 4 bytes of
+ *           i_generation, then the serialized inode bytes in the
+ *           regions [0, 0x7C), [0x7E, 0x80), [0x80, 0x82) and
+ *           [0x84, inode_size), with the i_checksum_lo and
+ *           i_checksum_hi fields replaced by zeros (skipped).
+ *
+ * The result is the raw (non-inverted) crc32c value that ext4
+ * stores.  inode_size is taken from the filesystem superblock; the
+ * inode's i_extra_isize selects where the checksum_hi exclusion
+ * falls.
  */
 u_int32_t
 ext4fs_inode_csum(struct m_ext4fs *fs,
-    struct ext4fs_dinode_256 *dp, u_int32_t ino)
+    struct ext4fs_dinode_large *dp, u_int32_t ino)
 {
-	u_int32_t crc;
-	u_int32_t seed;
-	u_int32_t ino_le;
-	struct ext4fs_dinode_256 tmp;
+	const char *raw = (const char *)dp;
+	u_int32_t crc, seed, ino_le;
+	u_int32_t inode_size = fs->m_inode_size;
+	u_int16_t extra_isize = 0;
+	u_int16_t zero = 0;
 
 	if (!(fs->m_feature_ro_compat &
 	    EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM))
@@ -267,12 +281,32 @@ ext4fs_inode_csum(struct m_ext4fs *fs,
 	crc = ext4fs_crc32c(crc, &dp->dinode.i_nfs_generation,
 	    sizeof(dp->dinode.i_nfs_generation));
 
-	tmp = *dp;
-	tmp.dinode.i_checksum_lo = 0;
-	tmp.dinode.i_checksum_hi = 0;
-	crc = ext4fs_crc32c(crc, &tmp, sizeof(tmp));
+	crc = ext4fs_crc32c(crc, raw, offsetof(struct ext4fs_dinode,
+	    i_checksum_lo));
+	crc = ext4fs_crc32c(crc, &zero, sizeof(zero));
+	crc = ext4fs_crc32c(crc, raw + offsetof(struct ext4fs_dinode,
+	    i_checksum_lo) + sizeof(zero),
+	    EXT4FS_GOOD_OLD_INODE_SIZE -
+	    (offsetof(struct ext4fs_dinode, i_checksum_lo) +
+	     sizeof(zero)));
 
-	return ~crc;
+	if (inode_size > EXT4FS_GOOD_OLD_INODE_SIZE) {
+		size_t offset = offsetof(struct ext4fs_dinode,
+		    i_checksum_hi);
+
+		extra_isize = ext4fs_inode_extra_isize(fs, dp);
+
+		crc = ext4fs_crc32c(crc, raw + EXT4FS_GOOD_OLD_INODE_SIZE,
+		    offset - EXT4FS_GOOD_OLD_INODE_SIZE);
+		if (offset + sizeof(zero) <=
+		    (size_t)EXT4FS_GOOD_OLD_INODE_SIZE + extra_isize) {
+			crc = ext4fs_crc32c(crc, &zero, sizeof(zero));
+			offset += sizeof(zero);
+		}
+		crc = ext4fs_crc32c(crc, raw + offset, inode_size - offset);
+	}
+
+	return (~crc);
 }
 
 /*
@@ -282,18 +316,28 @@ ext4fs_inode_csum(struct m_ext4fs *fs,
  */
 int
 ext4fs_inode_csum_verify(struct m_ext4fs *fs,
-    struct ext4fs_dinode_256 *dp, u_int32_t ino)
+    struct ext4fs_dinode_large *dp, u_int32_t ino)
 {
 	u_int32_t provided, calculated;
+	u_int16_t extra_isize = 0;
 
 	if (!(fs->m_feature_ro_compat &
 	    EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM))
 		return 0;
 
 	provided = letoh16(dp->dinode.i_checksum_lo);
-	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-		provided |= (u_int32_t)letoh16(dp->dinode.i_checksum_hi) << 16;
+	if (fs->m_inode_size > EXT4FS_GOOD_OLD_INODE_SIZE) {
+		extra_isize = ext4fs_inode_extra_isize(fs, dp);
+		if (offsetof(struct ext4fs_dinode, i_checksum_hi) + 2 <=
+		    (size_t)EXT4FS_GOOD_OLD_INODE_SIZE + extra_isize)
+			provided |= (u_int32_t)letoh16(
+			    dp->dinode.i_checksum_hi) << 16;
+	}
 	calculated = ext4fs_inode_csum(fs, dp, ino);
+	if (!(fs->m_inode_size > EXT4FS_GOOD_OLD_INODE_SIZE &&
+	    offsetof(struct ext4fs_dinode, i_checksum_hi) + 2 <=
+	    (size_t)EXT4FS_GOOD_OLD_INODE_SIZE + extra_isize))
+		calculated &= 0xFFFF;
 
 	if (provided != calculated) {
 		printf("ext4fs: inode %u checksum mismatch: "
@@ -310,13 +354,16 @@ ext4fs_bitmap_csum(struct m_ext4fs *fs, u_int32_t group,
     void *bitmap, size_t size)
 {
 	u_int32_t crc, seed;
+	u_int32_t group_le;
 
 	if (!(fs->m_feature_ro_compat &
 	    EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM))
 		return 0;
 
 	seed = ext4fs_csum_seed(fs);
-	crc = ext4fs_crc32c(seed, bitmap, size);
+	group_le = htole32(group);
+	crc = ext4fs_crc32c(seed, &group_le, sizeof(group_le));
+	crc = ext4fs_crc32c(crc, bitmap, size);
 
 	return ~crc;
 }

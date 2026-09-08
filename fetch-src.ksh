@@ -287,12 +287,17 @@ resolve_component() {
 	pax | src/bin/pax)
 		COMPONENT_TREE=src
 		COMPONENT_PATH=bin/pax
-		COMPONENT_DIR="pax" ;;
+		COMPONENT_DIR="pax"
+		;;
 	fvwm | xenocara/app/fvwm)
 		COMPONENT_TREE=xenocara
 		COMPONENT_PATH=app/fvwm
-		COMPONENT_DIR=fvwm ;;
-	*) error "Unknown component: $1"; return 1 ;;
+		COMPONENT_DIR=fvwm
+		;;
+	*)
+		error "Unknown component: $1"
+		return 1
+		;;
 	esac
 	if [ -L "$COMPONENT_DIR" ] || [ -L "$COMPONENT_DIR/Makefile" ] ||
 		[ ! -f "$COMPONENT_DIR/Makefile" ]; then
@@ -303,7 +308,8 @@ resolve_component() {
 
 detect_target_tree() {
 	[ -f "$TARGET_TREE/Makefile" ] || {
-		error "Not a source checkout: $TARGET_TREE"; return 1
+		error "Not a source checkout: $TARGET_TREE"
+		return 1
 	}
 	if [ -d "$TARGET_TREE/bin" ] && [ -d "$TARGET_TREE/sys" ]; then
 		TARGET_KIND=src
@@ -418,7 +424,10 @@ canonical_target_tree() {
 		error "Refusing symlinked checkout root: $path"
 		return 1
 	fi
-	(unset CDPATH; cd -- "$path" && pwd -P)
+	(
+		unset CDPATH
+		cd -- "$path" && pwd -P
+	)
 }
 
 # Main function
@@ -428,7 +437,8 @@ main() {
 	--list)
 		move_to_wip_openbsd_src
 		list_all_directories
-		return $? ;;
+		return $?
+		;;
 	--copy-only)
 		[ "$#" -ge 2 ] || {
 			error "Usage: $0 --copy-only TREE [component ...]"
@@ -447,10 +457,13 @@ main() {
 			SELECTED_DIRECTORIES="$*"
 			copy_selected_directories
 		fi
-		return $? ;;
+		return $?
+		;;
 	"") ;;
-	*) error "Usage: $0 [--list | --copy-only TREE [component ...]]"
-		return 1 ;;
+	*)
+		error "Usage: $0 [--list | --copy-only TREE [component ...]]"
+		return 1
+		;;
 	esac
 	check_root
 	set_cvsroot

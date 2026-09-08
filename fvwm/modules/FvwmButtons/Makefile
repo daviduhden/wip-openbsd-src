@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmButtons
-
 PROG = FvwmButtons
 SRCS = FvwmButtons.c button.c draw.c icons.c misc.c output.c parse.c
 

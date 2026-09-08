@@ -173,8 +173,8 @@ main(int argc, char **argv)
 	if (argc == 7 && !strcasecmp(argv[6], "Transient"))
 		globals.transient = 1;
 
-	Fvwm_fd[0] = atoi(argv[1]);
-	Fvwm_fd[1] = atoi(argv[2]);
+	Fvwm_fd[0] = FvwmParseFd(argv[1]);
+	Fvwm_fd[1] = FvwmParseFd(argv[2]);
 	init_display();
 	init_boxes();
 

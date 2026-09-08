@@ -123,8 +123,8 @@ main(int argc, char **argv)
 	/* We should exit if our fvwm pipes die */
 	signal(SIGPIPE, DeadPipe);
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	for (i = 6; i < argc; i++) {
 		if (strcasecmp(argv[i], "-m4-prefix") == 0) {

@@ -402,10 +402,10 @@ WindowShade(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		XBell(dpy, 0);
 		return;
 	}
-	while (isspace(*action))
+	while (isspace((unsigned char)*action))
 		++action;
-	if (isdigit(*action))
-		sscanf(action, "%d", &n);
+	if (isdigit((unsigned char)*action))
+		n = FvwmParseInteger(action);
 
 	if (((tmp_win->buttons & WSHADE) || (n == 2)) && (n != 1)) {
 		tmp_win->buttons &= ~WSHADE;
@@ -823,19 +823,29 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	char *cmd = NULL;
+	char *shell_argv[4];
 
-	{
-		cmd = strdup(action);
-	}
+	cmd = strdup(action);
 	if (!cmd)
 		return;
-	/* Use to grab the pointer here, but the fork guarantees that
-	 * we wont be held up waiting for the function to finish,
-	 * so the pointer-gram just caused needless delay and flashing
-	 * on the screen */
-	/* Thought I'd try vfork and _exit() instead of regular fork().
-	 * The man page says that its better. */
-	/* Not everyone has vfork! */
+
+	/*
+	 * Run the command through the user's shell with the full
+	 * environment, preserving historical Exec semantics.  The
+	 * privilege-separated helper forks and execs it without the
+	 * X11 connection.  If the helper is unavailable (e.g. not
+	 * installed), fall back to forking here.
+	 */
+	shell_argv[0] = exec_shell_name;
+	shell_argv[1] = "-c";
+	shell_argv[2] = cmd;
+	shell_argv[3] = NULL;
+
+	if (exec_helper_launch(3, shell_argv, environ) == 0) {
+		free(cmd);
+		return;
+	}
+
 	if (!(fork())) { /* child process */
 		if (execl(exec_shell_name, exec_shell_name, "-c", cmd,
 		    (char *)NULL) == -1) {
@@ -1004,7 +1014,7 @@ menu_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	mops.flags.allflags = 0;
 	action = GetNextToken(action, &menu_name);
 	action = GetMenuOptions(action, w, tmp_win, NULL, &mops);
-	while (action && *action && isspace(*action))
+	while (action && *action && isspace((unsigned char)*isspace))
 		action++;
 	if (action && *action == 0)
 		action = NULL;
@@ -1446,7 +1456,7 @@ SetHiColor(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	}
 }
 
-void
+static void
 SafeDefineCursor(Window w, Cursor cursor)
 {
 	if (w)
@@ -1512,7 +1522,7 @@ CursorStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		free(newcursor);
 		return;
 	}
-	nc = atoi(newcursor);
+	nc = FvwmParseInteger(newcursor);
 	free(cname);
 	if ((nc < 0) || (nc >= XC_num_glyphs) || ((nc % 2) != 0)) {
 		fvwm_msg(ERR, "CursorStyle", "Bad cursor number %s", newcursor);
@@ -1553,7 +1563,7 @@ CursorStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	}
 }
 
-MenuStyle *
+static MenuStyle *
 FindMenuStyle(char *name)
 {
 	MenuStyle *ms = Scr.menus.DefaultStyle;
@@ -2001,7 +2011,8 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			break;
 
 		case 16: /* MenuFace */
-			while (args && *args != '\0' && isspace(*args))
+			while (args && *args != '\0' &&
+			    isspace((unsigned char)*isspace))
 				args++;
 			ReadMenuFace(args, &tmpms->look.face, True);
 			break;
@@ -2303,7 +2314,7 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				bf = &fl->BorderStyle.active;
 			else
 				bf = &fl->BorderStyle.inactive;
-			while (isspace(*action))
+			while (isspace((unsigned char)*isspace))
 				++action;
 			if ('(' != *action) {
 				if (!*action) {
@@ -2859,7 +2870,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 		}
 #ifdef VECTOR_BUTTONS
 		else if (strncasecmp(style, "Vector", 6) == 0 ||
-		    (strlen(style) <= 2 && isdigit(*style))) {
+		    (strlen(style) <= 2 && isdigit((unsigned char)*style))) {
 			/* normal coordinate list button style */
 			int i, num_coords, num;
 			struct vector_coords *vc = &bf->vector;
@@ -2931,7 +2942,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 					free(item);
 				return False;
 			}
-			npixels = atoi(item);
+			npixels = FvwmParseInteger(item);
 			free(item);
 
 			if (!(s = GetNextToken(s, &item)) || (item == NULL)) {
@@ -2943,7 +2954,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 				return False;
 			}
 
-			if (!(isdigit(*item))) {
+			if (!(isdigit((unsigned char)*item))) {
 				s_colors =
 				    (char **)xmalloc(sizeof(char *) * 2);
 				perc = (int *)xmalloc(sizeof(int));
@@ -2952,7 +2963,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 				s = GetNextToken(s, &s_colors[1]);
 				perc[0] = 100;
 			} else {
-				nsegs = atoi(item);
+				nsegs = FvwmParseInteger(item);
 				free(item);
 				if (nsegs < 1)
 					nsegs = 1;
@@ -2966,7 +2977,9 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 					if (i < nsegs) {
 						s = GetNextToken(s, &item);
 						if (item) {
-							perc[i] = atoi(item);
+							perc[i] =
+							    FvwmParseInteger(
+							    item);
 							free(item);
 						} else
 							perc[i] = 0;
@@ -3191,7 +3204,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	enum ButtonState bs = MaxButtonState;
 	int i = 0, all = 0, pstyle = 0;
 
-	while (isspace(*s))
+	while (isspace((unsigned char)*isspace))
 		++s;
 	for (; i < MaxButtonState; ++i)
 		if (strncasecmp(
@@ -3203,7 +3216,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 		s += strlen(button_states[bs]);
 	else
 		all = 1;
-	while (isspace(*s))
+	while (isspace((unsigned char)*isspace))
 		++s;
 	if ('(' == *s) {
 		int len;
@@ -3220,7 +3233,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	} else
 		spec = s;
 
-	while (isspace(*spec))
+	while (isspace((unsigned char)*isspace))
 		++spec;
 	/* setup temporary in case button read fails */
 	tmpbf.style = SimpleButton;
@@ -3276,7 +3289,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	if (pstyle) {
 		free(spec);
 		++end;
-		while (isspace(*end))
+		while (isspace((unsigned char)*isspace))
 			++end;
 	}
 	return end;
@@ -3374,7 +3387,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 			free(style);
 			return False;
 		}
-		npixels = atoi(item);
+		npixels = FvwmParseInteger(item);
 		free(item);
 
 		s = GetNextToken(s, &item);
@@ -3386,7 +3399,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 			return False;
 		}
 
-		if (!(isdigit(*item))) {
+		if (!(isdigit((unsigned char)*item))) {
 			s_colors = (char **)xmalloc(sizeof(char *) * 2);
 			nsegs = 1;
 			s_colors[0] = item;
@@ -3402,7 +3415,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 			}
 			perc[0] = 100;
 		} else {
-			nsegs = atoi(item);
+			nsegs = FvwmParseInteger(item);
 			free(item);
 			if (nsegs < 1)
 				nsegs = 1;
@@ -3414,7 +3427,8 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 				s = GetNextToken(s, &s_colors[i]);
 				if (i < nsegs) {
 					s = GetNextToken(s, &item);
-					perc[i] = (item) ? atoi(item) : 0;
+					perc[i] = (item) ?
+					    FvwmParseInteger(item) : 0;
 					if (item)
 						free(item);
 				}
@@ -3530,7 +3544,7 @@ AddToDecor(FvwmDecor *fl, char *s)
 {
 	if (!s)
 		return;
-	while (*s && isspace(*s))
+	while (*s && isspace((unsigned char)*isspace))
 		++s;
 	if (!*s)
 		return;
@@ -3773,8 +3787,8 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 #endif
 
 	text = GetNextToken(text, &parm);
-	if (parm && isdigit(*parm))
-		button = atoi(parm);
+	if (parm && isdigit((unsigned char)*parm))
+		button = FvwmParseInteger(parm);
 
 	if ((parm == NULL) || (button > 10) || (button < 0)) {
 		fvwm_msg(ERR, "ButtonStyle", "Bad button style (1) in line %s",
@@ -3784,7 +3798,7 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		return;
 	}
 
-	if (!isdigit(*parm)) {
+	if (!isdigit((unsigned char)*parm)) {
 		if (StrEquals(parm, "left"))
 			multi = 1; /* affect all left buttons */
 		else if (StrEquals(parm, "right"))
@@ -3946,8 +3960,8 @@ AddButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 #endif
 
 	text = GetNextToken(text, &parm);
-	if (parm && isdigit(*parm))
-		button = atoi(parm);
+	if (parm && isdigit((unsigned char)*parm))
+		button = FvwmParseInteger(parm);
 
 	if ((parm == NULL) || (button > 10) || (button < 0)) {
 		fvwm_msg(ERR, "ButtonStyle", "Bad button style (1) in line %s",
@@ -3957,7 +3971,7 @@ AddButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		return;
 	}
 
-	if (!isdigit(*parm)) {
+	if (!isdigit((unsigned char)*parm)) {
 		if (StrEquals(parm, "left"))
 			multi = 1; /* affect all left buttons */
 		else if (StrEquals(parm, "right"))
@@ -4054,7 +4068,7 @@ SetEnv(XEvent *eventp, Window junk, FvwmWindow *tmp_win, unsigned long context,
  * Note that the returned string is allocated here and it must be
  * freed when it is not needed anymore.
  **********************************************************************/
-char *
+static char *
 CreateFlagString(char *string, char **restptr)
 {
 	char *retval;
@@ -4064,7 +4078,7 @@ CreateFlagString(char *string, char **restptr)
 	int length;
 
 	c = string;
-	while (isspace(*c) && (*c != 0))
+	while (isspace((unsigned char)*isspace) && (*c != 0))
 		c++;
 
 	if (*c == '[' || *c == '(') {
@@ -4107,7 +4121,7 @@ CreateFlagString(char *string, char **restptr)
  * The name field of the mask is allocated in CreateConditionMask.
  * It must be freed.
  **********************************************************************/
-void
+static void
 FreeConditionMask(WindowConditionMask *mask)
 {
 	if (mask->needsName)
@@ -4117,7 +4131,7 @@ FreeConditionMask(WindowConditionMask *mask)
 }
 
 /* Assign the default values for the window mask */
-void
+static void
 DefaultConditionMask(WindowConditionMask *mask)
 {
 	mask->name = NULL;
@@ -4135,7 +4149,7 @@ DefaultConditionMask(WindowConditionMask *mask)
  * Note that this function allocates the name field of the mask struct.
  * FreeConditionMask must be called for the mask when the mask is discarded.
  **********************************************************************/
-void
+static void
 CreateConditionMask(char *flags, WindowConditionMask *mask)
 {
 	char *condition;
@@ -4212,7 +4226,7 @@ CreateConditionMask(char *flags, WindowConditionMask *mask)
  * Checks whether the given window matches the mask created with
  * CreateConditionMask.
  **********************************************************************/
-Bool
+static Bool
 MatchesConditionMask(FvwmWindow *fw, WindowConditionMask *mask)
 {
 	Bool fMatchesName;
@@ -4276,7 +4290,7 @@ MatchesConditionMask(FvwmWindow *fw, WindowConditionMask *mask)
  * Direction = 0 ==> operation on current window (returns pass or fail)
  *
  **************************************************************************/
-FvwmWindow *
+static FvwmWindow *
 Circulate(char *action, int Direction, char **restofline)
 {
 	int pass = 0;

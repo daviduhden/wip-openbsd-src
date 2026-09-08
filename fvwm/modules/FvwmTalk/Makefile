@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmTalk
-
 PROG = FvwmTalk
 SRCS = FvwmTalk.c
 

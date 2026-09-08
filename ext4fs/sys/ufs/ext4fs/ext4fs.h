@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 2025 kmx.io.
  * Copyright (c) 1997 Manuel Bouyer.
  * Copyright (c) 1982, 1986, 1989, 1993
@@ -40,12 +41,17 @@
 
 #include <ufs/ufs/dinode.h>
 #include <ufs/ext4fs/ext4fs_crc32c.h>
+#include <ufs/ext4fs/ext4fs_dinode.h>
+
+#ifndef _EXT4FS_H_
+#define _EXT4FS_H_
 
 struct fid;
 struct inode;
 struct nameidata;
 struct statfs;
 struct vfsconf;
+struct componentname;
 
 #define EXT4FS_EXTENT_DEPTH_MAX		5
 #define EXT4FS_FUNCTION_MAX		32
@@ -65,7 +71,7 @@ struct vfsconf;
 #define	EXT4FS_DIRECT_ADDR_IN_INODE	12
 #define	EXT4FS_INDIRECT_ADDR_IN_INODE	3
 #define EXT4FS_SYMLINK_LEN_MAX \
-	((EXT4FS_DIRECT_ADDR_IN_INODE +				\
+	((EXT4FS_DIRECT_ADDR_IN_INODE +                         \
 	  EXT4FS_INDIRECT_ADDR_IN_INODE) * sizeof(u_int32_t))
 
 #define	EXT4FS_NINDIR(fs)	((fs)->m_block_size / sizeof(u_int32_t))
@@ -341,118 +347,117 @@ struct ext4fs {
 
 struct m_ext4fs {
 	/* little-endian super-block */
-	struct ext4fs	m_sble;
+	struct ext4fs				 m_sble;
 	/* computed from little-endian super-block */
-	u_int32_t	m_inodes_count;
-	u_int64_t	m_blocks_count;
-	u_int64_t	m_reserved_blocks_count;
-	u_int64_t	m_free_blocks_count;
-	u_int32_t	m_free_inodes_count;
-	u_int32_t	m_first_data_block;
-	u_int32_t	m_log_block_size;       // log2(block size) - 10
-	u_int32_t	m_log_cluster_size;     // log2(cluster size) - 10
-	u_int32_t	m_blocks_per_group;
-	u_int32_t	m_clusters_per_group;
-	u_int32_t	m_inodes_per_group;
-	u_int64_t	m_mount_time;
-	u_int32_t	m_write_time;
-	u_int16_t	m_mount_count;
-	int16_t		m_max_mount_count_before_fsck;
-	u_int16_t	m_state;                // EXT4FS_STATE_*
-	u_int16_t	m_errors;               // EXT4FS_ERRORS_*
-	u_int16_t	m_revision_level_minor;
-	u_int64_t	m_check_time;
-	u_int32_t	m_check_interval;
-	u_int32_t	m_creator_os;           // EXT4FS_OS_*
-	u_int32_t	m_revision_level;
-	u_int16_t	m_default_reserved_uid;
-	u_int16_t	m_default_reserved_gid;
-	u_int32_t	m_first_non_reserved_inode;
-	u_int16_t	m_inode_size;
-	u_int16_t	m_block_group_id;
-	u_int32_t	m_feature_compat;
-	u_int32_t	m_feature_incompat;
-	u_int32_t	m_feature_ro_compat;
-	u_int32_t	m_algorithm_usage_bitmap;
-	u_int16_t	m_reserved_bgdt_blocks;
-	u_int32_t	m_journal_inode_number;
-	u_int32_t	m_journal_device_number;
-	u_int32_t	m_last_orphan;
-	u_int16_t	m_block_group_descriptor_size;
-	u_int32_t	m_default_mount_opts;
-	u_int32_t	m_first_meta_block_group;
-	u_int64_t	m_newfs_time;
-	u_int16_t	m_inode_size_extra_min;
-	u_int16_t	m_inode_size_extra_want;
-	u_int32_t	m_flags;
-	u_int16_t	m_raid_stride_block_count;
-	u_int16_t	m_mmp_interval;
-	u_int64_t	m_mmp_block;
-	u_int32_t	m_raid_stripe_width_block_count;
-	u_int64_t	m_kilobytes_written;
-	u_int32_t	m_error_count;
-	u_int64_t	m_first_error_time;
-	u_int32_t	m_first_error_inode;
-	u_int64_t	m_first_error_block;
-	u_int32_t	m_first_error_line;
-	u_int64_t	m_last_error_time;
-	u_int32_t	m_last_error_inode;
-	u_int32_t	m_last_error_line;
-	u_int64_t	m_last_error_block;
-	u_int32_t	m_user_quota_inode;
-	u_int32_t	m_group_quota_inode;
-	u_int32_t	m_overhead_clusters;
-	u_int32_t	m_backup_block_groups[2];
-	u_int32_t	m_lost_and_found_inode;
-	u_int32_t	m_project_quota_inode;
-	u_int32_t	m_checksum_seed;
-	u_int16_t	m_encoding;
-	u_int16_t	m_encoding_flags;
-	u_int16_t	m_orphan_file_inode;
-	int		m_read_only;
-	int		m_fs_was_modified;
+	u_int32_t				 m_inodes_count;
+	u_int64_t				 m_blocks_count;
+	u_int64_t				 m_reserved_blocks_count;
+	u_int64_t				 m_free_blocks_count;
+	u_int32_t				 m_free_inodes_count;
+	u_int32_t				 m_first_data_block;
+	u_int32_t				 m_log_block_size;       // log2(block size) - 10
+	u_int32_t				 m_log_cluster_size;     // log2(cluster size) - 10
+	u_int32_t				 m_blocks_per_group;
+	u_int32_t				 m_clusters_per_group;
+	u_int32_t				 m_inodes_per_group;
+	u_int64_t				 m_mount_time;
+	u_int32_t				 m_write_time;
+	u_int16_t				 m_mount_count;
+	int16_t					 m_max_mount_count_before_fsck;
+	u_int16_t				 m_state;                // EXT4FS_STATE_*
+	u_int16_t				 m_errors;               // EXT4FS_ERRORS_*
+	u_int16_t				 m_revision_level_minor;
+	u_int64_t				 m_check_time;
+	u_int32_t				 m_check_interval;
+	u_int32_t				 m_creator_os;           // EXT4FS_OS_*
+	u_int32_t				 m_revision_level;
+	u_int16_t				 m_default_reserved_uid;
+	u_int16_t				 m_default_reserved_gid;
+	u_int32_t				 m_first_non_reserved_inode;
+	u_int16_t				 m_inode_size;
+	u_int16_t				 m_block_group_id;
+	u_int32_t				 m_feature_compat;
+	u_int32_t				 m_feature_incompat;
+	u_int32_t				 m_feature_ro_compat;
+	u_int32_t				 m_algorithm_usage_bitmap;
+	u_int16_t				 m_reserved_bgdt_blocks;
+	u_int32_t				 m_journal_inode_number;
+	u_int32_t				 m_journal_device_number;
+	u_int32_t				 m_last_orphan;
+	u_int16_t				 m_block_group_descriptor_size;
+	u_int32_t				 m_default_mount_opts;
+	u_int32_t				 m_first_meta_block_group;
+	u_int64_t				 m_newfs_time;
+	u_int16_t				 m_inode_size_extra_min;
+	u_int16_t				 m_inode_size_extra_want;
+	u_int32_t				 m_flags;
+	u_int16_t				 m_raid_stride_block_count;
+	u_int16_t				 m_mmp_interval;
+	u_int64_t				 m_mmp_block;
+	u_int32_t				 m_raid_stripe_width_block_count;
+	u_int64_t				 m_kilobytes_written;
+	u_int32_t				 m_error_count;
+	u_int64_t				 m_first_error_time;
+	u_int32_t				 m_first_error_inode;
+	u_int64_t				 m_first_error_block;
+	u_int32_t				 m_first_error_line;
+	u_int64_t				 m_last_error_time;
+	u_int32_t				 m_last_error_inode;
+	u_int32_t				 m_last_error_line;
+	u_int64_t				 m_last_error_block;
+	u_int32_t				 m_user_quota_inode;
+	u_int32_t				 m_group_quota_inode;
+	u_int32_t				 m_overhead_clusters;
+	u_int32_t				 m_backup_block_groups[2];
+	u_int32_t				 m_lost_and_found_inode;
+	u_int32_t				 m_project_quota_inode;
+	u_int32_t				 m_checksum_seed;
+	u_int16_t				 m_encoding;
+	u_int16_t				 m_encoding_flags;
+	u_int16_t				 m_orphan_file_inode;
+	int					 m_read_only;
+	int					 m_fs_was_modified;
 	/* computed by ext4fs_sbfill */
-	u_int64_t       m_block_group_descriptor_blocks_count;
-	u_int64_t	m_block_group_count;
-	u_int64_t	m_block_size;
-	u_int64_t	m_block_size_shift;
-	u_int32_t	m_fs_block_to_disk_block;
-	u_int32_t	m_inodes_per_block;
-	u_int32_t	m_inode_table_blocks_per_group;
-	u_int32_t	m_resize_dind_block;
-	struct ext4fs_block_group_descriptor *m_gd;
+	u_int64_t				 m_block_group_descriptor_blocks_count;
+	u_int64_t				 m_block_group_count;
+	u_int64_t				 m_block_size;
+	u_int64_t				 m_block_size_shift;
+	u_int32_t				 m_fs_block_to_disk_block;
+	u_int32_t				 m_inodes_per_block;
+	u_int32_t				 m_inode_table_blocks_per_group;
+	u_int32_t				 m_resize_dind_block;
+	struct ext4fs_block_group_descriptor	*m_gd;
 };
 
 struct ext4fs_block_group_descriptor {
-  u_int32_t bgd_block_bitmap_block_lo;
-  u_int32_t bgd_inode_bitmap_block_lo;
-  u_int32_t bgd_inode_table_block_lo;
-  u_int16_t bgd_free_blocks_count_lo;
-  u_int16_t bgd_free_inodes_count_lo;
+	u_int32_t bgd_block_bitmap_block_lo;
+	u_int32_t bgd_inode_bitmap_block_lo;
+	u_int32_t bgd_inode_table_block_lo;
+	u_int16_t bgd_free_blocks_count_lo;
+	u_int16_t bgd_free_inodes_count_lo;
   // 0x10
-  u_int16_t bgd_used_dirs_count_lo;
-  u_int16_t bgd_flags;
-  u_int32_t bgd_exclude_bitmap_block_lo;
-  u_int16_t bgd_block_bitmap_checksum_lo;
-  u_int16_t bgd_inode_bitmap_checksum_lo;
-  u_int16_t bgd_inode_table_unused_lo;
-  u_int16_t bgd_checksum;
+	u_int16_t bgd_used_dirs_count_lo;
+	u_int16_t bgd_flags;
+	u_int32_t bgd_exclude_bitmap_block_lo;
+	u_int16_t bgd_block_bitmap_checksum_lo;
+	u_int16_t bgd_inode_bitmap_checksum_lo;
+	u_int16_t bgd_inode_table_unused_lo;
+	u_int16_t bgd_checksum;
   // 0x20
-  u_int32_t bgd_block_bitmap_block_hi;
-  u_int32_t bgd_inode_bitmap_block_hi;
-  u_int32_t bgd_inode_table_block_hi;
-  u_int16_t bgd_free_blocks_count_hi;
-  u_int16_t bgd_free_inodes_count_hi;
+	u_int32_t bgd_block_bitmap_block_hi;
+	u_int32_t bgd_inode_bitmap_block_hi;
+	u_int32_t bgd_inode_table_block_hi;
+	u_int16_t bgd_free_blocks_count_hi;
+	u_int16_t bgd_free_inodes_count_hi;
   // 0x30
-  u_int16_t bgd_used_dirs_count_hi;
-  u_int16_t bgd_inode_table_unused_hi;
-  u_int32_t bgd_exclude_bitmap_block_hi;
-  u_int16_t bgd_block_bitmap_checksum_hi;
-  u_int16_t bgd_inode_bitmap_checksum_hi;
-  u_int32_t bgd_reserved_3c;
+	u_int16_t bgd_used_dirs_count_hi;
+	u_int16_t bgd_inode_table_unused_hi;
+	u_int32_t bgd_exclude_bitmap_block_hi;
+	u_int16_t bgd_block_bitmap_checksum_hi;
+	u_int16_t bgd_inode_bitmap_checksum_hi;
+	u_int32_t bgd_reserved_3c;
   // 0x40
 } __attribute__((packed));
-
 
 /* Directory entry file types */
 #define EXT4FS_FT_UNKNOWN	0
@@ -486,44 +491,135 @@ struct ext4fs_directory_tail {
 } __attribute__((packed));
 
 struct ext4fs_feature {
-	int		f_mask;
-	const char *	f_name;
+	int		 f_mask;
+	const char	*f_name;
 };
 
 static const struct ext4fs_feature ext4fs_feature_incompat[] = {
-  {EXT4FS_FEATURE_INCOMPAT_COMPRESSION, "compression"},
-  {EXT4FS_FEATURE_INCOMPAT_FILETYPE,    "filetype"},
-  {EXT4FS_FEATURE_INCOMPAT_RECOVER,     "recover"},
-  {EXT4FS_FEATURE_INCOMPAT_JOURNAL_DEV, "journal_dev"},
-  {EXT4FS_FEATURE_INCOMPAT_META_BG,     "meta_bg"},
-  {EXT4FS_FEATURE_INCOMPAT_EXTENTS,     "extents"},
-  {EXT4FS_FEATURE_INCOMPAT_64BIT,       "64bit"},
-  {EXT4FS_FEATURE_INCOMPAT_MMP,         "mmp"},
-  {EXT4FS_FEATURE_INCOMPAT_FLEX_BG,     "flex_bg"},
-  {EXT4FS_FEATURE_INCOMPAT_EA_INODE,    "ea_inode"},
-  {EXT4FS_FEATURE_INCOMPAT_DIRDATA,     "dirdata"},
-  {EXT4FS_FEATURE_INCOMPAT_CSUM_SEED,   "csum_seed"},
-  {EXT4FS_FEATURE_INCOMPAT_LARGEDIR,    "largedir"},
-  {EXT4FS_FEATURE_INCOMPAT_INLINE_DATA, "inline_data"},
-  {EXT4FS_FEATURE_INCOMPAT_ENCRYPT,     "encrypt"},
+	{EXT4FS_FEATURE_INCOMPAT_COMPRESSION, "compression"},
+	{EXT4FS_FEATURE_INCOMPAT_FILETYPE,    "filetype"},
+	{EXT4FS_FEATURE_INCOMPAT_RECOVER,     "recover"},
+	{EXT4FS_FEATURE_INCOMPAT_JOURNAL_DEV, "journal_dev"},
+	{EXT4FS_FEATURE_INCOMPAT_META_BG,     "meta_bg"},
+	{EXT4FS_FEATURE_INCOMPAT_EXTENTS,     "extents"},
+	{EXT4FS_FEATURE_INCOMPAT_64BIT,       "64bit"},
+	{EXT4FS_FEATURE_INCOMPAT_MMP,         "mmp"},
+	{EXT4FS_FEATURE_INCOMPAT_FLEX_BG,     "flex_bg"},
+	{EXT4FS_FEATURE_INCOMPAT_EA_INODE,    "ea_inode"},
+	{EXT4FS_FEATURE_INCOMPAT_DIRDATA,     "dirdata"},
+	{EXT4FS_FEATURE_INCOMPAT_CSUM_SEED,   "csum_seed"},
+	{EXT4FS_FEATURE_INCOMPAT_LARGEDIR,    "largedir"},
+	{EXT4FS_FEATURE_INCOMPAT_INLINE_DATA, "inline_data"},
+	{EXT4FS_FEATURE_INCOMPAT_ENCRYPT,     "encrypt"},
 };
 
 static const struct ext4fs_feature ext4fs_feature_ro_compat[] = {
-  {EXT4FS_FEATURE_RO_COMPAT_SPARSE_SUPER,  "sparse-super"},
-  {EXT4FS_FEATURE_RO_COMPAT_LARGE_FILE,    "large-file"},
-  {EXT4FS_FEATURE_RO_COMPAT_BTREE_DIR,     "btree-dir"},
-  {EXT4FS_FEATURE_RO_COMPAT_HUGE_FILE,     "huge-file"},
-  {EXT4FS_FEATURE_RO_COMPAT_GDT_CSUM,      "gdt-csum"},
-  {EXT4FS_FEATURE_RO_COMPAT_DIR_NLINK,     "dir-nlink"},
-  {EXT4FS_FEATURE_RO_COMPAT_EXTRA_ISIZE,   "extra-isize"},
-  {EXT4FS_FEATURE_RO_COMPAT_HAS_SNAPSHOT,  "has-snapshot"},
-  {EXT4FS_FEATURE_RO_COMPAT_QUOTA,         "quota"},
-  {EXT4FS_FEATURE_RO_COMPAT_BIGALLOC,      "bigalloc"},
-  {EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM, "metadata-csum"},
-  {EXT4FS_FEATURE_RO_COMPAT_REPLICA,       "replica"},
-  {EXT4FS_FEATURE_RO_COMPAT_READONLY,      "readonly"},
-  {EXT4FS_FEATURE_RO_COMPAT_PROJECT,       "project"},
+	{EXT4FS_FEATURE_RO_COMPAT_SPARSE_SUPER,  "sparse-super"},
+	{EXT4FS_FEATURE_RO_COMPAT_LARGE_FILE,    "large-file"},
+	{EXT4FS_FEATURE_RO_COMPAT_BTREE_DIR,     "btree-dir"},
+	{EXT4FS_FEATURE_RO_COMPAT_HUGE_FILE,     "huge-file"},
+	{EXT4FS_FEATURE_RO_COMPAT_GDT_CSUM,      "gdt-csum"},
+	{EXT4FS_FEATURE_RO_COMPAT_DIR_NLINK,     "dir-nlink"},
+	{EXT4FS_FEATURE_RO_COMPAT_EXTRA_ISIZE,   "extra-isize"},
+	{EXT4FS_FEATURE_RO_COMPAT_HAS_SNAPSHOT,  "has-snapshot"},
+	{EXT4FS_FEATURE_RO_COMPAT_QUOTA,         "quota"},
+	{EXT4FS_FEATURE_RO_COMPAT_BIGALLOC,      "bigalloc"},
+	{EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM, "metadata-csum"},
+	{EXT4FS_FEATURE_RO_COMPAT_REPLICA,       "replica"},
+	{EXT4FS_FEATURE_RO_COMPAT_READONLY,      "readonly"},
+	{EXT4FS_FEATURE_RO_COMPAT_PROJECT,       "project"},
 };
+
+/*
+ * Size of the i_extra_isize region of an on-disk inode: 0 for
+ * 128-byte inodes (the field does not exist), otherwise the value
+ * read from the inode, clamped so that malformed extra_isize values
+ * can never make field-fits checks read past the inode allocation.
+ */
+static inline u_int16_t
+ext4fs_inode_extra_isize(struct m_ext4fs *fs, struct ext4fs_dinode_large *dp)
+{
+	u_int16_t extra;
+
+	if (fs->m_inode_size <= EXT4FS_GOOD_OLD_INODE_SIZE)
+		return (0);
+
+	extra = letoh16(dp->dinode.i_extra_isize);
+	if ((extra & 3) != 0 ||
+	    extra > fs->m_inode_size - EXT4FS_GOOD_OLD_INODE_SIZE)
+		return (fs->m_inode_size - EXT4FS_GOOD_OLD_INODE_SIZE);
+
+	return (extra);
+}
+
+/*
+ * Does an extended field [off, off+size) fit in this inode?  Follows
+ * the kernel's EXT4_FITS_IN_INODE: the extended region runs from
+ * offset 128 for i_extra_isize bytes; anything beyond that is
+ * padding and must not be interpreted as fields.
+ */
+static inline int
+ext4fs_din_fits(struct m_ext4fs *fs, struct ext4fs_dinode_large *dp,
+    size_t off, size_t size)
+{
+	return (off <= (size_t)EXT4FS_GOOD_OLD_INODE_SIZE +
+	    ext4fs_inode_extra_isize(fs, dp) &&
+	    size <= (size_t)EXT4FS_GOOD_OLD_INODE_SIZE +
+	    ext4fs_inode_extra_isize(fs, dp) - off);
+}
+
+/*
+ * Is the inode's extra_isize value itself sane?  Rejects values that
+ * are not 4-byte aligned or that run past the serialized inode.
+ */
+static inline int
+ext4fs_inode_extra_isize_valid(struct m_ext4fs *fs,
+    struct ext4fs_dinode_large *dp)
+{
+	u_int16_t extra;
+
+	if (fs->m_inode_size <= EXT4FS_GOOD_OLD_INODE_SIZE)
+		return (1);
+
+	extra = letoh16(dp->dinode.i_extra_isize);
+	return ((extra & 3) == 0 &&
+	    extra <= fs->m_inode_size - EXT4FS_GOOD_OLD_INODE_SIZE);
+}
+
+/*
+ * Validate sb_inode_size against the ext4 on-disk format rules:
+ * a power of two between 128 and the block size, with a
+ * superblock extra-isize window (when the inode is larger than
+ * 128 bytes) that is 4-byte aligned and fits inside the inode.
+ * Returns 0 on success or EINVAL.  The caller reports details.
+ */
+static inline int
+ext4fs_sb_inode_size_check(struct ext4fs *sble)
+{
+	u_int32_t tmp = letoh16(sble->sb_inode_size);
+	u_int32_t logblk = letoh32(sble->sb_log_block_size);
+
+	if (logblk > 2)
+		return (EINVAL);
+	if (tmp < EXT4FS_GOOD_OLD_INODE_SIZE)
+		return (EINVAL);
+	if (tmp & (tmp - 1))
+		return (EINVAL);
+	if (tmp > (1U << (EXT4FS_LOG_MIN_BLOCK_SIZE + logblk)))
+		return (EINVAL);
+
+	if (tmp > EXT4FS_GOOD_OLD_INODE_SIZE) {
+		u_int32_t max = tmp - EXT4FS_GOOD_OLD_INODE_SIZE;
+		u_int32_t min = letoh16(sble->sb_inode_size_extra_min);
+		u_int32_t want = letoh16(sble->sb_inode_size_extra_want);
+
+		if ((min != 0 && (min < 4 || min > max || (min & 3))) ||
+		    (want != 0 && (want < 4 || want > max || (want & 3))))
+			return (EINVAL);
+	}
+
+	return (0);
+}
 
 #define EXT4FS_ITIMES(ip) do {						\
 	if ((ip)->i_flag & (IN_ACCESS | IN_CHANGE | IN_UPDATE)) {	\
@@ -533,20 +629,26 @@ static const struct ext4fs_feature ext4fs_feature_ro_compat[] = {
 		if ((ip)->i_flag & IN_ACCESS) {				\
 			(ip)->i_e4din->dinode.i_atime =			\
 			    htole32((u_int32_t)_ts.tv_sec);		\
-			(ip)->i_e4din->dinode.i_atime_extra =		\
-			    htole32(_ts.tv_nsec << 2);			\
+			if (ext4fs_din_fits((ip)->i_e4fs, (ip)->i_e4din,\
+			    offsetof(struct ext4fs_dinode, i_atime_extra), 4))\
+				(ip)->i_e4din->dinode.i_atime_extra =	\
+				    htole32(_ts.tv_nsec << 2);		\
 		}							\
 		if ((ip)->i_flag & IN_UPDATE) {				\
 			(ip)->i_e4din->dinode.i_mtime =			\
 			    htole32((u_int32_t)_ts.tv_sec);		\
-			(ip)->i_e4din->dinode.i_mtime_extra =		\
-			    htole32(_ts.tv_nsec << 2);			\
+			if (ext4fs_din_fits((ip)->i_e4fs, (ip)->i_e4din,\
+			    offsetof(struct ext4fs_dinode, i_mtime_extra), 4))\
+				(ip)->i_e4din->dinode.i_mtime_extra =	\
+				    htole32(_ts.tv_nsec << 2);		\
 		}							\
 		if ((ip)->i_flag & IN_CHANGE) {				\
 			(ip)->i_e4din->dinode.i_ctime =			\
 			    htole32((u_int32_t)_ts.tv_sec);		\
-			(ip)->i_e4din->dinode.i_ctime_extra =		\
-			    htole32(_ts.tv_nsec << 2);			\
+			if (ext4fs_din_fits((ip)->i_e4fs, (ip)->i_e4din,\
+			    offsetof(struct ext4fs_dinode, i_ctime_extra), 4))\
+				(ip)->i_e4din->dinode.i_ctime_extra =	\
+				    htole32(_ts.tv_nsec << 2);		\
 			(ip)->i_modrev++;				\
 		}							\
 		(ip)->i_flag &= ~(IN_ACCESS | IN_CHANGE | IN_UPDATE);	\
@@ -554,25 +656,24 @@ static const struct ext4fs_feature ext4fs_feature_ro_compat[] = {
 } while (0)
 
 struct ext4fs_sync_args {
-	int	allerror;
-	int	waitfor;
-	struct proc *p;
-	struct ucred *cred;
+	int		 allerror;
+	int		 waitfor;
+	struct proc	*p;
+	struct ucred	*cred;
 };
 
 extern struct pool ext4fs_inode_pool;
-extern struct pool ext4fs_dinode_pool;
 
 /* VFS operations */
 int ext4fs_fhtovp(struct mount *, struct fid *, struct vnode **);
 int ext4fs_init(struct vfsconf *);
 int ext4fs_mount(struct mount *, const char *, void *,
-	struct nameidata *, struct proc *);
+    struct nameidata *, struct proc *);
 int ext4fs_statfs(struct mount *, struct statfs *, struct proc *);
 int ext4fs_sync(struct mount *, int, int, struct ucred *,
-	struct proc *);
+    struct proc *);
 int ext4fs_sysctl(int *, u_int, void *, size_t *, void *, size_t,
-	struct proc *);
+    struct proc *);
 int ext4fs_unmount(struct mount *, int, struct proc *);
 int ext4fs_vget(struct mount *, ino_t, struct vnode **);
 int ext4fs_vptofh(struct vnode *, struct fid *);
@@ -612,13 +713,13 @@ int ext4fs_sb_csum_verify(struct ext4fs *);
 u_int32_t ext4fs_csum_seed(struct m_ext4fs *);
 u_int32_t ext4fs_bitmap_csum(struct m_ext4fs *, u_int32_t, void *, size_t);
 u_int16_t ext4fs_bgd_csum(struct m_ext4fs *,
-	struct ext4fs_block_group_descriptor *, u_int32_t);
+    struct ext4fs_block_group_descriptor *, u_int32_t);
 int ext4fs_bgd_csum_verify(struct m_ext4fs *,
-	struct ext4fs_block_group_descriptor *, u_int32_t);
+    struct ext4fs_block_group_descriptor *, u_int32_t);
 u_int32_t ext4fs_inode_csum(struct m_ext4fs *,
-	struct ext4fs_dinode_256 *, u_int32_t);
+    struct ext4fs_dinode_large *, u_int32_t);
 int ext4fs_inode_csum_verify(struct m_ext4fs *,
-	struct ext4fs_dinode_256 *, u_int32_t);
+    struct ext4fs_dinode_large *, u_int32_t);
 
 /* Directory entry size: 8 bytes header + name, rounded up to 4 */
 #define EXT4FS_DIRSIZ(namlen)	(((8 + (namlen)) + 3) & ~3)
@@ -628,14 +729,14 @@ static inline u_int8_t
 ext4fs_mode_to_ft(u_int16_t mode)
 {
 	switch (mode & S_IFMT) {
-	case S_IFREG:	return EXT4FS_FT_REG_FILE;
-	case S_IFDIR:	return EXT4FS_FT_DIR;
-	case S_IFCHR:	return EXT4FS_FT_CHRDEV;
-	case S_IFBLK:	return EXT4FS_FT_BLKDEV;
-	case S_IFIFO:	return EXT4FS_FT_FIFO;
-	case S_IFSOCK:	return EXT4FS_FT_SOCK;
-	case S_IFLNK:	return EXT4FS_FT_SYMLINK;
-	default:	return EXT4FS_FT_UNKNOWN;
+	case S_IFREG: return EXT4FS_FT_REG_FILE;
+	case S_IFDIR: return EXT4FS_FT_DIR;
+	case S_IFCHR: return EXT4FS_FT_CHRDEV;
+	case S_IFBLK: return EXT4FS_FT_BLKDEV;
+	case S_IFIFO: return EXT4FS_FT_FIFO;
+	case S_IFSOCK: return EXT4FS_FT_SOCK;
+	case S_IFLNK: return EXT4FS_FT_SYMLINK;
+	default: return EXT4FS_FT_UNKNOWN;
 	}
 }
 
@@ -646,16 +747,16 @@ void ext4fs_blkfree(struct inode *, u_int64_t);
 
 /* Inode allocation / free */
 int ext4fs_inode_alloc(struct inode *, mode_t, struct ucred *,
-	struct vnode **);
+    struct vnode **);
 void ext4fs_inode_free(struct inode *, ufsino_t, mode_t);
 
 /* Directory operations */
 int ext4fs_direnter(struct inode *, struct vnode *,
-	struct componentname *);
+    struct componentname *);
 int ext4fs_dirremove(struct vnode *, struct componentname *);
 int ext4fs_dirempty(struct inode *, ufsino_t, struct ucred *);
 int ext4fs_dirrewrite(struct inode *, struct inode *,
-	struct componentname *);
+    struct componentname *);
 
 /* Truncation */
 int ext4fs_truncate(struct inode *, off_t, int, struct ucred *);
@@ -666,3 +767,5 @@ void ext4fs_setsize(struct inode *, u_int64_t);
 /* Superblock / BGD write-back */
 int ext4fs_bgd_write(struct m_ext4fs *, struct vnode *, u_int32_t);
 int ext4fs_sbwrite(struct mount *);
+
+#endif /* _EXT4FS_H_ */

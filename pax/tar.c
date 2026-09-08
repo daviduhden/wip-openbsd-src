@@ -1,7 +1,8 @@
-/*	$OpenBSD: tar.c,v 1.87 2025/07/06 19:25:51 jca Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: tar.c,v 1.5 1995/03/21 09:07:49 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -34,8 +35,6 @@
  * SUCH DAMAGE.
  */
 
-#include "tar.h"
-
 #include <sys/queue.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -54,8 +53,9 @@
 #include <unistd.h>
 #include <wchar.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
+#include "tar.h"
 
 SLIST_HEAD(xheader, xheader_record);
 struct xheader_record {

@@ -81,6 +81,8 @@ char *GetNextToken(char *indata, char **token);
 char *GetNextOption(char *indata, char **token);
 char *SkipNTokens(char *indata, unsigned int n);
 char *GetModuleResource(char *indata, char **resource, char *module_name);
+int FvwmParseInteger(const char *string);
+int FvwmParseFd(const char *arg);
 int GetIntegerArguments(
     char *action, char **ret_action, int retvals[], int num);
 int GetTokenIndex(char *token, char *list[], int len, char **next);

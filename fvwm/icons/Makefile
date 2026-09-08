@@ -67,5 +67,5 @@ clean:
 
 cleandir:
 
-	.include <bsd.own.mk>
+.include <bsd.own.mk>
 .include <bsd.xorg.mk>

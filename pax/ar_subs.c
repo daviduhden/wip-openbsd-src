@@ -1,7 +1,8 @@
-/*	$OpenBSD: ar_subs.c,v 1.53 2024/07/14 14:32:02 jca Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: ar_subs.c,v 1.5 1995/03/21 09:07:06 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -45,8 +46,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 static void wr_archive(ARCHD *, int is_app);
 static int get_arc(void);

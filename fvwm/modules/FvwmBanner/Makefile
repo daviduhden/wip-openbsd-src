@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmBanner
-
 PROG = FvwmBanner
 SRCS = FvwmBanner.c
 

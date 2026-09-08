@@ -357,7 +357,7 @@ StashEventTime(XEvent *ev)
 	return True;
 }
 
-void
+static void
 ComputeActualPosition(int x, int y, int x_unit, int y_unit, int width,
     int height, int *pfinalX, int *pfinalY)
 {
@@ -732,7 +732,7 @@ GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
  *
  ***************************************************************************/
 void
-WaitForButtonsUp()
+WaitForButtonsUp(void)
 {
 	Bool AllUp = False;
 	XEvent JunkEvent;
@@ -801,7 +801,7 @@ GrabEm(int cursor)
  *
  ****************************************************************************/
 void
-UngrabEm()
+UngrabEm(void)
 {
 	Window w;
 
@@ -829,7 +829,7 @@ UngrabEm()
  *
  ****************************************************************************/
 void
-KeepOnTop()
+KeepOnTop(void)
 {
 	FvwmWindow *t;
 
@@ -1175,7 +1175,7 @@ fvwm_msg(int type, const char *id, const char *msg, ...)
  * window is not click_to_focus;  I think that
  * that behaviour is correct and desirable. --11/08/97 gjb */
 void
-CoerceEnterNotifyOnCurrentWindow()
+CoerceEnterNotifyOnCurrentWindow(void)
 {
 	extern FvwmWindow *Tmp_win; /* from events.c */
 	Window child, root;

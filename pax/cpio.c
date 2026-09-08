@@ -1,7 +1,8 @@
-/*	$OpenBSD: cpio.c,v 1.34 2023/06/26 18:00:59 millert Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: cpio.c,v 1.5 1995/03/21 09:07:13 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -34,8 +35,6 @@
  * SUCH DAMAGE.
  */
 
-#include "cpio.h"
-
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -45,8 +44,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "cpio.h"
+#include "extern.h"
 
 static int rd_nm(ARCHD *, int);
 static int rd_ln_nm(ARCHD *);

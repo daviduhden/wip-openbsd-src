@@ -1,7 +1,8 @@
-/*	$OpenBSD: file_subs.c,v 1.57 2024/07/14 14:32:02 jca Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: file_subs.c,v 1.4 1995/03/21 09:07:18 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -45,8 +46,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 static int fset_ids(char *, int, uid_t, gid_t);
 static int unlnk_exist(char *, int);

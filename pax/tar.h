@@ -1,7 +1,8 @@
-/*	$OpenBSD: tar.h,v 1.9 2014/01/08 06:43:34 deraadt Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: tar.h,v 1.3 1995/03/21 09:07:51 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.

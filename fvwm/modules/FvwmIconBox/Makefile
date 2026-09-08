@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmIconBox
-
 PROG = FvwmIconBox
 SRCS = FvwmIconBox.c icons.c
 

@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "fvwmlib.h"
 
 #ifndef FD_SETSIZE
 #define FD_SETSIZE 2048

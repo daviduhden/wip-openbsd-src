@@ -138,7 +138,7 @@ InitEventHandlerJumpTable(void)
  *
  ************************************************************************/
 void
-DispatchEvent()
+DispatchEvent(void)
 {
 	Window w = Event.xany.window;
 
@@ -165,7 +165,7 @@ DispatchEvent()
  *
  ************************************************************************/
 void
-HandleEvents()
+HandleEvents(void)
 {
 	/*
 	 * TEMPORARY declaration: this variable should really be
@@ -276,7 +276,7 @@ GetContext(FvwmWindow *t, XEvent *e, Window *w)
  *
  ************************************************************************/
 void
-HandleFocusIn()
+HandleFocusIn(void)
 {
 	XEvent d;
 	Window w;
@@ -331,7 +331,7 @@ HandleFocusIn()
  *
  ************************************************************************/
 void
-HandleKeyPress()
+HandleKeyPress(void)
 {
 	Binding *key;
 	unsigned int modifier;
@@ -396,7 +396,7 @@ HandleKeyPress()
 #define MAX_ICON_NAME_LEN 200L /* ditto */
 
 void
-HandlePropertyNotify()
+HandlePropertyNotify(void)
 {
 	XTextProperty text_prop;
 	Boolean OnThisPage = False;
@@ -578,7 +578,7 @@ HandlePropertyNotify()
  *
  ************************************************************************/
 void
-HandleClientMessage()
+HandleClientMessage(void)
 {
 	XEvent button;
 
@@ -617,7 +617,7 @@ HandleClientMessage()
  *
  ***********************************************************************/
 void
-HandleExpose()
+HandleExpose(void)
 {
 	if (Event.xexpose.count != 0)
 		return;
@@ -642,7 +642,7 @@ HandleExpose()
  *
  ***********************************************************************/
 void
-HandleDestroyNotify()
+HandleDestroyNotify(void)
 {
 	DBUG("HandleDestroyNotify", "Routine Entered");
 
@@ -656,7 +656,7 @@ HandleDestroyNotify()
  *
  ************************************************************************/
 void
-HandleMapRequest()
+HandleMapRequest(void)
 {
 	DBUG("HandleMapRequest", "Routine Entered");
 
@@ -768,7 +768,7 @@ HandleMapRequestKeepRaised(Window KeepRaised)
  *
  ***********************************************************************/
 void
-HandleMapNotify()
+HandleMapNotify(void)
 {
 	Boolean OnThisPage = False;
 
@@ -852,7 +852,7 @@ HandleMapNotify()
  *
  ************************************************************************/
 void
-HandleUnmapNotify()
+HandleUnmapNotify(void)
 {
 	int dstx, dsty;
 	Window dumwin;
@@ -982,7 +982,7 @@ HandleUnmapNotify()
  *
  ***********************************************************************/
 void
-HandleButtonPress()
+HandleButtonPress(void)
 {
 	unsigned int modifier;
 	Binding *MouseEntry;
@@ -1087,7 +1087,7 @@ HandleButtonPress()
  *
  ************************************************************************/
 void
-HandleEnterNotify()
+HandleEnterNotify(void)
 {
 	XEnterWindowEvent *ewp = &Event.xcrossing;
 	XEvent d;
@@ -1160,7 +1160,7 @@ HandleEnterNotify()
  *
  ************************************************************************/
 void
-HandleLeaveNotify()
+HandleLeaveNotify(void)
 {
 	DBUG("HandleLeaveNotify", "Routine Entered");
 
@@ -1189,7 +1189,7 @@ HandleLeaveNotify()
  *
  ************************************************************************/
 void
-HandleConfigureRequest()
+HandleConfigureRequest(void)
 {
 	XWindowChanges xwc;
 	unsigned long xwcm;
@@ -1403,7 +1403,7 @@ HandleShapeNotify(void)
  *
  ************************************************************************/
 void
-HandleVisibilityNotify()
+HandleVisibilityNotify(void)
 {
 	XVisibilityEvent *vevent = (XVisibilityEvent *)&Event;
 
@@ -1465,6 +1465,9 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_ZERO(&in_fdset);
 	FD_SET(x_fd, &in_fdset);
 	FD_ZERO(&out_fdset);
+	if (exec_helper_fd() >= 0) {
+		FD_SET(exec_helper_fd(), &in_fdset);
+	}
 	for (i = 0; i < npipes; i++) {
 		if (readPipes[i] >= 0) {
 			FD_SET(readPipes[i], &in_fdset);
@@ -1477,6 +1480,11 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	DBUG("My_XNextEvent", "waiting for module input/output");
 	XFlush(dpy);
 	if (select(fd_width, &in_fdset, &out_fdset, NULL, NULL) > 0) {
+		/* Check for exec helper messages. */
+		if (exec_helper_fd() >= 0 &&
+		    FD_ISSET(exec_helper_fd(), &in_fdset)) {
+			exec_helper_handle();
+		}
 		/* Check for module input. */
 		for (i = 0; i < npipes; i++) {
 			if (readPipes[i] >= 0) {

@@ -1916,7 +1916,7 @@ PaintEntry(MenuItem *mi)
  *
  ************************************************************/
 
-void
+static void
 PaintSidePic(MenuRoot *mr)
 {
 	GC ReliefGC, TextGC;
@@ -2235,7 +2235,7 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 	return;
 }
 
-void
+static void
 FreeMenuItem(MenuItem *mi)
 {
 	if (!mi)
@@ -2556,7 +2556,7 @@ MakeMenu(MenuRoot *mr)
  * used the given hotkey already
  * This means that it doesn't check the last element of the menu
  */
-int
+static int
 FHotKeyUsedBefore(MenuRoot *menu, char ch)
 {
 	int f = FALSE;
@@ -2582,7 +2582,7 @@ FHotKeyUsedBefore(MenuRoot *menu, char ch)
  * 	which 	- +1 to look in it->item1 and -1 to look in it->item2.
  *
  ***********************************************************************/
-char
+static char
 scanForHotkeys(MenuItem *it, int which)
 {
 	char *start, *txt;
@@ -2618,7 +2618,7 @@ scanForHotkeys(MenuItem *it, int which)
 
 /* Side picture support: this scans for a color int the menu name
    for colorization */
-void
+static void
 scanForColor(char *instring, Pixel *p, Bool *c, char identifier)
 {
 	char *tstart, *txt, *save_instring, *name;
@@ -2672,7 +2672,7 @@ scanForColor(char *instring, Pixel *p, Bool *c, char identifier)
 	return;
 }
 
-void
+static void
 scanForPixmap(char *instring, FvwmPicture **p, char identifier)
 {
 	char *tstart, *txt, *name;
@@ -2843,7 +2843,7 @@ AddToMenu(
 	tmp->lpicture = NULL;
 
 	/* skip leading spaces */
-	/*while(isspace(*item)&&(item != NULL))
+	/*while(isspace((unsigned char)*isspace)&&(item != NULL))
 	  item++;*/
 	/* up to first tab goes in "item" field */
 	start = item;

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 2025 kmx.io.
  *
  * Permission to use, copy, modify, and distribute this software for any

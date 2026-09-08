@@ -1,7 +1,8 @@
-/*	$OpenBSD: tty_subs.c,v 1.18 2023/06/26 16:58:50 millert Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: tty_subs.c,v 1.5 1995/03/21 09:07:52 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -43,8 +44,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * routines that deal with I/O to and from the user

@@ -115,8 +115,8 @@ main(int argc, char **argv)
 	/* We should exit if our fvwm pipes die */
 	signal(SIGPIPE, DeadPipe);
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	for (i = 6; i < argc; i++) {
 		/* leaving this in just in case-- any option starting with '-'
@@ -486,8 +486,8 @@ is_cpp_linemarker(const char *line)
 		p++;
 	if (*p == '\0' || *p == '\n')
 		return 1;
-	if (isdigit(*p)) {
-		while (isdigit(*p))
+	if (isdigit((unsigned char)*p)) {
+		while (isdigit((unsigned char)*p))
 			p++;
 		while (*p == ' ' || *p == '\t')
 			p++;

@@ -49,8 +49,6 @@
 #include "../../fvwm/module.h"
 #include "FvwmBacker.h"
 
-unsigned long GetColor(char *color);
-
 typedef struct {
 	int type;                 /* The command type.
 	                           * -1 = no command.
@@ -103,8 +101,8 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	Fvwm_fd[0] = atoi(argv[1]);
-	Fvwm_fd[1] = atoi(argv[2]);
+	Fvwm_fd[0] = FvwmParseFd(argv[1]);
+	Fvwm_fd[1] = FvwmParseFd(argv[2]);
 
 	/* Grab the X display information now. */
 
@@ -149,7 +147,7 @@ main(int argc, char **argv)
   EndLessLoop -  Read until we get killed, blocking when can't read
 ******************************************************************************/
 void
-EndLessLoop()
+EndLessLoop(void)
 {
 	fd_set readset;
 	struct timeval tv;
@@ -162,11 +160,11 @@ EndLessLoop()
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
 
-		if (!select(fd_width, & readset, NULL, NULL,
+		if (!select(fd_width, &readset, NULL, NULL,
 		    &tv)) {
 			FD_ZERO(&readset);
 			FD_SET(Fvwm_fd[1], &readset);
-			select(fd_width, & readset, NULL,
+			select(fd_width, &readset, NULL,
 			    NULL, NULL);
 		}
 
@@ -182,7 +180,7 @@ EndLessLoop()
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
 void
-ReadFvwmPipe()
+ReadFvwmPipe(void)
 {
 	int count;
 	unsigned long header[HEADER_SIZE], *body;
@@ -302,7 +300,7 @@ DeadPipe(int nonsense)
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
 void
-ParseConfig()
+ParseConfig(void)
 {
 	char line2[40];
 	char *tline;
@@ -329,12 +327,12 @@ AddCommand(char *string)
 	char *temp;
 	int num;
 	temp = string;
-	while (isspace(*temp))
+	while (isspace((unsigned char)*temp))
 		temp++;
-	num = atoi(temp);
-	while (!isspace(*temp))
+	num = FvwmParseInteger(temp);
+	while (!isspace((unsigned char)*temp))
 		temp++;
-	while (isspace(*temp))
+	while (isspace((unsigned char)*temp))
 		temp++;
 	if (DeskCount < 1) {
 		commands = (Command *)xmalloc((num + 1) * sizeof(Command));
@@ -355,10 +353,10 @@ AddCommand(char *string)
 		/* Process a solid color request */
 
 		color = &temp[7];
-		while (isspace(*color))
+		while (isspace((unsigned char)*color))
 			color++;
 		tmp = color;
-		while (!isspace(*tmp))
+		while (!isspace((unsigned char)*tmp))
 			tmp++;
 		*tmp = 0;
 		commands[num].type = 1;

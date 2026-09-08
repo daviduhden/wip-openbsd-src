@@ -102,8 +102,8 @@ main(int argc, char **argv)
 
 	if (argc >= 3) {
 		/* sever our connection with fvwm, if we have one. */
-		fd[0] = atoi(argv[1]);
-		fd[1] = atoi(argv[2]);
+		fd[0] = FvwmParseFd(argv[1]);
+		fd[1] = FvwmParseFd(argv[2]);
 	} else {
 		fprintf(stderr,
 		    "%s version %s should only be executed by fvwm!\n", myName,
@@ -189,7 +189,7 @@ main(int argc, char **argv)
 		FD_SET(x_fd, &in_fdset);
 
 		if (!XPending(dpy))
-			retval = select(fd_width, & in_fdset,
+			retval = select(fd_width, &in_fdset,
 			    0, 0, &value);
 
 		if (retval == 0) {
@@ -264,7 +264,7 @@ GetXPMFile(char *file, char *path)
 	GetXPMData(fvwm2_big_xpm);
 }
 
-void
+static void
 nocolor(char *a, char *b)
 {
 	fprintf(stderr, "FvwmBanner: can't %s %s\n", a, b);
@@ -296,7 +296,8 @@ parseOptions(int fd[2])
 			if (strncasecmp(tline,
 			    CatString3("*", myName, "Timeout"),
 			    clength + 8) == 0) {
-				timeout = atoi(&tline[clength + 8]) * 1000000;
+				timeout = FvwmParseInteger(&tline[clength +
+				    8]) * 1000000;
 				continue;
 			}
 			if (strncasecmp(tline, "PixmapPath", 10) == 0) {
@@ -337,6 +338,8 @@ change_window_name(char *str)
  ***********************************************************************/
 
 /*ARGSUSED*/
+void DeadPipe(int nonsense);
+
 void
 DeadPipe(int nonsense)
 {

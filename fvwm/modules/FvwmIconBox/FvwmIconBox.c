@@ -20,7 +20,6 @@
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
 
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -197,8 +196,8 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	if (!(dpy = XOpenDisplay(display_name))) {
 		fprintf(stderr, "%s: can't open display %s", MyName,
@@ -1482,8 +1481,8 @@ ParseOptions(void)
 			    CatString3("*", MyName, "Geometry"),
 			    Clength + 9) == 0) {
 				tmp = &tline[Clength + 9];
-				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				    (*tmp != 0))
+				while (((isspace((unsigned char)*tmp)) &&
+				    (*tmp != '\n')) && (*tmp != 0))
 					tmp++;
 				tmp[strlen(tmp) - 1] = 0;
 				flags = XParseGeometry(
@@ -1504,8 +1503,8 @@ ParseOptions(void)
 			    CatString3("*", MyName, "MaxIconSize"),
 			    Clength + 12) == 0) {
 				tmp = &tline[Clength + 12];
-				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				    (*tmp != 0))
+				while (((isspace((unsigned char)*tmp)) &&
+				    (*tmp != '\n')) && (*tmp != 0))
 					tmp++;
 				tmp[strlen(tmp) - 1] = 0;
 
@@ -1556,7 +1555,8 @@ ParseOptions(void)
 			else if (strncasecmp(tline,
 			    CatString3("*", MyName, "Padding"),
 			    Clength + 8) == 0)
-				interval = max(0, atoi(&tline[Clength + 8]));
+				interval = max(0,
+				    FvwmParseInteger(&tline[Clength + 8]));
 			else if (strncasecmp(tline,
 			    CatString3("*", MyName, "FrameWidth"),
 			    Clength + 11) == 0) {
@@ -1567,11 +1567,13 @@ ParseOptions(void)
 			} else if (strncasecmp(tline,
 			    CatString3("*", MyName, "Lines"),
 			    Clength + 6) == 0)
-				Lines = max(1, atoi(&tline[Clength + 6]));
+				Lines = max(1,
+				    FvwmParseInteger(&tline[Clength + 6]));
 			else if (strncasecmp(tline,
 			    CatString3("*", MyName, "SBWidth"),
 			    Clength + 8) == 0)
-				bar_width = max(5, atoi(&tline[Clength + 8]));
+				bar_width = max(5,
+				    FvwmParseInteger(&tline[Clength + 8]));
 			else if (strncasecmp(tline,
 			    CatString3("*", MyName, "Placement"),
 			    Clength + 10) == 0)
@@ -1588,8 +1590,8 @@ ParseOptions(void)
 			    CatString3("*", MyName, "Resolution"),
 			    Clength + 11) == 0) {
 				tmp = &tline[Clength + 11];
-				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				    (*tmp != 0))
+				while (((isspace((unsigned char)*tmp)) &&
+				    (*tmp != '\n')) && (*tmp != 0))
 					tmp++;
 				if (strncasecmp(tmp, "Desk", 4) == 0) {
 					m_mask |= M_NEW_DESK;
@@ -1607,8 +1609,8 @@ ParseOptions(void)
 			    CatString3("*", MyName, "SortIcons"),
 			    Clength + 10) == 0) {
 				tmp = &tline[Clength + 10];
-				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				    (*tmp != 0))
+				while (((isspace((unsigned char)*tmp)) &&
+				    (*tmp != '\n')) && (*tmp != 0))
 					tmp++;
 				if (strlen(tmp) == 0) { /* the case where no
 					                   argument is given */
@@ -1627,8 +1629,8 @@ ParseOptions(void)
 			    CatString3("*", MyName, "HideSC"),
 			    Clength + 7) == 0) {
 				tmp = &tline[Clength + 7];
-				while (((isspace(*tmp)) && (*tmp != '\n')) &&
-				    (*tmp != 0))
+				while (((isspace((unsigned char)*tmp)) &&
+				    (*tmp != '\n')) && (*tmp != 0))
 					tmp++;
 				if (strncasecmp(tmp, "Horizontal", 10) == 0)
 					local_flags |= HIDE_H;
@@ -1643,9 +1645,9 @@ ParseOptions(void)
 			else if (strncasecmp(tline, "PixmapPath", 10) == 0)
 				CopyString(&pixmapPath, &tline[10]);
 			else if (strncasecmp(tline, "ClickTime", 9) == 0)
-				ClickTime = atoi(&tline[9]);
+				ClickTime = FvwmParseInteger(&tline[9]);
 			else if (strncasecmp(tline, "ColorLimit", 10) == 0) {
-				save_color_limit = atoi(&tline[10]);
+				save_color_limit = FvwmParseInteger(&tline[10]);
 			}
 		}
 		GetConfigLine(fd, &tline);
@@ -1685,11 +1687,13 @@ parseicon(char *tline)
 
 	/* file */
 	/* skip spaces */
-	while (isspace(*tline) && (*tline != '\n') && (*tline != 0))
+	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
+	    (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
-	while (!isspace(*end) && (*end != '\n') && (*end != 0))
+	while (!isspace((unsigned char)*isspace) && (*end != '\n') &&
+	    (*end != 0))
 		end++;
 	len = end - start;
 	ptr = xmalloc(len + 1);
@@ -1748,11 +1752,12 @@ parsemouse(char *tline)
 	f->mouse = 0;
 
 	/* skip spaces */
-	while (isspace(*tline) && (*tline != '\n') && (*tline != 0))
+	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
+	    (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
-	while ((!isspace(*end)) && (*end != '\n') && (*end != 0))
+	while ((!isspace((unsigned char)*end)) && (*end != '\n') && (*end != 0))
 		end++;
 	if (strncasecmp(start, "1", 1) == 0)
 		f->mouse = Button1;
@@ -1763,11 +1768,12 @@ parsemouse(char *tline)
 	/* click or doubleclick */
 	tline = end;
 	/* skip spaces */
-	while (isspace(*tline) && (*tline != '\n') && (*tline != 0))
+	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
+	    (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
-	while ((!isspace(*end)) && (*end != '\n') && (*end != 0))
+	while ((!isspace((unsigned char)*end)) && (*end != '\n') && (*end != 0))
 		end++;
 	if (strncasecmp(start, "Click", 5) == 0)
 		f->type = CLICK;
@@ -1777,13 +1783,14 @@ parsemouse(char *tline)
 	/* actions */
 	tline = end;
 	/* skip spaces */
-	while (isspace(*tline) && (*tline != '\n') && (*tline != 0))
+	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
+	    (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
 	tmp = tline;
 	while ((*tmp != '\n') && (*tmp != 0)) {
-		if (!isspace(*tmp))
+		if (!isspace((unsigned char)*tmp))
 			end = tmp;
 		tmp++;
 	}
@@ -1814,11 +1821,12 @@ parsekey(char *tline)
 	KeySym keysym;
 
 	/* skip spaces */
-	while (isspace(*tline) && (*tline != '\n') && (*tline != 0))
+	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
+	    (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
-	while ((!isspace(*end)) && (*end != '\n') && (*end != 0))
+	while ((!isspace((unsigned char)*end)) && (*end != '\n') && (*end != 0))
 		end++;
 	nlen = end - start;
 	nptr = xmalloc(nlen + 1);
@@ -1828,13 +1836,14 @@ parsekey(char *tline)
 	/* actions */
 	tline = end;
 	/* skip spaces */
-	while (isspace(*tline) && (*tline != '\n') && (*tline != 0))
+	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
+	    (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
 	tmp = tline;
 	while ((*tmp != '\n') && (*tmp != 0)) {
-		if (!isspace(*tmp))
+		if (!isspace((unsigned char)*tmp))
 			end = tmp;
 		tmp++;
 	}
@@ -1891,7 +1900,7 @@ parsekey(char *tline)
  * 	Original work from GoodStuff:
  *		Copyright 1993, Robert Nation.
  ***********************************************************************/
-void
+static void
 change_window_name(char *str)
 {
 	XTextProperty name;
@@ -1927,7 +1936,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	select(fd_width, & in_fdset, 0, 0, NULL);
+	select(fd_width, &in_fdset, 0, 0, NULL);
 
 	if (FD_ISSET(x_fd, &in_fdset)) {
 		if (XPending(dpy)) {
@@ -2663,7 +2672,7 @@ freeitem(struct icon_info *item, int d)
         Copyright 1989, Massachusetts Institute of Technology,
         Copyright 1993, Robert Nation.
  ***********************************************************************/
-Bool
+static Bool
 IsClick(int x, int y, unsigned EndMask, XEvent *d)
 {
 	int xcurrent, ycurrent, total = 0;

@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmRearrange
-
 PROG = FvwmRearrange
 SRCS = FvwmRearrange.c
 

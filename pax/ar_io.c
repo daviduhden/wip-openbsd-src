@@ -1,7 +1,8 @@
-/*	$OpenBSD: ar_io.c,v 1.64 2023/11/09 18:54:15 kn Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: ar_io.c,v 1.5 1996/03/26 23:54:13 mrg Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -49,8 +50,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * Routines which deal directly with the archive I/O device/file.
@@ -1274,11 +1275,16 @@ ar_start_gzip(int fd, const char *path, int wr)
 		{
 			const char *promises;
 
+			/*
+			 * Keep this in sync with the final pledge in
+			 * main(): pledge(2) can only reduce, and this
+			 * re-pledge also runs on later volume changes.
+			 */
 			if (act == LIST)
-				promises = "stdio rpath getpw proc exec";
+				promises = "stdio rpath getpw tape proc exec";
 			else
 				promises = "stdio rpath wpath cpath fattr "
-				    "dpath getpw proc exec";
+				    "dpath getpw tape proc exec";
 
 			if (pledge(promises, NULL) == -1)
 				err(1, "pledge");

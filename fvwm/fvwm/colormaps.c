@@ -178,7 +178,7 @@ InstallWindowColormaps(FvwmWindow *tmp)
  *	   other colormap list would potentially be loaded anyway.
  ***********************************************************************/
 void
-InstallRootColormap()
+InstallRootColormap(void)
 {
 	FvwmWindow *tmp;
 	if (Scr.root_pushes == 0) {
@@ -197,7 +197,7 @@ InstallRootColormap()
  *
  ***************************************************************************/
 void
-UninstallRootColormap()
+UninstallRootColormap(void)
 {
 	if (Scr.root_pushes)
 		Scr.root_pushes--;

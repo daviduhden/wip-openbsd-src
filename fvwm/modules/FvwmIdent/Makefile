@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmIdent
-
 PROG = FvwmIdent
 SRCS = FvwmIdent.c
 

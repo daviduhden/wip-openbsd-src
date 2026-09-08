@@ -1,7 +1,8 @@
-/*	$OpenBSD: gen_subs.c,v 1.34 2024/04/27 19:49:42 florian Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: gen_subs.c,v 1.5 1995/03/21 09:07:26 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -51,8 +52,8 @@
 #include <utmp.h>
 #include <vis.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * a collection of general purpose subroutines used by pax
@@ -601,6 +602,8 @@ listopt_output(ARCHD *arcn, FILE *fp)
 		case 's': {
 			const char *str = listopt_keyword_string(&ctx, arcn,
 			    spec.keyword[0] ? spec.keyword : "path");
+			if (str == NULL)
+				str = "";
 			snprintf(fmtbuf, sizeof(fmtbuf), "%%%s%s%s%s",
 			    spec.flags, spec.width, spec.precision, "s");
 			(void)fprintf(fp, fmtbuf, str);

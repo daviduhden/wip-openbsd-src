@@ -29,7 +29,7 @@
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
 
-void
+static void
 dummy(FILE *f, const char *fmt, ...)
 {
 }
@@ -245,7 +245,7 @@ append_item_to_line(Line *line, Item *item)
 }
 
 /* copy a string until '\0', or up to n chars, and delete trailing spaces */
-char *
+static char *
 CopyNString(char *cp, int n)
 {
 	char *dp, *bp;
@@ -265,14 +265,14 @@ CopyNString(char *cp, int n)
 	len = n;
 	while (len-- > 0)
 		*dp++ = *cp++;
-	while (dp > bp && isspace(*(dp - 1)))
+	while (dp > bp && isspace((unsigned char)*(dp - 1)))
 		dp--;
 	*dp = '\0';
 	return bp;
 }
 
 /* copy a string until '"', or '\n', or '\0' */
-char *
+static char *
 CopyQuotedString(char *cp)
 {
 	char *dp, *bp, c;
@@ -298,7 +298,7 @@ CopyQuotedString(char *cp)
 }
 
 /* copy a string until the first space */
-char *
+static char *
 CopySolidString(char *cp)
 {
 	char *dp, *bp, c;
@@ -317,22 +317,22 @@ CopySolidString(char *cp)
 }
 
 /* get the font height */
-int
+static int
 FontHeight(XFontStruct *xfs)
 {
 	return (xfs->ascent + xfs->descent);
 }
 
 /* get the font width, for fixed-width font only */
-int
+static int
 FontWidth(XFontStruct *xfs)
 {
 	return (xfs->per_char[0].width);
 }
 
 /* read the configuration file */
-void
-ReadConfig()
+static void
+ReadConfig(void)
 {
 	int prog_name_len, i, j, l, extra;
 	char *line_buf;
@@ -373,7 +373,7 @@ ReadConfig()
 
 	while (GetConfigLine(fd, &line_buf), line_buf) {
 		cp = line_buf;
-		while (isspace(*cp))
+		while (isspace((unsigned char)*cp))
 			cp++; /* skip blanks */
 		if (*cp != '*')
 			continue;
@@ -389,33 +389,33 @@ ReadConfig()
 		} else if (strncmp(cp, "Position", 8) == 0) {
 			cp += 8;
 			geom = 1;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
-			gx = atoi(cp);
-			while (!isspace(*cp))
+			gx = FvwmParseInteger(cp);
+			while (!isspace((unsigned char)*cp))
 				cp++;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
-			gy = atoi(cp);
+			gy = FvwmParseInteger(cp);
 			fprintf(fp_err, "Position @ (%d, %d)\n", gx, gy);
 			continue;
 		} else if (strncmp(cp, "Fore", 4) == 0) {
 			cp += 4;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			color_names[c_fore] = CopyNString(cp, 0);
 			fprintf(fp_err, "ColorFore: %s\n", color_names[c_fore]);
 			continue;
 		} else if (strncmp(cp, "Back", 4) == 0) {
 			cp += 4;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			color_names[c_back] = CopyNString(cp, 0);
 			fprintf(fp_err, "ColorBack: %s\n", color_names[c_back]);
 			continue;
 		} else if (strncmp(cp, "ItemFore", 8) == 0) {
 			cp += 8;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			color_names[c_itemfore] = CopyNString(cp, 0);
 			fprintf(fp_err, "ColorItemFore: %s\n",
@@ -423,7 +423,7 @@ ReadConfig()
 			continue;
 		} else if (strncmp(cp, "ItemBack", 8) == 0) {
 			cp += 8;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			color_names[c_itemback] = CopyNString(cp, 0);
 			fprintf(fp_err, "ColorItemBack: %s\n",
@@ -431,7 +431,7 @@ ReadConfig()
 			continue;
 		} else if (strncmp(cp, "Font", 4) == 0) {
 			cp += 4;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			font_names[f_text] = CopyNString(cp, 0);
 			fprintf(fp_err, "Font: %s\n", font_names[f_text]);
@@ -440,7 +440,7 @@ ReadConfig()
 			continue;
 		} else if (strncmp(cp, "ButtonFont", 10) == 0) {
 			cp += 10;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			font_names[f_button] = CopyNString(cp, 0);
 			fprintf(
@@ -451,7 +451,7 @@ ReadConfig()
 			continue;
 		} else if (strncmp(cp, "InputFont", 9) == 0) {
 			cp += 9;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			font_names[f_input] = CopyNString(cp, 0);
 			fprintf(fp_err, "InputFont: %s\n", font_names[f_input]);
@@ -470,7 +470,7 @@ ReadConfig()
 			} else {
 				cur_line = add_line(L_CENTER);
 			}
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (strncmp(cp, "left", 4) == 0)
 				cur_line->justify = L_LEFT;
@@ -496,7 +496,7 @@ ReadConfig()
 			item = &items[n_items++];
 			item->type = I_TEXT;
 			item->header.name = "";
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (*cp == '\"')
 				item->text.value = CopyQuotedString(++cp);
@@ -526,16 +526,16 @@ ReadConfig()
 			}
 			item = &items[n_items++];
 			item->type = I_INPUT;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			item->header.name = CopySolidString(cp);
 			cp += strlen(item->header.name);
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
-			item->input.size = atoi(cp);
-			while (!isspace(*cp))
+			item->input.size = FvwmParseInteger(cp);
+			while (!isspace((unsigned char)*cp))
 				cp++;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (*cp == '\"')
 				item->input.init_value = CopyQuotedString(++cp);
@@ -567,11 +567,11 @@ ReadConfig()
 			}
 			cur_sel = &items[n_items++];
 			cur_sel->type = I_SELECT;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			cur_sel->header.name = CopySolidString(cp);
 			cp += strlen(cur_sel->header.name);
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (strncmp(cp, "multiple", 8) == 0)
 				cur_sel->select.key = IS_MULTIPLE;
@@ -591,7 +591,7 @@ ReadConfig()
 		} else if (strncmp(cp, "Choice", 6) == 0) {
 			/* syntax: *FFChoice <name> <value> on|off "<text>" */
 			cp += 6;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (cur_sel == NULL) {
 				fprintf(fp_err, "Choice specified before "
@@ -618,11 +618,11 @@ ReadConfig()
 			item->choice.sel = cur_sel;
 			item->header.name = CopySolidString(cp);
 			cp += strlen(item->header.name);
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			item->choice.value = CopySolidString(cp);
 			cp += strlen(item->choice.value);
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (strncmp(cp, "on", 2) == 0) {
 				item->choice.on = 1;
@@ -631,9 +631,9 @@ ReadConfig()
 				item->choice.on = 0;
 				item->choice.init_on = 0;
 			}
-			while (!isspace(*cp) && *cp != '\0')
+			while (!isspace((unsigned char)*cp) && *cp != '\0')
 				cp++;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (*cp == '"')
 				item->choice.text = CopyQuotedString(++cp);
@@ -666,7 +666,7 @@ ReadConfig()
 			item = &items[n_items++];
 			item->type = I_BUTTON;
 			item->header.name = "";
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (strncmp(cp, "restart", 7) == 0)
 				item->button.key = IB_RESTART;
@@ -674,21 +674,22 @@ ReadConfig()
 				item->button.key = IB_QUIT;
 			else
 				item->button.key = IB_CONTINUE;
-			while (!isspace(*cp))
+			while (!isspace((unsigned char)*cp))
 				cp++;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (*cp == '\"') {
 				item->button.text = CopyQuotedString(++cp);
 				cp += strlen(item->button.text) + 1;
-				while (isspace(*cp))
+				while (isspace((unsigned char)*cp))
 					cp++;
 			} else
 				item->button.text = "";
 			if (*cp == '^')
 				item->button.keypress = *(++cp) - '@';
 			else if (*cp == 'F')
-				item->button.keypress = 256 + atoi(++cp);
+				item->button.keypress = 256 +
+				    FvwmParseInteger(++cp);
 			else
 				item->button.keypress = -1;
 			item->button.len = strlen(item->button.text);
@@ -708,7 +709,7 @@ ReadConfig()
 		} else if (strncmp(cp, "Command", 7) == 0) {
 			/* syntax: *FFCommand <command> */
 			cp += 7;
-			while (isspace(*cp))
+			while (isspace((unsigned char)*cp))
 				cp++;
 			if (cur_button->button.n + 1 >
 			    cur_button->button.commands_cap) {
@@ -830,8 +831,8 @@ ReadConfig()
 #define MAX_INTENSITY 65535
 
 /* allocate color cells */
-void
-GetColors()
+static void
+GetColors(void)
 {
 	Visual *visual = DefaultVisual(dpy, screen);
 	XColor xc_item;
@@ -919,8 +920,8 @@ GetColors()
 }
 
 /* reset all the values */
-void
-Restart()
+static void
+Restart(void)
 {
 	int i;
 	Item *item;
@@ -948,8 +949,8 @@ Restart()
 }
 
 /* redraw the frame */
-void
-RedrawFrame()
+static void
+RedrawFrame(void)
 {
 	int i, x, y;
 	Item *item;
@@ -974,7 +975,7 @@ RedrawFrame()
 }
 
 /* redraw an item */
-void
+static void
 RedrawItem(Item *item, int click)
 {
 	int dx, dy, len, x;
@@ -1113,7 +1114,7 @@ RedrawItem(Item *item, int click)
 	XFlush(dpy);
 }
 
-void
+static void
 ToggleChoice(Item *item)
 {
 	int i;
@@ -1137,7 +1138,7 @@ ToggleChoice(Item *item)
 }
 
 /* do var substitution for command string */
-void
+static void
 ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 #define AddChar(chr)							\
 	{								\
@@ -1270,7 +1271,7 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 }
 
 /* execute a command */
-void
+static void
 DoCommand(Item *cmd)
 {
 	int i, k, dn, len;
@@ -1315,8 +1316,8 @@ DoCommand(Item *cmd)
 }
 
 /* open the windows */
-void
-OpenWindows()
+static void
+OpenWindows(void)
 {
 	int i, x, y;
 	Item *item;
@@ -1418,8 +1419,8 @@ OpenWindows()
 }
 
 /* read something from Fvwm */
-void
-ReadFvwm()
+static void
+ReadFvwm(void)
 {
 	static char buffer[32];
 	int n;
@@ -1433,8 +1434,8 @@ ReadFvwm()
 }
 
 /* read an X event */
-void
-ReadXServer()
+static void
+ReadXServer(void)
 {
 	static XEvent event;
 	int i, old_cursor, keypress;
@@ -1884,8 +1885,8 @@ ReadXServer()
 }
 
 /* main event loop */
-void
-MainLoop()
+static void
+MainLoop(void)
 {
 	fd_set fds;
 
@@ -1941,8 +1942,8 @@ main(int argc, char **argv)
 	} else {
 		if (argc == 7)
 			prog_name = argv[6];
-		fd_out = atoi(argv[1]);
-		fd_in = atoi(argv[2]);
+		fd_out = FvwmParseFd(argv[1]);
+		fd_in = FvwmParseFd(argv[2]);
 		ref = strtol(argv[4], NULL, 16);
 		if (ref == 0)
 			ref = None;
@@ -1975,6 +1976,8 @@ main(int argc, char **argv)
 
 	return 0;
 }
+
+void DeadPipe(int nonsense);
 
 void
 DeadPipe(int nonsense)

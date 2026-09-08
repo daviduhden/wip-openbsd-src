@@ -53,8 +53,13 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 				    body_length * sizeof(unsigned long) -
 				    total)) > 0) {
 					total += count2;
-				} else if (count2 < 0) {
-					DeadPipe(errno);
+				} else {
+				/* EOF or read error: the pipe is gone.
+				 * Report a dead pipe instead of
+				 * spinning on a closed connection. */
+					free(*body);
+					*body = NULL;
+					return -1;
 				}
 			}
 		} else
@@ -140,7 +145,8 @@ GetConfigLine(int *fd, char **tline)
 			body_size = header[2] - HEADER_SIZE;
 			/* DB(("Config line (%d): `%s'", body_size, body_size ?
 			 * *tline : "")); */
-			while ((body_size > 0) && isspace(**tline)) {
+			while ((body_size > 0) &&
+			    isspace((unsigned char)**isspace)) {
 				(*tline)++;
 				--body_size;
 			}

@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmWinList
-
 PROG = FvwmWinList
 SRCS = ButtonArray.c Colors.c FvwmWinList.c List.c
 

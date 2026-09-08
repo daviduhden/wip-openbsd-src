@@ -1,7 +1,8 @@
-/*	$OpenBSD: extern.h,v 1.64 2024/04/17 18:12:12 jca Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: extern.h,v 1.5 1996/03/26 23:54:16 mrg Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.

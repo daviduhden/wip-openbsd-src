@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmIconMan
-
 PROG = FvwmIconMan
 SRCS = FvwmIconMan.c debug.c functions.c fvwm.c globals.c readconfig.c \
 	winlist.c x.c xmanager.c

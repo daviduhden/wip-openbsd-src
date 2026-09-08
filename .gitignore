@@ -1,0 +1,16 @@
+# Build artifacts (standalone in-place builds)
+
+obj/
+*.o
+*.d
+.depend
+
+pax/pax
+
+fvwm/libs/libfvwm.a
+fvwm/fvwm/fvwm
+fvwm/fvwm/fvwm_exec
+fvwm/fvwm/fvwm.1
+fvwm/utils/xpmroot
+fvwm/modules/*/Fvwm*
+fvwm/sample.fvwmrc/.fvwmrc

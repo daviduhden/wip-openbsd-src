@@ -1,3 +1,4 @@
+#include "fvwmlib.h"
 /*
 ** MyXGrabServer & MyXUngrabServer - to handle nested grab server calls
 */

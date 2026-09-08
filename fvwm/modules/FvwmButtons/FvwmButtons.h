@@ -185,3 +185,6 @@ extern GC NormalGC;
 extern int x, y, xneg, yneg, w, h; /* Dirty... */
 
 /* ---------------------------------- misc --------------------------------- */
+
+void DumpButtons(button_info *b);
+void SaveButtons(button_info *b);

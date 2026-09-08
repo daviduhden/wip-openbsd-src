@@ -343,6 +343,7 @@ void LoadDefaultButton(ButtonFace *bf, int i);
 void ResetAllButtons(FvwmDecor *fl);
 void InitFvwmDecor(FvwmDecor *fl);
 void DestroyFvwmDecor(FvwmDecor *fl);
+void AddToDecor(FvwmDecor *fl, char *s);
 
 extern ScreenInfo Scr;
 

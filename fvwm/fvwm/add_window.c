@@ -259,7 +259,7 @@ AddWindow(Window w)
 		status = XrmGetResource(
 		    db, "fvwm.desk", "Fvwm.Desk", &str_type, &rm_value);
 		if ((status == True) && (rm_value.size != 0)) {
-			styles.Desk = atoi(rm_value.addr);
+			styles.Desk = FvwmParseInteger(rm_value.addr);
 			/*  RBW - 11/20/1998  */
 			if (styles.Desk > -1) {
 				styles.Desk++;

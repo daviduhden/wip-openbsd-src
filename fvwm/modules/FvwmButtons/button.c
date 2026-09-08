@@ -403,7 +403,7 @@ NumberButtons(button_info *b)
 *** PlaceAndExpandButton()
 *** Places a button in it's container and claims all needed slots.
 **/
-char
+static char
 PlaceAndExpandButton(int x, int y, button_info *b, button_info *ub)
 {
 	int i, j, k;
@@ -470,7 +470,7 @@ PlaceAndExpandButton(int x, int y, button_info *b, button_info *ub)
 *** ShrinkButton()
 *** Frees all but the upper left slot a button uses in it's container.
 **/
-void
+static void
 ShrinkButton(button_info *b, container_info *c)
 {
 	int i, j, k, l;

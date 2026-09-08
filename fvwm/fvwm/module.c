@@ -520,7 +520,7 @@ BroadcastName(unsigned long event_type, unsigned long data1,
 }
 
 #ifdef MINI_ICONS
-void
+static void
 SendMiniIcon(int module, unsigned long event_type, unsigned long data1,
     unsigned long data2, unsigned long data3, unsigned long data4,
     unsigned long data5, unsigned long data6, unsigned long data7,

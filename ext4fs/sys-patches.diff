@@ -169,7 +169,7 @@ index 16aaac8b7..2d9224f0f 100644
 +		struct ufs1_dinode	 *ffs1_din;
 +		struct ufs2_dinode	 *ffs2_din;
 +		struct ext2fs_dinode	 *e2fs_din;
-+		struct ext4fs_dinode_256 *e4fs_din;
++		struct ext4fs_dinode_large *e4fs_din;
  	} dinode_u;
  
  #define i_din1	dinode_u.ffs1_din

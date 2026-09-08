@@ -36,6 +36,7 @@
 
 #include "../../libs/fvwmlib.h"
 #include "FvwmButtons.h"
+#include "icons.h"
 
 #ifdef XPM
 #include <X11/xpm.h>

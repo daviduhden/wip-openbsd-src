@@ -1,7 +1,8 @@
-/*	$OpenBSD: ftree.c,v 1.43 2024/08/15 00:47:44 guenther Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: ftree.c,v 1.4 1995/03/21 09:07:21 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -44,8 +45,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * Data structure used to store the file args to be handed to fts().

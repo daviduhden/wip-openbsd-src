@@ -2,12 +2,108 @@
 ** Parse.c: routines for parsing in fvwm & modules
 */
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "config.h"
 #include "fvwmlib.h"
+
+/*
+ * FvwmParseInteger -- historical atoi(3) configuration parsing made
+ * explicit and safe.
+ *
+ * Accepts optional leading whitespace, one optional sign and decimal
+ * digits; parsing stops at the first non-digit (prefix semantics,
+ * exactly what atoi(3) did with trailing text).  Returns the parsed
+ * value, or 0 when nothing numeric is present (atoi() returned 0 for
+ * non-numeric input).  Overflow, which was undefined behaviour for
+ * atoi(3), is defined here: 0 is returned.
+ *
+ * errno reports why a value could not be produced: EINVAL when no
+ * digit was parsed, ERANGE on overflow.  Callers that do not care
+ * can ignore errno and treat the result as atoi()'s value.
+ *
+ * fvwm's configuration language intentionally accepted numeric
+ * prefixes followed by other syntax; nothing in this function is
+ * stricter than atoi(3) except the defined overflow result.
+ */
+int
+FvwmParseInteger(const char *string)
+{
+	const char *s = string;
+	int negative = 0;
+	unsigned long value = 0;
+	int digits = 0;
+
+	if (s == NULL)
+		return 0;
+
+	while (isspace((unsigned char)*s))
+		s++;
+	if (*s == '+' || *s == '-') {
+		negative = (*s == '-');
+		s++;
+	}
+	while (isdigit((unsigned char)*s)) {
+		unsigned long nv;
+
+		digits = 1;
+		nv = value * 10 + (unsigned long)(*s - '0');
+		if (nv < value || nv > (negative ?
+		    (unsigned long)LONG_MAX + 1 : (unsigned long)LONG_MAX)) {
+			/* Historical atoi() overflow was undefined;
+			 * report it instead of returning garbage. */
+			errno = ERANGE;
+			return 0;
+		}
+		value = nv;
+		s++;
+	}
+	if (digits == 0) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	if (negative) {
+		if (value > (unsigned long)INT_MAX + 1) {
+			errno = ERANGE;
+			return 0;
+		}
+		if (value == (unsigned long)INT_MAX + 1)
+			return INT_MIN;
+		return -(int)value;
+	}
+	if (value > (unsigned long)INT_MAX) {
+		errno = ERANGE;
+		return 0;
+	}
+	return (int)value;
+}
+
+/*
+ * FvwmParseFd -- module-protocol file descriptor argument (argv[1]
+ * and argv[2] of every module, supplied by fvwm).  Strict
+ * non-negative integer; a module cannot operate without valid
+ * descriptors, so a malformed argument is fatal.
+ */
+int
+FvwmParseFd(const char *arg)
+{
+	const char *errstr;
+	int fd;
+
+	fd = (int)strtonum(arg, 0, INT_MAX, &errstr);
+	if (errstr != NULL) {
+		fprintf(stderr, "fvwm module: invalid descriptor "
+		    "argument '%s': %s\n", arg, errstr);
+		exit(1);
+	}
+	return fd;
+}
 
 /* If the string s begins with a quote chracter SkipQuote returns a pointer
  * to the first unquoted character or to the final '\0'. If it does not, a
@@ -397,10 +493,12 @@ GetIntegerArguments(char *action, char **ret_action, int retvals[], int num)
 		action = GetNextToken(action, &token);
 		if (token == NULL)
 			break;
-		if (sscanf(token, "%d", &(retvals[i])) != 1)
-			break;
+		errno = 0;
+		retvals[i] = FvwmParseInteger(token);
 		free(token);
 		token = NULL;
+		if (errno == EINVAL)
+			break;
 	}
 	if (token)
 		free(token);
@@ -485,16 +583,40 @@ int
 GetRectangleArguments(char *action, int *width, int *height)
 {
 	char *token;
-	int n;
+	const char *s;
+	int w, h;
 
 	GetNextToken(action, &token);
 	if (!token)
 		return 0;
-	/* now try MxN style number, specifically for DeskTopSize: */
-	n = sscanf(token, "%d%*c%d", width, height);
-	free(token);
+	/* MxN style number, specifically for DeskTopSize: a number,
+	 * one separator character, another number.  The historical
+	 * sscanf("%d%*c%d") accepted any separator. */
+	errno = 0;
+	w = FvwmParseInteger(token);
+	if (errno != 0)
+		goto bad;
+	s = token;
+	while (*s != '\0' && !isdigit((unsigned char)*s))
+		s++;
+	while (isdigit((unsigned char)*s))
+		s++;
+	if (*s == '\0')
+		goto bad;
+	s++;
+	errno = 0;
+	h = FvwmParseInteger(s);
+	if (errno != 0)
+		goto bad;
 
-	return (n == 2) ? 2 : 0;
+	free(token);
+	*width = w;
+	*height = h;
+	return 2;
+
+bad:
+	free(token);
+	return 0;
 }
 
 /* unit_io is input as well as output. If action has a postfix 'p' or 'P',
@@ -519,7 +641,9 @@ GetOnePercentArgument(char *action, int *value, int *unit_io)
 		*unit_io = 100;
 		token[len - 1] = '\0';
 	}
-	n = sscanf(token, "%d", value);
+	errno = 0;
+	*value = FvwmParseInteger(token);
+	n = (errno == EINVAL) ? 0 : 1;
 
 	free(token);
 	return n;

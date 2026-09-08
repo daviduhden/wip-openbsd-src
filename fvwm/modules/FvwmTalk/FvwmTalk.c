@@ -17,7 +17,6 @@
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
 
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -124,8 +123,8 @@ main(int argc, char **argv)
 	/* Dead pipes mean fvwm died */
 	signal(SIGPIPE, DeadPipe);
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
 	/* Initialize X connection */
 	if (!(dpy = XOpenDisplay(display_name))) {
@@ -345,7 +344,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	select(fd_width, & in_fdset, 0, 0, NULL);
+	select(fd_width, &in_fdset, 0, 0, NULL);
 
 	if (FD_ISSET(x_fd, &in_fdset)) {
 		if (XPending(dpy)) {

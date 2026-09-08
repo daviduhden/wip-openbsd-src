@@ -1,7 +1,8 @@
-/*	$OpenBSD: options.c,v 1.115 2024/05/10 20:28:31 millert Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: options.c,v 1.6 1996/03/26 23:54:18 mrg Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -46,10 +47,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "cpio.h"
-#include "extern.h"
 #include "pax.h"
+#include "cpio.h"
 #include "tar.h"
+#include "extern.h"
 
 static int bad_opt(void);
 static int opt_add(const char *);

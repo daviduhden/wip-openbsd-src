@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmBacker
-
 PROG = FvwmBacker
 SRCS = FvwmBacker.c root_bits.c
 

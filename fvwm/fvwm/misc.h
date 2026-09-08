@@ -463,7 +463,20 @@ void DestroyModConfig(F_CMD_ARGS);
 void AddModConfig(F_CMD_ARGS);
 void SetEnv(F_CMD_ARGS);
 
-void CoerceEnterNotifyOnCurrentWindow();
+/* exec.c -- privilege-separated execution helper interface */
+struct imsg;
+void exec_helper_start(void);
+void exec_helper_stop(void);
+void exec_helper_handle(void);
+int exec_helper_fd(void);
+int exec_helper_running(void);
+int exec_helper_launch(int, char **, char **);
+int exec_helper_dispatch(struct imsg *, void *);
+int exec_helper_drain(int (*)(struct imsg *, void *), void *);
+int exec_helper_piperead_start(u_int32_t, const char *);
+int exec_helper_piperead_kill(u_int32_t);
+
+void CoerceEnterNotifyOnCurrentWindow(void);
 
 /*
 ** message levels for fvwm_msg:

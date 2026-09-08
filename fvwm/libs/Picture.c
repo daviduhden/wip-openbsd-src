@@ -48,7 +48,7 @@
 
 #ifdef XPM
 /* static function prototypes */
-static void c100_init_base_table();              /* prototype */
+static void c100_init_base_table(void);              /* prototype */
 static void c200_substitute_color(char **, int); /* prototype */
 static void c300_color_to_rgb(char *, XColor *); /* prototype */
 static double c400_distance(XColor *, XColor *); /* prototype */
@@ -70,7 +70,7 @@ InitPictureCMap(Display *dpy, Window Root)
 	PictureCMap = root_attr.colormap;
 }
 
-FvwmPicture *
+static FvwmPicture *
 LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 {
 	int l;
@@ -322,7 +322,7 @@ static Color_Info base_array[] = {
 #define NColors (sizeof(base_array) / sizeof(Color_Info))
 
 /* if c_color isn't set, copy it from one of the other colours */
-Bool
+static Bool
 xpmcolor_require_c_color(XpmColor *p)
 {
 	if (p->c_color != NULL)
@@ -379,7 +379,7 @@ color_reduce_pixmap(XpmImage *image, int color_limit)
 
 /* from the color names in the base table, calc rgbs */
 static void
-c100_init_base_table()
+c100_init_base_table(void)
 {
 	int i;
 	for (i = 0; i < NColors; i++) { /* change all base colors to numbers */

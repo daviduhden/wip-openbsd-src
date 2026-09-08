@@ -60,7 +60,8 @@ static int
 selected_button_in_man(WinManager *man)
 {
 	assert(man);
-	ConsoleDebug(X11, "selected_button_in_man: %p\n", globals.select_win);
+	ConsoleDebug(X11, "selected_button_in_man: %p\n",
+	    (void *)globals.select_win);
 	if (globals.select_win && globals.select_win->button &&
 	    globals.select_win->manager == man) {
 		return globals.select_win->button->index;

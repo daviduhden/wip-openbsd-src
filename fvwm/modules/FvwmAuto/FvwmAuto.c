@@ -24,7 +24,6 @@
 #include "config.h"
 #include "../fvwm/fvwm_sandbox.h"
 
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -50,6 +49,8 @@
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
+void DeadPipe(int nonsense);
+
 void
 DeadPipe(int nonsense)
 {
@@ -82,10 +83,10 @@ main(int argc, char **argv)
 	/* Dead pipes mean fvwm died */
 	signal(SIGPIPE, DeadPipe);
 
-	fd[0] = atoi(argv[1]);
-	fd[1] = atoi(argv[2]);
+	fd[0] = FvwmParseFd(argv[1]);
+	fd[1] = FvwmParseFd(argv[2]);
 
-	if ((timeout = atoi(argv[6]))) {
+	if ((timeout = FvwmParseInteger(argv[6]))) {
 		sec = timeout / 1000;
 		usec = (timeout % 1000) * 1000;
 		delay = &value;
@@ -123,7 +124,7 @@ main(int argc, char **argv)
 			delay->tv_sec = sec;
 			delay->tv_usec = usec;
 		}
-		select(fd_width, & in_fdset, 0, 0,
+		select(fd_width, &in_fdset, 0, 0,
 		    (focus_win == last_win) ? NULL : delay);
 #ifdef DEBUG
 		fprintf(stderr,

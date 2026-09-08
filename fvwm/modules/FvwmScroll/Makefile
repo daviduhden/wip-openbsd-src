@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmScroll
-
 PROG = FvwmScroll
 SRCS = FvwmScroll.c GrabWindow.c
 

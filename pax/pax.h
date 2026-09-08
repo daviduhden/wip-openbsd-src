@@ -1,7 +1,8 @@
-/*	$OpenBSD: pax.h,v 1.29 2017/09/12 17:11:11 otto Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: pax.h,v 1.3 1995/03/21 09:07:41 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.

@@ -117,13 +117,13 @@ volatile sig_atomic_t isTerminated = False;
  *
  ***********************************************************************
  */
+static void InitVariables(void);
+static void InternUsefulAtoms(void);
 int
 main(int argc, char **argv)
 {
 	unsigned long valuemask;         /* mask for create windows */
 	XSetWindowAttributes attributes; /* attributes for create windows */
-	void InternUsefulAtoms(void);
-	void InitVariables(void);
 	int i;
 	extern int x_fd;
 	int len;
@@ -462,17 +462,92 @@ main(int argc, char **argv)
 	fFvwmInStartup = False;
 	DBUG("main", "Entering HandleEvents loop...");
 
-	if (unveil(FVWMLIBDIR, "rx") == -1)
-		err(1, "unveil %s", FVWMLIBDIR);
-	if (unveil("/etc/X11/fvwm", "r") == -1)
-		err(1, "unveil /etc/X11/fvwm");
-	if (unveil("/tmp", "rwc") == -1)
-		err(1, "unveil /tmp");
-	if (unveil(NULL, NULL) == -1)
-		err(1, "unveil");
+	/*
+	 * The execution helper must start before unveil locks the
+	 * filesystem: it, and everything it launches, need the
+	 * unrestricted view.
+	 */
+	exec_helper_start();
 
-	if (pledge("stdio rpath proc exec", NULL) == -1)
-		err(1, "pledge");
+	/*
+	 * Sandbox baseline shared by fvwm and the modules it spawns.
+	 * Modules inherit this state and tighten it with their own
+	 * pledge/unveil calls (see fvwm_sandbox.h).  The baseline
+	 * therefore has to cover every module's needs:
+	 *
+	 *   FVWMLIBDIR          module binaries and fvwm_exec
+	 *   /etc/X11/fvwm       system configuration
+	 *   /tmp                X11 unix socket, temp files
+	 *   $HOME               user configs, .Xauthority, saved state
+	 *   /etc                passwd/group lookups (getpw promise)
+	 *   bin directories     module helpers (FvwmCpp, FvwmM4);
+	 *                       PipeRead/Exec commands themselves run
+	 *                       in fvwm_exec, which was started before
+	 *                       this veil and therefore has the full
+	 *                       filesystem view
+	 *   /dev/null|console   FvwmForm, FvwmRearrange, FvwmWinList
+	 *   argv[0] directory   Restart re-execs fvwm
+	 */
+	{
+		const char *home = getenv("HOME");
+		char *argv0copy = NULL;
+		char *slash;
+
+		if (unveil(FVWMLIBDIR, "rx") == -1)
+			err(1, "unveil %s", FVWMLIBDIR);
+		if (unveil("/etc/X11/fvwm", "r") == -1 && errno != ENOENT)
+			err(1, "unveil /etc/X11/fvwm");
+		if (unveil("/tmp", "rwc") == -1)
+			err(1, "unveil /tmp");
+		if (home != NULL && *home != '\0' &&
+		    unveil(home, "rwc") == -1)
+			err(1, "unveil %s", home);
+		if (unveil("/etc", "r") == -1)
+			err(1, "unveil /etc");
+		if (unveil("/usr/bin", "rx") == -1)
+			err(1, "unveil /usr/bin");
+		if (unveil("/usr/local/bin", "rx") == -1 && errno != ENOENT)
+			err(1, "unveil /usr/local/bin");
+		if (unveil("/usr/X11R6/bin", "rx") == -1)
+			err(1, "unveil /usr/X11R6/bin");
+		if (unveil("/bin", "rx") == -1)
+			err(1, "unveil /bin");
+		if (unveil("/sbin", "rx") == -1)
+			err(1, "unveil /sbin");
+		if (unveil("/usr/sbin", "rx") == -1)
+			err(1, "unveil /usr/sbin");
+		if (unveil("/dev/null", "w") == -1)
+			err(1, "unveil /dev/null");
+		if (unveil("/dev/console", "w") == -1)
+			err(1, "unveil /dev/console");
+		argv0copy = strdup(g_argv[0]);
+		if (argv0copy != NULL && strchr(argv0copy, '/') != NULL) {
+			slash = strrchr(argv0copy, '/');
+			*slash = '\0';
+			if (unveil(argv0copy, "rx") == -1 &&
+			    errno != ENOENT)
+				err(1, "unveil %s", argv0copy);
+		}
+		free(argv0copy);
+		if (unveil(NULL, NULL) == -1)
+			err(1, "unveil");
+
+		/*
+		 * proc/exec remain needed: modules are forked and
+		 * exec'd here (module.c), multi-screen operation
+		 * forks, Restart re-execs fvwm, and Exec keeps a
+		 * local fork fallback for installations without the
+		 * helper.  PipeRead no longer forks in this process;
+		 * its commands run in fvwm_exec.  wpath/cpath and
+		 * dns/getpw/inet are kept so the spawned modules can
+		 * inherit them and reduce to their own sets (pledge(2)
+		 * can only drop promises); the unveil policy above
+		 * bounds where they apply.
+		 */
+		if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
+		    NULL) == -1)
+			err(1, "pledge");
+	}
 
 	HandleEvents();
 	switch (fvwmRunState) {
@@ -648,7 +723,7 @@ CaptureAllWindows(void)
 ** Sets some initial style values & such
 */
 void
-SetRCDefaults()
+SetRCDefaults(void)
 {
 	/* set up default colors, fonts, etc */
 	char *defaults[] = {"HilightColor black grey", "XORValue 0",
@@ -748,7 +823,7 @@ Atom _XA_OL_DECOR_RESIZE;
 Atom _XA_OL_DECOR_HEADER;
 Atom _XA_OL_DECOR_ICON_NAME;
 
-void
+static void
 InternUsefulAtoms(void)
 {
 	/*
@@ -1216,7 +1291,7 @@ InitFvwmDecor(FvwmDecor *fl)
  *	InitVariables - initialize fvwm variables
  *
  ************************************************************************/
-void
+static void
 InitVariables(void)
 {
 	FvwmContext = XUniqueContext();
@@ -1412,6 +1487,7 @@ Done(int restart, char *command)
 
 	/* Close all my pipes */
 	ClosePipes();
+	exec_helper_stop();
 
 	Reborder();
 
@@ -1529,7 +1605,7 @@ usage(void)
  *
  ****************************************************************************/
 void
-SaveDesktopState()
+SaveDesktopState(void)
 {
 	FvwmWindow *t;
 	unsigned long data[1];
@@ -1567,7 +1643,7 @@ SetMWM_INFO(Window window)
 }
 
 void
-BlackoutScreen()
+BlackoutScreen(void)
 {
 	XSetWindowAttributes attributes;
 	unsigned long valuemask;
@@ -1592,7 +1668,7 @@ BlackoutScreen()
 } /* BlackoutScreen */
 
 void
-UnBlackoutScreen()
+UnBlackoutScreen(void)
 {
 	if (Blackout && (BlackoutWin != None) && !debugging) {
 		DBUG("UnBlackoutScreen", "UnBlacking out screen");

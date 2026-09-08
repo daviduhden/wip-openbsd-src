@@ -1,7 +1,8 @@
-/*	$OpenBSD: pax.c,v 1.57 2023/11/26 16:04:17 espie Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: pax.c,v 1.5 1996/03/26 23:54:20 mrg Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -34,8 +35,6 @@
  * SUCH DAMAGE.
  */
 
-#include "pax.h"
-
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -52,6 +51,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "pax.h"
 #include "extern.h"
 static int gen_init(void);
 static void sig_cleanup(int);
@@ -326,8 +326,17 @@ main(int argc, char **argv)
 
 	/* If using compression, unveil compressor paths. */
 	if (gzip_program != NULL && act != COPY && act != APPND) {
-		(void)unveil("/usr/bin", "rx");
-		(void)unveil("/usr/local/bin", "rx");
+		/*
+		 * The default compressor names live in the base system or
+		 * in packages.  An explicit path given with -z (or -Z) is
+		 * unveiled directly so custom locations keep working.
+		 */
+		if (strchr(gzip_program, '/') != NULL)
+			(void)unveil(gzip_program, "rx");
+		else {
+			(void)unveil("/usr/bin", "rx");
+			(void)unveil("/usr/local/bin", "rx");
+		}
 	}
 
 	/* Lock unveil. */
@@ -341,6 +350,11 @@ main(int argc, char **argv)
 	 * that skipped pledge when pmode was set during
 	 * extract/copy was overly conservative and left these modes
 	 * without sandboxing.
+	 *
+	 * "tape" is retained in every mode: tape drives are
+	 * repositioned with MTIOCTOP ioctls not only at open time but
+	 * also during mid-stream error recovery (ar_rdsync) and
+	 * append-mode trailer rewriting (ar_rev).
 	 */
 	{
 		int need_proc = (gzip_program != NULL &&
@@ -349,18 +363,18 @@ main(int argc, char **argv)
 
 		if (act == LIST) {
 			if (need_proc)
-				promises = "stdio rpath getpw proc exec";
+				promises = "stdio rpath getpw tape proc exec";
 			else
-				promises = "stdio rpath getpw";
+				promises = "stdio rpath getpw tape";
 		} else if (act == APPND) {
-			promises = "stdio rpath wpath getpw";
+			promises = "stdio rpath wpath getpw tape";
 		} else {
 			if (need_proc)
 				promises = "stdio rpath wpath cpath fattr "
-				    "dpath getpw proc exec";
+				    "dpath getpw tape proc exec";
 			else
 				promises = "stdio rpath wpath cpath fattr "
-				    "dpath getpw";
+				    "dpath getpw tape";
 		}
 
 		if (pledge(promises, NULL) == -1)

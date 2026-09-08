@@ -2,8 +2,6 @@
 
 .include "../Makefile.inc"
 
-.PATH: ${DIST}/modules/FvwmPager
-
 PROG = FvwmPager
 SRCS = FvwmPager.c x_pager.c
 

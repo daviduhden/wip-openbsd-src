@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 2025 kmx.io.
  * Copyright (c) 1997 Manuel Bouyer.
  * Copyright (c) 1982, 1986, 1989, 1993
@@ -99,10 +100,27 @@ ext4fs_extent_pblk(struct inode *ip, u_int64_t lbn, u_int64_t *pblk,
 	depth = letoh16(eh->eh_depth);
 	entries = letoh16(eh->eh_entries);
 
+	/*
+	 * The in-inode header lives in i_block[] and every deeper node
+	 * in one filesystem block: reject entry counts that would
+	 * reach past the buffer, and reject trees deeper than the ext4
+	 * on-disk maximum.  The depth must decrease by exactly one at
+	 * each level so corrupted cyclic nodes cannot loop forever.
+	 */
+	{
+		size_t cap = (sizeof(din->i_block) -
+		    sizeof(struct ext4fs_extent_header)) /
+		    sizeof(struct ext4fs_extent_idx);
+
+		if (depth > EXT4FS_MAX_EXTENT_DEPTH || entries > cap)
+			return (EIO);
+	}
+
 	/* Walk down the extent tree */
 	while (depth > 0) {
 		struct ext4fs_extent_idx *idx;
 		u_int64_t child_blk;
+		u_int16_t child_depth;
 
 		/* Index node: find the child that covers lbn */
 		idx = (struct ext4fs_extent_idx *)(eh + 1);
@@ -140,13 +158,33 @@ ext4fs_extent_pblk(struct inode *ip, u_int64_t lbn, u_int64_t *pblk,
 			brelse(bp);
 			return (EIO);
 		}
-		depth = letoh16(eh->eh_depth);
+		child_depth = letoh16(eh->eh_depth);
 		entries = letoh16(eh->eh_entries);
+		{
+			size_t cap = (fs->m_block_size -
+			    sizeof(struct ext4fs_extent_header)) /
+			    sizeof(struct ext4fs_extent_idx);
+
+			if (child_depth != depth - 1 || entries > cap) {
+				brelse(bp);
+				return (EIO);
+			}
+		}
+		depth = child_depth;
 	}
 
 	/* Leaf node: search for the extent containing lbn */
 	{
 		struct ext4fs_extent *ext;
+		size_t cap = (fs->m_block_size -
+		    sizeof(struct ext4fs_extent_header)) /
+		    sizeof(struct ext4fs_extent);
+
+		if (entries > cap) {
+			if (bp != NULL)
+				brelse(bp);
+			return (EIO);
+		}
 		ext = (struct ext4fs_extent *)(eh + 1);
 		for (i = 0; i < (int)entries; i++) {
 			u_int32_t e_block = letoh32(ext[i].e_block);
@@ -210,8 +248,8 @@ ext4fs_update(struct inode *ip, int waitfor)
 	inode_group = (ip->i_number - 1) / fs->m_inodes_per_group;
 	inode_index = (ip->i_number - 1) % fs->m_inodes_per_group;
 	block_in_table = inode_index / fs->m_inodes_per_block;
-	offset_in_block = (inode_index % fs->m_inodes_per_block) *
-	    fs->m_inode_size;
+	offset_in_block = (u_int32_t)(((u_int64_t)inode_index %
+	    fs->m_inodes_per_block) * fs->m_inode_size);
 
 	gd = &fs->m_gd[inode_group];
 	inode_table_block = letoh32(gd->bgd_inode_table_block_lo);
@@ -253,7 +291,11 @@ ext4fs_update(struct inode *ip, int waitfor)
 	/* Recompute inode checksum */
 	csum = ext4fs_inode_csum(fs, ip->i_e4din, ip->i_number);
 	ip->i_e4din->dinode.i_checksum_lo = htole16(csum & 0xFFFF);
-	ip->i_e4din->dinode.i_checksum_hi = htole16((csum >> 16) & 0xFFFF);
+	if (fs->m_inode_size > EXT4FS_GOOD_OLD_INODE_SIZE &&
+	    ext4fs_din_fits(fs, ip->i_e4din,
+	    offsetof(struct ext4fs_dinode, i_checksum_hi), 2))
+		ip->i_e4din->dinode.i_checksum_hi =
+		    htole16((csum >> 16) & 0xFFFF);
 
 	/* Copy inode to buffer */
 	memcpy((char *)bp->b_data + offset_in_block, ip->i_e4din,
@@ -367,11 +409,14 @@ ext4fs_blkalloc(struct inode *ip, u_int64_t goal, u_int32_t count,
 			else {
 				u_int64_t n;
 				for (n = 3; n <= g; n *= 3)
-					if (n == g) has_sb = 1;
+					if (n == g)
+						has_sb = 1;
 				for (n = 5; n <= g; n *= 5)
-					if (n == g) has_sb = 1;
+					if (n == g)
+						has_sb = 1;
 				for (n = 7; n <= g; n *= 7)
-					if (n == g) has_sb = 1;
+					if (n == g)
+						has_sb = 1;
 			}
 			if (has_sb) {
 				u_int32_t overhead = 1 +
@@ -642,7 +687,8 @@ ext4fs_extent_grow_tree(struct inode *ip)
 	memcpy((char *)bp->b_data + sizeof(struct ext4fs_extent_header),
 	    din->i_extent, 4 * sizeof(struct ext4fs_extent));
 
-	ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation, bp->b_data);
+	ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation,
+	    bp->b_data);
 	bdwrite(bp);
 
 	/* Convert inode root to index node with depth=1 */
@@ -703,6 +749,25 @@ ext4fs_leaf_split(struct inode *ip, struct buf *old_bp,
 	/* Check parent has room for new index entry */
 	root_entries = letoh16(root_eh->eh_entries);
 	root_max = letoh16(root_eh->eh_max);
+
+	/*
+	 * Both entry counts come from on-disk headers; clamp to what
+	 * the in-inode index area and the leaf block can hold.
+	 */
+	{
+		u_int16_t lcap = (fs->m_block_size -
+		    sizeof(struct ext4fs_extent_header)) /
+		    sizeof(struct ext4fs_extent);
+		u_int16_t rcap = (sizeof(din->i_block) -
+		    sizeof(struct ext4fs_extent_header)) /
+		    sizeof(struct ext4fs_extent_idx);
+
+		if (old_entries > lcap || maxleaf > lcap ||
+		    root_entries > rcap) {
+			brelse(old_bp);
+			return (EIO);
+		}
+	}
 	if (root_entries >= root_max) {
 		brelse(old_bp);
 		return (ENOSPC);  /* Would need depth 2+, phase 4 */
@@ -743,12 +808,14 @@ ext4fs_leaf_split(struct inode *ip, struct buf *old_bp,
 	memcpy(new_ext, &old_ext[old_entries],
 	    new_entries * sizeof(struct ext4fs_extent));
 
-	ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation, new_bp->b_data);
+	ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation,
+	    new_bp->b_data);
 	bdwrite(new_bp);
 
 	/* Update old leaf */
 	old_eh->eh_entries = htole16(old_entries);
-	ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation, old_bp->b_data);
+	ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation,
+	    old_bp->b_data);
 	bdwrite(old_bp);
 
 	/* Add new index entry in parent root (keep sorted by ei_block) */
@@ -807,6 +874,14 @@ ext4fs_extent_insert_depth(struct inode *ip, u_int32_t lbn, u_int64_t pblk,
 	root_entries = letoh16(root_eh->eh_entries);
 	if (root_entries == 0)
 		return (EIO);
+	/*
+	 * The in-inode index area holds at most four entries; a larger
+	 * on-disk count would read and write past i_block[].
+	 */
+	if (root_entries > (sizeof(din->i_block) -
+	    sizeof(struct ext4fs_extent_header)) /
+	    sizeof(struct ext4fs_extent_idx))
+		return (EIO);
 
 	/* Find the index entry whose subtree covers lbn */
 	idx = din->i_extent_idx;
@@ -838,6 +913,21 @@ ext4fs_extent_insert_depth(struct inode *ip, u_int32_t lbn, u_int64_t pblk,
 
 	leaf_entries = letoh16(leaf_eh->eh_entries);
 	leaf_max = letoh16(leaf_eh->eh_max);
+	/*
+	 * Entry counts are attacker-controlled on-disk fields; clamp
+	 * them to what the block can actually hold so the loops and
+	 * memmove()s below cannot escape the buffer.
+	 */
+	{
+		u_int16_t cap = (fs->m_block_size -
+		    sizeof(struct ext4fs_extent_header)) /
+		    sizeof(struct ext4fs_extent);
+
+		if (leaf_entries > cap || leaf_max > cap) {
+			brelse(bp);
+			return (EIO);
+		}
+	}
 	ext = (struct ext4fs_extent *)(leaf_eh + 1);
 
 	/* Try to merge with last extent in this leaf */
@@ -852,7 +942,8 @@ ext4fs_extent_insert_depth(struct inode *ip, u_int32_t lbn, u_int64_t pblk,
 		    last_start + last_len == pblk &&
 		    last_len + len <= 32768) {
 			last->e_len = htole16(last_len + len);
-			ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation, bp->b_data);
+			ext4fs_extent_block_csum_set(fs, ip->i_number,
+			    din->i_nfs_generation, bp->b_data);
 			bdwrite(bp);
 			ip->i_flag |= IN_CHANGE | IN_MODIFIED;
 			return (0);
@@ -877,7 +968,8 @@ ext4fs_extent_insert_depth(struct inode *ip, u_int32_t lbn, u_int64_t pblk,
 		ext[i].e_start_hi = htole16((u_int16_t)(pblk >> 32));
 
 		leaf_eh->eh_entries = htole16(leaf_entries + 1);
-		ext4fs_extent_block_csum_set(fs, ip->i_number, din->i_nfs_generation, bp->b_data);
+		ext4fs_extent_block_csum_set(fs, ip->i_number,
+		    din->i_nfs_generation, bp->b_data);
 		bdwrite(bp);
 		ip->i_flag |= IN_CHANGE | IN_MODIFIED;
 		return (0);
@@ -1004,14 +1096,16 @@ ext4fs_buf_alloc(struct inode *ip, u_int64_t lbn, int size,
 		u_int16_t depth = letoh16(din->i_extent_header.eh_depth);
 
 		if (depth == 0) {
-			u_int16_t ent = letoh16(din->i_extent_header.eh_entries);
+			u_int16_t ent = letoh16(
+			    din->i_extent_header.eh_entries);
 			struct ext4fs_extent *last = &din->i_extent[ent - 1];
 			u_int64_t last_start = letoh32(last->e_start_lo) |
 			    ((u_int64_t)letoh16(last->e_start_hi) << 32);
 			goal = last_start + letoh16(last->e_len);
 		} else {
 			/* Walk to last leaf to find last extent */
-			u_int16_t ent = letoh16(din->i_extent_header.eh_entries);
+			u_int16_t ent = letoh16(
+			    din->i_extent_header.eh_entries);
 			struct ext4fs_extent_idx *idx = din->i_extent_idx;
 			u_int64_t leaf_blk;
 			struct buf *gbp;
@@ -1032,7 +1126,7 @@ ext4fs_buf_alloc(struct inode *ip, u_int64_t lbn, int size,
 					u_int64_t ls =
 					    letoh32(le[lent - 1].e_start_lo) |
 					    ((u_int64_t)letoh16(
-					    le[lent - 1].e_start_hi) << 32);
+					     le[lent - 1].e_start_hi) << 32);
 					goal = ls + letoh16(le[lent - 1].e_len);
 				}
 				brelse(gbp);
@@ -1307,7 +1401,7 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 
 				leaf_blk = letoh32(idx[i].ei_leaf_lo) |
 				    ((u_int64_t)letoh16(
-				    idx[i].ei_leaf_hi) << 32);
+				     idx[i].ei_leaf_hi) << 32);
 
 				error = bread(ip->i_devvp,
 				    (daddr_t)EXT4FS_FSBTODB(fs, leaf_blk),
@@ -1397,7 +1491,7 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 
 				leaf_blk = letoh32(idx[i].ei_leaf_lo) |
 				    ((u_int64_t)letoh16(
-				    idx[i].ei_leaf_hi) << 32);
+				     idx[i].ei_leaf_hi) << 32);
 
 				error = bread(ip->i_devvp,
 				    (daddr_t)EXT4FS_FSBTODB(fs, leaf_blk),
@@ -1596,7 +1690,7 @@ ext4fs_lookup(void *v)
 	if (nameiop == CREATE || nameiop == RENAME)
 		slotneeded = EXT4FS_DIRSIZ(cnp->cn_namelen);
 
-	for (off = 0; off < filesz; ) {
+	for (off = 0; off < filesz;) {
 		lbn = EXT4FS_LBLKNO(fs, off);
 
 		error = ext4fs_extent_pblk(dp, lbn, &pblk, NULL);
@@ -1621,6 +1715,17 @@ ext4fs_lookup(void *v)
 			reclen = letoh16(ep->e4d_reclen);
 
 			if (reclen == 0) {
+				brelse(bp);
+				return (EIO);
+			}
+
+			/*
+			 * Each record must fit entirely inside the
+			 * block and its name length inside the record.
+			 */
+			if (reclen < 8 ||
+			    blkoff + reclen > fs->m_block_size ||
+			    ep->e4d_namlen > reclen - 8) {
 				brelse(bp);
 				return (EIO);
 			}
@@ -1812,7 +1917,6 @@ ext4fs_makeinode(int mode, struct vnode *dvp, struct vnode **vpp,
 	if ((mode & S_IFMT) == 0)
 		mode |= S_IFREG;
 
-
 	error = ext4fs_inode_alloc(pdir, mode, cnp->cn_cred, &tvp);
 	if (error) {
 		pool_put(&namei_pool, cnp->cn_pnbuf);
@@ -1960,7 +2064,7 @@ ext4fs_getattr(void *v)
 	struct vnode *vp = ap->a_vp;
 	struct inode *ip = VTOI(vp);
 
-	struct ext4fs_dinode_256 *din = ip->i_e4din;
+	struct ext4fs_dinode_large *din = ip->i_e4din;
 	struct vattr *vap = ap->a_vap;
 
 	/* Copy from inode table */
@@ -1976,13 +2080,23 @@ ext4fs_getattr(void *v)
 	vap->va_size = letoh32(din->dinode.i_size_lo);
 	vap->va_size |= (off_t)letoh32(din->dinode.i_size_hi) << 32;
 
-	/* Convert timestamps with nanosecond precision */
+	/* Convert timestamps; the extra (nanosecond) fields only
+	 * exist when the inode format provides them. */
 	vap->va_atime.tv_sec = letoh32(din->dinode.i_atime);
-	vap->va_atime.tv_nsec = letoh32(din->dinode.i_atime_extra) >> 2;
+	vap->va_atime.tv_nsec = 0;
 	vap->va_mtime.tv_sec = letoh32(din->dinode.i_mtime);
-	vap->va_mtime.tv_nsec = letoh32(din->dinode.i_mtime_extra) >> 2;
+	vap->va_mtime.tv_nsec = 0;
 	vap->va_ctime.tv_sec = letoh32(din->dinode.i_ctime);
-	vap->va_ctime.tv_nsec = letoh32(din->dinode.i_ctime_extra) >> 2;
+	vap->va_ctime.tv_nsec = 0;
+	if (ext4fs_din_fits(ip->i_e4fs, din,
+	    offsetof(struct ext4fs_dinode, i_atime_extra), 4)) {
+		vap->va_atime.tv_nsec =
+		    letoh32(din->dinode.i_atime_extra) >> 2;
+		vap->va_mtime.tv_nsec =
+		    letoh32(din->dinode.i_mtime_extra) >> 2;
+		vap->va_ctime.tv_nsec =
+		    letoh32(din->dinode.i_ctime_extra) >> 2;
+	}
 
 	vap->va_flags = 0;
 	vap->va_gen = letoh32(din->dinode.i_nfs_generation);
@@ -2095,6 +2209,7 @@ ext4fs_setattr(void *v)
 	struct vattr *vap = ap->a_vap;
 	struct vnode *vp = ap->a_vp;
 	struct inode *ip = VTOI(vp);
+	struct m_ext4fs *fs = ip->i_e4fs;
 	struct ext4fs_dinode *din = &ip->i_e4din->dinode;
 	struct ucred *cred = ap->a_cred;
 
@@ -2158,7 +2273,7 @@ ext4fs_setattr(void *v)
 		if (cred->cr_uid != uid &&
 		    (error = suser_ucred(cred)) &&
 		    ((vap->va_vaflags & VA_UTIMES_NULL) == 0 ||
-		    (error = VOP_ACCESS(vp, VWRITE, cred, ap->a_p))))
+		     (error = VOP_ACCESS(vp, VWRITE, cred, ap->a_p))))
 			return (error);
 		if (vap->va_mtime.tv_nsec != VNOVAL)
 			ip->i_flag |= IN_CHANGE | IN_UPDATE;
@@ -2170,14 +2285,18 @@ ext4fs_setattr(void *v)
 		if (vap->va_mtime.tv_nsec != VNOVAL) {
 			din->i_mtime =
 			    htole32((u_int32_t)vap->va_mtime.tv_sec);
-			din->i_mtime_extra =
-			    htole32(vap->va_mtime.tv_nsec << 2);
+			if (ext4fs_din_fits(fs, ip->i_e4din,
+			    offsetof(struct ext4fs_dinode, i_mtime_extra), 4))
+				din->i_mtime_extra =
+				    htole32(vap->va_mtime.tv_nsec << 2);
 		}
 		if (vap->va_atime.tv_nsec != VNOVAL) {
 			din->i_atime =
 			    htole32((u_int32_t)vap->va_atime.tv_sec);
-			din->i_atime_extra =
-			    htole32(vap->va_atime.tv_nsec << 2);
+			if (ext4fs_din_fits(fs, ip->i_e4din,
+			    offsetof(struct ext4fs_dinode, i_atime_extra), 4))
+				din->i_atime_extra =
+				    htole32(vap->va_atime.tv_nsec << 2);
 		}
 		ip->i_flag |= IN_MODIFIED;
 		error = ext4fs_update(ip, 1);
@@ -2321,7 +2440,7 @@ ext4fs_write(void *v)
 
 	resid = uio->uio_resid;
 
-	for (error = 0; uio->uio_resid > 0; ) {
+	for (error = 0; uio->uio_resid > 0;) {
 		lbn = EXT4FS_LBLKNO(fs, uio->uio_offset);
 		blkoffset = EXT4FS_BLKOFF(fs, uio->uio_offset);
 		xfersize = fs->m_block_size - blkoffset;
@@ -2335,7 +2454,7 @@ ext4fs_write(void *v)
 		if (blkoffset == 0 && xfersize == fs->m_block_size &&
 		    uio->uio_offset >= filesz &&
 		    (ext4fs_extent_pblk(ip, lbn, &pblk, &ncontig) != 0 ||
-		    pblk == 0)) {
+		     pblk == 0)) {
 			/* Count full blocks remaining in this write */
 			prealloc_count = uio->uio_resid / fs->m_block_size;
 			if (prealloc_count > 32768)
@@ -2453,7 +2572,6 @@ ext4fs_fsync(void *v)
 {
 	struct vop_fsync_args *ap = v;
 	struct vnode *vp = ap->a_vp;
-
 
 	if (vp->v_mount->mnt_flag & MNT_RDONLY)
 		return (0);
@@ -2589,7 +2707,8 @@ ext4fs_checkpath(struct inode *source, struct inode *target, struct ucred *cred)
 		/* Read ".." from first directory block */
 		error = ext4fs_extent_pblk(ip, 0, &pblk, NULL);
 		if (error || pblk == 0) {
-			if (!error) error = EIO;
+			if (!error)
+				error = EIO;
 			break;
 		}
 		error = bread(ip->i_devvp,
@@ -2602,8 +2721,19 @@ ext4fs_checkpath(struct inode *source, struct inode *target, struct ucred *cred)
 
 		/* ".." is the second entry after "." */
 		dot = (struct ext4fs_directory *)bp->b_data;
-		dotdot = (struct ext4fs_directory *)
-		    ((char *)bp->b_data + letoh16(dot->e4d_reclen));
+		{
+			u_int16_t dreclen = letoh16(dot->e4d_reclen);
+
+			if (dreclen < 8 ||
+			    dreclen > fs->m_block_size -
+			    sizeof(struct ext4fs_directory)) {
+				brelse(bp);
+				error = ENOTDIR;
+				break;
+			}
+			dotdot = (struct ext4fs_directory *)
+			    ((char *)bp->b_data + dreclen);
+		}
 		if (dotdot->e4d_namlen != 2 ||
 		    dotdot->e4d_name[0] != '.' ||
 		    dotdot->e4d_name[1] != '.') {
@@ -2851,7 +2981,7 @@ abortit:
 	fcnp->cn_flags |= LOCKPARENT | LOCKLEAF;
 	if ((fcnp->cn_flags & SAVESTART) == 0)
 		panic("ext4fs_rename: lost from startdir");
-	(void) vfs_relookup(fdvp, &fvp, fcnp);
+	(void)vfs_relookup(fdvp, &fvp, fcnp);
 	if (fvp != NULL) {
 		xp = VTOI(fvp);
 		dp = VTOI(fdvp);
@@ -2885,13 +3015,12 @@ abortit:
 				if (error == 0) {
 					dotdot = (struct ext4fs_directory *)
 					    ((char *)dbp->b_data +
-					    letoh16(((struct ext4fs_directory *)
-					    dbp->b_data)->e4d_reclen));
+					     letoh16(
+					     ((struct ext4fs_directory *)dbp->b_data)->e4d_reclen));
 					dotdot->e4d_ino = htole32(newparent);
 					ext4fs_dir_set_csum(ip->i_e4fs,
 					    ip->i_number,
-					    ip->i_e4din->dinode.
-					    i_nfs_generation,
+					    ip->i_e4din->dinode.i_nfs_generation,
 					    dbp->b_data);
 					bwrite(dbp);
 				} else
@@ -3007,7 +3136,8 @@ ext4fs_mkdir(void *v)
 	dirp->e4d_ino = htole32((u_int32_t)dp->i_number);
 	dirp->e4d_reclen = htole16(fs->m_block_size - 12 -
 	    ((fs->m_feature_ro_compat &
-	    EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM) ? EXT4FS_DIR_TAIL_SIZE : 0));
+	      EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM) ? EXT4FS_DIR_TAIL_SIZE :
+	     0));
 	dirp->e4d_namlen = 2;
 	dirp->e4d_type = EXT4FS_FT_DIR;
 	dirp->e4d_name[0] = '.';
@@ -3161,7 +3291,8 @@ ext4fs_symlink(void *v)
 		auio.uio_segflg = UIO_SYSSPACE;
 		auio.uio_procp = NULL;
 		auio.uio_resid = len;
-		error = VOP_WRITE(*vpp, &auio, IO_NODELOCKED, ap->a_cnp->cn_cred);
+		error = VOP_WRITE(*vpp, &auio, IO_NODELOCKED,
+		    ap->a_cnp->cn_cred);
 	}
 
 	vput(*vpp);
@@ -3199,7 +3330,8 @@ ext4fs_readdir(void *v)
 
 		error = ext4fs_extent_pblk(ip, lbn, &pblk, NULL);
 		if (error || pblk == 0) {
-			if (!error) error = EIO;
+			if (!error)
+				error = EIO;
 			break;
 		}
 
@@ -3504,7 +3636,7 @@ ext4fs_dirempty(struct inode *ip, ufsino_t parentino, struct ucred *cred)
 	filesz = (off_t)letoh32(din->i_size_lo) |
 	    ((off_t)letoh32(din->i_size_hi) << 32);
 
-	for (off = 0; off < filesz; ) {
+	for (off = 0; off < filesz;) {
 		lbn = EXT4FS_LBLKNO(fs, off);
 
 		error = ext4fs_extent_pblk(ip, lbn, &pblk, NULL);
@@ -3689,7 +3821,7 @@ ext4fs_reclaim(void *v)
 		return (error);
 
 	if (ip->i_e4din != NULL)
-		pool_put(&ext4fs_dinode_pool, ip->i_e4din);
+		free(ip->i_e4din, M_TEMP, ip->i_e4fs->m_inode_size);
 
 	pool_put(&ext4fs_inode_pool, ip);
 
@@ -3796,7 +3928,6 @@ int
 ext4fs_pathconf(void *v)
 {
 	struct vop_pathconf_args *ap = v;
-
 
 	switch (ap->a_name) {
 	case _PC_LINK_MAX:

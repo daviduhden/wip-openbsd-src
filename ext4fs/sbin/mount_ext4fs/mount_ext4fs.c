@@ -2,6 +2,7 @@
 /*	$NetBSD: mount_ffs.c,v 1.3 1996/04/13 01:31:19 jtc Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -108,6 +109,6 @@ void
 ext4fs_usage(void)
 {
 	(void)fprintf(stderr,
-		"usage: mount_ext4fs [-o options] special node\n");
+	    "usage: mount_ext4fs [-o options] special node\n");
 	exit(1);
 }

@@ -1,7 +1,8 @@
-/*	$OpenBSD: tables.c,v 1.55 2023/11/26 16:04:17 espie Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: tables.c,v 1.4 1995/03/21 09:07:45 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -46,8 +47,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 static u_int st_hash(const char *, int, int);
 
 /*
@@ -1606,6 +1607,7 @@ add_dir(char *name, struct stat *psb, int frc_mode)
 		}
 		name = rp;
 	}
+	sigfillset(&allsigs);
 	if (dircnt == dirsize) {
 		dblk = reallocarray(dirp, dirsize * 2, sizeof(DIRDATA));
 		if (dblk == NULL) {

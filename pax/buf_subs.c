@@ -1,7 +1,8 @@
-/*	$OpenBSD: buf_subs.c,v 1.33 2024/04/23 13:34:50 jsg Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: buf_subs.c,v 1.5 1995/03/21 09:07:08 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -43,8 +44,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * routines which implement archive and file buffering

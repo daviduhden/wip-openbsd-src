@@ -1,11 +1,22 @@
 /*
- * fvwm_sandbox.h -- common sandbox helper for fvwm processes.
+ * fvwm_sandbox.h -- common sandbox helpers for fvwm processes.
  *
  * Provides pledge/unveil setup patterns used across the fvwm module set.
  * Each module calls only the helpers it needs; there is no "one size fits
  * all" policy.
  *
  * All pledge/unveil calls check return values and fail with diagnostics.
+ *
+ * Modules inherit the fvwm baseline sandbox (see fvwm.c): a locked
+ * unveil covering FVWMLIBDIR, system config, /tmp, $HOME, the bin
+ * directories, and the two device files modules use, plus a pledge
+ * superset they reduce from.  A module's own unveil calls below are
+ * therefore refinements and ignore EPERM (the inherited policy is
+ * already broader than or equal to what they ask for).
+ *
+ * The execution helper (fvwm_exec) deliberately has no sandbox of
+ * its own: pledge(2) and unveil(2) are inherited across execve(2)
+ * and would cripple the arbitrary programs fvwm launches.
  *
  * IMPORTANT: Every policy declared here requires verification on a real
  * OpenBSD system with ktrace(1) and a full X11 session.
@@ -31,61 +42,63 @@
 #define FVWM_SANDBOX_H
 
 #include <err.h>
+#include <errno.h>
 
 #ifndef FVWMLIBDIR
 #define FVWMLIBDIR "/usr/X11R6/lib/X11/fvwm"
 #endif
 
 /*
+ * All X11-talking modules carry "inet dns": X connections may use
+ * TCP (DISPLAY=host:0) and resolve display host names.
+ */
+
+/*
  * sandbox_x11_only -- process that only needs X11 + stdio + fvwm pipes.
- * No filesystem access, no network, no process creation.
+ * No filesystem access, no network beyond X11, no process creation.
  * Used by: FvwmAuto, FvwmBanner, FvwmBacker, FvwmIdent, FvwmIconBox,
  *          FvwmPager, FvwmScroll, FvwmTalk, FvwmWinList
  */
 static inline void
 sandbox_x11_only(const char *progname)
 {
-	if (pledge("stdio", NULL) == -1)
+	if (pledge("stdio inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio", progname);
 }
 
 /*
  * sandbox_x11_config -- X11 + read-only config file access.
- * No write, no network, no process creation.
+ * No write, no network beyond X11, no process creation.
  * Used by: FvwmButtons, FvwmIconMan (after config read),
  *          FvwmForm (after /dev/null open), FvwmRearrange
  */
 static inline void
 sandbox_x11_config(const char *progname)
 {
-	if (pledge("stdio rpath", NULL) == -1)
+	if (pledge("stdio rpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath", progname);
 }
 
 /*
  * sandbox_save_state -- X11 + write to home directory.
- * No network, no process creation.
+ * No network beyond X11, no process creation.
  * Used by: FvwmSave, FvwmSaveDesk
- *
- * Unveil is set up BEFORE calling this to restrict to the exact file.
  */
 static inline void
 sandbox_save_state(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath", NULL) == -1)
+	if (pledge("stdio rpath wpath cpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath wpath cpath", progname);
 }
 
 /*
  * sandbox_cpp_preproc -- X11 + fork/exec cpp + tmp + dns.
  * Used by: FvwmCpp
- *
- * Unveil is set up BEFORE calling this.
  */
 static inline void
 sandbox_cpp_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw",
+	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
 	    NULL) == -1)
 		err(1, "%s: pledge", progname);
 }
@@ -93,13 +106,11 @@ sandbox_cpp_preproc(const char *progname)
 /*
  * sandbox_m4_preproc -- X11 + popen m4 + tmp + dns.
  * Used by: FvwmM4
- *
- * Unveil is set up BEFORE calling this.
  */
 static inline void
 sandbox_m4_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw",
+	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
 	    NULL) == -1)
 		err(1, "%s: pledge", progname);
 }
@@ -110,50 +121,8 @@ sandbox_m4_preproc(const char *progname)
 static inline void
 sandbox_xpmroot(const char *progname)
 {
-	if (pledge("stdio rpath", NULL) == -1)
+	if (pledge("stdio rpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath", progname);
-}
-
-/*
- * sandbox_main_fvwm -- main window manager process.
- * After startup: retains proc for module fork, exec for helper launch,
- * rpath for config reads.
- */
-static inline void
-sandbox_main_fvwm(const char *progname)
-{
-	if (unveil(FVWMLIBDIR, "rx") == -1)
-		err(1, "%s: unveil %s", progname, FVWMLIBDIR);
-	if (unveil("/etc/X11/fvwm", "r") == -1)
-		err(1, "%s: unveil /etc/X11/fvwm", progname);
-	if (unveil("/tmp", "rwc") == -1)
-		err(1, "%s: unveil /tmp", progname);
-	if (unveil(NULL, NULL) == -1)
-		err(1, "%s: unveil lock", progname);
-
-	if (pledge("stdio rpath proc exec", NULL) == -1)
-		err(1, "%s: pledge", progname);
-}
-
-/*
- * sandbox_exec_helper -- fvwm_exec helper process.
- * Receives imsg requests, forks children, and execs them.
- */
-static inline void
-sandbox_exec_helper(const char *progname)
-{
-	if (pledge("stdio proc exec", NULL) == -1)
-		err(1, "%s: pledge", progname);
-}
-
-/*
- * sandbox_exec_child -- child of the execution helper, about to exec.
- */
-static inline void
-sandbox_exec_child(const char *progname)
-{
-	if (pledge("stdio exec", NULL) == -1)
-		err(1, "%s: pledge", progname);
 }
 
 /*
@@ -168,7 +137,7 @@ unveil_tempdir(const char *progname)
 	tmp = getenv("TMPDIR");
 	if (tmp == NULL)
 		tmp = "/tmp";
-	if (unveil(tmp, "rwc") == -1)
+	if (unveil(tmp, "rwc") == -1 && errno != EPERM)
 		err(1, "%s: unveil %s", progname, tmp);
 }
 
@@ -185,7 +154,7 @@ unveil_home_read(const char *progname)
 		warnx("%s: HOME not set, cannot unveil", progname);
 		return;
 	}
-	if (unveil(home, "r") == -1)
+	if (unveil(home, "r") == -1 && errno != EPERM)
 		err(1, "%s: unveil %s", progname, home);
 }
 
@@ -202,7 +171,7 @@ unveil_home_write(const char *progname)
 		warnx("%s: HOME not set, cannot unveil", progname);
 		return;
 	}
-	if (unveil(home, "rwc") == -1)
+	if (unveil(home, "rwc") == -1 && errno != EPERM)
 		err(1, "%s: unveil %s", progname, home);
 }
 

@@ -122,7 +122,7 @@ TerminateHandler(int sig)
 	isTerminated = True;
 }
 
-int
+static int
 ItemCountD(List *list)
 {
 	if (!ShowCurrentDesk)
@@ -173,8 +173,8 @@ main(int argc, char **argv)
 	if ((argc == 7) && (!strcasecmp(argv[6], "Transient")))
 		Transient = 1;
 
-	Fvwm_fd[0] = atoi(argv[1]);
-	Fvwm_fd[1] = atoi(argv[2]);
+	Fvwm_fd[0] = FvwmParseFd(argv[1]);
+	Fvwm_fd[1] = FvwmParseFd(argv[2]);
 
 #ifdef HAVE_SIGACTION
 #ifdef SA_INTERRUPT
@@ -618,11 +618,13 @@ ParseConfig(void)
 			else if (strncasecmp(tline,
 			    CatString3(Module, "MinWidth", ""),
 			    Clength + 8) == 0)
-				MinWidth = atoi(&tline[Clength + 8]);
+				MinWidth = FvwmParseInteger(&tline[Clength +
+				    8]);
 			else if (strncasecmp(tline,
 			    CatString3(Module, "MaxWidth", ""),
 			    Clength + 8) == 0)
-				MaxWidth = atoi(&tline[Clength + 8]);
+				MaxWidth = FvwmParseInteger(&tline[Clength +
+				    8]);
 			else if (strncasecmp(tline,
 			    CatString3(Module, "DontDepressFocus", ""),
 			    Clength + 16) == 0)
@@ -755,7 +757,7 @@ LoopOnEvents(void)
   Cribbed from FvwmIconMan/x.c - maybe should be in a library
   Returns the root-child and fills in off_x, off_y to give offset
 ******************************************************************************/
-Window
+static Window
 find_frame_window(Window win, int *off_x, int *off_y)
 {
 	Window root, parent, *junkw;
@@ -876,7 +878,7 @@ LinkAction(char *string)
 {
 	char *temp;
 	temp = string;
-	while (isspace(*temp))
+	while (isspace((unsigned char)*temp))
 		temp++;
 	if (strncasecmp(temp, "Click1", 6) == 0)
 		CopyString(&ClickAction[0], &temp[6]);

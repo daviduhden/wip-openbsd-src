@@ -29,7 +29,6 @@
 #include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
 
-
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -594,7 +593,7 @@ parse_arguments(ModuleState *state, const char *source, int argc, char *argv[],
 		} else if (!strcmp(arg, "-s")) {
 			state->include_sticky = 1;
 		} else if (!strcmp(arg, "-mn") && ((i + 1) < argc)) {
-			state->tile_limit = atoi(argv[++i]);
+			state->tile_limit = FvwmParseInteger(argv[++i]);
 		} else if (!strcmp(arg, "-resize")) {
 			state->resize_clients = 1;
 		} else if (!strcmp(arg, "-incx") && ((i + 1) < argc)) {
@@ -733,8 +732,8 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	state->pipe_fd[0] = atoi(argv[1]);
-	state->pipe_fd[1] = atoi(argv[2]);
+	state->pipe_fd[0] = FvwmParseFd(argv[1]);
+	state->pipe_fd[1] = FvwmParseFd(argv[2]);
 
 	state->display = XOpenDisplay(NULL);
 	if (!state->display) {

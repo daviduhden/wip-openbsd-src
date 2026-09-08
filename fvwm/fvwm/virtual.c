@@ -348,7 +348,7 @@ raisePanFrames(void)
  *
  ****************************************************************************/
 void
-initPanFrames()
+initPanFrames(void)
 {
 	XSetWindowAttributes attributes; /* attributes for create */
 	unsigned long valuemask;
@@ -615,7 +615,7 @@ MoveViewport(int newx, int newy, Bool grab)
  * read (or if action is empty).
  *
  **************************************************************************/
-int
+static int
 GetDeskNumber(char *action)
 {
 	int n;

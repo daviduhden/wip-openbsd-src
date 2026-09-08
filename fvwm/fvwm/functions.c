@@ -180,7 +180,7 @@ static struct functions func_config[] = {
  * Set a colon-separated path, with environment variable expansions,
  * and expand '+' to be the value of the previous path.
  **/
-void
+static void
 setPath(char **p_path, char *newpath, int free_old_path)
 {
 	char *oldpath = *p_path;
@@ -346,7 +346,7 @@ find_func_type(char *action, short *func_type, Bool *func_needs_window)
 	int mlen;
 
 	if (action) {
-		while (*endtok && !isspace(*endtok))
+		while (*endtok && !isspace((unsigned char)*isspace))
 			++endtok;
 		len = endtok - action;
 		j = 0;

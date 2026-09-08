@@ -1,7 +1,8 @@
-/*	$OpenBSD: pat_rep.c,v 1.45 2023/06/26 07:10:17 op Exp $	*/
+/*	$OpenBSD: $	*/
 /*	$NetBSD: pat_rep.c,v 1.4 1995/03/21 09:07:33 cgd Exp $	*/
 
 /*-
+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  * Copyright (c) 1992 Keith Muller.
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -42,8 +43,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * data structure for storing user supplied replacement strings (-s)

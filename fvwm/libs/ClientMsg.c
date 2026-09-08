@@ -1,3 +1,4 @@
+#include "fvwmlib.h"
 /***************************************************************************
  *
  * ICCCM Client Messages - Section 4.2.8 of the ICCCM dictates that all
