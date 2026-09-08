@@ -1,0 +1,75 @@
+.Dd $Mdocdate$
+.Dt FVWM_EXEC 1
+.Os OpenBSD
+.Sh NAME
+.Nm fvwm_exec
+.Nd privilege-separated execution helper for
+.Xr fvwm 1
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+is the execution helper of the
+.Xr fvwm 1
+window manager.
+It is started by
+.Xr fvwm 1
+at session startup, before the window manager locks its filesystem
+view, and communicates with it over an
+.Xr imsg 3
+channel (a
+.Xr socketpair 2
+whose descriptor is passed in the
+.Ev FVWM_EXEC_FD
+environment variable).
+.Pp
+.Nm
+handles two request classes:
+.Bl -tag -width Ds
+.It Ic Exec
+Launch a program detached from
+.Xr fvwm 1 .
+.It Ic PipeRead
+Run a command with its standard output streamed back to
+.Xr fvwm 1 ,
+which feeds it to its configuration parser.
+.El
+.Pp
+Every request payload is validated against the message length;
+oversized or malformed requests are discarded.
+A PipeRead command whose output cannot be consumed promptly is
+terminated with
+.Dv SIGTERM
+followed by
+.Dv SIGKILL
+after a grace period.
+.Pp
+Because the helper runs commands that may need the user's full
+privileges, it deliberately applies no
+.Xr pledge 2
+or
+.Xr unveil 2
+policy: both are inherited across
+.Xr execve 2
+and would cripple the launched programs.
+Its protection comes from its small dedicated code base, strict
+message validation, and
+.Xr closefrom 3
+descriptor hygiene; it never inherits the X11 connection.
+.Sh SEE ALSO
+.Xr fvwm 1 ,
+.Xr execve 2 ,
+.Xr closefrom 3 ,
+.Xr imsg_init 3 ,
+.Xr pledge 2 ,
+.Xr unveil 2
+.Sh HISTORY
+.Nm
+first appeared as part of the OpenBSD fork of FVWM 2.2.5.
+.Sh CAVEATS
+.Nm
+should only be started by
+.Xr fvwm 1 :
+it expects the imsg descriptor in
+.Ev FVWM_EXEC_FD
+and takes no arguments.

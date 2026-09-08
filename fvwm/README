@@ -8,9 +8,12 @@ Motif mwm compatibility.
 For users of the old FVWM 1.xx, please be aware that version 2.2 has a
 lot of differences.
 
-For users of the FVWM 2.0.x betas, please be aware that version 2.2 uses
-GNU autoconf/automake rather than Imake, so things will install in
-different places by default.
+This tree is the OpenBSD fork of FVWM 2.2.5, built with OpenBSD
+make(1) and /usr/share/mk (see the top-level README.md of the
+repository); the GNU autoconf/automake build of the original release
+is not used here.  The OpenBSD fork adds privilege separation:
+external commands run in the fvwm_exec helper, and every process
+applies pledge(2)/unveil(2) policies; see fvwm(1) and fvwm_exec(1).
 
 FVWM's original author, Rob Nation (THANKS ROB!), has "retired" from
 work on it, so please don't bother him with silly little things like bug

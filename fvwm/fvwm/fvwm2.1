@@ -248,13 +248,17 @@ manages windows.
 .It
 The
 .Nm fvwm_exec
-helper process executes external commands without access
-to the X11 connection.
-.It
-After initialization, the main process drops privileges via
-.Xr pledge 2
+helper process executes external commands
+.Pq Ic Exec
 and
-.Xr unveil 2 .
+.Ic PipeRead
+commands without access to the X11 connection.
+.It
+After initialization, the main process locks its filesystem view
+with
+.Xr unveil 2
+and reduces its privileges with
+.Xr pledge 2 .
 .El
 .Pp
 The main
@@ -267,52 +271,102 @@ promises after startup:
 .Va stdio
 (memory allocation, logging)
 .It
-.Va rpath
-(read configuration and resources)
+.Va rpath wpath cpath
+(read and write configuration, resource files, and saved state)
 .It
-.Va proc
-(fork for module launching)
+.Va proc exec
+(fork/exec for module launching, multi-screen operation,
+.Ic Restart ,
+and the local
+.Ic Exec
+fallback when the helper is unavailable)
 .It
-.Va exec
-(launch the execution helper)
-.El
-.Pp
-The execution helper runs with the following
-.Xr pledge 2
-promises:
-.Bl -dash -compact
-.It
-.Va stdio
-.It
-.Va proc
-.It
-.Va exec
+.Va dns getpw inet
+(user database lookups and TCP X11 connections; kept so the
+spawned modules can inherit them and reduce to their own sets)
 .El
 .Pp
 .Nm
 uses
 .Xr unveil 2
-to restrict filesystem access to:
+to restrict filesystem access of the main process and the modules
+it launches to:
 .Bl -dash -compact
 .It
 .Pa /usr/X11R6/lib/X11/fvwm/
-(read + execute)
+(read + execute; modules and
+.Nm fvwm_exec )
 .It
 .Pa /etc/X11/fvwm/
-(read)
+(read; system configuration)
 .It
 .Pa /tmp/
 (read, write, create)
+.It
+.Pa $HOME
+(read, write, create; user configuration, saved state)
+.It
+.Pa /etc
+(read; passwd/group lookups)
+.It
+.Pa /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/X11R6/bin
+(read + execute; module helpers such as
+.Xr FvwmCpp 1
+and
+.Xr FvwmM4 1 )
+.It
+.Pa /dev/null /dev/console
+(write)
+.It
+the directory containing
+.Ar argv[0]
+(read + execute; required by
+.Ic Restart )
 .El
 .Pp
+The
+.Nm fvwm_exec
+helper is started before the main process locks its
+.Xr unveil 2
+policy, and it deliberately applies no
+.Xr pledge 2
+or
+.Xr unveil 2
+of its own: both are inherited across
+.Xr execve 2
+and would cripple the arbitrary programs
 .Nm
-modules are separate processes.
-Each module opens its own X11 connection and communicates
-with the main
+launches.
+This means
+.Ic Exec
+and
+.Ic PipeRead
+commands are not constrained by the main process's filesystem
+sandbox.
+The helper's protection comes from its small dedicated code base,
+strict validation of every
+.Xr imsg 3
+payload, and
+.Xr closefrom 3
+descriptor hygiene.
+.Pp
+.Ic PipeRead
+runs its command in the helper and streams the output back over
+the imsg channel; the output is parsed with the historical FVWM
+line semantics (backslash-newline continuation, NUL-truncated
+commands, nested
+.Ic PipeRead
+up to the configured depth) with bounded line lengths, and is
+treated as untrusted configuration input.
+.Pp
 .Nm
-process via Unix pipes.
-Module binaries are executed by the helper process, preventing
-the main window manager from directly executing user commands.
+modules are separate processes launched by the main process; each
+module opens its own X11 connection, communicates with the main
+.Nm
+process via Unix pipes, and applies its own
+.Xr pledge 2
+policy (derived from the inherited baseline via
+.Pa fvwm_sandbox.h ).
 .Sh SEE ALSO
 .Xr fvwm_exec 1 ,
 .Xr FvwmAuto 1 ,
@@ -361,9 +415,13 @@ Privilege separation,
 .Xr pledge 2 ,
 and
 .Xr unveil 2
-policies in this version have not been verified through runtime testing.
+policies in this version have not been verified through runtime testing
+on a live X11 session.
 .Pp
-The execution helper and imsg IPC have not been tested against real
-X11 workloads.
+The imsg payload decoding, the
+.Ic PipeRead
+line assembly, and the integer configuration parsing are covered by
+host-side unit tests, but the execution helper and the imsg IPC have
+not been exercised against real X11 workloads.
 Module protocol compatibility has been preserved through static
 inspection of message layouts but has not been empirically verified.

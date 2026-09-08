@@ -22,6 +22,8 @@ LDADD += -lXpm -lXt -lICE -lSM -lXext -lX11 -lxcb -lXdmcp -lXau -lutil
 fvwm.1: fvwm2.1
 	sed -e "s,__projectroot__,${X11BASE}," ${.CURDIR}/fvwm2.1 > fvwm.1
 
+MAN += fvwm_exec.1
+
 CLEANFILES += fvwm.1 fvwm_exec
 
 # fvwm_exec is the privilege-separated execution helper, built by
