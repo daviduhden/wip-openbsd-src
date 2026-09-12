@@ -47,9 +47,16 @@ Additional Component Licenses
 -----------------------------
 The following pieces of software are distributed under the ISC License:
 
+  fvwm/exec.c
+  fvwm/exec_imsg.h
+  fvwm/fvwm_exec.c
+  fvwm/fvwm_sandbox.h
+  fvwm/pipebuf.c
+  fvwm/pipebuf.h
+  fvwm/xalloc.h
   libs/ColorUtils.c
-  modules/FvwmRearrange
   modules/FvwmBacker/root_bits.c
+  modules/FvwmRearrange
 
 ISC License
 -----------
