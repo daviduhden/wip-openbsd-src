@@ -28,4 +28,9 @@ installation prefixes/build integration still need native review.
 
 Without options, the existing interactive bootstrap workflow checks out a
 fresh tree and configures the host. Do not use that mode merely to copy
-sources into an existing checkout.
+sources into an existing checkout. `--no-provision` keeps that workflow
+but skips creating the `user` account and configuring doas:
+
+```sh
+doas ./fetch-src.ksh --no-provision
+```

@@ -433,6 +433,7 @@ canonical_target_tree() {
 # Main function
 main() {
 	TARGET_KIND=""
+	NO_PROVISION=0
 	case "${1:-}" in
 	--list)
 		move_to_wip_openbsd_src
@@ -459,9 +460,17 @@ main() {
 		fi
 		return $?
 		;;
+	--no-provision)
+		NO_PROVISION=1
+		shift
+		[ "$#" -eq 0 ] || {
+			error "Usage: $0 [--list | --copy-only TREE [component ...] | --no-provision]"
+			return 1
+		}
+		;;
 	"") ;;
 	*)
-		error "Usage: $0 [--list | --copy-only TREE [component ...]]"
+		error "Usage: $0 [--list | --copy-only TREE [component ...] | --no-provision]"
 		return 1
 		;;
 	esac
@@ -487,8 +496,12 @@ main() {
 	else
 		log "Skipping copy from wip-openbsd-src."
 	fi
-	create_user_with_random_password
-	configure_doas
+	if [ "$NO_PROVISION" -eq 1 ]; then
+		log "Skipping user creation and doas configuration."
+	else
+		create_user_with_random_password
+		configure_doas
+	fi
 }
 
 # Execute the main function
