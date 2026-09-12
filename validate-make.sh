@@ -46,8 +46,14 @@ log() { printf '%s\n' "$*"; }
 MODE=check
 if [ $# -gt 0 ] && [ "$1" != "-" ]; then
 	case "$1" in
-	check | format) MODE=$1; shift ;;
-	-h | --help) printf '%s\n' "$USAGE"; exit 0 ;;
+	check | format)
+		MODE=$1
+		shift
+		;;
+	-h | --help)
+		printf '%s\n' "$USAGE"
+		exit 0
+		;;
 	esac
 fi
 ROOT=${1:-.}
@@ -137,7 +143,8 @@ build_stubdir() {
 		: >"$STUBDIR/$inc"
 	done
 	# Any additional system includes referenced by the Makefiles.
-	grep -h '^[^#]*\.include *<' $FILES 2>/dev/null |
+	printf '%s\n' "$FILES" |
+		grep -h '^[^#]*\.include *<' 2>/dev/null |
 		sed -n 's/.*\.include *<\([^>]*\)>.*/\1/p' |
 		while IFS= read -r name; do
 			[ -n "$name" ] || continue
@@ -393,9 +400,9 @@ semantic_check() {
 	esac
 	output=$(cd "$dir" &&
 		"$bmk" -m "$LOG_FILE/obsdmk" -n \
-		MACHINE_ARCH=amd64 MACHINE=amd64 \
-		LIBCRT0=/dev/null LIBC=/dev/null \
-		CRTBEGIN=/dev/null CRTEND=/dev/null 2>&1)
+			MACHINE_ARCH=amd64 MACHINE=amd64 \
+			LIBCRT0=/dev/null LIBC=/dev/null \
+			CRTBEGIN=/dev/null CRTEND=/dev/null 2>&1)
 	rc=$?
 	case "$output" in
 	*"don't know how to make"*)

@@ -86,21 +86,23 @@ check_deps() {
 	fi
 }
 
-make_args() {
+run_make() {
 	if [ -n "${DESTDIR:-}" ]; then
-		print -- "DESTDIR=$DESTDIR"
+		"$MAKE" "$@" "DESTDIR=$DESTDIR"
+	else
+		"$MAKE" "$@"
 	fi
 }
 
 build_pax() {
 	log "Building pax..."
-	"$MAKE" -C "$SCRIPT_DIR/pax" $(make_args)
+	run_make -C "$SCRIPT_DIR/pax"
 	log "pax built successfully."
 }
 
 build_fvwm() {
 	log "Building fvwm..."
-	"$MAKE" -C "$SCRIPT_DIR/fvwm" $(make_args)
+	run_make -C "$SCRIPT_DIR/fvwm"
 	log "fvwm built successfully."
 }
 
@@ -109,7 +111,7 @@ do_install() {
 		warn "Installing to system paths needs root; use doas or DESTDIR."
 	fi
 	log "Installing pax and fvwm..."
-	"$MAKE" -C "$SCRIPT_DIR" $(make_args) install
+	run_make -C "$SCRIPT_DIR" install
 	log "Install complete."
 }
 
