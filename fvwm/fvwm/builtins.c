@@ -26,6 +26,8 @@
 static Boolean ReadMenuFace(char *s, MenuFace *mf, int verbose);
 static void FreeMenuFace(Display *dpy, MenuFace *mf);
 
+extern char **environ;
+
 static char *exec_shell_name = "/bin/sh";
 /* button state strings must match the enumerated states */
 static char *button_states[MaxButtonState] = {
