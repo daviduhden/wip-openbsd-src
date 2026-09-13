@@ -116,11 +116,11 @@ static void
 test_long_lines(void)
 {
 	char big[8192];
-	char *s, *tok;
+	char *tok;
 
 	memset(big, 'x', sizeof(big) - 2);
 	big[sizeof(big) - 2] = '\0';
-	s = GetNextToken(big, &tok);
+	GetNextToken(big, &tok);
 	CHECK(tok != NULL && strlen(tok) == sizeof(big) - 2, "long token");
 	free(tok);
 }
