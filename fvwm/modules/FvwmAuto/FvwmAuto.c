@@ -54,6 +54,7 @@ void DeadPipe(int nonsense);
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }
 

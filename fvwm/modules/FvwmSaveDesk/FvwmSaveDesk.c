@@ -254,6 +254,7 @@ list_new_page(unsigned long *body)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }
 

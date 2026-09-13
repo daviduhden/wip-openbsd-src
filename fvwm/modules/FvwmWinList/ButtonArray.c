@@ -290,7 +290,7 @@ FreeAllButtons(ButtonArray *array)
 void
 DoButton(Button *button, int x, int y, int w, int h)
 {
-	int up, Fontheight, newx, set;
+	int up, newx, set;
 	GC topgc;
 	GC bottomgc;
 	char *string;
@@ -308,7 +308,6 @@ DoButton(Button *button, int x, int y, int w, int h)
 	gcv.font = font->fid;
 	XChangeGC(dpy, graph[set], gcm, &gcv);
 
-	Fontheight = ButtonFont->ascent + ButtonFont->descent;
 
 	/*? XClearArea(dpy,win,x,y,w,h,False);*/
 	XFillRectangle(dpy, win, background[set], x, y, w, h + 1);
@@ -471,7 +470,7 @@ WhichButton(ButtonArray *array, int x, int y)
   ButtonName - Return the name of the button
 ******************************************************************************/
 static char *
-ButtonName(ButtonArray *array, int butnum)
+ButtonName(ButtonArray *array, int butnum) __unused
 {
 	Button *temp;
 

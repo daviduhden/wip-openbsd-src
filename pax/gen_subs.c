@@ -291,6 +291,7 @@ static int
 listopt_keyword_time(struct listopt_ctx *ctx, ARCHD *arcn, const char *keyword,
     struct timespec *ts)
 {
+	(void)ctx;
 	const char *val;
 	char *end;
 

@@ -5,7 +5,7 @@
 
 #include "FvwmIconMan.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: readconfig.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
 /************************************************************************
@@ -34,13 +34,13 @@ FunctionType builtin_functions[] = {
 	{"gotomanager", builtin_gotomanager, 1, {ManagerArg}},
 	{"jmp", builtin_jmp, 1, {JmpArg}}, {"label", builtin_label, 1, {StringArg}},
 	{"print", builtin_print, 1, {StringArg}},
-	{"printdebug", builtin_printdebug, 0}, {"quit", builtin_quit, 0},
-	{"refresh", builtin_refresh, 0}, {"ret", builtin_ret, 0},
+	{"printdebug", builtin_printdebug, 0, {0}}, {"quit", builtin_quit, 0, {0}},
+	{"refresh", builtin_refresh, 0, {0}}, {"ret", builtin_ret, 0, {0}},
 	{"searchback", builtin_searchback, 1, {StringArg}},
 	{"searchforward", builtin_searchforward, 1, {StringArg}},
-	{"select", builtin_select, 0},
+	{"select", builtin_select, 0, {0}},
 	{"sendcommand", builtin_sendcommand, 1, {StringArg}},
-	{"warp", builtin_warp, 0}};
+	{"warp", builtin_warp, 0, {0}}};
 
 static int num_builtins = sizeof(builtin_functions) / sizeof(FunctionType);
 
@@ -84,6 +84,8 @@ save_current_line(char *s)
 void
 print_args(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
+	(void)args;
 #ifdef PRINT_DEBUG
 	int i;
 
@@ -174,6 +176,7 @@ print_binding(Binding *binding)
 void
 print_bindings(Binding *list)
 {
+	(void)list;
 #ifdef PRINT_DEBUG
 	ConsoleDebug(CONFIG, "binding list:\n");
 	while (list != NULL) {
@@ -258,13 +261,14 @@ extract_int(char *p, int *n)
 static void
 find_context(char *string, int *output, struct charstring *table, char *tline)
 {
+	(void)tline;
 	int i = 0, j = 0;
 	Bool matched;
 	char tmp1;
 
 	*output = 0;
 	i = 0;
-	while (i < strlen(string)) {
+	while (i < (int)strlen(string)) {
 		j = 0;
 		matched = FALSE;
 		while ((!matched) && (table[j].key != 0)) {
@@ -293,6 +297,7 @@ find_context(char *string, int *output, struct charstring *table, char *tline)
 static int
 init_config_file(char *file)
 {
+	(void)file;
 #if FVWM_VERSION == 1
 	if ((config_fp = fopen(file, "r")) == NULL) {
 		ConsoleMessage("Couldn't open file: %s\n", file);
@@ -669,7 +674,7 @@ ParseMouseEntry(char *tline)
 {
 	char modifiers[20], *action, *token;
 	Binding *new;
-	int button;
+	int button = 0;
 	int n1 = 0, n2 = 0;
 	int mods;
 

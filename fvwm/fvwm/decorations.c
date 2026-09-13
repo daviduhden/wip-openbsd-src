@@ -197,7 +197,7 @@ GetOlHints(FvwmWindow *t)
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_DECOR_ADD, 0L, 20L, False,
 	    XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
 	    (unsigned char **)&hints) == Success) {
-		for (i = 0; i < nitems; i++) {
+		for (i = 0; i < (int)nitems; i++) {
 			if (hints[i] == _XA_OL_DECOR_CLOSE)
 				t->ol_hints |= OL_DECOR_CLOSE;
 			else if (hints[i] == _XA_OL_DECOR_RESIZE)
@@ -214,7 +214,7 @@ GetOlHints(FvwmWindow *t)
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_DECOR_DEL, 0L, 20L, False,
 	    XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
 	    (unsigned char **)&hints) == Success) {
-		for (i = 0; i < nitems; i++) {
+		for (i = 0; i < (int)nitems; i++) {
 			if (hints[i] == _XA_OL_DECOR_CLOSE)
 				t->ol_hints &= ~OL_DECOR_CLOSE;
 			else if (hints[i] == _XA_OL_DECOR_RESIZE)

@@ -377,6 +377,7 @@ static void
 ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module, int piperead)
 {
+	(void)junk;
 
 	if (numfilesread >= MAX_NESTING_DEPTH) {
 		fvwm_msg(ERR, piperead ? "PipeRead" : "Read",
@@ -508,7 +509,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 			break;
 		{
 			int l;
-			while ((l = strlen(line)) < sizeof(line) && l >= 2 &&
+			while ((l = strlen(line)) < (int)sizeof(line) && l >= 2 &&
 			    line[l - 2] == '\\' && line[l - 1] == '\n') {
 				char *cont = fgets(
 				    line + l - 2, sizeof(line) - l + 1, stream);

@@ -115,6 +115,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module, Bool fAnimated,
     Bool fMoveToPage)
 {
+	(void)Module;
 	int FinalX, FinalY;
 	int n;
 	int x, y;
@@ -139,7 +140,8 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	XGetGeometry(
-	    dpy, w, &JunkRoot, &x, &y, &width, &height, &JunkBW, &JunkDepth);
+	    dpy, w, &JunkRoot, &x, &y, (unsigned int *)&width,
+	    (unsigned int *)&height, &JunkBW, &JunkDepth);
 	if (fMoveToPage) {
 		fAnimated = FALSE;
 		FinalX = x % Scr.MyDisplayWidth;
@@ -396,6 +398,7 @@ DoSnapAttract(FvwmWindow *tmp_win, int Width, int Height, int *px, int *py)
 static void
 ClampToScreen(int *x, int *y, int width, int height, int bw)
 {
+	(void)bw;
 	int margin = 32;
 
 	if (*x + width < margin)

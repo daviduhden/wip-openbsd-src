@@ -257,8 +257,8 @@ GetXPMFile(struct icon_info *item)
 		free(path);
 		return;
 	}
-	item->icon_w = min(max_icon_width, my_image.width);
-	item->icon_h = min(max_icon_height, my_image.height);
+	item->icon_w = min(max_icon_width, (int)my_image.width);
+	item->icon_h = min(max_icon_height, (int)my_image.height);
 	item->icon_depth = d_depth;
 	free(path);
 #endif /* XPM */

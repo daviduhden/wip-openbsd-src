@@ -38,6 +38,11 @@ void
 setEdgeThickness(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	int val, n;
 
 	n = GetIntegerArguments(action, NULL, &val, 1);
@@ -685,6 +690,11 @@ void
 changeDesks_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	changeDesks(GetDeskNumber(action));
 }
 
@@ -693,7 +703,6 @@ changeDesks(int desk)
 {
 	int oldDesk;
 	FvwmWindow *FocusWin = 0, *t, *t1;
-	static FvwmWindow *StickyWin = 0;
 
 	oldDesk = Scr.CurrentDesk;
 	Scr.CurrentDesk = desk;
@@ -734,7 +743,6 @@ changeDesks(int desk)
 				t->Desk = Scr.CurrentDesk;
 				if (Scr.Focus == t) {
 					t->FocusDesk = oldDesk;
-					StickyWin = t;
 				}
 			}
 			t = t->stack_next;
@@ -792,6 +800,7 @@ void
 changeWindowsDesk(XEvent *eventp, Window w, FvwmWindow *t,
     unsigned long context, char *action, int *Module)
 {
+	(void)Module;
 	int desk;
 
 	if (DeferExecution(eventp, &w, &t, &context, SELECT, ButtonRelease))
@@ -829,10 +838,15 @@ void
 scroll(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
     char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	int x, y;
-	int val1, val2, val1_unit, val2_unit, n;
+	int val1, val2, val1_unit, val2_unit;
 
-	n = GetTwoArguments(action, &val1, &val2, &val1_unit, &val2_unit);
+	GetTwoArguments(action, &val1, &val2, &val1_unit, &val2_unit);
 
 	if ((val1 > -100000) && (val1 < 100000))
 		x = Scr.Vx + val1 * val1_unit / 100;
@@ -875,6 +889,11 @@ void
 goto_page_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	int val[2], n, x, y;
 
 	n = GetIntegerArguments(action, NULL, val, 2);

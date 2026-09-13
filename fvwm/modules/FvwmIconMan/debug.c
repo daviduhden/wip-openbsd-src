@@ -4,7 +4,7 @@
 #include "FvwmIconMan.h"
 #include "debuglevels.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: debug.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 static FILE *console = NULL;
@@ -39,6 +39,8 @@ OpenConsole(const char *filenm)
 void
 ConsoleDebug(int flag, const char *fmt, ...)
 {
+	(void)flag;
+	(void)fmt;
 	assert(console != NULL);
 
 #ifdef PRINT_DEBUG

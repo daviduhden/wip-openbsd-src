@@ -162,6 +162,7 @@ main(int argc, char **argv)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	extern Atom wm_del_win;
 
 	XReparentWindow(dpy, app_win, Root, 0, 0);
@@ -246,7 +247,7 @@ ClientWindow(Window input)
 	if (!XQueryTree(dpy, input, &root, &parent, &children, &nchildren))
 		return None;
 
-	for (i = 0; i < nchildren; i++) {
+	for (i = 0; i < (int)nchildren; i++) {
 		target = ClientWindow(children[i]);
 		if (target != None) {
 			XFree((char *)children);

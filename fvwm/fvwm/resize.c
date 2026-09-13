@@ -46,6 +46,7 @@ void
 resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)Module;
 	Bool finished = FALSE, done = FALSE, abort = FALSE;
 	int x, y, delta_x, delta_y, stashed_x, stashed_y;
 	Window ResizeWindow;
@@ -599,6 +600,7 @@ ConstrainSize(FvwmWindow *tmp_win, int *widthp, int *heightp, Bool roundUp,
 void
 MoveOutline(Window root, int x, int y, int width, int height)
 {
+	(void)root;
 	static int lastx = 0;
 	static int lasty = 0;
 	static int lastWidth = 0;

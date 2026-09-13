@@ -38,7 +38,7 @@ IsClick(int x, int y, long EndMask, XEvent *d)
 
 	while ((total < Scr.ClickTime) && (x - xcurrent < 3) &&
 	    (x - xcurrent > -3) && (y - ycurrent < 3) &&
-	    (y - ycurrent > -3) && ((lastTimestamp - t0) < Scr.ClickTime)) {
+	    (y - ycurrent > -3) && ((lastTimestamp - t0) < (Time)Scr.ClickTime)) {
 		usleep(20000);
 		total += 20;
 		if (XCheckMaskEvent(dpy, EndMask, d)) {
@@ -64,6 +64,7 @@ void
 ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)Module;
 	char type = MOTION;
 	char c;
 	MenuItem *mi;
@@ -236,7 +237,7 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 			n = input[i + 1] - '0';
 			if ((n >= 0) && (n <= 9)) {
 				if (arguments[n] != NULL) {
-					for (k = 0; k < strlen(arguments[n]);
+					for (k = 0; k < (int)strlen(arguments[n]);
 					    k++)
 						out[j++] = arguments[n][k];
 					i++;

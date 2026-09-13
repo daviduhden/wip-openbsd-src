@@ -236,6 +236,7 @@ process_message(unsigned long type, unsigned long *body)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	freelist();
 	exit(0);
 }
@@ -436,7 +437,7 @@ list_end(void)
 			exit(0);
 		case ClientMessage:
 			if (Event.xclient.format == 32 &&
-			    Event.xclient.data.l[0] == wm_del_win) {
+			    (Atom)Event.xclient.data.l[0] == wm_del_win) {
 				freelist();
 				exit(0);
 			}

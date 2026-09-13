@@ -160,7 +160,7 @@ MatchArgument(const char *pstr, char *tok)
  *
  **************************************************************************/
 static char *
-GetNextArgument(char *indata, char **token)
+GetNextArgument(char *indata, char **token) __unused
 {
 	char *t, *start, *end, *text;
 

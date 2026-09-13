@@ -362,8 +362,8 @@ HandleKeyPress(void)
 	}
 
 	for (key = Scr.AllBindings; key != NULL; key = key->NextBinding) {
-		if ((key->Button_Key == Event.xkey.keycode) &&
-		    ((key->Modifier == (modifier & (~LockMask))) ||
+		if ((key->Button_Key == (int)Event.xkey.keycode) &&
+		    ((key->Modifier == (int)(modifier & (~LockMask))) ||
 		     (key->Modifier == AnyModifier)) &&
 		    (key->Context & Context) && (key->IsMouse == 0)) {
 			ExecuteFunction(
@@ -1059,11 +1059,11 @@ HandleButtonPress(void)
 	/* need to search for an appropriate mouse binding */
 	for (MouseEntry = Scr.AllBindings; MouseEntry != NULL;
 	    MouseEntry = MouseEntry->NextBinding) {
-		if (((MouseEntry->Button_Key == Event.xbutton.button) ||
+		if (((MouseEntry->Button_Key == (int)Event.xbutton.button) ||
 		    (MouseEntry->Button_Key == 0)) &&
 		    (MouseEntry->Context & Context) &&
 		    ((MouseEntry->Modifier == AnyModifier) ||
-		     (MouseEntry->Modifier == (modifier & (~LockMask)))) &&
+		     (MouseEntry->Modifier == (int)(modifier & (~LockMask)))) &&
 		    (MouseEntry->IsMouse == 1)) {
 			/* got a match, now process it */
 			ExecuteFunction(

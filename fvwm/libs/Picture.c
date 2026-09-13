@@ -290,40 +290,40 @@ typedef struct {
    Currently 61 colors in this list.
    */
 static Color_Info base_array[] = {
-	{"white"}, {"black"}, {"grey"}, {"green"}, {"blue"}, {"red"}, {"cyan"},
-	{"yellow"}, {"magenta"}, {"DodgerBlue"}, {"SteelBlue"}, {"chartreuse"},
-	{"wheat"}, {"turquoise"}, {"CadetBlue"}, {"gray87"}, {"CornflowerBlue"},
-	{"YellowGreen"}, {"NavyBlue"}, {"MediumBlue"}, {"plum"}, {"aquamarine"},
-	{"orchid"}, {"ForestGreen"}, {"lightyellow"}, {"brown"}, {"orange"},
-	{"red3"}, {"HotPink"}, {"LightBlue"}, {"gray47"}, {"pink"}, {"red4"},
-	{"violet"}, {"purple"}, {"gray63"}, {"gray94"}, {"plum1"}, {"PeachPuff"},
-	{"maroon"}, {"lavender"}, {"salmon"}, /* for peachpuff, orange gap */
-	{"blue4"},                            /* for navyblue/mediumblue gap */
-	{"PaleGreen4"},                       /* for forestgreen, yellowgreen gap */
-	{"#AA7700"},                          /* brick, no close named color */
-	{"#11EE88"}, /* light green, no close named color */
-	{"#884466"}, /* dark brown, no close named color */
-	{"#CC8888"}, /* light brick, no close named color */
-	{"#EECC44"}, /* gold, no close named color */
-	{"#AAAA44"}, /* dull green, no close named color */
-	{"#FF1188"}, /* pinkish red */
-	{"#992299"}, /* purple */
-	{"#CCFFAA"}, /* light green */
-	{"#664400"}, /* dark brown*/
-	{"#AADD99"}, /* light green */
-	{"#66CCFF"}, /* light blue */
-	{"#CC2299"}, /* dark red */
-	{"#FF11CC"}, /* bright pink */
-	{"#11CC99"}, /* grey/green */
-	{"#AA77AA"}, /* purple/red */
-	{"#EEBB77"}  /* orange/yellow */
+	{"white", {0}}, {"black", {0}}, {"grey", {0}}, {"green", {0}}, {"blue", {0}}, {"red", {0}}, {"cyan", {0}},
+	{"yellow", {0}}, {"magenta", {0}}, {"DodgerBlue", {0}}, {"SteelBlue", {0}}, {"chartreuse", {0}},
+	{"wheat", {0}}, {"turquoise", {0}}, {"CadetBlue", {0}}, {"gray87", {0}}, {"CornflowerBlue", {0}},
+	{"YellowGreen", {0}}, {"NavyBlue", {0}}, {"MediumBlue", {0}}, {"plum", {0}}, {"aquamarine", {0}},
+	{"orchid", {0}}, {"ForestGreen", {0}}, {"lightyellow", {0}}, {"brown", {0}}, {"orange", {0}},
+	{"red3", {0}}, {"HotPink", {0}}, {"LightBlue", {0}}, {"gray47", {0}}, {"pink", {0}}, {"red4", {0}},
+	{"violet", {0}}, {"purple", {0}}, {"gray63", {0}}, {"gray94", {0}}, {"plum1", {0}}, {"PeachPuff", {0}},
+	{"maroon", {0}}, {"lavender", {0}}, {"salmon", {0}}, /* for peachpuff, orange gap */
+	{"blue4", {0}},                            /* for navyblue/mediumblue gap */
+	{"PaleGreen4", {0}},                       /* for forestgreen, yellowgreen gap */
+	{"#AA7700", {0}},                          /* brick, no close named color */
+	{"#11EE88", {0}}, /* light green, no close named color */
+	{"#884466", {0}}, /* dark brown, no close named color */
+	{"#CC8888", {0}}, /* light brick, no close named color */
+	{"#EECC44", {0}}, /* gold, no close named color */
+	{"#AAAA44", {0}}, /* dull green, no close named color */
+	{"#FF1188", {0}}, /* pinkish red */
+	{"#992299", {0}}, /* purple */
+	{"#CCFFAA", {0}}, /* light green */
+	{"#664400", {0}}, /* dark brown*/
+	{"#AADD99", {0}}, /* light green */
+	{"#66CCFF", {0}}, /* light blue */
+	{"#CC2299", {0}}, /* dark red */
+	{"#FF11CC", {0}}, /* bright pink */
+	{"#11CC99", {0}}, /* grey/green */
+	{"#AA77AA", {0}}, /* purple/red */
+	{"#EEBB77", {0}}  /* orange/yellow */
 };
 
 #define NColors (sizeof(base_array) / sizeof(Color_Info))
 
 /* if c_color isn't set, copy it from one of the other colours */
 static Bool
-xpmcolor_require_c_color(XpmColor *p)
+xpmcolor_require_c_color(XpmColor *p) __unused
 {
 	if (p->c_color != NULL)
 		return False;
@@ -355,7 +355,7 @@ color_reduce_pixmap(XpmImage *image, int color_limit)
 		} /* end base table init */
 		color_table_ptr =
 		    image->colorTable; /* start of xpm color table */
-		for (i = 0; i < image->ncolors;
+		for (i = 0; i < (int)image->ncolors;
 		    i++) { /* all colors in the xpm */
 			/* Theres an array for this in the xpm library, but it
 			   doesn't appear to be part of the API.  Too bad. dje
@@ -382,7 +382,7 @@ static void
 c100_init_base_table(void)
 {
 	int i;
-	for (i = 0; i < NColors; i++) { /* change all base colors to numbers */
+	for (i = 0; i < (int)NColors; i++) { /* change all base colors to numbers */
 		c300_color_to_rgb(
 		    base_array[i].c_color, &base_array[i].rgb_space);
 	}
@@ -408,7 +408,7 @@ c200_substitute_color(char **my_color, int color_limit)
 	   to my_color */
 	minind = 0;                  /* Its going to find something... */
 	limit = NColors;             /* init to max */
-	if (color_limit < NColors) { /* can't do more than I have */
+	if (color_limit < (int)NColors) { /* can't do more than I have */
 		limit = color_limit; /* Do reduction using subset */
 	} /* end reducing limit */
 	for (i = 0; i < limit; i++) { /* loop over base array */

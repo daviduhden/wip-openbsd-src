@@ -22,7 +22,7 @@ static volatile sig_atomic_t isTerminated = False;
 
 static char *IM_VERSION = "1.3";
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: FvwmIconMan.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 static void TerminateHandler(int);
@@ -53,6 +53,7 @@ Free(void *p)
 static void
 TerminateHandler(int sig)
 {
+	(void)sig;
 	isTerminated = True;
 }
 
@@ -66,6 +67,7 @@ ShutMeDown(int flag)
 void
 DeadPipe(int nothing)
 {
+	(void)nothing;
 	ShutMeDown(0);
 }
 
@@ -128,7 +130,6 @@ main_loop(void)
 int
 main(int argc, char **argv)
 {
-	char *temp, *s;
 	int i;
 
 #ifdef ELECTRIC_FENCE
@@ -158,11 +159,6 @@ main(int argc, char **argv)
 
 	init_globals();
 	init_winlists();
-
-	temp = argv[0];
-	s = strrchr(argv[0], '/');
-	if (s != NULL)
-		temp = s + 1;
 
 	if ((argc != 6) && (argc != 7)) {
 		fprintf(stderr,

@@ -222,13 +222,13 @@ FSUB fsub[] = {
 	{},
 #else
     /* 6: compress, to detect failure to use -Z */
-	{NULL, 0, 4, 0, 0, 0, 0, compress_id},
+	{NULL, 0, 4, 0, 0, 0, 0, compress_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
     /* 7: xz, to detect failure to decompress it */
-	{NULL, 0, 4, 0, 0, 0, 0, xz_id},
+	{NULL, 0, 4, 0, 0, 0, 0, xz_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
     /* 8: bzip2, to detect failure to use -j */
-	{NULL, 0, 4, 0, 0, 0, 0, bzip2_id},
+	{NULL, 0, 4, 0, 0, 0, 0, bzip2_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
     /* 9: gzip, to detect failure to use -z */
-	{NULL, 0, 4, 0, 0, 0, 0, gzip_id},
+	{NULL, 0, 4, 0, 0, 0, 0, gzip_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
     /* 10: POSIX PAX */
 	{"pax", 10240, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd, tar_endrd,
 	 no_op, pax_wr, tar_endwr, tar_trail, pax_opt},

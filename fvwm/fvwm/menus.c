@@ -274,7 +274,7 @@ do_menu(MenuRoot *menu, MenuRoot *menuPrior, MenuItem **pmiExecuteAction,
 		    Scr.MyDisplayHeight, x_start, y_start);
 	}
 
-	if (lastTimestamp - t0 < Scr.menus.DoubleClickTime && !mouse_moved &&
+	if (lastTimestamp - t0 < (Time)Scr.menus.DoubleClickTime && !mouse_moved &&
 	    (!key_press || dkp_timestamp != 0)) {
 		/* dkp_timestamp is non-zero if a double-keypress occured! */
 		fDoubleClick = TRUE;
@@ -442,7 +442,7 @@ menuShortcuts(MenuRoot *menu, XEvent *Event, MenuItem **pmiCurrent)
 
 	/* handle double-keypress */
 	if (dkp_timestamp &&
-	    lastTimestamp - dkp_timestamp < Scr.menus.DoubleClickTime &&
+	    lastTimestamp - dkp_timestamp < (Time)Scr.menus.DoubleClickTime &&
 	    Event->xkey.state == dkp_keystate &&
 	    Event->xkey.keycode == dkp_keycode) {
 		*pmiCurrent = NULL;
@@ -1012,10 +1012,10 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 					if ((!IS_LEFT_MENU(mrPopup) &&
 					    x < mx) ||
 					    (!IS_RIGHT_MENU(mrPopup) &&
-					     x > mx + mw) ||
+					     x > (int)(mx + mw)) ||
 					    (!IS_UP_MENU(mrPopup) && y < my) ||
 					    (!IS_DOWN_MENU(mrPopup) &&
-					     y > my + mh)) {
+					     y > (int)(my + mh))) {
 						PopDownAndRepaintParent(
 						    mrPopup, &fSubmenuOverlaps);
 						mrPopup = NULL;
@@ -1149,9 +1149,9 @@ DoMenusOverlap(
 		/* Don't use multiplier if doing an intolerant check */
 		prior_width *= (float)(mr->ms->feel.PopupOffsetPercent) / 100.0;
 	}
-	if (y <= prior_y + prior_height - tolerance2 &&
+	if (y <= (int)(prior_y + prior_height - tolerance2) &&
 	    prior_y <= y + height - tolerance2 &&
-	    x <= prior_x + prior_width - tolerance1 &&
+	    x <= (int)(prior_x + prior_width - tolerance1) &&
 	    prior_x <= x + width - tolerance2) {
 		x_overlap = x - prior_x;
 		if (x <= prior_x) {
@@ -1269,7 +1269,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 			    menuPrior->ms->feel.PopupOffsetAdd;
 			left_x = prev_x - menu->width + 2;
 			right_x = prev_x + x_offset;
-			if (x_offset > prev_width - 2)
+			if (x_offset > (int)(prev_width - 2))
 				right_x = prev_x + prev_width - 2;
 			if (x + menu->width < prev_x + right_x)
 				fDefaultLeft = TRUE;
@@ -1283,13 +1283,13 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 				int left_x, right_x, end_x;
 
 				left_x = x - x_offset;
-				if (x_offset >= prev_width)
+				if (x_offset >= (int)prev_width)
 					left_x = x - x_offset + 3;
 				right_x = x + menu->width;
 				if (fDefaultLeft) {
 					/* popup menu is left of old menu, try
 					 * to move prior menu right */
-					if (right_x + prev_width <=
+					if ((int)(right_x + prev_width) <=
 					    Scr.MyDisplayWidth - 2)
 						end_x = right_x;
 					else if (left_x >= 0)
@@ -1302,7 +1302,7 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 					 * to move prior menu left */
 					if (left_x >= 0)
 						end_x = left_x;
-					else if (right_x + prev_width <=
+					else if ((int)(right_x + prev_width) <=
 					    Scr.MyDisplayWidth - 2)
 						end_x = right_x;
 					else
@@ -1366,11 +1366,11 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 
 		if (x < prev_x)
 			menu->flags.f.is_left = 1;
-		if (x + menu->width > prev_x + prev_width)
+		if (x + menu->width > (int)(prev_x + prev_width))
 			menu->flags.f.is_right = 1;
 		if (y < prev_y)
 			menu->flags.f.is_up = 1;
-		if (y + menu->height > prev_y + prev_height)
+		if (y + menu->height > (int)(prev_y + prev_height))
 			menu->flags.f.is_down = 1;
 		if (!menu->flags.f.is_left && !menu->flags.f.is_right) {
 			menu->flags.f.is_left = 1;
@@ -1459,7 +1459,8 @@ SetMenuItemSelected(MenuItem *mi, Bool f)
 				iy = 0;
 			}
 			XGetGeometry(dpy, mi->mr->w, &JunkRoot, &JunkX, &JunkY,
-			    &mw, &mh, &JunkBW, &JunkDepth);
+			    (unsigned int *)&mw, (unsigned int *)&mh, &JunkBW,
+			    &JunkDepth);
 			if (iy + ih > mh)
 				ih = mh - iy;
 			/* grab image */
@@ -1589,7 +1590,7 @@ PopDownAndRepaintParent(MenuRoot *mr, Bool *fSubmenuOverlaps)
 
 	if (*fSubmenuOverlaps && parent) {
 		XGetGeometry(dpy, mr->w, &JunkRoot, &JunkX, &mr_y, &JunkWidth,
-		    &mr_height, &JunkBW, &JunkDepth);
+		    (unsigned int *)&mr_height, &JunkBW, &JunkDepth);
 		XGetGeometry(dpy, parent->w, &JunkRoot, &JunkX, &parent_y,
 		    &JunkWidth, &JunkWidth, &JunkBW, &JunkDepth);
 		PopDownMenu(mr);
@@ -2192,9 +2193,9 @@ PaintMenu(MenuRoot *mr, XEvent *pevent)
 				x = border;
 			if (y < border)
 				y = border;
-			if (width > p->width)
+			if (width > (int)p->width)
 				width = p->width;
-			if (height > p->height)
+			if (height > (int)p->height)
 				height = p->height;
 			if (width > mr->width - x - border)
 				width = mr->width - x - border;
@@ -2367,7 +2368,7 @@ MakeMenu(MenuRoot *mr)
 	for (cur = mr->first; cur != NULL; cur = cur->next) {
 		width = XTextWidth(
 		    mr->ms->look.pStdFont->font, cur->item, cur->strlen);
-		if (cur->picture && width < cur->picture->width)
+		if (cur->picture && width < (int)cur->picture->width)
 			width = cur->picture->width;
 		if (cur->func_type == F_POPUP)
 			width += 15;
@@ -2386,7 +2387,7 @@ MakeMenu(MenuRoot *mr)
 			mr->width2 = 1;
 
 		if (cur->lpicture)
-			if (mr->width0 < (cur->lpicture->width + 3))
+			if (mr->width0 < (int)(cur->lpicture->width + 3))
 				mr->width0 = cur->lpicture->width + 3;
 	}
 
@@ -2451,7 +2452,7 @@ MakeMenu(MenuRoot *mr)
 		}
 		if (cur->picture)
 			cur->y_height += cur->picture->height;
-		if (cur->lpicture && cur->y_height < cur->lpicture->height + 4)
+		if (cur->lpicture && cur->y_height < (int)(cur->lpicture->height + 4))
 			cur->y_height = cur->lpicture->height + 4;
 		y += cur->y_height;
 		if (mr->width2 == 0) {

@@ -386,6 +386,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }
 

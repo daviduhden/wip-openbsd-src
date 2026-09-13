@@ -895,7 +895,7 @@ FetchWmProtocols(FvwmWindow *tmp)
 		    False, _XA_WM_PROTOCOLS, &atype, &aformat, &nitems,
 		    &bytes_remain, (unsigned char **)&protocols)) ==
 		    Success) {
-			for (i = 0, ap = protocols; i < nitems; i++, ap++) {
+			for (i = 0, ap = protocols; i < (int)nitems; i++, ap++) {
 				if (*ap == (Atom)_XA_WM_TAKE_FOCUS)
 					flags |= DoesWmTakeFocus;
 				if (*ap == (Atom)_XA_WM_DELETE_WINDOW)

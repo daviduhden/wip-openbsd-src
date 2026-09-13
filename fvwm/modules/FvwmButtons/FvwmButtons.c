@@ -153,6 +153,7 @@ static volatile sig_atomic_t connection_dead = False;
 static Bool
 DestroyedWindow(Display *d, XEvent *e, char *a)
 {
+	(void)d;
 	if (e->xany.window == (Window)a)
 		if ((e->type == DestroyNotify &&
 		    e->xdestroywindow.window == (Window)a) ||
@@ -176,6 +177,7 @@ IsThereADestroyEvent(button_info *b)
 void
 DeadPipe(int whatever)
 {
+	(void)whatever;
 	exit(0);
 }
 
@@ -186,6 +188,7 @@ DeadPipe(int whatever)
 static void
 TerminateHandler(int sig)
 {
+	(void)sig;
 	isTerminated = True;
 }
 
@@ -454,6 +457,8 @@ XErrorHandler oldErrorHandler = NULL;
 static int
 myErrorHandler(Display *dpy, XErrorEvent *event)
 {
+	(void)dpy;
+	(void)event;
 	fprintf(stderr, "%s: Cause of next X Error.\n", MyName);
 	/* return (*oldErrorHandler)(dpy,event); */
 	return 0;
@@ -989,7 +994,7 @@ Loop(void)
 
 			case ClientMessage:
 				if (Event.xclient.format == 32 &&
-				    Event.xclient.data.l[0] == _XA_WM_DEL_WIN) {
+				    (Atom)Event.xclient.data.l[0] == _XA_WM_DEL_WIN) {
 					for (ppi = MainPanel->next; ppi != NULL;
 					    ppi = ppi->next) {
 						if (ppi->uber->IconWinParent ==
@@ -1994,7 +1999,6 @@ void
 Slide(panel_info *p, button_info *b)
 {
 	Window PanelWin;
-	Window root;
 	int x, y, iw, ih, BW, depth;
 	char direction;
 	ushort i, c, xstep, ystep, wstep, hstep;
@@ -2009,7 +2013,7 @@ Slide(panel_info *p, button_info *b)
 
 	if (p->uber->swallow) {
 		/* shown ---> hidden */
-		root = GetRealGeometry(Dpy, PanelWin, &x, &y, (ushort *)&iw,
+		GetRealGeometry(Dpy, PanelWin, &x, &y, (ushort *)&iw,
 		    (ushort *)&ih, (ushort *)&BW, (ushort *)&depth);
 
 		switch (direction) {

@@ -87,7 +87,6 @@ SetBorder(
 	XSetWindowAttributes attributes;
 	unsigned long valuemask;
 	static unsigned int corners[4];
-	Window w;
 
 	corners[0] = TOP_HILITE | LEFT_HILITE;
 	corners[1] = TOP_HILITE | RIGHT_HILITE;
@@ -118,12 +117,6 @@ SetBorder(
 			    GetDecor(t, BorderStyle.active.u.p->picture);
 #endif
 
-		/* set the keyboard focus */
-		if ((Mapped) && (t->flags & MAPPED) && (Scr.Hilite != t))
-			w = t->w;
-		else if ((t->flags & ICONIFIED) && (Scr.Hilite != t) &&
-		    (!(t->flags & SUPPRESSICON)))
-			w = t->icon_w;
 		Scr.Hilite = t;
 
 		TextColor = GetDecor(t, HiColors.fore);
@@ -622,6 +615,7 @@ void
 DrawButton(FvwmWindow *t, Window win, int w, int h, ButtonFace *bf, GC ReliefGC,
     GC ShadowGC, Boolean inverted, int stateflags)
 {
+	(void)inverted;
 	register int type = bf->style & ButtonFaceTypeMask;
 #ifdef PIXMAP_BUTTONS
 	FvwmPicture *p;
@@ -691,9 +685,9 @@ DrawButton(FvwmWindow *t, Window win, int w, int h, ButtonFace *bf, GC ReliefGC,
 			x = border;
 		if (y < border)
 			y = border;
-		if (width > p->width)
+		if (width > (int)p->width)
 			width = p->width;
-		if (height > p->height)
+		if (height > (int)p->height)
 			height = p->height;
 		if (width > w - x - border)
 			width = w - x - border;
@@ -767,6 +761,7 @@ DrawButton(FvwmWindow *t, Window win, int w, int h, ButtonFace *bf, GC ReliefGC,
 void
 SetTitleBar(FvwmWindow *t, Bool onoroff, Bool NewTitle)
 {
+	(void)NewTitle;
 	int hor_off, w, i;
 	enum ButtonState title_state;
 	ButtonFaceStyle tb_style;

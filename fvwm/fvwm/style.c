@@ -85,7 +85,11 @@ void
 ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *text, int *Module)
 {
-	char *line;
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	char *restofline, *tmp;
 	name_list *nptr;
 	int butt; /* work area for button number */
@@ -111,7 +115,6 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	SKIPSPACE; /* skip over white space */
-	line = restofline;
 
 	if (restofline == NULL) {
 		free(tname.name);
@@ -349,8 +352,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						    &IconBoxes->IconBox[0],
 						    &IconBoxes
 						    ->IconBox[1], /* x/y */
-						    &IconBoxes->IconBox[2],
-						    &IconBoxes->IconBox
+						    (unsigned int *)&IconBoxes->IconBox[2],
+						    (unsigned int *)&IconBoxes->IconBox
 						    [3]); /* width/ht
 						               */
 						if (IconBoxes->IconBox[2] ==

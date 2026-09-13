@@ -2,7 +2,7 @@
 #include "readconfig.h"
 #include "xmanager.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: functions.c,v 1.2 2021/01/24 09:21:21 matthieu Exp $";
 
 static Button *get_select_button(void);
@@ -264,6 +264,8 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 int
 builtin_select(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
+	(void)args;
 	WinManager *man = get_current_man();
 	if (man) {
 		move_highlight(man, get_current_button());
@@ -276,6 +278,7 @@ builtin_select(int numargs, BuiltinArg *args)
 int
 builtin_sendcommand(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	WinData *win = get_current_win();
 
 	if (!win) {
@@ -290,6 +293,8 @@ builtin_sendcommand(int numargs, BuiltinArg *args)
 int
 builtin_printdebug(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
+	(void)args;
 	int i;
 
 	for (i = 0; i < globals.num_managers; i++) {
@@ -395,6 +400,7 @@ eval_if(ButtonValue *bv)
 int
 builtin_bif(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	int off = args[1].value.int_value;
 	ConsoleDebug(FUNCTIONS, "bif: off = %d\n", off);
 
@@ -408,6 +414,7 @@ builtin_bif(int numargs, BuiltinArg *args)
 int
 builtin_bifn(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	int off = args[1].value.int_value;
 	ConsoleDebug(FUNCTIONS, "bifn: off = %d\n", off);
 
@@ -421,6 +428,7 @@ builtin_bifn(int numargs, BuiltinArg *args)
 int
 builtin_jmp(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	int off = args[0].value.int_value;
 	ConsoleDebug(FUNCTIONS, "jmp: off = %d\n", off);
 
@@ -431,6 +439,8 @@ builtin_jmp(int numargs, BuiltinArg *args)
 int
 builtin_ret(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
+	(void)args;
 	function_context.fp = NULL;
 	return 0;
 }
@@ -438,6 +448,7 @@ builtin_ret(int numargs, BuiltinArg *args)
 int
 builtin_print(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	char *s;
 
 	ConsoleDebug(FUNCTIONS, "print: %s\n", args[0].value.string_value);
@@ -455,6 +466,7 @@ builtin_print(int numargs, BuiltinArg *args)
 int
 builtin_searchforward(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	char *s;
 	Button *b, *cur;
 	WinManager *man;
@@ -488,6 +500,7 @@ builtin_searchforward(int numargs, BuiltinArg *args)
 int
 builtin_searchback(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
 	char *s;
 	Button *b, *cur;
 	WinManager *man;
@@ -521,6 +534,8 @@ builtin_searchback(int numargs, BuiltinArg *args)
 int
 builtin_warp(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
+	(void)args;
 	Button *cur;
 	WinManager *man;
 	int x, y;
@@ -542,6 +557,8 @@ builtin_warp(int numargs, BuiltinArg *args)
 int
 builtin_refresh(int numargs, BuiltinArg *args)
 {
+	(void)numargs;
+	(void)args;
 	draw_managers();
 	return 0;
 }

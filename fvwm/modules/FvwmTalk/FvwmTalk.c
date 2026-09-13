@@ -267,7 +267,7 @@ Loop(int *fd)
 				break;
 			case ClientMessage:
 				if ((event.xclient.format == 32) &&
-				    (event.xclient.data.l[0] == wm_del_win)) {
+				    ((Atom)event.xclient.data.l[0] == wm_del_win)) {
 					exit(0);
 				}
 				break;
@@ -290,6 +290,7 @@ Loop(int *fd)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	fprintf(stderr, "FvwmTalk: dead pipe\n");
 	exit(0);
 }
@@ -411,7 +412,7 @@ paste_primary(int window, int property, int Delete)
 
 		data2 = data;
 		/* want to make a \n to \r mapping for cut and paste only */
-		for (i = 0; i < nitems; i++) {
+		for (i = 0; i < (int)nitems; i++) {
 			if (*data == '\n')
 				*data = '\r';
 			data++;

@@ -88,6 +88,9 @@ cpio_strd(void)
 int
 cpio_trail(ARCHD *arcn, char *notused, int notused2, int *notused3)
 {
+	(void)notused;
+	(void)notused2;
+	(void)notused3;
 	/*
 	 * look for trailer id in file we are about to process
 	 */

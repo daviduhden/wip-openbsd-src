@@ -6,7 +6,7 @@
 #include "x.h"
 #include "xmanager.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: fvwm.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 typedef struct {
@@ -302,7 +302,7 @@ icon_name(FvwmPacketBody *body)
 
 	win = id_to_win(app_id);
 
-	if (win->iconname && !strcmp(win->iconname, name)) {
+	if (win->iconname && !strcmp((char *)win->iconname, name)) {
 		ConsoleDebug(
 		    FVWM, "No icon change: %s %s\n", win->iconname, name);
 		return;
@@ -335,7 +335,7 @@ window_name(FvwmPacketBody *body)
 
 	/* This is necessary because bash seems to update the window title on
 	   every keystroke regardless of whether anything changes */
-	if (win->titlename && !strcmp(win->titlename, name)) {
+	if (win->titlename && !strcmp((char *)win->titlename, name)) {
 		ConsoleDebug(
 		    FVWM, "No name change: %s %s\n", win->titlename, name);
 		return;
@@ -444,7 +444,7 @@ sendtomodule(FvwmPacketBody *body)
 
 	ConsoleDebug(FVWM, "Got string: %s\n", string);
 
-	execute_function(string);
+	execute_function((char *)string);
 }
 
 static void

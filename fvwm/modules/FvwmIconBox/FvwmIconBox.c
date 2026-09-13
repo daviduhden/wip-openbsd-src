@@ -217,7 +217,7 @@ main(int argc, char **argv)
 	InitPictureCMap(dpy, Root); /* store the root cmap */
 	d_depth = DefaultDepth(dpy, screen);
 
-	XSetErrorHandler((XErrorHandler)myErrorHandler);
+	XSetErrorHandler(myErrorHandler);
 
 	ParseOptions();
 
@@ -489,7 +489,7 @@ Loop(void)
 				break;
 			case ClientMessage:
 				if ((Event.xclient.format == 32) &&
-				    (Event.xclient.data.l[0] == wm_del_win))
+				    ((Atom)Event.xclient.data.l[0] == wm_del_win))
 					DeadPipe(1);
 				break;
 			case PropertyNotify:
@@ -501,7 +501,7 @@ Loop(void)
 					tmp = Head;
 					i = 0;
 					while (tmp != NULL) {
-						if (Event.xproperty.window ==
+						if (Event.xproperty.window == (Window)
 						    tmp->id)
 							break;
 						tmp = tmp->next;
@@ -1454,6 +1454,7 @@ Prev(void)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }
 
@@ -1901,7 +1902,7 @@ parsekey(char *tline)
  *		Copyright 1993, Robert Nation.
  ***********************************************************************/
 static void
-change_window_name(char *str)
+change_window_name(char *str) __unused
 {
 	XTextProperty name;
 
@@ -1978,8 +1979,8 @@ process_message(unsigned long type, unsigned long *body)
 				break;
 			tmp = Head;
 			while (tmp != NULL) {
-				if (tmp->id == body[0]) {
-					if ((tmp->desk != body[7]) &&
+				if (tmp->id == (long)body[0]) {
+					if ((tmp->desk != (long)body[7]) &&
 					    !(tmp->flags & STICKY)) {
 						olddesk = tmp->desk;
 						tmp->desk = body[7];
@@ -2163,7 +2164,7 @@ process_message(unsigned long type, unsigned long *body)
 			break;
 		tmp = Head;
 		while (tmp != NULL) {
-			if (tmp->id == body[0])
+			if (tmp->id == (long)body[0])
 				break;
 			tmp = tmp->next;
 		}
@@ -2175,7 +2176,7 @@ process_message(unsigned long type, unsigned long *body)
 			RedrawIcon(tmp, redraw_flag);
 		break;
 	case M_NEW_DESK:
-		if (CurrentDesk != body[0]) {
+		if (CurrentDesk != (long)body[0]) {
 			CurrentDesk = body[0];
 			if (body[0] != 10000 &&
 			    ready) { /* 10000 is a "magic" number used in
@@ -2236,7 +2237,7 @@ SetFlag(unsigned long id, int t)
 	tmp = Head;
 
 	while (tmp != NULL) {
-		if (tmp->id == id) {
+		if (tmp->id == (long)id) {
 			if (t == M_ICONIFY)
 				tmp->flags |= ICONIFIED;
 			else
@@ -2304,7 +2305,7 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 		return False;
 
 	while (tmp != NULL) {
-		if (tmp->id == id ||
+		if (tmp->id == (long)id ||
 		    (tmp->wmhints && (tmp->wmhints->flags & IconWindowHint) &&
 		     tmp->wmhints->icon_window == id))
 			return False;
@@ -2367,7 +2368,7 @@ DeleteItem(unsigned long id)
 	struct icon_info *tmp = Head;
 
 	while (tmp != NULL) {
-		if (tmp->id == id) {
+		if (tmp->id == (long)id) {
 			if (desk_cond(tmp))
 				num_icons--;
 			if (Hilite == tmp)
@@ -2413,7 +2414,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 
 	tmp = Head;
 	while (tmp != NULL) {
-		if (tmp->id == id) {
+		if (tmp->id == (long)id) {
 			size_t item_len = strlen(item) + 1;
 			str = (char *)xmalloc(item_len);
 			strlcpy(str, item, item_len);
@@ -2706,7 +2707,6 @@ void
 ExecuteAction(int x, int y, struct icon_info *item)
 {
 	int type = NO_CLICK;
-	XEvent *ev;
 	XEvent d;
 	struct mousefunc *tmp;
 
@@ -2714,23 +2714,20 @@ ExecuteAction(int x, int y, struct icon_info *item)
 	/* wait 100 msec, see if the used releases the button */
 	if (IsClick(x, y, ButtonReleaseMask, &d)) {
 		type = CLICK;
-		ev = &d;
 	}
 
 	/* If it was a click, wait to see if its a double click */
 	if ((type == CLICK) && (IsClick(x, y, ButtonPressMask, &d))) {
 		type = ONE_AND_A_HALF_CLICKS;
-		ev = &d;
 	}
 	if ((type == ONE_AND_A_HALF_CLICKS) &&
 	    (IsClick(x, y, ButtonReleaseMask, &d))) {
 		type = DOUBLE_CLICK;
-		ev = &d;
 	}
 	tmp = MouseActions;
 
 	while (tmp != NULL) {
-		if (tmp->mouse == d.xbutton.button && tmp->type == type) {
+		if (tmp->mouse == (int)d.xbutton.button && tmp->type == type) {
 			SendFvwmPipe(fd, tmp->action, item->id);
 			return;
 		}
@@ -2868,7 +2865,7 @@ stripcpy2(char *source)
 /***********************************************************************
  Error handler
  ***********************************************************************/
-XErrorHandler
+int
 myErrorHandler(Display *dpy, XErrorEvent *event)
 {
 	char msg[256];

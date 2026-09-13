@@ -481,7 +481,8 @@ match_string(button_info **uberb, char *s)
 				geom = seekright(&s);
 				if (geom) {
 					flags = XParseGeometry(
-					    geom, &x, &y, &w, &h);
+					    geom, &x, &y, (unsigned int *)&w,
+					    (unsigned int *)&h);
 					if (flags & WidthValue)
 						b->BWidth = w;
 					if (flags & HeightValue)
@@ -1024,7 +1025,7 @@ ParseConfigFile(button_info *ub)
 
 	while (fgets(s, 1023, f)) {
 		/* Allow for line continuation: */
-		while ((l = strlen(s)) < sizeof(s) && l >= 2 &&
+		while ((l = strlen(s)) < (int)sizeof(s) && l >= 2 &&
 		    s[l - 1] == '\n' && s[l - 2] == '\\')
 			fgets(s + l - 2, sizeof(s) - l, f);
 

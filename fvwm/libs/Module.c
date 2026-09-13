@@ -47,7 +47,7 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 			    body_length * sizeof(unsigned long));
 			cbody = (char *)(*body);
 			total = 0;
-			while (total < body_length * sizeof(unsigned long)) {
+			while (total < (int)(body_length * sizeof(unsigned long))) {
 				errno = 0;
 				if ((count2 = read(fd, &cbody[total],
 				    body_length * sizeof(unsigned long) -

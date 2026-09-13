@@ -93,6 +93,11 @@ static void
 ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long junk, char *tline, int *Module, Bool fKey)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)junk;
+	(void)Module;
 	char *action, context[20], modifiers[20], key[20], *ptr, *token;
 	Binding *temp;
 	int button, i, min, max;
@@ -294,7 +299,7 @@ find_context(char *string, int *output, struct charstring *table, char *tline)
 
 	*output = 0;
 	i = 0;
-	while (i < strlen(string)) {
+	while (i < (int)strlen(string)) {
 		j = 0;
 		matched = FALSE;
 		while ((!matched) && (table[j].key != 0)) {

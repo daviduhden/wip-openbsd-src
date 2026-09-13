@@ -269,6 +269,7 @@ main(int argc, char **argv)
 void
 Loop(int *fd)
 {
+	(void)fd;
 	XEvent Event;
 
 	while (!isTerminated) {
@@ -354,12 +355,14 @@ process_message(unsigned long type, unsigned long *body)
 static void
 TerminateHandler(int nonsense)
 {
+	(void)nonsense;
 	isTerminated = True;
 }
 
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }
 
@@ -373,14 +376,12 @@ void
 list_add(unsigned long *body)
 {
 	PagerWindow *t, **prev;
-	int i = 0;
 
 	t = Start;
 	prev = &Start;
 	while (t != NULL) {
 		prev = &(t->next);
 		t = t->next;
-		i++;
 	}
 	*prev = (PagerWindow *)xmalloc(sizeof(PagerWindow));
 	(*prev)->w = body[0];
@@ -403,7 +404,7 @@ list_add(unsigned long *body)
 	(*prev)->border_width = body[10];
 	(*prev)->icon_w = body[19];
 	(*prev)->icon_pixmap_w = body[20];
-	if ((win_fore_pix != -1) && (win_back_pix != -1)) {
+	if ((win_fore_pix != (Pixel)-1) && (win_back_pix != (Pixel)-1)) {
 		(*prev)->text = win_fore_pix;
 		(*prev)->back = win_back_pix;
 	} else {
@@ -444,7 +445,7 @@ list_configure(unsigned long *body)
 		t->flags = body[8];
 		t->icon_w = body[19];
 		t->icon_pixmap_w = body[20];
-		if ((win_fore_pix != -1) && (win_back_pix != -1)) {
+		if ((win_fore_pix != (Pixel)-1) && (win_back_pix != (Pixel)-1)) {
 			t->text = win_fore_pix;
 			t->back = win_back_pix;
 		} else {
@@ -466,7 +467,7 @@ list_configure(unsigned long *body)
 			t->width = t->frame_width;
 			t->height = t->frame_height;
 		}
-		if (t->desk != body[7]) {
+		if (t->desk != (int)body[7]) {
 			ChangeDeskForWindow(t, body[7]);
 		} else
 			MoveResizePagerView(t);
@@ -524,7 +525,7 @@ list_focus(unsigned long *body)
 	extern Pixel focus_pix, focus_fore_pix;
 	target_w = body[0];
 
-	if ((win_hi_fore_pix != -1) && (win_hi_back_pix != -1)) {
+	if ((win_hi_fore_pix != (Pixel)-1) && (win_hi_back_pix != (Pixel)-1)) {
 		focus_pix = win_hi_back_pix;
 		focus_fore_pix = win_hi_fore_pix;
 	} else {
@@ -558,7 +559,7 @@ list_new_page(unsigned long *body)
 	Scr.Vx = (long)body[0];
 	Scr.Vy = (long)body[1];
 	Scr.CurrentDesk = (long)body[2];
-	if ((Scr.VxMax != body[3]) || (Scr.VyMax != body[4])) {
+	if ((Scr.VxMax != (int)body[3]) || (Scr.VyMax != (int)body[4])) {
 		Scr.VxMax = body[3];
 		Scr.VyMax = body[4];
 		ReConfigure();
@@ -689,6 +690,7 @@ list_lower(unsigned long *body)
 void
 list_unknown(unsigned long *body)
 {
+	(void)body;
 	/*  fprintf(stderr,"Unknown packet type\n");*/
 }
 
@@ -908,7 +910,7 @@ void
 ParseOptions(void)
 {
 	char *tline = NULL;
-	int Clength, n, desk;
+	int n, desk;
 
 	Scr.FvwmRoot = NULL;
 	Scr.Hilite = NULL;
@@ -926,19 +928,17 @@ ParseOptions(void)
 	Scr.Vx = 0;
 	Scr.Vy = 0;
 
-	Clength = strlen(MyName);
 
 	for (GetConfigLine(fd, &tline); tline != NULL;
 	    GetConfigLine(fd, &tline)) {
 		int g_x, g_y, flags;
 		unsigned width, height;
 		char *resource;
-		char *resource_string;
 		char *arg1;
 		char *arg2;
 		char *tline2;
 
-		resource_string = arg1 = arg2 = NULL;
+		arg1 = arg2 = NULL;
 		tline2 = GetModuleResource(tline, &resource, MyName);
 		if (!resource)
 			continue;

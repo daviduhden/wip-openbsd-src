@@ -666,6 +666,7 @@ AutoPlace(FvwmWindow *t)
 void
 GrabIconButtons(FvwmWindow *tmp_win, Window w)
 {
+	(void)tmp_win;
 	Binding *MouseEntry;
 
 	MouseEntry = Scr.AllBindings;
@@ -712,6 +713,7 @@ GrabIconButtons(FvwmWindow *tmp_win, Window w)
 void
 GrabIconKeys(FvwmWindow *tmp_win, Window w)
 {
+	(void)tmp_win;
 	Binding *tmp;
 	for (tmp = Scr.AllBindings; tmp != NULL; tmp = tmp->NextBinding) {
 		if ((tmp->Context & C_ICON) && (tmp->IsMouse == 0))

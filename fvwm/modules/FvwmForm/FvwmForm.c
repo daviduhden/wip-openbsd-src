@@ -32,6 +32,8 @@
 static void
 dummy(FILE *f, const char *fmt, ...)
 {
+	(void)f;
+	(void)fmt;
 }
 
 #ifdef DEBUG
@@ -1150,7 +1152,7 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 	}
 {
 	static char var[256];
-	char c, x, *wp, *cp, *vp;
+	char c, x, *cp, *vp;
 	int i, j, dn2;
 	Item *item;
 
@@ -1169,7 +1171,7 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 		if (c == '$') { /* variable */
 			if (*sp != '(')
 				goto normal_char;
-			wp = ++sp;
+			++sp;
 			vp = var;
 			while (1) {
 				x = *(sp++);
@@ -1324,8 +1326,8 @@ OpenWindows(void)
 	static XColor xcf, xcb;
 	static XSetWindowAttributes xswa;
 	static XGCValues xgcv;
-	static XWMHints wmh = {InputHint, True};
-	static XSizeHints sh = {PPosition | PSize | USPosition | USSize};
+	static XWMHints wmh = {.flags = InputHint, .input = True};
+	static XSizeHints sh = {.flags = PPosition | PSize | USPosition | USSize};
 	static int xgcv_mask = GCBackground | GCForeground | GCFont;
 
 	xc_ibeam = XCreateFontCursor(dpy, XC_xterm);
@@ -1460,7 +1462,7 @@ ReadXServer(void)
 				break;
 			case KeyPress: /* we do text input here */
 				n = XLookupString(
-				    &event.xkey, buf, 10, &ks, NULL);
+				    &event.xkey, (char *)buf, 10, &ks, NULL);
 				keypress = buf[0];
 				fprintf(fp_err, "Keypress [%s]\n", buf);
 				if (n == 0) { /* not a regular key, translate it
@@ -1798,7 +1800,7 @@ ReadXServer(void)
 		} /* end of if (event.xany.window == frame) */
 		for (i = 0; i < n_items; i++) {
 			item = items + i;
-			if (event.xany.window == item->header.win) {
+			if (event.xany.window == (Window)item->header.win) {
 				switch (event.type) {
 				case Expose:
 					RedrawItem(item, 0);
@@ -1982,5 +1984,6 @@ void DeadPipe(int nonsense);
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }

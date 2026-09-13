@@ -5,7 +5,7 @@
 #include "readconfig.h"
 #include "xmanager.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: x.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
 #define GRAB_EVENTS							\
@@ -109,11 +109,11 @@ handle_buttonevent(XEvent *theEvent, WinManager *man)
 			    MouseEntry != NULL;
 			    MouseEntry = MouseEntry->NextBinding) {
 				if (((MouseEntry->Button_Key ==
-				    theEvent->xbutton.button) ||
+				    (int)theEvent->xbutton.button) ||
 				    (MouseEntry->Button_Key == 0)) &&
 				    ((MouseEntry->Modifier == AnyModifier) ||
 				     (MouseEntry->Modifier ==
-				      (modifier & (~LockMask))))) {
+				      (int)(modifier & (~LockMask))))) {
 					Function *ftype = MouseEntry->Function;
 					ConsoleDebug(
 					    X11, "\tgot a mouse binding\n");
@@ -140,7 +140,7 @@ find_frame_window(Window win, int *off_x, int *off_y)
 	while (1) {
 		junkw = NULL;
 		if (XQueryTree(theDisplay, win, &root, &parent, &junkw,
-		    &junki) && junkw)
+		    (unsigned int *)&junki) && junkw)
 			XFree(junkw);
 		if (parent == root)
 			break;
@@ -164,6 +164,7 @@ find_frame_window(Window win, int *off_x, int *off_y)
 static void
 reparentnotify_event(WinManager *man, XEvent *ev)
 {
+	(void)ev;
 	ConsoleDebug(X11, "XEVENT: ReparentNotify\n");
 	if (man->can_draw == 0) {
 		man->can_draw = 1;
@@ -236,9 +237,9 @@ xevent_loop(void)
 			for (key = man->bindings[KEYPRESS]; key != NULL;
 			    key = key->NextBinding) {
 				if ((key->Button_Key ==
-				    theEvent.xkey.keycode) &&
+				    (int)theEvent.xkey.keycode) &&
 				    ((key->Modifier ==
-				      (modifier & (~LockMask))) ||
+				      (int)(modifier & (~LockMask))) ||
 				     (key->Modifier == AnyModifier))) {
 					Function *ftype = key->Function;
 					if (ftype && ftype->func) {
@@ -528,7 +529,8 @@ X_init_manager(int man_id)
 	if (man->button_geometry_str) {
 		int val;
 		val = XParseGeometry(
-		    man->button_geometry_str, &x, &y, &width, &height);
+		    man->button_geometry_str, &x, &y,
+		    (unsigned int *)&width, (unsigned int *)&height);
 		ConsoleDebug(X11, "button x, y, w, h = %d %d %d %d\n", x, y,
 		    width, height);
 		if (val & WidthValue)
@@ -539,8 +541,9 @@ X_init_manager(int man_id)
 	}
 	if (man->geometry_str) {
 		geometry_mask = XParseGeometry(man->geometry_str,
-		    &man->geometry.x, &man->geometry.y, &man->geometry.cols,
-		    &man->geometry.rows);
+		    &man->geometry.x, &man->geometry.y,
+		    (unsigned int *)&man->geometry.cols,
+		    (unsigned int *)&man->geometry.rows);
 
 		if ((geometry_mask & XValue) || (geometry_mask & YValue)) {
 			man->sizehints_flags |= USPosition;
@@ -585,7 +588,8 @@ X_init_manager(int man_id)
 		int junk;
 
 		XQueryPointer(theDisplay, theRoot, &dummyroot, &dummychild,
-		    &man->geometry.x, &man->geometry.y, &junk, &junk, &junk);
+		    &man->geometry.x, &man->geometry.y, &junk, &junk,
+		    (unsigned int *)&junk);
 		man->geometry.dir |= GROW_DOWN | GROW_RIGHT;
 		man->sizehints_flags |= USPosition;
 	}
@@ -736,6 +740,7 @@ create_manager_window(int man_id)
 static int
 handle_error(Display *d, XErrorEvent *ev)
 {
+	(void)d;
 	ConsoleMessage("X Error:\n");
 	ConsoleMessage("         error code: %d\n", ev->error_code);
 	ConsoleMessage("         request code: %d\n", ev->request_code);

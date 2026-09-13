@@ -119,6 +119,7 @@ static void TerminateHandler(int sig);
 static void
 TerminateHandler(int sig)
 {
+	(void)sig;
 	isTerminated = True;
 }
 
@@ -456,6 +457,7 @@ SendFvwmPipe(char *message, unsigned long window)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	/* ShutMeDown(1); */
 	/*
 	 * do not call ShutMeDown, it may make X calls which are not allowed
@@ -512,6 +514,7 @@ RedrawWindow(int force)
 void
 ConsoleMessage(const char *fmt, ...)
 {
+	(void)fmt;
 #ifndef NO_CONSOLE
 	va_list args;
 	FILE *filep;
@@ -711,7 +714,7 @@ LoopOnEvents(void)
 			break;
 		case ClientMessage:
 			if ((Event.xclient.format == 32) &&
-			    (Event.xclient.data.l[0] == wm_del_win))
+			    ((Atom)Event.xclient.data.l[0] == wm_del_win))
 				exit(0);
 		case EnterNotify:
 			if (!SomeButtonDown(Event.xcrossing.state))
@@ -766,7 +769,8 @@ find_frame_window(Window win, int *off_x, int *off_y)
 
 	while (1) {
 		junkw = NULL;
-		if (XQueryTree(dpy, win, &root, &parent, &junkw, &junki) &&
+		if (XQueryTree(dpy, win, &root, &parent, &junkw,
+		    (unsigned int *)&junki) &&
 		    junkw)
 			XFree(junkw);
 		if (parent == root)

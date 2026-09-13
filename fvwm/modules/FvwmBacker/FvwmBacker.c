@@ -201,7 +201,7 @@ void
 ProcessMessage(unsigned long type, unsigned long *body)
 {
 	if (type == M_NEW_DESK) {
-		if (body[0] > DeskCount || commands[body[0]].type == -1) {
+		if ((int)body[0] > DeskCount || commands[body[0]].type == -1) {
 			return;
 		}
 #ifdef LOGFILE
@@ -291,6 +291,7 @@ SendFvwmPipe(char *message, unsigned long window)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(1);
 }
 

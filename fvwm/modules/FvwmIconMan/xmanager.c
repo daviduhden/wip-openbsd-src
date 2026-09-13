@@ -7,7 +7,7 @@
 #include "config.h"
 #include "x.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: xmanager.c,v 1.1.1.1 2006/11/26 10:53:51 matthieu Exp $";
 
 #ifdef SHAPE
@@ -426,7 +426,7 @@ button_right(WinManager *man, Button *b)
 Button *
 button_left(WinManager *man, Button *b)
 {
-	int i;
+	int i = -1;
 	if (index_to_col(man, b->index) > 0) {
 		i = box_to_index(man, index_to_box(man, b->index) - 1);
 	}
@@ -983,8 +983,8 @@ get_button_geometry(WinManager *man, Button *button, ButtonGeometry *g)
 	if (man->draw_icons && win && win->pic.picture) {
 		/* If no window, then icon_* aren't used, so doesn't matter what
 		   they are */
-		g->icon_w = min(win->pic.width, g->button_h);
-		g->icon_h = min(g->button_h - 4, win->pic.height);
+		g->icon_w = min((int)win->pic.width, g->button_h);
+		g->icon_h = min(g->button_h - 4, (int)win->pic.height);
 		icon_pad = center_padding(g->icon_h, g->button_h);
 		g->icon_x = g->button_x + 4;
 		g->icon_y = g->button_y + icon_pad;
@@ -1068,6 +1068,7 @@ static void
 draw_3d_icon(WinManager *man, int box, ButtonGeometry *g, int iconified,
     int dir, Contexts contextId)
 {
+	(void)box;
 	if (iconified == 0) {
 		draw_3d_square(man, g->icon_x, g->icon_y, g->icon_w, g->icon_h,
 		    man->flatContext[contextId], man->flatContext[contextId]);
@@ -1852,6 +1853,7 @@ check_managers_consistency(void)
 static void
 print_button_info(Button *b)
 {
+	(void)b;
 #ifdef PRINT_DEBUG
 	ConsoleMessage("button: %d\n", b->index);
 	ConsoleMessage("win: 0x%x\n", b->drawn_state.win);

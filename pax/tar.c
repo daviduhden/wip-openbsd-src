@@ -165,6 +165,7 @@ tar_endrd(void)
 int
 tar_trail(ARCHD *ignore, char *buf, int in_resync, int *cnt)
 {
+	(void)ignore;
 	int i;
 
 	/*

@@ -59,7 +59,7 @@ int label_h = 0;
 
 DeskInfo *Desks;
 int Wait = 0;
-XErrorHandler FvwmErrorHandler(Display *, XErrorEvent *);
+int FvwmErrorHandler(Display *, XErrorEvent *);
 
 /* assorted gray bitmaps for decorative borders */
 #define g_width 2
@@ -122,7 +122,7 @@ initialize_pager(void)
 	/* domivogt (07-mar-1999): But it is! A window being moved in the pager
 	 * might die at any moment causing the Xlib calls to generate BadMatch
 	 * errors. Without an error handler the pager will die! */
-	XSetErrorHandler((XErrorHandler)FvwmErrorHandler);
+	XSetErrorHandler(FvwmErrorHandler);
 #endif /* 1 */
 
 	wm_del_win = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
@@ -591,7 +591,7 @@ DispatchEvent(XEvent *Event)
 
 	case ClientMessage:
 		if ((Event->xclient.format == 32) &&
-		    (Event->xclient.data.l[0] == wm_del_win)) {
+		    ((Atom)Event->xclient.data.l[0] == wm_del_win)) {
 			exit(0);
 		}
 		break;
@@ -1503,9 +1503,11 @@ MoveWindow(XEvent *Event)
  *      FvwmErrorHandler - displays info on internal errors
  *
  ************************************************************************/
-XErrorHandler
+int
 FvwmErrorHandler(Display *dpy, XErrorEvent *event)
 {
+	(void)dpy;
+	(void)event;
 	extern Bool error_occured;
 	error_occured = True;
 	return 0;
@@ -1585,21 +1587,21 @@ PictureWindow(PagerWindow *t)
 	int iconY;
 	if (MiniIcons) {
 		if (t->mini_icon.picture && (t->PagerView != None)) {
-			if (t->pager_view_width > t->mini_icon.width)
+			if (t->pager_view_width > (int)t->mini_icon.width)
 				iconX =
 				    (t->pager_view_width - t->mini_icon.width) /
 				    2;
-			else if (t->pager_view_width < t->mini_icon.width)
+			else if (t->pager_view_width < (int)t->mini_icon.width)
 				iconX = -(
 				    (t->mini_icon.width - t->pager_view_width) /
 				    2);
 			else
 				iconX = 0;
-			if (t->pager_view_height > t->mini_icon.height)
+			if (t->pager_view_height > (int)t->mini_icon.height)
 				iconY = (t->pager_view_height -
 				    t->mini_icon.height) /
 				    2;
-			else if (t->pager_view_height < t->mini_icon.height)
+			else if (t->pager_view_height < (int)t->mini_icon.height)
 				iconY = -((t->mini_icon.height -
 				    t->pager_view_height) /
 				    2);
@@ -1635,21 +1637,21 @@ PictureIconWindow(PagerWindow *t)
 	int iconY;
 	if (MiniIcons) {
 		if (t->mini_icon.picture && (t->IconView != None)) {
-			if (t->icon_view_width > t->mini_icon.width)
+			if (t->icon_view_width > (int)t->mini_icon.width)
 				iconX =
 				    (t->icon_view_width - t->mini_icon.width) /
 				    2;
-			else if (t->icon_view_width < t->mini_icon.width)
+			else if (t->icon_view_width < (int)t->mini_icon.width)
 				iconX = -(
 				    (t->mini_icon.width - t->icon_view_width) /
 				    2);
 			else
 				iconX = 0;
-			if (t->icon_view_height > t->mini_icon.height)
+			if (t->icon_view_height > (int)t->mini_icon.height)
 				iconY = (t->icon_view_height -
 				    t->mini_icon.height) /
 				    2;
-			else if (t->icon_view_height < t->mini_icon.height)
+			else if (t->icon_view_height < (int)t->mini_icon.height)
 				iconY = -((t->mini_icon.height -
 				    t->icon_view_height) /
 				    2);
@@ -1680,7 +1682,7 @@ void
 IconMoveWindow(XEvent *Event, PagerWindow *t)
 {
 	char command[100];
-	int x1, y1, finished = 0, wx, wy, n, x = 0, y = 0, xi = 0, yi = 0;
+	int x1, y1, finished = 0, n, x = 0, y = 0, xi = 0, yi = 0;
 	Window dumwin;
 	int m, n1, m1;
 	int moved = 0;
@@ -1693,11 +1695,6 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 	m = (Scr.VyMax) / Scr.MyDisplayHeight;
 	n1 = (Scr.Vx + t->x) / Scr.MyDisplayWidth;
 	m1 = (Scr.Vy + t->y) / Scr.MyDisplayHeight;
-	wx = (Scr.Vx + t->x) * (icon_w - n) / (Scr.VxMax + Scr.MyDisplayWidth) +
-	    n1;
-	wy =
-	    (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
-	    m1;
 
 	XRaiseWindow(dpy, t->IconView);
 

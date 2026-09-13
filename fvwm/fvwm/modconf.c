@@ -69,6 +69,11 @@ void
 ModuleConfig(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	int module;
 	AddToModList(action); /* save for config request */
 	for (module = 0; module < npipes;
@@ -114,6 +119,11 @@ void
 AddModConfig(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)junk;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	AddToModList(action);
 }
 
@@ -124,6 +134,11 @@ void
 DestroyModConfig(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)junk;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	struct moduleInfoList *current, *next, *prev;
 	char *info; /* info to be deleted - may contain wildcards */
 	char *mi;
@@ -161,6 +176,11 @@ void
 SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)action;
 	struct moduleInfoList *t;
 	char *message, msg2[32];
 	extern char *IconPath;

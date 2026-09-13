@@ -146,7 +146,7 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	for (i = 0; i < strlen(filename); i++)
+	for (i = 0; i < (int)strlen(filename); i++)
 		if ((filename[i] == '\n') || (filename[i] == '\r')) {
 			filename[i] = 0;
 		}
@@ -508,6 +508,7 @@ is_cpp_linemarker(const char *line)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }
 

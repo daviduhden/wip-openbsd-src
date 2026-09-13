@@ -3,7 +3,7 @@
 
 #include "FvwmIconMan.h"
 
-static char const rcsid[] =
+static char const rcsid[] __unused =
     "$Id: winlist.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
 #define HASHTAB_SIZE 257
@@ -240,6 +240,7 @@ free_windata(WinData *p)
 WinManager *
 figure_win_manager(WinData *win, Uchar name_mask)
 {
+	(void)name_mask;
 	int i;
 	char *tname = win->titlename;
 	char *iname = win->iconname;

@@ -359,7 +359,7 @@ StashEventTime(XEvent *ev)
 
 static void
 ComputeActualPosition(int x, int y, int x_unit, int y_unit, int width,
-    int height, int *pfinalX, int *pfinalY)
+    int height, int *pfinalX, int *pfinalY) __unused
 {
 	*pfinalX = x * x_unit / 100;
 	*pfinalY = y * y_unit / 100;
@@ -524,7 +524,7 @@ GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
     MenuOptions *pops)
 {
 	char *tok = NULL, *naction = action, *taction;
-	int x, y, button, gflags;
+	int x, y, button;
 	unsigned int width, height;
 	Window context_window = 0;
 	Bool fHasContext, fUseItemOffset;
@@ -540,7 +540,6 @@ GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
 	taction = action;
 	while (action != NULL) {
 		/* ^ just to be able to jump to end of loop without 'goto' */
-		gflags = NoValue;
 		pops->flags.allflags = 0;
 		pops->pos_hints.fRelative = FALSE;
 		/* parse context argument (if present) */

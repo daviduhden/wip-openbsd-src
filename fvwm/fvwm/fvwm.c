@@ -38,7 +38,7 @@
 #define MAXHOSTNAME 255
 
 #ifndef lint
-static char sccsid[] = "@(#)fvwm.c " VERSION " fvwm";
+static char sccsid[] __unused = "@(#)fvwm.c " VERSION " fvwm";
 #endif
 
 int master_pid; /* process number of 1st fvwm process */
@@ -267,7 +267,7 @@ main(int argc, char **argv)
 		strlcpy(message, XDisplayString(dpy), sizeof(message));
 
 		for (i = 0; i < Scr.NumberOfScreens; i++) {
-			if (i != Scr.screen && fork() == 0) {
+			if (i != (int)Scr.screen && fork() == 0) {
 				myscreen = i;
 
 				/*
@@ -637,13 +637,13 @@ CaptureAllWindows(void)
 		/*
 		** weed out icon windows
 		*/
-		for (i = 0; i < nchildren; i++) {
+		for (i = 0; i < (int)nchildren; i++) {
 			if (children[i]) {
 				XWMHints *wmhintsp =
 				    XGetWMHints(dpy, children[i]);
 				if (wmhintsp) {
 					if (wmhintsp->flags & IconWindowHint) {
-						for (j = 0; j < nchildren;
+						for (j = 0; j < (int)nchildren;
 						    j++) {
 							if (children[j] ==
 							    wmhintsp
@@ -661,7 +661,7 @@ CaptureAllWindows(void)
 		/*
 		** map all of the non-override, non-icon windows
 		*/
-		for (i = 0; i < nchildren; i++) {
+		for (i = 0; i < (int)nchildren; i++) {
 			if (children[i] && MappedNotOverride(children[i])) {
 				XUnmapWindow(dpy, children[i]);
 				Event.xmaprequest.window = children[i];
@@ -672,7 +672,7 @@ CaptureAllWindows(void)
 	} else /* must be recapture */ {
 		/* reborder all windows */
 		tmp = Scr.FvwmRoot.next;
-		for (i = 0; i < nchildren; i++) {
+		for (i = 0; i < (int)nchildren; i++) {
 			if (XFindContext(dpy, children[i], FvwmContext,
 			    (caddr_t *)&tmp) != XCNOENT) {
 				isIconicState = DontCareState;
@@ -897,6 +897,7 @@ newhandler(int sig)
 void
 Restart(int nonsense)
 {
+	(void)nonsense;
 	isTerminated = True;
 	fvwmRunState = FVWM_RESTART;
 }
@@ -1467,6 +1468,7 @@ Reborder(void)
 void
 SigDone(int nonsense)
 {
+	(void)nonsense;
 	isTerminated = True;
 	fvwmRunState = FVWM_DONE;
 }
@@ -1541,6 +1543,8 @@ Done(int restart, char *command)
 int
 CatchRedirectError(Display *dpy, XErrorEvent *event)
 {
+	(void)dpy;
+	(void)event;
 	fvwm_msg(ERR, "CatchRedirectError", "another WM is running");
 	exit(1);
 }
@@ -1554,6 +1558,7 @@ CatchRedirectError(Display *dpy, XErrorEvent *event)
 int
 CatchFatal(Display *dpy)
 {
+	(void)dpy;
 	/* No action is taken because usually this action is caused by someone
 	   using "xlogout" to be able to switch between multiple window managers
 	   */
@@ -1570,6 +1575,7 @@ CatchFatal(Display *dpy)
 int
 FvwmErrorHandler(Display *dpy, XErrorEvent *event)
 {
+	(void)dpy;
 	extern int last_event_type;
 
 	/* some errors are acceptable, mostly they're caused by
@@ -1626,6 +1632,7 @@ SaveDesktopState(void)
 void
 SetMWM_INFO(Window window)
 {
+	(void)window;
 #ifdef MODALITY_IS_EVIL
 	struct mwminfo {
 		long flags;

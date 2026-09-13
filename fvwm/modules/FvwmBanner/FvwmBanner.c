@@ -208,7 +208,7 @@ main(int argc, char **argv)
 				exit(0);
 			case ClientMessage:
 				if (Event.xclient.format == 32 &&
-				    Event.xclient.data.l[0] == wm_del_win) {
+				    (Atom)Event.xclient.data.l[0] == wm_del_win) {
 					XDestroyWindow(dpy, win);
 					XSync(dpy, 0);
 					exit(0);
@@ -265,7 +265,7 @@ GetXPMFile(char *file, char *path)
 }
 
 static void
-nocolor(char *a, char *b)
+nocolor(char *a, char *b) __unused
 {
 	fprintf(stderr, "FvwmBanner: can't %s %s\n", a, b);
 }
@@ -343,5 +343,6 @@ void DeadPipe(int nonsense);
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 	exit(0);
 }

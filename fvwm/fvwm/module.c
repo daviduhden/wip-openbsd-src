@@ -94,6 +94,7 @@ void
 executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)w;
 	int fvwm_to_app[2], app_to_fvwm[2];
 	int i, val, nargs = 0;
 	char *cptr;
@@ -255,7 +256,7 @@ HandleModuleInput(Window w, int channel)
 	/* Already read a (possibly NULL) window id from the pipe,
 	 * Now read an fvwm bultin command line */
 	n = read(readPipes[channel], &size, sizeof(size));
-	if (n < sizeof(size)) {
+	if (n < (int)sizeof(size)) {
 		KillModule(channel, 1);
 		return 0;
 	}
@@ -284,7 +285,7 @@ HandleModuleInput(Window w, int channel)
 
 	n = read(readPipes[channel], &cont, sizeof(cont));
 	/* DB(("Module read[%d] cont = %d", n, cont)); */
-	if (n < sizeof(cont)) {
+	if (n < (int)sizeof(cont)) {
 		KillModule(channel, 3);
 		return 0;
 	}
@@ -343,11 +344,13 @@ HandleModuleInput(Window w, int channel)
 void
 DeadPipe(int nonsense)
 {
+	(void)nonsense;
 }
 
 void
 KillModule(int channel, int place)
 {
+	(void)place;
 	close(readPipes[channel]);
 	close(writePipes[channel]);
 
@@ -564,6 +567,11 @@ void
 SendStrToModule(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)junk;
+	(void)tmp_win;
+	(void)context;
+	(void)Module;
 	char *module, *str;
 	int i;
 
@@ -712,6 +720,11 @@ void
 send_list_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
+	(void)action;
 	FvwmWindow *t;
 
 	if (*Module >= 0) {
@@ -788,6 +801,10 @@ void
 set_mask_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
+	(void)eventp;
+	(void)w;
+	(void)tmp_win;
+	(void)context;
 	int val = 0;
 
 	GetIntegerArguments(action, NULL, &val, 1);

@@ -562,7 +562,7 @@ Loop(Window target)
 			break;
 		case ClientMessage:
 			if ((Event.xclient.format == 32) &&
-			    (Event.xclient.data.l[0] == wm_del_win)) {
+			    ((Atom)Event.xclient.data.l[0] == wm_del_win)) {
 				DeadPipe(1);
 			}
 			break;

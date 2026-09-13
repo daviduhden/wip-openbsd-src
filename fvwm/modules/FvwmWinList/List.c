@@ -132,10 +132,9 @@ int
 UpdateItemDesk(List *list, long id, long desk)
 {
 	Item *temp;
-	int i;
 
-	for (i = 0, temp = list->head; temp != NULL && temp->id != id;
-	    i++, temp = temp->next)
+	for (temp = list->head; temp != NULL && temp->id != id;
+	    temp = temp->next)
 		;
 	/*  	printf("sk=%ld %ld \n", id, temp->id);
 	 */
