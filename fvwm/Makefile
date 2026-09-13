@@ -7,3 +7,10 @@ SUBDIR = libs fvwm sample.fvwmrc utils icons modules
 
 .include <bsd.subdir.mk>
 .include <bsd.xorg.mk>
+
+# Debug the main window manager; modules have their own debug target.
+debug:
+	@echo "===> fvwm"
+	@${MAKE} -C ${.CURDIR}/fvwm debug
+
+.PHONY: debug

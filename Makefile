@@ -12,6 +12,7 @@
 #   make install    install both components (run as root or via doas)
 #   make clean      remove build artifacts
 #   make obj        create objdirs (pax only; fvwm builds in place)
+#   make debug      build each component and run it under lldb
 #
 # Requires OpenBSD make(1) and /usr/share/mk.  fvwm additionally
 # requires Xenocara/X11 development files.
@@ -19,6 +20,15 @@
 # The ext4fs component is not built here; it stores files at
 # OpenBSD source-tree-relative paths for copying into a checkout.
 
+# Toolchain: clang compiles, lldb debugs.
+CC =		clang
+DEBUGGER =	lldb
+
 SUBDIR = pax fvwm
 
 .include <bsd.subdir.mk>
+
+# Recurse into each component and start the built program under lldb.
+debug: _SUBDIRUSE
+
+.PHONY: debug

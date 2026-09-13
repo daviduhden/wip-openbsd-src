@@ -11,14 +11,19 @@
 # Run with:
 #   make            # build the test binaries
 #   make run        # build and run them (ASan/UBSan enabled)
+#   make debug      # build and debug one test (TEST=..., default
+#                   # fvwm-parse-tests)
 #   make clean
 #
 # Overrides:
-#   CC=clang        # prefer clang for the sanitizer runtimes
+#   CC=...          # C compiler (default clang)
+#   DEBUGGER=...    # debugger (default lldb)
+#   TEST=...        # test to debug
 #   X11INCS=...     # location of the X11 headers
 #   SANITIZE=       # disable sanitizers
 
-CC ?=		cc
+CC =		clang
+DEBUGGER =	lldb
 CFLAGS ?=	-O2 -g
 CFLAGS +=	-std=c17 -D_GNU_SOURCE -Wall -Wextra
 CFLAGS +=	-Wno-unused-function -Wno-deprecated-declarations
@@ -71,7 +76,12 @@ run: $(TESTS)
 	ASAN_OPTIONS=detect_leaks=0 ./ext4fs-jbd2-tests
 	ASAN_OPTIONS=detect_leaks=0 ./ext4fs-inode-tests
 
+TEST ?=		fvwm-parse-tests
+
+debug: $(TEST)
+	$(DEBUGGER) ./$(TEST)
+
 clean:
 	rm -f $(TESTS) *.o
 
-.PHONY: all run clean
+.PHONY: all run debug clean

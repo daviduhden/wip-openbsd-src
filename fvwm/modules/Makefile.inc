@@ -7,6 +7,9 @@ FVWM_MAKEFILE_INC = done
 
 X11BASE ?=	/usr/X11R6
 
+CC =		clang
+DEBUGGER =	lldb
+
 CFLAGS +=	-std=c17 -I${X11BASE}/include -I${.CURDIR}/../.. \
 		-I${.CURDIR}/../../libs
 LDADD +=	-L${X11BASE}/lib
@@ -20,4 +23,14 @@ MANDIR =	${X11BASE}/man/man
 NOOBJ =		Yes
 
 LDADD +=	-L${.CURDIR}/../../libs -lfvwm
+
+# Build the module, then start it under the debugger.
+debug: all
+	@if [ -z "${PROG}" ]; then \
+		echo "make debug: no PROG in ${.CURDIR}" >&2; \
+		exit 1; \
+	fi; \
+	exec ${DEBUGGER} ${PROG}
+
+.PHONY: debug
 .endif
