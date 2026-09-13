@@ -74,6 +74,7 @@ void
 SetBorder(
     FvwmWindow *t, Bool onoroff, Bool force, Bool Mapped, Window expose_win)
 {
+	(void)Mapped;
 	int y, i, x;
 	GC ReliefGC, ShadowGC;
 	Pixel BorderColor, BackColor;

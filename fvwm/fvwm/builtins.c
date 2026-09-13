@@ -557,9 +557,9 @@ destroy_menu(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	MenuRoot *mr;
 	MenuRoot *mrContinuation;
 
-	char *token, *rest;
+	char *token;
 
-	rest = GetNextToken(action, &token);
+	GetNextToken(action, &token);
 	if (!token)
 		return;
 	mr = FindPopup(token);

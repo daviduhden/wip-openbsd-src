@@ -1901,8 +1901,8 @@ parsekey(char *tline)
  * 	Original work from GoodStuff:
  *		Copyright 1993, Robert Nation.
  ***********************************************************************/
-static void
-change_window_name(char *str) __unused
+__unused static void
+change_window_name(char *str)
 {
 	XTextProperty name;
 

@@ -469,8 +469,8 @@ WhichButton(ButtonArray *array, int x, int y)
 /******************************************************************************
   ButtonName - Return the name of the button
 ******************************************************************************/
-static char *
-ButtonName(ButtonArray *array, int butnum) __unused
+__unused static char *
+ButtonName(ButtonArray *array, int butnum)
 {
 	Button *temp;
 

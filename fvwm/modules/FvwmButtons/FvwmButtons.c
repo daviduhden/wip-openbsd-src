@@ -2064,7 +2064,7 @@ Slide(panel_info *p, button_info *b)
 		int w;                    /* current width */
 		int h;                    /* current height */
 
-		root = GetRealGeometry(Dpy, CurrentPanel->uber->IconWinParent,
+		GetRealGeometry(Dpy, CurrentPanel->uber->IconWinParent,
 		    &x, &y, (ushort *)&iw, (ushort *)&ih, (ushort *)&BW,
 		    (ushort *)&depth);
 

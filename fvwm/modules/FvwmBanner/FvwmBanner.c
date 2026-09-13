@@ -264,8 +264,8 @@ GetXPMFile(char *file, char *path)
 	GetXPMData(fvwm2_big_xpm);
 }
 
-static void
-nocolor(char *a, char *b) __unused
+__unused static void
+nocolor(char *a, char *b)
 {
 	fprintf(stderr, "FvwmBanner: can't %s %s\n", a, b);
 }
