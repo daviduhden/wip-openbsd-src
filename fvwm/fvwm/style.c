@@ -39,7 +39,7 @@ static void AddToList(name_list *);           /* prototype */
 
 /* A macro for skipping over white space */
 #define SKIPSPACE							\
-	while (isspace((unsigned char)*isspace))			\
+	while (isspace((unsigned char)*restofline))			\
 		restofline++;
 
 /* A macro for checking the command with a caseless compare */
@@ -54,7 +54,7 @@ static void AddToList(name_list *);           /* prototype */
 	tmp = restofline;						\
 	len = 0;							\
 	while ((tmp != NULL) && (*tmp != 0) && (*tmp != ',') &&		\
-	       (*tmp != '\n') && (!isspace((unsigned char)*isspace))) {	\
+	       (*tmp != '\n') && (!isspace((unsigned char)*tmp))) {	\
 		tmp++;							\
 		len++;							\
 	}
@@ -71,7 +71,7 @@ static void AddToList(name_list *);           /* prototype */
 	len = 0;							\
 	while (tmp && *tmp &&						\
 	       ((!is_quoted && (*tmp != ',') && (*tmp != '\n') &&	\
-	            (!isspace((unsigned char)*isspace))) ||		\
+	            (!isspace((unsigned char)*tmp))) ||		\
 	           (is_quoted && (*tmp != '\n') && (*tmp != '"')))) {	\
 		tmp++;							\
 		len++;							\
@@ -170,7 +170,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				while ((tmp != NULL) && (*tmp != 0) &&
 				    (*tmp != ',') && (*tmp != '\n') &&
 				    (*tmp != '/') && (!isspace(
-				    (unsigned char)*isspace))) {
+				    (unsigned char)*tmp))) {
 					tmp++;
 					len++;
 				}
@@ -182,18 +182,18 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					tname.off_flags |= FORE_COLOR_FLAG;
 				}
 
-				while (isspace((unsigned char)*isspace))
+				while (isspace((unsigned char)*tmp))
 					tmp++;
 				if (*tmp == '/') {
 					tmp++;
-					while (isspace((unsigned char)*isspace))
+					while (isspace((unsigned char)*tmp))
 						tmp++;
 					restofline = tmp;
 					len = 0;
 					while ((tmp != NULL) && (*tmp != 0) &&
 					    (*tmp != ',') && (*tmp != '\n') &&
 					    (*tmp != '/') && (!isspace(
-					    (unsigned char)*isspace))) {
+					    (unsigned char)*tmp))) {
 						tmp++;
 						len++;
 					}
@@ -954,7 +954,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						free(tmp);
 					}
 				}
-				while (isspace((unsigned char)*isspace))
+				while (isspace((unsigned char)*restofline))
 					restofline++;
 			}
 			break;

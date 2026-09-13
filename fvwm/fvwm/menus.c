@@ -2843,7 +2843,7 @@ AddToMenu(
 	tmp->lpicture = NULL;
 
 	/* skip leading spaces */
-	/*while(isspace((unsigned char)*isspace)&&(item != NULL))
+	/*while(isspace((unsigned char)*item)&&(item != NULL))
 	  item++;*/
 	/* up to first tab goes in "item" field */
 	start = item;

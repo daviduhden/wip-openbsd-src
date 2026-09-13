@@ -148,7 +148,7 @@ findEnvVar(const char *s, int *len)
 	while (*s) {
 		next = s + 1;
 		if (*s == '$' &&
-		    (isalpha((unsigned char)*isalpha) || *next == '_' ||
+		    (isalpha((unsigned char)*next) || *next == '_' ||
 		     *next == '{')) {
 			ret = (char *)s++;
 			if (*s == '{') {
@@ -156,7 +156,7 @@ findEnvVar(const char *s, int *len)
 				++s;
 			}
 			while (*s &&
-			    (isalnum((unsigned char)*isalnum) || *s == '_'))
+			    (isalnum((unsigned char)*s) || *s == '_'))
 				++s;
 			*len = s - ret;
 			if (brace) {

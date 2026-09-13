@@ -346,7 +346,7 @@ find_func_type(char *action, short *func_type, Bool *func_needs_window)
 	int mlen;
 
 	if (action) {
-		while (*endtok && !isspace((unsigned char)*isspace))
+		while (*endtok && !isspace((unsigned char)*endtok))
 			++endtok;
 		len = endtok - action;
 		j = 0;

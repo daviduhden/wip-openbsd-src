@@ -1014,7 +1014,7 @@ menu_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	mops.flags.allflags = 0;
 	action = GetNextToken(action, &menu_name);
 	action = GetMenuOptions(action, w, tmp_win, NULL, &mops);
-	while (action && *action && isspace((unsigned char)*isspace))
+	while (action && *action && isspace((unsigned char)*action))
 		action++;
 	if (action && *action == 0)
 		action = NULL;
@@ -2012,7 +2012,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 		case 16: /* MenuFace */
 			while (args && *args != '\0' &&
-			    isspace((unsigned char)*isspace))
+			    isspace((unsigned char)*args))
 				args++;
 			ReadMenuFace(args, &tmpms->look.face, True);
 			break;
@@ -2314,7 +2314,7 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				bf = &fl->BorderStyle.active;
 			else
 				bf = &fl->BorderStyle.inactive;
-			while (isspace((unsigned char)*isspace))
+			while (isspace((unsigned char)*action))
 				++action;
 			if ('(' != *action) {
 				if (!*action) {
@@ -3204,7 +3204,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	enum ButtonState bs = MaxButtonState;
 	int i = 0, all = 0, pstyle = 0;
 
-	while (isspace((unsigned char)*isspace))
+	while (isspace((unsigned char)*s))
 		++s;
 	for (; i < MaxButtonState; ++i)
 		if (strncasecmp(
@@ -3216,7 +3216,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 		s += strlen(button_states[bs]);
 	else
 		all = 1;
-	while (isspace((unsigned char)*isspace))
+	while (isspace((unsigned char)*s))
 		++s;
 	if ('(' == *s) {
 		int len;
@@ -3233,7 +3233,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	} else
 		spec = s;
 
-	while (isspace((unsigned char)*isspace))
+	while (isspace((unsigned char)*spec))
 		++spec;
 	/* setup temporary in case button read fails */
 	tmpbf.style = SimpleButton;
@@ -3289,7 +3289,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	if (pstyle) {
 		free(spec);
 		++end;
-		while (isspace((unsigned char)*isspace))
+		while (isspace((unsigned char)*end))
 			++end;
 	}
 	return end;
@@ -3544,7 +3544,7 @@ AddToDecor(FvwmDecor *fl, char *s)
 {
 	if (!s)
 		return;
-	while (*s && isspace((unsigned char)*isspace))
+	while (*s && isspace((unsigned char)*s))
 		++s;
 	if (!*s)
 		return;
@@ -4078,7 +4078,7 @@ CreateFlagString(char *string, char **restptr)
 	int length;
 
 	c = string;
-	while (isspace((unsigned char)*isspace) && (*c != 0))
+	while (isspace((unsigned char)*c) && (*c != 0))
 		c++;
 
 	if (*c == '[' || *c == '(') {

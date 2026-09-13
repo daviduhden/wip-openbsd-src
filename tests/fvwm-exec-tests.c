@@ -316,8 +316,8 @@ imsgbuf_clear(struct imsgbuf *b)
 	(void)b;
 }
 
-ssize_t
-imsg_get(struct imsgbuf *b, struct imsg *m)
+int
+imsgbuf_get(struct imsgbuf *b, struct imsg *m)
 {
 	(void)b;
 	(void)m;

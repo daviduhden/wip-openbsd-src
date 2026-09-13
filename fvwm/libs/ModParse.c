@@ -54,7 +54,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 					break;
 				}
 			} else /* normal token */ {
-				if (isspace((unsigned char)*isspace) ||
+				if (isspace((unsigned char)*p) ||
 				    *p == ',')
 					break;
 			}
@@ -169,10 +169,10 @@ GetNextArgument(char *indata, char **token)
 		*token = NULL;
 		return NULL;
 	}
-	while (isspace((unsigned char)*isspace) && (*t != 0))
+	while (isspace((unsigned char)*t) && (*t != 0))
 		t++;
 	start = t;
-	while (!isspace((unsigned char)*isspace) && (*t != 0)) {
+	while (!isspace((unsigned char)*t) && (*t != 0)) {
 		/* Check for qouted text */
 		if (*t == '"') {
 			t++;

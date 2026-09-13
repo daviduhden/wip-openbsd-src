@@ -129,12 +129,12 @@ MergeConfigLineResource(
 
 	line += len;
 	end = line;
-	while (*end && !isspace((unsigned char)*isspace))
+	while (*end && !isspace((unsigned char)*end))
 		end++;
 	if (line == end)
 		return False;
 	value = end;
-	while (*value && isspace((unsigned char)*isspace))
+	while (*value && isspace((unsigned char)*value))
 		value++;
 
 	/* prefix*suffix: value */

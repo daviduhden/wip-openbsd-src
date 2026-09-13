@@ -1692,7 +1692,7 @@ parseicon(char *tline)
 		tline++;
 	start = tline;
 	end = tline;
-	while (!isspace((unsigned char)*isspace) && (*end != '\n') &&
+	while (!isspace((unsigned char)*end) && (*end != '\n') &&
 	    (*end != 0))
 		end++;
 	len = end - start;

@@ -146,7 +146,7 @@ GetConfigLine(int *fd, char **tline)
 			/* DB(("Config line (%d): `%s'", body_size, body_size ?
 			 * *tline : "")); */
 			while ((body_size > 0) &&
-			    isspace((unsigned char)**isspace)) {
+			    isspace((unsigned char)**tline)) {
 				(*tline)++;
 				--body_size;
 			}

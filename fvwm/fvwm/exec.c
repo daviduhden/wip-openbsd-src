@@ -212,7 +212,7 @@ exec_helper_drain(int (*cb)(struct imsg *, void *), void *arg)
 		return -1;
 	}
 
-	while ((n = imsg_get(exec_ibuf, &imsg)) != -1) {
+	while ((n = imsgbuf_get(exec_ibuf, &imsg)) != -1) {
 		if (n == 0)
 			break;
 		cb(&imsg, arg);

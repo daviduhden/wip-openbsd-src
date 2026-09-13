@@ -586,7 +586,7 @@ main(int argc, char **argv)
 		if (n == 0)
 			break;
 
-		while ((n = imsg_get(&ibuf, &imsg)) != -1) {
+		while ((n = imsgbuf_get(&ibuf, &imsg)) != -1) {
 			if (n == 0)
 				break;
 

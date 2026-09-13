@@ -338,7 +338,7 @@ AddButtonAction(button_info *b, int n, char *action)
 		b->flags |= b_Action;
 	}
 
-	while (*action && isspace((unsigned char)*isspace))
+	while (*action && isspace((unsigned char)*action))
 		action++;
 	l = strlen(action);
 	if (l > 1) {
