@@ -10,7 +10,7 @@
 #
 # Run with:
 #   make            # build the test binaries
-#   make run        # build and run them (ASan/UBSan enabled)
+#   make run        # build and run them (ASan+UBSan, or ubsan_minimal on OpenBSD)
 #   make debug      # clean, rebuild one test as <test>_debug with
 #                   # -O0 -g and debug it (TEST=..., default
 #                   # fvwm-parse-tests)
@@ -34,6 +34,9 @@ SUFFIX =
 # the real one when it is not in the default list.
 X11INCS ?=	-I/usr/X11R6/include -I/usr/local/include
 
+# On OpenBSD ASan is unsupported and only the ubsan_minimal runtime is
+# shipped (clang-local(1)); elsewhere use the ASan+UBSan runtimes.
+SANITIZE != if [ "`uname -s`" = OpenBSD ]; then echo "-fsanitize=undefined -fsanitize-minimal-runtime -Wl,--no-execute-only"; else echo "-fsanitize=address,undefined"; fi
 SANITIZE ?=	-fsanitize=address,undefined
 
 TESTS =		fvwm-parse-tests fvwm-exec-tests fvwm-pipebuf-tests \
