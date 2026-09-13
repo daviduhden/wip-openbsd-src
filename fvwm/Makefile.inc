@@ -11,8 +11,11 @@ MANDIR ?=	${X11BASE}/man/man
 CC =		clang
 DEBUGGER =	lldb
 
-CFLAGS +=	-std=c17 -I${X11BASE}/include -I${.CURDIR} -I${.CURDIR}/.. \
-		-I${.CURDIR}/../libs
+CFLAGS_COMMON =	-std=c17 -Wall -Wextra -Wpedantic \
+		-I${X11BASE}/include \
+		-I${.CURDIR} -I${.CURDIR}/.. -I${.CURDIR}/../libs
+CFLAGS =	-O2 -pipe ${CFLAGS_COMMON}
+CFLAGS_DEBUG =	-O0 -g ${CFLAGS_COMMON}
 LDADD +=	-L${X11BASE}/lib
 
 FVWMLIBDIR =	${X11BASE}/lib/X11/fvwm
@@ -28,13 +31,20 @@ INCSDIR ?=	${X11BASE}/include
 
 LDADD +=	-L${.CURDIR}/../libs -lfvwm
 
-# Build the directory's program, then start it under the debugger.
-debug: all
+# Reject directories without a program before cleaning anything.
+debug-check:
 	@if [ -z "${PROG}" ]; then \
 		echo "make debug: no PROG in ${.CURDIR}" >&2; \
 		exit 1; \
-	fi; \
-	exec ${DEBUGGER} ${PROG}
+	fi
 
-.PHONY: debug
+# Build <prog>_debug with -O0 -g, then start it under the debugger.
+debug: debug-check .WAIT clean
+	${MAKE} CFLAGS="${CFLAGS_DEBUG}" PROG="${PROG}_debug" all
+	${DEBUGGER} ./${PROG}_debug
+
+# Clean and rebuild the directory's program from scratch.
+rebuild: clean .WAIT all
+
+.PHONY: debug debug-check rebuild
 .endif

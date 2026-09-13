@@ -12,7 +12,9 @@
 #   make install    install both components (run as root or via doas)
 #   make clean      remove build artifacts
 #   make obj        create objdirs (pax only; fvwm builds in place)
-#   make debug      build each component and run it under lldb
+#   make debug      build each component as <prog>_debug and run it under lldb
+#   make test       run the host-side test suite
+#   make rebuild    clean and rebuild everything
 #
 # Requires OpenBSD make(1) and /usr/share/mk.  fvwm additionally
 # requires Xenocara/X11 development files.
@@ -28,7 +30,14 @@ SUBDIR = pax fvwm
 
 .include <bsd.subdir.mk>
 
-# Recurse into each component and start the built program under lldb.
+# Recurse into each component, build <prog>_debug and start it under lldb.
 debug: _SUBDIRUSE
 
-.PHONY: debug
+# Run the host-side test suite.
+test:
+	@${MAKE} -C ${.CURDIR}/tests test
+
+# Clean and rebuild everything from scratch.
+rebuild: clean .WAIT all
+
+.PHONY: debug test rebuild

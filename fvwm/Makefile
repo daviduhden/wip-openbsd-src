@@ -13,4 +13,7 @@ debug:
 	@echo "===> fvwm"
 	@${MAKE} -C ${.CURDIR}/fvwm debug
 
-.PHONY: debug
+# Clean and rebuild the whole hierarchy from scratch.
+rebuild: clean .WAIT all
+
+.PHONY: debug rebuild
