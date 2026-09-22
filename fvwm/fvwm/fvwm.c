@@ -17,6 +17,7 @@
 #include <X11/Xresource.h>
 #include <err.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +79,14 @@ Boolean debugging = False, PPosOverride, Blackout = False;
 char **g_argv;
 int g_argc;
 
+/*
+ * Absolute path of the running fvwm binary, recorded with
+ * getexecpath(3) at startup (before pledge(2)).  Restart uses it to
+ * unveil the binary's directory and to re-exec fvwm when a Restart
+ * command fails.  Empty when getexecpath(3) is unavailable.
+ */
+static char execpath[PATH_MAX];
+
 /* assorted gray bitmaps for decorative borders */
 #define g_width 2
 #define g_height 2
@@ -136,6 +145,16 @@ main(int argc, char **argv)
 
 	g_argv = argv;
 	g_argc = argc;
+
+	/*
+	 * Record the path of the running binary while the process is
+	 * still unrestricted.  Restart needs it both to unveil the
+	 * binary's directory and to re-exec fvwm itself.  Leave it
+	 * empty if getexecpath(3) fails, so callers fall back to
+	 * argv[0].
+	 */
+	if (getexecpath(execpath, sizeof(execpath)) == -1)
+		execpath[0] = '\0';
 
 	DBUG("main", "Entered, about to parse args");
 
@@ -486,11 +505,10 @@ main(int argc, char **argv)
 	 *                       this veil and therefore has the full
 	 *                       filesystem view
 	 *   /dev/null|console   FvwmForm, FvwmRearrange, FvwmWinList
-	 *   argv[0] directory   Restart re-execs fvwm
+	 *   executable dir      Restart re-execs fvwm
 	 */
 	{
 		const char *home = getenv("HOME");
-		char *argv0copy = NULL;
 		char *slash;
 
 		if (unveil(FVWMLIBDIR, "rx") == -1)
@@ -520,15 +538,25 @@ main(int argc, char **argv)
 			err(1, "unveil /dev/null");
 		if (unveil("/dev/console", "w") == -1)
 			err(1, "unveil /dev/console");
-		argv0copy = strdup(g_argv[0]);
-		if (argv0copy != NULL && strchr(argv0copy, '/') != NULL) {
-			slash = strrchr(argv0copy, '/');
-			*slash = '\0';
-			if (unveil(argv0copy, "rx") == -1 &&
-			    errno != ENOENT)
-				err(1, "unveil %s", argv0copy);
+		/*
+		 * Restart re-execs fvwm, so the directory holding the
+		 * running binary must stay visible.  execpath was
+		 * recorded with getexecpath(3) in main(), before
+		 * pledge(2); copy it before trimming the basename so
+		 * the full path remains available to Done().
+		 */
+		if (execpath[0] != '\0') {
+			char dir[PATH_MAX];
+
+			strlcpy(dir, execpath, sizeof(dir));
+			slash = strrchr(dir, '/');
+			if (slash != NULL && slash != dir) {
+				*slash = '\0';
+				if (unveil(dir, "rx") == -1 &&
+				    errno != ENOENT)
+					err(1, "unveil %s", dir);
+			}
 		}
-		free(argv0copy);
 		if (unveil(NULL, NULL) == -1)
 			err(1, "unveil");
 
@@ -1532,6 +1560,15 @@ Done(int restart, char *command)
 		fvwm_msg(ERR, "Done",
 		    "Call of '%s' failed!!!! (restarting '%s' instead)",
 		    command, g_argv[0]);
+		/*
+		 * Re-exec the running fvwm binary through the absolute
+		 * path recorded at startup.  g_argv is passed unchanged,
+		 * so the new process keeps the original argv[0].  If the
+		 * path is unknown or execv(2) fails, fall back to the
+		 * historical PATH lookup.
+		 */
+		if (execpath[0] != '\0')
+			execv(execpath, g_argv);
 		execvp(g_argv[0], g_argv); /* that _should_ work */
 		fvwm_msg(ERR, "Done", "Call of '%s' failed!!!!", g_argv[0]);
 	} else {
