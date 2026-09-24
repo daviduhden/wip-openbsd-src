@@ -46,8 +46,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * data structure for storing uid/grp selects (-U, -G non standard options)

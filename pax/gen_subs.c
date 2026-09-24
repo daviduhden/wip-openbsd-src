@@ -52,8 +52,8 @@
 #include <utmp.h>
 #include <vis.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * a collection of general purpose subroutines used by pax

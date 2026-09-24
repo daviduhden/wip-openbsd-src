@@ -46,8 +46,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 static void	wr_archive(ARCHD *, int is_app);
 static int	get_arc(void);

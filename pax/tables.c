@@ -47,8 +47,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 static u_int st_hash(const char *, int, int);
 
 /*

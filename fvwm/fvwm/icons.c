@@ -517,11 +517,9 @@ AutoPlace(FvwmWindow *t)
 					       (dim[2].start_at +
 						       dim[2].icon_dimension -
 						       dim[2].nom_dimension >
-						   dim
-						       [2]
-							   .end_at) /* check
-								       back edge
-								     */
+						   dim[2].end_at) /* check
+								     back edge
+								   */
 					       :
 					       (dim[2].start_at +
 						       dim[2].nom_dimension <

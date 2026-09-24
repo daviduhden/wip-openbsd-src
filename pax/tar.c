@@ -53,8 +53,8 @@
 #include <unistd.h>
 #include <wchar.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 #include "tar.h"
 
 SLIST_HEAD(xheader, xheader_record);

@@ -46,8 +46,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 static int  fset_ids(char *, int, uid_t, gid_t);
 static int  unlnk_exist(char *, int);

@@ -30,13 +30,12 @@
  */
 #include <limits.h>
 #include <stdbool.h>
+#include <stdckdint.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <stdckdint.h>
 
 #include "xalloc.h"
 
@@ -58,10 +57,10 @@ static int failures;
 static void
 test_add_unsigned(void)
 {
-	size_t	     sz;
-	unsigned     u;
+	size_t	      sz;
+	unsigned      u;
 	unsigned long ul;
-	uint8_t	     b;
+	uint8_t	      b;
 
 	sz = 99;
 	CHECK(!ckd_add(&sz, (size_t)0, (size_t)0), "size_t 0+0 flag");
@@ -95,10 +94,10 @@ test_add_unsigned(void)
 static void
 test_add_signed(void)
 {
-	int	   r;
-	long	   l;
-	long long  ll;
-	ptrdiff_t  p;
+	int	    r;
+	long	    l;
+	long long   ll;
+	ptrdiff_t   p;
 	signed char c;
 
 	r = 0;
@@ -147,9 +146,9 @@ test_add_signed(void)
 static void
 test_sub(void)
 {
-	size_t	   sz;
-	unsigned   u;
-	int	   r;
+	size_t	 sz;
+	unsigned u;
+	int	 r;
 
 	sz = 99;
 	CHECK(!ckd_sub(&sz, (size_t)0, (size_t)0), "size_t 0-0 flag");
@@ -236,9 +235,9 @@ test_mul(void)
 static void
 test_mixed_types(void)
 {
-	int	r;
+	int	 r;
 	unsigned u;
-	size_t	sz;
+	size_t	 sz;
 
 	/* Operands of different signedness/width. */
 	r = 99;

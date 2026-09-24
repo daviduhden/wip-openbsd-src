@@ -50,8 +50,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * Routines which deal directly with the archive I/O device/file.

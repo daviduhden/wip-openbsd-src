@@ -308,9 +308,10 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						    '-') { /* If leading minus
 							      sign */
 							if (i == 0 ||
-							    i == 2) { /* if a
-									     width
-								       */
+							    i ==
+								2) { /* if a
+									    width
+								      */
 								IconBoxes
 								    ->IconBox
 									[i] +=

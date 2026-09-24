@@ -44,8 +44,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * routines that deal with I/O to and from the user

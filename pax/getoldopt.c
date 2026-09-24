@@ -17,8 +17,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 int
 getoldopt(int argc, char **argv, const char *optstring)

@@ -45,8 +45,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * Data structure used to store the file args to be handed to fts().
