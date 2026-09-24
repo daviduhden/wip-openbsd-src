@@ -43,6 +43,8 @@
 
 #include <err.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #ifndef FVWMLIBDIR
 #define FVWMLIBDIR "/usr/X11R6/lib/X11/fvwm"
