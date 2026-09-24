@@ -10,7 +10,6 @@
 */
 
 #include "ModParse.h"
-
 #include "fvwmlib.h"
 
 /*
@@ -27,10 +26,10 @@
 static char *
 DoPeekArgument(const char *pstr, const char **pret)
 {
-	char *tok = NULL;
+	char	   *tok = NULL;
 	const char *p;
-	char bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
-	int len = 0;
+	char	    bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
+	int	    len = 0;
 
 	if (!pstr)
 		return NULL;
@@ -40,7 +39,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 	if (*p) {
 		if (IsQuote(*p) ||
 		    IsBlockStart(*p)) { /* quoted string or block start? */
-			bc = *p; /* save block start char */
+			bc = *p;	/* save block start char */
 			p++;
 		}
 		/* find end of token */
@@ -54,8 +53,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 					break;
 				}
 			} else /* normal token */ {
-				if (isspace((unsigned char)*p) ||
-				    *p == ',')
+				if (isspace((unsigned char)*p) || *p == ',')
 					break;
 			}
 
@@ -100,7 +98,7 @@ PeekArgument(const char *pstr)
 char *
 GetArgument(char **pstr)
 {
-	char *tok;
+	char	   *tok;
 	const char *next = NULL;
 
 	if (!pstr || !*pstr || !(tok = DoPeekArgument(*pstr, &next)))
@@ -124,7 +122,7 @@ GetArgument(char **pstr)
 int
 CmpArgument(const char *pstr, char *tok)
 {
-	int rc = 0;
+	int   rc = 0;
 	char *ntok = PeekArgument(pstr);
 	if (ntok) {
 		rc = strcasecmp(tok, ntok);
@@ -140,7 +138,7 @@ CmpArgument(const char *pstr, char *tok)
 int
 MatchArgument(const char *pstr, char *tok)
 {
-	int rc = 0;
+	int   rc = 0;
 	char *ntok = PeekArgument(pstr);
 	if (ntok) {
 		rc = (strcasecmp(tok, ntok) == 0);
@@ -226,15 +224,15 @@ GetNextArgument(char *indata, char **token)
    function:		MatchToken
    description:	        matches one word
    returns:		pointer to delimiter character
-                        NULL if no match
+			NULL if no match
 */
 
 /*
    function:		CmpToken
    description:	        compare 1st word of s to 1st word of w
    returns:		< 0  if s < t
-                        = 0  if s = t
-                        > 0  if s > t
+			= 0  if s = t
+			> 0  if s > t
 
    Note arguments are not declares register, so the function can be
    used with the bsearch() <search.h> function of the c library.
@@ -255,23 +253,22 @@ XCmpToken(const void *vs, const void *vt)
 #ifdef WORD_IS_UPPERCASE
 	while (*w &&
 	    (*s == *w ||
-	     (isupper((unsigned char)*s) &&
-	      _toupper((unsigned char)*s) == *w))) {
+		(isupper((unsigned char)*s) &&
+		    _toupper((unsigned char)*s) == *w))) {
 		s++, w++;
 	}
 #else
 	while (*w &&
 	    (*s == *w ||
-	     toupper((unsigned char)*s) ==
-	     toupper((unsigned char)*w))) {
+		toupper((unsigned char)*s) == toupper((unsigned char)*w))) {
 		s++, w++;
 	}
 #endif
 
 	if ((*s == '\0' &&
-	    (ispunct((unsigned char)*w) || isspace((unsigned char)*w))) ||
+		(ispunct((unsigned char)*w) || isspace((unsigned char)*w))) ||
 	    (*w == '\0' &&
-	     (ispunct((unsigned char)*s) || isspace((unsigned char)*s))))
+		(ispunct((unsigned char)*s) || isspace((unsigned char)*s))))
 		return 0; /* 1st word equal */
 	else
 		return toupper((unsigned char)*s) -

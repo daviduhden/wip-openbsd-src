@@ -35,9 +35,9 @@
  * SUCH DAMAGE.
  */
 
+#include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include <err.h>
 #include <errno.h>
@@ -51,9 +51,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
-static int gen_init(void);
+#include "pax.h"
+static int  gen_init(void);
 static void sig_cleanup(int);
 
 /*
@@ -63,45 +63,45 @@ static void sig_cleanup(int);
 /*
  * Variables that can be accessed by any routine within pax
  */
-int act = DEFOP;            /* read/write/append/copy */
-FSUB *frmt = NULL;          /* archive format type */
-int cflag;                  /* match all EXCEPT pattern/file */
-int cwdfd;                  /* starting cwd */
-int dflag;                  /* directory member match only  */
-int iflag;                  /* interactive file/archive rename */
-int kflag;                  /* do not overwrite existing files */
-int lflag;                  /* use hard links when possible */
-int nflag;                  /* select first archive member match */
-int tflag;                  /* restore access time after read */
-int uflag;                  /* ignore older modification time files */
-int vflag;                  /* produce verbose output */
-int Dflag;                  /* same as uflag except inode change time */
-int Hflag;                  /* follow command line symlinks (write only) */
-int Lflag;                  /* follow symlinks when writing */
-int Nflag;                  /* only use numeric uid and gid */
-int Xflag;                  /* archive files with same device id only */
-int Yflag;                  /* same as Dflag except after name mode */
-int Zflag;                  /* same as uflag except after name mode */
-int zeroflag;               /* use \0 as pathname terminator */
-int vfpart;                 /* is partial verbose output in progress */
-int patime = 1;             /* preserve file access time */
-int pmtime = 1;             /* preserve file modification times */
-int nodirs;                 /* do not create directories as needed */
-int pmode;                  /* preserve file mode bits */
-int pids;                   /* preserve file uid/gid */
-int rmleadslash = 1;        /* remove leading '/' from pathnames */
-int exit_val;               /* exit value */
-int docrc;                  /* check/create file crc */
-int swapbytes;              /* swap bytes when extracting */
-int swaphalf;               /* swap halfwords when extracting */
-char *dirptr;               /* destination dir in a copy */
-char *argv0;                /* root of argv[0] */
-enum op_mode op_mode;       /* what program are we acting as? */
-sigset_t s_mask;            /* signal mask for cleanup critical sect */
-FILE *listf;                /* file pointer to print file list to */
-int listfd = STDERR_FILENO; /* fd matching listf, for sighandler output */
-char *tempfile;             /* tempfile to use for mkstemp(3) */
-char *tempbase;             /* basename of tempfile to use for mkstemp(3) */
+int	     act = DEFOP;     /* read/write/append/copy */
+FSUB	    *frmt = NULL;     /* archive format type */
+int	     cflag;	      /* match all EXCEPT pattern/file */
+int	     cwdfd;	      /* starting cwd */
+int	     dflag;	      /* directory member match only  */
+int	     iflag;	      /* interactive file/archive rename */
+int	     kflag;	      /* do not overwrite existing files */
+int	     lflag;	      /* use hard links when possible */
+int	     nflag;	      /* select first archive member match */
+int	     tflag;	      /* restore access time after read */
+int	     uflag;	      /* ignore older modification time files */
+int	     vflag;	      /* produce verbose output */
+int	     Dflag;	      /* same as uflag except inode change time */
+int	     Hflag;	      /* follow command line symlinks (write only) */
+int	     Lflag;	      /* follow symlinks when writing */
+int	     Nflag;	      /* only use numeric uid and gid */
+int	     Xflag;	      /* archive files with same device id only */
+int	     Yflag;	      /* same as Dflag except after name mode */
+int	     Zflag;	      /* same as uflag except after name mode */
+int	     zeroflag;	      /* use \0 as pathname terminator */
+int	     vfpart;	      /* is partial verbose output in progress */
+int	     patime = 1;      /* preserve file access time */
+int	     pmtime = 1;      /* preserve file modification times */
+int	     nodirs;	      /* do not create directories as needed */
+int	     pmode;	      /* preserve file mode bits */
+int	     pids;	      /* preserve file uid/gid */
+int	     rmleadslash = 1; /* remove leading '/' from pathnames */
+int	     exit_val;	      /* exit value */
+int	     docrc;	      /* check/create file crc */
+int	     swapbytes;	      /* swap bytes when extracting */
+int	     swaphalf;	      /* swap halfwords when extracting */
+char	    *dirptr;	      /* destination dir in a copy */
+char	    *argv0;	      /* root of argv[0] */
+enum op_mode op_mode;	      /* what program are we acting as? */
+sigset_t     s_mask;	      /* signal mask for cleanup critical sect */
+FILE	    *listf;	      /* file pointer to print file list to */
+int   listfd = STDERR_FILENO; /* fd matching listf, for sighandler output */
+char *tempfile;		      /* tempfile to use for mkstemp(3) */
+char *tempbase;		      /* basename of tempfile to use for mkstemp(3) */
 
 /*
  *	PAX - Portable Archive Interchange
@@ -226,7 +226,7 @@ char *tempbase;             /* basename of tempfile to use for mkstemp(3) */
 int
 main(int argc, char **argv)
 {
-	char *tmpdir;
+	char  *tmpdir;
 	size_t tdlen;
 
 	listf = stderr;
@@ -357,8 +357,8 @@ main(int argc, char **argv)
 	 * append-mode trailer rewriting (ar_rev).
 	 */
 	{
-		int need_proc = (gzip_program != NULL &&
-		    act != COPY && act != APPND);
+		int need_proc =
+		    (gzip_program != NULL && act != COPY && act != APPND);
 		const char *promises;
 
 		if (act == LIST) {
@@ -371,10 +371,10 @@ main(int argc, char **argv)
 		} else {
 			if (need_proc)
 				promises = "stdio rpath wpath cpath fattr "
-				    "dpath getpw tape proc exec";
+					   "dpath getpw tape proc exec";
 			else
 				promises = "stdio rpath wpath cpath fattr "
-				    "dpath getpw tape";
+					   "dpath getpw tape";
 		}
 
 		if (pledge(promises, NULL) == -1)
@@ -467,7 +467,7 @@ setup_sig(int sig, const struct sigaction *n_hand)
 static int
 gen_init(void)
 {
-	struct rlimit reslimit;
+	struct rlimit	 reslimit;
 	struct sigaction n_hand;
 
 	/*

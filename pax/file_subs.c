@@ -46,13 +46,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
-static int fset_ids(char *, int, uid_t, gid_t);
-static int unlnk_exist(char *, int);
-static int chk_path(char *, uid_t, gid_t, int);
-static int mk_link(char *, struct stat *, char *, int);
+static int  fset_ids(char *, int, uid_t, gid_t);
+static int  unlnk_exist(char *, int);
+static int  chk_path(char *, uid_t, gid_t, int);
+static int  mk_link(char *, struct stat *, char *, int);
 static void fset_ftime(
     const char *, int, const struct timespec *, const struct timespec *, int);
 static void fset_pmode(char *, int, mode_t);
@@ -72,9 +72,9 @@ static void fset_pmode(char *, int, mode_t);
 int
 file_creat(ARCHD *arcn)
 {
-	int fd = -1;
+	int    fd = -1;
 	mode_t file_mode;
-	int oerrno;
+	int    oerrno;
 
 	/*
 	 * Assume file doesn't exist, so just try to create it, most times this
@@ -107,11 +107,12 @@ file_creat(ARCHD *arcn)
 		 * it cannot fix anything, we will skip the last attempt
 		 */
 		if ((fd = open(arcn->name, O_WRONLY | O_CREAT | O_TRUNC,
-		    file_mode)) >= 0)
+			 file_mode)) >= 0)
 			break;
 		oerrno = errno;
-		if (nodirs || chk_path(arcn->name, arcn->sb.st_uid,
-		    arcn->sb.st_gid, 0) < 0) {
+		if (nodirs ||
+		    chk_path(arcn->name, arcn->sb.st_uid, arcn->sb.st_gid, 0) <
+			0) {
 			syswarn(1, oerrno, "Unable to create %s", arcn->name);
 			return (-1);
 		}
@@ -173,7 +174,7 @@ int
 lnk_creat(ARCHD *arcn)
 {
 	struct stat sb;
-	int res;
+	int	    res;
 
 	/*
 	 * we may be running as root, so we have to be sure that link target
@@ -280,7 +281,7 @@ static int
 mk_link(char *to, struct stat *to_sb, char *from, int ign)
 {
 	struct stat sb;
-	int oerrno;
+	int	    oerrno;
 
 	/*
 	 * if from file exists, it has to be unlinked to make the link. If the
@@ -354,15 +355,15 @@ mk_link(char *to, struct stat *to_sb, char *from, int ign)
 int
 node_creat(ARCHD *arcn)
 {
-	int res;
-	int ign = 0;
-	int oerrno;
-	int pass = 0;
-	mode_t file_mode;
+	int	    res;
+	int	    ign = 0;
+	int	    oerrno;
+	int	    pass = 0;
+	mode_t	    file_mode;
 	struct stat sb;
-	char target[PATH_MAX];
-	char *nm = arcn->name;
-	int len, defer_pmode = 0;
+	char	    target[PATH_MAX];
+	char	   *nm = arcn->name;
+	int	    len, defer_pmode = 0;
 
 	/*
 	 * create node based on type, if that fails try to unlink the node and
@@ -399,7 +400,7 @@ node_creat(ARCHD *arcn)
 			}
 			res = mkdir(nm, file_mode);
 
- badlink:
+		badlink:
 			if (ign)
 				res = 0;
 			break;
@@ -604,10 +605,10 @@ unlnk_exist(char *name, int type)
 int
 chk_path(char *name, uid_t st_uid, gid_t st_gid, int ign)
 {
-	char *spt = name;
-	char *next;
+	char	   *spt = name;
+	char	   *next;
 	struct stat sb;
-	int retval = -1;
+	int	    retval = -1;
 
 	/*
 	 * watch out for paths with nodes stored directly in / (e.g. /bozo)
@@ -826,7 +827,7 @@ set_attr(const struct file_times *ft, int force_times, mode_t mode, int do_mode,
     int in_sig)
 {
 	struct stat sb;
-	int fd, r;
+	int	    fd, r;
 
 	if (!do_mode && !force_times && !patime && !pmtime)
 		return (0);
@@ -863,9 +864,9 @@ set_attr(const struct file_times *ft, int force_times, mode_t mode, int do_mode,
 		if (do_mode && (mode & ABITS) != (sb.st_mode & ABITS))
 			fset_pmode(ft->ft_name, fd, mode);
 		if (((force_times || patime) &&
-		    timespeccmp(&ft->ft_atim, &sb.st_atim, !=)) ||
+			timespeccmp(&ft->ft_atim, &sb.st_atim, !=)) ||
 		    ((force_times || pmtime) &&
-		     timespeccmp(&ft->ft_mtim, &sb.st_mtim, !=)))
+			timespeccmp(&ft->ft_mtim, &sb.st_mtim, !=)))
 			fset_ftime(ft->ft_name, fd, &ft->ft_mtim, &ft->ft_atim,
 			    force_times);
 		r = 0;
@@ -927,10 +928,10 @@ int
 file_write(
     int fd, char *str, int cnt, int *rem, int *isempt, int sz, char *name)
 {
-	char *pt;
-	char *end;
-	int wcnt;
-	char *st = str;
+	char  *pt;
+	char  *end;
+	int    wcnt;
+	char  *st = str;
 	char **strp;
 
 	/*
@@ -1002,7 +1003,8 @@ file_write(
 		}
 		if (strp) {
 			if (*strp)
-				err(1, "WARNING! Major Internal Error! GNU "
+				err(1,
+				    "WARNING! Major Internal Error! GNU "
 				    "hack Failing!");
 			*strp = malloc(wcnt + 1);
 			if (*strp == NULL) {
@@ -1090,12 +1092,12 @@ rdfile_close(ARCHD *arcn, int *fd)
 int
 set_crc(ARCHD *arcn, int fd)
 {
-	int i;
-	int res;
-	off_t cpcnt = 0;
-	size_t size;
-	u_int32_t crc = 0;
-	char tbuf[FILEBLK];
+	int	    i;
+	int	    res;
+	off_t	    cpcnt = 0;
+	size_t	    size;
+	u_int32_t   crc = 0;
+	char	    tbuf[FILEBLK];
 	struct stat sb;
 
 	if (fd < 0) {

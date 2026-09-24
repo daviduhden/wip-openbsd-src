@@ -20,19 +20,19 @@
 #define __FILE__ "?"
 #define __LINE__ 0
 #endif
-#define DB(_x)								\
-	do {								\
-		f_db_info.filenm = __FILE__;				\
-		f_db_info.lineno = __LINE__;				\
-		f_db_print _x;						\
+#define DB(_x)                                                                 \
+	do {                                                                   \
+		f_db_info.filenm = __FILE__;                                   \
+		f_db_info.lineno = __LINE__;                                   \
+		f_db_print _x;                                                 \
 	} while (0)
 struct f_db_info {
-	const char *filenm;
+	const char   *filenm;
 	unsigned long lineno;
 };
 extern struct f_db_info f_db_info;
-extern void f_db_print(const char *fmt, ...)
-	__attribute__((__format__(__printf__, 1, 2)));
+extern void		f_db_print(const char *fmt, ...)
+    __attribute__((__format__(__printf__, 1, 2)));
 #endif
 
 /***********************************************************************
@@ -40,11 +40,11 @@ extern void f_db_print(const char *fmt, ...)
  ***********************************************************************/
 
 char *CatString3(char *a, char *b, char *c);
-void CopyString(char **dest, char *source);
+void  CopyString(char **dest, char *source);
 char *stripcpy(char *source);
-int StrEquals(char *s1, char *s2);
+int   StrEquals(char *s1, char *s2);
 
-int envExpand(char *s, int maxstrlen);
+int   envExpand(char *s, int maxstrlen);
 char *envDupExpand(const char *s, int extra);
 
 int matchWildcards(char *pattern, char *string);
@@ -52,15 +52,15 @@ int matchWildcards(char *pattern, char *string);
 /***********************************************************************
  * Stuff for consistent parsing
  ***********************************************************************/
-#define EatWS(s)							\
-	do {								\
-		while ((s) && (isspace(*(s)) || *(s) == ','))		\
-			(s)++;						\
+#define EatWS(s)                                                               \
+	do {                                                                   \
+		while ((s) && (isspace(*(s)) || *(s) == ','))                  \
+			(s)++;                                                 \
 	} while (0)
 #define IsQuote(c) ((c) == '"' || (c) == '\'' || (c) == '`')
 #define IsBlockStart(c) ((c) == '[' || (c) == '{' || (c) == '(')
-#define IsBlockEnd(c, cs)						\
-	(((c) == ']' && (cs) == '[') || ((c) == '}' && (cs) == '{') ||	\
+#define IsBlockEnd(c, cs)                                                      \
+	(((c) == ']' && (cs) == '[') || ((c) == '}' && (cs) == '{') ||         \
 	    ((c) == ')' && (cs) == '('))
 #define MAX_TOKEN_LENGTH 255
 
@@ -70,9 +70,9 @@ char *GetQuotedString(char *sin, char **sout, const char *delims,
     const char *qlong, const char *qstart, const char *qend);
 char *PeekToken(const char *pstr);
 char *GetToken(char **pstr);
-int CmpToken(const char *pstr, char *tok);
-int MatchToken(const char *pstr, char *tok);
-void NukeToken(char **pstr);
+int   CmpToken(const char *pstr, char *tok);
+int   MatchToken(const char *pstr, char *tok);
+void  NukeToken(char **pstr);
 
 /* old style parse routine: */
 char *DoGetNextToken(
@@ -81,15 +81,15 @@ char *GetNextToken(char *indata, char **token);
 char *GetNextOption(char *indata, char **token);
 char *SkipNTokens(char *indata, unsigned int n);
 char *GetModuleResource(char *indata, char **resource, char *module_name);
-int FvwmParseInteger(const char *string);
-int FvwmParseFd(const char *arg);
-int GetIntegerArguments(
+int   FvwmParseInteger(const char *string);
+int   FvwmParseFd(const char *arg);
+int   GetIntegerArguments(
     char *action, char **ret_action, int retvals[], int num);
-int GetTokenIndex(char *token, char *list[], int len, char **next);
+int   GetTokenIndex(char *token, char *list[], int len, char **next);
 char *GetNextTokenIndex(char *action, char *list[], int len, int *index);
-int GetRectangleArguments(char *action, int *width, int *height);
-int GetOnePercentArgument(char *action, int *value, int *unit_io);
-int GetTwoPercentArguments(
+int   GetRectangleArguments(char *action, int *width, int *height);
+int   GetOnePercentArgument(char *action, int *value, int *unit_io);
+int   GetTwoPercentArguments(
     char *action, int *val1, int *val2, int *val1_unit, int *val2_unit);
 
 /***********************************************************************
@@ -102,7 +102,7 @@ int getostype(char *buf, int max);
 /***********************************************************************
  * Stuff for modules to communicate with fvwm
  ***********************************************************************/
-int ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body);
+int  ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body);
 void SendText(int *fd, char *message, unsigned long window);
 #define SendInfo SendText
 void GetConfigLine(int *fd, char **tline);
@@ -113,16 +113,16 @@ void SetMessageMask(int *fd, unsigned long mask);
  ***********************************************************************/
 typedef struct PictureThing {
 	struct PictureThing *next;
-	char *name;
-	Pixmap picture;
-	Pixmap mask;
-	unsigned int depth;
-	unsigned int width;
-	unsigned int height;
-	unsigned int count;
+	char		    *name;
+	Pixmap		     picture;
+	Pixmap		     mask;
+	unsigned int	     depth;
+	unsigned int	     width;
+	unsigned int	     height;
+	unsigned int	     count;
 } FvwmPicture;
 
-void InitPictureCMap(Display *, Window);
+void	     InitPictureCMap(Display *, Window);
 FvwmPicture *GetPicture(Display *dpy, Window Root, char *IconPath,
     char *PixmapPath, char *name, int color_limit);
 FvwmPicture *CachePicture(

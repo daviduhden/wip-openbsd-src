@@ -12,7 +12,7 @@ size_t
 strlcpy(char *dst, const char *src, size_t dsize)
 {
 	const char *osrc = src;
-	size_t nleft = dsize;
+	size_t	    nleft = dsize;
 
 	if (nleft != 0) {
 		while (--nleft != 0) {
@@ -34,8 +34,8 @@ strlcat(char *dst, const char *src, size_t dsize)
 {
 	const char *odst = dst;
 	const char *osrc = src;
-	size_t n = dsize;
-	size_t dlen;
+	size_t	    n = dsize;
+	size_t	    dlen;
 
 	while (n-- != 0 && *dst != '\0')
 		dst++;

@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -43,24 +43,24 @@
 #include "FvwmIdent.h"
 
 char *MyName;
-int fd_width;
-int fd[2];
+int   fd_width;
+int   fd[2];
 
 Display *dpy; /* which display are we talking to */
-Window Root;
-int screen;
-int x_fd;
-int d_depth;
-int ScreenWidth, ScreenHeight;
+Window	 Root;
+int	 screen;
+int	 x_fd;
+int	 d_depth;
+int	 ScreenWidth, ScreenHeight;
 
 char *BackColor = "white";
 char *ForeColor = "black";
 char *font_string = "fixed";
 
-Pixel back_pix, fore_pix;
-GC NormalGC;
-Window main_win;
-Window app_win;
+Pixel	     back_pix, fore_pix;
+GC	     NormalGC;
+Window	     main_win;
+Window	     app_win;
 XFontStruct *font;
 
 int Width, Height, win_x, win_y;
@@ -70,12 +70,12 @@ int Width, Height, win_x, win_y;
 static Atom wm_del_win;
 
 struct target_struct target;
-int found = 0;
+int		     found = 0;
 
 static int ListSize = 0;
 
 struct Item *itemlistRoot = NULL;
-int max_col1, max_col2;
+int	     max_col1, max_col2;
 char id[15], desktop[10], swidth[10], sheight[10], borderw[10], geometry[30];
 char mymin_aspect[11], max_aspect[11];
 
@@ -90,7 +90,7 @@ main(int argc, char **argv)
 {
 	char *temp, *s;
 	char *display_name = NULL;
-	int Clength;
+	int   Clength;
 	char *tline;
 
 	/* Save the program name for error messages and config parsing */
@@ -135,9 +135,10 @@ main(int argc, char **argv)
 	ScreenHeight = DisplayHeight(dpy, screen);
 	ScreenWidth = DisplayWidth(dpy, screen);
 
-	SetMessageMask(fd, M_CONFIGURE_WINDOW | M_WINDOW_NAME | M_ICON_NAME |
-	    M_RES_CLASS | M_RES_NAME | M_END_WINDOWLIST |
-	    M_CONFIG_INFO | M_END_CONFIG_INFO);
+	SetMessageMask(fd,
+	    M_CONFIGURE_WINDOW | M_WINDOW_NAME | M_ICON_NAME | M_RES_CLASS |
+		M_RES_NAME | M_END_WINDOWLIST | M_CONFIG_INFO |
+		M_END_CONFIG_INFO);
 	/* scan config file for set-up parameters */
 	/* Colors and fonts */
 
@@ -146,15 +147,15 @@ main(int argc, char **argv)
 	while (tline != (char *)0) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline, CatString3(MyName, "Font", ""),
-			    Clength + 4) == 0) {
+				Clength + 4) == 0) {
 				CopyString(&font_string, &tline[Clength + 4]);
 			} else if (strncasecmp(tline,
-			    CatString3(MyName, "Fore", ""),
-			    Clength + 4) == 0) {
+				       CatString3(MyName, "Fore", ""),
+				       Clength + 4) == 0) {
 				CopyString(&ForeColor, &tline[Clength + 4]);
 			} else if (strncasecmp(tline,
-			    CatString3(MyName, "Back", ""),
-			    Clength + 4) == 0) {
+				       CatString3(MyName, "Back", ""),
+				       Clength + 4) == 0) {
 				CopyString(&BackColor, &tline[Clength + 4]);
 			}
 		}
@@ -333,14 +334,14 @@ XSizeHints mysizehints;
 void
 list_end(void)
 {
-	XGCValues gcv;
+	XGCValues     gcv;
 	unsigned long gcm;
-	int lmax, height;
-	XEvent Event;
-	Window JunkRoot, JunkChild;
-	int JunkX, JunkY;
-	unsigned int JunkMask;
-	int x, y;
+	int	      lmax, height;
+	XEvent	      Event;
+	Window	      JunkRoot, JunkChild;
+	int	      JunkX, JunkY;
+	unsigned int  JunkMask;
+	int	      x, y;
 
 	if (!found) {
 		/*    fprintf(stderr,"%s: Couldn't find app window\n",MyName);
@@ -457,7 +458,7 @@ void
 GetTargetWindow(Window *app_win)
 {
 	XEvent eventp;
-	int val = -10, trials;
+	int    val = -10, trials;
 
 	trials = 0;
 	while ((trials < 100) && (val != GrabSuccess)) {
@@ -489,7 +490,7 @@ GetTargetWindow(Window *app_win)
 void
 RedrawWindow(void)
 {
-	int fontheight, i = 0;
+	int	     fontheight, i = 0;
 	struct Item *cur = itemlistRoot;
 
 	fontheight = font->ascent + font->descent;
@@ -533,7 +534,7 @@ change_window_name(char *str)
 void
 AddToList(char *s1, char *s2)
 {
-	int tw1, tw2;
+	int	     tw1, tw2;
 	struct Item *item, *cur = itemlistRoot;
 
 	tw1 = XTextWidth(font, s1, strlen(s1));
@@ -560,8 +561,8 @@ AddToList(char *s1, char *s2)
 void
 MakeList(void)
 {
-	int bw, width, height, x1, y1, x2, y2;
-	char loc[20];
+	int	    bw, width, height, x1, y1, x2, y2;
+	char	    loc[20];
 	static char xstr[6], ystr[6];
 
 	ListSize = 0;
@@ -670,12 +671,12 @@ MakeList(void)
 
 	{
 		Atom *protocols = NULL, *ap;
-		Atom _XA_WM_TAKE_FOCUS =
+		Atom  _XA_WM_TAKE_FOCUS =
 		    XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 		XWMHints *wmhintsp = XGetWMHints(dpy, target.id);
-		int i, n;
-		Boolean HasTakeFocus = False, InputField = True;
-		char *focus_policy = "", *ifstr = "", *tfstr = "";
+		int	  i, n;
+		Boolean	  HasTakeFocus = False, InputField = True;
+		char	 *focus_policy = "", *ifstr = "", *tfstr = "";
 
 		if (wmhintsp) {
 			InputField = wmhintsp->input;
@@ -712,17 +713,17 @@ MakeList(void)
 		AddToList("  - WM_TAKE_FOCUS:", tfstr);
 		{
 			long supplied_return; /* flags, hints that were supplied
-			                       */
-			int getrc;
+					       */
+			int	    getrc;
 			XSizeHints *size_hints =
 			    XAllocSizeHints(); /* the size hints */
 			if ((getrc = XGetWMSizeHints(dpy,
-			    target.id,  /* get size hints */
-			    size_hints, /* Hints */
-			    &supplied_return, XA_WM_ZOOM_HINTS))) {
+				 target.id,  /* get size hints */
+				 size_hints, /* Hints */
+				 &supplied_return, XA_WM_ZOOM_HINTS))) {
 				if (supplied_return &
 				    PAspect) { /* if window has a aspect ratio
-					        */
+						*/
 					snprintf(mymin_aspect,
 					    sizeof(mymin_aspect), "%d/%d",
 					    size_hints->min_aspect.x,
@@ -767,7 +768,7 @@ nocolor(char *a, char *b)
 Pixel
 GetColor(char *name)
 {
-	XColor color;
+	XColor		  color;
 	XWindowAttributes attributes;
 
 	XGetWindowAttributes(dpy, Root, &attributes);

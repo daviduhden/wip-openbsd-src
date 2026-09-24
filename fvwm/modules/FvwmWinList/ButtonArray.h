@@ -18,40 +18,40 @@
 
 /* Struct definitions */
 typedef struct button {
-	char *title;
-	char *truncate_title; /* valid only if truncatewidth > 0 */
-	int up, needsupdate, tw, set, truncatewidth;
+	char	      *title;
+	char	      *truncate_title; /* valid only if truncatewidth > 0 */
+	int	       up, needsupdate, tw, set, truncatewidth;
 	struct button *next;
-	FvwmPicture p;
-	long desk;
+	FvwmPicture    p;
+	long	       desk;
 } Button;
 
 typedef struct {
-	int count;
+	int	count;
 	Button *head, *tail;
-	int x, y, w, h;
+	int	x, y, w, h;
 } ButtonArray;
 
 #define MAX_COLOUR_SETS 4
 
 /* Function Prototypes */
 Button *ButtonNew(char *title, FvwmPicture *p, int up);
-void InitArray(ButtonArray *array, int x, int y, int w, int h);
-void UpdateArray(ButtonArray *array, int x, int y, int w, int h);
-int AddButton(ButtonArray *array, char *title, FvwmPicture *p, int up);
-int UpdateButton(ButtonArray *array, int butnum, char *title, int up);
-int UpdateButtonPicture(ButtonArray *array, int butnum, FvwmPicture *p);
-int UpdateButtonSet(ButtonArray *array, int butnum, int set);
-int UpdateButtonDesk(ButtonArray *array, int butnum, long desk);
-void RemoveButton(ButtonArray *array, int butnum);
+void	InitArray(ButtonArray *array, int x, int y, int w, int h);
+void	UpdateArray(ButtonArray *array, int x, int y, int w, int h);
+int	AddButton(ButtonArray *array, char *title, FvwmPicture *p, int up);
+int	UpdateButton(ButtonArray *array, int butnum, char *title, int up);
+int	UpdateButtonPicture(ButtonArray *array, int butnum, FvwmPicture *p);
+int	UpdateButtonSet(ButtonArray *array, int butnum, int set);
+int	UpdateButtonDesk(ButtonArray *array, int butnum, long desk);
+void	RemoveButton(ButtonArray *array, int butnum);
 Button *find_n(ButtonArray *array, int n);
-void FreeButton(Button *ptr);
-void FreeAllButtons(ButtonArray *array);
-void DoButton(Button *ptr, int x, int y, int w, int h);
-void DrawButtonArray(ButtonArray *array, int all);
-void SwitchButton(ButtonArray *array, int butnum);
-void RadioButton(ButtonArray *array, int butnum);
-int WhichButton(ButtonArray *array, int x, int y);
-void PrintButtons(ButtonArray *array);
+void	FreeButton(Button *ptr);
+void	FreeAllButtons(ButtonArray *array);
+void	DoButton(Button *ptr, int x, int y, int w, int h);
+void	DrawButtonArray(ButtonArray *array, int all);
+void	SwitchButton(ButtonArray *array, int butnum);
+void	RadioButton(ButtonArray *array, int butnum);
+int	WhichButton(ButtonArray *array, int x, int y);
+void	PrintButtons(ButtonArray *array);
 
 #endif /* BUTTONARRAY_H */

@@ -14,14 +14,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define ReapChildren()					\
-	while ((waitpid(-1, NULL, WNOHANG)) > 0)	\
+#define ReapChildren()                                                         \
+	while ((waitpid(-1, NULL, WNOHANG)) > 0)                               \
 		;
 
 typedef struct name_list_struct {
-	struct name_list_struct *next; /* pointer to the next name */
-	char *name;                    /* the name of the window */
-	char *value;                   /* icon name */
+	struct name_list_struct *next;	/* pointer to the next name */
+	char			*name;	/* the name of the window */
+	char			*value; /* icon name */
 #ifdef MINI_ICONS
 	char *mini_value; /* mini icon name */
 #endif
@@ -35,30 +35,30 @@ typedef struct name_list_struct {
 	/**/
 	unsigned long on_flags;
 	unsigned long off_flags;
-	int border_width;
-	int resize_width;
-	char *ForeColor;
-	char *BackColor;
-	icon_boxes *IconBoxes; /* pointer to iconbox(s) */
+	int	      border_width;
+	int	      resize_width;
+	char	     *ForeColor;
+	char	     *BackColor;
+	icon_boxes   *IconBoxes; /* pointer to iconbox(s) */
 	unsigned long on_buttons;
 	unsigned long off_buttons;
 } name_list;
 
 /* used for parsing configuration */
 struct config {
-	char *keyword;
-	void (*action)(char *, FILE *, char **, int *);
+	char  *keyword;
+	void   (*action)(char *, FILE *, char **, int *);
 	char **arg;
-	int *arg2;
+	int   *arg2;
 };
 
 /* used for parsing commands*/
 struct functions {
 	char *keyword;
-	void (*action)(XEvent *, Window, FvwmWindow *, unsigned long, char *,
-	    int *);
+	void  (*action)(
+	    XEvent *, Window, FvwmWindow *, unsigned long, char *, int *);
 	short func_type;
-	Bool func_needs_window;
+	Bool  func_needs_window;
 };
 
 /* values for name_list flags */
@@ -102,13 +102,13 @@ struct functions {
 #endif
 
 /* some fancy font handling stuff */
-#define NewFontAndColor(newfont, color, backcolor)			\
-	{								\
-		Globalgcv.font = newfont;				\
-		Globalgcv.foreground = color;				\
-		Globalgcv.background = backcolor;			\
-		Globalgcm = GCFont | GCForeground | GCBackground;	\
-		XChangeGC(dpy, Scr.ScratchGC3, Globalgcm, &Globalgcv);	\
+#define NewFontAndColor(newfont, color, backcolor)                             \
+	{                                                                      \
+		Globalgcv.font = newfont;                                      \
+		Globalgcv.foreground = color;                                  \
+		Globalgcv.background = backcolor;                              \
+		Globalgcm = GCFont | GCForeground | GCBackground;              \
+		XChangeGC(dpy, Scr.ScratchGC3, Globalgcm, &Globalgcv);         \
 	}
 
 #ifdef NO_ICONS
@@ -117,10 +117,10 @@ struct functions {
 #define ICON_HEIGHT (Scr.IconFont.height + 6)
 #endif
 
-extern XGCValues Globalgcv;
+extern XGCValues     Globalgcv;
 extern unsigned long Globalgcm;
-extern Time lastTimestamp;
-extern XEvent Event;
+extern Time	     lastTimestamp;
+extern XEvent	     Event;
 
 extern char NoName[];
 extern char NoClass[];
@@ -137,8 +137,8 @@ extern char NoResource[];
 /* Macro for args passed to fvwm commands...
    For now, this macro is only used within this file. dje 12/19/98
 */
-#define F_CMD_ARGS							\
-	XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,\
+#define F_CMD_ARGS                                                             \
+	XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,  \
 	    char *action, int *Module
 
 extern void LookInList(FvwmWindow *, name_list *);
@@ -182,14 +182,14 @@ extern void Destroy(FvwmWindow *);
 extern void GetGravityOffsets(FvwmWindow *, int *, int *);
 extern void MoveViewport(int newx, int newy, Bool);
 extern FvwmWindow *AddWindow(Window w);
-extern int MappedNotOverride(Window w);
-extern void GrabButtons(FvwmWindow *);
-extern void GrabKeys(FvwmWindow *);
-extern void GetWindowSizeHints(FvwmWindow *);
-extern void SwitchPages(Bool, Bool);
-extern void NextPage(void);
-extern void PrevPage(void);
-extern void moveLoop(
+extern int	   MappedNotOverride(Window w);
+extern void	   GrabButtons(FvwmWindow *);
+extern void	   GrabKeys(FvwmWindow *);
+extern void	   GetWindowSizeHints(FvwmWindow *);
+extern void	   SwitchPages(Bool, Bool);
+extern void	   NextPage(void);
+extern void	   PrevPage(void);
+extern void	   moveLoop(
     FvwmWindow *, int, int, int, int, int *, int *, Bool, Bool);
 
 extern void Keyboard_shortcuts(XEvent *, FvwmWindow *, int);
@@ -214,36 +214,36 @@ void Maximize(F_CMD_ARGS);
 #ifdef WINDOWSHADE
 void WindowShade(F_CMD_ARGS);
 #endif
-extern void RaiseWindow(FvwmWindow *t);
-extern void LowerWindow(FvwmWindow *t);
-extern Bool IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor);
-extern Bool GrabEm(int);
-extern void UngrabEm(void);
+extern void	 RaiseWindow(FvwmWindow *t);
+extern void	 LowerWindow(FvwmWindow *t);
+extern Bool	 IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor);
+extern Bool	 GrabEm(int);
+extern void	 UngrabEm(void);
 extern MenuRoot *NewMenuRoot(char *name, Bool function_or_popup);
-extern void AddToMenu(MenuRoot *, char *, char *, Bool, Bool);
-extern void MakeMenu(MenuRoot *);
-extern void CaptureAllWindows(void);
-extern void SetTimer(int);
-extern int flush_expose(Window w);
-void ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
+extern void	 AddToMenu(MenuRoot *, char *, char *, Bool, Bool);
+extern void	 MakeMenu(MenuRoot *);
+extern void	 CaptureAllWindows(void);
+extern void	 SetTimer(int);
+extern int	 flush_expose(Window w);
+void	    ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
     unsigned long context, int Module);
-void do_windowList(F_CMD_ARGS);
+void	    do_windowList(F_CMD_ARGS);
 extern void RaiseThisWindow(int);
-extern int GetContext(FvwmWindow *, XEvent *, Window *dummy);
+extern int  GetContext(FvwmWindow *, XEvent *, Window *dummy);
 extern void ConstrainSize(
     FvwmWindow *, int *, int *, Bool roundUp, int xmotion, int ymotion);
-extern void HandlePaging(int, int, int *, int *, int *, int *, Bool);
-extern void SetShape(FvwmWindow *, int);
-extern void AutoPlace(FvwmWindow *);
-void executeModule(F_CMD_ARGS);
-extern void SetFocus(Window, FvwmWindow *, Bool FocusByMouse);
-extern void CheckAndSetFocus(void);
-extern void initModules(void);
-extern int HandleModuleInput(Window w, int channel);
-extern void match_string(struct config *, char *, char *, FILE *);
-extern void no_popup(char *ptr);
-extern void KillModule(int channel, int place);
-extern void ClosePipes(void);
+extern void  HandlePaging(int, int, int *, int *, int *, int *, Bool);
+extern void  SetShape(FvwmWindow *, int);
+extern void  AutoPlace(FvwmWindow *);
+void	     executeModule(F_CMD_ARGS);
+extern void  SetFocus(Window, FvwmWindow *, Bool FocusByMouse);
+extern void  CheckAndSetFocus(void);
+extern void  initModules(void);
+extern int   HandleModuleInput(Window w, int channel);
+extern void  match_string(struct config *, char *, char *, FILE *);
+extern void  no_popup(char *ptr);
+extern void  KillModule(int channel, int place);
+extern void  ClosePipes(void);
 extern char *findIconFile(char *icon, char *pathlist, int mode);
 void find_func_type(char *action, short *func_type, Bool *func_needs_window);
 extern void GetBitmapFile(FvwmWindow *tmp_win);
@@ -270,8 +270,8 @@ void GetMwmHints(FvwmWindow *t);
 void GetOlHints(FvwmWindow *t);
 void SelectDecor(FvwmWindow *, unsigned long, int, int);
 extern Bool PopUpMenu(MenuRoot *, int, int);
-void ComplexFunction(F_CMD_ARGS);
-extern int DeferExecution(
+void	    ComplexFunction(F_CMD_ARGS);
+extern int  DeferExecution(
     XEvent *, Window *, FvwmWindow **, unsigned long *, int, int);
 void SetBorder(FvwmWindow *, Bool, Bool, Bool, Window);
 void move_window(F_CMD_ARGS);
@@ -301,25 +301,25 @@ void free_window_names(FvwmWindow *tmp, Bool nukename, Bool nukeicon);
 MenuStatus do_menu(MenuRoot *menu, MenuRoot *menuPrior,
     MenuItem **pmiExecuteAction, int cmenuDeep, Bool fSticks, XEvent *eventp,
     MenuOptions *pops);
-int check_allowed_function(MenuItem *mi);
-int check_allowed_function2(int function, FvwmWindow *t);
-void ReInstallActiveColormap(void);
-void ParsePopupEntry(char *, FILE *, char **, int *);
-void ParseMouseEntry(F_CMD_ARGS);
-void ParseKeyEntry(F_CMD_ARGS);
-void SetOneStyle(char *text, FILE *, char **, int *);
-void ParseStyle(char *text, FILE *, char **, int *);
-void assign_string(char *text, FILE *fd, char **arg, int *);
-void SetFlag(char *text, FILE *fd, char **arg, int *);
-void SetCursor(char *text, FILE *fd, char **arg, int *);
-void SetInts(char *text, FILE *fd, char **arg, int *);
-void SetBox(char *text, FILE *fd, char **arg, int *);
-void set_func(char *, FILE *, char **, int *);
-void copy_config(FILE **config_fd);
-void SetEdgeScroll(F_CMD_ARGS);
-void SetEdgeResistance(F_CMD_ARGS);
-void CursorStyle(F_CMD_ARGS);
-void ButtonStyle(F_CMD_ARGS);
+int	   check_allowed_function(MenuItem *mi);
+int	   check_allowed_function2(int function, FvwmWindow *t);
+void	   ReInstallActiveColormap(void);
+void	   ParsePopupEntry(char *, FILE *, char **, int *);
+void	   ParseMouseEntry(F_CMD_ARGS);
+void	   ParseKeyEntry(F_CMD_ARGS);
+void	   SetOneStyle(char *text, FILE *, char **, int *);
+void	   ParseStyle(char *text, FILE *, char **, int *);
+void	   assign_string(char *text, FILE *fd, char **arg, int *);
+void	   SetFlag(char *text, FILE *fd, char **arg, int *);
+void	   SetCursor(char *text, FILE *fd, char **arg, int *);
+void	   SetInts(char *text, FILE *fd, char **arg, int *);
+void	   SetBox(char *text, FILE *fd, char **arg, int *);
+void	   set_func(char *, FILE *, char **, int *);
+void	   copy_config(FILE **config_fd);
+void	   SetEdgeScroll(F_CMD_ARGS);
+void	   SetEdgeResistance(F_CMD_ARGS);
+void	   CursorStyle(F_CMD_ARGS);
+void	   ButtonStyle(F_CMD_ARGS);
 #ifdef MULTISTYLE
 void AddButtonStyle(F_CMD_ARGS);
 #endif
@@ -341,7 +341,7 @@ void checkPanFrames(void);
 void raisePanFrames(void);
 void initPanFrames(void);
 Bool StashEventTime(XEvent *ev);
-int My_XNextEvent(Display *dpy, XEvent *event);
+int  My_XNextEvent(Display *dpy, XEvent *event);
 void FlushQueue(int Module);
 void QuickRestart(void);
 void AddFuncKey(
@@ -374,36 +374,36 @@ void changeDesks_func(F_CMD_ARGS);
 void changeDesks(int desk);
 void changeWindowsDesk(F_CMD_ARGS);
 
-int GetMoveArguments(char *action, int x, int y, int w, int h, int *pfinalX,
+int   GetMoveArguments(char *action, int x, int y, int w, int h, int *pfinalX,
     int *pfinalY, Bool *fWarp);
 char *GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
     MenuOptions *pops);
-int GetTwoArguments(
+int   GetTwoArguments(
     char *action, int *val1, int *val2, int *val1_unit, int *val2_unit);
 int GetTwoPercentArguments(
     char *action, int *val1, int *val2, int *val1_unit, int *val2_unit);
 
 void goto_page_func(F_CMD_ARGS);
 
-void wait_func(F_CMD_ARGS);
-void flip_focus_func(F_CMD_ARGS);
-void focus_func(F_CMD_ARGS);
-void warp_func(F_CMD_ARGS);
-void SendDataToModule(F_CMD_ARGS);
-void send_list_func(F_CMD_ARGS);
-void popup_func(F_CMD_ARGS);
-void staysup_func(F_CMD_ARGS);
-void quit_func(F_CMD_ARGS);
-void quit_screen_func(F_CMD_ARGS);
-void echo_func(F_CMD_ARGS);
-void raiselower_func(F_CMD_ARGS);
-void Nop_func(F_CMD_ARGS);
-void SetGlobalOptions(F_CMD_ARGS);
-void Emulate(F_CMD_ARGS);
-void set_mask_function(F_CMD_ARGS);
-void DestroyMenu(MenuRoot *mr);
+void  wait_func(F_CMD_ARGS);
+void  flip_focus_func(F_CMD_ARGS);
+void  focus_func(F_CMD_ARGS);
+void  warp_func(F_CMD_ARGS);
+void  SendDataToModule(F_CMD_ARGS);
+void  send_list_func(F_CMD_ARGS);
+void  popup_func(F_CMD_ARGS);
+void  staysup_func(F_CMD_ARGS);
+void  quit_func(F_CMD_ARGS);
+void  quit_screen_func(F_CMD_ARGS);
+void  echo_func(F_CMD_ARGS);
+void  raiselower_func(F_CMD_ARGS);
+void  Nop_func(F_CMD_ARGS);
+void  SetGlobalOptions(F_CMD_ARGS);
+void  Emulate(F_CMD_ARGS);
+void  set_mask_function(F_CMD_ARGS);
+void  DestroyMenu(MenuRoot *mr);
 Pixel GetColor(char *);
-void FreeColors(Pixel *pixels, int n);
+void  FreeColors(Pixel *pixels, int n);
 #ifdef GRADIENT_BUTTONS
 Pixel *AllocLinearGradient(char *s_from, char *s_to, int npixels);
 Pixel *AllocNonlinearGradient(
@@ -441,40 +441,40 @@ void SetTitleStyle(F_CMD_ARGS);
 #ifdef MULTISTYLE
 void AddTitleStyle(F_CMD_ARGS);
 #endif
-void SetDeskSize(F_CMD_ARGS);
-void SetOpaque(F_CMD_ARGS);
-void SetXOR(F_CMD_ARGS);
-void SetClick(F_CMD_ARGS);
-void SetSnapAttraction(F_CMD_ARGS);
-void SetSnapGrid(F_CMD_ARGS);
-void NextFunc(F_CMD_ARGS);
-void PrevFunc(F_CMD_ARGS);
-void NoneFunc(F_CMD_ARGS);
-void CurrentFunc(F_CMD_ARGS);
-void DirectionFunc(F_CMD_ARGS);
-void WindowIdFunc(F_CMD_ARGS);
-void ReadFile(F_CMD_ARGS);
-void PipeRead(F_CMD_ARGS);
-void module_zapper(F_CMD_ARGS);
+void  SetDeskSize(F_CMD_ARGS);
+void  SetOpaque(F_CMD_ARGS);
+void  SetXOR(F_CMD_ARGS);
+void  SetClick(F_CMD_ARGS);
+void  SetSnapAttraction(F_CMD_ARGS);
+void  SetSnapGrid(F_CMD_ARGS);
+void  NextFunc(F_CMD_ARGS);
+void  PrevFunc(F_CMD_ARGS);
+void  NoneFunc(F_CMD_ARGS);
+void  CurrentFunc(F_CMD_ARGS);
+void  DirectionFunc(F_CMD_ARGS);
+void  WindowIdFunc(F_CMD_ARGS);
+void  ReadFile(F_CMD_ARGS);
+void  PipeRead(F_CMD_ARGS);
+void  module_zapper(F_CMD_ARGS);
 char *expand(char *input, char *arguments[], FvwmWindow *tmp_win);
-void Recapture(F_CMD_ARGS);
-void HandleHardFocus(FvwmWindow *t);
-void DestroyModConfig(F_CMD_ARGS);
-void AddModConfig(F_CMD_ARGS);
-void SetEnv(F_CMD_ARGS);
+void  Recapture(F_CMD_ARGS);
+void  HandleHardFocus(FvwmWindow *t);
+void  DestroyModConfig(F_CMD_ARGS);
+void  AddModConfig(F_CMD_ARGS);
+void  SetEnv(F_CMD_ARGS);
 
 /* exec.c -- privilege-separated execution helper interface */
 struct imsg;
 void exec_helper_start(void);
 void exec_helper_stop(void);
 void exec_helper_handle(void);
-int exec_helper_fd(void);
-int exec_helper_running(void);
-int exec_helper_launch(int, char **, char **);
-int exec_helper_dispatch(struct imsg *, void *);
-int exec_helper_drain(int (*)(struct imsg *, void *), void *);
-int exec_helper_piperead_start(u_int32_t, const char *);
-int exec_helper_piperead_kill(u_int32_t);
+int  exec_helper_fd(void);
+int  exec_helper_running(void);
+int  exec_helper_launch(int, char **, char **);
+int  exec_helper_dispatch(struct imsg *, void *);
+int  exec_helper_drain(int (*)(struct imsg *, void *), void *);
+int  exec_helper_piperead_start(u_int32_t, const char *);
+int  exec_helper_piperead_kill(u_int32_t);
 
 void CoerceEnterNotifyOnCurrentWindow(void);
 

@@ -53,17 +53,17 @@ void DrawLinePattern(Window win, GC ReliefGC, GC ShadowGC,
 #endif
 
 /* macro to change window background color/pixmap */
-#define ChangeWindowColor(window, valuemask)				\
-	{								\
-		if (NewColor) {						\
-			XChangeWindowAttributes(			\
-			    dpy, window, valuemask, &attributes);	\
-			XClearWindow(dpy, window);			\
-		}							\
+#define ChangeWindowColor(window, valuemask)                                   \
+	{                                                                      \
+		if (NewColor) {                                                \
+			XChangeWindowAttributes(                               \
+			    dpy, window, valuemask, &attributes);              \
+			XClearWindow(dpy, window);                             \
+		}                                                              \
 	}
 
 extern Window PressedW;
-XGCValues Globalgcv;
+XGCValues     Globalgcv;
 unsigned long Globalgcm;
 /****************************************************************************
  *
@@ -75,19 +75,19 @@ SetBorder(
     FvwmWindow *t, Bool onoroff, Bool force, Bool Mapped, Window expose_win)
 {
 	(void)Mapped;
-	int y, i, x;
-	GC ReliefGC, ShadowGC;
-	Pixel BorderColor, BackColor;
+	int    y, i, x;
+	GC     ReliefGC, ShadowGC;
+	Pixel  BorderColor, BackColor;
 	Pixmap BackPixmap, TextColor;
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
-	Pixmap TexturePixmap = None;
+	Pixmap		     TexturePixmap = None;
 	XSetWindowAttributes notex_attributes;
-	unsigned long notex_valuemask;
+	unsigned long	     notex_valuemask;
 #endif
-	Bool NewColor = False;
+	Bool		     NewColor = False;
 	XSetWindowAttributes attributes;
-	unsigned long valuemask;
-	static unsigned int corners[4];
+	unsigned long	     valuemask;
+	static unsigned int  corners[4];
 
 	corners[0] = TOP_HILITE | LEFT_HILITE;
 	corners[1] = TOP_HILITE | RIGHT_HILITE;
@@ -113,7 +113,7 @@ SetBorder(
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 		/* are we using textured borders? */
 		if ((GetDecor(t, BorderStyle.active.style) &
-		    ButtonFaceTypeMask) == TiledPixmapButton)
+			ButtonFaceTypeMask) == TiledPixmapButton)
 			TexturePixmap =
 			    GetDecor(t, BorderStyle.active.u.p->picture);
 #endif
@@ -138,7 +138,7 @@ SetBorder(
 
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 		if ((GetDecor(t, BorderStyle.inactive.style) &
-		    ButtonFaceTypeMask) == TiledPixmapButton)
+			ButtonFaceTypeMask) == TiledPixmapButton)
 			TexturePixmap =
 			    GetDecor(t, BorderStyle.inactive.u.p->picture);
 #endif
@@ -185,21 +185,21 @@ SetBorder(
 		}
 	} else
 #endif
-		if (Scr.d_depth < 2) {
-			attributes.background_pixmap = BackPixmap;
-			valuemask |= CWBackPixmap;
+	    if (Scr.d_depth < 2) {
+		attributes.background_pixmap = BackPixmap;
+		valuemask |= CWBackPixmap;
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
-			notex_attributes.background_pixmap = BackPixmap;
-			notex_valuemask |= CWBackPixmap;
+		notex_attributes.background_pixmap = BackPixmap;
+		notex_valuemask |= CWBackPixmap;
 #endif
-		} else {
-			attributes.background_pixel = BackColor;
-			valuemask |= CWBackPixel;
+	} else {
+		attributes.background_pixel = BackColor;
+		valuemask |= CWBackPixel;
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
-			notex_attributes.background_pixel = BackColor;
-			notex_valuemask |= CWBackPixel;
+		notex_attributes.background_pixel = BackColor;
+		notex_valuemask |= CWBackPixel;
 #endif
-		}
+	}
 
 	if (t->flags & (TITLE | BORDER)) {
 		XSetWindowBorder(dpy, t->Parent, BorderColor);
@@ -220,9 +220,9 @@ SetBorder(
 				    (expose_win == t->left_w[i]) ||
 				    (expose_win == None)
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
-				     || NewColor
+				    || NewColor
 #endif
-				    ) {
+				) {
 					int inverted = PressedW == t->left_w[i];
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
 					if (bf->style & UseBorderStyle)
@@ -250,8 +250,8 @@ SetBorder(
 							    tsbf, ReliefGC,
 							    ShadowGC, inverted,
 							    GetDecor(t,
-							    left_buttons[i]
-							    .flags));
+								left_buttons[i]
+								    .flags));
 					}
 #endif /* EXTENDED_TITLESTYLE */
 #ifdef MULTISTYLE
@@ -263,26 +263,28 @@ SetBorder(
 						    ReliefGC, ShadowGC,
 						    inverted,
 						    GetDecor(t,
-						    left_buttons[i].flags));
+							left_buttons[i].flags));
 
-					if (!(GetDecor(t, left_buttons[i]
-					    .state[bs]
-					    .style) &
-					    FlatButton)) {
-						if (GetDecor(t, left_buttons[i]
-						    .state[bs]
-						    .style) &
+					if (!(GetDecor(t,
+						  left_buttons[i]
+						      .state[bs]
+						      .style) &
+						FlatButton)) {
+						if (GetDecor(t,
+							left_buttons[i]
+							    .state[bs]
+							    .style) &
 						    SunkButton)
 							RelieveWindow(t,
 							    t->left_w[i], 0, 0,
 							    t->title_height,
 							    t->title_height,
 							    (inverted ?
-							     ReliefGC :
-							     ShadowGC),
+								    ReliefGC :
+								    ShadowGC),
 							    (inverted ?
-							     ShadowGC :
-							     ReliefGC),
+								    ShadowGC :
+								    ReliefGC),
 							    BOTTOM_HILITE);
 						else
 							RelieveWindow(t,
@@ -290,11 +292,11 @@ SetBorder(
 							    t->title_height,
 							    t->title_height,
 							    (inverted ?
-							     ShadowGC :
-							     ReliefGC),
+								    ShadowGC :
+								    ReliefGC),
 							    (inverted ?
-							     ReliefGC :
-							     ShadowGC),
+								    ReliefGC :
+								    ShadowGC),
 							    BOTTOM_HILITE);
 					}
 				}
@@ -313,9 +315,9 @@ SetBorder(
 				    (expose_win == t->right_w[i]) ||
 				    (expose_win == None)
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
-				     || NewColor
+				    || NewColor
 #endif
-				    ) {
+				) {
 					int inverted =
 					    PressedW == t->right_w[i];
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
@@ -344,8 +346,8 @@ SetBorder(
 							    tsbf, ReliefGC,
 							    ShadowGC, inverted,
 							    GetDecor(t,
-							    right_buttons[i]
-							    .flags));
+								right_buttons[i]
+								    .flags));
 					}
 #endif /* EXTENDED_TITLESTYLE */
 #ifdef MULTISTYLE
@@ -356,27 +358,30 @@ SetBorder(
 						    t->title_height, bf,
 						    ReliefGC, ShadowGC,
 						    inverted,
-						    GetDecor(t, right_buttons[i]
-						    .flags));
+						    GetDecor(t,
+							right_buttons[i]
+							    .flags));
 
-					if (!(GetDecor(t, right_buttons[i]
-					    .state[bs]
-					    .style) &
-					    FlatButton)) {
-						if (GetDecor(t, right_buttons[i]
-						    .state[bs]
-						    .style) &
+					if (!(GetDecor(t,
+						  right_buttons[i]
+						      .state[bs]
+						      .style) &
+						FlatButton)) {
+						if (GetDecor(t,
+							right_buttons[i]
+							    .state[bs]
+							    .style) &
 						    SunkButton)
 							RelieveWindow(t,
 							    t->right_w[i], 0, 0,
 							    t->title_height,
 							    t->title_height,
 							    (inverted ?
-							     ReliefGC :
-							     ShadowGC),
+								    ReliefGC :
+								    ShadowGC),
 							    (inverted ?
-							     ShadowGC :
-							     ReliefGC),
+								    ShadowGC :
+								    ReliefGC),
 							    BOTTOM_HILITE);
 						else
 							RelieveWindow(t,
@@ -384,11 +389,11 @@ SetBorder(
 							    t->title_height,
 							    t->title_height,
 							    (inverted ?
-							     ShadowGC :
-							     ReliefGC),
+								    ShadowGC :
+								    ReliefGC),
 							    (inverted ?
-							     ReliefGC :
-							     ShadowGC),
+								    ReliefGC :
+								    ShadowGC),
 							    BOTTOM_HILITE);
 					}
 				}
@@ -405,8 +410,8 @@ SetBorder(
 		for (i = 0; i < 4; i++) {
 			int vertical = i % 2;
 #ifdef BORDERSTYLE
-			int flags =
-			    onoroff ? GetDecor(t, BorderStyle.active.style) :
+			int flags = onoroff ?
+			    GetDecor(t, BorderStyle.active.style) :
 			    GetDecor(t, BorderStyle.inactive.style);
 #endif /* BORDERSTYLE */
 
@@ -436,33 +441,34 @@ SetBorder(
 						RelieveWindowHH(t, t->sides[i],
 						    0, 0,
 						    ((vertical) ?
-						     t->boundary_width :
-						     x),
+							    t->boundary_width :
+							    x),
 						    ((vertical) ?
-						     y :
-						     t->boundary_width),
+							    y :
+							    t->boundary_width),
 						    rgc, sgc,
 						    vertical ?
-						    (i == 3 ? LEFT_HILITE :
-						     RIGHT_HILITE) :
-						    (i ? BOTTOM_HILITE :
-						     TOP_HILITE),
+							(i == 3 ?
+								LEFT_HILITE :
+								RIGHT_HILITE) :
+							(i ? BOTTOM_HILITE :
+							     TOP_HILITE),
 						    (0x0001 << i));
 					else
 						RelieveWindowHH(t, t->sides[i],
 						    0, 0,
 						    ((vertical) ?
-						     t->boundary_width :
-						     x),
+							    t->boundary_width :
+							    x),
 						    ((vertical) ?
-						     y :
-						     t->boundary_width),
+							    y :
+							    t->boundary_width),
 						    rgc, sgc,
 						    vertical ?
-						    (LEFT_HILITE |
-						     RIGHT_HILITE) :
-						    (TOP_HILITE |
-						     BOTTOM_HILITE),
+							(LEFT_HILITE |
+							    RIGHT_HILITE) :
+							(TOP_HILITE |
+							    BOTTOM_HILITE),
 						    (0x0001 << i));
 				} else
 #endif /* BORDERSTYLE */
@@ -489,7 +495,7 @@ SetBorder(
 					RelieveWindowHH(t, t->corners[i], 0, 0,
 					    t->corner_width,
 					    ((i / 2) ? t->corner_width + t->bw :
-					     t->corner_width),
+						       t->corner_width),
 					    rgc, sgc, corners[i], corners[i]);
 
 					if (!(flags & NoInset)) {
@@ -497,23 +503,23 @@ SetBorder(
 							RelieveParts(t,
 							    i | HH_HILITE,
 							    ((i / 2) ? rgc :
-							     sgc),
+								       sgc),
 							    (vertical ? rgc :
-							     sgc));
+									sgc));
 						else
 							RelieveParts(t,
 							    i | HH_HILITE,
 							    ((i / 2) ? sgc :
-							     sgc),
+								       sgc),
 							    (vertical ? sgc :
-							     sgc));
+									sgc));
 					}
 				} else {
 #endif /* ! BORDERSTYLE */
 					RelieveWindow(t, t->corners[i], 0, 0,
 					    t->corner_width,
 					    ((i / 2) ? t->corner_width + t->bw :
-					     t->corner_width),
+						       t->corner_width),
 					    rgc, sgc, corners[i]);
 
 					if (t->boundary_width > 1)
@@ -577,25 +583,25 @@ SetBorder(
 					    t->boundary_width - 1 - t->bw,
 					    t->boundary_width - 1 - t->bw,
 					    t->frame_width -
-					    (t->boundary_width << 1) + 2 +
-					    3 * t->bw,
+						(t->boundary_width << 1) + 2 +
+						3 * t->bw,
 					    t->frame_height -
-					    (t->boundary_width << 1) + 2 +
-					    3 * t->bw,
+						(t->boundary_width << 1) + 2 +
+						3 * t->bw,
 					    sgc, rgc,
 					    TOP_HILITE | LEFT_HILITE |
-					    RIGHT_HILITE | BOTTOM_HILITE);
+						RIGHT_HILITE | BOTTOM_HILITE);
 					RelieveWindow(t, t->frame, 0, 0,
 					    t->frame_width + t->bw,
 					    t->frame_height + t->bw, rgc, sgc,
 					    TOP_HILITE | LEFT_HILITE |
-					    RIGHT_HILITE | BOTTOM_HILITE);
+						RIGHT_HILITE | BOTTOM_HILITE);
 				} else {
 					RelieveWindow(t, t->frame, 0, 0,
 					    t->frame_width + t->bw,
 					    t->frame_height + t->bw, rgc, rgc,
 					    TOP_HILITE | LEFT_HILITE |
-					    RIGHT_HILITE | BOTTOM_HILITE);
+						RIGHT_HILITE | BOTTOM_HILITE);
 				}
 			} else {
 				XSetWindowBackground(
@@ -620,8 +626,8 @@ DrawButton(FvwmWindow *t, Window win, int w, int h, ButtonFace *bf, GC ReliefGC,
 	register int type = bf->style & ButtonFaceTypeMask;
 #ifdef PIXMAP_BUTTONS
 	FvwmPicture *p;
-	int border = 0;
-	int width, height, x, y;
+	int	     border = 0;
+	int	     width, height, x, y;
 #endif
 
 	switch (type) {
@@ -734,7 +740,7 @@ DrawButton(FvwmWindow *t, Window win, int w, int h, ButtonFace *bf, GC ReliefGC,
 		} else {
 			register int i = 0,
 				     dh =
-			    bounds.height / bf->u.grad.npixels + 1;
+					 bounds.height / bf->u.grad.npixels + 1;
 			while (i < bf->u.grad.npixels) {
 				unsigned short y =
 				    i * bounds.height / bf->u.grad.npixels;
@@ -744,8 +750,7 @@ DrawButton(FvwmWindow *t, Window win, int w, int h, ButtonFace *bf, GC ReliefGC,
 				    bounds.x, bounds.y + y, bounds.width, dh);
 			}
 		}
-	}
-		break;
+	} break;
 #endif /* GRADIENT_BUTTONS */
 
 	default:
@@ -763,12 +768,12 @@ void
 SetTitleBar(FvwmWindow *t, Bool onoroff, Bool NewTitle)
 {
 	(void)NewTitle;
-	int hor_off, w, i;
+	int		 hor_off, w, i;
 	enum ButtonState title_state;
-	ButtonFaceStyle tb_style;
-	int tb_flags;
-	GC ReliefGC, ShadowGC, tGC;
-	Pixel Forecolor, BackColor;
+	ButtonFaceStyle	 tb_style;
+	int		 tb_flags;
+	GC		 ReliefGC, ShadowGC, tGC;
+	Pixel		 Forecolor, BackColor;
 
 	if (!t)
 		return;
@@ -830,7 +835,7 @@ SetTitleBar(FvwmWindow *t, Bool onoroff, Bool NewTitle)
 	/* we need to check for UseBorderStyle for the titlebar */
 	{
 		ButtonFace *bf = onoroff ? &GetDecor(t, BorderStyle.active) :
-		    &GetDecor(t, BorderStyle.inactive);
+					   &GetDecor(t, BorderStyle.inactive);
 
 		if ((tb_style & UseBorderStyle) &&
 		    ((bf->style & ButtonFaceTypeMask) == TiledPixmapButton))
@@ -944,8 +949,8 @@ RelieveWindow(FvwmWindow *t, Window win, int x, int y, int w, int h,
     GC ReliefGC, GC ShadowGC, int hilite)
 {
 	XSegment seg[4];
-	int i;
-	int edge;
+	int	 i;
+	int	 edge;
 
 	edge = 0;
 	if ((win == t->sides[0]) || (win == t->sides[1]) ||
@@ -974,8 +979,8 @@ RelieveWindow(FvwmWindow *t, Window win, int x, int y, int w, int h,
 	if (((t->boundary_width > 2) || (edge == 0)) &&
 	    ((t->boundary_width > 3) || (edge < 1)) &&
 	    (!(t->flags & MWMBorders) ||
-	     (((edge == 0) || (t->boundary_width > 3)) &&
-	      (hilite & TOP_HILITE)))) {
+		(((edge == 0) || (t->boundary_width > 3)) &&
+		    (hilite & TOP_HILITE)))) {
 		seg[i].x1 = x + 1;
 		seg[i].y1 = y + 1;
 		seg[i].x2 = x + w - 2;
@@ -984,8 +989,8 @@ RelieveWindow(FvwmWindow *t, Window win, int x, int y, int w, int h,
 	if (((t->boundary_width > 2) || (edge == 0)) &&
 	    ((t->boundary_width > 3) || (edge < 1)) &&
 	    (!(t->flags & MWMBorders) ||
-	     (((edge == 0) || (t->boundary_width > 3)) &&
-	      (hilite & LEFT_HILITE)))) {
+		(((edge == 0) || (t->boundary_width > 3)) &&
+		    (hilite & LEFT_HILITE)))) {
 		seg[i].x1 = x + 1;
 		seg[i].y1 = y + 1;
 		seg[i].x2 = x + 1;
@@ -1001,8 +1006,8 @@ RelieveWindow(FvwmWindow *t, Window win, int x, int y, int w, int h,
 
 	if (((t->boundary_width > 2) || (edge == 0)) &&
 	    (!(t->flags & MWMBorders) ||
-	     (((edge == 0) || (t->boundary_width > 3)) &&
-	      (hilite & BOTTOM_HILITE)))) {
+		(((edge == 0) || (t->boundary_width > 3)) &&
+		    (hilite & BOTTOM_HILITE)))) {
 		seg[i].x1 = x + 1;
 		seg[i].y1 = y + h - 2;
 		seg[i].x2 = x + w - 2;
@@ -1016,8 +1021,8 @@ RelieveWindow(FvwmWindow *t, Window win, int x, int y, int w, int h,
 
 	if (((t->boundary_width > 2) || (edge == 0)) &&
 	    (!(t->flags & MWMBorders) ||
-	     (((edge == 0) || (t->boundary_width > 3)) &&
-	      (hilite & RIGHT_HILITE)))) {
+		(((edge == 0) || (t->boundary_width > 3)) &&
+		    (hilite & RIGHT_HILITE)))) {
 		seg[i].x1 = x + w - 2;
 		seg[i].y1 = y + 1;
 		seg[i].x2 = x + w - 2;
@@ -1039,8 +1044,8 @@ RelieveWindowHH(FvwmWindow *t, Window win, int x, int y, int w, int h,
     GC ReliefGC, GC ShadowGC, int draw, int hilite)
 {
 	XSegment seg[4];
-	int i = 0;
-	int edge = 0, a = 0, b = 0;
+	int	 i = 0;
+	int	 edge = 0, a = 0, b = 0;
 
 	if (win == t->sides[0]) {
 		edge = 5;
@@ -1072,8 +1077,8 @@ RelieveWindowHH(FvwmWindow *t, Window win, int x, int y, int w, int h,
 		if (((t->boundary_width > 2) || (edge == 0)) &&
 		    ((t->boundary_width > 3) || (edge < 1)) &&
 		    (!(t->flags & MWMBorders) ||
-		     (((edge == 0) || (t->boundary_width > 3)) &&
-		      (hilite & TOP_HILITE)))) {
+			(((edge == 0) || (t->boundary_width > 3)) &&
+			    (hilite & TOP_HILITE)))) {
 			seg[i].x1 = x + ((edge == 2) || b ? 0 : 1);
 			seg[i].y1 = y + 1;
 			seg[i].x2 = x + w - 1 - ((edge == 1) || b ? 0 : 1);
@@ -1090,8 +1095,8 @@ RelieveWindowHH(FvwmWindow *t, Window win, int x, int y, int w, int h,
 		if (((t->boundary_width > 2) || (edge == 0)) &&
 		    ((t->boundary_width > 3) || (edge < 1)) &&
 		    (!(t->flags & MWMBorders) ||
-		     (((edge == 0) || (t->boundary_width > 3)) &&
-		      (hilite & LEFT_HILITE)))) {
+			(((edge == 0) || (t->boundary_width > 3)) &&
+			    (hilite & LEFT_HILITE)))) {
 			seg[i].x1 = x + 1;
 			seg[i].y1 = y + ((edge == 3) || a ? 0 : 1);
 			seg[i].x2 = x + 1;
@@ -1110,8 +1115,8 @@ RelieveWindowHH(FvwmWindow *t, Window win, int x, int y, int w, int h,
 
 		if (((t->boundary_width > 2) || (edge == 0)) &&
 		    (!(t->flags & MWMBorders) ||
-		     (((edge == 0) || (t->boundary_width > 3)) &&
-		      (hilite & BOTTOM_HILITE)))) {
+			(((edge == 0) || (t->boundary_width > 3)) &&
+			    (hilite & BOTTOM_HILITE)))) {
 			seg[i].x1 = x + (b || (edge == 4) ? 0 : 1);
 			seg[i].y1 = y + h - 2;
 			seg[i].x2 = x + w - ((edge == 3) ? 0 : 1);
@@ -1127,8 +1132,8 @@ RelieveWindowHH(FvwmWindow *t, Window win, int x, int y, int w, int h,
 
 		if (((t->boundary_width > 2) || (edge == 0)) &&
 		    (!(t->flags & MWMBorders) ||
-		     (((edge == 0) || (t->boundary_width > 3)) &&
-		      (hilite & RIGHT_HILITE)))) {
+			(((edge == 0) || (t->boundary_width > 3)) &&
+			    (hilite & RIGHT_HILITE)))) {
 			seg[i].x1 = x + w - 2;
 			seg[i].y1 = y + (a || (edge == 4) ? 0 : 1);
 			seg[i].x2 = x + w - 2;
@@ -1143,7 +1148,7 @@ void
 RelieveParts(FvwmWindow *t, int i, GC hor, GC vert)
 {
 	XSegment seg[2];
-	int n = 0, hh = i & HH_HILITE;
+	int	 n = 0, hh = i & HH_HILITE;
 	i &= FULL_HILITE;
 
 	if ((t->flags & MWMBorders) || (t->boundary_width < 3)) {
@@ -1388,12 +1393,12 @@ DrawLinePattern(Window win, GC ReliefGC, GC ShadowGC,
 void
 SetupFrame(FvwmWindow *tmp_win, int x, int y, int w, int h, Bool sendEvent)
 {
-	XEvent client_event;
+	XEvent	       client_event;
 	XWindowChanges frame_wc, xwc;
-	unsigned long frame_mask, xwcm;
-	int cx, cy, i;
-	Bool Resized = False, Moved = False;
-	int xwidth, ywidth, left, right;
+	unsigned long  frame_mask, xwcm;
+	int	       cx, cy, i;
+	Bool	       Resized = False, Moved = False;
+	int	       xwidth, ywidth, left, right;
 #ifdef WINDOWSHADE
 	int shaded = tmp_win->buttons & WSHADE;
 #endif
@@ -1409,7 +1414,7 @@ SetupFrame(FvwmWindow *tmp_win, int x, int y, int w, int h, Bool sendEvent)
 #ifdef WINDOWSHADE
 	    && !shaded
 #endif
-	    ) {
+	) {
 		tmp_win->orig_x = x;
 		tmp_win->orig_y = y;
 		tmp_win->orig_wd = w;
@@ -1437,8 +1442,8 @@ SetupFrame(FvwmWindow *tmp_win, int x, int y, int w, int h, Bool sendEvent)
 			tmp_win->title_height =
 			    GetDecor(tmp_win, TitleHeight) + tmp_win->bw;
 
-		tmp_win->title_width =
-		    w - (left + right) * tmp_win->title_height -
+		tmp_win->title_width = w -
+		    (left + right) * tmp_win->title_height -
 		    2 * tmp_win->boundary_width + tmp_win->bw;
 
 		if (tmp_win->title_width < 1)
@@ -1502,8 +1507,7 @@ SetupFrame(FvwmWindow *tmp_win, int x, int y, int w, int h, Bool sendEvent)
 
 		if (tmp_win->flags & BORDER) {
 			tmp_win->corner_width = GetDecor(tmp_win, TitleHeight) +
-			    tmp_win->bw +
-			    tmp_win->boundary_width;
+			    tmp_win->bw + tmp_win->boundary_width;
 
 			if (w < 2 * tmp_win->corner_width)
 				tmp_win->corner_width = w / 3;
@@ -1511,7 +1515,7 @@ SetupFrame(FvwmWindow *tmp_win, int x, int y, int w, int h, Bool sendEvent)
 #ifdef WINDOWSHADE
 			    && !shaded
 #endif
-			    )
+			)
 				tmp_win->corner_width = h / 3;
 			xwidth = w - 2 * tmp_win->corner_width + tmp_win->bw;
 			ywidth = h - 2 * tmp_win->corner_width;
@@ -1621,7 +1625,7 @@ SetupFrame(FvwmWindow *tmp_win, int x, int y, int w, int h, Bool sendEvent)
 #ifdef WINDOWSHADE
 	    && !shaded
 #endif
-	    ) {
+	) {
 		client_event.type = ConfigureNotify;
 		client_event.xconfigure.display = dpy;
 		client_event.xconfigure.event = tmp_win->w;

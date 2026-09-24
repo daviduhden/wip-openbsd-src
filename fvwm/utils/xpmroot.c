@@ -15,14 +15,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../fvwm/fvwm_sandbox.h"
 #include "../libs/fvwmlib.h"
 #include "config.h"
-#include "../fvwm/fvwm_sandbox.h"
 
-Display *dpy;
-int screen;
-Window root;
-char *display_name = NULL;
+Display	   *dpy;
+int	    screen;
+Window	    root;
+char	   *display_name = NULL;
 static void SetRootWindow(
     char *tline, XWindowAttributes *root_attr, Atom colors_atom);
 static void FreePreviousResources(
@@ -32,7 +32,7 @@ Pixmap rootXpm;
 int
 main(int argc, char **argv)
 {
-	Atom prop, color_prop;
+	Atom		  prop, color_prop;
 	XWindowAttributes root_attr;
 
 	if (argc != 2) {
@@ -70,14 +70,14 @@ static void
 SetRootWindow(char *tline, XWindowAttributes *root_attr, Atom colors_atom)
 {
 	XpmAttributes xpm_attributes;
-	Pixmap shapeMask;
-	int val;
+	Pixmap	      shapeMask;
+	int	      val;
 
 	memset(&xpm_attributes, 0, sizeof(xpm_attributes));
 	xpm_attributes.colormap = root_attr->colormap;
 	xpm_attributes.valuemask = XpmSize | XpmReturnAllocPixels | XpmColormap;
 	if ((val = XpmReadFileToPixmap(dpy, root, tline, &rootXpm, &shapeMask,
-	    &xpm_attributes)) != XpmSuccess) {
+		 &xpm_attributes)) != XpmSuccess) {
 		if (val == XpmOpenFailed)
 			fprintf(stderr, "Couldn't open pixmap file\n");
 		else if (val == XpmColorFailed)
@@ -116,19 +116,18 @@ static void
 FreePreviousResources(
     Atom pixmap_atom, Atom colors_atom, XWindowAttributes *root_attr)
 {
-	Atom type;
-	int format;
-	unsigned long length, after;
+	Atom	       type;
+	int	       format;
+	unsigned long  length, after;
 	unsigned char *data = NULL;
-	int visual_class =
+	int	       visual_class =
 	    (root_attr->visual != NULL) ? root_attr->visual->class : StaticGray;
-	Bool can_free_colors =
-	    (visual_class == PseudoColor || visual_class == GrayScale ||
-	     visual_class == DirectColor);
+	Bool can_free_colors = (visual_class == PseudoColor ||
+	    visual_class == GrayScale || visual_class == DirectColor);
 
 	if (XGetWindowProperty(dpy, root, colors_atom, 0L, (~0L), True,
-	    XA_CARDINAL, &type, &format, &length, &after,
-	    &data) == Success) {
+		XA_CARDINAL, &type, &format, &length, &after,
+		&data) == Success) {
 		if (can_free_colors && type == XA_CARDINAL && format == 32 &&
 		    length > 0 && data != NULL) {
 			Pixel *pixels = (Pixel *)data;
@@ -141,8 +140,8 @@ FreePreviousResources(
 
 	data = NULL;
 	if (XGetWindowProperty(dpy, root, pixmap_atom, 0L, 1L, True,
-	    AnyPropertyType, &type, &format, &length, &after,
-	    &data) == Success) {
+		AnyPropertyType, &type, &format, &length, &after,
+		&data) == Success) {
 		if ((type == XA_PIXMAP) && (format == 32) && (length == 1) &&
 		    data != NULL)
 			XKillClient(dpy, *((Pixmap *)data));

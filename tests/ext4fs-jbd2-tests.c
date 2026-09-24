@@ -21,7 +21,7 @@ static uint32_t
 ref_crc32c(uint32_t init, const void *data, size_t len)
 {
 	const uint8_t *p = data;
-	uint32_t c = init;
+	uint32_t       c = init;
 
 	while (len-- > 0) {
 		c ^= *p++;
@@ -63,17 +63,17 @@ bwrite(struct buf *bp)
 
 static int failures;
 
-#define CHECK(cond, msg) do {						\
-	if (!(cond)) {							\
-		fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,	\
-		    __LINE__);						\
-		failures++;						\
-	}								\
-} while (0)
+#define CHECK(cond, msg)                                                       \
+	do {                                                                   \
+		if (!(cond)) {                                                 \
+			fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,   \
+			    __LINE__);                                         \
+			failures++;                                            \
+		}                                                              \
+	} while (0)
 
 static const uint8_t test_uuid[16] = {
-	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
-};
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
 /* 4096-byte payload matching the reference vector generator:
  * pattern[i] = (i * 7 + 3) & 0xFF. */
@@ -159,8 +159,8 @@ mk_tag2(char *p, uint32_t blocknr, uint16_t csum, uint16_t flags)
 }
 
 static size_t
-mk_tag2_64(char *p, uint32_t blocknr, uint32_t high, uint16_t csum,
-    uint16_t flags)
+mk_tag2_64(
+    char *p, uint32_t blocknr, uint32_t high, uint16_t csum, uint16_t flags)
 {
 	uint32_t be32 = htobe32(blocknr);
 	uint16_t be16;
@@ -177,8 +177,7 @@ mk_tag2_64(char *p, uint32_t blocknr, uint32_t high, uint16_t csum,
 }
 
 static size_t
-mk_tag3(char *p, uint32_t blocknr, uint32_t high, uint32_t flags,
-    uint32_t csum)
+mk_tag3(char *p, uint32_t blocknr, uint32_t high, uint32_t flags, uint32_t csum)
 {
 	uint32_t be32;
 
@@ -225,18 +224,19 @@ static void
 test_parse_variants(void)
 {
 	struct jbd2_replay_ctx ctx;
-	char buf[128];
-	u_int64_t target;
-	u_int32_t flags, csum, offset;
-	size_t used;
+	char		       buf[128];
+	u_int64_t	       target;
+	u_int32_t	       flags, csum, offset;
+	size_t		       used;
 
 	/* plain 32-bit */
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
 	used = mk_tag_plain(buf, 0x11223344, JBD2_FLAG_ESCAPE);
 	memcpy(buf + used, test_uuid, 16);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, used + 16, &offset, &target,
-	    &flags, &csum) == 0, "plain tag parse");
+	CHECK(jbd2_parse_tag(
+		  &ctx, buf, used + 16, &offset, &target, &flags, &csum) == 0,
+	    "plain tag parse");
 	CHECK(target == 0x11223344, "plain tag target");
 	CHECK(flags == JBD2_FLAG_ESCAPE, "plain tag flags");
 	CHECK(csum == 0, "plain tag csum absent");
@@ -246,8 +246,9 @@ test_parse_variants(void)
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 1);
 	used = mk_tag_plain64(buf, 0x44556677, 0x89, JBD2_FLAG_SAME_UUID);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, used, &offset, &target, &flags,
-	    &csum) == 0, "plain64 tag parse");
+	CHECK(jbd2_parse_tag(
+		  &ctx, buf, used, &offset, &target, &flags, &csum) == 0,
+	    "plain64 tag parse");
 	CHECK(target == ((u_int64_t)0x89 << 32 | 0x44556677),
 	    "plain64 tag target");
 	CHECK(flags == JBD2_FLAG_SAME_UUID, "plain64 tag flags");
@@ -258,8 +259,9 @@ test_parse_variants(void)
 	used = mk_tag2(buf, 0x123, 0xD1AD, JBD2_FLAG_LAST_TAG);
 	memcpy(buf + used, test_uuid, 16);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, used + 16, &offset, &target,
-	    &flags, &csum) == 0, "csum2 tag parse");
+	CHECK(jbd2_parse_tag(
+		  &ctx, buf, used + 16, &offset, &target, &flags, &csum) == 0,
+	    "csum2 tag parse");
 	CHECK(target == 0x123, "csum2 tag target");
 	CHECK(flags == JBD2_FLAG_LAST_TAG, "csum2 tag flags");
 	CHECK(csum == 0xD1AD, "csum2 tag checksum");
@@ -271,8 +273,9 @@ test_parse_variants(void)
 	    JBD2_FLAG_ESCAPE | JBD2_FLAG_DELETED);
 	memcpy(buf + used, test_uuid, 16);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, used + 16, &offset, &target,
-	    &flags, &csum) == 0, "csum2-64 tag parse");
+	CHECK(jbd2_parse_tag(
+		  &ctx, buf, used + 16, &offset, &target, &flags, &csum) == 0,
+	    "csum2-64 tag parse");
 	CHECK(target == ((u_int64_t)0x99 << 32 | 0x55667788),
 	    "csum2-64 tag target");
 	CHECK(flags == (JBD2_FLAG_ESCAPE | JBD2_FLAG_DELETED),
@@ -281,11 +284,12 @@ test_parse_variants(void)
 
 	/* csum3 64-bit */
 	setup_ctx(&ctx, JBD2_CSUM_V3, 1);
-	used = mk_tag3(buf, 0xAABBCCDD, 0x11223344, JBD2_FLAG_SAME_UUID,
-	    0xDEADBEEF);
+	used = mk_tag3(
+	    buf, 0xAABBCCDD, 0x11223344, JBD2_FLAG_SAME_UUID, 0xDEADBEEF);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, used, &offset, &target, &flags,
-	    &csum) == 0, "csum3 tag parse");
+	CHECK(jbd2_parse_tag(
+		  &ctx, buf, used, &offset, &target, &flags, &csum) == 0,
+	    "csum3 tag parse");
 	CHECK(target == ((u_int64_t)0x11223344 << 32 | 0xAABBCCDD),
 	    "csum3 tag target");
 	CHECK(flags == JBD2_FLAG_SAME_UUID, "csum3 tag flags");
@@ -297,59 +301,64 @@ static void
 test_parse_truncation(void)
 {
 	struct jbd2_replay_ctx ctx;
-	char buf[64];
-	u_int64_t target;
-	u_int32_t flags, csum, offset;
+	char		       buf[64];
+	u_int64_t	       target;
+	u_int32_t	       flags, csum, offset;
 
 	/* csum3 tag cut off one byte short of the fixed size */
 	setup_ctx(&ctx, JBD2_CSUM_V3, 1);
 	memset(buf, 0, sizeof(buf));
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, 15, &offset, &target, &flags,
-	    &csum) == EINVAL, "csum3 truncated tag rejected");
+	CHECK(jbd2_parse_tag(&ctx, buf, 15, &offset, &target, &flags, &csum) ==
+		EINVAL,
+	    "csum3 truncated tag rejected");
 	CHECK(offset == 0, "csum3 truncated offset unchanged");
 
 	/* csum2 tag with UUID truncated at block end */
 	setup_ctx(&ctx, JBD2_CSUM_V2, 0);
 	memset(buf, 0, sizeof(buf));
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, 10 + 15, &offset, &target,
-	    &flags, &csum) == EINVAL, "csum2 truncated uuid rejected");
+	CHECK(jbd2_parse_tag(&ctx, buf, 10 + 15, &offset, &target, &flags,
+		  &csum) == EINVAL,
+	    "csum2 truncated uuid rejected");
 
 	/* tag start beyond the usable area */
 	offset = 60;
-	CHECK(jbd2_parse_tag(&ctx, buf, 61, &offset, &target, &flags,
-	    &csum) == EINVAL, "tag start beyond buffer rejected");
+	CHECK(jbd2_parse_tag(&ctx, buf, 61, &offset, &target, &flags, &csum) ==
+		EINVAL,
+	    "tag start beyond buffer rejected");
 
 	/* unknown flag bits rejected */
 	setup_ctx(&ctx, JBD2_CSUM_V2, 0);
 	mk_tag2(buf, 1, 0, 0x8000);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, 10, &offset, &target, &flags,
-	    &csum) == EINVAL, "unknown tag flags rejected");
+	CHECK(jbd2_parse_tag(&ctx, buf, 10, &offset, &target, &flags, &csum) ==
+		EINVAL,
+	    "unknown tag flags rejected");
 
 	/* csum3 with nonzero high blocknr but no 64BIT feature */
 	setup_ctx(&ctx, JBD2_CSUM_V3, 0);
 	mk_tag3(buf, 1, 5, JBD2_FLAG_SAME_UUID, 0);
 	offset = 0;
-	CHECK(jbd2_parse_tag(&ctx, buf, 16, &offset, &target, &flags,
-	    &csum) == EINVAL, "tag3 high block without 64BIT rejected");
+	CHECK(jbd2_parse_tag(&ctx, buf, 16, &offset, &target, &flags, &csum) ==
+		EINVAL,
+	    "tag3 high block without 64BIT rejected");
 }
 
 static void
 test_tag_checksum(void)
 {
 	struct jbd2_replay_ctx ctx;
-	uint32_t expected, seq = 0x10203040;
-	uint32_t seq_be = htobe32(seq);
-	uint32_t raw;
-	uint8_t bad[4096];
+	uint32_t	       expected, seq = 0x10203040;
+	uint32_t	       seq_be = htobe32(seq);
+	uint32_t	       raw;
+	uint8_t		       bad[4096];
 
 	/* Seed = raw crc32c(~0, uuid); tag csum = raw crc32c(seed,
 	 * be32 seq, 4096-byte payload).  Reference implementation is
 	 * the independent bitwise crc32c above. */
-	expected = ref_crc32c(ref_crc32c(~0u, test_uuid,
-	    sizeof(test_uuid)), &seq_be, sizeof(seq_be));
+	expected = ref_crc32c(ref_crc32c(~0u, test_uuid, sizeof(test_uuid)),
+	    &seq_be, sizeof(seq_be));
 	expected = ref_crc32c(expected, pattern4096, sizeof(pattern4096));
 
 	/* Independently generated known vector (see
@@ -361,32 +370,34 @@ test_tag_checksum(void)
 	CHECK(raw == expected, "jbd2_tag_csum matches reference");
 
 	/* Verify accepts the right checksum */
-	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096,
-	    sizeof(pattern4096), expected) == 0, "tag csum verify ok");
+	CHECK(jbd2_tag_csum_verify(
+		  &ctx, seq, pattern4096, sizeof(pattern4096), expected) == 0,
+	    "tag csum verify ok");
 
 	/* One-bit payload corruption must be rejected */
 	memcpy(bad, pattern4096, sizeof(bad));
 	bad[1500] ^= 0x01;
-	CHECK(jbd2_tag_csum_verify(&ctx, seq, bad, sizeof(bad),
-	    expected) == EIO, "tag csum corrupted payload rejected");
+	CHECK(
+	    jbd2_tag_csum_verify(&ctx, seq, bad, sizeof(bad), expected) == EIO,
+	    "tag csum corrupted payload rejected");
 
 	/* Corrupted checksum must be rejected */
-	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096,
-	    sizeof(pattern4096), expected ^ 1) == EIO,
+	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096, sizeof(pattern4096),
+		  expected ^ 1) == EIO,
 	    "tag csum corrupted checksum rejected");
 
 	/* Wrong transaction sequence must be rejected */
 	CHECK(jbd2_tag_csum_verify(&ctx, seq + 1, pattern4096,
-	    sizeof(pattern4096), expected) == EIO,
+		  sizeof(pattern4096), expected) == EIO,
 	    "tag csum wrong sequence rejected");
 
 	/* CSUM_V2 stores only the low 16 bits */
 	setup_ctx(&ctx, JBD2_CSUM_V2, 0);
-	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096,
-	    sizeof(pattern4096), expected & 0xFFFF) == 0,
+	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096, sizeof(pattern4096),
+		  expected & 0xFFFF) == 0,
 	    "csum2 low-16 verify ok");
-	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096,
-	    sizeof(pattern4096), (expected & 0xFFFF) ^ 0x400) == EIO,
+	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096, sizeof(pattern4096),
+		  (expected & 0xFFFF) ^ 0x400) == EIO,
 	    "csum2 corrupted checksum rejected");
 
 	/* A different UUID must be rejected (the port seeds from the
@@ -394,29 +405,28 @@ test_tag_checksum(void)
 	setup_ctx(&ctx, JBD2_CSUM_V3, 1);
 	ctx.rc_uuid[0] ^= 0xFF;
 	jbd2_seed_init(&ctx);
-	CHECK(jbd2_tag_csum_verify(&ctx, seq, pattern4096,
-	    sizeof(pattern4096), expected) == EIO,
+	CHECK(jbd2_tag_csum_verify(
+		  &ctx, seq, pattern4096, sizeof(pattern4096), expected) == EIO,
 	    "tag csum wrong uuid rejected");
 }
 
 static void
 test_descriptor_tail(void)
 {
-	struct jbd2_replay_ctx ctx;
-	uint8_t block[4096];
+	struct jbd2_replay_ctx		ctx;
+	uint8_t				block[4096];
 	struct jbd2_journal_block_tail *tail;
-	uint32_t expected, stored;
+	uint32_t			expected, stored;
 
 	fill_block4096(block);
 	/* The checksum covers the block with the tail zeroed. */
 	memset(block + 4096 - 4, 0, 4);
-	expected = ref_crc32c(ref_crc32c(~0u, test_uuid,
-	    sizeof(test_uuid)), block, sizeof(block));
+	expected = ref_crc32c(ref_crc32c(~0u, test_uuid, sizeof(test_uuid)),
+	    block, sizeof(block));
 	CHECK(expected == 0x628E32C7, "descriptor csum known vector");
 
 	setup_ctx(&ctx, JBD2_CSUM_V3, 1);
-	tail = (struct jbd2_journal_block_tail *)(block + 4096 -
-	    sizeof(*tail));
+	tail = (struct jbd2_journal_block_tail *)(block + 4096 - sizeof(*tail));
 	stored = htobe32(expected);
 	memcpy(&tail->t_checksum, &stored, 4);
 	CHECK(jbd2_descr_tail_verify(&ctx, block, 4096) == 0,
@@ -437,10 +447,10 @@ static void
 test_descriptor_stream(void)
 {
 	struct jbd2_replay_ctx ctx;
-	char buf[4096];
-	u_int32_t offset, flags, csum, count = 0;
-	u_int64_t target;
-	size_t off;
+	char		       buf[4096];
+	u_int32_t	       offset, flags, csum, count = 0;
+	u_int64_t	       target;
+	size_t		       off;
 
 	/* Three csum2 tags, first with UUID, LAST_TAG on the third. */
 	setup_ctx(&ctx, JBD2_CSUM_V2, 0);
@@ -449,13 +459,14 @@ test_descriptor_stream(void)
 	memcpy(buf + off, test_uuid, 16);
 	off += 16;
 	off += mk_tag2(buf + off, 200, 0x2222, JBD2_FLAG_SAME_UUID);
-	off += mk_tag2(buf + off, 300, 0x3333,
-	    JBD2_FLAG_SAME_UUID | JBD2_FLAG_LAST_TAG);
+	off += mk_tag2(
+	    buf + off, 300, 0x3333, JBD2_FLAG_SAME_UUID | JBD2_FLAG_LAST_TAG);
 
 	offset = 0;
 	while (offset < off) {
-		CHECK(jbd2_parse_tag(&ctx, buf, off, &offset, &target,
-		    &flags, &csum) == 0, "stream tag parse");
+		CHECK(jbd2_parse_tag(
+			  &ctx, buf, off, &offset, &target, &flags, &csum) == 0,
+		    "stream tag parse");
 		CHECK(target == 100u + 100u * count, "stream tag target");
 		count++;
 		if (flags & JBD2_FLAG_LAST_TAG)
@@ -474,8 +485,8 @@ test_descriptor_stream(void)
 	offset = 0;
 	count = 0;
 	while (offset + jbd2_tag_bytes(&ctx) <= 4096 - 4) {
-		int rc = jbd2_parse_tag(&ctx, buf, 4096 - 4, &offset,
-		    &target, &flags, &csum);
+		int rc = jbd2_parse_tag(
+		    &ctx, buf, 4096 - 4, &offset, &target, &flags, &csum);
 		CHECK(rc == 0, "zero-tail stream parse");
 		count++;
 		if (flags & JBD2_FLAG_LAST_TAG)
@@ -498,30 +509,27 @@ test_feature_check(void)
 	CHECK(jbd2_feature_check(&ctx) == 0, "no features ok");
 
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
-	ctx.rc_features_incompat = 0x80;	/* unknown bit */
+	ctx.rc_features_incompat = 0x80; /* unknown bit */
 	CHECK(jbd2_feature_check(&ctx) == EOPNOTSUPP,
 	    "unknown incompat feature rejected");
 
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
 	ctx.rc_features_incompat = JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT;
-	CHECK(jbd2_feature_check(&ctx) == EOPNOTSUPP,
-	    "async commit rejected");
+	CHECK(jbd2_feature_check(&ctx) == EOPNOTSUPP, "async commit rejected");
 
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
-	ctx.rc_features_incompat = JBD2_FEATURE_INCOMPAT_CSUM_V2 |
-	    JBD2_FEATURE_INCOMPAT_CSUM_V3;
-	CHECK(jbd2_feature_check(&ctx) == EINVAL,
-	    "csum v2+v3 rejected");
+	ctx.rc_features_incompat =
+	    JBD2_FEATURE_INCOMPAT_CSUM_V2 | JBD2_FEATURE_INCOMPAT_CSUM_V3;
+	CHECK(jbd2_feature_check(&ctx) == EINVAL, "csum v2+v3 rejected");
 
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
 	ctx.rc_features_incompat = JBD2_FEATURE_INCOMPAT_CSUM_V2;
 	ctx.rc_features_compat = JBD2_FEATURE_COMPAT_CHECKSUM;
-	CHECK(jbd2_feature_check(&ctx) == EINVAL,
-	    "csum v1 with v2 rejected");
+	CHECK(jbd2_feature_check(&ctx) == EINVAL, "csum v1 with v2 rejected");
 
 	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
-	ctx.rc_features_incompat = JBD2_FEATURE_INCOMPAT_64BIT |
-	    JBD2_FEATURE_INCOMPAT_CSUM_V3;
+	ctx.rc_features_incompat =
+	    JBD2_FEATURE_INCOMPAT_64BIT | JBD2_FEATURE_INCOMPAT_CSUM_V3;
 	CHECK(jbd2_feature_check(&ctx) == 0, "64bit+csum3 ok");
 	CHECK(ctx.rc_csum_mode == JBD2_CSUM_V3, "csum3 mode selected");
 
@@ -546,8 +554,7 @@ main(void)
 	test_feature_check();
 
 	if (failures != 0) {
-		fprintf(stderr, "ext4fs-jbd2-tests: %d failure(s)\n",
-		    failures);
+		fprintf(stderr, "ext4fs-jbd2-tests: %d failure(s)\n", failures);
 		return 1;
 	}
 	printf("ext4fs-jbd2-tests: all tests passed\n");

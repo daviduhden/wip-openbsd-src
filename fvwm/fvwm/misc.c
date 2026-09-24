@@ -12,10 +12,8 @@
  *
  **************************************************************************/
 
-#include "misc.h"
-
-#include <sys/time.h>
 #include <sys/types.h>
+#include <sys/time.h>
 
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
@@ -28,14 +26,15 @@
 #include "config.h"
 #include "fvwm.h"
 #include "menus.h"
+#include "misc.h"
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
 
 FvwmWindow *FocusOnNextTimeStamp = NULL;
 
-char NoName[] = "Untitled";       /* name if no name in XA_WM_NAME */
-char NoClass[] = "NoClass";       /* Class if no res_class in class hints */
+char NoName[] = "Untitled";	  /* name if no name in XA_WM_NAME */
+char NoClass[] = "NoClass";	  /* Class if no res_class in class hints */
 char NoResource[] = "NoResource"; /* Class if no res_name in class hints */
 
 /**************************************************************************
@@ -71,10 +70,10 @@ free_window_names(FvwmWindow *tmp, Bool nukename, Bool nukeicon)
 void
 Destroy(FvwmWindow *Tmp_win)
 {
-	int i;
+	int		   i;
 	extern FvwmWindow *ButtonWindow;
 	extern FvwmWindow *colormap_win;
-	extern Boolean PPosOverride;
+	extern Boolean	   PPosOverride;
 
 	/*
 	 * Warning, this is also called by HandleUnmapNotify; if it ever needs
@@ -208,7 +207,7 @@ int
 flush_expose(Window w)
 {
 	XEvent dummy;
-	int i = 0;
+	int    i = 0;
 
 	while (XCheckTypedWindowEvent(dpy, w, Expose, &dummy))
 		i++;
@@ -226,15 +225,15 @@ flush_expose(Window w)
 void
 RestoreWithdrawnLocation(FvwmWindow *tmp, Bool restart)
 {
-	int a, b, w2, h2;
-	unsigned int mask;
+	int	       a, b, w2, h2;
+	unsigned int   mask;
 	XWindowChanges xwc;
 
 	if (!tmp)
 		return;
 
 	if (XGetGeometry(dpy, tmp->w, &JunkRoot, &xwc.x, &xwc.y, &JunkWidth,
-	    &JunkHeight, &JunkBW, &JunkDepth)) {
+		&JunkHeight, &JunkBW, &JunkDepth)) {
 		XTranslateCoordinates(dpy, tmp->frame, Scr.Root, xwc.x, xwc.y,
 		    &a, &b, &JunkChild);
 		xwc.x = a + tmp->xdiff;
@@ -423,9 +422,9 @@ GetMoveArguments(char *action, int x, int y, int w, int h, int *pFinalX,
     int *pFinalY, Bool *fWarp)
 {
 	char *s1, *s2, *warp;
-	int scrWidth = Scr.MyDisplayWidth;
-	int scrHeight = Scr.MyDisplayHeight;
-	int retval = 0;
+	int   scrWidth = Scr.MyDisplayWidth;
+	int   scrHeight = Scr.MyDisplayHeight;
+	int   retval = 0;
 
 	action = GetNextToken(action, &s1);
 	action = GetNextToken(action, &s2);
@@ -434,13 +433,13 @@ GetMoveArguments(char *action, int x, int y, int w, int h, int *pFinalX,
 
 	if (s1 != NULL && s2 != NULL) {
 		if (GetOnePositionArgument(
-		    s1, x, w, pFinalX, (float)scrWidth / 100, scrWidth) &&
+			s1, x, w, pFinalX, (float)scrWidth / 100, scrWidth) &&
 		    GetOnePositionArgument(
-		    s2, y, h, pFinalY, (float)scrHeight / 100, scrHeight))
+			s2, y, h, pFinalY, (float)scrHeight / 100, scrHeight))
 			retval = 2;
 		else
 			*fWarp = FALSE; /* make sure warping is off for
-			                   interactive moves */
+					   interactive moves */
 	}
 
 	if (s1)
@@ -463,9 +462,9 @@ GetOneMenuPositionArgument(
     char *action, int x, int w, int *pFinalX, float *width_factor)
 {
 	char *token, *orgtoken, *naction;
-	char c;
-	int val;
-	int chars;
+	char  c;
+	int   val;
+	int   chars;
 	float factor = (float)w / 100;
 
 	naction = GetNextToken(action, &token);
@@ -523,12 +522,12 @@ char *
 GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
     MenuOptions *pops)
 {
-	char *tok = NULL, *naction = action, *taction;
-	int x, y, button;
+	char	    *tok = NULL, *naction = action, *taction;
+	int	     x, y, button;
 	unsigned int width, height;
-	Window context_window = 0;
-	Bool fHasContext, fUseItemOffset;
-	Bool fValidPosHints = fLastMenuPosHintsValid;
+	Window	     context_window = 0;
+	Bool	     fHasContext, fUseItemOffset;
+	Bool	     fValidPosHints = fLastMenuPosHintsValid;
 
 	fLastMenuPosHintsValid = FALSE;
 	if (pops == NULL) {
@@ -647,9 +646,9 @@ GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
 
 		if (!context_window || !fHasContext ||
 		    !XGetGeometry(dpy, context_window, &JunkRoot, &JunkX,
-		    &JunkY, &width, &height, &JunkBW, &JunkDepth) ||
+			&JunkY, &width, &height, &JunkBW, &JunkDepth) ||
 		    !XTranslateCoordinates(dpy, context_window, Scr.Root, 0, 0,
-		    &x, &y, &JunkChild)) {
+			&x, &y, &JunkChild)) {
 			/* now window or could not get geometry */
 			XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &x,
 			    &y, &JunkX, &JunkY, &JunkMask);
@@ -733,8 +732,8 @@ GetMenuOptions(char *action, Window w, FvwmWindow *tmp_win, MenuItem *mi,
 void
 WaitForButtonsUp(void)
 {
-	Bool AllUp = False;
-	XEvent JunkEvent;
+	Bool	     AllUp = False;
+	XEvent	     JunkEvent;
 	unsigned int mask;
 
 	while (!AllUp) {
@@ -742,8 +741,9 @@ WaitForButtonsUp(void)
 		XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &JunkX,
 		    &JunkY, &JunkX, &JunkY, &mask);
 
-		if ((mask & (Button1Mask | Button2Mask | Button3Mask |
-		    Button4Mask | Button5Mask)) == 0)
+		if ((mask &
+			(Button1Mask | Button2Mask | Button3Mask | Button4Mask |
+			    Button5Mask)) == 0)
 			AllUp = True;
 	}
 	XSync(dpy, 0);
@@ -763,7 +763,7 @@ WaitForButtonsUp(void)
 Bool
 GrabEm(int cursor)
 {
-	int i = 0, val = 0;
+	int	     i = 0, val = 0;
 	unsigned int mask;
 
 	XSync(dpy, 0);
@@ -777,8 +777,8 @@ GrabEm(int cursor)
 	    PointerMotionMask | EnterWindowMask | LeaveWindowMask;
 	while ((i < 1000) &&
 	    (val = XGrabPointer(dpy, Scr.Root, True, mask, GrabModeAsync,
-	     GrabModeAsync, Scr.Root, Scr.FvwmCursors[cursor],
-	     CurrentTime) != GrabSuccess)) {
+		       GrabModeAsync, Scr.Root, Scr.FvwmCursors[cursor],
+		       CurrentTime) != GrabSuccess)) {
 		i++;
 		/* If you go too fast, other windows may not get a change to
 		 * release any grab that they have. */
@@ -851,7 +851,7 @@ void
 UnmapIt(FvwmWindow *t)
 {
 	XWindowAttributes winattrs;
-	unsigned long eventMask;
+	unsigned long	  eventMask;
 	/*
 	 * Prevent the receipt of an UnmapNotify, since that would
 	 * cause a transition to the Withdrawn state.
@@ -894,7 +894,7 @@ Bool
 IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor)
 {
 	FvwmWindow *p;
-	Window tw;
+	Window	    tw;
 
 	if (t == ancestor)
 		return False;
@@ -921,13 +921,13 @@ IsTransientDescendantOf(FvwmWindow *t, FvwmWindow *ancestor)
 void
 RaiseWindow(FvwmWindow *t)
 {
-	FvwmWindow *t2;
-	int count, i;
-	Window *wins;
+	FvwmWindow    *t2;
+	int	       count, i;
+	Window	      *wins;
 	XWindowChanges changes;
-	FvwmWindow *t1;
-	FvwmWindow **FvwmTopwins = NULL;
-	int j, count2;
+	FvwmWindow    *t1;
+	FvwmWindow   **FvwmTopwins = NULL;
+	int	       j, count2;
 
 	memset((void *)&changes, '\0', sizeof(changes));
 	/* raise the target, at least */
@@ -974,8 +974,7 @@ RaiseWindow(FvwmWindow *t)
 #ifndef DONT_RAISE_TRANSIENTS
 	for (t2 = Scr.FvwmRoot.stack_next; t2 != &Scr.FvwmRoot;
 	    t2 = t2->stack_next) {
-		if (IsTransientDescendantOf(t2, t) &&
-		    (!(t2->flags & ONTOP))) {
+		if (IsTransientDescendantOf(t2, t) && (!(t2->flags & ONTOP))) {
 			wins[i++] = t2->frame;
 			FvwmTopwins[j++] = t2;
 			if ((t2->flags & ICONIFIED) &&
@@ -1023,10 +1022,10 @@ RaiseWindow(FvwmWindow *t)
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next->icon_w;
 				} else if (Scr.FvwmRoot.stack_next
-				    ->icon_pixmap_w) {
+					       ->icon_pixmap_w) {
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next
-					    ->icon_pixmap_w;
+						->icon_pixmap_w;
 				} else {
 					changes.sibling =
 					    Scr.FvwmRoot.stack_next->frame;
@@ -1125,7 +1124,7 @@ HandleHardFocus(FvwmWindow *t)
 void
 fvwm_msg(int type, const char *id, const char *msg, ...)
 {
-	char *typestr;
+	char   *typestr;
 	va_list args1, args2;
 
 	switch (type) {
@@ -1153,7 +1152,7 @@ fvwm_msg(int type, const char *id, const char *msg, ...)
 
 	if (type == ERR) {
 		char tmp[1024]; /* I hate to use a fixed length but this will do
-		                   for now */
+				   for now */
 		snprintf(tmp, sizeof(tmp), "[FVWM][%s]: %s ", id, typestr);
 		vsnprintf(
 		    tmp + strlen(tmp), sizeof(tmp) - strlen(tmp), msg, args2);
@@ -1177,15 +1176,15 @@ void
 CoerceEnterNotifyOnCurrentWindow(void)
 {
 	extern FvwmWindow *Tmp_win; /* from events.c */
-	Window child, root;
-	int root_x, root_y;
-	int win_x, win_y;
+	Window		   child, root;
+	int		   root_x, root_y;
+	int		   win_x, win_y;
 	Bool f = XQueryPointer(dpy, Scr.Root, &root, &child, &root_x, &root_y,
 	    &win_x, &win_y, &JunkMask);
 	if (f && child != None) {
 		Event.xany.window = child;
 		if (XFindContext(dpy, child, FvwmContext,
-		    (caddr_t *)&Tmp_win) == XCNOENT)
+			(caddr_t *)&Tmp_win) == XCNOENT)
 			Tmp_win = NULL;
 		HandleEnterNotify();
 		Tmp_win = None;

@@ -5,7 +5,7 @@
 #define EXT4FS_TEST_UCRED_H
 
 struct ucred {
-	int	c_dummy;
+	int c_dummy;
 };
 
 #endif /* EXT4FS_TEST_UCRED_H */

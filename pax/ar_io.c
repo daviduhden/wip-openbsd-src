@@ -35,10 +35,10 @@
  * SUCH DAMAGE.
  */
 
+#include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/mtio.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <err.h>
@@ -50,38 +50,38 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * Routines which deal directly with the archive I/O device/file.
  */
 
-#define DMOD 0666         /* default mode of created archives */
+#define DMOD 0666	  /* default mode of created archives */
 #define EXT_MODE O_RDONLY /* open mode for list/extract */
 #define AR_MODE (O_WRONLY | O_CREAT | O_TRUNC) /* mode for archive */
-#define APP_MODE O_RDWR                        /* mode for append */
-#define STDO "<STDOUT>"                        /* pseudo name for stdout */
-#define STDN "<STDIN>"                         /* pseudo name for stdin */
-static int arfd = -1;                          /* archive file descriptor */
-static int artyp = ISREG; /* archive type: file/FIFO/tape */
-static int arvol = 1;     /* archive volume number */
-static int lstrval = -1;  /* return value from last i/o */
-static int io_ok;         /* i/o worked on volume after resync */
-static int did_io;        /* did i/o ever occur on volume? */
-static int done;          /* set via tty termination */
-static struct stat arsb;  /* stat of archive device at open */
-static int invld_rec;     /* tape has out of spec record size */
-static int wr_trail = 1;  /* trailer was rewritten in append */
-static int can_unlnk = 0; /* do we unlink null archives?  */
-const char *arcname;      /* printable name of archive */
-const char *gzip_program; /* name of gzip program */
-static pid_t zpid = -1;   /* pid of child process */
-int force_one_volume;     /* 1 if we ignore volume changes */
+#define APP_MODE O_RDWR			       /* mode for append */
+#define STDO "<STDOUT>"			       /* pseudo name for stdout */
+#define STDN "<STDIN>"			       /* pseudo name for stdin */
+static int	   arfd = -1;		       /* archive file descriptor */
+static int	   artyp = ISREG;    /* archive type: file/FIFO/tape */
+static int	   arvol = 1;	     /* archive volume number */
+static int	   lstrval = -1;     /* return value from last i/o */
+static int	   io_ok;	     /* i/o worked on volume after resync */
+static int	   did_io;	     /* did i/o ever occur on volume? */
+static int	   done;	     /* set via tty termination */
+static struct stat arsb;	     /* stat of archive device at open */
+static int	   invld_rec;	     /* tape has out of spec record size */
+static int	   wr_trail = 1;     /* trailer was rewritten in append */
+static int	   can_unlnk = 0;    /* do we unlink null archives?  */
+const char	  *arcname;	     /* printable name of archive */
+const char	  *gzip_program;     /* name of gzip program */
+static pid_t	   zpid = -1;	     /* pid of child process */
+int		   force_one_volume; /* 1 if we ignore volume changes */
 
-static int get_phys(void);
+static int	get_phys(void);
 extern sigset_t s_mask;
-static void ar_start_gzip(int, const char *, int);
+static void	ar_start_gzip(int, const char *, int);
 
 /*
  * ar_open()
@@ -416,7 +416,7 @@ ar_close(int in_sig)
 void
 ar_drain(void)
 {
-	int res;
+	int  res;
 	char drbuf[MAXBLK];
 
 	/*
@@ -595,7 +595,7 @@ int
 ar_write(char *buf, int bsz)
 {
 	ssize_t res;
-	off_t cpos;
+	off_t	cpos;
 
 	/*
 	 * do not allow pax to create a "bad" archive. Once a write fails on
@@ -714,9 +714,9 @@ ar_write(char *buf, int bsz)
 int
 ar_rdsync(void)
 {
-	long fsbz;
-	off_t cpos;
-	off_t mpos;
+	long	    fsbz;
+	off_t	    cpos;
+	off_t	    mpos;
 	struct mtop mb;
 
 	/*
@@ -859,9 +859,9 @@ ar_fow(off_t sksz, off_t *skipped)
 int
 ar_rev(off_t sksz)
 {
-	off_t cpos;
+	off_t	    cpos;
 	struct mtop mb;
-	int phyblk;
+	int	    phyblk;
 
 	/*
 	 * make sure we do not have try to reverse on a flawed archive
@@ -992,11 +992,11 @@ ar_rev(off_t sksz)
 static int
 get_phys(void)
 {
-	int padsz = 0;
-	int res;
-	int phyblk;
+	int	    padsz = 0;
+	int	    res;
+	int	    phyblk;
 	struct mtop mb;
-	char scbuf[MAXBLK];
+	char	    scbuf[MAXBLK];
 
 	/*
 	 * move to the file mark, and then back up one record and read it.
@@ -1105,9 +1105,9 @@ get_phys(void)
 int
 ar_next(void)
 {
-	char buf[PAXPATHLEN + 2];
+	char	   buf[PAXPATHLEN + 2];
 	static int freeit = 0;
-	sigset_t o_mask;
+	sigset_t   o_mask;
 
 	/*
 	 * WE MUST CLOSE THE DEVICE. A lot of devices must see last close, (so
@@ -1254,7 +1254,7 @@ ar_next(void)
 void
 ar_start_gzip(int fd, const char *path, int wr)
 {
-	int fds[2];
+	int	    fds[2];
 	const char *gzip_flags;
 
 	if (pipe(fds) == -1)
@@ -1284,7 +1284,7 @@ ar_start_gzip(int fd, const char *path, int wr)
 				promises = "stdio rpath getpw tape proc exec";
 			else
 				promises = "stdio rpath wpath cpath fattr "
-				    "dpath getpw tape proc exec";
+					   "dpath getpw tape proc exec";
 
 			if (pledge(promises, NULL) == -1)
 				err(1, "pledge");

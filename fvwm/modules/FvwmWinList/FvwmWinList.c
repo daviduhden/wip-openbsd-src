@@ -41,16 +41,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 #endif
-
-#include <ctype.h>
-#include <unistd.h>
 
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
@@ -58,7 +55,9 @@
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
+#include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "../../fvwm/module.h"
 #include "ButtonArray.h"
@@ -66,8 +65,8 @@
 #include "FvwmWinList.h"
 #include "List.h"
 
-#define GRAB_EVENTS							\
-	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |	\
+#define GRAB_EVENTS                                                            \
+	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |              \
 	    EnterWindowMask | LeaveWindowMask)
 
 #define SomeButtonDown(a)                                                      \
@@ -75,39 +74,39 @@
 
 /* File type information */
 FILE *console;
-int fd_width;
-int Fvwm_fd[2];
-int x_fd;
+int   fd_width;
+int   Fvwm_fd[2];
+int   x_fd;
 
 /* X related things */
 Display *dpy;
-Window Root, win;
-int screen, d_depth, ScreenWidth, ScreenHeight;
-Pixel back[MAX_COLOUR_SETS], fore[MAX_COLOUR_SETS];
+Window	 Root, win;
+int	 screen, d_depth, ScreenWidth, ScreenHeight;
+Pixel	 back[MAX_COLOUR_SETS], fore[MAX_COLOUR_SETS];
 GC graph[MAX_COLOUR_SETS], shadow[MAX_COLOUR_SETS], hilite[MAX_COLOUR_SETS];
 GC background[MAX_COLOUR_SETS];
 XFontStruct *ButtonFont;
-int fontheight;
-static Atom wm_del_win;
-Atom MwmAtom = None;
+int	     fontheight;
+static Atom  wm_del_win;
+Atom	     MwmAtom = None;
 
 /* Module related information */
 char *Module;
-int WindowIsUp = 0, win_width = 5, win_height = 5, win_grav, win_x, win_y,
-    win_title, win_border;
-int Clength, Transient = 0, Pressed = 0, ButPressed, Checked = 0;
-int MinWidth = DEFMINWIDTH, MaxWidth = DEFMAXWIDTH;
+int   WindowIsUp = 0, win_width = 5, win_height = 5, win_grav, win_x, win_y,
+      win_title, win_border;
+int   Clength, Transient = 0, Pressed = 0, ButPressed, Checked = 0;
+int   MinWidth = DEFMINWIDTH, MaxWidth = DEFMAXWIDTH;
 ButtonArray buttons;
-List windows;
+List	    windows;
 char *ClickAction[3] = {"Iconify -1,Raise", "Iconify", "Lower"}, *EnterAction,
      *BackColor[MAX_COLOUR_SETS] = {"white"},
      *ForeColor[MAX_COLOUR_SETS] = {"black"}, *geometry = "";
 char *font_string = "fixed";
-int UseSkipList = 0, Anchor = 1, UseIconNames = 0, LeftJustify = 0,
-    TruncateLeft = 0, ShowFocus = 1;
+int   UseSkipList = 0, Anchor = 1, UseIconNames = 0, LeftJustify = 0,
+      TruncateLeft = 0, ShowFocus = 1;
 
 long CurrentDesk = 0;
-int ShowCurrentDesk = 0;
+int  ShowCurrentDesk = 0;
 
 static volatile sig_atomic_t isTerminated = False;
 
@@ -213,15 +212,15 @@ main(int argc, char **argv)
 	/* Request a list of all windows,
 	 * wait for ConfigureWindow packets */
 
-	SetMessageMask(Fvwm_fd, M_CONFIGURE_WINDOW | M_RES_CLASS | M_RES_NAME |
-	    M_ADD_WINDOW | M_DESTROY_WINDOW |
-	    M_ICON_NAME | M_DEICONIFY | M_ICONIFY |
-	    M_END_WINDOWLIST | M_NEW_DESK | M_NEW_PAGE |
-	    M_FOCUS_CHANGE | M_WINDOW_NAME |
+	SetMessageMask(Fvwm_fd,
+	    M_CONFIGURE_WINDOW | M_RES_CLASS | M_RES_NAME | M_ADD_WINDOW |
+		M_DESTROY_WINDOW | M_ICON_NAME | M_DEICONIFY | M_ICONIFY |
+		M_END_WINDOWLIST | M_NEW_DESK | M_NEW_PAGE | M_FOCUS_CHANGE |
+		M_WINDOW_NAME |
 #ifdef MINI_ICONS
-	    M_MINI_ICON |
+		M_MINI_ICON |
 #endif
-	    M_STRING);
+		M_STRING);
 
 	SendFvwmPipe("Send_WindowList", 0);
 
@@ -252,8 +251,7 @@ MainEventLoop(void)
 		 * having one fewer select statements
 		 */
 		XFlush(dpy);
-		if (select(fd_width, &readset, NULL, NULL,
-		    NULL) > 0) {
+		if (select(fd_width, &readset, NULL, NULL, NULL) > 0) {
 			if (FD_ISSET(x_fd, &readset) || XPending(dpy))
 				LoopOnEvents();
 			if (FD_ISSET(Fvwm_fd[1], &readset))
@@ -287,9 +285,9 @@ ReadFvwmPipe(void)
 void
 ProcessMessage(unsigned long type, unsigned long *body)
 {
-	int redraw = 0, i;
-	long flags;
-	char *name, *string;
+	int	   redraw = 0, i;
+	long	   flags;
+	char	  *name, *string;
 	static int current_focus = -1;
 
 	FvwmPicture p;
@@ -376,7 +374,7 @@ ProcessMessage(unsigned long type, unsigned long *body)
 			redraw = 1;
 		if (i != current_focus || (flags & ICONIFIED))
 			if (UpdateButtonSet(
-			    &buttons, i, (flags & ICONIFIED) ? 1 : 0) != -1)
+				&buttons, i, (flags & ICONIFIED) ? 1 : 0) != -1)
 				redraw = 1;
 		free(name);
 		break;
@@ -417,7 +415,7 @@ ProcessMessage(unsigned long type, unsigned long *body)
 void
 SendFvwmPipe(char *message, unsigned long window)
 {
-	int w;
+	int   w;
 	char *hold, *temp, *temp_msg;
 
 	hold = message;
@@ -517,7 +515,7 @@ ConsoleMessage(const char *fmt, ...)
 	(void)fmt;
 #ifndef NO_CONSOLE
 	va_list args;
-	FILE *filep;
+	FILE   *filep;
 
 	if (console == NULL)
 		filep = stderr;
@@ -558,79 +556,79 @@ ParseConfig(void)
 	while (tline != (char *)0) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline, CatString3(Module, "Font", ""),
-			    Clength + 4) == 0)
+				Clength + 4) == 0)
 				CopyString(&font_string, &tline[Clength + 4]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "Fore", ""),
-			    Clength + 4) == 0)
+				     CatString3(Module, "Fore", ""),
+				     Clength + 4) == 0)
 				CopyString(&ForeColor[0], &tline[Clength + 4]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "IconFore", ""),
-			    Clength + 8) == 0)
+				     CatString3(Module, "IconFore", ""),
+				     Clength + 8) == 0)
 				CopyString(&ForeColor[1], &tline[Clength + 8]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "FocusFore", ""),
-			    Clength + 9) == 0) {
+				     CatString3(Module, "FocusFore", ""),
+				     Clength + 9) == 0) {
 				CopyString(&ForeColor[2], &tline[Clength + 9]);
 				CopyString(&ForeColor[3], &tline[Clength + 9]);
 			} else if (strncasecmp(tline,
-			    CatString3(Module, "Geometry", ""),
-			    Clength + 8) == 0)
+				       CatString3(Module, "Geometry", ""),
+				       Clength + 8) == 0)
 				CopyString(&geometry, &tline[Clength + 8]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "Back", ""),
-			    Clength + 4) == 0)
+				     CatString3(Module, "Back", ""),
+				     Clength + 4) == 0)
 				CopyString(&BackColor[0], &tline[Clength + 4]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "IconBack", ""),
-			    Clength + 8) == 0)
+				     CatString3(Module, "IconBack", ""),
+				     Clength + 8) == 0)
 				CopyString(&BackColor[1], &tline[Clength + 8]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "FocusBack", ""),
-			    Clength + 9) == 0) {
+				     CatString3(Module, "FocusBack", ""),
+				     Clength + 9) == 0) {
 				CopyString(&BackColor[2], &tline[Clength + 9]);
 				CopyString(&BackColor[3], &tline[Clength + 9]);
 			} else if (strncasecmp(tline,
-			    CatString3(Module, "NoAnchor", ""),
-			    Clength + 8) == 0)
+				       CatString3(Module, "NoAnchor", ""),
+				       Clength + 8) == 0)
 				Anchor = 0;
 			else if (strncasecmp(tline,
-			    CatString3(Module, "Action", ""),
-			    Clength + 6) == 0)
+				     CatString3(Module, "Action", ""),
+				     Clength + 6) == 0)
 				LinkAction(&tline[Clength + 6]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "UseSkipList", ""),
-			    Clength + 11) == 0)
+				     CatString3(Module, "UseSkipList", ""),
+				     Clength + 11) == 0)
 				UseSkipList = 1;
 			else if (strncasecmp(tline,
-			    CatString3(Module, "UseIconNames", ""),
-			    Clength + 12) == 0)
+				     CatString3(Module, "UseIconNames", ""),
+				     Clength + 12) == 0)
 				UseIconNames = 1;
 			else if (strncasecmp(tline,
-			    CatString3(Module, "ShowCurrentDesk", ""),
-			    Clength + 15) == 0)
+				     CatString3(Module, "ShowCurrentDesk", ""),
+				     Clength + 15) == 0)
 				ShowCurrentDesk = 1;
 			else if (strncasecmp(tline,
-			    CatString3(Module, "LeftJustify", ""),
-			    Clength + 11) == 0)
+				     CatString3(Module, "LeftJustify", ""),
+				     Clength + 11) == 0)
 				LeftJustify = 1;
 			else if (strncasecmp(tline,
-			    CatString3(Module, "TruncateLeft", ""),
-			    Clength + 12) == 0)
+				     CatString3(Module, "TruncateLeft", ""),
+				     Clength + 12) == 0)
 				TruncateLeft = 1;
 			else if (strncasecmp(tline,
-			    CatString3(Module, "MinWidth", ""),
-			    Clength + 8) == 0)
-				MinWidth = FvwmParseInteger(&tline[Clength +
-				    8]);
+				     CatString3(Module, "MinWidth", ""),
+				     Clength + 8) == 0)
+				MinWidth =
+				    FvwmParseInteger(&tline[Clength + 8]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "MaxWidth", ""),
-			    Clength + 8) == 0)
-				MaxWidth = FvwmParseInteger(&tline[Clength +
-				    8]);
+				     CatString3(Module, "MaxWidth", ""),
+				     Clength + 8) == 0)
+				MaxWidth =
+				    FvwmParseInteger(&tline[Clength + 8]);
 			else if (strncasecmp(tline,
-			    CatString3(Module, "DontDepressFocus", ""),
-			    Clength + 16) == 0)
+				     CatString3(Module, "DontDepressFocus", ""),
+				     Clength + 16) == 0)
 				ShowFocus = 0;
 		}
 		GetConfigLine(Fvwm_fd, &tline);
@@ -643,11 +641,11 @@ ParseConfig(void)
 void
 LoopOnEvents(void)
 {
-	int num;
-	char buffer[10];
-	XEvent Event;
-	Window dummyroot, dummychild;
-	int x, x1, y, y1;
+	int	     num;
+	char	     buffer[10];
+	XEvent	     Event;
+	Window	     dummyroot, dummychild;
+	int	     x, x1, y, y1;
 	unsigned int dummy1;
 
 	if (Transient && !Checked) {
@@ -674,10 +672,8 @@ LoopOnEvents(void)
 				if (num != -1) {
 					SendFvwmPipe(
 					    ClickAction[(Transient) ?
-					    0 :
-					    Event.xbutton
-					    .button -
-					    1],
+						    0 :
+						    Event.xbutton.button - 1],
 					    ItemID(&windows, num));
 					SwitchButton(&buttons, num);
 				}
@@ -763,14 +759,14 @@ LoopOnEvents(void)
 static Window
 find_frame_window(Window win, int *off_x, int *off_y)
 {
-	Window root, parent, *junkw;
-	int junki;
+	Window		  root, parent, *junkw;
+	int		  junki;
 	XWindowAttributes attr;
 
 	while (1) {
 		junkw = NULL;
 		if (XQueryTree(dpy, win, &root, &parent, &junkw,
-		    (unsigned int *)&junki) &&
+			(unsigned int *)&junki) &&
 		    junkw)
 			XFree(junkw);
 		if (parent == root)
@@ -790,8 +786,8 @@ find_frame_window(Window win, int *off_x, int *off_y)
 void
 AdjustWindow(void)
 {
-	int new_width = 0, new_height = 0, tw, i, total, off_x, off_y;
-	char *temp;
+	int    new_width = 0, new_height = 0, tw, i, total, off_x, off_y;
+	char  *temp;
 	Window frame;
 	XWindowAttributes win_attr, frame_attr;
 
@@ -861,7 +857,7 @@ AdjustWindow(void)
 char *
 makename(const char *string, long flags)
 {
-	char *ptr;
+	char  *ptr;
 	size_t name_len = strlen(string);
 	size_t extra = (flags & ICONIFIED) ? 2 : 1;
 	ptr = xmalloc(name_len + extra);
@@ -900,13 +896,13 @@ LinkAction(char *string)
 void
 MakeMeWindow(void)
 {
-	XSizeHints hints;
-	XGCValues gcval;
+	XSizeHints    hints;
+	XGCValues     gcval;
 	unsigned long gcmask;
-	unsigned int dummy1, dummy2;
-	int x, y, ret, count;
-	Window dummyroot, dummychild;
-	int i;
+	unsigned int  dummy1, dummy2;
+	int	      x, y, ret, count;
+	Window	      dummyroot, dummychild;
+	int	      i;
 
 	if ((count = ItemCountD(&windows)) == 0 && Transient)
 		exit(0);
@@ -986,9 +982,9 @@ MakeMeWindow(void)
 		XGrabButton(dpy, 3, AnyModifier, win, True, GRAB_EVENTS,
 		    GrabModeAsync, GrabModeAsync, None, None);
 		SetMwmHints(MWM_DECOR_ALL | MWM_DECOR_RESIZEH |
-		    MWM_DECOR_MAXIMIZE | MWM_DECOR_MINIMIZE,
+			MWM_DECOR_MAXIMIZE | MWM_DECOR_MINIMIZE,
 		    MWM_FUNC_ALL | MWM_FUNC_RESIZE | MWM_FUNC_MAXIMIZE |
-		    MWM_FUNC_MINIMIZE,
+			MWM_FUNC_MINIMIZE,
 		    MWM_INPUT_MODELESS);
 	} else {
 		SetMwmHints(0, MWM_FUNC_ALL, MWM_INPUT_MODELESS);
@@ -1032,7 +1028,7 @@ MakeMeWindow(void)
 
 	if (Transient) {
 		if (XGrabPointer(dpy, win, True, GRAB_EVENTS, GrabModeAsync,
-		    GrabModeAsync, None, None, CurrentTime) != GrabSuccess)
+			GrabModeAsync, None, None, CurrentTime) != GrabSuccess)
 			exit(1);
 		XQueryPointer(dpy, Root, &dummyroot, &dummychild, &hints.x,
 		    &hints.y, &x, &y, &dummy1);

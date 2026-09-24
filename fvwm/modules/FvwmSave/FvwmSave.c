@@ -8,8 +8,6 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#include "FvwmSave.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -26,18 +24,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../../fvwm/module.h"
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "../../fvwm/module.h"
+#include "FvwmSave.h"
+#include "config.h"
 
 char *MyName;
-int fd[2];
+int   fd[2];
 
 struct list *list_root = NULL;
 
 Display *dpy; /* which display are we talking to */
-int ScreenWidth, ScreenHeight;
-int screen;
+int	 ScreenWidth, ScreenHeight;
+int	 screen;
 
 long Vx, Vy;
 
@@ -107,7 +106,7 @@ void
 Loop(int *fd)
 {
 	unsigned long header[HEADER_SIZE], *body;
-	int count;
+	int	      count;
 
 	unveil_home_write("FvwmSave");
 	unveil(NULL, NULL);
@@ -275,19 +274,19 @@ void
 do_save(void)
 {
 	struct list *t;
-	char tname[200], loc[30];
-	FILE *out;
-	char **command_list;
-	int dwidth, dheight, xtermline = 0;
-	int x1, x2, y1, y2, i, command_count;
-	long tVx, tVy;
+	char	     tname[200], loc[30];
+	FILE	    *out;
+	char	   **command_list;
+	int	     dwidth, dheight, xtermline = 0;
+	int	     x1, x2, y1, y2, i, command_count;
+	long	     tVx, tVy;
 
 	snprintf(tname, sizeof(tname), "%s/new.xinitrc",
 	    getenv("HOME") ? getenv("HOME") : ".");
 	out = fopen(tname, "w+");
 	if (out == NULL) {
-		fprintf(stderr, "%s: couldn't open %s for writing\n",
-		    MyName, tname);
+		fprintf(stderr, "%s: couldn't open %s for writing\n", MyName,
+		    tname);
 		return;
 	}
 	for (t = list_root; t != NULL; t = t->next) {

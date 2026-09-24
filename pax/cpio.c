@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <limits.h>
 #include <stdio.h>
@@ -44,9 +44,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "cpio.h"
 #include "extern.h"
+#include "pax.h"
 
 static int rd_nm(ARCHD *, int);
 static int rd_ln_nm(ARCHD *);
@@ -274,9 +274,9 @@ cpio_id(char *blk, int size)
 int
 cpio_rd(ARCHD *arcn, char *buf)
 {
-	int nsz;
+	int		   nsz;
 	unsigned long long val;
-	HD_CPIO *hd;
+	HD_CPIO		  *hd;
 
 	/*
 	 * check that this is a valid header, if not return -1
@@ -381,8 +381,8 @@ int
 cpio_wr(ARCHD *arcn)
 {
 	HD_CPIO *hd;
-	int nsz;
-	char hdblk[sizeof(HD_CPIO)];
+	int	 nsz;
+	char	 hdblk[sizeof(HD_CPIO)];
 
 	/*
 	 * check and repair truncated device and inode fields in the header
@@ -404,7 +404,7 @@ cpio_wr(ARCHD *arcn)
 		 * set data size for file data
 		 */
 		if (ull_asc(arcn->sb.st_size, hd->c_filesize,
-		    sizeof(hd->c_filesize), OCT)) {
+			sizeof(hd->c_filesize), OCT)) {
 			paxwarn(1, "File is too large for cpio format %s",
 			    arcn->org_name);
 			return (1);
@@ -415,7 +415,7 @@ cpio_wr(ARCHD *arcn)
 		 * set data size to hold link name
 		 */
 		if (ul_asc(arcn->ln_nlen, hd->c_filesize,
-		    sizeof(hd->c_filesize), OCT))
+			sizeof(hd->c_filesize), OCT))
 			goto out;
 		break;
 	default:
@@ -439,7 +439,7 @@ cpio_wr(ARCHD *arcn)
 	    ul_asc(arcn->sb.st_nlink, hd->c_nlink, sizeof(hd->c_nlink), OCT) ||
 	    ul_asc(arcn->sb.st_rdev, hd->c_rdev, sizeof(hd->c_rdev), OCT) ||
 	    ull_asc(arcn->sb.st_mtime < 0 ? 0 : arcn->sb.st_mtime, hd->c_mtime,
-	    sizeof(hd->c_mtime), OCT) ||
+		sizeof(hd->c_mtime), OCT) ||
 	    ul_asc(nsz, hd->c_namesize, sizeof(hd->c_namesize), OCT))
 		goto out;
 
@@ -547,9 +547,9 @@ int
 vcpio_rd(ARCHD *arcn, char *buf)
 {
 	HD_VCPIO *hd;
-	dev_t devminor;
-	dev_t devmajor;
-	int nsz;
+	dev_t	  devminor;
+	dev_t	  devmajor;
+	int	  nsz;
 
 	/*
 	 * during the id phase it was determined if we were using CRC, use the
@@ -673,9 +673,9 @@ crc_stwr(void)
 int
 vcpio_wr(ARCHD *arcn)
 {
-	HD_VCPIO *hd;
+	HD_VCPIO    *hd;
 	unsigned int nsz;
-	char hdblk[sizeof(HD_VCPIO)];
+	char	     hdblk[sizeof(HD_VCPIO)];
 
 	/*
 	 * check and repair truncated device and inode fields in the cpio
@@ -712,7 +712,7 @@ vcpio_wr(ARCHD *arcn)
 		 */
 		arcn->pad = VCPIO_PAD(arcn->sb.st_size);
 		if (ull_asc(arcn->sb.st_size, hd->c_filesize,
-		    sizeof(hd->c_filesize), HEX)) {
+			sizeof(hd->c_filesize), HEX)) {
 			paxwarn(1, "File is too large for sv4cpio format %s",
 			    arcn->org_name);
 			return (1);
@@ -725,7 +725,7 @@ vcpio_wr(ARCHD *arcn)
 		 */
 		arcn->pad = 0;
 		if (ul_asc(arcn->ln_nlen, hd->c_filesize,
-		    sizeof(hd->c_filesize), HEX))
+			sizeof(hd->c_filesize), HEX))
 			goto out;
 		break;
 	default:
@@ -746,14 +746,14 @@ vcpio_wr(ARCHD *arcn)
 	    ul_asc(arcn->sb.st_uid, hd->c_uid, sizeof(hd->c_uid), HEX) ||
 	    ul_asc(arcn->sb.st_gid, hd->c_gid, sizeof(hd->c_gid), HEX) ||
 	    ul_asc(arcn->sb.st_mtime < 0 ? 0 : arcn->sb.st_mtime, hd->c_mtime,
-	    sizeof(hd->c_mtime), HEX) ||
+		sizeof(hd->c_mtime), HEX) ||
 	    ul_asc(arcn->sb.st_nlink, hd->c_nlink, sizeof(hd->c_nlink), HEX) ||
 	    ul_asc(MAJOR(arcn->sb.st_dev), hd->c_maj, sizeof(hd->c_maj), HEX) ||
 	    ul_asc(MINOR(arcn->sb.st_dev), hd->c_min, sizeof(hd->c_min), HEX) ||
 	    ul_asc(
-	    MAJOR(arcn->sb.st_rdev), hd->c_rmaj, sizeof(hd->c_maj), HEX) ||
+		MAJOR(arcn->sb.st_rdev), hd->c_rmaj, sizeof(hd->c_maj), HEX) ||
 	    ul_asc(
-	    MINOR(arcn->sb.st_rdev), hd->c_rmin, sizeof(hd->c_min), HEX) ||
+		MINOR(arcn->sb.st_rdev), hd->c_rmin, sizeof(hd->c_min), HEX) ||
 	    ul_asc(nsz, hd->c_namesize, sizeof(hd->c_namesize), HEX))
 		goto out;
 
@@ -844,7 +844,7 @@ int
 bcpio_rd(ARCHD *arcn, char *buf)
 {
 	HD_BCPIO *hd;
-	int nsz;
+	int	  nsz;
 
 	/*
 	 * check the header
@@ -960,11 +960,11 @@ int
 bcpio_wr(ARCHD *arcn)
 {
 	HD_BCPIO *hd;
-	int nsz;
-	char hdblk[sizeof(HD_BCPIO)];
-	off_t t_offt;
-	int t_int;
-	time_t t_timet;
+	int	  nsz;
+	char	  hdblk[sizeof(HD_BCPIO)];
+	off_t	  t_offt;
+	int	  t_int;
+	time_t	  t_timet;
 
 	/*
 	 * check and repair truncated device and inode fields in the cpio

@@ -1,6 +1,7 @@
-#include "fvwmlib.h"
 #include <stdio.h>
 #include <string.h>
+
+#include "fvwmlib.h"
 
 #ifndef TRUE
 #define TRUE 1
@@ -52,7 +53,7 @@ matchWildcards(char *pattern, char *string)
 		} else {
 			if (*pattern == '\\')
 				pattern++; /* has strange, but harmless effects
-				              if the last character is a '\\' */
+					      if the last character is a '\\' */
 			if (*pattern++ != *string++) {
 				return FALSE;
 			}

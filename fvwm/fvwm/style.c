@@ -34,12 +34,12 @@
 #include "parse.h"
 #include "screen.h"
 
-static int Get_TBLR(char *, unsigned char *); /* prototype */
-static void AddToList(name_list *);           /* prototype */
+static int  Get_TBLR(char *, unsigned char *); /* prototype */
+static void AddToList(name_list *);	       /* prototype */
 
 /* A macro for skipping over white space */
-#define SKIPSPACE							\
-	while (isspace((unsigned char)*restofline))			\
+#define SKIPSPACE                                                              \
+	while (isspace((unsigned char)*restofline))                            \
 		restofline++;
 
 /* A macro for checking the command with a caseless compare */
@@ -49,34 +49,34 @@ static void AddToList(name_list *);           /* prototype */
 #define SKIP(THIS) restofline += sizeof(THIS) - 1
 
 /* A macro for getting a non-quoted operand */
-#define GETWORD								\
-	SKIPSPACE;							\
-	tmp = restofline;						\
-	len = 0;							\
-	while ((tmp != NULL) && (*tmp != 0) && (*tmp != ',') &&		\
-	       (*tmp != '\n') && (!isspace((unsigned char)*tmp))) {	\
-		tmp++;							\
-		len++;							\
+#define GETWORD                                                                \
+	SKIPSPACE;                                                             \
+	tmp = restofline;                                                      \
+	len = 0;                                                               \
+	while ((tmp != NULL) && (*tmp != 0) && (*tmp != ',') &&                \
+	    (*tmp != '\n') && (!isspace((unsigned char)*tmp))) {               \
+		tmp++;                                                         \
+		len++;                                                         \
 	}
 
 /* A macro for getting a quoted operand */
-#define GETQUOTEDWORD							\
-	is_quoted = 0;							\
-	SKIPSPACE;							\
-	if (*restofline == '"') {					\
-		is_quoted = 1;						\
-		++restofline;						\
-	}								\
-	tmp = restofline;						\
-	len = 0;							\
-	while (tmp && *tmp &&						\
-	       ((!is_quoted && (*tmp != ',') && (*tmp != '\n') &&	\
-	            (!isspace((unsigned char)*tmp))) ||		\
-	           (is_quoted && (*tmp != '\n') && (*tmp != '"')))) {	\
-		tmp++;							\
-		len++;							\
-	}								\
-	if (tmp && (*tmp == '"'))					\
+#define GETQUOTEDWORD                                                          \
+	is_quoted = 0;                                                         \
+	SKIPSPACE;                                                             \
+	if (*restofline == '"') {                                              \
+		is_quoted = 1;                                                 \
+		++restofline;                                                  \
+	}                                                                      \
+	tmp = restofline;                                                      \
+	len = 0;                                                               \
+	while (tmp && *tmp &&                                                  \
+	    ((!is_quoted && (*tmp != ',') && (*tmp != '\n') &&                 \
+		 (!isspace((unsigned char)*tmp))) ||                           \
+		(is_quoted && (*tmp != '\n') && (*tmp != '"')))) {             \
+		tmp++;                                                         \
+		len++;                                                         \
+	}                                                                      \
+	if (tmp && (*tmp == '"'))                                              \
 		++tmp;
 
 /* Process a style command.  First built up in a temp area.
@@ -90,18 +90,18 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char *restofline, *tmp;
+	char	  *restofline, *tmp;
 	name_list *nptr;
-	int butt; /* work area for button number */
-	int num, i;
+	int	   butt; /* work area for button number */
+	int	   num, i;
 	/*  RBW - 11/02/1998  */
 	int tmpno1 = -1, tmpno2 = -1, tmpno3 = -1, spargs = 0;
 	/**/
 
-	name_list tname; /* temp area to build name list */
-	int len = 0;
+	name_list   tname; /* temp area to build name list */
+	int	    len = 0;
 	icon_boxes *which = 0; /* which current boxes to chain to */
-	int is_quoted;         /* for parsing args with quotes */
+	int	    is_quoted; /* for parsing args with quotes */
 
 	memset(&tname, 0, sizeof(name_list)); /* init temp name_list area */
 
@@ -172,8 +172,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				len = 0;
 				while ((tmp != NULL) && (*tmp != 0) &&
 				    (*tmp != ',') && (*tmp != '\n') &&
-				    (*tmp != '/') && (!isspace(
-				    (unsigned char)*tmp))) {
+				    (*tmp != '/') &&
+				    (!isspace((unsigned char)*tmp))) {
 					tmp++;
 					len++;
 				}
@@ -195,8 +195,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					len = 0;
 					while ((tmp != NULL) && (*tmp != 0) &&
 					    (*tmp != ',') && (*tmp != '\n') &&
-					    (*tmp != '/') && (!isspace(
-					    (unsigned char)*tmp))) {
+					    (*tmp != '/') &&
+					    (!isspace((unsigned char)*tmp))) {
 						tmp++;
 						len++;
 					}
@@ -289,8 +289,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			} else if (ITIS("IconBox")) {
 				icon_boxes *IconBoxes = 0;
 				SKIP("IconBox"); /* Skip over word "IconBox" */
-				IconBoxes = (icon_boxes *)xmalloc(
-				    sizeof(icon_boxes));
+				IconBoxes =
+				    (icon_boxes *)xmalloc(sizeof(icon_boxes));
 				memset(IconBoxes, 0,
 				    sizeof(icon_boxes));    /* clear it */
 				IconBoxes->IconGrid[0] = 3; /* init grid x */
@@ -308,23 +308,23 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						    '-') { /* If leading minus
 							      sign */
 							if (i == 0 ||
-							    i ==
-							    2) { /* if a
-								        width */
+							    i == 2) { /* if a
+									     width
+								       */
 								IconBoxes
 								    ->IconBox
-								    [i] +=
+									[i] +=
 								    Scr.MyDisplayWidth;
 							} else { /* it must be a
 								    height */
 								IconBoxes
 								    ->IconBox
-								    [i] +=
+									[i] +=
 								    Scr.MyDisplayHeight;
 							} /* end width/height */
 						} /* end leading minus sign */
-						while ((!isspace(
-						    *restofline)) &&
+						while (
+						    (!isspace(*restofline)) &&
 						    (*restofline != 0) &&
 						    (*restofline != ',') &&
 						    (*restofline != '\n'))
@@ -334,28 +334,30 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					 * co-ords, use geom */
 				} else { /* Not 4 numeric args dje */
 					char geom_string[25]; /* bigger than
-					             =32767x32767+32767+32767
-					           */
+						     =32767x32767+32767+32767
+						   */
 					int geom_flags;
 					GETWORD; /* read in 1 word w/o advancing
-					          */
+						  */
 					if (len > 0 &&
 					    len < 24) { /* if word found, not
-						           too long */
+							   too long */
 						strncpy(geom_string, restofline,
 						    len); /* copy and null term
-						           */
+							   */
 						geom_string[len] =
 						    0; /* null terminate it */
 						geom_flags = XParseGeometry(
 						    geom_string,
 						    &IconBoxes->IconBox[0],
 						    &IconBoxes
-						    ->IconBox[1], /* x/y */
-						    (unsigned int *)&IconBoxes->IconBox[2],
-						    (unsigned int *)&IconBoxes->IconBox
-						    [3]); /* width/ht
-						               */
+							->IconBox[1], /* x/y */
+						    (unsigned int *)&IconBoxes
+							->IconBox[2],
+						    (unsigned int *)&IconBoxes
+							->IconBox
+							    [3]); /* width/ht
+								   */
 						if (IconBoxes->IconBox[2] ==
 						    0) { /* zero width ind
 							    invalid */
@@ -368,59 +370,63 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 							    "<%s>.",
 							    geom_string);
 							free(IconBoxes); /* Drop
-							                    the
-							                    box
-							                  */
+									    the
+									    box
+									  */
 							IconBoxes =
 							    0; /* forget about
-							          it */
+								  it */
 						} else { /* got valid iconbox
 							    geom */
 							if (geom_flags &
 							    XNegative) {
 								IconBoxes
 								    ->IconBox
-								    [0] =
+									[0] =
 								    Scr.MyDisplayWidth +
- /* screen width */
+								    /* screen
+								       width */
 								    IconBoxes->IconBox
-								    [0] /* neg
-								               x coord */
+									[0] /* neg
+										   x coord */
 								    -
 								    IconBoxes
-								    ->IconBox
-								    [2] -
+									->IconBox
+									    [2] -
 								    2; /* width
-								          - 2 */
+									  - 2 */
 							}
 							if (geom_flags &
 							    YNegative) {
 								IconBoxes
 								    ->IconBox
-								    [1] =
+									[1] =
 								    Scr.MyDisplayHeight +
- /* scr height */
+								    /* scr
+								       height */
 								    IconBoxes->IconBox
-								    [1] /* neg
-								               y coord */
+									[1] /* neg
+										   y coord */
 								    -
 								    IconBoxes
-								    ->IconBox
-								    [3] -
+									->IconBox
+									    [3] -
 								    2; /* height
-								          - 2 */
+									  - 2 */
 							}
 							IconBoxes->IconBox[2] +=
 							    IconBoxes->IconBox
-							    [0]; /* x + wid
-							                = right
-							                x */
+								[0]; /* x + wid
+									    =
+									right
+									    x */
 							IconBoxes->IconBox[3] +=
 							    IconBoxes->IconBox
-							    [1]; /* y +
-							                height =
-							                bottom y
-							              */
+								[1]; /* y +
+									    height
+									= bottom
+									y
+									  */
 						} /* end icon geom worked */
 					} else { /* no word or too long */
 						fvwm_msg(ERR, "ProcessNewStyle",
@@ -429,7 +435,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						    "long (%d).",
 						    len);
 						free(IconBoxes); /* Drop the box
-						                  */
+								  */
 						IconBoxes =
 						    0; /* forget about it */
 					} /* end word found, not too long */
@@ -443,17 +449,17 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					    0) { /* If first one */
 						tname.IconBoxes =
 						    IconBoxes; /* chain to root
-						                */
+								*/
 					} else { /* else not first one */
 						which->next =
 						    IconBoxes; /* add to end of
-						                  chain */
+								  chain */
 					} /* end not first one */
 					which = IconBoxes; /* new current box.
-					                      save for grid */
+							      save for grid */
 				} /* end no error */
-			} /* end iconbox parameter */ else if (ITIS(
-			    "ICONGRID")) {
+			} /* end iconbox parameter */ else if (ITIS("ICONGRI"
+								    "D")) {
 				SKIP("ICONGRID");
 				SKIPSPACE; /* skip whitespace after keyword */
 				/* The grid always affects the prior iconbox */
@@ -479,8 +485,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						which->IconGrid[0] =
 						    3; /* reset grid x */
 						which->IconGrid[1] =
-						    3;   /* reset grid y */
-					} else {         /* it worked */
+						    3;	 /* reset grid y */
+					} else {	 /* it worked */
 						GETWORD; /* swallow word */
 						restofline = tmp;
 						GETWORD; /* swallow word */
@@ -488,7 +494,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					} /* end bad grid */
 				} /* end place to grid */
 			} else if (ITIS("ICONFILL")) { /* direction to fill
-				                          iconbox */
+							  iconbox */
 				SKIP("ICONFILL");
 				SKIPSPACE; /* skip whitespace after keyword */
 				/* The fill always affects the prior iconbox */
@@ -497,10 +503,10 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					    "IconFill must follow an IconBox "
 					    "in same Style command");
 				} else { /* have a place to fill */
-					unsigned char IconFill_1; /* first  type direction
-					                   parsed */
-					unsigned char IconFill_2; /* second type direction
-					                   parsed */
+					unsigned char IconFill_1; /* first  type
+							   direction parsed */
+					unsigned char IconFill_2; /* second type
+							   direction parsed */
 					GETWORD; /* read in word for length */
 					if (Get_TBLR(restofline, &IconFill_1) ==
 					    0) { /* top/bot/lft/rgt */
@@ -513,11 +519,11 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						restofline =
 						    tmp;   /* swallow it */
 						SKIPSPACE; /* skip space between
-						              words */
+							      words */
 						GETWORD; /* read in second word
-						          */
+							  */
 						if (Get_TBLR(restofline,
-						    &IconFill_2) ==
+							&IconFill_2) ==
 						    0) { /* top/bot/lft/rgt */
 							fvwm_msg(ERR,
 							    "ProcessNewStyle",
@@ -527,12 +533,12 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 							    "%.*s.",
 							    len,
 							    restofline); /* its
-							                    wrong
-							                  */
+									    wrong
+									  */
 						} else if ((IconFill_1 &
-						    ICONFILLHRZ) ==
+							       ICONFILLHRZ) ==
 						    (IconFill_2 &
-						     ICONFILLHRZ)) {
+							ICONFILLHRZ)) {
 							fvwm_msg(ERR,
 							    "ProcessNewStyle",
 							    "IconFill must "
@@ -543,25 +549,25 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						} else { /* Its valid! */
 							which->IconFlags |=
 							    IconFill_1; /* merge
-							                   in
-							                   flags
-							                 */
+									   in
+									   flags
+									 */
 							IconFill_2 &=
 							    ~ICONFILLHRZ; /* ignore
-							                     horiz
-							                     in
-							                     2nd
-							                     arg
-							                   */
+									     horiz
+									     in
+									     2nd
+									     arg
+									   */
 							which->IconFlags |=
 							    IconFill_2; /* merge
-							                   in
-							                   flags
-							                 */
+									   in
+									   flags
+									 */
 						} /* end second word valid */
 					} /* end first word valid */
 					restofline = tmp; /* swallow first or
-					                     second word */
+							     second word */
 				} /* end have a place to fill */
 			} /* end iconfill */ else if (ITIS("ICON")) {
 				SKIP("ICON");
@@ -759,11 +765,10 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					 * page.  */
 					/*  RBW - 11/20/1998 - allow for the
 					 * special case of -1  */
-					tname.Desk =
-					    (tmpno1 > -1) ?
+					tname.Desk = (tmpno1 > -1) ?
 					    tmpno1 + 1 :
 					    tmpno1; /*  Desk is now actual
-					                     + 1  */
+							     + 1  */
 					/*  Bump past desk no.    */
 					GETWORD;
 					restofline = tmp;
@@ -842,9 +847,9 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					for (nptr = Scr.TheList; nptr;
 					    nptr = nptr->next) {
 						if (!strncasecmp(restofline,
-						    nptr->name,
-						    len)) { /* match style
-							         */
+							nptr->name,
+							len)) { /* match style
+								 */
 							if (!hit) { /* first
 								       match */
 								char *save_name;
@@ -852,24 +857,25 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 								    tname.name;
 								memcpy(
 								    (void *)&tname,
-								    (const void *)
-								    nptr,
+								    (const void
+									    *)
+									nptr,
 								    sizeof(
-								    name_list)); /* copy everything */
+									name_list)); /* copy everything */
 								tname.next =
 								    0; /* except
-								          the
-								          next
-								          pointer
-								        */
+									  the
+									  next
+									  pointer
+									*/
 								tname.name =
 								    save_name; /* and the name */
 								hit =
 								    1; /* set
-								          not
-								          first
-								          match
-								        */
+									  not
+									  first
+									  match
+									*/
 							} else { /* subsequent
 								    match */
 								tname
@@ -904,7 +910,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 								    STARTSONDESK_FLAG)
 								/*  RBW -
 								   11/02/1998 */
-								    {
+								{
 									tname
 									    .Desk =
 									    nptr->Desk;
@@ -1042,9 +1048,9 @@ AddToList(name_list *tname)
 
 	nptr = (name_list *)xmalloc(sizeof(name_list)); /* malloc area */
 	memcpy((void *)nptr, (const void *)tname,
-	    sizeof(name_list));       /* copy term area into list */
-	if (lastptr != NULL)          /* If not first entry in list */
+	    sizeof(name_list));	      /* copy term area into list */
+	if (lastptr != NULL)	      /* If not first entry in list */
 		lastptr->next = nptr; /* chain this entry to the list */
-	else                          /* else first entry in list */
+	else			      /* else first entry in list */
 		Scr.TheList = nptr;   /* set the list root pointer. */
 } /* end function */

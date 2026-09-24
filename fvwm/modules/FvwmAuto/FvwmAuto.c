@@ -21,9 +21,6 @@
 #define TRUE 1
 #define FALSE
 
-#include "config.h"
-#include "../fvwm/fvwm_sandbox.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -31,6 +28,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -68,13 +68,13 @@ int
 main(int argc, char **argv)
 {
 	char *enter_fn = "Raise", /* default */
-	     *leave_fn = NULL, mask_mesg[80];
+	    *leave_fn = NULL, mask_mesg[80];
 	unsigned long header[HEADER_SIZE], *body,
-		      last_win = 0,  /* last window handled */
-		      focus_win = 0; /* current focus */
-	int fd_width, fd[2], timeout, sec = 0, usec = 0;
+	    last_win = 0,  /* last window handled */
+	    focus_win = 0; /* current focus */
+	int	       fd_width, fd[2], timeout, sec = 0, usec = 0;
 	struct timeval value, *delay;
-	fd_set in_fdset;
+	fd_set	       in_fdset;
 
 	if (argc < 7 || argc > 9) {
 		fprintf(stderr, "FvwmAuto can use one to three arguments.\n");
@@ -94,7 +94,7 @@ main(int argc, char **argv)
 	} else
 		delay = NULL;
 
-	if (argv[7]) { /* if specified */
+	if (argv[7]) {					    /* if specified */
 		if (*argv[7] && !StrEquals(argv[7], "NOP")) /* not empty */
 			enter_fn = argv[7]; /* override default */
 		else

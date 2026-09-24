@@ -34,10 +34,10 @@
 int
 FvwmParseInteger(const char *string)
 {
-	const char *s = string;
-	int negative = 0;
+	const char   *s = string;
+	int	      negative = 0;
 	unsigned long value = 0;
-	int digits = 0;
+	int	      digits = 0;
 
 	if (s == NULL)
 		return 0;
@@ -53,8 +53,9 @@ FvwmParseInteger(const char *string)
 
 		digits = 1;
 		nv = value * 10 + (unsigned long)(*s - '0');
-		if (nv < value || nv > (negative ?
-		    (unsigned long)LONG_MAX + 1 : (unsigned long)LONG_MAX)) {
+		if (nv < value ||
+		    nv > (negative ? (unsigned long)LONG_MAX + 1 :
+				     (unsigned long)LONG_MAX)) {
 			/* Historical atoi() overflow was undefined;
 			 * report it instead of returning garbage. */
 			errno = ERANGE;
@@ -94,12 +95,14 @@ int
 FvwmParseFd(const char *arg)
 {
 	const char *errstr;
-	int fd;
+	int	    fd;
 
 	fd = (int)strtonum(arg, 0, INT_MAX, &errstr);
 	if (errstr != NULL) {
-		fprintf(stderr, "fvwm module: invalid descriptor "
-		    "argument '%s': %s\n", arg, errstr);
+		fprintf(stderr,
+		    "fvwm module: invalid descriptor "
+		    "argument '%s': %s\n",
+		    arg, errstr);
 		exit(1);
 	}
 	return fd;
@@ -174,7 +177,7 @@ char *
 GetQuotedString(char *sin, char **sout, const char *delims, const char *qlong,
     const char *qstart, const char *qend)
 {
-	char *t = sin;
+	char	    *t = sin;
 	unsigned int len;
 
 	if (!sout || !sin)
@@ -205,10 +208,10 @@ GetQuotedString(char *sin, char **sout, const char *delims, const char *qlong,
 char *
 PeekToken(const char *pstr)
 {
-	char *tok = NULL;
+	char	   *tok = NULL;
 	const char *p;
-	char bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
-	int len = 0;
+	char	    bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
+	int	    len = 0;
 
 	if (!pstr)
 		return NULL;
@@ -218,7 +221,7 @@ PeekToken(const char *pstr)
 	if (*p) {
 		if (IsQuote(*p) ||
 		    IsBlockStart(*p)) { /* quoted string or block start? */
-			bc = *p; /* save block start char */
+			bc = *p;	/* save block start char */
 			p++;
 		}
 		/* find end of token */
@@ -267,7 +270,7 @@ PeekToken(const char *pstr)
 int
 CmpToken(const char *pstr, char *tok)
 {
-	int rc = 0;
+	int   rc = 0;
 	char *ntok = PeekToken(pstr);
 	if (ntok) {
 		rc = strcasecmp(tok, ntok);
@@ -283,7 +286,7 @@ CmpToken(const char *pstr, char *tok)
 int
 MatchToken(const char *pstr, char *tok)
 {
-	int rc = 0;
+	int   rc = 0;
 	char *ntok = PeekToken(pstr);
 	if (ntok) {
 		rc = (strcasecmp(tok, ntok) == 0);
@@ -336,8 +339,8 @@ DoGetNextToken(
     char *indata, char **token, char *spaces, char *delims, char *out_delim)
 {
 	char *t, *start, *end, *text;
-	int snum;
-	int dnum;
+	int   snum;
+	int   dnum;
 
 	snum = (spaces) ? strlen(spaces) : 0;
 	dnum = (delims) ? strlen(delims) : 0;
@@ -354,7 +357,7 @@ DoGetNextToken(
 	start = t;
 	while ((*t != 0) &&
 	    !(isspace((unsigned char)*t) || (snum && strchr(spaces, *t)) ||
-	    (dnum && strchr(delims, *t)))) {
+		(dnum && strchr(delims, *t)))) {
 		/* Check for qouted text */
 		if (IsQuote(*t)) {
 			char c = *t;
@@ -486,7 +489,7 @@ GetModuleResource(char *indata, char **resource, char *module_name)
 int
 GetIntegerArguments(char *action, char **ret_action, int retvals[], int num)
 {
-	int i;
+	int   i;
 	char *token;
 
 	for (i = 0; i < num && action; i++) {
@@ -582,9 +585,9 @@ GetNextTokenIndex(char *action, char *list[], int len, int *index)
 int
 GetRectangleArguments(char *action, int *width, int *height)
 {
-	char *token;
+	char	   *token;
 	const char *s;
-	int w, h;
+	int	    w, h;
 
 	GetNextToken(action, &token);
 	if (!token)
@@ -625,8 +628,8 @@ int
 GetOnePercentArgument(char *action, int *value, int *unit_io)
 {
 	unsigned int len;
-	char *token;
-	int n;
+	char	    *token;
+	int	     n;
 
 	*value = 0;
 	if (!action)
@@ -654,7 +657,7 @@ GetTwoPercentArguments(
     char *action, int *val1, int *val2, int *val1_unit, int *val2_unit)
 {
 	char *tok1, *tok2;
-	int n = 0;
+	int   n = 0;
 
 	*val1 = 0;
 	*val2 = 0;

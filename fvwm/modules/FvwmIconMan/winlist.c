@@ -9,13 +9,13 @@
 #define HASHTAB_SIZE 257
 
 typedef WinList HashTab[HASHTAB_SIZE];
-static HashTab hash_tab;
+static HashTab	hash_tab;
 
 void
 print_stringlist(StringList *list)
 {
 	StringEl *p;
-	char *s;
+	char	 *s;
 
 	ConsoleDebug(WINLIST, "\tmask = 0x%x\n", list->mask);
 	for (p = list->list; p; p = p->next) {
@@ -51,8 +51,8 @@ void
 add_to_stringlist(StringList *list, char *s)
 {
 	StringEl *new;
-	NameType type;
-	char *pat;
+	NameType  type;
+	char	 *pat;
 
 	ConsoleDebug(WINLIST, "In add_to_stringlist: %s\n", s);
 
@@ -145,7 +145,7 @@ iconmanager_show(
     WinManager *man, char *tname, char *iname, char *rname, char *cname)
 {
 	StringEl *string;
-	int in_showlist = 0, in_dontshowlist = 0;
+	int	  in_showlist = 0, in_dontshowlist = 0;
 
 	assert(man);
 
@@ -161,7 +161,7 @@ iconmanager_show(
 	for (string = man->dontshow.list; string; string = string->next) {
 		ConsoleDebug(WINLIST, "Matching: %s\n", string->string);
 		if (matches_string(string->type, string->string, tname, iname,
-		    rname, cname)) {
+			rname, cname)) {
 			ConsoleDebug(WINLIST, "Dont show\n");
 			in_dontshowlist = 1;
 			break;
@@ -177,7 +177,7 @@ iconmanager_show(
 				ConsoleDebug(
 				    WINLIST, "Matching: %s\n", string->string);
 				if (matches_string(string->type, string->string,
-				    tname, iname, rname, cname)) {
+					tname, iname, rname, cname)) {
 					ConsoleDebug(WINLIST, "Show\n");
 					in_showlist = 1;
 					break;
@@ -241,11 +241,11 @@ WinManager *
 figure_win_manager(WinData *win, Uchar name_mask)
 {
 	(void)name_mask;
-	int i;
-	char *tname = win->titlename;
-	char *iname = win->iconname;
-	char *rname = win->resname;
-	char *cname = win->classname;
+	int	    i;
+	char	   *tname = win->titlename;
+	char	   *iname = win->iconname;
+	char	   *rname = win->resname;
+	char	   *cname = win->classname;
 	WinManager *man;
 
 	assert(tname || iname || rname || cname);
@@ -279,10 +279,10 @@ check_win_complete(WinData *p)
 		if (p->manager->format_depend & RESOURCE_NAME)
 			need_resname = 1;
 		else if (stringlist_requires_name(
-		    &p->manager->show, RESOURCE_NAME))
+			     &p->manager->show, RESOURCE_NAME))
 			need_resname = 1;
 		else if (stringlist_requires_name(
-		    &p->manager->dontshow, RESOURCE_NAME))
+			     &p->manager->dontshow, RESOURCE_NAME))
 			need_resname = 1;
 	}
 
@@ -331,7 +331,7 @@ init_winlists(void)
 void
 delete_win_hashtab(WinData *win)
 {
-	int entry;
+	int	 entry;
 	WinList *list;
 
 	entry = win->app_id & 0xff;
@@ -351,7 +351,7 @@ delete_win_hashtab(WinData *win)
 void
 insert_win_hashtab(WinData *win)
 {
-	int entry;
+	int	 entry;
 	WinList *list;
 	WinData *p;
 
@@ -387,7 +387,7 @@ WinData *
 find_win_hashtab(Ulong id)
 {
 	WinList *list;
-	int entry = id & 0xff;
+	int	 entry = id & 0xff;
 	WinData *p;
 
 	list = &hash_tab[entry];
@@ -401,7 +401,7 @@ find_win_hashtab(Ulong id)
 void
 walk_hashtab(void (*func)(void *))
 {
-	int i;
+	int	 i;
 	WinData *p;
 
 	for (i = 0; i < HASHTAB_SIZE; i++) {
@@ -413,7 +413,7 @@ walk_hashtab(void (*func)(void *))
 int
 accumulate_walk_hashtab(int (*func)(void *))
 {
-	int i, ret = 0;
+	int	 i, ret = 0;
 	WinData *p;
 
 	for (i = 0; i < HASHTAB_SIZE; i++) {

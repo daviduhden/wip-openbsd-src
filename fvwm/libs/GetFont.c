@@ -22,7 +22,8 @@ GetFontOrFixed(Display *disp, char *fontname)
 		    fontname);
 		/* fixed should always be avail, so try that */
 		if ((fnt = XLoadQueryFont(disp, "fixed")) == NULL) {
-			fprintf(stderr, "[GetFontOrFixed]: ERROR -- can't get "
+			fprintf(stderr,
+			    "[GetFontOrFixed]: ERROR -- can't get "
 			    "font 'fixed'");
 		}
 	}

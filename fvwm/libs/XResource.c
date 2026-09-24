@@ -14,11 +14,11 @@
 
 /* Default option table */
 static XrmOptionDescRec default_opts[] = {
-	{"-fg", "*Foreground", XrmoptionSepArg, NULL},
-	{"-bg", "*Background", XrmoptionSepArg, NULL},
-	{"-fn", "*Font", XrmoptionSepArg, NULL},
-	{"-geometry", "*Geometry", XrmoptionSepArg, NULL},
-	{"-title", "*Title", XrmoptionSepArg, NULL}
+    {"-fg", "*Foreground", XrmoptionSepArg, NULL},
+    {"-bg", "*Background", XrmoptionSepArg, NULL},
+    {"-fn", "*Font", XrmoptionSepArg, NULL},
+    {"-geometry", "*Geometry", XrmoptionSepArg, NULL},
+    {"-title", "*Title", XrmoptionSepArg, NULL}
     /* Remember to update NUM_DEFAULT_OPTIONS if you change this list! */
 };
 #define NUM_DEFAULT_OPTS 5
@@ -110,11 +110,11 @@ Bool
 MergeConfigLineResource(
     XrmDatabase *pdb, char *line, char *prefix, char *bindstr)
 {
-	int len;
-	char *end;
-	char *value;
-	char *myvalue;
-	char *resource;
+	int    len;
+	char  *end;
+	char  *value;
+	char  *myvalue;
+	char  *resource;
 	size_t reslen;
 
 	/* translate "*(prefix)(suffix)" to "(prefix)(binding)(suffix)",
@@ -180,9 +180,9 @@ GetResourceString(
     XrmDatabase db, const char *resource, const char *prefix, char **val)
 {
 	XrmValue xval = {0, NULL};
-	char *str_type;
-	char *name;
-	size_t len;
+	char	*str_type;
+	char	*name;
+	size_t	 len;
 
 	len = strlen(resource) + strlen(prefix) + 2;
 	name = (char *)xmalloc(len);

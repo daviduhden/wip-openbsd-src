@@ -20,18 +20,19 @@ long long strtonum(const char *, long long, long long, const char **);
 
 static int failures;
 
-#define CHECK(cond, msg) do {						\
-	if (!(cond)) {							\
-		fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,	\
-		    __LINE__);						\
-		failures++;						\
-	}								\
-} while (0)
+#define CHECK(cond, msg)                                                       \
+	do {                                                                   \
+		if (!(cond)) {                                                 \
+			fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,   \
+			    __LINE__);                                         \
+			failures++;                                            \
+		}                                                              \
+	} while (0)
 
 static void
 test_basic_tokens(void)
 {
-	char buf[] = "one two three";
+	char  buf[] = "one two three";
 	char *s = buf, *tok;
 
 	s = GetNextToken(s, &tok);
@@ -50,7 +51,7 @@ test_basic_tokens(void)
 static void
 test_quoting(void)
 {
-	char buf[] = "one \"two three\" four";
+	char  buf[] = "one \"two three\" four";
 	char *s = buf, *tok;
 
 	s = GetNextToken(s, &tok);
@@ -67,7 +68,7 @@ test_quoting(void)
 static void
 test_escapes(void)
 {
-	char buf[] = "a\\ b c";
+	char  buf[] = "a\\ b c";
 	char *s = buf, *tok;
 
 	s = GetNextToken(s, &tok);
@@ -81,7 +82,7 @@ test_escapes(void)
 static void
 test_empty_and_missing(void)
 {
-	char buf[] = "  ";
+	char  buf[] = "  ";
 	char *s = buf, *tok;
 
 	s = GetNextToken(s, &tok);
@@ -93,10 +94,10 @@ test_empty_and_missing(void)
 static void
 test_integers(void)
 {
-	char buf[] = "3 4 -5";
+	char  buf[] = "3 4 -5";
 	char *s = buf;
-	int ret[4];
-	int n;
+	int   ret[4];
+	int   n;
 
 	n = GetIntegerArguments(s, &s, ret, 4);
 	CHECK(n == 3, "three integers");
@@ -104,7 +105,7 @@ test_integers(void)
 
 	/* Truncated input must never run past the buffer. */
 	{
-		char bad[] = "1 2 3 4 5";
+		char  bad[] = "1 2 3 4 5";
 		char *t = bad;
 
 		n = GetIntegerArguments(t, &t, ret, 4);
@@ -115,7 +116,7 @@ test_integers(void)
 static void
 test_long_lines(void)
 {
-	char big[8192];
+	char  big[8192];
 	char *tok;
 
 	memset(big, 'x', sizeof(big) - 2);
@@ -163,8 +164,8 @@ test_fvwm_parse_integer(void)
 	check_int("99999999999999999999", 0, "overflow clamps to 0");
 	check_int_errno("99999999999999999999", ERANGE, "overflow sets ERANGE");
 	check_int("-99999999999999999999", 0, "negative overflow clamps to 0");
-	check_int_errno("-99999999999999999999", ERANGE,
-	    "negative overflow sets ERANGE");
+	check_int_errno(
+	    "-99999999999999999999", ERANGE, "negative overflow sets ERANGE");
 	check_int("2147483648", 0, "INT_MAX + 1 clamps to 0");
 	check_int_errno("2147483648", ERANGE, "INT_MAX + 1 sets ERANGE");
 	check_int("-2147483649", 0, "INT_MIN - 1 clamps to 0");

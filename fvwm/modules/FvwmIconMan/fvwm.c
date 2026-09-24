@@ -1,5 +1,4 @@
 #include "../fvwm/fvwm.h"
-
 #include "../fvwm/module.h"
 #include "FvwmIconMan.h"
 #include "config.h"
@@ -82,12 +81,12 @@ typedef struct {
 
 typedef union {
 	m_toggle_paging_data toggle_paging_data;
-	m_new_desk_data new_desk_data;
-	m_add_config_data add_config_data;
-	m_new_page_data new_page_data;
-	m_minimal_data minimal_data;
-	m_icon_data icon_data;
-	m_name_data name_data;
+	m_new_desk_data	     new_desk_data;
+	m_add_config_data    add_config_data;
+	m_new_page_data	     new_page_data;
+	m_minimal_data	     minimal_data;
+	m_icon_data	     icon_data;
+	m_name_data	     name_data;
 #ifdef MINI_ICONS
 	m_mini_icon_data mini_icon_data;
 #endif
@@ -99,7 +98,7 @@ static WinManager *the_manager;
 static int
 count_nonsticky_in_hashtab(void *arg)
 {
-	WinData *win = (WinData *)arg;
+	WinData	   *win = (WinData *)arg;
 	WinManager *man = the_manager;
 
 	if (!(win->fvwm_flags & STICKY) && win->complete && win->manager == man)
@@ -156,7 +155,7 @@ int
 win_in_viewport(WinData *win)
 {
 	WinManager *manager = win->manager;
-	int flag = 0;
+	int	    flag = 0;
 
 	assert(manager);
 
@@ -215,7 +214,7 @@ set_win_configuration(WinData *win, FvwmPacketBody *body)
 static void
 configure_window(FvwmPacketBody *body)
 {
-	Ulong app_id = body->add_config_data.app_id;
+	Ulong	 app_id = body->add_config_data.app_id;
 	WinData *win;
 	ConsoleDebug(FVWM, "configure_window: %ld\n", app_id);
 
@@ -231,7 +230,7 @@ configure_window(FvwmPacketBody *body)
 static void
 focus_change(FvwmPacketBody *body)
 {
-	Ulong app_id = body->minimal_data.app_id;
+	Ulong	 app_id = body->minimal_data.app_id;
 	WinData *win = id_to_win(app_id);
 
 	ConsoleDebug(FVWM, "Focus Change\n");
@@ -258,8 +257,8 @@ focus_change(FvwmPacketBody *body)
 static void
 res_name(FvwmPacketBody *body)
 {
-	Ulong app_id = body->name_data.app_id;
-	Uchar *name = body->name_data.name.name;
+	Ulong	 app_id = body->name_data.app_id;
+	Uchar	*name = body->name_data.name.name;
 	WinData *win;
 
 	ConsoleDebug(FVWM, "In res_name\n");
@@ -275,8 +274,8 @@ res_name(FvwmPacketBody *body)
 static void
 class_name(FvwmPacketBody *body)
 {
-	Ulong app_id = body->name_data.app_id;
-	Uchar *name = body->name_data.name.name;
+	Ulong	 app_id = body->name_data.app_id;
+	Uchar	*name = body->name_data.name.name;
 	WinData *win;
 
 	ConsoleDebug(FVWM, "In class_name\n");
@@ -293,8 +292,8 @@ static void
 icon_name(FvwmPacketBody *body)
 {
 	WinData *win;
-	Ulong app_id;
-	Uchar *name = body->name_data.name.name;
+	Ulong	 app_id;
+	Uchar	*name = body->name_data.name.name;
 
 	ConsoleDebug(FVWM, "In icon_name\n");
 
@@ -324,8 +323,8 @@ static void
 window_name(FvwmPacketBody *body)
 {
 	WinData *win;
-	Ulong app_id;
-	Uchar *name = body->name_data.name.name;
+	Ulong	 app_id;
+	Uchar	*name = body->name_data.name.name;
 
 	ConsoleDebug(FVWM, "In window_name\n");
 
@@ -372,7 +371,7 @@ static void
 destroy_window(FvwmPacketBody *body)
 {
 	WinData *win;
-	Ulong app_id;
+	Ulong	 app_id;
 
 	app_id = body->minimal_data.app_id;
 	win = id_to_win(app_id);
@@ -390,7 +389,7 @@ destroy_window(FvwmPacketBody *body)
 static void
 mini_icon(FvwmPacketBody *body)
 {
-	Ulong app_id = body->mini_icon_data.app_id;
+	Ulong	 app_id = body->mini_icon_data.app_id;
 	WinData *win;
 
 	win = id_to_win(app_id);
@@ -407,7 +406,7 @@ mini_icon(FvwmPacketBody *body)
 static void
 iconify(FvwmPacketBody *body, int dir)
 {
-	Ulong app_id = body->minimal_data.app_id;
+	Ulong	 app_id = body->minimal_data.app_id;
 	WinData *win;
 
 	win = id_to_win(app_id);
@@ -440,7 +439,7 @@ static void
 sendtomodule(FvwmPacketBody *body)
 {
 	extern void execute_function(char *);
-	Uchar *string = body->name_data.name.name;
+	Uchar	   *string = body->name_data.name.name;
 
 	ConsoleDebug(FVWM, "Got string: %s\n", string);
 
@@ -573,9 +572,9 @@ ProcessMessage(Ulong type, FvwmPacketBody *body)
 void
 ReadFvwmPipe(void)
 {
-	int body_length;
+	int		 body_length;
 	FvwmPacketHeader header;
-	FvwmPacketBody *body;
+	FvwmPacketBody	*body;
 
 	ConsoleDebug(FVWM, "DEBUG: entering ReadFvwmPipe\n");
 	body_length = ReadFvwmPacket(

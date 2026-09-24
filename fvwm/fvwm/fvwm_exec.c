@@ -40,16 +40,15 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 
-#include <imsg.h>
-
 #include <err.h>
 #include <errno.h>
+#include <imsg.h>
 #include <limits.h>
 #include <poll.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -62,14 +61,14 @@ static volatile sig_atomic_t got_sigchld;
  * One active PipeRead command.
  */
 struct piperead_slot {
-	int		active;
-	u_int32_t	id;
-	pid_t		pid;
-	int		fd;
-	int		status;		/* wait status once known */
-	int		status_known;
-	int		kill_pending;
-	time_t		kill_deadline;
+	int	  active;
+	u_int32_t id;
+	pid_t	  pid;
+	int	  fd;
+	int	  status; /* wait status once known */
+	int	  status_known;
+	int	  kill_pending;
+	time_t	  kill_deadline;
 };
 
 static struct piperead_slot piperead_slots[PIPEREAD_SLOTS];
@@ -77,13 +76,13 @@ static struct piperead_slot piperead_slots[PIPEREAD_SLOTS];
 /* Pids of detached (Exec) children, for exit reporting. */
 #define MAX_EXEC_CHILDREN 512
 static pid_t exec_children[MAX_EXEC_CHILDREN];
-static int exec_children_count;
+static int   exec_children_count;
 
 /* PipeRead children whose pipe closed before they exited; reaped
  * once SIGCHLD shows they are gone. */
 #define MAX_PENDING_REAPS PIPEREAD_SLOTS
 static pid_t pending_reaps[MAX_PENDING_REAPS];
-static int pending_reaps_count;
+static int   pending_reaps_count;
 
 [[noreturn]] static void
 usage(void)
@@ -130,9 +129,9 @@ static int
 decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 {
 	char **child_argv, **child_envp;
-	char *data = imsg->data;
+	char  *data = imsg->data;
 	size_t remaining;
-	int cargc, envc;
+	int    cargc, envc;
 	size_t i;
 
 	if (imsg->hdr.len < IMSG_HEADER_SIZE + 2 * sizeof(int))
@@ -148,8 +147,8 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 	 * empty strings (one NUL each), so argc must not exceed
 	 * remaining.  Same for envc.
 	 */
-	if (cargc < 1 || envc < 0 ||
-	    (size_t)cargc > remaining || (size_t)envc > remaining)
+	if (cargc < 1 || envc < 0 || (size_t)cargc > remaining ||
+	    (size_t)envc > remaining)
 		return -1;
 
 	if ((child_argv = calloc(cargc + 1, sizeof(char *))) == NULL)
@@ -199,7 +198,7 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 static char *
 decode_piperead_msg(struct imsg *imsg)
 {
-	char *cmd;
+	char  *cmd;
 	size_t len;
 
 	if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(u_int32_t) + 1)
@@ -207,7 +206,7 @@ decode_piperead_msg(struct imsg *imsg)
 
 	len = imsg->hdr.len - IMSG_HEADER_SIZE - sizeof(u_int32_t);
 	if (strnlen((char *)imsg->data + sizeof(u_int32_t), len) == len)
-		return NULL;	/* no terminating NUL */
+		return NULL; /* no terminating NUL */
 
 	cmd = strdup((char *)imsg->data + sizeof(u_int32_t));
 	if (cmd == NULL)
@@ -224,8 +223,8 @@ static void
 reap_children(struct imsgbuf *ibuf)
 {
 	pid_t pid;
-	int status;
-	int i;
+	int   status;
+	int   i;
 
 	got_sigchld = 0;
 	for (i = 0; i < PIPEREAD_SLOTS; i++) {
@@ -257,7 +256,7 @@ reap_children(struct imsgbuf *ibuf)
 	for (i = 0; i < exec_children_count; i++) {
 		struct {
 			pid_t pid;
-			int status;
+			int   status;
 		} msg;
 
 		pid = waitpid(exec_children[i], &status, WNOHANG);
@@ -265,8 +264,7 @@ reap_children(struct imsgbuf *ibuf)
 			continue;
 		msg.pid = pid;
 		msg.status = status;
-		imsg_compose(ibuf, IMSG_EXEC_EXIT, 0, 0, -1,
-		    &msg, sizeof(msg));
+		imsg_compose(ibuf, IMSG_EXEC_EXIT, 0, 0, -1, &msg, sizeof(msg));
 		/* Remove from the table. */
 		exec_children[i] = exec_children[exec_children_count - 1];
 		exec_children_count--;
@@ -280,12 +278,11 @@ reap_children(struct imsgbuf *ibuf)
  * and free the slot.
  */
 static void
-piperead_finish(struct imsgbuf *ibuf, struct piperead_slot *slot,
-    int errnum)
+piperead_finish(struct imsgbuf *ibuf, struct piperead_slot *slot, int errnum)
 {
 	struct {
 		u_int32_t id;
-		int status;
+		int	  status;
 	} msg;
 
 	if (slot->fd >= 0) {
@@ -311,18 +308,18 @@ piperead_finish(struct imsgbuf *ibuf, struct piperead_slot *slot,
 	if (errnum != 0) {
 		struct {
 			u_int32_t id;
-			int errnum;
+			int	  errnum;
 		} errmsg;
 
 		errmsg.id = slot->id;
 		errmsg.errnum = errnum;
-		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1,
-		    &errmsg, sizeof(errmsg));
+		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1, &errmsg,
+		    sizeof(errmsg));
 	} else {
 		msg.id = slot->id;
 		msg.status = slot->status_known ? slot->status : 0;
-		imsg_compose(ibuf, IMSG_PIPEREAD_EOF, 0, 0, -1,
-		    &msg, sizeof(msg));
+		imsg_compose(
+		    ibuf, IMSG_PIPEREAD_EOF, 0, 0, -1, &msg, sizeof(msg));
 	}
 	imsgbuf_flush(ibuf);
 	slot->active = 0;
@@ -338,9 +335,9 @@ static int
 piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
 {
 	struct piperead_slot *slot;
-	int pipe_fd[2];
-	pid_t pid;
-	int i;
+	int		      pipe_fd[2];
+	pid_t		      pid;
+	int		      i;
 
 	for (i = 0; i < PIPEREAD_SLOTS; i++) {
 		if (!piperead_slots[i].active)
@@ -349,13 +346,13 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
 	if (i == PIPEREAD_SLOTS) {
 		struct {
 			u_int32_t id;
-			int errnum;
+			int	  errnum;
 		} errmsg;
 
 		errmsg.id = id;
 		errmsg.errnum = EBUSY;
-		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1,
-		    &errmsg, sizeof(errmsg));
+		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1, &errmsg,
+		    sizeof(errmsg));
 		imsgbuf_flush(ibuf);
 		return -1;
 	}
@@ -364,13 +361,13 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
 	if (pipe(pipe_fd) < 0) {
 		struct {
 			u_int32_t id;
-			int errnum;
+			int	  errnum;
 		} errmsg;
 
 		errmsg.id = id;
 		errmsg.errnum = errno;
-		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1,
-		    &errmsg, sizeof(errmsg));
+		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1, &errmsg,
+		    sizeof(errmsg));
 		imsgbuf_flush(ibuf);
 		return -1;
 	}
@@ -379,15 +376,15 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
 	if (pid < 0) {
 		struct {
 			u_int32_t id;
-			int errnum;
+			int	  errnum;
 		} errmsg;
 
 		close(pipe_fd[0]);
 		close(pipe_fd[1]);
 		errmsg.id = id;
 		errmsg.errnum = errno;
-		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1,
-		    &errmsg, sizeof(errmsg));
+		imsg_compose(ibuf, IMSG_PIPEREAD_ERROR, 0, 0, -1, &errmsg,
+		    sizeof(errmsg));
 		imsgbuf_flush(ibuf);
 		return -1;
 	}
@@ -444,10 +441,10 @@ int
 main(int argc, char **argv)
 {
 	struct imsgbuf ibuf;
-	struct imsg imsg;
-	const char *errstr = NULL;
-	ssize_t n;
-	int s;
+	struct imsg    imsg;
+	const char    *errstr = NULL;
+	ssize_t	       n;
+	int	       s;
 
 	(void)argv;
 	if (argc != 1)
@@ -488,11 +485,11 @@ main(int argc, char **argv)
 	closefrom(s + 1);
 
 	for (;;) {
-		struct pollfd pfd[1 + PIPEREAD_SLOTS];
-		int slot_of_pfd[PIPEREAD_SLOTS];
-		nfds_t npfd = 0;
-		int i, ready;
-		time_t now;
+		struct pollfd	pfd[1 + PIPEREAD_SLOTS];
+		int		slot_of_pfd[PIPEREAD_SLOTS];
+		nfds_t		npfd = 0;
+		int		i, ready;
+		time_t		now;
 		static u_int8_t chunk_data[PIPEREAD_CHUNK];
 
 		pfd[npfd].fd = s;
@@ -548,18 +545,16 @@ main(int argc, char **argv)
 			if (nr > 0) {
 				struct {
 					u_int32_t id;
-					u_int8_t data[];
+					u_int8_t  data[];
 				} *chunk;
 
-				chunk = malloc(sizeof(u_int32_t) +
-				    (size_t)nr);
+				chunk = malloc(sizeof(u_int32_t) + (size_t)nr);
 				if (chunk == NULL)
 					err(1, "malloc");
 				chunk->id = slot->id;
 				memcpy(chunk->data, chunk_data, (size_t)nr);
-				imsg_compose(&ibuf, IMSG_PIPEREAD_DATA,
-				    0, 0, -1, chunk,
-				    sizeof(u_int32_t) + (size_t)nr);
+				imsg_compose(&ibuf, IMSG_PIPEREAD_DATA, 0, 0,
+				    -1, chunk, sizeof(u_int32_t) + (size_t)nr);
 				free(chunk);
 				imsgbuf_flush(&ibuf);
 			} else if (nr == 0) {
@@ -590,7 +585,7 @@ main(int argc, char **argv)
 
 			switch (imsg.hdr.type) {
 			case IMSG_EXEC_RUN: {
-				pid_t pid;
+				pid_t  pid;
 				char **child_argv;
 				char **child_envp;
 
@@ -600,7 +595,7 @@ main(int argc, char **argv)
 					break;
 				}
 				if (decode_exec_msg(&imsg, &child_argv,
-				    &child_envp) == -1) {
+					&child_envp) == -1) {
 					warnx("malformed IMSG_EXEC_RUN");
 					break;
 				}
@@ -608,32 +603,30 @@ main(int argc, char **argv)
 				pid = fork();
 				if (pid == -1) {
 					warn("fork");
-					imsg_compose(&ibuf, IMSG_EXEC_ERROR,
-					    0, 0, -1, &errno, sizeof(int));
+					imsg_compose(&ibuf, IMSG_EXEC_ERROR, 0,
+					    0, -1, &errno, sizeof(int));
 					free(child_argv);
 					free(child_envp);
 					break;
 				}
 				if (pid == 0)
-					exec_child(child_argv,
-					    child_envp);
+					exec_child(child_argv, child_envp);
 
 				free(child_argv);
 				free(child_envp);
 
-				if (exec_children_count <
-				    MAX_EXEC_CHILDREN)
-					exec_children[exec_children_count++]
-					    = pid;
+				if (exec_children_count < MAX_EXEC_CHILDREN)
+					exec_children[exec_children_count++] =
+					    pid;
 
-				imsg_compose(&ibuf, IMSG_EXEC_OK,
-				    0, 0, -1, &pid, sizeof(pid_t));
+				imsg_compose(&ibuf, IMSG_EXEC_OK, 0, 0, -1,
+				    &pid, sizeof(pid_t));
 				imsgbuf_flush(&ibuf);
 				break;
 			}
 			case IMSG_PIPEREAD_RUN: {
 				u_int32_t id;
-				char *command;
+				char	 *command;
 
 				if (imsg.hdr.len >
 				    IMSG_HEADER_SIZE + MAX_PIPEREAD_COMMAND) {
@@ -666,8 +659,7 @@ main(int argc, char **argv)
 				break;
 			}
 			default:
-				warnx("unknown imsg type %d",
-				    imsg.hdr.type);
+				warnx("unknown imsg type %d", imsg.hdr.type);
 				break;
 			}
 			imsg_free(&imsg);

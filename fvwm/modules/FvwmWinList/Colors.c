@@ -16,15 +16,14 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#include "Colors.h"
-
 #include <X11/Xlib.h>
 #include <stdio.h>
 
+#include "Colors.h"
 #include "config.h"
 
 extern Display *dpy;
-extern Window Root;
+extern Window	Root;
 
 /****************************************************************************
   Loads a single color
@@ -32,7 +31,7 @@ extern Window Root;
 Pixel
 GetColor(char *name)
 {
-	XColor color;
+	XColor		  color;
 	XWindowAttributes attributes;
 
 	XGetWindowAttributes(dpy, Root, &attributes);

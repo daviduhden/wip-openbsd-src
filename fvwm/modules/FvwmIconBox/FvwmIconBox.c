@@ -17,9 +17,6 @@
 #define VERTICAL 1
 #define HORIZONTAL 2
 
-#include "config.h"
-#include "../../fvwm/fvwm_sandbox.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -27,6 +24,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -60,11 +60,11 @@ char *MyName;
 XFontStruct *font;
 
 Display *dpy; /* which display are we talking to */
-int x_fd, fd_width;
+int	 x_fd, fd_width;
 
 Window Root;
-int screen;
-int d_depth;
+int    screen;
+int    d_depth;
 
 char *Back = "#5f9ea0";
 char *Fore = "#82dfe3";
@@ -81,9 +81,9 @@ char NoResource[] = "NoResource";
 Pixel fore_pix, hilite_pix, back_pix, shadow_pix;
 Pixel icon_fore_pix, icon_back_pix, icon_hilite_pix, icon_shadow_pix;
 Pixel act_icon_fore_pix, act_icon_back_pix, act_icon_hilite_pix,
-      act_icon_shadow_pix;
+    act_icon_shadow_pix;
 
-GC NormalGC, ShadowGC, ReliefGC, IconShadowGC, IconReliefGC;
+GC     NormalGC, ShadowGC, ReliefGC, IconShadowGC, IconReliefGC;
 Window main_win;
 Window holder_win;
 Window icon_win;
@@ -97,30 +97,29 @@ long CurrentDesk;
 int Width, Height;
 int UWidth, UHeight;
 
-#define MW_EVENTS							\
-	(KeyPressMask | ExposureMask | StructureNotifyMask |		\
+#define MW_EVENTS                                                              \
+	(KeyPressMask | ExposureMask | StructureNotifyMask |                   \
 	    ButtonReleaseMask | ButtonPressMask)
-#define SCROLL_EVENTS							\
-	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |	\
+#define SCROLL_EVENTS                                                          \
+	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
 	    ButtonPressMask | PointerMotionMask)
-#define BUTTON_EVENTS							\
-	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |	\
+#define BUTTON_EVENTS                                                          \
+	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
 	    ButtonPressMask | LeaveWindowMask | PointerMotionMask)
 
 unsigned long m_mask = M_CONFIGURE_WINDOW | M_ADD_WINDOW | M_DESTROY_WINDOW |
-    M_END_WINDOWLIST | M_ICONIFY | M_DEICONIFY |
-    M_ICON_NAME | M_RES_NAME | M_RES_CLASS | M_WINDOW_NAME |
-    M_ICON_FILE | M_DEFAULTICON | M_CONFIG_INFO |
+    M_END_WINDOWLIST | M_ICONIFY | M_DEICONIFY | M_ICON_NAME | M_RES_NAME |
+    M_RES_CLASS | M_WINDOW_NAME | M_ICON_FILE | M_DEFAULTICON | M_CONFIG_INFO |
     M_END_CONFIG_INFO;
 
 struct icon_info *Hilite;
-int main_width, main_height;
-int num_icons = 0;
-int num_rows = 1;
-int num_columns = 6;
-int Lines = 6;
-int max_icon_width = 48, max_icon_height = 48;
-int ButtonWidth, ButtonHeight;
+int		  main_width, main_height;
+int		  num_icons = 0;
+int		  num_rows = 1;
+int		  num_columns = 6;
+int		  Lines = 6;
+int		  max_icon_width = 48, max_icon_height = 48;
+int		  ButtonWidth, ButtonHeight;
 int x = -100000, y = -100000, w = -1, h = -1, gravity = NorthWestGravity;
 int icon_win_x = 0, icon_win_y = 0, icon_win_width = 100, icon_win_height = 100;
 int interval = 8;
@@ -129,13 +128,13 @@ int primary = LEFT, secondary = BOTTOM;
 int xneg = 0, yneg = 0;
 int ClickTime = 150;
 unsigned int bar_width = 9;
-int redraw_flag = 3;
-int icon_relief = 4;
-int margin1 = 8;
-int margin2 = 6;
+int	     redraw_flag = 3;
+int	     icon_relief = 4;
+int	     margin1 = 8;
+int	     margin2 = 6;
 
 Pixmap IconwinPixmap = None;
-char *IconwinPixmapFile = NULL;
+char  *IconwinPixmapFile = NULL;
 
 int h_margin;
 int v_margin;
@@ -144,35 +143,35 @@ int fd[2];
 
 struct icon_info *Head = NULL;
 struct icon_info *Tail = NULL;
-struct iconfile *IconListHead = NULL;
-struct iconfile *IconListTail = NULL;
-struct iconfile *DefaultIcon = NULL;
+struct iconfile	 *IconListHead = NULL;
+struct iconfile	 *IconListTail = NULL;
+struct iconfile	 *DefaultIcon = NULL;
 struct mousefunc *MouseActions = NULL;
-struct keyfunc *KeyActions = NULL;
-char *iconPath = NULL;
-char *pixmapPath = NULL;
-char *FvwmDefaultIcon = NULL;
+struct keyfunc	 *KeyActions = NULL;
+char		 *iconPath = NULL;
+char		 *pixmapPath = NULL;
+char		 *FvwmDefaultIcon = NULL;
 
 static Atom wm_del_win;
-Atom _XA_WM_PROTOCOLS;
-Atom _XA_WM_NAME;
+Atom	    _XA_WM_PROTOCOLS;
+Atom	    _XA_WM_NAME;
 
-int ready = 0;
+int	      ready = 0;
 unsigned long local_flags = 0;
-int sortby = UNSORT;
+int	      sortby = UNSORT;
 
 int save_color_limit; /* color limit from config */
 
 /************************************************************************
   Main
   Based on main() from GoodStuff:
-        Copyright 1993, Robert Nation.
+	Copyright 1993, Robert Nation.
 ************************************************************************/
 int
 main(int argc, char **argv)
 {
-	char *display_name = NULL;
-	char *temp, *s;
+	char	  *display_name = NULL;
+	char	  *temp, *s;
 	XIconSize *size;
 
 	temp = argv[0];
@@ -250,14 +249,14 @@ main(int argc, char **argv)
 void
 Loop(void)
 {
-	Window root;
+	Window		  root;
 	struct icon_info *tmp, *exhilite;
-	int x, y, border_width, depth;
-	int i, hr = icon_relief / 2;
-	XEvent Event;
-	int tw, th;
-	int diffx, diffy;
-	int oldw, oldh;
+	int		  x, y, border_width, depth;
+	int		  i, hr = icon_relief / 2;
+	XEvent		  Event;
+	int		  tw, th;
+	int		  diffx, diffy;
+	int		  oldw, oldh;
 
 	sandbox_x11_only("FvwmIconBox");
 
@@ -276,7 +275,8 @@ Loop(void)
 								RedrawIcon(
 								    tmp, 1);
 								break;
-							} else if (Event.xany.window ==
+							} else if (
+							    Event.xany.window ==
 							    tmp->IconWin) {
 								RedrawIcon(
 								    tmp, 2);
@@ -391,19 +391,19 @@ Loop(void)
 			case ButtonRelease:
 				if (!(local_flags & HIDE_H)) {
 					if (Event.xbutton.window ==
-					    h_scroll_bar &&
+						h_scroll_bar &&
 					    motion == HORIZONTAL)
 						HScroll(Event.xbutton.x *
 						    icon_win_width / Width);
 					else if (Event.xbutton.window ==
-					    l_button &&
+						l_button &&
 					    Pressed == l_button) {
 						Pressed = None;
 						RedrawLeftButton(
 						    ReliefGC, ShadowGC);
 						HScroll(icon_win_x - UWidth);
 					} else if (Event.xbutton.window ==
-					    r_button &&
+						r_button &&
 					    Pressed == r_button) {
 						Pressed = None;
 						RedrawRightButton(
@@ -413,20 +413,19 @@ Loop(void)
 				}
 				if (!(local_flags & HIDE_V)) {
 					if (Event.xbutton.window ==
-					    v_scroll_bar &&
+						v_scroll_bar &&
 					    motion == VERTICAL)
 						VScroll(Event.xbutton.y *
-						    icon_win_height /
-						    Height);
+						    icon_win_height / Height);
 					else if (Event.xbutton.window ==
-					    t_button &&
+						t_button &&
 					    Pressed == t_button) {
 						Pressed = None;
 						RedrawTopButton(
 						    ReliefGC, ShadowGC);
 						VScroll(icon_win_y - UHeight);
 					} else if (Event.xbutton.window ==
-					    b_button &&
+						b_button &&
 					    Pressed == b_button) {
 						Pressed = None;
 						RedrawBottomButton(
@@ -460,7 +459,7 @@ Loop(void)
 
 			case LeaveNotify:
 				if ((tmp = Search(Event.xcrossing.window)) !=
-				    NULL &&
+					NULL &&
 				    tmp == Hilite) {
 					Hilite = NULL;
 					RedrawIcon(tmp, redraw_flag);
@@ -489,7 +488,8 @@ Loop(void)
 				break;
 			case ClientMessage:
 				if ((Event.xclient.format == 32) &&
-				    ((Atom)Event.xclient.data.l[0] == wm_del_win))
+				    ((Atom)Event.xclient.data.l[0] ==
+					wm_del_win))
 					DeadPipe(1);
 				break;
 			case PropertyNotify:
@@ -501,8 +501,8 @@ Loop(void)
 					tmp = Head;
 					i = 0;
 					while (tmp != NULL) {
-						if (Event.xproperty.window == (Window)
-						    tmp->id)
+						if (Event.xproperty.window ==
+						    (Window)tmp->id)
 							break;
 						tmp = tmp->next;
 						++i;
@@ -517,7 +517,7 @@ Loop(void)
 					    XGetWMHints(dpy, tmp->id);
 					if (tmp->wmhints &&
 					    (tmp->wmhints->flags &
-					     IconPixmapHint)) {
+						IconPixmapHint)) {
 #ifdef SHAPE
 						/* turn off "old" shape mask */
 						if (tmp->icon_maskPixmap !=
@@ -666,9 +666,9 @@ void
 RedrawIcon(struct icon_info *item, int f)
 {
 	unsigned long plane = 1;
-	int hr, len;
-	int diff, lm, w, h, tw;
-	char label[256];
+	int	      hr, len;
+	int	      diff, lm, w, h, tw;
+	char	      label[256];
 
 	hr = icon_relief / 2;
 
@@ -799,7 +799,7 @@ void
 RedrawLeftButton(GC rgc, GC sgc)
 {
 	XSegment seg[4];
-	int i = 0;
+	int	 i = 0;
 
 	seg[i].x1 = 1;
 	seg[i].y1 = bar_width / 2;
@@ -839,7 +839,7 @@ void
 RedrawRightButton(GC rgc, GC sgc)
 {
 	XSegment seg[4];
-	int i = 0;
+	int	 i = 0;
 
 	seg[i].x1 = 1;
 	seg[i].y1 = 1;
@@ -880,7 +880,7 @@ void
 RedrawTopButton(GC rgc, GC sgc)
 {
 	XSegment seg[4];
-	int i = 0;
+	int	 i = 0;
 
 	seg[i].x1 = bar_width / 2;
 	seg[i].y1 = 1;
@@ -920,7 +920,7 @@ void
 RedrawBottomButton(GC rgc, GC sgc)
 {
 	XSegment seg[4];
-	int i = 0;
+	int	 i = 0;
 
 	seg[i].x1 = 1;
 	seg[i].y1 = 1;
@@ -965,7 +965,7 @@ void
 RelieveWindow(Window win, int x, int y, int w, int h, GC rgc, GC sgc)
 {
 	XSegment seg[4];
-	int i;
+	int	 i;
 
 	i = 0;
 	seg[i].x1 = x;
@@ -1026,14 +1026,14 @@ RelieveWindow(Window win, int x, int y, int w, int h, GC rgc, GC sgc)
 void
 CreateWindow(void)
 {
-	XGCValues gcv;
-	unsigned long gcm;
-	unsigned long mask;
-	char *list[2];
+	XGCValues	     gcv;
+	unsigned long	     gcm;
+	unsigned long	     mask;
+	char		    *list[2];
 	XSetWindowAttributes attributes;
-	XSizeHints mysizehints;
-	XTextProperty name;
-	XClassHint class_hints;
+	XSizeHints	     mysizehints;
+	XTextProperty	     name;
+	XClassHint	     class_hints;
 
 	h_margin = margin1 * 2 + bar_width + margin2 + 8;
 	v_margin = margin1 * 2 + bar_width + margin2 + 8;
@@ -1138,11 +1138,11 @@ CreateWindow(void)
 	mysizehints.height -= v_margin;
 	holder_win =
 	    XCreateSimpleWindow(dpy, main_win, margin1 + 2, margin1 + 2,
-	    mysizehints.width, mysizehints.height, 0, fore_pix, back_pix);
+		mysizehints.width, mysizehints.height, 0, fore_pix, back_pix);
 
 	icon_win =
 	    XCreateSimpleWindow(dpy, holder_win, -icon_win_x, -icon_win_y,
-	    icon_win_width, icon_win_height, 0, fore_pix, back_pix);
+		icon_win_width, icon_win_height, 0, fore_pix, back_pix);
 
 	gcm = GCForeground | GCBackground;
 	gcv.foreground = hilite_pix;
@@ -1221,14 +1221,14 @@ CreateWindow(void)
 		attributes.win_gravity = NorthEastGravity;
 		t_button =
 		    XCreateWindow(dpy, main_win, margin1 + 6 + Width + margin2,
-		    margin1 + 2, bar_width, bar_width, 0, CopyFromParent,
-		    InputOutput, CopyFromParent, mask, &attributes);
+			margin1 + 2, bar_width, bar_width, 0, CopyFromParent,
+			InputOutput, CopyFromParent, mask, &attributes);
 		attributes.win_gravity = SouthEastGravity;
 		b_button =
 		    XCreateWindow(dpy, main_win, margin1 + 6 + Width + margin2,
-		    margin1 + 2 + Height - bar_width, bar_width, bar_width,
-		    0, CopyFromParent, InputOutput, CopyFromParent, mask,
-		    &attributes);
+			margin1 + 2 + Height - bar_width, bar_width, bar_width,
+			0, CopyFromParent, InputOutput, CopyFromParent, mask,
+			&attributes);
 		XSelectInput(dpy, t_button, BUTTON_EVENTS);
 		XSelectInput(dpy, b_button, BUTTON_EVENTS);
 	}
@@ -1242,13 +1242,13 @@ GetIconwinSize(int *dx, int *dy)
 
 	if (primary == LEFT || primary == RIGHT) {
 		icon_win_width = max(Width, UWidth * Lines + interval - 1);
-		icon_win_height = max(
-		    Height, UHeight * (max(0, (num_icons - 1)) / Lines + 1) -
-		    1 + interval);
+		icon_win_height = max(Height,
+		    UHeight * (max(0, (num_icons - 1)) / Lines + 1) - 1 +
+			interval);
 	} else {
-		icon_win_width =
-		    max(Width, UWidth * (max(0, num_icons - 1) / Lines + 1) +
-		    interval - 1);
+		icon_win_width = max(Width,
+		    UWidth * (max(0, num_icons - 1) / Lines + 1) + interval -
+			1);
 		icon_win_height = max(Height, UHeight * Lines - 1 + interval);
 	}
 	*dx = icon_win_width - *dx;
@@ -1274,7 +1274,7 @@ nocolor(char *a, char *b)
 Pixel
 GetColor(char *name)
 {
-	XColor color;
+	XColor		  color;
 	XWindowAttributes attributes;
 
 	XGetWindowAttributes(dpy, Root, &attributes);
@@ -1295,7 +1295,7 @@ GetColor(char *name)
 void
 SendFvwmPipe(int *fd, char *message, unsigned long window)
 {
-	int w;
+	int   w;
 	char *hold, *temp, *temp_msg;
 	hold = message;
 
@@ -1356,7 +1356,7 @@ void
 Next(void)
 {
 	struct icon_info *new, *old;
-	int i;
+	int		  i;
 
 	old = new = Hilite;
 
@@ -1403,7 +1403,7 @@ void
 Prev(void)
 {
 	struct icon_info *new, *old;
-	int i;
+	int		  i;
 
 	old = new = Hilite;
 
@@ -1467,23 +1467,24 @@ void
 ParseOptions(void)
 {
 	char *tline = NULL, *tmp;
-	int Clength;
+	int   Clength;
 
 	Clength = strlen(MyName);
 
 	GetConfigLine(fd, &tline);
 
 	while (tline != NULL) {
-		int g_x, g_y, flags;
+		int	 g_x, g_y, flags;
 		unsigned width, height;
 
 		if (strlen(&tline[0]) > 1) {
 			if (strncasecmp(tline,
-			    CatString3("*", MyName, "Geometry"),
-			    Clength + 9) == 0) {
+				CatString3("*", MyName, "Geometry"),
+				Clength + 9) == 0) {
 				tmp = &tline[Clength + 9];
 				while (((isspace((unsigned char)*tmp)) &&
-				    (*tmp != '\n')) && (*tmp != 0))
+					   (*tmp != '\n')) &&
+				    (*tmp != 0))
 					tmp++;
 				tmp[strlen(tmp) - 1] = 0;
 				flags = XParseGeometry(
@@ -1501,11 +1502,12 @@ ParseOptions(void)
 				if (flags & YNegative)
 					yneg = 1;
 			} else if (strncasecmp(tline,
-			    CatString3("*", MyName, "MaxIconSize"),
-			    Clength + 12) == 0) {
+				       CatString3("*", MyName, "MaxIconSize"),
+				       Clength + 12) == 0) {
 				tmp = &tline[Clength + 12];
 				while (((isspace((unsigned char)*tmp)) &&
-				    (*tmp != '\n')) && (*tmp != 0))
+					   (*tmp != '\n')) &&
+				    (*tmp != 0))
 					tmp++;
 				tmp[strlen(tmp) - 1] = 0;
 
@@ -1521,100 +1523,102 @@ ParseOptions(void)
 					max_icon_width += 4;
 				}
 			} else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Font"),
-			    Clength + 5) == 0)
+				       CatString3("*", MyName, "Font"),
+				       Clength + 5) == 0)
 				CopyString(&font_string, &tline[Clength + 5]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "IconFore"),
-			    Clength + 9) == 0)
+				     CatString3("*", MyName, "IconFore"),
+				     Clength + 9) == 0)
 				CopyString(&IconFore, &tline[Clength + 9]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "IconBack"),
-			    Clength + 9) == 0)
+				     CatString3("*", MyName, "IconBack"),
+				     Clength + 9) == 0)
 				CopyString(&IconBack, &tline[Clength + 9]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "IconHiFore"),
-			    Clength + 11) == 0)
+				     CatString3("*", MyName, "IconHiFore"),
+				     Clength + 11) == 0)
 				CopyString(&ActIconFore, &tline[Clength + 11]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "IconHiBack"),
-			    Clength + 11) == 0)
+				     CatString3("*", MyName, "IconHiBack"),
+				     Clength + 11) == 0)
 				CopyString(&ActIconBack, &tline[Clength + 11]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Fore"),
-			    Clength + 5) == 0)
+				     CatString3("*", MyName, "Fore"),
+				     Clength + 5) == 0)
 				CopyString(&Fore, &tline[Clength + 5]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Back"),
-			    Clength + 5) == 0)
+				     CatString3("*", MyName, "Back"),
+				     Clength + 5) == 0)
 				CopyString(&Back, &tline[Clength + 5]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Pixmap"),
-			    Clength + 7) == 0)
+				     CatString3("*", MyName, "Pixmap"),
+				     Clength + 7) == 0)
 				CopyString(
 				    &IconwinPixmapFile, &tline[Clength + 7]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Padding"),
-			    Clength + 8) == 0)
-				interval = max(0,
-				    FvwmParseInteger(&tline[Clength + 8]));
+				     CatString3("*", MyName, "Padding"),
+				     Clength + 8) == 0)
+				interval = max(
+				    0, FvwmParseInteger(&tline[Clength + 8]));
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "FrameWidth"),
-			    Clength + 11) == 0) {
+				     CatString3("*", MyName, "FrameWidth"),
+				     Clength + 11) == 0) {
 				sscanf(&tline[Clength + 11], "%d %d", &margin1,
 				    &margin2);
 				margin1 = max(0, margin1);
 				margin2 = max(0, margin2);
 			} else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Lines"),
-			    Clength + 6) == 0)
-				Lines = max(1,
-				    FvwmParseInteger(&tline[Clength + 6]));
+				       CatString3("*", MyName, "Lines"),
+				       Clength + 6) == 0)
+				Lines = max(
+				    1, FvwmParseInteger(&tline[Clength + 6]));
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "SBWidth"),
-			    Clength + 8) == 0)
-				bar_width = max(5,
-				    FvwmParseInteger(&tline[Clength + 8]));
+				     CatString3("*", MyName, "SBWidth"),
+				     Clength + 8) == 0)
+				bar_width = max(
+				    5, FvwmParseInteger(&tline[Clength + 8]));
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Placement"),
-			    Clength + 10) == 0)
+				     CatString3("*", MyName, "Placement"),
+				     Clength + 10) == 0)
 				parseplacement(&tline[Clength + 10]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "SetWMIconSize"),
-			    Clength + 14) == 0)
+				     CatString3("*", MyName, "SetWMIconSize"),
+				     Clength + 14) == 0)
 				local_flags |= SETWMICONSIZE;
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "HilightFocusWin"),
-			    Clength + 16) == 0)
+				     CatString3("*", MyName, "HilightFocusWin"),
+				     Clength + 16) == 0)
 				m_mask |= M_FOCUS_CHANGE;
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Resolution"),
-			    Clength + 11) == 0) {
+				     CatString3("*", MyName, "Resolution"),
+				     Clength + 11) == 0) {
 				tmp = &tline[Clength + 11];
 				while (((isspace((unsigned char)*tmp)) &&
-				    (*tmp != '\n')) && (*tmp != 0))
+					   (*tmp != '\n')) &&
+				    (*tmp != 0))
 					tmp++;
 				if (strncasecmp(tmp, "Desk", 4) == 0) {
 					m_mask |= M_NEW_DESK;
 					local_flags |= CURRENT_ONLY;
 				}
 			} else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Mouse"),
-			    Clength + 6) == 0)
+				       CatString3("*", MyName, "Mouse"),
+				       Clength + 6) == 0)
 				parsemouse(&tline[Clength + 6]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "Key"),
-			    Clength + 4) == 0)
+				     CatString3("*", MyName, "Key"),
+				     Clength + 4) == 0)
 				parsekey(&tline[Clength + 4]);
 			else if (strncasecmp(tline,
-			    CatString3("*", MyName, "SortIcons"),
-			    Clength + 10) == 0) {
+				     CatString3("*", MyName, "SortIcons"),
+				     Clength + 10) == 0) {
 				tmp = &tline[Clength + 10];
 				while (((isspace((unsigned char)*tmp)) &&
-				    (*tmp != '\n')) && (*tmp != 0))
+					   (*tmp != '\n')) &&
+				    (*tmp != 0))
 					tmp++;
 				if (strlen(tmp) == 0) { /* the case where no
-					                   argument is given */
+							   argument is given */
 					sortby = ICONNAME;
 					return;
 				}
@@ -1627,19 +1631,20 @@ ParseOptions(void)
 				else if (strncasecmp(tmp, "ResName", 7) == 0)
 					sortby = RESNAME;
 			} else if (strncasecmp(tline,
-			    CatString3("*", MyName, "HideSC"),
-			    Clength + 7) == 0) {
+				       CatString3("*", MyName, "HideSC"),
+				       Clength + 7) == 0) {
 				tmp = &tline[Clength + 7];
 				while (((isspace((unsigned char)*tmp)) &&
-				    (*tmp != '\n')) && (*tmp != 0))
+					   (*tmp != '\n')) &&
+				    (*tmp != 0))
 					tmp++;
 				if (strncasecmp(tmp, "Horizontal", 10) == 0)
 					local_flags |= HIDE_H;
 				else if (strncasecmp(tmp, "Vertical", 8) == 0)
 					local_flags |= HIDE_V;
 			} else if (strncasecmp(tline,
-			    CatString3("*", MyName, ""),
-			    Clength + 1) == 0)
+				       CatString3("*", MyName, ""),
+				       Clength + 1) == 0)
 				parseicon(&tline[Clength + 1]);
 			else if (strncasecmp(tline, "IconPath", 8) == 0)
 				CopyString(&iconPath, &tline[8]);
@@ -1660,9 +1665,9 @@ ParseOptions(void)
 void
 parseicon(char *tline)
 {
-	int len;
+	int		 len;
 	struct iconfile *tmp;
-	char *ptr, *start, *end;
+	char		*ptr, *start, *end;
 
 	tmp = (struct iconfile *)xmalloc(sizeof(struct iconfile));
 
@@ -1688,13 +1693,12 @@ parseicon(char *tline)
 
 	/* file */
 	/* skip spaces */
-	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
-	    (*tline != 0))
+	while (
+	    isspace((unsigned char)*tline) && (*tline != '\n') && (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
-	while (!isspace((unsigned char)*end) && (*end != '\n') &&
-	    (*end != 0))
+	while (!isspace((unsigned char)*end) && (*end != '\n') && (*end != 0))
 		end++;
 	len = end - start;
 	ptr = xmalloc(len + 1);
@@ -1745,16 +1749,16 @@ void
 parsemouse(char *tline)
 {
 	struct mousefunc *f = NULL;
-	int len;
-	char *ptr, *start, *end, *tmp;
+	int		  len;
+	char		 *ptr, *start, *end, *tmp;
 
 	f = (struct mousefunc *)xmalloc(sizeof(struct mousefunc));
 	f->next = NULL;
 	f->mouse = 0;
 
 	/* skip spaces */
-	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
-	    (*tline != 0))
+	while (
+	    isspace((unsigned char)*tline) && (*tline != '\n') && (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
@@ -1769,8 +1773,8 @@ parsemouse(char *tline)
 	/* click or doubleclick */
 	tline = end;
 	/* skip spaces */
-	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
-	    (*tline != 0))
+	while (
+	    isspace((unsigned char)*tline) && (*tline != '\n') && (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
@@ -1784,8 +1788,8 @@ parsemouse(char *tline)
 	/* actions */
 	tline = end;
 	/* skip spaces */
-	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
-	    (*tline != 0))
+	while (
+	    isspace((unsigned char)*tline) && (*tline != '\n') && (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
@@ -1807,23 +1811,23 @@ parsemouse(char *tline)
 
 /***********************************************************************
   parsekey
-        Based on part of AddFunckey() of configure.c in Fvwm.
-        Copyright 1988, Evans and Sutherland Computer Corporation,
-        Copyright 1989, Massachusetts Institute of Technology,
-        Copyright 1993, Robert Nation.
+	Based on part of AddFunckey() of configure.c in Fvwm.
+	Copyright 1988, Evans and Sutherland Computer Corporation,
+	Copyright 1989, Massachusetts Institute of Technology,
+	Copyright 1993, Robert Nation.
  ***********************************************************************/
 void
 parsekey(char *tline)
 {
 	struct keyfunc *k;
-	int nlen, alen;
-	char *nptr, *aptr, *start, *end, *tmp;
-	int i, kmin, kmax;
-	KeySym keysym;
+	int		nlen, alen;
+	char	       *nptr, *aptr, *start, *end, *tmp;
+	int		i, kmin, kmax;
+	KeySym		keysym;
 
 	/* skip spaces */
-	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
-	    (*tline != 0))
+	while (
+	    isspace((unsigned char)*tline) && (*tline != '\n') && (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
@@ -1837,8 +1841,8 @@ parsekey(char *tline)
 	/* actions */
 	tline = end;
 	/* skip spaces */
-	while (isspace((unsigned char)*tline) && (*tline != '\n') &&
-	    (*tline != 0))
+	while (
+	    isspace((unsigned char)*tline) && (*tline != '\n') && (*tline != 0))
 		tline++;
 	start = tline;
 	end = tline;
@@ -1867,7 +1871,7 @@ parsekey(char *tline)
 
 		for (i = kmin; i <= kmax; i++) {
 			KeySym *mapping;
-			int width;
+			int	width;
 
 			mapping = XGetKeyboardMapping(dpy, i, 1, &width);
 			if (mapping == NULL)
@@ -1923,9 +1927,9 @@ change_window_name(char *str)
 int
 My_XNextEvent(Display *dpy, XEvent *event)
 {
-	fd_set in_fdset;
-	unsigned long header[HEADER_SIZE];
-	static int miss_counter = 0;
+	fd_set	       in_fdset;
+	unsigned long  header[HEADER_SIZE];
+	static int     miss_counter = 0;
 	unsigned long *body;
 
 	if (XPending(dpy)) {
@@ -1969,8 +1973,8 @@ void
 process_message(unsigned long type, unsigned long *body)
 {
 	struct icon_info *tmp, *old;
-	char *str;
-	long olddesk;
+	char		 *str;
+	long		  olddesk;
 
 	switch (type) {
 	case M_CONFIGURE_WINDOW:
@@ -1987,7 +1991,7 @@ process_message(unsigned long type, unsigned long *body)
 						if (olddesk == CurrentDesk ||
 						    tmp->desk == CurrentDesk) {
 							if (tmp->desk ==
-							    CurrentDesk &&
+								CurrentDesk &&
 							    sortby != UNSORT)
 								SortItem(NULL);
 							num_icons =
@@ -1996,15 +2000,15 @@ process_message(unsigned long type, unsigned long *body)
 							    &diffx, &diffy);
 							if (diffy &&
 							    (primary ==
-							     BOTTOM ||
-							     secondary ==
-							     BOTTOM))
+								    BOTTOM ||
+								secondary ==
+								    BOTTOM))
 								icon_win_y +=
 								    diffy;
 							if (diffx &&
 							    (primary == RIGHT ||
-							     secondary ==
-							     RIGHT))
+								secondary ==
+								    RIGHT))
 								icon_win_x +=
 								    diffx;
 							if (icon_win_y < 0)
@@ -2017,7 +2021,7 @@ process_message(unsigned long type, unsigned long *body)
 								    icon_win_width -
 								    Width;
 							if (icon_win_y +
-							    Height >
+								Height >
 							    icon_win_height)
 								icon_win_y =
 								    icon_win_height -
@@ -2048,21 +2052,20 @@ process_message(unsigned long type, unsigned long *body)
 									    tmp->icon_pixmap_w);
 							}
 							if (!(local_flags &
-							    HIDE_H) &&
+								HIDE_H) &&
 							    diffx)
 								RedrawHScrollbar();
 							if (!(local_flags &
-							    HIDE_V) &&
+								HIDE_V) &&
 							    diffy)
 								RedrawVScrollbar();
 						}
 					} else if ((body[8] & STICKY) &&
-					    !(tmp->flags &
-					    STICKY)) /* stick */
+					    !(tmp->flags & STICKY)) /* stick */
 						tmp->flags |= STICKY;
 					else if (!(body[8] & STICKY) &&
 					    (tmp->flags &
-					     STICKY)) { /* unstick */
+						STICKY)) { /* unstick */
 						tmp->flags &= ~STICKY;
 						tmp->desk = body[7];
 					}
@@ -2180,7 +2183,7 @@ process_message(unsigned long type, unsigned long *body)
 			CurrentDesk = body[0];
 			if (body[0] != 10000 &&
 			    ready) { /* 10000 is a "magic" number used in
-				        FvwmPager */
+					FvwmPager */
 				if (sortby != UNSORT)
 					SortItem(NULL);
 				num_icons = AdjustIconWindows();
@@ -2269,7 +2272,7 @@ int
 AdjustIconWindows(void)
 {
 	struct icon_info *tmp;
-	int i = 0;
+	int		  i = 0;
 	tmp = Head;
 
 	while (tmp != NULL) {
@@ -2307,7 +2310,7 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 	while (tmp != NULL) {
 		if (tmp->id == (long)id ||
 		    (tmp->wmhints && (tmp->wmhints->flags & IconWindowHint) &&
-		     tmp->wmhints->icon_window == id))
+			tmp->wmhints->icon_window == id))
 			return False;
 		tmp = tmp->next;
 	}
@@ -2408,9 +2411,9 @@ struct icon_info *
 UpdateItem(unsigned long type, unsigned long id, char *item)
 {
 	struct icon_info *tmp;
-	char *str;
-	XClassHint classhint;
-	int ret;
+	char		 *str;
+	XClassHint	  classhint;
+	int		  ret;
 
 	tmp = Head;
 	while (tmp != NULL) {
@@ -2440,7 +2443,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 				if (sortby == RESCLASS &&
 				    strcmp(NoClass, str) == 0 &&
 				    !(ret = XGetClassHint(
-				    dpy, tmp->id, &classhint))) {
+					  dpy, tmp->id, &classhint))) {
 					tmp->extra_flags |= NOCLASS;
 				}
 				if (ret) {
@@ -2456,7 +2459,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 				if (sortby == RESNAME &&
 				    strcmp(NoResource, str) == 0 &&
 				    !(ret = XGetClassHint(
-				    dpy, tmp->id, &classhint)))
+					  dpy, tmp->id, &classhint)))
 					tmp->extra_flags |= NONAME;
 				if (ret) {
 					if (classhint.res_class != NULL)
@@ -2480,8 +2483,9 @@ SortItem(struct icon_info *item)
 	if (tmp1 == NULL)
 		return False;
 
-	if (item != NULL && ((itemcmp(item->prev, item) <= 0) &&
-	    (itemcmp(item->next, item) >= 0)))
+	if (item != NULL &&
+	    ((itemcmp(item->prev, item) <= 0) &&
+		(itemcmp(item->next, item) >= 0)))
 		return False;
 
 	while (tmp1->next != NULL) {
@@ -2601,9 +2605,9 @@ void ShowItem(struct icon_info *head)
   tmp = head;
   while (tmp != NULL){
     fprintf(stderr, "id:%x  name:%s resname:%s class%s iconfile:%s\n",
-            tmp->id,
-            tmp->name == NULL ? "NULL" : tmp->name, tmp->res_name,
-            tmp->res_class, tmp->icon_file);
+	    tmp->id,
+	    tmp->name == NULL ? "NULL" : tmp->name, tmp->res_name,
+	    tmp->res_class, tmp->icon_file);
     tmp = tmp->next;
   }
 }
@@ -2615,7 +2619,7 @@ void ShowAction(void)
   tmp = MouseActions;
   while (tmp != NULL){
     fprintf(stderr, "mouse:%d type %d action:%s\n", tmp->mouse,
-            tmp->type, tmp->action);
+	    tmp->type, tmp->action);
     tmp = tmp->next;
   }
 }
@@ -2627,7 +2631,7 @@ void ShowKAction(void)
   tmp = KeyActions;
   while (tmp != NULL){
     fprintf(stderr, "key:%s keycode:%d action:%s\n", tmp->name,
-            tmp->keycode, tmp->action);
+	    tmp->keycode, tmp->action);
     tmp = tmp->next;
   }
 }
@@ -2660,7 +2664,7 @@ freeitem(struct icon_info *item, int d)
 		XFreePixmap(dpy, item->iconPixmap);
 	if (item->icon_maskPixmap != None &&
 	    (item->wmhints == NULL ||
-	     !(item->wmhints->flags & (IconPixmapHint | IconWindowHint))))
+		!(item->wmhints->flags & (IconPixmapHint | IconWindowHint))))
 		XFreePixmap(dpy, item->icon_maskPixmap);
 
 	free(item);
@@ -2668,10 +2672,10 @@ freeitem(struct icon_info *item, int d)
 
 /************************************************************************
   IsClick
-        Based on functions.c from Fvwm:
-        Copyright 1988, Evans and Sutherland Computer Corporation,
-        Copyright 1989, Massachusetts Institute of Technology,
-        Copyright 1993, Robert Nation.
+	Based on functions.c from Fvwm:
+	Copyright 1988, Evans and Sutherland Computer Corporation,
+	Copyright 1989, Massachusetts Institute of Technology,
+	Copyright 1993, Robert Nation.
  ***********************************************************************/
 static Bool
 IsClick(int x, int y, unsigned EndMask, XEvent *d)
@@ -2681,14 +2685,13 @@ IsClick(int x, int y, unsigned EndMask, XEvent *d)
 	xcurrent = x;
 	ycurrent = y;
 	while ((total < ClickTime) && (x - xcurrent < 5) &&
-	    (x - xcurrent > -5) && (y - ycurrent < 5) &&
-	    (y - ycurrent > -5)) {
+	    (x - xcurrent > -5) && (y - ycurrent < 5) && (y - ycurrent > -5)) {
 		usleep(10000);
 		total += 10;
 		if (XCheckMaskEvent(dpy, EndMask, d))
 			return True;
 		if (XCheckMaskEvent(
-		    dpy, ButtonMotionMask | PointerMotionMask, d)) {
+			dpy, ButtonMotionMask | PointerMotionMask, d)) {
 			xcurrent = d->xmotion.x_root;
 			ycurrent = d->xmotion.y_root;
 		}
@@ -2699,15 +2702,15 @@ IsClick(int x, int y, unsigned EndMask, XEvent *d)
 /************************************************************************
  * ExecuteAction
 * 	Based on part of ComplexFunction() of functions.c from fvwm:
-        Copyright 1988, Evans and Sutherland Computer Corporation,
-        Copyright 1989, Massachusetts Institute of Technology,
-        Copyright 1993, Robert Nation.
+	Copyright 1988, Evans and Sutherland Computer Corporation,
+	Copyright 1989, Massachusetts Institute of Technology,
+	Copyright 1993, Robert Nation.
  ***********************************************************************/
 void
 ExecuteAction(int x, int y, struct icon_info *item)
 {
-	int type = NO_CLICK;
-	XEvent d;
+	int		  type = NO_CLICK;
+	XEvent		  d;
 	struct mousefunc *tmp;
 
 	/* Wait and see if we have a click, or a move */
@@ -2739,7 +2742,7 @@ void
 ExecuteKey(XEvent event)
 {
 	struct icon_info *item;
-	struct keyfunc *tmp;
+	struct keyfunc	 *tmp;
 
 	if ((item = Hilite) == NULL)
 		if ((item = Head) == NULL)
@@ -2748,12 +2751,12 @@ ExecuteKey(XEvent event)
 	tmp = KeyActions;
 	{
 		KeySym *mapping;
-		int width;
+		int	width;
 
 		mapping =
 		    XGetKeyboardMapping(dpy, event.xkey.keycode, 1, &width);
 		if (mapping != NULL) {
-			KeySym primary = width > 0 ? mapping[0] : NoSymbol;
+			KeySym	primary = width > 0 ? mapping[0] : NoSymbol;
 			KeyCode canonical = (primary != NoSymbol) ?
 			    XKeysymToKeycode(dpy, primary) :
 			    0;
@@ -2773,16 +2776,16 @@ ExecuteKey(XEvent event)
 
 /***********************************************************************
  LookInList
-        Based on part of LookInList() of add_window.c from fvwm:
-        Copyright 1988, Evans and Sutherland Computer Corporation,
-        Copyright 1989, Massachusetts Institute of Technology,
-        Copyright 1993, Robert Nation.
+	Based on part of LookInList() of add_window.c from fvwm:
+	Copyright 1988, Evans and Sutherland Computer Corporation,
+	Copyright 1989, Massachusetts Institute of Technology,
+	Copyright 1993, Robert Nation.
  ***********************************************************************/
 int
 LookInList(struct icon_info *item)
 {
-	int isdefault = 1;
-	char *value = NULL;
+	int		 isdefault = 1;
+	char		*value = NULL;
 	struct iconfile *nptr;
 
 	if (IconListHead == NULL) {
@@ -2835,16 +2838,16 @@ LookInList(struct icon_info *item)
 
 /***********************************************************************
  strcpy
-        Based on stripcpy2() of configure.c from Fvwm:
-        Copyright 1988, Evans and Sutherland Computer Corporation,
-        Copyright 1989, Massachusetts Institute of Technology,
-        Copyright 1993, Robert Nation.
+	Based on stripcpy2() of configure.c from Fvwm:
+	Copyright 1988, Evans and Sutherland Computer Corporation,
+	Copyright 1989, Massachusetts Institute of Technology,
+	Copyright 1993, Robert Nation.
  ***********************************************************************/
 char *
 stripcpy2(char *source)
 {
 	char *ptr;
-	int count = 0;
+	int   count = 0;
 	while ((*source != '"') && (*source != 0))
 		source++;
 	if (*source == 0)

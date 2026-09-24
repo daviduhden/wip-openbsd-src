@@ -10,8 +10,8 @@
 #endif
 
 extern Display *theDisplay;
-extern Window theRoot;
-extern int theDepth, theScreen;
+extern Window	theRoot;
+extern int	theDepth, theScreen;
 
 extern void unmap_manager(WinManager *man);
 extern void map_manager(WinManager *man);

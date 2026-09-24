@@ -45,28 +45,28 @@
 /*
  * Header encoding of the different file types
  */
-#define C_ISDIR 040000  /* Directory */
+#define C_ISDIR 040000	/* Directory */
 #define C_ISFIFO 010000 /* FIFO */
 #define C_ISREG 0100000 /* Regular file */
-#define C_ISBLK 060000  /* Block special file */
-#define C_ISCHR 020000  /* Character special file */
+#define C_ISBLK 060000	/* Block special file */
+#define C_ISCHR 020000	/* Character special file */
 #define C_ISCTG 0110000 /* Reserved for contiguous files */
 #define C_ISLNK 0120000 /* Reserved for symbolic links */
 #define C_ISOCK 0140000 /* Reserved for sockets */
-#define C_IFMT 0170000  /* type of file */
+#define C_IFMT 0170000	/* type of file */
 
 /*
  * Data Interchange Format - Extended cpio header format - POSIX 1003.1-1990
  */
 typedef struct {
 	char c_magic[6];     /* magic cookie */
-	char c_dev[6];       /* device number */
-	char c_ino[6];       /* inode number */
-	char c_mode[6];      /* file type/access */
-	char c_uid[6];       /* owners uid */
-	char c_gid[6];       /* owners gid */
+	char c_dev[6];	     /* device number */
+	char c_ino[6];	     /* inode number */
+	char c_mode[6];	     /* file type/access */
+	char c_uid[6];	     /* owners uid */
+	char c_gid[6];	     /* owners gid */
 	char c_nlink[6];     /* # of links at archive creation */
-	char c_rdev[6];      /* block/char major/minor # */
+	char c_rdev[6];	     /* block/char major/minor # */
 	char c_mtime[11];    /* modification time */
 	char c_namesize[6];  /* length of pathname */
 	char c_filesize[11]; /* length of file in bytes */
@@ -75,10 +75,10 @@ typedef struct {
 #define MAGIC 070707 /* transportable archive id */
 
 #ifdef _PAX_
-#define AMAGIC "070707"   /* ascii equivalent string of MAGIC */
+#define AMAGIC "070707"	  /* ascii equivalent string of MAGIC */
 #define CPIO_MASK 0x3ffff /* bits valid in the dev/ino fields */
 			  /* used for dev/inode remaps */
-#endif                    /* _PAX_ */
+#endif			  /* _PAX_ */
 
 /*
  * Binary cpio header structure
@@ -119,25 +119,25 @@ typedef struct {
  * binary cpio masks and pads
  */
 #define BCPIO_PAD(x) ((2 - ((x) & 1)) & 1) /* pad to next 2 byte word */
-#define BCPIO_MASK 0xffff                  /* mask for dev/ino fields */
-#endif                                     /* _PAX_ */
+#define BCPIO_MASK 0xffff		   /* mask for dev/ino fields */
+#endif					   /* _PAX_ */
 
 /*
  * System VR4 cpio header structure (with/without file data crc)
  */
 typedef struct {
 	char c_magic[6];    /* magic cookie */
-	char c_ino[8];      /* inode number */
-	char c_mode[8];     /* file type/access */
-	char c_uid[8];      /* owners uid */
-	char c_gid[8];      /* owners gid */
+	char c_ino[8];	    /* inode number */
+	char c_mode[8];	    /* file type/access */
+	char c_uid[8];	    /* owners uid */
+	char c_gid[8];	    /* owners gid */
 	char c_nlink[8];    /* # of links at archive creation */
 	char c_mtime[8];    /* modification time */
 	char c_filesize[8]; /* length of file in bytes */
-	char c_maj[8];      /* block/char major # */
-	char c_min[8];      /* block/char minor # */
-	char c_rmaj[8];     /* special file major # */
-	char c_rmin[8];     /* special file minor # */
+	char c_maj[8];	    /* block/char major # */
+	char c_min[8];	    /* block/char minor # */
+	char c_rmaj[8];	    /* special file major # */
+	char c_rmin[8];	    /* special file minor # */
 	char c_namesize[8]; /* length of pathname */
 	char c_chksum[8];   /* 0 OR CRC of bytes of FILE data */
 } HD_VCPIO;
@@ -145,8 +145,8 @@ typedef struct {
 #define VMAGIC 070701  /* sVr4 new portable archive id */
 #define VCMAGIC 070702 /* sVr4 new portable archive id CRC */
 #ifdef _PAX_
-#define AVMAGIC "070701"                   /* ascii string of above */
-#define AVCMAGIC "070702"                  /* ascii string of above */
+#define AVMAGIC "070701"		   /* ascii string of above */
+#define AVCMAGIC "070702"		   /* ascii string of above */
 #define VCPIO_PAD(x) ((4 - ((x) & 3)) & 3) /* pad to next 4 byte word */
-#define VCPIO_MASK 0xffffffff              /* mask for dev/ino fields */
-#endif                                     /* _PAX_ */
+#define VCPIO_MASK 0xffffffff		   /* mask for dev/ino fields */
+#endif					   /* _PAX_ */

@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <ctype.h>
 #include <errno.h>
@@ -47,13 +47,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "cpio.h"
-#include "tar.h"
 #include "extern.h"
+#include "pax.h"
+#include "tar.h"
 
-static int bad_opt(void);
-static int opt_add(const char *);
+static int   bad_opt(void);
+static int   opt_add(const char *);
 static char *opt_parse_value(const char **, int);
 /*
  * argv[0] names. Used for tar and cpio emulation
@@ -128,28 +128,28 @@ static char *opt_parse_value(const char **, int);
 #define BDEXTR (AF | BF | LF | TF | WF | XF | CBF | CHF | CLF | CPF | CXF)
 #define BDARCH (CF | KF | LF | NF | PF | RF | CDF | CEF | CYF | CZF)
 #define BDCOPY (AF | BF | FF | XF | CBF | CEF)
-#define BDLIST								\
-	(AF | BF | IF | KF | LF | PF | RF | TF | UF | WF | XF | CBF | CDF |\
+#define BDLIST                                                                 \
+	(AF | BF | IF | KF | LF | PF | RF | TF | UF | WF | XF | CBF | CDF |    \
 	    CHF | CLF | CPF | CXF | CYF | CZF)
 
 /*
  * Routines which handle command line options
  */
 
-static char flgch[] = FLGCH;  /* list of all possible flags */
-static OPLIST *ophead = NULL; /* head for format specific options -x */
-static OPLIST *optail = NULL; /* option tail */
+static char    flgch[] = FLGCH; /* list of all possible flags */
+static OPLIST *ophead = NULL;	/* head for format specific options -x */
+static OPLIST *optail = NULL;	/* option tail */
 
-static int no_op(void);
-static void printflg(unsigned int);
+static int   no_op(void);
+static void  printflg(unsigned int);
 static off_t str_offt(char *);
 static char *get_line(FILE *fp);
 static char *opt_parse_value(const char **, int);
-static void opt_common(void);
-static void pax_options(int, char **);
-static void pax_usage(void);
-static void tar_options(int, char **);
-static void tar_usage(void);
+static void  opt_common(void);
+static void  pax_options(int, char **);
+static void  pax_usage(void);
+static void  tar_options(int, char **);
+static void  tar_usage(void);
 #ifndef NOCPIO
 static void cpio_options(int, char **);
 static void cpio_usage(void);
@@ -160,9 +160,9 @@ static int gzip_id(char *_blk, int _size);
 static int bzip2_id(char *_blk, int _size);
 static int xz_id(char *_blk, int _size);
 
-#define GZIP_CMD "gzip"         /* command to run as gzip */
+#define GZIP_CMD "gzip"		/* command to run as gzip */
 #define COMPRESS_CMD "compress" /* command to run as compress */
-#define BZIP2_CMD "bzip2"       /* command to run as bzip2 */
+#define BZIP2_CMD "bzip2"	/* command to run as bzip2 */
 
 /*
  *	Format specific routine table
@@ -176,62 +176,66 @@ static int xz_id(char *_blk, int _size);
 FSUB fsub[] = {
 #ifdef NOCPIO
     /* 0: OLD BINARY CPIO */
-	{},
+    {},
     /* 1: OLD OCTAL CHARACTER CPIO */
-	{},
+    {},
     /* 2: SVR4 HEX CPIO */
-	{},
+    {},
     /* 3: SVR4 HEX CPIO WITH CRC */
-	{},
+    {},
 #else
     /* 0: OLD BINARY CPIO */
-	{"bcpio", 5120, sizeof(HD_BCPIO), 1, 0, 0, 1, bcpio_id, cpio_strd, bcpio_rd,
-	 bcpio_endrd, cpio_stwr, bcpio_wr, cpio_endwr, cpio_trail, bad_opt},
+    {"bcpio", 5120, sizeof(HD_BCPIO), 1, 0, 0, 1, bcpio_id, cpio_strd, bcpio_rd,
+	bcpio_endrd, cpio_stwr, bcpio_wr, cpio_endwr, cpio_trail, bad_opt},
 
     /* 1: OLD OCTAL CHARACTER CPIO */
-	{"cpio", 5120, sizeof(HD_CPIO), 1, 0, 0, 1, cpio_id, cpio_strd, cpio_rd,
-	 cpio_endrd, cpio_stwr, cpio_wr, cpio_endwr, cpio_trail, bad_opt},
+    {"cpio", 5120, sizeof(HD_CPIO), 1, 0, 0, 1, cpio_id, cpio_strd, cpio_rd,
+	cpio_endrd, cpio_stwr, cpio_wr, cpio_endwr, cpio_trail, bad_opt},
 
     /* 2: SVR4 HEX CPIO */
-	{"sv4cpio", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, vcpio_id, cpio_strd,
-	 vcpio_rd, vcpio_endrd, cpio_stwr, vcpio_wr, cpio_endwr, cpio_trail,
-	 bad_opt},
+    {"sv4cpio", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, vcpio_id, cpio_strd,
+	vcpio_rd, vcpio_endrd, cpio_stwr, vcpio_wr, cpio_endwr, cpio_trail,
+	bad_opt},
 
     /* 3: SVR4 HEX CPIO WITH CRC */
-	{"sv4crc", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, crc_id, crc_strd, vcpio_rd,
-	 vcpio_endrd, crc_stwr, vcpio_wr, cpio_endwr, cpio_trail, bad_opt},
+    {"sv4crc", 5120, sizeof(HD_VCPIO), 1, 0, 0, 1, crc_id, crc_strd, vcpio_rd,
+	vcpio_endrd, crc_stwr, vcpio_wr, cpio_endwr, cpio_trail, bad_opt},
 #endif
     /* 4: OLD TAR */
-	{"tar", 10240, BLKMULT, 0, 1, BLKMULT, 0, tar_id, no_op, tar_rd, tar_endrd,
-	 no_op, tar_wr, tar_endwr, tar_trail, tar_opt},
+    {"tar", 10240, BLKMULT, 0, 1, BLKMULT, 0, tar_id, no_op, tar_rd, tar_endrd,
+	no_op, tar_wr, tar_endwr, tar_trail, tar_opt},
 
     /* 5: POSIX USTAR */
-	{"ustar", 10240, BLKMULT, 0, 1, BLKMULT, 0, ustar_id, no_op, ustar_rd,
-	 tar_endrd, no_op, ustar_wr, tar_endwr, tar_trail, tar_opt},
+    {"ustar", 10240, BLKMULT, 0, 1, BLKMULT, 0, ustar_id, no_op, ustar_rd,
+	tar_endrd, no_op, ustar_wr, tar_endwr, tar_trail, tar_opt},
 
 #ifdef SMALL
     /* 6: compress, to detect failure to use -Z */
-	{},
+    {},
     /* 7: xz, to detect failure to decompress it */
-	{},
+    {},
     /* 8: bzip2, to detect failure to use -j */
-	{},
+    {},
     /* 9: gzip, to detect failure to use -z */
-	{},
+    {},
     /* 10: POSIX PAX */
-	{},
+    {},
 #else
     /* 6: compress, to detect failure to use -Z */
-	{NULL, 0, 4, 0, 0, 0, 0, compress_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+    {NULL, 0, 4, 0, 0, 0, 0, compress_id, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL},
     /* 7: xz, to detect failure to decompress it */
-	{NULL, 0, 4, 0, 0, 0, 0, xz_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+    {NULL, 0, 4, 0, 0, 0, 0, xz_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL},
     /* 8: bzip2, to detect failure to use -j */
-	{NULL, 0, 4, 0, 0, 0, 0, bzip2_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+    {NULL, 0, 4, 0, 0, 0, 0, bzip2_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL},
     /* 9: gzip, to detect failure to use -z */
-	{NULL, 0, 4, 0, 0, 0, 0, gzip_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
+    {NULL, 0, 4, 0, 0, 0, 0, gzip_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL},
     /* 10: POSIX PAX */
-	{"pax", 10240, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd, tar_endrd,
-	 no_op, pax_wr, tar_endwr, tar_trail, pax_opt},
+    {"pax", 10240, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd,
+	tar_endrd, no_op, pax_wr, tar_endwr, tar_trail, pax_opt},
 #endif
 };
 #define F_OCPIO 0 /* format when called as cpio -6 */
@@ -256,7 +260,7 @@ int ford[] = {10, 5, 4, 9, 8, 7, 6, 3, 2, 1, 0, -1};
 /*
  * Do we have -C anywhere and what is it?
  */
-int havechd = 0;
+int   havechd = 0;
 char *chdname = NULL;
 
 /*
@@ -303,18 +307,18 @@ options(int argc, char **argv)
 static void
 pax_options(int argc, char **argv)
 {
-	int c;
-	unsigned i;
+	int	     c;
+	unsigned     i;
 	unsigned int flg = 0;
 	unsigned int bflg = 0;
-	const char *errstr;
-	char *pt;
+	const char  *errstr;
+	char	    *pt;
 
 	/*
 	 * process option flags
 	 */
 	while ((c = getopt(argc, argv,
-	    "ab:cdf:ijklno:p:rs:tuvwx:zB:DE:G:HLOPT:U:XYZ0")) != -1) {
+		    "ab:cdf:ijklno:p:rs:tuvwx:zB:DE:G:HLOPT:U:XYZ0")) != -1) {
 		switch (c) {
 		case 'a':
 			/*
@@ -728,9 +732,9 @@ pax_options(int argc, char **argv)
 static void
 tar_options(int argc, char **argv)
 {
-	int c;
-	int nincfiles = 0;
-	int incfiles_max = 0;
+	int	     c;
+	int	     nincfiles = 0;
+	int	     incfiles_max = 0;
 	unsigned int i;
 	unsigned int format = F_TAR;
 	struct incfile {
@@ -748,7 +752,7 @@ tar_options(int argc, char **argv)
 	 * process option flags
 	 */
 	while ((c = getoldopt(argc, argv,
-	    "b:cef:hjmopqruts:vwxzBC:F:HI:LNOPXZ014578")) != -1) {
+		    "b:cef:hjmopqruts:vwxzBC:F:HI:LNOPXZ014578")) != -1) {
 		switch (c) {
 		case 'b':
 			/*
@@ -899,13 +903,14 @@ tar_options(int argc, char **argv)
 			break;
 		case 'I':
 			if (++nincfiles > incfiles_max) {
-				size_t n = nincfiles + 3;
+				size_t		n = nincfiles + 3;
 				struct incfile *p;
 
 				p = reallocarray(
 				    incfiles, n, sizeof(*incfiles));
 				if (p == NULL) {
-					paxwarn(0, "Unable to allocate space "
+					paxwarn(0,
+					    "Unable to allocate space "
 					    "for option list");
 					exit(1);
 				}
@@ -997,7 +1002,7 @@ tar_options(int argc, char **argv)
 	case LIST:
 	case EXTRACT:
 	default: {
-		int sawpat = 0;
+		int   sawpat = 0;
 		char *file, *dir;
 
 		while (nincfiles || *argv != NULL) {
@@ -1061,8 +1066,7 @@ tar_options(int argc, char **argv)
 		 */
 		if (sawpat > 0)
 			chdname = NULL;
-	}
-		break;
+	} break;
 	case ARCHIVE:
 	case APPND:
 		frmt = &fsub[format];
@@ -1145,8 +1149,8 @@ static int
 mkpath(char *path)
 {
 	struct stat sb;
-	char *slash;
-	int done = 0;
+	char	   *slash;
+	int	    done = 0;
 
 	slash = path;
 
@@ -1185,10 +1189,10 @@ static void
 cpio_options(int argc, char **argv)
 {
 	const char *errstr;
-	int c, list_only = 0;
-	unsigned i;
-	char *str;
-	FILE *fp;
+	int	    c, list_only = 0;
+	unsigned    i;
+	char	   *str;
+	FILE	   *fp;
 
 	kflag = 1;
 	pids = 1;
@@ -1201,7 +1205,7 @@ cpio_options(int argc, char **argv)
 	swapbytes = 0;
 	swaphalf = 0;
 	while ((c = getopt(
-	    argc, argv, "abcdfijklmoprstuvzABC:E:F:H:I:LO:SZ6")) != -1)
+		    argc, argv, "abcdfijklmoprstuvzABC:E:F:H:I:LO:SZ6")) != -1)
 		switch (c) {
 		case 'a':
 			/*
@@ -1538,8 +1542,8 @@ static char *
 opt_parse_value(const char **srcp, int consume_rest)
 {
 	const char *src;
-	char *buf, *tmp;
-	size_t len, cap;
+	char	   *buf, *tmp;
+	size_t	    len, cap;
 
 	src = *srcp;
 	cap = 64;
@@ -1595,9 +1599,9 @@ static int
 opt_add(const char *str)
 {
 	const char *src;
-	OPLIST *opt;
-	char *name, *value;
-	int assign;
+	OPLIST	   *opt;
+	char	   *name, *value;
+	int	    assign;
 
 	if (str == NULL || *str == '\0') {
 		paxwarn(0, "Invalid option string");
@@ -1620,8 +1624,8 @@ opt_add(const char *str)
 		    *src != ',' && !isspace((unsigned char)*src))
 			src++;
 		const char *key_end = src;
-		while (key_end > key_start &&
-		    isspace((unsigned char)key_end[-1]))
+		while (
+		    key_end > key_start && isspace((unsigned char)key_end[-1]))
 			key_end--;
 		if (key_end == key_start) {
 			paxwarn(0, "Invalid option name");
@@ -1740,8 +1744,8 @@ static off_t
 str_offt(char *val)
 {
 	static int depth = 0;
-	char *expr;
-	off_t num, t;
+	char	  *expr;
+	off_t	   num, t;
 
 	if (++depth > 32) {
 		--depth;
@@ -1816,8 +1820,8 @@ str_offt(char *val)
 char *
 get_line(FILE *f)
 {
-	char *str = NULL;
-	size_t size = 0;
+	char   *str = NULL;
+	size_t	size = 0;
 	ssize_t len;
 
 	do {

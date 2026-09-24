@@ -41,33 +41,33 @@
  * BSD PAX global data structures and constants.
  */
 
-#define MAXBLK 64512       /* MAX blocksize supported (posix SPEC) */
+#define MAXBLK 64512	   /* MAX blocksize supported (posix SPEC) */
 			   /* WARNING: increasing MAXBLK past 32256 */
 			   /* will violate posix spec. */
 #define MAXBLK_POSIX 32256 /* MAX blocksize supported as per POSIX */
-#define BLKMULT 512        /* blocksize must be even mult of 512 bytes */
+#define BLKMULT 512	   /* blocksize must be even mult of 512 bytes */
 			   /* Don't even think of changing this */
-#define DEVBLK 8192        /* default read blksize for devices */
-#define FILEBLK 10240      /* default read blksize for files */
-#define PAXPATHLEN 3072    /* maximum path length for pax. MUST be */
+#define DEVBLK 8192	   /* default read blksize for devices */
+#define FILEBLK 10240	   /* default read blksize for files */
+#define PAXPATHLEN 3072	   /* maximum path length for pax. MUST be */
 			   /* longer than the system PATH_MAX */
 
 /*
  * Pax modes of operation
  */
-#define LIST 0     /* List the file in an archive */
+#define LIST 0	   /* List the file in an archive */
 #define EXTRACT 1  /* extract the files in an archive */
 #define ARCHIVE 2  /* write a new archive */
-#define APPND 3    /* append to the end of an archive */
-#define COPY 4     /* copy files to destination dir */
+#define APPND 3	   /* append to the end of an archive */
+#define COPY 4	   /* copy files to destination dir */
 #define DEFOP LIST /* if no flags default is to LIST */
 
 /*
  * Device type of the current archive volume
  */
-#define ISREG 0  /* regular file */
-#define ISCHR 1  /* character device */
-#define ISBLK 2  /* block device */
+#define ISREG 0	 /* regular file */
+#define ISCHR 1	 /* character device */
+#define ISBLK 2	 /* block device */
 #define ISTAPE 3 /* tape drive */
 #define ISPIPE 4 /* pipe/socket */
 
@@ -77,13 +77,13 @@
  * Used to store command line patterns
  */
 typedef struct pattern {
-	char *pstr;          /* pattern to match, user supplied */
-	char *pend;          /* end of a prefix match */
-	char *chdname;       /* the dir to change to if not NULL.  */
-	size_t plen;         /* length of pstr */
-	int flgs;            /* processing/state flags */
-#define MTCH 0x1             /* pattern has been matched */
-#define DIR_MTCH 0x2         /* pattern matched a directory */
+	char  *pstr;	     /* pattern to match, user supplied */
+	char  *pend;	     /* end of a prefix match */
+	char  *chdname;	     /* the dir to change to if not NULL.  */
+	size_t plen;	     /* length of pstr */
+	int    flgs;	     /* processing/state flags */
+#define MTCH 0x1	     /* pattern has been matched */
+#define DIR_MTCH 0x2	     /* pattern matched a directory */
 	struct pattern *fow; /* next pattern */
 } PATTERN;
 
@@ -103,22 +103,22 @@ typedef struct pattern {
  * Linked list entry used to retain pax extended header keywords.
  */
 typedef struct paxkey {
-	char *name;
-	char *value;
+	char	      *name;
+	char	      *value;
 	struct paxkey *next;
 } PAXKEY;
 
 /* Records command-line supplied pax keywords and their assignment style. */
 typedef struct paxopkv {
-	char *name;
-	char *value;
-	int assign;
+	char	       *name;
+	char	       *value;
+	int		assign;
 	struct paxopkv *next;
 } PAXOPKV;
 
 /* Tracks delete= pattern expressions supplied via -o options. */
 typedef struct paxdel {
-	char *pattern;
+	char	      *pattern;
 	struct paxdel *next;
 } PAXDEL;
 
@@ -135,35 +135,35 @@ enum pax_invalid_action {
 #define PAX_INVALID_RENAME 2
 
 typedef struct {
-	int nlen;                     /* file name length */
-	char name[PAXPATHLEN + 1];    /* file name */
-	int ln_nlen;                  /* link name length */
-	char ln_name[PAXPATHLEN + 1]; /* name to link to (if any) */
-	char *org_name;               /* orig name in file system */
-	PATTERN *pat;                 /* ptr to pattern match (if any) */
-	struct stat sb;               /* stat buffer see stat(2) */
-	off_t pad;                    /* bytes of padding after file xfer */
-	off_t skip;                   /* bytes of real data after header */
-				      /* IMPORTANT. The st_size field does */
-				      /* not always indicate the amount of */
-				      /* data following the header. */
-	u_int32_t crc;                /* file crc */
-	int type;                     /* type of file node */
-#define PAX_DIR 1                     /* directory */
-#define PAX_CHR 2                     /* character device */
-#define PAX_BLK 3                     /* block device */
-#define PAX_REG 4                     /* regular file */
-#define PAX_SLK 5                     /* symbolic link */
-#define PAX_SCK 6                     /* socket */
-#define PAX_FIF 7                     /* fifo */
-#define PAX_HLK 8                     /* hard link */
-#define PAX_HRG 9                     /* hard link to a regular file */
-#define PAX_CTG 10                    /* high performance file */
-#define PAX_GLL 11                    /* GNU long symlink */
-#define PAX_GLF 12                    /* GNU long file */
-	PAXKEY *xattr;                /* file specific pax keywords */
-	const PAXKEY *gattr;          /* global pax keywords in effect */
-	int invalid;                  /* invalid handling state */
+	int	    nlen;		     /* file name length */
+	char	    name[PAXPATHLEN + 1];    /* file name */
+	int	    ln_nlen;		     /* link name length */
+	char	    ln_name[PAXPATHLEN + 1]; /* name to link to (if any) */
+	char	   *org_name;		     /* orig name in file system */
+	PATTERN	   *pat;		     /* ptr to pattern match (if any) */
+	struct stat sb;			     /* stat buffer see stat(2) */
+	off_t	    pad;       /* bytes of padding after file xfer */
+	off_t	    skip;      /* bytes of real data after header */
+			       /* IMPORTANT. The st_size field does */
+			       /* not always indicate the amount of */
+			       /* data following the header. */
+	u_int32_t crc;	       /* file crc */
+	int	  type;	       /* type of file node */
+#define PAX_DIR 1	       /* directory */
+#define PAX_CHR 2	       /* character device */
+#define PAX_BLK 3	       /* block device */
+#define PAX_REG 4	       /* regular file */
+#define PAX_SLK 5	       /* symbolic link */
+#define PAX_SCK 6	       /* socket */
+#define PAX_FIF 7	       /* fifo */
+#define PAX_HLK 8	       /* hard link */
+#define PAX_HRG 9	       /* hard link to a regular file */
+#define PAX_CTG 10	       /* high performance file */
+#define PAX_GLL 11	       /* GNU long symlink */
+#define PAX_GLF 12	       /* GNU long file */
+	PAXKEY	     *xattr;   /* file specific pax keywords */
+	const PAXKEY *gattr;   /* global pax keywords in effect */
+	int	      invalid; /* invalid handling state */
 } ARCHD;
 
 #define PAX_IS_REG(type) ((type) == PAX_REG || (type) == PAX_CTG)
@@ -181,38 +181,38 @@ typedef struct {
  * dependent routines pass pointers to ARCHD structure (described below).
  */
 typedef struct {
-	char *name;            /* name of format, this is the name the user */
+	char *name;	       /* name of format, this is the name the user */
 			       /* gives to -x option to select it. */
-	int bsz;               /* default block size. used when the user */
+	int bsz;	       /* default block size. used when the user */
 			       /* does not specify a blocksize for writing */
 			       /* Appends continue to with the blocksize */
 			       /* the archive is currently using. */
-	int hsz;               /* Header size in bytes. this is the size of */
+	int hsz;	       /* Header size in bytes. this is the size of */
 			       /* the smallest header this format supports. */
 			       /* Headers are assumed to fit in a BLKMULT. */
 			       /* If they are bigger, get_head() and */
 			       /* get_arc() must be adjusted */
-	int udev;              /* does append require unique dev/ino? some */
+	int udev;	       /* does append require unique dev/ino? some */
 			       /* formats use the device and inode fields */
 			       /* to specify hard links. when members in */
 			       /* the archive have the same inode/dev they */
 			       /* are assumed to be hard links. During */
 			       /* append we may have to generate unique ids */
 			       /* to avoid creating incorrect hard links */
-	int hlk;               /* does archive store hard links info? if */
+	int hlk;	       /* does archive store hard links info? if */
 			       /* not, we do not bother to look for them */
 			       /* during archive write operations */
-	int blkalgn;           /* writes must be aligned to blkalgn boundary */
-	int inhead;            /* is the trailer encoded in a valid header? */
+	int blkalgn;	       /* writes must be aligned to blkalgn boundary */
+	int inhead;	       /* is the trailer encoded in a valid header? */
 			       /* if not, trailers are assumed to be found */
 			       /* in invalid headers (i.e like tar) */
 	int (*id)(char *,      /* checks if a buffer is a valid header */
-	    int);              /* returns 1 if it is, o.w. returns a 0 */
+	    int);	       /* returns 1 if it is, o.w. returns a 0 */
 	int (*st_rd)(void);    /* initialize routine for read. so format */
 			       /* can set up tables etc before it starts */
 			       /* reading an archive */
 	int (*rd)(ARCHD *,     /* read header routine. passed a pointer to */
-	    char *);           /* ARCHD. It must extract the info from the */
+	    char *);	       /* ARCHD. It must extract the info from the */
 			       /* format and store it in the ARCHD struct. */
 			       /* This routine is expected to fill all the */
 			       /* fields in the ARCHD (including stat buf) */
@@ -243,7 +243,7 @@ typedef struct {
 			       /* at the end of an archive write */
 	int (*trail)(ARCHD *,  /* returns 0 if a valid trailer, -1 if not */
 	    char *, int,       /* For formats which encode the trailer */
-	    int *);            /* outside of a valid header, a return value */
+	    int *);	       /* outside of a valid header, a return value */
 			       /* of 1 indicates that the block passed to */
 			       /* it can never contain a valid header (skip */
 			       /* this block, no point in looking at it)  */
@@ -260,11 +260,11 @@ typedef struct {
  * at the given name has the indicated dev+ino.
  */
 struct file_times {
-	ino_t ft_ino;            /* inode number to verify */
+	ino_t		ft_ino;	 /* inode number to verify */
 	struct timespec ft_mtim; /* times to set */
 	struct timespec ft_atim;
-	char *ft_name; /* name of file to set the times on */
-	dev_t ft_dev;  /* device number to verify */
+	char	       *ft_name; /* name of file to set the times on */
+	dev_t		ft_dev;	 /* device number to verify */
 };
 
 /*
@@ -273,11 +273,11 @@ struct file_times {
  * Used to pass format options to the format options handler
  */
 typedef struct oplist {
-	char *name;         /* option variable name e.g. name= */
-	char *value;        /* value for option variable */
-	int assign;         /* assignment type: '=' or ':=' */
-	int handled;        /* option consumed by generic parser */
-	struct oplist *fow; /* next option */
+	char	      *name;	/* option variable name e.g. name= */
+	char	      *value;	/* value for option variable */
+	int	       assign;	/* assignment type: '=' or ':=' */
+	int	       handled; /* option consumed by generic parser */
+	struct oplist *fow;	/* next option */
 } OPLIST;
 
 #define OPT_ASSIGN_NONE 0

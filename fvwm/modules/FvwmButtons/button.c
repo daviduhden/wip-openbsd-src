@@ -285,7 +285,7 @@ void
 alloc_buttonlist(button_info *ub, int num)
 {
 	button_info **bb;
-	int i, old;
+	int	      i, old;
 
 	if (num >= ub->c->allocated_buttons) {
 		old = ub->c->allocated_buttons;
@@ -406,7 +406,7 @@ NumberButtons(button_info *b)
 static char
 PlaceAndExpandButton(int x, int y, button_info *b, button_info *ub)
 {
-	int i, j, k;
+	int		i, j, k;
 	container_info *c = ub->c;
 
 	i = x + y * c->num_columns;
@@ -487,7 +487,8 @@ ShrinkButton(button_info *b, container_info *c)
 			if (j || k) {
 				l = i + j + k * c->num_columns;
 				if (c->buttons[l] != b) {
-					fprintf(stderr, "error: shrink2: "
+					fprintf(stderr,
+					    "error: shrink2: "
 					    "button was stolen\n");
 					exit(1);
 				}
@@ -503,10 +504,10 @@ ShrinkButton(button_info *b, container_info *c)
 void
 ShuffleButtons(button_info *ub)
 {
-	int i, actual_buttons_used;
-	int next_button_x, next_button_y, num_items;
-	button_info *b;
-	button_info **local_buttons;
+	int		i, actual_buttons_used;
+	int		next_button_x, next_button_y, num_items;
+	button_info    *b;
+	button_info   **local_buttons;
 	container_info *c = ub->c;
 
 	/* make local copy of buttons in ub */
@@ -612,8 +613,8 @@ ShuffleButtons(button_info *ub)
 			next_button_x = 0;
 		}
 		/* Search for next free position to accomodate button */
-		while (PlaceAndExpandButton(next_button_x, next_button_y, b,
-		    ub)) {
+		while (
+		    PlaceAndExpandButton(next_button_x, next_button_y, b, ub)) {
 			next_button_x++;
 			if (next_button_x + b->BWidth > c->num_columns) {
 				next_button_y++;
@@ -693,7 +694,7 @@ NextButton(button_info **ub, button_info **b, int *i, int all)
 int
 button_belongs_to(button_info *ub, int button)
 {
-	int x, y, xx, yy;
+	int	     x, y, xx, yy;
 	button_info *b;
 	if (!ub || button < 0 || button > ub->c->num_buttons)
 		return -1;
@@ -719,7 +720,7 @@ button_belongs_to(button_info *ub, int button)
 button_info *
 select_button(button_info *ub, int x, int y)
 {
-	int i;
+	int	     i;
 	button_info *b;
 	if (!(ub->flags & b_Container))
 		return ub;

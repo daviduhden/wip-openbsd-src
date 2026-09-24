@@ -31,7 +31,7 @@ typedef struct geom {
  * Since some functions are called from other modules unwanted side effects
  * (i.e. bugs.) would be created */
 
-extern int menuFromFrameOrWindowOrTitlebar;
+extern int    menuFromFrameOrWindowOrTitlebar;
 extern Window PressedW;
 
 static void DoResize(int x_root, int y_root, FvwmWindow *tmp_win, geom *drag,
@@ -47,18 +47,18 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	(void)Module;
-	Bool finished = FALSE, done = FALSE, abort = FALSE;
-	int x, y, delta_x, delta_y, stashed_x, stashed_y;
-	Window ResizeWindow;
-	Bool flags;
-	Bool fButtonAbort = False;
-	int val1, val2, val1_unit, val2_unit, n;
+	Bool	     finished = FALSE, done = FALSE, abort = FALSE;
+	int	     x, y, delta_x, delta_y, stashed_x, stashed_y;
+	Window	     ResizeWindow;
+	Bool	     flags;
+	Bool	     fButtonAbort = False;
+	int	     val1, val2, val1_unit, val2_unit, n;
 	unsigned int button_mask = 0;
-	geom sdrag;
-	geom sorig;
-	geom *drag = &sdrag;
-	geom *orig = &sorig;
-	int ymotion = 0, xmotion = 0;
+	geom	     sdrag;
+	geom	     sorig;
+	geom	    *drag = &sdrag;
+	geom	    *orig = &sorig;
+	int	     ymotion = 0, xmotion = 0;
 
 	if (DeferExecution(eventp, &w, &tmp_win, &context, MOVE, ButtonPress))
 		return;
@@ -75,7 +75,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #ifdef WINDOWSHADE
 	    || (tmp_win->buttons & WSHADE)
 #endif
-	    ) {
+	) {
 		XBell(dpy, 0);
 		return;
 	}
@@ -186,7 +186,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	while (!finished) {
 		XMaskEvent(dpy,
 		    ButtonPressMask | ButtonReleaseMask | KeyPressMask |
-		    ButtonMotionMask | PointerMotionMask | ExposureMask,
+			ButtonMotionMask | PointerMotionMask | ExposureMask,
 		    &Event);
 		StashEventTime(&Event);
 
@@ -194,7 +194,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			/* discard any extra motion events before a release */
 			while (XCheckMaskEvent(dpy,
 			    ButtonMotionMask | ButtonReleaseMask |
-			    PointerMotionMask,
+				PointerMotionMask,
 			    &Event)) {
 				StashEventTime(&Event);
 				if (Event.type == ButtonRelease)
@@ -211,15 +211,15 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			XAllowEvents(dpy, ReplayPointer, CurrentTime);
 			done = TRUE;
 			if (((Event.xbutton.button == 1) &&
-			    (button_mask & Button1Mask)) ||
+				(button_mask & Button1Mask)) ||
 			    ((Event.xbutton.button == 2) &&
-			     (button_mask & Button2Mask)) ||
+				(button_mask & Button2Mask)) ||
 			    ((Event.xbutton.button == 3) &&
-			     (button_mask & Button3Mask)) ||
+				(button_mask & Button3Mask)) ||
 			    ((Event.xbutton.button == 4) &&
-			     (button_mask & Button4Mask)) ||
+				(button_mask & Button4Mask)) ||
 			    ((Event.xbutton.button == 5) &&
-			     (button_mask & Button5Mask))) {
+				(button_mask & Button5Mask))) {
 				/* No new button was pressed, just a delayed
 				 * event */
 				break;
@@ -392,8 +392,8 @@ void
 DisplaySize(
     FvwmWindow *tmp_win, int width, int height, Bool Init, Bool resetLast)
 {
-	char str[100];
-	int dwidth, dheight, offset;
+	char	   str[100];
+	int	   dwidth, dheight, offset;
 	static int last_width = 0;
 	static int last_height = 0;
 
@@ -417,7 +417,7 @@ DisplaySize(
 
 	(void)snprintf(str, sizeof(str), " %4d x %-4d ", dwidth, dheight);
 	offset = (Scr.SizeStringWidth + SIZE_HINDENT * 2 -
-	    XTextWidth(Scr.StdFont.font, str, strlen(str))) /
+		     XTextWidth(Scr.StdFont.font, str, strlen(str))) /
 	    2;
 	if (Init) {
 		XClearWindow(dpy, Scr.SizeWindow);
@@ -605,7 +605,7 @@ MoveOutline(Window root, int x, int y, int width, int height)
 	static int lasty = 0;
 	static int lastWidth = 0;
 	static int lastHeight = 0;
-	char draw;
+	char	   draw;
 	XRectangle rects[5];
 
 	if (x == lastx && y == lasty && width == lastWidth &&

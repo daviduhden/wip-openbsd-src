@@ -11,26 +11,25 @@
  *
  */
 
-#include "ButtonArray.h"
-
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "../../libs/fvwmlib.h"
+#include "ButtonArray.h"
 #include "FvwmWinList.h"
 #include "config.h"
 
 extern XFontStruct *ButtonFont;
-extern Display *dpy;
-extern Window win;
-extern GC shadow[MAX_COLOUR_SETS], hilite[MAX_COLOUR_SETS];
-extern GC graph[MAX_COLOUR_SETS], background[MAX_COLOUR_SETS];
-extern int LeftJustify, TruncateLeft, ShowFocus;
+extern Display	   *dpy;
+extern Window	    win;
+extern GC	    shadow[MAX_COLOUR_SETS], hilite[MAX_COLOUR_SETS];
+extern GC	    graph[MAX_COLOUR_SETS], background[MAX_COLOUR_SETS];
+extern int	    LeftJustify, TruncateLeft, ShowFocus;
 
 extern long CurrentDesk;
-extern int ShowCurrentDesk;
+extern int  ShowCurrentDesk;
 
 /*************************************************************************
  *                                                                       *
@@ -249,7 +248,7 @@ Button *
 find_n(ButtonArray *array, int n)
 {
 	Button *temp;
-	int i;
+	int	i;
 
 	temp = array->head;
 	for (i = 0; i < n && temp != NULL; i++, temp = temp->next)
@@ -290,13 +289,13 @@ FreeAllButtons(ButtonArray *array)
 void
 DoButton(Button *button, int x, int y, int w, int h)
 {
-	int up, newx, set;
-	GC topgc;
-	GC bottomgc;
-	char *string;
-	XGCValues gcv;
+	int	      up, newx, set;
+	GC	      topgc;
+	GC	      bottomgc;
+	char	     *string;
+	XGCValues     gcv;
 	unsigned long gcm;
-	XFontStruct *font;
+	XFontStruct  *font;
 
 	up = button->up;
 	set = button->set;
@@ -307,7 +306,6 @@ DoButton(Button *button, int x, int y, int w, int h)
 	gcm = GCFont;
 	gcv.font = font->fid;
 	XChangeGC(dpy, graph[set], gcm, &gcv);
-
 
 	/*? XClearArea(dpy,win,x,y,w,h,False);*/
 	XFillRectangle(dpy, win, background[set], x, y, w, h + 1);
@@ -343,10 +341,11 @@ DoButton(Button *button, int x, int y, int w, int h)
 			else {
 				string = button->title;
 				while (*string &&
-				    (w - XTextWidth(ButtonFont, string,
-				     strlen(string))) /
-				    2 <
-				    4)
+				    (w -
+					XTextWidth(ButtonFont, string,
+					    strlen(string))) /
+					    2 <
+					4)
 					string++;
 				button->truncatewidth = w;
 				button->truncate_title = string;
@@ -376,7 +375,7 @@ void
 DrawButtonArray(ButtonArray *barray, int all)
 {
 	Button *btn;
-	int i = 0; /* buttons displayed */
+	int	i = 0; /* buttons displayed */
 
 	for (btn = barray->head; btn != NULL; btn = btn->next) {
 		if ((!ShowCurrentDesk) || (btn->desk == CurrentDesk)) {
@@ -411,7 +410,7 @@ void
 RadioButton(ButtonArray *array, int butnum)
 {
 	Button *temp;
-	int i;
+	int	i;
 
 	for (temp = array->head, i = 0; temp != NULL; temp = temp->next, i++) {
 		if (i == butnum) {
@@ -453,7 +452,7 @@ WhichButton(ButtonArray *array, int x, int y)
 
 	if (ShowCurrentDesk) {
 		Button *temp;
-		int i, n;
+		int	i, n;
 
 		temp = array->head;
 		for (i = 0, n = 0; n < (num + 1) && temp != NULL;

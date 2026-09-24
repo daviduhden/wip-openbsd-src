@@ -26,9 +26,10 @@
 #define HAVE_SYS_WAIT_H 1
 #define HAVE_WAITPID 1
 
+#include <sys/types.h>
+
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #ifndef min

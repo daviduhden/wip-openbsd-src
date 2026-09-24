@@ -33,33 +33,32 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 
-#include <ctype.h>
-#include <unistd.h>
-
 #include <X11/Xlib.h>
+#include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "../../fvwm/module.h"
 #include "FvwmBacker.h"
 
 typedef struct {
-	int type;                 /* The command type.
-	                           * -1 = no command.
-	                           *  0 = command to be spawned
-	                           *  1 = a solid color to be set */
-	char *cmdStr;             /* The command string (Type 0)   */
+	int type;		  /* The command type.
+				   * -1 = no command.
+				   *  0 = command to be spawned
+				   *  1 = a solid color to be set */
+	char	     *cmdStr;	  /* The command string (Type 0)   */
 	unsigned long solidColor; /* A solid color after X parsing (Type 1) */
 } Command;
 
 Command *commands;
-int DeskCount = 0;
+int	 DeskCount = 0;
 
 int Fvwm_fd[2];
 int fd_width;
@@ -69,8 +68,8 @@ char *Module;
 /* X Display information. */
 
 Display *dpy;
-Window root;
-int screen;
+Window	 root;
+int	 screen;
 
 FILE *logFile;
 
@@ -149,7 +148,7 @@ main(int argc, char **argv)
 void
 EndLessLoop(void)
 {
-	fd_set readset;
+	fd_set	       readset;
 	struct timeval tv;
 
 	sandbox_x11_only("FvwmBacker");
@@ -160,12 +159,10 @@ EndLessLoop(void)
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
 
-		if (!select(fd_width, &readset, NULL, NULL,
-		    &tv)) {
+		if (!select(fd_width, &readset, NULL, NULL, &tv)) {
 			FD_ZERO(&readset);
 			FD_SET(Fvwm_fd[1], &readset);
-			select(fd_width, &readset, NULL,
-			    NULL, NULL);
+			select(fd_width, &readset, NULL, NULL, NULL);
 		}
 
 		if (!FD_ISSET(Fvwm_fd[1], &readset))
@@ -182,7 +179,7 @@ EndLessLoop(void)
 void
 ReadFvwmPipe(void)
 {
-	int count;
+	int	      count;
 	unsigned long header[HEADER_SIZE], *body;
 
 	body = NULL;
@@ -252,7 +249,7 @@ ProcessMessage(unsigned long type, unsigned long *body)
 void
 SendFvwmPipe(char *message, unsigned long window)
 {
-	int w;
+	int   w;
 	char *hold, *temp, *temp_msg;
 	hold = message;
 
@@ -303,7 +300,7 @@ DeadPipe(int nonsense)
 void
 ParseConfig(void)
 {
-	char line2[40];
+	char  line2[40];
 	char *tline;
 
 	snprintf(line2, sizeof(line2), "*%sDesk", Module);
@@ -326,7 +323,7 @@ void
 AddCommand(char *string)
 {
 	char *temp;
-	int num;
+	int   num;
 	temp = string;
 	while (isspace((unsigned char)*temp))
 		temp++;

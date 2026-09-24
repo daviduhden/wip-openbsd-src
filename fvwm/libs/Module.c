@@ -1,13 +1,12 @@
 /*
 ** Module.c: code for modules to communicate with fvwm
 */
-#include "../fvwm/module.h"
-
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../fvwm/module.h"
 #include "config.h"
 #include "fvwmlib.h"
 
@@ -31,8 +30,8 @@
 int
 ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 {
-	int count, total, count2, body_length;
-	char *cbody;
+	int	    count, total, count2, body_length;
+	char	   *cbody;
 	extern void DeadPipe(int);
 
 	errno = 0;
@@ -47,16 +46,17 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 			    body_length * sizeof(unsigned long));
 			cbody = (char *)(*body);
 			total = 0;
-			while (total < (int)(body_length * sizeof(unsigned long))) {
+			while (total <
+			    (int)(body_length * sizeof(unsigned long))) {
 				errno = 0;
 				if ((count2 = read(fd, &cbody[total],
-				    body_length * sizeof(unsigned long) -
-				    total)) > 0) {
+					 body_length * sizeof(unsigned long) -
+					     total)) > 0) {
 					total += count2;
 				} else {
-				/* EOF or read error: the pipe is gone.
-				 * Report a dead pipe instead of
-				 * spinning on a closed connection. */
+					/* EOF or read error: the pipe is gone.
+					 * Report a dead pipe instead of
+					 * spinning on a closed connection. */
 					free(*body);
 					*body = NULL;
 					return -1;
@@ -121,10 +121,10 @@ SetMessageMask(int *fd, unsigned long mask)
 void
 GetConfigLine(int *fd, char **tline)
 {
-	static int first_pass = 1;
-	int count, done = 0;
-	int body_size;
-	static char *line = NULL;
+	static int    first_pass = 1;
+	int	      count, done = 0;
+	int	      body_size;
+	static char  *line = NULL;
 	unsigned long header[HEADER_SIZE];
 
 	if (line != NULL)

@@ -34,8 +34,8 @@
 #define NO_DESK_SORT (1 << 6)
 #define SHOW_ICONNAME (1 << 7)
 #define SHOW_ALPHABETIC (1 << 8)
-#define SHOW_EVERYTHING							\
-	(SHOW_GEOMETRY | SHOW_ALLDESKS | SHOW_NORMAL | SHOW_ICONIC |	\
+#define SHOW_EVERYTHING                                                        \
+	(SHOW_GEOMETRY | SHOW_ALLDESKS | SHOW_NORMAL | SHOW_ICONIC |           \
 	    SHOW_STICKY | SHOW_ONTOP)
 
 /* Function to compare window title names
@@ -59,31 +59,31 @@ void
 do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
-	MenuRoot *mr;
-	MenuItem *miExecuteAction;
-	FvwmWindow *t;
+	MenuRoot    *mr;
+	MenuItem    *miExecuteAction;
+	FvwmWindow  *t;
 	FvwmWindow **windowList;
-	int numWindows;
-	int ii;
-	char tname[80] = "";
-	char loc[40], *name = NULL;
-	int dwidth, dheight;
-	char tlabel[50] = "";
-	int last_desk_done = INT_MIN;
-	int last_desk_displayed = INT_MIN;
-	int next_desk = 0;
-	char *t_hot = NULL; /* Menu label with hotkey added */
-	char scut = '0';    /* Current short cut key */
-	char *line = NULL, *tok = NULL;
-	int desk = Scr.CurrentDesk;
-	int flags = SHOW_EVERYTHING;
-	char *func = NULL;
-	char *tfunc = NULL;
-	char *default_action = NULL;
-	MenuStatus menu_retval;
-	XEvent *teventp;
-	MenuOptions mops;
-	size_t hotlen;
+	int	     numWindows;
+	int	     ii;
+	char	     tname[80] = "";
+	char	     loc[40], *name = NULL;
+	int	     dwidth, dheight;
+	char	     tlabel[50] = "";
+	int	     last_desk_done = INT_MIN;
+	int	     last_desk_displayed = INT_MIN;
+	int	     next_desk = 0;
+	char	    *t_hot = NULL; /* Menu label with hotkey added */
+	char	     scut = '0';   /* Current short cut key */
+	char	    *line = NULL, *tok = NULL;
+	int	     desk = Scr.CurrentDesk;
+	int	     flags = SHOW_EVERYTHING;
+	char	    *func = NULL;
+	char	    *tfunc = NULL;
+	char	    *default_action = NULL;
+	MenuStatus   menu_retval;
+	XEvent	    *teventp;
+	MenuOptions  mops;
+	size_t	     hotlen;
 
 	mops.flags.allflags = 0;
 	if (action && *action) {
@@ -215,7 +215,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		for (ii = 0; ii < numWindows; ii++) {
 			t = windowList[ii];
 			if (((t->Desk == next_desk) ||
-			    (flags & NO_DESK_SORT)) &&
+				(flags & NO_DESK_SORT)) &&
 			    (!(t->flags & WINDOWLISTSKIP))) {
 				if (!(flags & SHOW_ICONIC) &&
 				    (t->flags & ICONIFIED))
@@ -223,16 +223,16 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				if (!(flags & SHOW_STICKY) &&
 				    (t->flags & STICKY))
 					continue; /* don't want sticky ones -
-					             skip */
+						     skip */
 				if (!(flags & SHOW_ONTOP) && (t->flags & ONTOP))
 					continue; /* don't want ontop ones -
-					             skip */
+						     skip */
 				if (!(flags & SHOW_NORMAL) &&
 				    !((t->flags & ICONIFIED) ||
-				    (t->flags & STICKY) ||
-				    (t->flags & ONTOP)))
+					(t->flags & STICKY) ||
+					(t->flags & ONTOP)))
 					continue; /* don't want "normal" ones -
-					             skip */
+						     skip */
 
 				/* put a seperator between desks, but not at the
 				 * top */
@@ -328,11 +328,11 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					mr->last->lpicture = t->mini_icon;
 					t->mini_icon
 					    ->count++; /* increase the cache
-					                  count!! otherwise the
-					                  pixmap will be
-					                  eventually removed
-					                  from the cache by
-					                  DestroyMenu */
+							  count!! otherwise the
+							  pixmap will be
+							  eventually removed
+							  from the cache by
+							  DestroyMenu */
 				}
 #endif
 				if (t_hot)

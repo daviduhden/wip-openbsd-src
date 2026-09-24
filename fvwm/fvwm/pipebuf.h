@@ -35,11 +35,11 @@
 #include <stddef.h>
 
 struct pipebuf {
-	char	*data;
-	size_t	 len;		/* valid bytes from data[0] */
-	size_t	 off;		/* consumed bytes */
-	size_t	 cap;
-	int	 discarding;	/* past a NUL, skipping to newline */
+	char  *data;
+	size_t len; /* valid bytes from data[0] */
+	size_t off; /* consumed bytes */
+	size_t cap;
+	int    discarding; /* past a NUL, skipping to newline */
 };
 
 void pipebuf_init(struct pipebuf *);
@@ -56,8 +56,8 @@ void pipebuf_append(struct pipebuf *, const void *, size_t);
  * Returns 0 when no complete line is available yet.  The returned
  * pointer is only valid until the next pipebuf_append() call.
  */
-int pipebuf_next_line(struct pipebuf *, char **linep, size_t *linelen,
-    size_t maxline);
+int pipebuf_next_line(
+    struct pipebuf *, char **linep, size_t *linelen, size_t maxline);
 
 /*
  * Drop the oldest buffered complete lines until at most limit bytes

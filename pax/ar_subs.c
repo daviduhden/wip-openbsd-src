@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -46,12 +46,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
-static void wr_archive(ARCHD *, int is_app);
-static int get_arc(void);
-static int next_head(ARCHD *);
+static void	wr_archive(ARCHD *, int is_app);
+static int	get_arc(void);
+static int	next_head(ARCHD *);
 extern sigset_t s_mask;
 
 /*
@@ -60,7 +60,7 @@ extern sigset_t s_mask;
  */
 
 static char hdbuf[BLKMULT]; /* space for archive header on read */
-u_long flcnt;               /* number of files processed */
+u_long	    flcnt;	    /* number of files processed */
 
 /*
  * list()
@@ -72,8 +72,8 @@ void
 list(void)
 {
 	ARCHD *arcn;
-	int res;
-	ARCHD archd = {0};
+	int    res;
+	ARCHD  archd = {0};
 	time_t now;
 
 	arcn = &archd;
@@ -108,7 +108,7 @@ list(void)
 			 */
 			off_t cnt;
 			if (!rd_wrfile(
-			    arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
+				arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
 				(void)rd_skip(cnt + arcn->pad);
 			continue;
 		}
@@ -159,7 +159,7 @@ static int
 cmp_file_times(int mtime_flag, int ctime_flag, ARCHD *arcn, const char *path)
 {
 	struct stat sb;
-	long res;
+	long	    res;
 
 	if (path == NULL)
 		path = arcn->name;
@@ -221,10 +221,10 @@ void
 extract(void)
 {
 	ARCHD *arcn;
-	int res;
-	off_t cnt;
-	ARCHD archd = {0};
-	int fd;
+	int    res;
+	off_t  cnt;
+	ARCHD  archd = {0};
+	int    fd;
 	time_t now;
 
 	sltab_start();
@@ -267,7 +267,7 @@ extract(void)
 			 * we need to read, to get the real filename
 			 */
 			if (!rd_wrfile(
-			    arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
+				arcn, arcn->type == PAX_GLF ? -1 : -2, &cnt))
 				(void)rd_skip(cnt + arcn->pad);
 			continue;
 		}
@@ -391,7 +391,7 @@ extract(void)
 		if (!res)
 			(void)rd_skip(cnt + arcn->pad);
 
- popd:
+	popd:
 		/*
 		 * if required, chdir around.
 		 */
@@ -423,12 +423,12 @@ extract(void)
 static void
 wr_archive(ARCHD *arcn, int is_app)
 {
-	int res;
-	int hlk;
-	int wr_one;
-	off_t cnt;
-	int (*wrf)(ARCHD *);
-	int fd = -1;
+	int    res;
+	int    hlk;
+	int    wr_one;
+	off_t  cnt;
+	int    (*wrf)(ARCHD *);
+	int    fd = -1;
 	time_t now;
 
 	/*
@@ -639,11 +639,11 @@ void
 append(void)
 {
 	ARCHD *arcn;
-	int res;
-	ARCHD archd = {0};
-	FSUB *orgfrmt;
-	int udev;
-	off_t tlen;
+	int    res;
+	ARCHD  archd = {0};
+	FSUB  *orgfrmt;
+	int    udev;
+	off_t  tlen;
 
 	arcn = &archd;
 	orgfrmt = frmt;
@@ -809,16 +809,16 @@ archive(void)
 void
 copy(void)
 {
-	ARCHD *arcn;
-	int res;
-	int fddest;
-	char *dest_pt;
-	size_t dlen;
-	size_t drem;
-	int fdsrc = -1;
+	ARCHD	   *arcn;
+	int	    res;
+	int	    fddest;
+	char	   *dest_pt;
+	size_t	    dlen;
+	size_t	    drem;
+	int	    fdsrc = -1;
 	struct stat sb;
-	ARCHD archd = {0};
-	char dirbuf[PAXPATHLEN + 1];
+	ARCHD	    archd = {0};
+	char	    dirbuf[PAXPATHLEN + 1];
 
 	sltab_start();
 
@@ -897,7 +897,7 @@ copy(void)
 			 * create the destination name
 			 */
 			if (strlcpy(dest_pt, arcn->name + (*arcn->name == '/'),
-			    drem + 1) > drem) {
+				drem + 1) > drem) {
 				paxwarn(1, "Destination pathname too long %s",
 				    arcn->name);
 				continue;
@@ -1043,14 +1043,14 @@ copy(void)
 static int
 next_head(ARCHD *arcn)
 {
-	int ret;
+	int   ret;
 	char *hdend;
-	int res;
-	int shftsz;
-	int hsz;
-	int in_resync = 0; /* set when we are in resync mode */
-	int cnt = 0;       /* counter for trailer function */
-	int first = 1;     /* on 1st read, EOF isn't premature. */
+	int   res;
+	int   shftsz;
+	int   hsz;
+	int   in_resync = 0; /* set when we are in resync mode */
+	int   cnt = 0;	     /* counter for trailer function */
+	int   first = 1;     /* on 1st read, EOF isn't premature. */
 
 	/*
 	 * Clear out any per-file extended header state left from the
@@ -1098,7 +1098,8 @@ next_head(ARCHD *arcn)
 			}
 			if (!in_resync) {
 				if (act == APPND) {
-					paxwarn(1, "Archive I/O error, cannot "
+					paxwarn(1,
+					    "Archive I/O error, cannot "
 					    "continue");
 					return (-1);
 				}
@@ -1134,7 +1135,7 @@ next_head(ARCHD *arcn)
 			 * this format has trailers outside of valid headers
 			 */
 			if ((ret = (*frmt->trail)(
-			    arcn, hdbuf, in_resync, &cnt)) == 0) {
+				 arcn, hdbuf, in_resync, &cnt)) == 0) {
 				/*
 				 * valid trailer found, drain input as required
 				 */
@@ -1208,12 +1209,12 @@ next_head(ARCHD *arcn)
 static int
 get_arc(void)
 {
-	int i;
-	int hdsz = 0;
-	int res;
-	int minhd = BLKMULT;
+	int   i;
+	int   hdsz = 0;
+	int   res;
+	int   minhd = BLKMULT;
 	char *hdend;
-	int notice = 0;
+	int   notice = 0;
 
 	/*
 	 * find the smallest header size in all archive formats and then set up

@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -44,15 +44,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * routines which implement archive and file buffering
  */
 
-static int buf_fill(void);
-static int buf_flush(int);
+static int  buf_fill(void);
+static int  buf_flush(int);
 static void apply_swaps(char *, size_t, int);
 static void swap_bytes(char *, size_t);
 static void swap_halfwords(char *, size_t);
@@ -65,17 +65,17 @@ static void swap_halfwords(char *, size_t);
  * limit on blocking size is removed (though that will violate pax spec)
  * MAXBLK define and tests will also need to be updated.
  */
-static char bufmem[MAXBLK + BLKMULT]; /* i/o buffer + pushback id space */
-static char *buf;                     /* normal start of i/o buffer */
-static char *bufend;                  /* end or last char in i/o buffer */
-static char *bufpt;                   /* read/write point in i/o buffer */
-int blksz = MAXBLK;                   /* block input/output size in bytes */
-int wrblksz;                          /* user spec output size in bytes */
-int maxflt = MAXFLT;                  /* MAX consecutive media errors */
-int rdblksz;                          /* first read blksize (tapes only) */
-off_t wrlimit;                        /* # of bytes written per archive vol */
-off_t wrcnt;                          /* # of bytes written on current vol */
-off_t rdcnt;                          /* # of bytes read on current vol */
+static char  bufmem[MAXBLK + BLKMULT]; /* i/o buffer + pushback id space */
+static char *buf;		       /* normal start of i/o buffer */
+static char *bufend;		       /* end or last char in i/o buffer */
+static char *bufpt;		       /* read/write point in i/o buffer */
+int	     blksz = MAXBLK;	       /* block input/output size in bytes */
+int	     wrblksz;		       /* user spec output size in bytes */
+int	     maxflt = MAXFLT;	       /* MAX consecutive media errors */
+int	     rdblksz;		       /* first read blksize (tapes only) */
+off_t	     wrlimit;		       /* # of bytes written per archive vol */
+off_t	     wrcnt;		       /* # of bytes written on current vol */
+off_t	     rdcnt;		       /* # of bytes read on current vol */
 
 /*
  * wr_start()
@@ -216,7 +216,7 @@ cp_start(void)
 int
 appnd_start(off_t skcnt)
 {
-	int res;
+	int   res;
 	off_t cnt;
 
 	if (exit_val != 0) {
@@ -612,9 +612,9 @@ wr_skip(off_t skcnt)
 int
 wr_rdfile(ARCHD *arcn, int ifd, off_t *left)
 {
-	int cnt;
-	int res = 0;
-	off_t size = arcn->sb.st_size;
+	int	    cnt;
+	int	    res = 0;
+	off_t	    size = arcn->sb.st_size;
 	struct stat sb;
 
 	/*
@@ -673,16 +673,16 @@ wr_rdfile(ARCHD *arcn, int ifd, off_t *left)
 int
 rd_wrfile(ARCHD *arcn, int ofd, off_t *left)
 {
-	int cnt = 0;
-	off_t size = arcn->sb.st_size;
-	int res = 0;
-	char *fnm = arcn->name;
-	int isem = 1;
-	int rem;
-	int sz = MINFBSZ;
+	int	    cnt = 0;
+	off_t	    size = arcn->sb.st_size;
+	int	    res = 0;
+	char	   *fnm = arcn->name;
+	int	    isem = 1;
+	int	    rem;
+	int	    sz = MINFBSZ;
 	struct stat sb;
-	u_int32_t crc = 0;
-	int need_swap = swapbytes || swaphalf;
+	u_int32_t   crc = 0;
+	int	    need_swap = swapbytes || swaphalf;
 
 	/*
 	 * pass the blocksize of the file being written to the write routine,
@@ -729,7 +729,7 @@ rd_wrfile(ARCHD *arcn, int ofd, off_t *left)
 			apply_swaps(bufpt, cnt, 1);
 
 		if (docrc) {
-			int i = res;
+			int	       i = res;
 			unsigned char *bp = (unsigned char *)bufpt;
 			while (--i >= 0)
 				crc += *bp++;
@@ -816,14 +816,14 @@ swap_halfwords(char *data, size_t len)
 void
 cp_file(ARCHD *arcn, int fd1, int fd2)
 {
-	int cnt;
-	off_t cpcnt = 0;
-	int res = 0;
-	char *fnm = arcn->name;
-	int no_hole = 0;
-	int isem = 1;
-	int rem;
-	int sz = MINFBSZ;
+	int	    cnt;
+	off_t	    cpcnt = 0;
+	int	    res = 0;
+	char	   *fnm = arcn->name;
+	int	    no_hole = 0;
+	int	    isem = 1;
+	int	    rem;
+	int	    sz = MINFBSZ;
 	struct stat sb;
 
 	/*
@@ -897,7 +897,7 @@ cp_file(ARCHD *arcn, int fd1, int fd2)
 static int
 buf_fill(void)
 {
-	int cnt;
+	int	   cnt;
 	static int fini = 0;
 
 	if (fini)

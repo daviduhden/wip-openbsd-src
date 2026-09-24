@@ -47,8 +47,8 @@ void GrabIconKeys(FvwmWindow *, Window);
 void
 CreateIconWindow(FvwmWindow *tmp_win, int def_x, int def_y)
 {
-	int final_x, final_y;
-	unsigned long valuemask;         /* mask for create windows */
+	int		     final_x, final_y;
+	unsigned long	     valuemask;	 /* mask for create windows */
 	XSetWindowAttributes attributes; /* attributes for create windows */
 
 	tmp_win->flags |= ICON_OURS;
@@ -125,10 +125,9 @@ CreateIconWindow(FvwmWindow *tmp_win, int def_x, int def_y)
 	valuemask = CWBorderPixel | CWCursor | CWEventMask | CWBackPixel;
 	attributes.border_pixel = Scr.StdColors.fore;
 	attributes.cursor = Scr.FvwmCursors[DEFAULT];
-	attributes.event_mask =
-	    (ButtonPressMask | ButtonReleaseMask | VisibilityChangeMask |
-	     ExposureMask | KeyPressMask | EnterWindowMask |
-	     FocusChangeMask);
+	attributes.event_mask = (ButtonPressMask | ButtonReleaseMask |
+	    VisibilityChangeMask | ExposureMask | KeyPressMask |
+	    EnterWindowMask | FocusChangeMask);
 	if (!(tmp_win->flags & NOICON_TITLE) || (tmp_win->icon_p_height == 0))
 		tmp_win->icon_w = XCreateWindow(dpy, Scr.Root, final_x,
 		    final_y + tmp_win->icon_p_height, tmp_win->icon_w_width,
@@ -142,10 +141,9 @@ CreateIconWindow(FvwmWindow *tmp_win, int def_x, int def_y)
 		    CopyFromParent, CopyFromParent, CopyFromParent, valuemask,
 		    &attributes);
 	} else {
-		attributes.event_mask =
-		    (ButtonPressMask | ButtonReleaseMask |
-		     VisibilityChangeMask | KeyPressMask | EnterWindowMask |
-		     FocusChangeMask | LeaveWindowMask);
+		attributes.event_mask = (ButtonPressMask | ButtonReleaseMask |
+		    VisibilityChangeMask | KeyPressMask | EnterWindowMask |
+		    FocusChangeMask | LeaveWindowMask);
 
 		valuemask = CWEventMask;
 		XChangeWindowAttributes(
@@ -187,9 +185,9 @@ CreateIconWindow(FvwmWindow *tmp_win, int def_x, int def_y)
 void
 DrawIconWindow(FvwmWindow *Tmp_win)
 {
-	GC Shadow, Relief;
+	GC    Shadow, Relief;
 	Pixel TextColor, BackColor;
-	int x;
+	int   x;
 
 	if (Tmp_win->flags & SUPPRESSICON)
 		return;
@@ -215,8 +213,7 @@ DrawIconWindow(FvwmWindow *Tmp_win)
 			Tmp_win->icon_w_width = Tmp_win->icon_t_width + 6;
 			if (Tmp_win->icon_w_width < Tmp_win->icon_p_width)
 				Tmp_win->icon_w_width = Tmp_win->icon_p_width;
-			Tmp_win->icon_xl_loc =
-			    Tmp_win->icon_x_loc -
+			Tmp_win->icon_xl_loc = Tmp_win->icon_x_loc -
 			    (Tmp_win->icon_w_width - Tmp_win->icon_p_width) / 2;
 			/* start keep label on screen. dje 8/7/97 */
 			if (Tmp_win->icon_xl_loc <
@@ -226,7 +223,7 @@ DrawIconWindow(FvwmWindow *Tmp_win)
 				/* if (new loc + width) > screen width (off edge
 				 * on right) */
 				if ((Tmp_win->icon_xl_loc +
-				    Tmp_win->icon_w_width) >
+					Tmp_win->icon_w_width) >
 				    Scr.MyDisplayWidth) { /* off right */
 					/* position up against right edge */
 					Tmp_win->icon_xl_loc =
@@ -305,7 +302,7 @@ DrawIconWindow(FvwmWindow *Tmp_win)
 
 		XDrawString(dpy, Tmp_win->icon_w, Scr.ScratchGC3, x,
 		    Tmp_win->icon_w_height - Scr.IconFont.height +
-		    Scr.IconFont.y - 3,
+			Scr.IconFont.y - 3,
 		    Tmp_win->icon_name, strlen(Tmp_win->icon_name));
 		RelieveWindow(Tmp_win, Tmp_win->icon_w, 0, 0,
 		    Tmp_win->icon_w_width, ICON_HEIGHT, Relief, Shadow,
@@ -346,13 +343,13 @@ RedoIconName(FvwmWindow *Tmp_win)
 void
 AutoPlace(FvwmWindow *t)
 {
-	int tw, th, tx, ty;
-	int base_x, base_y;
-	int width, height;
+	int	    tw, th, tx, ty;
+	int	    base_x, base_y;
+	int	    width, height;
 	FvwmWindow *test_window;
-	Bool loc_ok;
-	int real_x = 10, real_y = 10;
-	int new_x, new_y;
+	Bool	    loc_ok;
+	int	    real_x = 10, real_y = 10;
+	int	    new_x, new_y;
 
 	/* New! Put icon in same page as the center of the window */
 	/* Not a good idea for StickyIcons */
@@ -371,12 +368,12 @@ AutoPlace(FvwmWindow *t)
 		t->Desk = Scr.CurrentDesk;
 	} else {
 		base_x = ((t->frame_x + Scr.Vx + (t->frame_width >> 1)) /
-		    Scr.MyDisplayWidth) *
-		    Scr.MyDisplayWidth -
+			     Scr.MyDisplayWidth) *
+			Scr.MyDisplayWidth -
 		    Scr.Vx;
 		base_y = ((t->frame_y + Scr.Vy + (t->frame_height >> 1)) /
-		    Scr.MyDisplayHeight) *
-		    Scr.MyDisplayHeight -
+			     Scr.MyDisplayHeight) *
+			Scr.MyDisplayHeight -
 		    Scr.Vy;
 	}
 	if (t->flags & ICON_MOVED) {
@@ -398,18 +395,18 @@ AutoPlace(FvwmWindow *t)
 	else {
 		/* A place to hold inner and outer loop variables. */
 		typedef struct dimension_struct {
-			int step;             /* grid size (may be negative) */
-			int start_at;         /* starting edge */
-			int real_start;       /* on screen starting edge */
-			int end_at;           /* ending edge */
-			int base;             /* base for screen */
+			int step;	      /* grid size (may be negative) */
+			int start_at;	      /* starting edge */
+			int real_start;	      /* on screen starting edge */
+			int end_at;	      /* ending edge */
+			int base;	      /* base for screen */
 			int icon_dimension;   /* height or width */
 			int nom_dimension;    /* nonminal height or width */
 			int screen_dimension; /* screen height or width */
 		} dimension;
-		dimension dim[3];           /* space for work, 1st, 2nd dimen */
+		dimension   dim[3];	    /* space for work, 1st, 2nd dimen */
 		icon_boxes *icon_boxes_ptr; /* current icon box */
-		int i; /* index for inner/outer loop data */
+		int	    i; /* index for inner/outer loop data */
 
 		/* Hopefully this makes the following more readable. */
 #define ICONBOX_LFT icon_boxes_ptr->IconBox[0]
@@ -426,17 +423,17 @@ AutoPlace(FvwmWindow *t)
 
 		/* check all boxes in order */
 		for (icon_boxes_ptr = t->IconBoxes; /* init */
-		    icon_boxes_ptr != NULL;         /* until no more boxes */
+		    icon_boxes_ptr != NULL;	    /* until no more boxes */
 		    icon_boxes_ptr = icon_boxes_ptr->next) { /* all boxes */
 			if (loc_ok == True) {
 				break; /* leave for loop */
 			}
 			dim[1].step =
 			    icon_boxes_ptr->IconGrid[1]; /* y amount */
-			dim[1].start_at = ICONBOX_TOP;   /* init start from */
-			dim[1].end_at = ICONBOX_BOT;     /* init end at */
-			dim[1].base = base_y;            /* save base */
-			dim[1].icon_dimension = height;  /* save dimension */
+			dim[1].start_at = ICONBOX_TOP;	 /* init start from */
+			dim[1].end_at = ICONBOX_BOT;	 /* init end at */
+			dim[1].base = base_y;		 /* save base */
+			dim[1].icon_dimension = height;	 /* save dimension */
 			dim[1].screen_dimension = Scr.MyDisplayHeight;
 			if (BOT_FILL) { /* fill from bottom */
 				dim[1].step =
@@ -445,10 +442,10 @@ AutoPlace(FvwmWindow *t)
 
 			dim[2].step =
 			    icon_boxes_ptr->IconGrid[0]; /* x amount */
-			dim[2].start_at = ICONBOX_LFT;   /* init start from */
-			dim[2].end_at = ICONBOX_RGT;     /* init end at */
-			dim[2].base = base_x;            /* save base */
-			dim[2].icon_dimension = width;   /* save dimension */
+			dim[2].start_at = ICONBOX_LFT;	 /* init start from */
+			dim[2].end_at = ICONBOX_RGT;	 /* init end at */
+			dim[2].base = base_x;		 /* save base */
+			dim[2].icon_dimension = width;	 /* save dimension */
 			dim[2].screen_dimension = Scr.MyDisplayWidth;
 			if (RGT_FILL) { /* fill from right */
 				dim[2].step =
@@ -473,7 +470,7 @@ AutoPlace(FvwmWindow *t)
 					    dim[i].end_at; /* swap one */
 					dim[i].end_at =
 					    dim[0]
-					    .start_at; /* swap the other */
+						.start_at; /* swap the other */
 					dim[i].start_at -=
 					    dim[i].icon_dimension;
 				} /* end moving backwards */
@@ -491,17 +488,19 @@ AutoPlace(FvwmWindow *t)
 			} /* end horizontal dimension first */
 			dim[0].start_at =
 			    dim[2].start_at; /* save for reseting inner loop */
-			while ((dim[1].step < 0 ? /* filling reversed */
-			    (dim[1].start_at + dim[1].icon_dimension -
-			     dim[1].nom_dimension >
-			     dim[1].end_at) : /* check back edge */
-			    (dim[1].start_at + dim[1].nom_dimension <
-			     dim[1].end_at)) && /* check front edge */
-			     (!loc_ok)) { /* nothing found yet */
+			while (
+			    (dim[1].step < 0 ? /* filling reversed */
+				    (dim[1].start_at + dim[1].icon_dimension -
+					    dim[1].nom_dimension >
+					dim[1].end_at) : /* check back edge */
+				    (dim[1].start_at + dim[1].nom_dimension <
+					dim[1]
+					    .end_at)) && /* check front edge */
+			    (!loc_ok)) {		 /* nothing found yet */
 				dim[1].real_start = dim[1].start_at; /* init */
 				if (dim[1].start_at + dim[1].icon_dimension >
 				    dim[1].screen_dimension - 2 +
-				    dim[1].base) { /* if off screen */
+					dim[1].base) { /* if off screen */
 					dim[1].real_start =
 					    dim[1].screen_dimension -
 					    dim[1].icon_dimension +
@@ -513,106 +512,113 @@ AutoPlace(FvwmWindow *t)
 					    dim[1].base; /* move on screen */
 				} /* end off other edge */
 				dim[2].start_at =
-				    dim[0].start_at; /* reset inner loop */
+				    dim[0].start_at;	  /* reset inner loop */
 				while ((dim[2].step < 0 ? /* filling reversed */
-				    (dim[2].start_at +
-				     dim[2].icon_dimension -
-				     dim[2].nom_dimension >
-				     dim[2].end_at) /* check back
-				                                    edge */
-				     : (dim[2].start_at +
-				    dim[2].nom_dimension <
-				    dim[2].end_at)) /* check front
-				                                     edge */
+					       (dim[2].start_at +
+						       dim[2].icon_dimension -
+						       dim[2].nom_dimension >
+						   dim
+						       [2]
+							   .end_at) /* check
+								       back edge
+								     */
+					       :
+					       (dim[2].start_at +
+						       dim[2].nom_dimension <
+						   dim[2].end_at)) /* check
+								      front edge
+								    */
 				    && (!loc_ok)) { /* nothing found yet */
 					dim[2].real_start =
 					    dim[2].start_at; /* init */
 					if (dim[2].start_at +
-					    dim[2].icon_dimension >
+						dim[2].icon_dimension >
 					    dim[2].screen_dimension - 2 +
-					    dim[2]
-					    .base) { /* if off screen */
+						dim[2]
+						    .base) { /* if off screen */
 						dim[2].real_start =
 						    dim[2].screen_dimension -
 						    dim[2].icon_dimension +
 						    dim[2].base; /* move on
-						                    screen */
+								    screen */
 					} /* end off screen */
 					if (dim[2].start_at <
 					    dim[2]
-					    .base) { /* if off other edge */
+						.base) { /* if off other edge */
 						dim[2].real_start =
 						    dim[2].base; /* move on
-						                    screen */
+								    screen */
 					} /* end off other edge */
 
 					if (HRZ_FILL) { /* if hrz first */
 						real_x =
 						    dim[1]
-						    .real_start; /* unreverse
-						                        them */
+							.real_start; /* unreverse
+									    them
+								      */
 						real_y = dim[2].real_start;
 					} else {
 						real_x =
 						    dim[2]
-						    .real_start; /* reverse
-						                        them */
+							.real_start; /* reverse
+									    them
+								      */
 						real_y = dim[1].real_start;
 					}
 
 					loc_ok = True; /* this may be a good
-					                  location */
+							  location */
 					test_window = Scr.FvwmRoot.next;
-					while ((test_window !=
-					    (FvwmWindow *)0) &&
+					while (
+					    (test_window != (FvwmWindow *)0) &&
 					    (loc_ok ==
-					     True)) { /* test overlap */
+						True)) { /* test overlap */
 						if (test_window->Desk ==
 						    t->Desk) {
 							if ((test_window
-							    ->flags &
-							    ICONIFIED) &&
+								    ->flags &
+								ICONIFIED) &&
 							    (!(test_window
-							     ->flags &
-							     TRANSIENT) ||
-							     !test_window
-							     ->tmpflags
-							     .IconifiedByParent) &&
+								     ->flags &
+								 TRANSIENT) ||
+								!test_window
+								    ->tmpflags
+								    .IconifiedByParent) &&
 							    (test_window
-							     ->icon_w ||
-							     test_window
-							     ->icon_pixmap_w) &&
+								    ->icon_w ||
+								test_window
+								    ->icon_pixmap_w) &&
 							    (test_window !=
-							     t)) {
+								t)) {
 								tw =
 								    test_window
-								    ->icon_p_width;
+									->icon_p_width;
 								th =
 								    test_window
-								    ->icon_p_height +
+									->icon_p_height +
 								    test_window
-								    ->icon_w_height;
+									->icon_w_height;
 								tx =
 								    test_window
-								    ->icon_x_loc;
+									->icon_x_loc;
 								ty =
 								    test_window
-								    ->icon_y_loc;
+									->icon_y_loc;
 
 								if ((tx <
-								    (real_x +
-								     width +
-								     3)) &&
+									(real_x +
+									    width +
+									    3)) &&
 								    ((tx + tw +
-								      3) >
-								     real_x) &&
+									 3) >
+									real_x) &&
 								    (ty <
-								     (real_y +
-								      height +
-								      3)) &&
+									(real_y +
+									    height +
+									    3)) &&
 								    ((ty + th +
-								      3) >
-								     real_y)) {
+									 3) >
+									real_y)) {
 									loc_ok =
 									    False; /* don't accept this location */
 								} /* end if
@@ -625,15 +631,15 @@ AutoPlace(FvwmWindow *t)
 					} /* end while icons that may overlap */
 					dim[2].start_at +=
 					    dim[2].step; /* Grid inner value &
-					                    direction */
+							    direction */
 				} /* end while room inner dimension */
 				dim[1].start_at +=
 				    dim[1].step; /* Grid outer value & direction
-				                  */
+						  */
 			} /* end while room outer dimension */
 		} /* end for all icon boxes, or found space */
 		if (loc_ok == False) /* If icon never found a home */
-			return;      /* just leave it */
+			return;	     /* just leave it */
 		t->icon_x_loc = real_x;
 		t->icon_y_loc = real_y;
 
@@ -731,8 +737,8 @@ GrabIconKeys(FvwmWindow *tmp_win, Window w)
 void
 GetBitmapFile(FvwmWindow *tmp_win)
 {
-	char *path = NULL;
-	int HotX, HotY;
+	char	    *path = NULL;
+	int	     HotX, HotY;
 	extern char *IconPath;
 
 	path = findIconFile(tmp_win->icon_bitmap_file, IconPath, R_OK);
@@ -740,9 +746,9 @@ GetBitmapFile(FvwmWindow *tmp_win)
 	if (path == NULL)
 		return;
 	if (XReadBitmapFile(dpy, Scr.Root, path,
-	    (unsigned int *)&tmp_win->icon_p_width,
-	    (unsigned int *)&tmp_win->icon_p_height, &tmp_win->iconPixmap,
-	    &HotX, &HotY) != BitmapSuccess) {
+		(unsigned int *)&tmp_win->icon_p_width,
+		(unsigned int *)&tmp_win->icon_p_height, &tmp_win->iconPixmap,
+		&HotX, &HotY) != BitmapSuccess) {
 		tmp_win->icon_p_width = 0;
 		tmp_win->icon_p_height = 0;
 	}
@@ -760,11 +766,11 @@ GetXPMFile(FvwmWindow *tmp_win)
 {
 #ifdef XPM
 	XWindowAttributes root_attr;
-	XpmAttributes xpm_attributes;
-	extern char *PixmapPath;
-	char *path = NULL;
-	XpmImage my_image;
-	int rc;
+	XpmAttributes	  xpm_attributes;
+	extern char	 *PixmapPath;
+	char		 *path = NULL;
+	XpmImage	  my_image;
+	int		  rc;
 
 	path = findIconFile(tmp_win->icon_bitmap_file, PixmapPath, R_OK);
 	if (path == NULL)
@@ -819,9 +825,9 @@ GetIconWindow(FvwmWindow *tmp_win)
 	/* We are guaranteed that wmhints is non-null when calling this
 	 * routine */
 	if (XGetGeometry(dpy, tmp_win->wmhints->icon_window, &JunkRoot, &JunkX,
-	    &JunkY, (unsigned int *)&tmp_win->icon_p_width,
-	    (unsigned int *)&tmp_win->icon_p_height, &JunkBW,
-	    &JunkDepth) == 0) {
+		&JunkY, (unsigned int *)&tmp_win->icon_p_width,
+		(unsigned int *)&tmp_win->icon_p_height, &JunkBW,
+		&JunkDepth) == 0) {
 		fvwm_msg(ERR, "GetIconWindow", "Help! Bad Icon Window!");
 	}
 	tmp_win->icon_p_width += JunkBW << 1;
@@ -889,8 +895,7 @@ DeIconify(FvwmWindow *tmp_win)
 	/* AS dje  RaiseWindow(tmp_win); */
 	/* now de-iconify transients */
 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
-		if ((t == tmp_win) ||
-		    IsTransientDescendantOf(t, tmp_win)) {
+		if ((t == tmp_win) || IsTransientDescendantOf(t, tmp_win)) {
 			t->flags |= MAPPED;
 			t->tmpflags.IconifiedByParent = 0;
 			if (Scr.Hilite == t)
@@ -952,9 +957,9 @@ DeIconify(FvwmWindow *tmp_win)
 void
 Iconify(FvwmWindow *tmp_win, int def_x, int def_y)
 {
-	FvwmWindow *t;
+	FvwmWindow	 *t;
 	XWindowAttributes winattrs = {0};
-	unsigned long eventMask;
+	unsigned long	  eventMask;
 
 	if (!tmp_win)
 		return;
@@ -968,8 +973,7 @@ Iconify(FvwmWindow *tmp_win, int def_x, int def_y)
 
 	/* iconify transients first */
 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
-		if ((t == tmp_win) ||
-		    IsTransientDescendantOf(t, tmp_win)) {
+		if ((t == tmp_win) || IsTransientDescendantOf(t, tmp_win)) {
 			/*
 			 * Prevent the receipt of an UnmapNotify, since that
 			 * would cause a transition to the Withdrawn state.

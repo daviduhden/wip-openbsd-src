@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -47,8 +47,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 static u_int st_hash(const char *, int, int);
 
 /*
@@ -89,10 +89,10 @@ static u_int st_hash(const char *, int, int);
  * hard links in a file system or with some archive formats (cpio)
  */
 typedef struct hrdlnk {
-	ino_t ino;    /* files inode number */
-	char *name;   /* name of first file seen with this ino/dev */
-	dev_t dev;    /* files device number */
-	u_long nlink; /* expected link count */
+	ino_t	       ino;   /* files inode number */
+	char	      *name;  /* name of first file seen with this ino/dev */
+	dev_t	       dev;   /* files device number */
+	u_long	       nlink; /* expected link count */
 	struct hrdlnk *fow;
 } HRDLNK;
 
@@ -108,10 +108,10 @@ typedef struct hrdlnk {
  * handle is greatly increased).
  */
 typedef struct ftm {
-	off_t seek;           /* location in scratch file */
+	off_t		seek; /* location in scratch file */
 	struct timespec mtim; /* files last modification time */
-	struct ftm *fow;
-	int namelen; /* file name length */
+	struct ftm     *fow;
+	int		namelen; /* file name length */
 } FTM;
 
 /*
@@ -122,8 +122,8 @@ typedef struct ftm {
  */
 
 typedef struct namt {
-	char *oname; /* old name */
-	char *nname; /* new name typed in by the user */
+	char	    *oname; /* old name */
+	char	    *nname; /* new name typed in by the user */
 	struct namt *fow;
 } NAMT;
 
@@ -154,14 +154,14 @@ typedef struct namt {
  */
 
 typedef struct devt {
-	dev_t dev;          /* the orig device number we now have to map */
-	struct devt *fow;   /* new device map list */
+	dev_t	      dev;  /* the orig device number we now have to map */
+	struct devt  *fow;  /* new device map list */
 	struct dlist *list; /* map list based on inode truncation bits */
 } DEVT;
 
 typedef struct dlist {
-	ino_t trunc_bits; /* truncation pattern for a specific map */
-	dev_t dev;        /* the new device id we use */
+	ino_t	      trunc_bits; /* truncation pattern for a specific map */
+	dev_t	      dev;	  /* the new device id we use */
 	struct dlist *fow;
 } DLIST;
 
@@ -175,7 +175,7 @@ typedef struct dlist {
 
 typedef struct atdir {
 	struct file_times ft;
-	struct atdir *fow;
+	struct atdir	 *fow;
 } ATDIR;
 
 /*
@@ -190,21 +190,21 @@ typedef struct atdir {
 
 typedef struct dirdata {
 	struct file_times ft;
-	u_int16_t mode;     /* file mode to restore */
-	u_int16_t frc_mode; /* do we force mode settings? */
+	u_int16_t	  mode;	    /* file mode to restore */
+	u_int16_t	  frc_mode; /* do we force mode settings? */
 } DIRDATA;
 
 static HRDLNK **ltab = NULL; /* hard link table for detecting hard links */
-static FTM **ftab = NULL;    /* file time table for updating arch */
-static NAMT **ntab = NULL;   /* interactive rename storage table */
+static FTM    **ftab = NULL; /* file time table for updating arch */
+static NAMT   **ntab = NULL; /* interactive rename storage table */
 #ifndef NOCPIO
 static DEVT **dtab = NULL; /* device/inode mapping tables */
 #endif
-static ATDIR **atab = NULL;  /* file tree directory time reset table */
+static ATDIR  **atab = NULL; /* file tree directory time reset table */
 static DIRDATA *dirp = NULL; /* storage for setting created dir time/mode */
-static size_t dirsize;       /* size of dirp table */
-static size_t dircnt = 0;    /* entries in dir time/mode storage */
-static int ffd = -1;         /* tmp file for file time table name storage */
+static size_t	dirsize;     /* size of dirp table */
+static size_t	dircnt = 0;  /* entries in dir time/mode storage */
+static int	ffd = -1;    /* tmp file for file time table name storage */
 
 /*
  * hard link table routines
@@ -256,9 +256,9 @@ lnk_start(void)
 int
 chk_lnk(ARCHD *arcn)
 {
-	HRDLNK *pt;
+	HRDLNK	*pt;
 	HRDLNK **ppt;
-	u_int indx;
+	u_int	 indx;
 
 	if (ltab == NULL)
 		return (-1);
@@ -345,9 +345,9 @@ chk_lnk(ARCHD *arcn)
 void
 purg_lnk(ARCHD *arcn)
 {
-	HRDLNK *pt;
+	HRDLNK	*pt;
 	HRDLNK **ppt;
-	u_int indx;
+	u_int	 indx;
 
 	if (ltab == NULL)
 		return;
@@ -399,7 +399,7 @@ purg_lnk(ARCHD *arcn)
 void
 lnk_end(void)
 {
-	int i;
+	int	i;
 	HRDLNK *pt;
 	HRDLNK *ppt;
 
@@ -496,10 +496,10 @@ ftime_start(void)
 int
 chk_ftime(ARCHD *arcn)
 {
-	FTM *pt;
-	int namelen;
+	FTM  *pt;
+	int   namelen;
 	u_int indx;
-	char ckname[PAXPATHLEN + 1];
+	char  ckname[PAXPATHLEN + 1];
 
 	/*
 	 * no info, go ahead and add to archive
@@ -628,16 +628,16 @@ chk_ftime(ARCHD *arcn)
  */
 
 struct slpath {
-	char *sp_path;
+	char	      *sp_path;
 	struct slpath *sp_next;
 };
 struct slinode {
-	ino_t sli_ino;
-	char *sli_value;
-	struct slpath sli_paths;
+	ino_t		sli_ino;
+	char	       *sli_value;
+	struct slpath	sli_paths;
 	struct slinode *sli_fow; /* hash table chain */
-	dev_t sli_dev;
-	mode_t sli_mode;
+	dev_t		sli_dev;
+	mode_t		sli_mode;
 };
 
 static struct slinode **slitab = NULL;
@@ -671,12 +671,12 @@ sltab_start(void)
 int
 sltab_add_sym(const char *path0, const char *value0, mode_t mode)
 {
-	struct stat sb;
+	struct stat	sb;
 	struct slinode *s;
-	struct slpath *p;
-	char *path, *value;
-	u_int indx;
-	int fd;
+	struct slpath  *p;
+	char	       *path, *value;
+	u_int		indx;
+	int		fd;
 
 	/* create the placeholder */
 	fd = open(path0, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
@@ -763,8 +763,8 @@ int
 sltab_add_link(const char *path, const struct stat *sb)
 {
 	struct slinode *s;
-	struct slpath *p;
-	u_int indx;
+	struct slpath  *p;
+	u_int		indx;
 
 	if (!S_ISREG(sb->st_mode) || sb->st_size != 0)
 		return (1);
@@ -807,9 +807,9 @@ sltab_process_one(
     struct slinode *s, struct slpath *p, const char *first, int in_sig)
 {
 	struct stat sb;
-	char *path = p->sp_path;
-	mode_t mode;
-	int err;
+	char	   *path = p->sp_path;
+	mode_t	    mode;
+	int	    err;
 
 	/*
 	 * is it the expected placeholder?  This can fail legimately
@@ -886,9 +886,9 @@ void
 sltab_process(int in_sig)
 {
 	struct slinode *s;
-	struct slpath *p;
-	char *first;
-	u_int indx;
+	struct slpath  *p;
+	char	       *first;
+	u_int		indx;
 
 	if (slitab == NULL)
 		return;
@@ -1230,13 +1230,13 @@ chk_dev(dev_t dev, int add)
 int
 map_dev(ARCHD *arcn, u_long dev_mask, u_long ino_mask)
 {
-	DEVT *pt;
-	DLIST *dpt;
+	DEVT	    *pt;
+	DLIST	    *dpt;
 	static dev_t lastdev = 0; /* next device number to try */
-	int trc_ino = 0;
-	int trc_dev = 0;
-	ino_t trunc_bits = 0;
-	ino_t nino;
+	int	     trc_ino = 0;
+	int	     trc_dev = 0;
+	ino_t	     trunc_bits = 0;
+	ino_t	     nino;
 
 	if (dtab == NULL)
 		return (0);
@@ -1394,7 +1394,7 @@ void
 atdir_end(void)
 {
 	ATDIR *pt;
-	int i;
+	int    i;
 
 	if (atab == NULL)
 		return;
@@ -1425,9 +1425,9 @@ void
 add_atdir(char *fname, dev_t dev, ino_t ino, const struct timespec *mtimp,
     const struct timespec *atimp)
 {
-	ATDIR *pt;
+	ATDIR	*pt;
 	sigset_t allsigs, savedsigs;
-	u_int indx;
+	u_int	 indx;
 
 	if (atab == NULL)
 		return;
@@ -1491,10 +1491,10 @@ add_atdir(char *fname, dev_t dev, ino_t ino, const struct timespec *mtimp,
 int
 do_atdir(const char *name, dev_t dev, ino_t ino)
 {
-	ATDIR *pt;
-	ATDIR **ppt;
+	ATDIR	*pt;
+	ATDIR  **ppt;
 	sigset_t allsigs, savedsigs;
-	u_int indx;
+	u_int	 indx;
 
 	if (atab == NULL)
 		return (-1);
@@ -1595,7 +1595,7 @@ add_dir(char *name, struct stat *psb, int frc_mode)
 {
 	DIRDATA *dblk;
 	sigset_t allsigs, savedsigs;
-	char realname[PATH_MAX], *rp;
+	char	 realname[PATH_MAX], *rp;
 
 	if (dirp == NULL)
 		return;
@@ -1651,8 +1651,8 @@ void
 delete_dir(dev_t dev, ino_t ino)
 {
 	DIRDATA *dblk;
-	char *name;
-	size_t i;
+	char	*name;
+	size_t	 i;
 
 	if (dirp == NULL)
 		return;
@@ -1681,7 +1681,7 @@ void
 proc_dir(int in_sig)
 {
 	DIRDATA *dblk;
-	size_t cnt;
+	size_t	 cnt;
 
 	if (dirp == NULL)
 		return;
@@ -1736,13 +1736,13 @@ static u_int
 st_hash(const char *name, int len, int tabsz)
 {
 	const char *pt;
-	char *dest;
+	char	   *dest;
 	const char *end;
-	int i;
-	u_int key = 0;
-	int steps;
-	int res;
-	u_int val;
+	int	    i;
+	u_int	    key = 0;
+	int	    steps;
+	int	    res;
+	u_int	    val;
 
 	/*
 	 * only look at the tail up to MAXKEYLEN, we do not need to waste

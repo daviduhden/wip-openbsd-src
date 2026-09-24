@@ -38,7 +38,7 @@
 void
 CreateGCs(void)
 {
-	XGCValues gcv;
+	XGCValues     gcv;
 	unsigned long gcm;
 
 	/* create scratch GC's */
@@ -105,7 +105,7 @@ Pixel *
 AllocNonlinearGradient(char *s_colors[], int clen[], int nsegs, int npixels)
 {
 	Pixel *pixels = (Pixel *)xmalloc(sizeof(Pixel) * npixels);
-	int i = 0, curpixel = 0, perc = 0;
+	int    i = 0, curpixel = 0, perc = 0;
 	if (nsegs < 1) {
 		fvwm_msg(ERR, "AllocNonlinearGradient",
 		    "must specify at least one segment");
@@ -117,7 +117,7 @@ AllocNonlinearGradient(char *s_colors[], int clen[], int nsegs, int npixels)
 
 	for (i = 0; (i < nsegs) && (curpixel < npixels) && (perc <= 100); ++i) {
 		Pixel *p;
-		int j = 0, n = clen[i] * npixels / 100;
+		int    j = 0, n = clen[i] * npixels / 100;
 		p = AllocLinearGradient(s_colors[i], s_colors[i + 1], n);
 		if (!p) {
 			fvwm_msg(ERR, "AllocNonlinearGradient",
@@ -146,8 +146,8 @@ AllocLinearGradient(char *s_from, char *s_to, int npixels)
 {
 	Pixel *pixels;
 	XColor from, to, c;
-	int r, dr, g, dg, b, db;
-	int i = 0, got_all = 1;
+	int    r, dr, g, dg, b, db;
+	int    i = 0, got_all = 1;
 
 	if (npixels < 1) {
 		fvwm_msg(ERR, "AllocLinearGradient",

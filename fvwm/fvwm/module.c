@@ -12,10 +12,8 @@
  *
  ***********************************************************************/
 
-#include "module.h"
-
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include <ctype.h>
 #include <errno.h>
@@ -30,21 +28,22 @@
 #include "fvwm.h"
 #include "menus.h"
 #include "misc.h"
+#include "module.h"
 #include "parse.h"
 #include "screen.h"
 
-int npipes;
-int *readPipes;
-int *writePipes;
-int *pipeOn;
+int    npipes;
+int   *readPipes;
+int   *writePipes;
+int   *pipeOn;
 char **pipeName;
 
-unsigned long *PipeMask;
+unsigned long		  *PipeMask;
 struct queue_buff_struct **pipeQueue;
 
 inline int PositiveWrite(int module, unsigned long *ptr, int size);
-void DeleteQueueBuff(int module);
-void AddToQueue(int module, unsigned long *ptr, int size, int done);
+void	   DeleteQueueBuff(int module);
+void	   AddToQueue(int module, unsigned long *ptr, int size, int done);
 
 void
 initModules(void)
@@ -95,18 +94,18 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	(void)w;
-	int fvwm_to_app[2], app_to_fvwm[2];
-	int i, val, nargs = 0;
-	char *cptr;
-	char *args[20];
-	char *arg1 = NULL;
-	char arg2[20];
-	char arg3[20];
-	char arg5[20];
-	char arg6[20];
+	int	     fvwm_to_app[2], app_to_fvwm[2];
+	int	     i, val, nargs = 0;
+	char	    *cptr;
+	char	    *args[20];
+	char	    *arg1 = NULL;
+	char	     arg2[20];
+	char	     arg3[20];
+	char	     arg5[20];
+	char	     arg6[20];
 	extern char *ModulePath;
 	extern char *fvwm_file;
-	Window win;
+	Window	     win;
 
 	if (eventp->type != KeyPress)
 		UngrabEm();
@@ -250,8 +249,8 @@ int
 HandleModuleInput(Window w, int channel)
 {
 	char text[256];
-	int size;
-	int cont, n;
+	int  size;
+	int  cont, n;
 
 	/* Already read a (possibly NULL) window id from the pipe,
 	 * Now read an fvwm bultin command line */
@@ -293,7 +292,7 @@ HandleModuleInput(Window w, int channel)
 		KillModule(channel, 4);
 	}
 	if (strlen(text) > 0) {
-		extern int Context;
+		extern int  Context;
 		FvwmWindow *tmp_win;
 
 		if (strncasecmp(text, "UNLOCK", 6) ==
@@ -390,7 +389,7 @@ static unsigned long *
 make_vpacket(unsigned long *body, unsigned long event_type, unsigned long num,
     va_list ap)
 {
-	extern Time lastTimestamp;
+	extern Time    lastTimestamp;
 	unsigned long *bp = body;
 
 	*(bp++) = START_FLAG;
@@ -408,7 +407,7 @@ void
 SendPacket(int module, unsigned long event_type, unsigned long num_datum, ...)
 {
 	unsigned long body[MAX_BODY_SIZE + HEADER_SIZE];
-	va_list ap;
+	va_list	      ap;
 
 	va_start(ap, num_datum);
 	make_vpacket(body, event_type, num_datum, ap);
@@ -422,8 +421,8 @@ void
 BroadcastPacket(unsigned long event_type, unsigned long num_datum, ...)
 {
 	unsigned long body[MAX_BODY_SIZE + HEADER_SIZE];
-	va_list ap;
-	int i;
+	va_list	      ap;
+	int	      i;
 
 	va_start(ap, num_datum);
 	make_vpacket(body, event_type, num_datum, ap);
@@ -434,17 +433,17 @@ BroadcastPacket(unsigned long event_type, unsigned long num_datum, ...)
 		    i, body, (num_datum + HEADER_SIZE) * sizeof(body[0]));
 }
 
-#define CONFIGARGS(_t)							\
-	24, (_t)->w, (_t)->frame, (unsigned long)(_t), (_t)->frame_x,	\
-	    (_t)->frame_y, (_t)->frame_width, (_t)->frame_height, (_t)->Desk,\
-	    (_t)->flags, (_t)->title_height, (_t)->boundary_width,	\
-	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_width : 0,\
-	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_height : 0,\
-	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.width_inc : 1,\
-	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.height_inc : 1,\
-	    (_t)->hints.min_width, (_t)->hints.min_height,		\
-	    (_t)->hints.max_width, (_t)->hints.max_height, (_t)->icon_w,\
-	    (_t)->icon_pixmap_w, (_t)->hints.win_gravity, (_t)->TextPixel,\
+#define CONFIGARGS(_t)                                                         \
+	24, (_t)->w, (_t)->frame, (unsigned long)(_t), (_t)->frame_x,          \
+	    (_t)->frame_y, (_t)->frame_width, (_t)->frame_height, (_t)->Desk,  \
+	    (_t)->flags, (_t)->title_height, (_t)->boundary_width,             \
+	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_width : 0,      \
+	    ((_t)->hints.flags & PBaseSize) ? (_t)->hints.base_height : 0,     \
+	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.width_inc : 1,      \
+	    ((_t)->hints.flags & PResizeInc) ? (_t)->hints.height_inc : 1,     \
+	    (_t)->hints.min_width, (_t)->hints.min_height,                     \
+	    (_t)->hints.max_width, (_t)->hints.max_height, (_t)->icon_w,       \
+	    (_t)->icon_pixmap_w, (_t)->hints.win_gravity, (_t)->TextPixel,     \
 	    (_t)->BackPixel
 
 void
@@ -464,7 +463,7 @@ make_named_packet(
     int *len, unsigned long event_type, const char *name, int num, ...)
 {
 	unsigned long *body;
-	va_list ap;
+	va_list	       ap;
 
 	/* Packet is the header plus the items plus enough items to hold the
 	   name string.  */
@@ -494,7 +493,7 @@ SendName(int module, unsigned long event_type, unsigned long data1,
     unsigned long data2, unsigned long data3, const char *name)
 {
 	unsigned long *body;
-	int l;
+	int	       l;
 
 	if (name == NULL)
 		return;
@@ -509,7 +508,7 @@ BroadcastName(unsigned long event_type, unsigned long data1,
     unsigned long data2, unsigned long data3, const char *name)
 {
 	unsigned long *body;
-	int i, l;
+	int	       i, l;
 
 	if (name == NULL)
 		return;
@@ -530,7 +529,7 @@ SendMiniIcon(int module, unsigned long event_type, unsigned long data1,
     unsigned long data8, const char *name)
 {
 	unsigned long *body;
-	int l;
+	int	       l;
 
 	if ((name == NULL) || (event_type != M_MINI_ICON))
 		return;
@@ -548,7 +547,7 @@ BroadcastMiniIcon(unsigned long event_type, unsigned long data1,
     unsigned long data8, const char *name)
 {
 	unsigned long *body;
-	int i, l;
+	int	       i, l;
 
 	body = make_named_packet(&l, event_type, name, 8, data1, data2, data3,
 	    data4, data5, data6, data7, data8);
@@ -573,7 +572,7 @@ SendStrToModule(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)context;
 	(void)Module;
 	char *module, *str;
-	int i;
+	int   i;
 
 	if (!action)
 		return;
@@ -613,9 +612,9 @@ PositiveWrite(int module, unsigned long *ptr, int size)
 	 * in some other way get finer control.
 	 */
 	if ((PipeMask[module] & M_LOCKONSEND) && /* module uses lock on send */
-	    (myxgrabcount != 0) &&            /* and server grabbed */
-	     (ptr[1] & M_ICONIFY)) {        /* and its an iconify event */
-		return -1;                    /* don't send it */
+	    (myxgrabcount != 0) &&		 /* and server grabbed */
+	    (ptr[1] & M_ICONIFY)) {		 /* and its an iconify event */
+		return -1;			 /* don't send it */
 	}
 	AddToQueue(module, ptr, size, 0);
 	/* dje, from afterstep, for FvwmAnimate,
@@ -623,12 +622,12 @@ PositiveWrite(int module, unsigned long *ptr, int size)
 	   */
 	if (PipeMask[module] & M_LOCKONSEND) {
 		Window targetWindow;
-		int e;
+		int    e;
 
 		FlushQueue(module);
 		fcntl(readPipes[module], F_SETFL, 0);
 		while ((e = read(readPipes[module], &targetWindow,
-		    sizeof(Window))) > 0) {
+			    sizeof(Window))) > 0) {
 			if (HandleModuleInput(targetWindow, module) == 66) {
 				break;
 			}
@@ -645,7 +644,7 @@ void
 AddToQueue(int module, unsigned long *ptr, int size, int done)
 {
 	struct queue_buff_struct *c, *e;
-	unsigned long *d;
+	unsigned long		 *d;
 
 	c = (struct queue_buff_struct *)xmalloc(
 	    sizeof(struct queue_buff_struct));
@@ -683,9 +682,9 @@ DeleteQueueBuff(int module)
 void
 FlushQueue(int module)
 {
-	char *dptr;
+	char			 *dptr;
 	struct queue_buff_struct *d;
-	int a;
+	int			  a;
 
 	if ((pipeOn[module] <= 0) || (pipeQueue[module] == NULL))
 		return;

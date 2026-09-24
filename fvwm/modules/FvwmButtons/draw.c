@@ -14,8 +14,6 @@
 
 /* ------------------------------- includes -------------------------------- */
 
-#include "config.h"
-
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -28,6 +26,7 @@
 
 #include "FvwmButtons.h"
 #include "button.h"
+#include "config.h"
 #include "draw.h"
 #include "icons.h" /* ConfigureIconWindow() */
 #include "misc.h"  /* ConstrainSize() */
@@ -42,11 +41,11 @@ void
 RelieveWindow(Window wn, int width, int x, int y, int w, int h, Pixel relief,
     Pixel shadow, int rev)
 {
-	XSegment seg[4];
+	XSegment      seg[4];
 	unsigned long gcm = 0;
-	XGCValues gcv;
-	Pixel p;
-	int i, j;
+	XGCValues     gcv;
+	Pixel	      p;
+	int	      i, j;
 
 	if (!width)
 		return;
@@ -115,7 +114,7 @@ MakeButton(button_info *b)
 	   icon and/or swallowed item in the correct position inside potential
 	   padding or frame.
 	*/
-	int ih, iw, ix, iy;
+	int	     ih, iw, ix, iy;
 	XFontStruct *font;
 
 	if (!b) {
@@ -169,7 +168,7 @@ MakeButton(button_info *b)
 		if (iw > 8 && ih > 8) {
 			if (!(buttonSwallow(b) & b_NoHints)) {
 				if (!XGetWMNormalHints(
-				    Dpy, b->IconWin, b->hints, &supplied))
+					Dpy, b->IconWin, b->hints, &supplied))
 					b->hints->flags = 0;
 				ConstrainSize(b->hints, &b->icon_w, &b->icon_h);
 				if (b->icon_w < 1)
@@ -198,13 +197,13 @@ MakeButton(button_info *b)
 void
 RedrawButton(button_info *b, int clean)
 {
-	int i, j, k, BH, BW;
-	int f, x, y, px, py;
-	int ix, iy, iw, ih;
-	XFontStruct *font = buttonFont(b);
-	XGCValues gcv;
+	int	      i, j, k, BH, BW;
+	int	      f, x, y, px, py;
+	int	      ix, iy, iw, ih;
+	XFontStruct  *font = buttonFont(b);
+	XGCValues     gcv;
 	unsigned long gcm = 0;
-	int rev = 0;
+	int	      rev = 0;
 
 	BW = buttonWidth(b);
 	BH = buttonHeight(b);
@@ -267,8 +266,7 @@ RedrawButton(button_info *b, int clean)
 				XFillRectangle(Dpy, MyWindow, NormalGC, x1,
 				    y1 + h - h2, w, h2);
 		} else if (!(b->flags & b_IconBack) &&
-		    !(b->flags & b_IconParent) &&
-		    !(b->flags & b_Swallow))
+		    !(b->flags & b_IconParent) && !(b->flags & b_Swallow))
 			XFillRectangle(Dpy, MyWindow, NormalGC, x + f, y + f,
 			    BW - 2 * f, BH - 2 * f);
 	}
@@ -292,13 +290,13 @@ RedrawButton(button_info *b, int clean)
 void
 DrawTitle(button_info *b, Window win, GC gc)
 {
-	int BH;
-	int ix, iy, iw, ih;
+	int	     BH;
+	int	     ix, iy, iw, ih;
 	XFontStruct *font = buttonFont(b);
-	int justify = buttonJustify(b);
-	int l, i, xpos;
-	char *s;
-	int just = justify & b_TitleHoriz; /* Left, center, right */
+	int	     justify = buttonJustify(b);
+	int	     l, i, xpos;
+	char	    *s;
+	int	     just = justify & b_TitleHoriz; /* Left, center, right */
 
 	BH = buttonHeight(b);
 

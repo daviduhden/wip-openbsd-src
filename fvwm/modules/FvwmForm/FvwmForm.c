@@ -5,8 +5,8 @@
  * risk.  Permission to use, modify, and redistribute this program is hereby
  * given, provided that this copyright is kept intact.
  */
-#include <sys/time.h>
 #include <sys/types.h>
+#include <sys/time.h>
 
 #include <ctype.h>
 #include <fcntl.h>
@@ -14,9 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../fvwm/fvwm_sandbox.h"
 #include "../../libs/fvwmlib.h"
 #include "config.h"
-#include "../../fvwm/fvwm_sandbox.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -69,54 +69,54 @@ dummy(FILE *f, const char *fmt, ...)
 typedef union _item {
 	int type;      /* item type, one of I_TEXT .. I_BUTTON */
 	struct _head { /* common header */
-		int type;
-		int win;            /* X window id */
-		char *name;         /* identifier name */
-		int size_x, size_y; /* size of bounding box */
-		int pos_x, pos_y;   /* position of top-left corner */
+		int   type;
+		int   win;	      /* X window id */
+		char *name;	      /* identifier name */
+		int   size_x, size_y; /* size of bounding box */
+		int   pos_x, pos_y;   /* position of top-left corner */
 	} header;
 	struct { /* I_TEXT */
 		struct _head head;
-		int n;       /* string length */
-		char *value; /* string to display */
+		int	     n;	    /* string length */
+		char	    *value; /* string to display */
 	} text;
 	struct { /* I_INPUT */
 		struct _head head;
-		int buf;          /* input string buffer */
-		int n;            /* string length */
-		char *value;      /* input string */
-		char *init_value; /* default string */
-		char *blanks;     /* blank string */
-		int size;         /* input field size */
-		int left;         /* position of the left-most displayed char */
-		int o_cursor;     /* store relative cursor position */
+		int	     buf;	 /* input string buffer */
+		int	     n;		 /* string length */
+		char	    *value;	 /* input string */
+		char	    *init_value; /* default string */
+		char	    *blanks;	 /* blank string */
+		int	     size;	 /* input field size */
+		int left;     /* position of the left-most displayed char */
+		int o_cursor; /* store relative cursor position */
 	} input;
 	struct { /* I_SELECT */
-		struct _head head;
-		int key;               /* one of IS_MULTIPLE, IS_SINGLE */
-		int n;                 /* number of choices */
+		struct _head  head;
+		int	      key;     /* one of IS_MULTIPLE, IS_SINGLE */
+		int	      n;       /* number of choices */
 		union _item **choices; /* list of choices */
-		int choices_cap;
+		int	      choices_cap;
 	} select;
 	struct { /* I_CHOICE */
 		struct _head head;
-		int on;           /* selected or not */
-		int init_on;      /* initially selected or not */
-		char *value;      /* value if selected */
-		int n;            /* text string length */
-		char *text;       /* text string */
-		union _item *sel; /* selection it belongs to */
+		int	     on;      /* selected or not */
+		int	     init_on; /* initially selected or not */
+		char	    *value;   /* value if selected */
+		int	     n;	      /* text string length */
+		char	    *text;    /* text string */
+		union _item *sel;     /* selection it belongs to */
 	} choice;
 	struct { /* I_BUTTON */
 		struct _head head;
-		int key;      /* one of IB_CONTINUE, IB_RESTART, IB_QUIT */
-		int n;        /* # of commands */
-		int len;      /* text length */
-		char *text;   /* text string */
-		int keypress; /* short cut */
+		int	     key;  /* one of IB_CONTINUE, IB_RESTART, IB_QUIT */
+		int	     n;	   /* # of commands */
+		int	     len;  /* text length */
+		char	    *text; /* text string */
+		int	     keypress; /* short cut */
 		/* Fvwm command to execute */
 		char **commands;
-		int commands_cap;
+		int    commands_cap;
 	} button;
 } Item;
 
@@ -126,49 +126,49 @@ typedef union _item {
 #define L_LEFTRIGHT 4
 
 typedef struct _line {
-	int n;              /* number of items on the line */
-	int justify;        /* justification */
-	int size_x, size_y; /* size of bounding rectangle */
-	Item **items;       /* list of items */
-	int items_cap;      /* capacity of items array */
+	int    n;	       /* number of items on the line */
+	int    justify;	       /* justification */
+	int    size_x, size_y; /* size of bounding rectangle */
+	Item **items;	       /* list of items */
+	int    items_cap;      /* capacity of items array */
 } Line;
 
-int fd_in;  /* fd for Fvwm->Module packets */
-int fd_out; /* fd for Module->Fvwm packets */
+int   fd_in;  /* fd for Fvwm->Module packets */
+int   fd_out; /* fd for Module->Fvwm packets */
 FILE *fp_err;
 
 Line *lines = NULL;
-int n_lines;
-int lines_capacity = 0;
+int   n_lines;
+int   lines_capacity = 0;
 Item *items = NULL;
-int n_items;
-int items_capacity = 0;
-Item def_button;
+int   n_items;
+int   items_capacity = 0;
+Item  def_button;
 
 int grab_server = 0, server_grabbed = 0;
 int gx, gy, geom = 0;
 int warp_pointer = 0;
 
 Display *dpy;
-int fd_x; /* fd for X connection */
-char *prog_name;
-int fd[2];
-int fd_err;
+int	 fd_x; /* fd for X connection */
+char	*prog_name;
+int	 fd[2];
+int	 fd_err;
 
-Window root, frame, ref;
+Window	 root, frame, ref;
 Colormap d_cmap;
-int screen;
-int scr_depth;
+int	 screen;
+int	 scr_depth;
 
 int max_width, total_height; /* frame size */
 
 enum { c_back, c_fore, c_itemback, c_itemfore, c_itemlo, c_itemhi };
-char *color_names[4] = {"Light Gray", "Black", "Gray50", "Wheat"};
+char	     *color_names[4] = {"Light Gray", "Black", "Gray50", "Wheat"};
 unsigned long colors[6];
 
 enum { f_text, f_input, f_button };
-char *font_names[3] = {"fixed", "fixed", "fixed"};
-Font fonts[3];
+char	    *font_names[3] = {"fixed", "fixed", "fixed"};
+Font	     fonts[3];
 XFontStruct *xfs[3];
 
 Cursor xc_ibeam, xc_hand;
@@ -176,11 +176,11 @@ Cursor xc_ibeam, xc_hand;
 GC gc_text, gc_input, gc_button;
 
 Item *cur_text;
-int abs_cursor;
-int rel_cursor;
+int   abs_cursor;
+int   rel_cursor;
 
 static char *buf;
-static int N = 8;
+static int   N = 8;
 
 static void
 ensure_line_capacity(int count)
@@ -250,7 +250,7 @@ append_item_to_line(Line *line, Item *item)
 static char *
 CopyNString(char *cp, int n)
 {
-	char *dp, *bp;
+	char  *dp, *bp;
 	size_t len;
 
 	if (n == 0)
@@ -336,7 +336,7 @@ FontWidth(XFontStruct *xfs)
 static void
 ReadConfig(void)
 {
-	int prog_name_len, i, j, l, extra;
+	int   prog_name_len, i, j, l, extra;
 	char *line_buf;
 	char *cp;
 	Line *cur_line, *line;
@@ -507,7 +507,7 @@ ReadConfig(void)
 			item->text.n = strlen(item->text.value);
 			item->header.size_x =
 			    XTextWidth(
-			    xfs[f_text], item->text.value, item->text.n) +
+				xfs[f_text], item->text.value, item->text.n) +
 			    2 * TEXT_SPC;
 			item->header.size_y =
 			    FontHeight(xfs[f_text]) + 2 * TEXT_SPC;
@@ -588,7 +588,7 @@ ReadConfig(void)
 			fprintf(fp_err, "Selection %s (%s)\n",
 			    cur_sel->header.name,
 			    (cur_sel->select.key == IS_MULTIPLE) ? "multiple" :
-			    "single");
+								   "single");
 			continue;
 		} else if (strncmp(cp, "Choice", 6) == 0) {
 			/* syntax: *FFChoice <name> <value> on|off "<text>" */
@@ -596,7 +596,8 @@ ReadConfig(void)
 			while (isspace((unsigned char)*cp))
 				cp++;
 			if (cur_sel == NULL) {
-				fprintf(fp_err, "Choice specified before "
+				fprintf(fp_err,
+				    "Choice specified before "
 				    "Selection, skipping\n");
 				continue;
 			}
@@ -605,8 +606,8 @@ ReadConfig(void)
 				cur_sel->select.choices_cap *= 2;
 				cur_sel->select.choices =
 				    (Item **)realloc(cur_sel->select.choices,
-				    sizeof(Item *) *
-				    cur_sel->select.choices_cap);
+					sizeof(Item *) *
+					    cur_sel->select.choices_cap);
 			}
 			if (n_items + 1 > items_capacity) {
 				items_capacity = items_capacity ?
@@ -645,10 +646,10 @@ ReadConfig(void)
 			cur_sel->select.choices[cur_sel->select.n++] = item;
 			item->header.size_y =
 			    FontHeight(xfs[f_text]) + 2 * TEXT_SPC;
-			item->header.size_x =
-			    FontHeight(xfs[f_text]) + 4 * TEXT_SPC +
+			item->header.size_x = FontHeight(xfs[f_text]) +
+			    4 * TEXT_SPC +
 			    XTextWidth(
-			    xfs[f_text], item->choice.text, item->choice.n);
+				xfs[f_text], item->choice.text, item->choice.n);
 			fprintf(fp_err, "Choice %s, \"%s\", [%d, %d]\n",
 			    item->header.name, item->choice.text,
 			    item->header.size_x, item->header.size_y);
@@ -690,8 +691,8 @@ ReadConfig(void)
 			if (*cp == '^')
 				item->button.keypress = *(++cp) - '@';
 			else if (*cp == 'F')
-				item->button.keypress = 256 +
-				    FvwmParseInteger(++cp);
+				item->button.keypress =
+				    256 + FvwmParseInteger(++cp);
 			else
 				item->button.keypress = -1;
 			item->button.len = strlen(item->button.text);
@@ -701,10 +702,9 @@ ReadConfig(void)
 			item->button.commands_cap = 8;
 			item->header.size_y = FontHeight(xfs[f_button]) +
 			    2 * TEXT_SPC + 2 * BOX_SPC;
-			item->header.size_x =
-			    2 * TEXT_SPC + 2 * BOX_SPC +
+			item->header.size_x = 2 * TEXT_SPC + 2 * BOX_SPC +
 			    XTextWidth(xfs[f_button], item->button.text,
-			    item->button.len);
+				item->button.len);
 			append_item_to_line(cur_line, item);
 			cur_button = item;
 			continue;
@@ -719,7 +719,7 @@ ReadConfig(void)
 				cur_button->button.commands = (char **)realloc(
 				    cur_button->button.commands,
 				    sizeof(char *) *
-				    cur_button->button.commands_cap);
+					cur_button->button.commands_cap);
 			}
 			cur_button->button.commands[cur_button->button.n++] =
 			    CopyNString(cp, 0);
@@ -735,8 +735,8 @@ ReadConfig(void)
 			if (line->items[i]->header.size_y < line->size_y)
 				line->items[i]->header.pos_y +=
 				    (line->size_y -
-				     line->items[i]->header.size_y) /
-				    2 +
+					line->items[i]->header.size_y) /
+					2 +
 				    1;
 		}
 		total_height += ITEM_VSPC + line->size_y;
@@ -798,7 +798,7 @@ ReadConfig(void)
 						    width;
 						width += ITEM_HSPC +
 						    line->items[i]
-						    ->header.size_x;
+							->header.size_x;
 					}
 				} else {
 					extra = (max_width - line->size_x) /
@@ -809,7 +809,7 @@ ReadConfig(void)
 						    width;
 						width += ITEM_HSPC +
 						    line->items[i]
-						    ->header.size_x +
+							->header.size_x +
 						    extra;
 					}
 				}
@@ -837,8 +837,8 @@ static void
 GetColors(void)
 {
 	Visual *visual = DefaultVisual(dpy, screen);
-	XColor xc_item;
-	int red, green, blue, tmp1, tmp2;
+	XColor	xc_item;
+	int	red, green, blue, tmp1, tmp2;
 	if (scr_depth < 8) {
 		colors[c_back] = colors[c_itemback] = WhitePixel(dpy, screen);
 		colors[c_fore] = colors[c_itemfore] = colors[c_itemlo] =
@@ -858,14 +858,14 @@ GetColors(void)
 			colors[c_back] = WhitePixel(dpy, screen);
 
 		if (XParseColor(
-		    dpy, d_cmap, color_names[c_itemfore], &xc_item) &&
+			dpy, d_cmap, color_names[c_itemfore], &xc_item) &&
 		    XAllocColor(dpy, d_cmap, &xc_item))
 			colors[c_itemfore] = xc_item.pixel;
 		else
 			colors[c_itemfore] = BlackPixel(dpy, screen);
 
 		if (XParseColor(
-		    dpy, d_cmap, color_names[c_itemback], &xc_item) &&
+			dpy, d_cmap, color_names[c_itemback], &xc_item) &&
 		    XAllocColor(dpy, d_cmap, &xc_item))
 			colors[c_itemback] = xc_item.pixel;
 		else
@@ -925,7 +925,7 @@ GetColors(void)
 static void
 Restart(void)
 {
-	int i;
+	int   i;
 	Item *item;
 
 	cur_text = NULL;
@@ -954,7 +954,7 @@ Restart(void)
 static void
 RedrawFrame(void)
 {
-	int i, x, y;
+	int   i, x, y;
 	Item *item;
 
 	for (i = 0; i < n_items; i++) {
@@ -980,7 +980,7 @@ RedrawFrame(void)
 static void
 RedrawItem(Item *item, int click)
 {
-	int dx, dy, len, x;
+	int		dx, dy, len, x;
 	static XSegment xsegs[4];
 
 	switch (item->type) {
@@ -1119,7 +1119,7 @@ RedrawItem(Item *item, int click)
 static void
 ToggleChoice(Item *item)
 {
-	int i;
+	int   i;
 	Item *sel = item->choice.sel;
 
 	if (sel->select.key == IS_SINGLE) {
@@ -1142,19 +1142,19 @@ ToggleChoice(Item *item)
 /* do var substitution for command string */
 static void
 ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
-#define AddChar(chr)							\
-	{								\
-		if (dn >= N) {						\
-			N *= 2;						\
-			buf = (char *)realloc(buf, N);			\
-		}							\
-		buf[dn++] = (chr);					\
+#define AddChar(chr)                                                           \
+	{                                                                      \
+		if (dn >= N) {                                                 \
+			N *= 2;                                                \
+			buf = (char *)realloc(buf, N);                         \
+		}                                                              \
+		buf[dn++] = (chr);                                             \
 	}
 {
 	static char var[256];
-	char c, x, *cp, *vp;
-	int i, j, dn2;
-	Item *item;
+	char	    c, x, *cp, *vp;
+	int	    i, j, dn2;
+	Item	   *item;
 
 	while (1) {
 		c = *(sp++);
@@ -1191,12 +1191,12 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 					case I_INPUT:
 						if (x == ')') {
 							for (cp = item->input
-							    .value;
+								 .value;
 							    *cp != '\0'; cp++) {
 								if (*cp ==
-								    '\"' ||
+									'\"' ||
 								    *cp ==
-								    '\'' ||
+									'\'' ||
 								    *cp == '\\')
 									AddChar(
 									    '\\');
@@ -1206,33 +1206,33 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 							ParseCommand(dn, sp,
 							    ')', &dn2, &sp);
 							if ((x == '?' &&
-							    strlen(
-							    item->input
-							    .value) >
-							    0) ||
+								strlen(
+								    item->input
+									.value) >
+								    0) ||
 							    (x == '!' &&
-							     strlen(
-							     item->input
-							     .value) ==
-							     0))
+								strlen(
+								    item->input
+									.value) ==
+								    0))
 								dn = dn2;
 						}
 						break;
 					case I_CHOICE:
 						if (x == ')') {
 							for (cp = item->choice
-							    .value;
+								 .value;
 							    *cp != '\0'; cp++)
 								AddChar(*cp);
 						} else {
 							ParseCommand(dn, sp,
 							    ')', &dn2, &sp);
 							if ((x == '?' &&
-							    item->choice
-							    .on) ||
+								item->choice
+								    .on) ||
 							    (x == '!' &&
-							     !item->choice
-							     .on))
+								!item->choice
+								    .on))
 								dn = dn2;
 						}
 						break;
@@ -1244,14 +1244,15 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 						for (j = 0; j < item->select.n;
 						    j++) {
 							if (item->select
-							    .choices[j]
-							    ->choice.on) {
-								for (cp = item
-								    ->select
-								    .choices
-								    [j]
-								    ->choice
-								    .value;
+								.choices[j]
+								->choice.on) {
+								for (
+								    cp = item
+									->select
+									.choices
+									    [j]
+									->choice
+									.value;
 								    *cp != '\0';
 								    cp++)
 									AddChar(
@@ -1266,9 +1267,9 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 			}
 			goto next_loop;
 		}
- normal_char:
+	normal_char:
 		AddChar(c);
- next_loop:		;
+	next_loop:;
 	}
 }
 
@@ -1276,7 +1277,7 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 static void
 DoCommand(Item *cmd)
 {
-	int i, k, dn, len;
+	int   i, k, dn, len;
 	char *sp;
 
 	/* pre-command */
@@ -1321,13 +1322,14 @@ DoCommand(Item *cmd)
 static void
 OpenWindows(void)
 {
-	int i, x, y;
-	Item *item;
-	static XColor xcf, xcb;
+	int			    i, x, y;
+	Item			   *item;
+	static XColor		    xcf, xcb;
 	static XSetWindowAttributes xswa;
-	static XGCValues xgcv;
-	static XWMHints wmh = {.flags = InputHint, .input = True};
-	static XSizeHints sh = {.flags = PPosition | PSize | USPosition | USSize};
+	static XGCValues	    xgcv;
+	static XWMHints		    wmh = {.flags = InputHint, .input = True};
+	static XSizeHints	    sh = {
+	    .flags = PPosition | PSize | USPosition | USSize};
 	static int xgcv_mask = GCBackground | GCForeground | GCFont;
 
 	xc_ibeam = XCreateFontCursor(dpy, XC_xterm);
@@ -1425,7 +1427,7 @@ static void
 ReadFvwm(void)
 {
 	static char buffer[32];
-	int n;
+	int	    n;
 
 	n = read(fd_in, buffer, 32);
 	if (n == 0) {
@@ -1439,11 +1441,11 @@ ReadFvwm(void)
 static void
 ReadXServer(void)
 {
-	static XEvent event;
-	int i, old_cursor, keypress;
-	Item *item, *old_item;
-	KeySym ks;
-	char *sp, *dp, *ep;
+	static XEvent	     event;
+	int		     i, old_cursor, keypress;
+	Item		    *item, *old_item;
+	KeySym		     ks;
+	char		    *sp, *dp, *ep;
 	static unsigned char buf[10], n;
 
 	while (XEventsQueued(dpy, QueuedAfterReading)) {
@@ -1455,8 +1457,8 @@ ReadXServer(void)
 				if (grab_server && !server_grabbed) {
 					if (GrabSuccess ==
 					    XGrabPointer(dpy, frame, True, 0,
-					    GrabModeAsync, GrabModeAsync,
-					    None, None, CurrentTime))
+						GrabModeAsync, GrabModeAsync,
+						None, None, CurrentTime))
 						server_grabbed = 1;
 				}
 				break;
@@ -1466,7 +1468,7 @@ ReadXServer(void)
 				keypress = buf[0];
 				fprintf(fp_err, "Keypress [%s]\n", buf);
 				if (n == 0) { /* not a regular key, translate it
-					         into one */
+						 into one */
 					switch (ks) {
 					case XK_Home:
 					case XK_Begin:
@@ -1495,11 +1497,11 @@ ReadXServer(void)
 							    257 + ks - XK_F1;
 						} else
 							goto no_redraw; /* no
-							                   action
-							                   for
-							                   this
-							                   event
-							                 */
+									   action
+									   for
+									   this
+									   event
+									 */
 					}
 				}
 				if (!cur_text) { /* no text input fields */
@@ -1511,7 +1513,7 @@ ReadXServer(void)
 						    i, item->button.keypress);
 						if (item->type == I_BUTTON &&
 						    item->button.keypress ==
-						    buf[0]) {
+							buf[0]) {
 							RedrawItem(item, 1);
 							sleep(1);
 							RedrawItem(item, 0);
@@ -1532,9 +1534,8 @@ ReadXServer(void)
 				case '\005': /* ^E */
 					old_cursor = abs_cursor;
 					rel_cursor = cur_text->input.n;
-					if ((cur_text->input.left =
-					    rel_cursor -
-					    cur_text->input.size) < 0)
+					if ((cur_text->input.left = rel_cursor -
+						    cur_text->input.size) < 0)
 						cur_text->input.left = 0;
 					abs_cursor =
 					    rel_cursor - cur_text->input.left;
@@ -1559,9 +1560,9 @@ ReadXServer(void)
 						rel_cursor++;
 						abs_cursor++;
 						if (abs_cursor >=
-						    cur_text->input.size &&
+							cur_text->input.size &&
 						    rel_cursor <
-						    cur_text->input.n) {
+							cur_text->input.n) {
 							abs_cursor--;
 							cur_text->input.left++;
 						}
@@ -1621,7 +1622,7 @@ ReadXServer(void)
 				case '\n':
 				case '\015':
 				case '\016': /* LINEFEED, TAB, RETURN, ^N, jump
-				                to the next field */
+						to the next field */
 					for (i = (cur_text - items) + 1;
 					    i < n_items; i++) {
 						item = items + i;
@@ -1634,7 +1635,7 @@ ReadXServer(void)
 							RedrawItem(old_item, 1);
 							rel_cursor =
 							    item->input
-							    .o_cursor;
+								.o_cursor;
 							abs_cursor =
 							    rel_cursor -
 							    item->input.left;
@@ -1651,7 +1652,7 @@ ReadXServer(void)
 						    i, item->button.keypress);
 						if (item->type == I_BUTTON &&
 						    item->button.keypress ==
-						    buf[0]) {
+							buf[0]) {
 							RedrawItem(item, 1);
 							sleep(1);
 							RedrawItem(item, 0);
@@ -1671,7 +1672,7 @@ ReadXServer(void)
 							RedrawItem(old_item, 1);
 							rel_cursor =
 							    item->input
-							    .o_cursor;
+								.o_cursor;
 							abs_cursor =
 							    rel_cursor -
 							    item->input.left;
@@ -1682,20 +1683,20 @@ ReadXServer(void)
 				default:
 					old_cursor = abs_cursor;
 					if ((buf[0] >= ' ' &&
-					    buf[0] < '\177') ||
+						buf[0] < '\177') ||
 					    (buf[0] >= 160)) { /* regular or
-						                  intl char */
+								  intl char */
 						if (++(cur_text->input.n) >=
 						    cur_text->input.buf) {
 							cur_text->input.buf +=
 							    cur_text->input
-							    .size;
+								.size;
 							cur_text->input.value =
 							    (char *)realloc(
-							    cur_text->input
-							    .value,
-							    cur_text->input
-							    .buf);
+								cur_text->input
+								    .value,
+								cur_text->input
+								    .buf);
 						}
 						dp = cur_text->input.value +
 						    cur_text->input.n;
@@ -1714,14 +1715,14 @@ ReadXServer(void)
 							    cur_text->input.n)
 								abs_cursor =
 								    cur_text
-								    ->input
-								    .size -
+									->input
+									.size -
 								    1;
 							else
 								abs_cursor =
 								    cur_text
-								    ->input
-								    .size;
+									->input
+									.size;
 							cur_text->input.left =
 							    rel_cursor -
 							    abs_cursor;
@@ -1738,7 +1739,7 @@ ReadXServer(void)
 						    i, item->button.keypress);
 						if (item->type == I_BUTTON &&
 						    item->button.keypress ==
-						    keypress) {
+							keypress) {
 							RedrawItem(item, 1);
 							sleep(
 							    1); /* .5 seconds */
@@ -1749,11 +1750,13 @@ ReadXServer(void)
 					}
 					break;
 				}
- redraw_newcursor:				{
+			redraw_newcursor:
+				{
 					int x, dy;
 					x = BOX_SPC + TEXT_SPC +
 					    FontWidth(xfs[f_input]) *
-					    old_cursor - 1;
+						old_cursor -
+					    1;
 					dy = cur_text->header.size_y - 1;
 					XSetForeground(
 					    dpy, gc_button, colors[c_itemback]);
@@ -1761,7 +1764,8 @@ ReadXServer(void)
 					    gc_button, x, BOX_SPC, x,
 					    dy - BOX_SPC);
 				}
- redraw:				{
+			redraw:
+				{
 					int len, x, dy;
 					len = cur_text->input.n -
 					    cur_text->input.left;
@@ -1772,28 +1776,31 @@ ReadXServer(void)
 						    cur_text->header.win,
 						    gc_input,
 						    BOX_SPC + TEXT_SPC +
-						    FontWidth(xfs[f_input]) *
-						    len,
+							FontWidth(
+							    xfs[f_input]) *
+							    len,
 						    BOX_SPC + TEXT_SPC +
-						    xfs[f_input]->ascent,
+							xfs[f_input]->ascent,
 						    cur_text->input.blanks,
 						    cur_text->input.size - len);
 					XDrawImageString(dpy,
 					    cur_text->header.win, gc_input,
 					    BOX_SPC + TEXT_SPC,
 					    BOX_SPC + TEXT_SPC +
-					    xfs[f_input]->ascent,
+						xfs[f_input]->ascent,
 					    cur_text->input.value +
-					    cur_text->input.left, len);
+						cur_text->input.left,
+					    len);
 					x = BOX_SPC + TEXT_SPC +
 					    FontWidth(xfs[f_input]) *
-					    abs_cursor - 1;
+						abs_cursor -
+					    1;
 					dy = cur_text->header.size_y - 1;
 					XDrawLine(dpy, cur_text->header.win,
 					    gc_input, x, BOX_SPC, x,
 					    dy - BOX_SPC);
 				}
- no_redraw:
+			no_redraw:
 				break; /* end of case KeyPress */
 			} /* end of switch (event.type) */
 			continue;
@@ -1814,10 +1821,10 @@ ReadXServer(void)
 						RedrawItem(old_item, 1);
 						abs_cursor =
 						    (event.xbutton.x - BOX_SPC -
-						     TEXT_SPC +
-						     FontWidth(
-						     xfs[f_input]) /
-						     2) /
+							TEXT_SPC +
+							FontWidth(
+							    xfs[f_input]) /
+							    2) /
 						    FontWidth(xfs[f_input]);
 						if (abs_cursor < 0)
 							abs_cursor = 0;
@@ -1834,13 +1841,13 @@ ReadXServer(void)
 							    item->input.n;
 						if (rel_cursor > 0 &&
 						    rel_cursor ==
-						    item->input.left)
+							item->input.left)
 							item->input.left--;
 						if (rel_cursor <
-						    item->input.n &&
+							item->input.n &&
 						    rel_cursor ==
-						    item->input.left +
-						    item->input.size)
+							item->input.left +
+							    item->input.size)
 							item->input.left++;
 						abs_cursor = rel_cursor -
 						    item->input.left;
@@ -1873,10 +1880,10 @@ ReadXServer(void)
 					}
 					if (event.xbutton.x >= 0 &&
 					    event.xbutton.x <
-					    item->header.size_x &&
+						item->header.size_x &&
 					    event.xbutton.y >= 0 &&
 					    event.xbutton.y <
-					    item->header.size_y) {
+						item->header.size_y) {
 						DoCommand(item);
 					}
 					break;

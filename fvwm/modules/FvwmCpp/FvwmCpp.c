@@ -11,12 +11,10 @@
 #define TRUE 1
 #define FALSE 0
 
-#include "FvwmCpp.h"
-
 #include <sys/param.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <X11/Intrinsic.h>
@@ -36,26 +34,27 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../../fvwm/fvwm_sandbox.h"
 #include "../../fvwm/module.h"
 #include "../../libs/fvwmlib.h"
+#include "FvwmCpp.h"
 #include "config.h"
-#include "../../fvwm/fvwm_sandbox.h"
 #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
 
 char *MyName;
-int fd[2];
+int   fd[2];
 
 struct list *list_root = NULL;
 
 int ScreenWidth, ScreenHeight;
 int Mscreen;
 
-long Vx, Vy;
+long	     Vx, Vy;
 static char *MkDef(const char *name, const char *def);
 static char *MkNum(const char *name, int def);
-static int cpp_process(Display *display, const char *host, char *options,
+static int   cpp_process(Display *display, const char *host, char *options,
     const char *config_file, int keep_output);
-static int is_cpp_linemarker(const char *line);
+static int   is_cpp_linemarker(const char *line);
 #define MAXHOSTNAME 255
 #define EXTRA 20
 
@@ -75,10 +74,10 @@ int
 main(int argc, char **argv)
 {
 	Display *dpy; /* which display are we talking to */
-	char *temp, *s;
-	char *display_name = NULL;
-	char *filename = NULL;
-	int i, cpp_debug = 0;
+	char	*temp, *s;
+	char	*display_name = NULL;
+	char	*filename = NULL;
+	int	 i, cpp_debug = 0;
 
 	cpp_options[0] = '\0';
 
@@ -173,31 +172,31 @@ static int
 cpp_process(Display *display, const char *host, char *cpp_opts,
     const char *config_file, int keep_output)
 {
-	Screen *screen;
-	Visual *visual;
-	char client[MAXHOSTNAME], server[MAXHOSTNAME], *colon;
-	char ostype[BUFSIZ];
-	char feature_opts[BUFSIZ];
+	Screen	       *screen;
+	Visual	       *visual;
+	char		client[MAXHOSTNAME], server[MAXHOSTNAME], *colon;
+	char		ostype[BUFSIZ];
+	char		feature_opts[BUFSIZ];
 	struct hostent *hostname;
-	char *vc;
-	struct passwd *pwent;
-	FILE *cpp_in = NULL;
-	FILE *cpp_out = NULL;
-	FILE *mirror = NULL;
-	int to_child[2];
-	int from_child[2];
-	pid_t pid;
-	int status;
-	char command[2 * BUFSIZ];
-	char tmp_name[BUFSIZ];
-	int created_temp = 0;
-	char kept_path[BUFSIZ];
-	size_t line_cap = 1024;
-	char *linebuf = NULL;
-	size_t line_len = 0;
-	unsigned char chunk[BUFSIZ];
-	size_t nread;
-	int appended_newline = 0;
+	char	       *vc;
+	struct passwd  *pwent;
+	FILE	       *cpp_in = NULL;
+	FILE	       *cpp_out = NULL;
+	FILE	       *mirror = NULL;
+	int		to_child[2];
+	int		from_child[2];
+	pid_t		pid;
+	int		status;
+	char		command[2 * BUFSIZ];
+	char		tmp_name[BUFSIZ];
+	int		created_temp = 0;
+	char		kept_path[BUFSIZ];
+	size_t		line_cap = 1024;
+	char	       *linebuf = NULL;
+	size_t		line_len = 0;
+	unsigned char	chunk[BUFSIZ];
+	size_t		nread;
+	int		appended_newline = 0;
 
 	kept_path[0] = '\0';
 
@@ -283,17 +282,17 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 		return -1;
 	}
 
-#define WRITE_DEF(name, value)						\
-	do {								\
-		char *tmp__ = MkDef((name), (value));			\
-		fputs(tmp__, cpp_in);					\
-		free(tmp__);						\
+#define WRITE_DEF(name, value)                                                 \
+	do {                                                                   \
+		char *tmp__ = MkDef((name), (value));                          \
+		fputs(tmp__, cpp_in);                                          \
+		free(tmp__);                                                   \
 	} while (0)
-#define WRITE_NUM(name, value)						\
-	do {								\
-		char *tmp__ = MkNum((name), (value));			\
-		fputs(tmp__, cpp_in);					\
-		free(tmp__);						\
+#define WRITE_NUM(name, value)                                                 \
+	do {                                                                   \
+		char *tmp__ = MkNum((name), (value));                          \
+		fputs(tmp__, cpp_in);                                          \
+		free(tmp__);                                                   \
 	} while (0)
 
 	gethostname(client, MAXHOSTNAME);
@@ -516,7 +515,7 @@ static char *
 MkDef(const char *name, const char *def)
 {
 	char *cp = NULL;
-	int n;
+	int   n;
 
 	/* Get space to hold everything, if needed */
 

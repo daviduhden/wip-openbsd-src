@@ -5,9 +5,6 @@
  *
  ***************************************************************************/
 
-#include "config.h"
-#include "../../fvwm/fvwm_sandbox.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -15,6 +12,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -33,23 +33,23 @@
 #include "../../libs/fvwmlib.h"
 
 typedef struct _XpmIcon {
-	Pixmap pixmap;
-	Pixmap mask;
+	Pixmap	      pixmap;
+	Pixmap	      mask;
 	XpmAttributes attributes;
 } XpmIcon;
 
 /**************************************************************************
  * A few function prototypes
  **************************************************************************/
-void RedrawWindow(void);
-void GetXPMData(char **);
-void GetXPMFile(char *, char *);
-void change_window_name(char *str);
-int flush_expose(Window w);
+void	    RedrawWindow(void);
+void	    GetXPMData(char **);
+void	    GetXPMFile(char *, char *);
+void	    change_window_name(char *str);
+int	    flush_expose(Window w);
 static void parseOptions(int fd[2]);
 
 XpmIcon view;
-Window win;
+Window	win;
 
 char *pixmapPath = NULL;
 char *pixmapName = NULL;
@@ -57,17 +57,17 @@ char *myName = NULL;
 
 int timeout = 3000000; /* default time of 3 seconds */
 
-Display *dpy; /* which display are we talking to */
-Window Root;
-int screen;
-int x_fd;
-int d_depth;
-int ScreenWidth, ScreenHeight;
-XSizeHints mysizehints;
-Pixel back_pix, fore_pix;
-GC NormalGC, FGC;
+Display	   *dpy; /* which display are we talking to */
+Window	    Root;
+int	    screen;
+int	    x_fd;
+int	    d_depth;
+int	    ScreenWidth, ScreenHeight;
+XSizeHints  mysizehints;
+Pixel	    back_pix, fore_pix;
+GC	    NormalGC, FGC;
 static Atom wm_del_win;
-Colormap colormap;
+Colormap    colormap;
 
 #define MW_EVENTS (ExposureMask | ButtonReleaseMask)
 
@@ -79,13 +79,13 @@ Colormap colormap;
 int
 main(int argc, char **argv)
 {
-	char *display_name = NULL, *string = NULL;
-	int retval = 0;
-	XEvent Event;
-	fd_set in_fdset;
-	int fd_width;
+	char	      *display_name = NULL, *string = NULL;
+	int	       retval = 0;
+	XEvent	       Event;
+	fd_set	       in_fdset;
+	int	       fd_width;
 	struct timeval value;
-	int fd[2];
+	int	       fd[2];
 
 	fd_width = GetFdWidth();
 
@@ -189,8 +189,7 @@ main(int argc, char **argv)
 		FD_SET(x_fd, &in_fdset);
 
 		if (!XPending(dpy))
-			retval = select(fd_width, &in_fdset,
-			    0, 0, &value);
+			retval = select(fd_width, &in_fdset, 0, 0, &value);
 
 		if (retval == 0) {
 			XDestroyWindow(dpy, win);
@@ -208,7 +207,8 @@ main(int argc, char **argv)
 				exit(0);
 			case ClientMessage:
 				if (Event.xclient.format == 32 &&
-				    (Atom)Event.xclient.data.l[0] == wm_del_win) {
+				    (Atom)Event.xclient.data.l[0] ==
+					wm_del_win) {
 					XDestroyWindow(dpy, win);
 					XSync(dpy, 0);
 					exit(0);
@@ -233,7 +233,7 @@ GetXPMData(char **data)
 	    XpmReturnPixels | XpmCloseness | XpmExtensions;
 	view.attributes.closeness = 40000 /* Allow for "similar" colors */;
 	if (XpmCreatePixmapFromData(dpy, Root, data, &view.pixmap, &view.mask,
-	    &view.attributes) != XpmSuccess) {
+		&view.attributes) != XpmSuccess) {
 		fprintf(stderr,
 		    "FvwmBanner: ERROR couldn't convert data to pixmap\n");
 		exit(1);
@@ -254,7 +254,7 @@ GetXPMFile(char *file, char *path)
 
 	if (full_file) {
 		if (XpmReadFileToPixmap(dpy, Root, full_file, &view.pixmap,
-		    &view.mask, &view.attributes) == XpmSuccess) {
+			&view.mask, &view.attributes) == XpmSuccess) {
 			return;
 		}
 		fprintf(stderr, "FvwmBanner: ERROR reading pixmap file\n");
@@ -274,15 +274,15 @@ static void
 parseOptions(int fd[2])
 {
 	char *tline = NULL;
-	int clength;
+	int   clength;
 
 	clength = strlen(myName);
 
 	while (GetConfigLine(fd, &tline), tline != NULL) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline,
-			    CatString3("*", myName, "Pixmap"),
-			    clength + 7) == 0) {
+				CatString3("*", myName, "Pixmap"),
+				clength + 7) == 0) {
 				if (pixmapName == (char *)0) {
 					CopyString(
 					    &pixmapName, &tline[clength + 7]);
@@ -294,10 +294,11 @@ parseOptions(int fd[2])
 				continue;
 			}
 			if (strncasecmp(tline,
-			    CatString3("*", myName, "Timeout"),
-			    clength + 8) == 0) {
-				timeout = FvwmParseInteger(&tline[clength +
-				    8]) * 1000000;
+				CatString3("*", myName, "Timeout"),
+				clength + 8) == 0) {
+				timeout =
+				    FvwmParseInteger(&tline[clength + 8]) *
+				    1000000;
 				continue;
 			}
 			if (strncasecmp(tline, "PixmapPath", 10) == 0) {

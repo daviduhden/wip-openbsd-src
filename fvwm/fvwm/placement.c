@@ -28,9 +28,9 @@
 #endif
 
 /*  RBW - 11/02/1998  */
-int get_next_x(FvwmWindow *t, int x, int y, int pdeltax, int pdeltay);
-int get_next_y(FvwmWindow *t, int y, int pdeltay);
-int test_fit(FvwmWindow *t, int test_x, int test_y, int aoimin, int pdeltax,
+int  get_next_x(FvwmWindow *t, int x, int y, int pdeltax, int pdeltay);
+int  get_next_y(FvwmWindow *t, int y, int pdeltay);
+int  test_fit(FvwmWindow *t, int test_x, int test_y, int aoimin, int pdeltax,
     int pdeltay);
 void CleverPlacement(FvwmWindow *t, int *x, int *y, int pdeltax, int pdeltay);
 /**/
@@ -65,11 +65,11 @@ SmartPlacement(FvwmWindow *t, int width, int height, int *x, int *y,
 	int PageLeft = 0 - pdeltax;
 	int rc = True;
 	/**/
-	int temp_h, temp_w;
-	int test_x = 0, test_y = 0;
-	int loc_ok = False, tw, tx, ty, th;
+	int	    temp_h, temp_w;
+	int	    test_x = 0, test_y = 0;
+	int	    loc_ok = False, tw, tx, ty, th;
 	FvwmWindow *test_window;
-	int stickyx, stickyy;
+	int	    stickyx, stickyy;
 
 	if (Scr.SmartPlacementIsClever) { /* call clever placement instead? */
 		/*  RBW - 11/02/1998  */
@@ -106,7 +106,7 @@ SmartPlacement(FvwmWindow *t, int width, int height, int *x, int *y,
 #ifndef NO_STUBBORN_PLACEMENT
 					if ((test_window->flags & ICONIFIED) &&
 					    (!(test_window->flags &
-					     ICON_UNMAPPED)) &&
+						ICON_UNMAPPED)) &&
 					    (test_window->icon_w) &&
 					    (test_window != t)) {
 						tw = test_window->icon_p_width;
@@ -212,11 +212,11 @@ int
 get_next_x(FvwmWindow *t, int x, int y, int pdeltax, int pdeltay)
 {
 	/**/
-	int xnew;
-	int xtest;
+	int	    xnew;
+	int	    xtest;
 	FvwmWindow *testw;
-	int PageRight = Scr.MyDisplayWidth - pdeltax;
-	int stickyx, stickyy;
+	int	    PageRight = Scr.MyDisplayWidth - pdeltax;
+	int	    stickyx, stickyy;
 
 	/* Test window at far right of screen */
 	/*  RBW - 11/02/1998  */
@@ -241,9 +241,9 @@ get_next_x(FvwmWindow *t, int x, int y, int pdeltax, int pdeltay)
 
 		if (testw->flags & ICONIFIED) {
 			if ((y < (testw->icon_p_height + testw->icon_w_height +
-			    testw->icon_y_loc - stickyy)) &&
+				     testw->icon_y_loc - stickyy)) &&
 			    (testw->icon_y_loc - stickyy <
-			     (t->frame_height + 2 * t->bw + y))) {
+				(t->frame_height + 2 * t->bw + y))) {
 				xtest = testw->icon_p_width +
 				    testw->icon_x_loc - stickyx;
 				if (xtest > x)
@@ -254,9 +254,9 @@ get_next_x(FvwmWindow *t, int x, int y, int pdeltax, int pdeltay)
 					xnew = MIN(xnew, xtest);
 			}
 		} else if ((y < (testw->frame_height + 2 * testw->bw +
-		    testw->frame_y - stickyy)) &&
+				    testw->frame_y - stickyy)) &&
 		    (testw->frame_y - stickyy <
-		     (t->frame_height + 2 * t->bw + y))) {
+			(t->frame_height + 2 * t->bw + y))) {
 			xtest = testw->frame_width + 2 * testw->bw +
 			    testw->frame_x - stickyx;
 			if (xtest > x)
@@ -275,11 +275,11 @@ int
 get_next_y(FvwmWindow *t, int y, int pdeltay)
 {
 	/**/
-	int ynew;
-	int ytest;
+	int	    ynew;
+	int	    ytest;
 	FvwmWindow *testw;
-	int PageBottom = Scr.MyDisplayHeight - pdeltay;
-	int stickyy;
+	int	    PageBottom = Scr.MyDisplayHeight - pdeltay;
+	int	    stickyy;
 
 	/* Test window at far bottom of screen */
 	/*  RBW - 11/02/1998  */
@@ -329,15 +329,15 @@ test_fit(FvwmWindow *t, int x11, int y11, int aoimin, int pdeltax, int pdeltay)
 {
 	/**/
 	FvwmWindow *testw;
-	int x12, x21, x22;
-	int y12, y21, y22;
-	int xl, xr, yt, yb; /* xleft, xright, ytop, ybottom */
-	int aoi = 0;        /* area of interference */
-	int anew;
-	int avoidance_factor;
-	int PageBottom = Scr.MyDisplayHeight - pdeltay;
-	int PageRight = Scr.MyDisplayWidth - pdeltax;
-	int stickyx, stickyy;
+	int	    x12, x21, x22;
+	int	    y12, y21, y22;
+	int	    xl, xr, yt, yb; /* xleft, xright, ytop, ybottom */
+	int	    aoi = 0;	    /* area of interference */
+	int	    anew;
+	int	    avoidance_factor;
+	int	    PageBottom = Scr.MyDisplayHeight - pdeltay;
+	int	    PageRight = Scr.MyDisplayWidth - pdeltax;
+	int	    stickyx, stickyy;
 
 	x12 = x11 + t->frame_width + 2 * t->bw;
 	y12 = y11 + t->frame_height + 2 * t->bw;
@@ -410,12 +410,12 @@ PlaceWindow(
 {
 	/**/
 	FvwmWindow *t;
-	int xl = -1, yt, DragWidth, DragHeight;
-	int gravx, gravy; /* gravity signs for positioning */
-			  /*  RBW - 11/02/1998  */
-	int px = 0, py = 0, pdeltax = 0, pdeltay = 0;
-	int PageRight = Scr.MyDisplayWidth, PageBottom = Scr.MyDisplayHeight;
-	int smartlyplaced = False;
+	int	    xl = -1, yt, DragWidth, DragHeight;
+	int	    gravx, gravy; /* gravity signs for positioning */
+				  /*  RBW - 11/02/1998  */
+	int  px = 0, py = 0, pdeltax = 0, pdeltay = 0;
+	int  PageRight = Scr.MyDisplayWidth, PageBottom = Scr.MyDisplayHeight;
+	int  smartlyplaced = False;
 	Bool HonorStartsOnPage = False;
 	extern Bool Restarting;
 	/**/
@@ -469,8 +469,8 @@ PlaceWindow(
 		  */
 		if (!PPosOverride &&
 		    ((tmp_win->flags & SHOW_ON_MAP) &&
-		     (!(tflag & RANDOM_PLACE_FLAG)) &&
-		     !Scr.go.ActivePlacementHonorsStartsOnPage)) {
+			(!(tflag & RANDOM_PLACE_FLAG)) &&
+			!Scr.go.ActivePlacementHonorsStartsOnPage)) {
 			HonorStartsOnPage = False;
 		}
 	}
@@ -483,9 +483,9 @@ PlaceWindow(
 		tmp_win->Desk =
 		    (Desk > -1) ? Desk - 1 : Desk; /*  RBW - 11/20/1998  */
 	else {
-		Atom atype;
-		int aformat;
-		unsigned long nitems, bytes_remain;
+		Atom	       atype;
+		int	       aformat;
+		unsigned long  nitems, bytes_remain;
 		unsigned char *prop;
 
 		if ((tmp_win->wmhints) &&
@@ -497,9 +497,9 @@ PlaceWindow(
 			for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 				if ((t->w == tmp_win->wmhints->window_group) ||
 				    ((t->wmhints) &&
-				     (t->wmhints->flags & WindowGroupHint) &&
-				     (t->wmhints->window_group ==
-				      tmp_win->wmhints->window_group)))
+					(t->wmhints->flags & WindowGroupHint) &&
+					(t->wmhints->window_group ==
+					    tmp_win->wmhints->window_group)))
 					tmp_win->Desk = t->Desk;
 			}
 		}
@@ -514,8 +514,8 @@ PlaceWindow(
 		}
 
 		if ((XGetWindowProperty(dpy, tmp_win->w, _XA_WM_DESKTOP, 0L, 1L,
-		    True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
-		    &bytes_remain, &prop)) == Success) {
+			True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
+			&bytes_remain, &prop)) == Success) {
 			if (prop != NULL) {
 				tmp_win->Desk = *(unsigned long *)prop;
 				XFree(prop);
@@ -526,7 +526,7 @@ PlaceWindow(
 	 * whenever a new window pops up, except during initialization */
 	if ((!PPosOverride) && (!(tmp_win->flags & SHOW_ON_MAP)))
 	/*  RBW - 11/02/1998  --  I dont. */
-	    {
+	{
 		changeDesks(tmp_win->Desk);
 	}
 
@@ -545,9 +545,9 @@ PlaceWindow(
 			    0;
 
 			px = (PageX != 0) ? ((PageX > 0) ? PageX - 1 : PageX) :
-			    current_px;
+					    current_px;
 			py = (PageY != 0) ? ((PageY > 0) ? PageY - 1 : PageY) :
-			    current_py;
+					    current_py;
 
 			px *= Scr.MyDisplayWidth;
 			py *= Scr.MyDisplayHeight;
@@ -581,12 +581,12 @@ PlaceWindow(
 	if (!(tmp_win->flags & TRANSIENT) &&
 	    !(tmp_win->hints.flags & USPosition) &&
 	    ((tflag & NO_PPOSITION_FLAG) ||
-	     !(tmp_win->hints.flags & PPosition)) &&
+		!(tmp_win->hints.flags & PPosition)) &&
 	    !(PPosOverride) &&
 	    /*  RBW - allow StartsOnPage to go through, even if iconic.  */
 	    (((!((tmp_win->wmhints) && (tmp_win->wmhints->flags & StateHint) &&
-	       (tmp_win->wmhints->initial_state == IconicState))) ||
-	      (HonorStartsOnPage)))) {
+		  (tmp_win->wmhints->initial_state == IconicState))) ||
+		(HonorStartsOnPage)))) {
 		/* Get user's window placement, unless RandomPlacement is
 		 * specified */
 		if (tflag & RANDOM_PLACE_FLAG) {
@@ -598,11 +598,11 @@ PlaceWindow(
 			if (!smartlyplaced) {
 				/* place window in a random location */
 				if ((Scr.randomx += GetDecor(tmp_win,
-				    TitleHeight)) > Scr.MyDisplayWidth / 2)
+					 TitleHeight)) > Scr.MyDisplayWidth / 2)
 					Scr.randomx =
 					    GetDecor(tmp_win, TitleHeight);
 				if ((Scr.randomy +=
-				    2 * GetDecor(tmp_win, TitleHeight)) >
+					2 * GetDecor(tmp_win, TitleHeight)) >
 				    Scr.MyDisplayHeight / 2)
 					Scr.randomy =
 					    2 * GetDecor(tmp_win, TitleHeight);
@@ -624,21 +624,19 @@ PlaceWindow(
 			    tmp_win->attr.y + tmp_win->old_bw - tmp_win->bw;
 
 			if (tmp_win->frame_x + tmp_win->frame_width +
-			    2 * tmp_win->boundary_width >
+				2 * tmp_win->boundary_width >
 			    PageRight) {
-				tmp_win->attr.x =
-				    PageRight - tmp_win->attr.width -
-				    tmp_win->old_bw + tmp_win->bw -
-				    2 * tmp_win->boundary_width;
+				tmp_win->attr.x = PageRight -
+				    tmp_win->attr.width - tmp_win->old_bw +
+				    tmp_win->bw - 2 * tmp_win->boundary_width;
 				Scr.randomx = 0;
 			}
 			if (tmp_win->frame_y + 2 * tmp_win->boundary_width +
-			    tmp_win->title_height + tmp_win->frame_height >
+				tmp_win->title_height + tmp_win->frame_height >
 			    PageBottom) {
-				tmp_win->attr.y =
-				    PageBottom - tmp_win->attr.height -
-				    tmp_win->old_bw + tmp_win->bw -
-				    tmp_win->title_height -
+				tmp_win->attr.y = PageBottom -
+				    tmp_win->attr.height - tmp_win->old_bw +
+				    tmp_win->bw - tmp_win->title_height -
 				    2 * tmp_win->boundary_width;
 				;
 				Scr.randomy = 0;
@@ -672,10 +670,10 @@ PlaceWindow(
 					/* Grabbed the pointer - continue */
 					MyXGrabServer(dpy);
 					if (XGetGeometry(dpy, tmp_win->w,
-					    &JunkRoot, &JunkX, &JunkY,
-					    (unsigned int *)&DragWidth,
-					    (unsigned int *)&DragHeight,
-					    &JunkBW, &JunkDepth) == 0) {
+						&JunkRoot, &JunkX, &JunkY,
+						(unsigned int *)&DragWidth,
+						(unsigned int *)&DragHeight,
+						&JunkBW, &JunkDepth) == 0) {
 						free((char *)tmp_win);
 						MyXUngrabServer(dpy);
 						return False;
@@ -720,14 +718,15 @@ PlaceWindow(
 
 		if (((tmp_win->flags & SHOW_ON_MAP) && HonorStartsOnPage) &&
 		    (!(tmp_win->flags & TRANSIENT) &&
-		     ((tflag & NO_PPOSITION_FLAG) ||
-		      !(tmp_win->hints.flags & PPosition)) &&
+			((tflag & NO_PPOSITION_FLAG) ||
+			    !(tmp_win->hints.flags & PPosition)) &&
 			/*  RBW - allow StartsOnPage to go through, even if
-		           iconic.  */
-		     (((!((tmp_win->wmhints) &&
-			(tmp_win->wmhints->flags & StateHint) &&
-			(tmp_win->wmhints->initial_state == IconicState))) ||
-		       (HonorStartsOnPage))))) {
+			   iconic.  */
+			(((!((tmp_win->wmhints) &&
+			      (tmp_win->wmhints->flags & StateHint) &&
+			      (tmp_win->wmhints->initial_state ==
+				  IconicState))) ||
+			    (HonorStartsOnPage))))) {
 			/*
 			      We're placing a SkipMapping window - either
 			   capturing one that's previously been mapped, or
@@ -743,7 +742,7 @@ PlaceWindow(
 			if (tmp_win->attr.x < 0) {
 				tmp_win->attr.x =
 				    ((Scr.MyDisplayWidth + tmp_win->attr.x) %
-				     Scr.MyDisplayWidth);
+					Scr.MyDisplayWidth);
 			} else {
 				tmp_win->attr.x =
 				    tmp_win->attr.x % Scr.MyDisplayWidth;
@@ -757,7 +756,7 @@ PlaceWindow(
 			if (tmp_win->attr.y < 0) {
 				tmp_win->attr.y =
 				    ((Scr.MyDisplayHeight + tmp_win->attr.y) %
-				     Scr.MyDisplayHeight);
+					Scr.MyDisplayHeight);
 			} else {
 				tmp_win->attr.y =
 				    tmp_win->attr.y % Scr.MyDisplayHeight;
@@ -798,21 +797,21 @@ void
 GetGravityOffsets(FvwmWindow *tmp, int *xp, int *yp)
 {
 	static struct _gravity_offset gravity_offsets[11] = {
-		{0, 0},   /* ForgetGravity */
-		{-1, -1}, /* NorthWestGravity */
-		{0, -1},  /* NorthGravity */
-		{1, -1},  /* NorthEastGravity */
-		{-1, 0},  /* WestGravity */
-		{0, 0},   /* CenterGravity */
-		{1, 0},   /* EastGravity */
-		{-1, 1},  /* SouthWestGravity */
-		{0, 1},   /* SouthGravity */
-		{1, 1},   /* SouthEastGravity */
-		{0, 0},   /* StaticGravity */
+	    {0, 0},   /* ForgetGravity */
+	    {-1, -1}, /* NorthWestGravity */
+	    {0, -1},  /* NorthGravity */
+	    {1, -1},  /* NorthEastGravity */
+	    {-1, 0},  /* WestGravity */
+	    {0, 0},   /* CenterGravity */
+	    {1, 0},   /* EastGravity */
+	    {-1, 1},  /* SouthWestGravity */
+	    {0, 1},   /* SouthGravity */
+	    {1, 1},   /* SouthEastGravity */
+	    {0, 0},   /* StaticGravity */
 	};
 	register int g =
 	    ((tmp->hints.flags & PWinGravity) ? tmp->hints.win_gravity :
-	     NorthWestGravity);
+						NorthWestGravity);
 
 	if (g < ForgetGravity || g > StaticGravity)
 		*xp = *yp = 0;

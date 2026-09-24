@@ -28,8 +28,8 @@
 static Bool
 IsClick(int x, int y, long EndMask, XEvent *d)
 {
-	int xcurrent, ycurrent, total = 0;
-	Time t0;
+	int	    xcurrent, ycurrent, total = 0;
+	Time	    t0;
 	extern Time lastTimestamp;
 
 	xcurrent = x;
@@ -37,8 +37,8 @@ IsClick(int x, int y, long EndMask, XEvent *d)
 	t0 = lastTimestamp;
 
 	while ((total < Scr.ClickTime) && (x - xcurrent < 3) &&
-	    (x - xcurrent > -3) && (y - ycurrent < 3) &&
-	    (y - ycurrent > -3) && ((lastTimestamp - t0) < (Time)Scr.ClickTime)) {
+	    (x - xcurrent > -3) && (y - ycurrent < 3) && (y - ycurrent > -3) &&
+	    ((lastTimestamp - t0) < (Time)Scr.ClickTime)) {
 		usleep(20000);
 		total += 20;
 		if (XCheckMaskEvent(dpy, EndMask, d)) {
@@ -46,7 +46,7 @@ IsClick(int x, int y, long EndMask, XEvent *d)
 			return True;
 		}
 		if (XCheckMaskEvent(
-		    dpy, ButtonMotionMask | PointerMotionMask, d)) {
+			dpy, ButtonMotionMask | PointerMotionMask, d)) {
 			xcurrent = d->xmotion.x_root;
 			ycurrent = d->xmotion.y_root;
 			StashEventTime(d);
@@ -65,16 +65,16 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	(void)Module;
-	char type = MOTION;
-	char c;
-	MenuItem *mi;
-	Bool Persist = False;
-	Bool HaveDoubleClick = False;
-	Bool NeedsTarget = False;
-	char *arguments[10], *junk, *taction;
-	int x, y, i;
-	XEvent d, *ev;
-	MenuRoot *mr;
+	char	    type = MOTION;
+	char	    c;
+	MenuItem   *mi;
+	Bool	    Persist = False;
+	Bool	    HaveDoubleClick = False;
+	Bool	    NeedsTarget = False;
+	char	   *arguments[10], *junk, *taction;
+	int	    x, y, i;
+	XEvent	    d, *ev;
+	MenuRoot   *mr;
 	extern Bool desperate;
 
 	mr = FindPopup(action);
@@ -133,7 +133,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	 * a window to operate on */
 	if (NeedsTarget) {
 		if (DeferExecution(
-		    eventp, &w, &tmp_win, &context, SELECT, ButtonPress)) {
+			eventp, &w, &tmp_win, &context, SELECT, ButtonPress)) {
 			WaitForButtonsUp();
 			for (i = 0; i < 10; i++)
 				if (arguments[i] != NULL)
@@ -202,9 +202,9 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 char *
 expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 {
-	int l, i, l2, n, k, j;
-	char *out;
-	int addto = 0; /*special cas if doing addtofunc */
+	int    l, i, l2, n, k, j;
+	char  *out;
+	int    addto = 0; /*special cas if doing addtofunc */
 	size_t outlen;
 
 	l = strlen(input);
@@ -237,8 +237,8 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 			n = input[i + 1] - '0';
 			if ((n >= 0) && (n <= 9)) {
 				if (arguments[n] != NULL) {
-					for (k = 0; k < (int)strlen(arguments[n]);
-					    k++)
+					for (k = 0;
+					    k < (int)strlen(arguments[n]); k++)
 						out[j++] = arguments[n][k];
 					i++;
 				} else if (addto == 1) {
@@ -247,7 +247,7 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 					i++;
 					if (isspace(input[i + 1]))
 						i++; /*eliminates extra white
-						        space*/
+							space*/
 				}
 			} else if (input[i + 1] == 'w') {
 				if (tmp_win)

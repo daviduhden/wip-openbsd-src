@@ -17,13 +17,14 @@
 
 static int failures;
 
-#define CHECK(cond, msg) do {						\
-	if (!(cond)) {							\
-		fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,	\
-		    __LINE__);						\
-		failures++;						\
-	}								\
-} while (0)
+#define CHECK(cond, msg)                                                       \
+	do {                                                                   \
+		if (!(cond)) {                                                 \
+			fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,   \
+			    __LINE__);                                         \
+			failures++;                                            \
+		}                                                              \
+	} while (0)
 
 static int
 next(struct pipebuf *pb, char **linep, size_t *lenp, size_t maxline)
@@ -36,8 +37,8 @@ test_split_lines(void)
 {
 	/* "one\n" then "tw" then "o\nthree\n" -> three lines. */
 	struct pipebuf pb;
-	char *line;
-	size_t len;
+	char	      *line;
+	size_t	       len;
 
 	pipebuf_init(&pb);
 	pipebuf_append(&pb, "one\n", 4);
@@ -63,8 +64,8 @@ static void
 test_multiple_lines_per_chunk(void)
 {
 	struct pipebuf pb;
-	char *line;
-	size_t len;
+	char	      *line;
+	size_t	       len;
 
 	pipebuf_init(&pb);
 	pipebuf_append(&pb, "a\nb\nc\nd\n", 8);
@@ -82,9 +83,9 @@ static void
 test_long_line(void)
 {
 	struct pipebuf pb;
-	char chunk[4096];
-	char *line;
-	size_t len, total = 0, want;
+	char	       chunk[4096];
+	char	      *line;
+	size_t	       len, total = 0, want;
 
 	/* A 12288-byte line without newline is returned in bounded
 	 * 64-byte fragments, never all at once. */
@@ -111,8 +112,8 @@ static void
 test_nul_handling(void)
 {
 	struct pipebuf pb;
-	char *line;
-	size_t len;
+	char	      *line;
+	size_t	       len;
 
 	/* "Exec foo\0garbage\nExec bar\n": the effective first command
 	 * is "Exec foo"; the rest of the physical line is discarded. */
@@ -146,8 +147,8 @@ test_continuation_visible(void)
 	 * backslash-newline continuation is the caller's job.  Just
 	 * make sure lines with trailing backslash come back intact. */
 	struct pipebuf pb;
-	char *line;
-	size_t len;
+	char	      *line;
+	size_t	       len;
 
 	pipebuf_init(&pb);
 	pipebuf_append(&pb, "cmd \\\narg\n", 10);
@@ -155,8 +156,8 @@ test_continuation_visible(void)
 	CHECK(len == 6 && memcmp(line, "cmd \\\n", 6) == 0,
 	    "backslash newline preserved");
 	CHECK(next(&pb, &line, &len, 64) == 1, "continuation line ready");
-	CHECK(len == 4 && memcmp(line, "arg\n", 4) == 0,
-	    "continuation content");
+	CHECK(
+	    len == 4 && memcmp(line, "arg\n", 4) == 0, "continuation content");
 	pipebuf_free(&pb);
 }
 
@@ -164,8 +165,8 @@ static void
 test_empty_and_edges(void)
 {
 	struct pipebuf pb;
-	char *line;
-	size_t len;
+	char	      *line;
+	size_t	       len;
 
 	pipebuf_init(&pb);
 	CHECK(next(&pb, &line, &len, 64) == 0, "empty buffer waits");
@@ -193,8 +194,8 @@ main(void)
 	test_empty_and_edges();
 
 	if (failures != 0) {
-		fprintf(stderr, "fvwm-pipebuf-tests: %d failure(s)\n",
-		    failures);
+		fprintf(
+		    stderr, "fvwm-pipebuf-tests: %d failure(s)\n", failures);
 		return 1;
 	}
 	printf("fvwm-pipebuf-tests: all tests passed\n");

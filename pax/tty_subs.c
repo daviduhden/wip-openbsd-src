@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <fcntl.h>
 #include <stdarg.h>
@@ -44,8 +44,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * routines that deal with I/O to and from the user
@@ -92,7 +92,7 @@ void
 tty_prnt(const char *fmt, ...)
 {
 	va_list ap;
-	char buf[8192];
+	char	buf[8192];
 
 	if (ttyoutf == NULL)
 		return;
@@ -134,7 +134,7 @@ void
 paxwarn(int set, const char *fmt, ...)
 {
 	va_list ap;
-	char buf[8192];
+	char	buf[8192];
 
 	if (set)
 		exit_val = 1;
@@ -165,7 +165,7 @@ void
 syswarn(int set, int errnum, const char *fmt, ...)
 {
 	va_list ap;
-	char buf[8192];
+	char	buf[8192];
 
 	if (set)
 		exit_val = 1;

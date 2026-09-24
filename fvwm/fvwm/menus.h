@@ -91,7 +91,7 @@ typedef struct MenuFace {
 		Pixel back;
 #ifdef GRADIENT_BUTTONS
 		struct {
-			int npixels;
+			int    npixels;
 			Pixel *pixels;
 		} grad;
 #endif
@@ -110,106 +110,108 @@ typedef struct MenuLook {
 		unsigned char TriangleRelief:1;
 		unsigned char hasSideColor:1;
 	} f;
-	char ReliefThickness;
-	char TitleUnderlines;
+	char	     ReliefThickness;
+	char	     TitleUnderlines;
 	FvwmPicture *sidePic;
-	Pixel sideColor;
-	GC MenuGC;
-	GC MenuActiveGC;
-	GC MenuActiveBackGC;
-	GC MenuStippleGC;
-	GC MenuReliefGC;
-	GC MenuShadowGC;
-	ColorPair MenuColors;
-	ColorPair MenuActiveColors;
-	ColorPair MenuStippleColors;
-	ColorPair MenuRelief;
-	MyFont *pStdFont;
-	int EntryHeight; /* menu entry height */
+	Pixel	     sideColor;
+	GC	     MenuGC;
+	GC	     MenuActiveGC;
+	GC	     MenuActiveBackGC;
+	GC	     MenuStippleGC;
+	GC	     MenuReliefGC;
+	GC	     MenuShadowGC;
+	ColorPair    MenuColors;
+	ColorPair    MenuActiveColors;
+	ColorPair    MenuStippleColors;
+	ColorPair    MenuRelief;
+	MyFont	    *pStdFont;
+	int	     EntryHeight; /* menu entry height */
 } MenuLook;
 
 typedef struct MenuStyle {
-	char *name;
+	char		 *name;
 	struct MenuStyle *next;
-	MenuLook look;
-	MenuFeel feel;
+	MenuLook	  look;
+	MenuFeel	  feel;
 } MenuStyle;
 
 struct MenuRoot; /* forward declaration */
 
 typedef struct MenuItem {
-	struct MenuRoot *mr;   /* the menu this item is in */
-	struct MenuItem *next; /* next menu item */
-	struct MenuItem *prev; /* prev menu item */
-	char *item;            /* the character string displayed on left*/
-	char *item2;           /* the character string displayed on right*/
-	FvwmPicture *picture;  /* Pixmap to show  above label*/
-	FvwmPicture *lpicture; /* Pixmap to show to left of label */
-	char *action;          /* action to be performed */
-	short item_num;        /* item number of this menu */
-	short x;               /* x coordinate for text (item) */
-	short x2;              /* x coordinate for text (item2) */
-	short xp;              /* x coordinate for picture */
-	short y_offset;        /* y coordinate for item */
-	short y_height;        /* y height for item */
-	short func_type;       /* type of built in function */
-	Bool func_needs_window;
-	short state;   /* video state, 0 = normal, 1 = reversed */
-	short strlen;  /* strlen(item) */
-	short strlen2; /* strlen(item2) */
-	short hotkey;  /* Hot key offset (pete@tecc.co.uk).
-	                                 0 - No hot key
-	                                 +ve - offset to hot key char in item
-	                                 -ve - offset to hot key char in item2
-	                                 (offsets have 1 added, so +1 or -1
-	                                 refer to the *first* character)
-	                                 */
-	char chHotkey;
+	struct MenuRoot *mr;	    /* the menu this item is in */
+	struct MenuItem *next;	    /* next menu item */
+	struct MenuItem *prev;	    /* prev menu item */
+	char		*item;	    /* the character string displayed on left*/
+	char		*item2;	    /* the character string displayed on right*/
+	FvwmPicture	*picture;   /* Pixmap to show  above label*/
+	FvwmPicture	*lpicture;  /* Pixmap to show to left of label */
+	char		*action;    /* action to be performed */
+	short		 item_num;  /* item number of this menu */
+	short		 x;	    /* x coordinate for text (item) */
+	short		 x2;	    /* x coordinate for text (item2) */
+	short		 xp;	    /* x coordinate for picture */
+	short		 y_offset;  /* y coordinate for item */
+	short		 y_height;  /* y height for item */
+	short		 func_type; /* type of built in function */
+	Bool		 func_needs_window;
+	short		 state;	  /* video state, 0 = normal, 1 = reversed */
+	short		 strlen;  /* strlen(item) */
+	short		 strlen2; /* strlen(item2) */
+	short		 hotkey;  /* Hot key offset (pete@tecc.co.uk).
+						    0 - No hot key
+						    +ve - offset to hot key char in item
+						    -ve - offset to hot key char in item2
+						    (offsets have 1 added, so +1 or -1
+						    refer to the *first* character)
+						    */
+	char  chHotkey;
 	short fIsSeparator; /* 1 if this is a separator or a title */
 } MenuItem;
 
 typedef struct MenuRoot {
 	MenuItem *first;    /* first item in menu */
-	MenuItem *last;     /* last item in menu */
+	MenuItem *last;	    /* last item in menu */
 	MenuItem *selected; /* the selected item in menu */
 #ifdef GRADIENT_BUTTONS
 	struct {
 		Pixmap stored;
-		int width;
-		int height;
-		int y;
+		int    width;
+		int    height;
+		int    y;
 	} stored_item;
 #endif
 
-	struct MenuRoot *next;         /* next in list of root menus */
+	struct MenuRoot *next;	       /* next in list of root menus */
 	struct MenuRoot *continuation; /* continuation of this menu
-	                                * (too tall for screen */
+					* (too tall for screen */
 	/* can get the menu that this popped up through selected->mr when
 	     selected IS_POPUP_MENU_ITEM(selected) */
-	struct MenuRoot *mrDynamicPrev; /* the menu that popped this up, if any */
+	struct MenuRoot
+	    *mrDynamicPrev; /* the menu that popped this up, if any */
 
-	char *name;         /* name of root */
-	Window w;           /* the window of the menu */
-	short height;       /* height of the menu */
-	short width;        /* width of the menu for 1st col */
-	short width2;       /* width of the menu for 2nd col */
-	short width0;       /* width of the menu-left-picture col */
-	short items;        /* number of items in the menu */
-	Bool backgroundset; /* is win background set for this menu ?? */
-	Bool in_use;
-	int func;
+	char	    *name;	    /* name of root */
+	Window	     w;		    /* the window of the menu */
+	short	     height;	    /* height of the menu */
+	short	     width;	    /* width of the menu for 1st col */
+	short	     width2;	    /* width of the menu for 2nd col */
+	short	     width0;	    /* width of the menu-left-picture col */
+	short	     items;	    /* number of items in the menu */
+	Bool	     backgroundset; /* is win background set for this menu ?? */
+	Bool	     in_use;
+	int	     func;
 	FvwmPicture *sidePic;
-	Pixel sideColor;
-	Bool colorize;
-	short xoffset;
-	MenuStyle *ms; /* Menu Face    */
-	union          /* internal flags, deleted when menu pops down! */ {
+	Pixel	     sideColor;
+	Bool	     colorize;
+	short	     xoffset;
+	MenuStyle   *ms; /* Menu Face    */
+	union /* internal flags, deleted when menu pops down! */ {
 		/* need to change that type if we have more than 8 flags.
 		 * more that a word will entail some changes in the code! */
 		unsigned char allflags;
 		struct {
 			unsigned painted:1;
-			unsigned is_left:1; /* menu direction relative to parent menu */
+			unsigned is_left
+			    :1; /* menu direction relative to parent menu */
 			unsigned is_right:1;
 			unsigned is_up:1;
 			unsigned is_down:1;
@@ -220,29 +222,29 @@ typedef struct MenuRoot {
 /* don't forget to initialise new members in NewMenuRoot()! */
 
 typedef struct MenuGlobals {
-	MenuRoot *all;
+	MenuRoot	 *all;
 	struct MenuStyle *DefaultStyle;
 	struct MenuStyle *LastStyle;
-	int PopupDelay10ms;
-	int DoubleClickTime;
+	int		  PopupDelay10ms;
+	int		  DoubleClickTime;
 } MenuGlobals;
 
 typedef struct Binding {
-	char IsMouse;   /* Is it a mouse or key binding 1= mouse; */
-	int Button_Key; /* Mouse Button number of Keycode */
-	char *key_name; /* In case of keycode, give the key_name too */
-	int Context;    /* Contex is Fvwm context, ie titlebar, frame, etc */
-	int Modifier;   /* Modifiers for keyboard state */
-	char *Action;   /* What to do? */
+	char  IsMouse;	  /* Is it a mouse or key binding 1= mouse; */
+	int   Button_Key; /* Mouse Button number of Keycode */
+	char *key_name;	  /* In case of keycode, give the key_name too */
+	int   Context;	  /* Contex is Fvwm context, ie titlebar, frame, etc */
+	int   Modifier;	  /* Modifiers for keyboard state */
+	char *Action;	  /* What to do? */
 	struct Binding *NextBinding;
 } Binding;
 
 typedef struct {
-	int x;          /* suggested x position */
-	int y;          /* suggested y position */
-	float x_factor; /* to take menu width into account (0, -1 or -0.5) */
-	float y_factor; /* same with height */
-	Bool fRelative; /* FALSE if referring to absolute screen position */
+	int   x;	 /* suggested x position */
+	int   y;	 /* suggested y position */
+	float x_factor;	 /* to take menu width into account (0, -1 or -0.5) */
+	float y_factor;	 /* same with height */
+	Bool  fRelative; /* FALSE if referring to absolute screen position */
 } MenuPosHints;
 
 typedef struct {
@@ -263,7 +265,7 @@ typedef struct {
 } MenuOptions;
 
 extern MenuPosHints lastMenuPosHints;
-extern Bool fLastMenuPosHintsValid;
+extern Bool	    fLastMenuPosHintsValid;
 
 /* Return values for UpdateMenu, do_menu, menuShortcuts */
 /* Just uses enum-s for their constant value, replaced a bunch of #define-s

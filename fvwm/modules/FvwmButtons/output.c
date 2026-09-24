@@ -76,8 +76,8 @@ DumpButtons(button_info *b)
 		    b->c->ButtonHeight, b->c->xpos, b->c->ypos);
 		/*
 		  fprintf(stderr,"  font(%s,%i) framew(%i) pad(%i,%i) { ",
-		          b->c->font_string,(int)b->c->font,b->c->framew,b->c->xpad,
-		          b->c->ypad);
+			  b->c->font_string,(int)b->c->font,b->c->framew,b->c->xpad,
+			  b->c->ypad);
 	    */
 		while (i < b->c->num_buttons)
 			fprintf(stderr, "0x%lx ",

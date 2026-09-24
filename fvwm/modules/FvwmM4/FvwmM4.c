@@ -11,12 +11,10 @@
 #define TRUE 1
 #define FALSE 0
 
-#include "FvwmM4.h"
-
 #include <sys/param.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <X11/Intrinsic.h>
@@ -36,19 +34,20 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../../fvwm/fvwm_sandbox.h"
 #include "../../fvwm/module.h"
 #include "../../libs/fvwmlib.h"
+#include "FvwmM4.h"
 #include "config.h"
-#include "../../fvwm/fvwm_sandbox.h"
 #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
 
 char *MyName;
-int fd[2];
+int   fd[2];
 
 int ScreenWidth, ScreenHeight;
 int Mscreen;
 
-long Vx, Vy;
+long	     Vx, Vy;
 static char *MkDef(const char *name, const char *def);
 static char *MkNum(const char *name, int def);
 static char *m4_defs(
@@ -56,14 +55,14 @@ static char *m4_defs(
 #define MAXHOSTNAME 255
 #define EXTRA 50
 
-int m4_enable;                /* use m4? */
-int m4_prefix;                /* Do GNU m4 prefixing (-P) */
-char m4_options[BUFSIZ];      /* Command line options to m4 */
-char m4_outfile[BUFSIZ] = ""; /* The output filename for m4 */
-char *m4_prog = "m4";         /* Name of the m4 program */
-int m4_default_quotes;        /* Use default m4 quotes */
-char *m4_startquote = "`";    /* Left quote characters for m4 */
-char *m4_endquote = "'";      /* Right quote characters for m4 */
+int   m4_enable;	       /* use m4? */
+int   m4_prefix;	       /* Do GNU m4 prefixing (-P) */
+char  m4_options[BUFSIZ];      /* Command line options to m4 */
+char  m4_outfile[BUFSIZ] = ""; /* The output filename for m4 */
+char *m4_prog = "m4";	       /* Name of the m4 program */
+int   m4_default_quotes;       /* Use default m4 quotes */
+char *m4_startquote = "`";     /* Left quote characters for m4 */
+char *m4_endquote = "'";       /* Right quote characters for m4 */
 
 /***********************************************************************
  *
@@ -76,11 +75,11 @@ int
 main(int argc, char **argv)
 {
 	Display *dpy; /* which display are we talking to */
-	char *temp, *s;
-	char *display_name = NULL;
-	char *filename = NULL;
-	char *tmp_file, read_string[80], delete_string[80];
-	int i, m4_debug = 0;
+	char	*temp, *s;
+	char	*display_name = NULL;
+	char	*filename = NULL;
+	char	*tmp_file, read_string[80], delete_string[80];
+	int	 i, m4_debug = 0;
 
 	m4_enable = TRUE;
 	m4_prefix = FALSE;
@@ -191,17 +190,17 @@ main(int argc, char **argv)
 static char *
 m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 {
-	Screen *screen;
-	Visual *visual;
-	char client[MAXHOSTNAME], server[MAXHOSTNAME], *colon;
-	char ostype[BUFSIZ];
-	char options[BUFSIZ];
-	static char tmp_name[BUFSIZ];
+	Screen	       *screen;
+	Visual	       *visual;
+	char		client[MAXHOSTNAME], server[MAXHOSTNAME], *colon;
+	char		ostype[BUFSIZ];
+	char		options[BUFSIZ];
+	static char	tmp_name[BUFSIZ];
 	struct hostent *hostname;
-	char *vc; /* Visual Class */
-	FILE *tmpf;
-	int fd;
-	struct passwd *pwent;
+	char	       *vc; /* Visual Class */
+	FILE	       *tmpf;
+	int		fd;
+	struct passwd  *pwent;
 	/* Generate a temporary filename.  Honor the TMPDIR environment
 	   variable, if set. Hope nobody deletes this file! */
 
@@ -394,10 +393,10 @@ static char *
 MkDef(const char *name, const char *def)
 {
 	static char *cp = NULL;
-	static int maxsize = 0;
-	int needed;
-	const char *prefix = m4_prefix ? "m4_define" : "define";
-	const char *suffix = m4_prefix ? "m4_" : "";
+	static int   maxsize = 0;
+	int	     needed;
+	const char  *prefix = m4_prefix ? "m4_define" : "define";
+	const char  *suffix = m4_prefix ? "m4_" : "";
 
 	needed = snprintf(NULL, 0, "%s(%s,%s%s%s%s%s)%sdnl\n", prefix, name,
 	    m4_startquote, m4_startquote, def, m4_endquote, m4_endquote,
@@ -411,7 +410,7 @@ MkDef(const char *name, const char *def)
 		char *tmp = realloc(cp, needed);
 		if (tmp == NULL) {
 			perror("MkDef can't allocate enough space for a macro "
-			    "definition");
+			       "definition");
 			free(cp);
 			exit(0377);
 		}
@@ -420,8 +419,8 @@ MkDef(const char *name, const char *def)
 	}
 
 	if (snprintf(cp, maxsize, "%s(%s,%s%s%s%s%s)%sdnl\n", prefix, name,
-	    m4_startquote, m4_startquote, def, m4_endquote, m4_endquote,
-	    suffix) < 0) {
+		m4_startquote, m4_startquote, def, m4_endquote, m4_endquote,
+		suffix) < 0) {
 		perror("MkDef failed to build macro definition");
 		exit(0377);
 	}

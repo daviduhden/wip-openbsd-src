@@ -18,13 +18,12 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
-
-#include <stdlib.h>
+#include "config.h"
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -41,8 +40,8 @@
 #include "FvwmPager.h"
 
 char *MyName;
-int fd_width;
-int fd[2];
+int   fd_width;
+int   fd[2];
 
 PagerStringList *FindDeskStrings(int desk);
 PagerStringList *NewPagerStringItem(PagerStringList *last, int desk);
@@ -52,12 +51,12 @@ PagerStringList *NewPagerStringItem(PagerStringList *last, int desk);
  * Screen, font, etc info
  *
  **************************************************************************/
-ScreenInfo Scr;
+ScreenInfo   Scr;
 PagerWindow *Start = NULL;
 PagerWindow *FocusWin = NULL;
 
 Display *dpy; /* which display are we talking to */
-int x_fd, fd_width;
+int	 x_fd, fd_width;
 
 char *PagerFore = NULL;
 char *PagerBack = NULL;
@@ -69,32 +68,32 @@ char *WindowFore = NULL;
 char *WindowHiBack = NULL;
 char *WindowHiFore = NULL;
 
-int ShowBalloons = 0, ShowPagerBalloons = 0, ShowIconBalloons = 0;
+int   ShowBalloons = 0, ShowPagerBalloons = 0, ShowIconBalloons = 0;
 char *BalloonTypeString = NULL;
 char *BalloonBack = NULL;
 char *BalloonFore = NULL;
 char *BalloonFont = NULL;
 char *BalloonBorderColor = NULL;
-int BalloonBorderWidth = 1;
-int BalloonYOffset = 2;
+int   BalloonBorderWidth = 1;
+int   BalloonYOffset = 2;
 
-int window_w = 0, window_h = 0, window_x = 0, window_y = 0;
-int icon_x = -10000, icon_y = -10000, icon_w = 0, icon_h = 0;
-int usposition = 0, uselabel = 1;
-int xneg = 0, yneg = 0;
+int		 window_w = 0, window_h = 0, window_x = 0, window_y = 0;
+int		 icon_x = -10000, icon_y = -10000, icon_w = 0, icon_h = 0;
+int		 usposition = 0, uselabel = 1;
+int		 xneg = 0, yneg = 0;
 extern DeskInfo *Desks;
-int StartIconic = 0;
-int MiniIcons = 0;
-int Rows = -1, Columns = -1;
-int desk1 = 0, desk2 = 0;
-int ndesks = 0;
-Pixel win_back_pix = -1;
-Pixel win_fore_pix = -1;
-Pixel win_hi_back_pix = -1;
-Pixel win_hi_fore_pix = -1;
-char fAlwaysCurrentDesk = 0;
-PagerStringList string_list = {NULL, 0, NULL, NULL};
-Bool error_occured = False;
+int		 StartIconic = 0;
+int		 MiniIcons = 0;
+int		 Rows = -1, Columns = -1;
+int		 desk1 = 0, desk2 = 0;
+int		 ndesks = 0;
+Pixel		 win_back_pix = -1;
+Pixel		 win_fore_pix = -1;
+Pixel		 win_hi_back_pix = -1;
+Pixel		 win_hi_fore_pix = -1;
+char		 fAlwaysCurrentDesk = 0;
+PagerStringList	 string_list = {NULL, 0, NULL, NULL};
+Bool		 error_occured = False;
 
 static volatile sig_atomic_t isTerminated = False;
 
@@ -111,8 +110,8 @@ main(int argc, char **argv)
 {
 	char *temp, *s;
 	char *display_name = NULL;
-	int itemp, i;
-	char line[100];
+	int   itemp, i;
+	char  line[100];
 
 	/* Save our program  name - for error messages */
 	temp = argv[0];
@@ -138,7 +137,8 @@ main(int argc, char **argv)
 		    VERSION, MyName);
 		fprintf(
 		    stderr, "   where desktops n through m are displayed\n");
-		fprintf(stderr, "   if n and m are \"*\" the current desktop "
+		fprintf(stderr,
+		    "   if n and m are \"*\" the current desktop "
 		    "is displayed\n");
 		exit(1);
 	}
@@ -225,12 +225,12 @@ main(int argc, char **argv)
 	}
 	Scr.d_depth = DefaultDepth(dpy, Scr.screen);
 
-	SetMessageMask(fd, M_ADD_WINDOW | M_CONFIGURE_WINDOW |
-	    M_DESTROY_WINDOW | M_FOCUS_CHANGE | M_NEW_PAGE |
-	    M_NEW_DESK | M_RAISE_WINDOW | M_LOWER_WINDOW |
-	    M_ICONIFY | M_ICON_LOCATION | M_DEICONIFY |
-	    M_ICON_NAME | M_CONFIG_INFO | M_END_CONFIG_INFO |
-	    M_MINI_ICON | M_END_WINDOWLIST);
+	SetMessageMask(fd,
+	    M_ADD_WINDOW | M_CONFIGURE_WINDOW | M_DESTROY_WINDOW |
+		M_FOCUS_CHANGE | M_NEW_PAGE | M_NEW_DESK | M_RAISE_WINDOW |
+		M_LOWER_WINDOW | M_ICONIFY | M_ICON_LOCATION | M_DEICONIFY |
+		M_ICON_NAME | M_CONFIG_INFO | M_END_CONFIG_INFO | M_MINI_ICON |
+		M_END_WINDOWLIST);
 #ifdef DEBUG
 	fprintf(stderr, "[main]: calling ParseOptions\n");
 #endif
@@ -276,13 +276,13 @@ Loop(int *fd)
 		if (My_XNextEvent(dpy, &Event))
 			DispatchEvent(&Event);
 		if (error_occured) {
-			Window root;
+			Window	 root;
 			unsigned border_width, depth;
-			int x, y;
+			int	 x, y;
 
 			if (XGetGeometry(dpy, Scr.Pager_w, &root, &x, &y,
-			    (unsigned *)&window_w, (unsigned *)&window_h,
-			    &border_width, &depth) == 0) {
+				(unsigned *)&window_w, (unsigned *)&window_h,
+				&border_width, &depth) == 0) {
 				exit(0);
 			}
 			error_occured = False;
@@ -424,7 +424,7 @@ void
 list_configure(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -445,7 +445,8 @@ list_configure(unsigned long *body)
 		t->flags = body[8];
 		t->icon_w = body[19];
 		t->icon_pixmap_w = body[20];
-		if ((win_fore_pix != (Pixel)-1) && (win_back_pix != (Pixel)-1)) {
+		if ((win_fore_pix != (Pixel)-1) &&
+		    (win_back_pix != (Pixel)-1)) {
 			t->text = win_fore_pix;
 			t->back = win_back_pix;
 		} else {
@@ -488,7 +489,7 @@ void
 list_destroy(unsigned long *body)
 {
 	PagerWindow *t, **prev;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -521,7 +522,7 @@ void
 list_focus(unsigned long *body)
 {
 	PagerWindow *t, *temp;
-	Window target_w;
+	Window	     target_w;
 	extern Pixel focus_pix, focus_fore_pix;
 	target_w = body[0];
 
@@ -584,9 +585,9 @@ list_new_desk(unsigned long *body)
 	oldDesk = Scr.CurrentDesk;
 	Scr.CurrentDesk = (long)body[0];
 	if (fAlwaysCurrentDesk && oldDesk != Scr.CurrentDesk) {
-		PagerWindow *t;
+		PagerWindow	*t;
 		PagerStringList *item;
-		char line[100];
+		char		 line[100];
 
 		desk1 = Scr.CurrentDesk;
 		desk2 = Scr.CurrentDesk;
@@ -641,7 +642,7 @@ void
 list_raise(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -665,7 +666,7 @@ void
 list_lower(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -704,7 +705,7 @@ void
 list_iconify(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -749,7 +750,7 @@ void
 list_deiconify(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -787,7 +788,7 @@ void
 list_icon_name(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 
 	target_w = body[0];
 	t = Start;
@@ -807,7 +808,7 @@ void
 list_mini_icon(unsigned long *body)
 {
 	PagerWindow *t;
-	Window target_w;
+	Window	     target_w;
 	target_w = body[0];
 	t = Start;
 	while (t && (t->w != target_w))
@@ -833,7 +834,7 @@ void
 list_end(void)
 {
 	unsigned int nchildren, i;
-	Window root, parent, *children;
+	Window	     root, parent, *children;
 	PagerWindow *ptr;
 
 	if (!XQueryTree(dpy, Scr.Root, &root, &parent, &children, &nchildren))
@@ -865,9 +866,9 @@ list_end(void)
 int
 My_XNextEvent(Display *dpy, XEvent *event)
 {
-	fd_set in_fdset;
-	unsigned long header[HEADER_SIZE];
-	static int miss_counter = 0;
+	fd_set	       in_fdset;
+	unsigned long  header[HEADER_SIZE];
+	static int     miss_counter = 0;
 	unsigned long *body;
 
 	if (XPending(dpy)) {
@@ -910,7 +911,7 @@ void
 ParseOptions(void)
 {
 	char *tline = NULL;
-	int n, desk;
+	int   n, desk;
 
 	Scr.FvwmRoot = NULL;
 	Scr.Hilite = NULL;
@@ -928,15 +929,14 @@ ParseOptions(void)
 	Scr.Vx = 0;
 	Scr.Vy = 0;
 
-
 	for (GetConfigLine(fd, &tline); tline != NULL;
 	    GetConfigLine(fd, &tline)) {
-		int g_x, g_y, flags;
+		int	 g_x, g_y, flags;
 		unsigned width, height;
-		char *resource;
-		char *arg1;
-		char *arg2;
-		char *tline2;
+		char	*resource;
+		char	*arg1;
+		char	*arg2;
+		char	*tline2;
 
 		arg1 = arg2 = NULL;
 		tline2 = GetModuleResource(tline, &resource, MyName);

@@ -19,9 +19,9 @@
  * semantics as before.  See exec.c and fvwm_exec.c.
  * *************************************************************************
  */
+#include <sys/types.h>
 #include <sys/select.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <ctype.h>
@@ -91,22 +91,22 @@ static const char *read_system_rc_cmd = "Read system" FVWMRC;
  * in that frame's pipebuf.
  */
 struct piperead_frame {
-	struct piperead_frame	*next;
-	u_int32_t		 id;
-	struct pipebuf		 buf;
-	char			*lbuf;		/* line assembly */
-	size_t			 lbuf_len;
-	size_t			 lbuf_cap;
-	int			 prev_continued;
-	int			 eof;
-	int			 error;
-	int			 timed_out;
-	int			 got_data;
-	int			 exit_status;
+	struct piperead_frame *next;
+	u_int32_t	       id;
+	struct pipebuf	       buf;
+	char		      *lbuf; /* line assembly */
+	size_t		       lbuf_len;
+	size_t		       lbuf_cap;
+	int		       prev_continued;
+	int		       eof;
+	int		       error;
+	int		       timed_out;
+	int		       got_data;
+	int		       exit_status;
 };
 
-static struct piperead_frame	*active_frames;
-static u_int32_t		 piperead_next_id = 1;
+static struct piperead_frame *active_frames;
+static u_int32_t	      piperead_next_id = 1;
 
 /*
  * piperead_msg -- route one helper message: PipeRead payloads go to
@@ -117,7 +117,7 @@ static int
 piperead_msg(struct imsg *imsg, void *)
 {
 	struct piperead_frame *frame;
-	u_int32_t id;
+	u_int32_t	       id;
 
 	switch (imsg->hdr.type) {
 	case IMSG_PIPEREAD_DATA:
@@ -130,7 +130,7 @@ piperead_msg(struct imsg *imsg, void *)
 				pipebuf_append(&frame->buf,
 				    (char *)imsg->data + sizeof(id),
 				    imsg->hdr.len - IMSG_HEADER_SIZE -
-				    sizeof(id));
+					sizeof(id));
 				/*
 				 * An outer frame whose output cannot
 				 * be consumed right now (a nested
@@ -142,16 +142,15 @@ piperead_msg(struct imsg *imsg, void *)
 				 * and never hits this.
 				 */
 				if (frame != active_frames)
-					pipebuf_trim(&frame->buf,
-					    PIPEREAD_BUF_MAX);
+					pipebuf_trim(
+					    &frame->buf, PIPEREAD_BUF_MAX);
 				frame->got_data = 1;
 				break;
 			}
 		}
 		break;
 	case IMSG_PIPEREAD_EOF:
-		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id) +
-		    sizeof(int))
+		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id) + sizeof(int))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
 		for (frame = active_frames; frame != NULL;
@@ -192,13 +191,12 @@ piperead_msg(struct imsg *imsg, void *)
  * the historical continuation behaviour.
  */
 static void
-piperead_execute_line(struct piperead_frame *frame, char *line,
-    size_t len, XEvent *eventp, FvwmWindow *tmp_win,
-    unsigned long context, int *Module)
+piperead_execute_line(struct piperead_frame *frame, char *line, size_t len,
+    XEvent *eventp, FvwmWindow *tmp_win, unsigned long context, int *Module)
 {
-	int continued = 0;
+	int    continued = 0;
 	size_t need;
-	char *nbuf;
+	char  *nbuf;
 
 	if (len >= 2 && line[len - 2] == '\\' && line[len - 1] == '\n')
 		continued = 1;
@@ -232,12 +230,12 @@ piperead_execute_line(struct piperead_frame *frame, char *line,
 	frame->prev_continued = continued;
 
 	if (continued && frame->lbuf_len < MAX_PIPEREAD_LINE)
-		return;	/* wait for the continuation line */
+		return; /* wait for the continuation line */
 
 	frame->lbuf[frame->lbuf_len] = '\0';
 	if (debugging) {
-		fvwm_msg(DBG, "ReadSubFunc", "about to exec: '%s'",
-		    frame->lbuf);
+		fvwm_msg(
+		    DBG, "ReadSubFunc", "about to exec: '%s'", frame->lbuf);
 	}
 	ExecuteFunction(frame->lbuf, tmp_win, eventp, context, *Module);
 	frame->lbuf_len = 0;
@@ -252,14 +250,13 @@ static int
 piperead_process_lines(struct piperead_frame *frame, XEvent *eventp,
     FvwmWindow *tmp_win, unsigned long context, int *Module)
 {
-	char *line;
+	char  *line;
 	size_t len;
 
-	if (!pipebuf_next_line(&frame->buf, &line, &len,
-	    MAX_PIPEREAD_LINE))
+	if (!pipebuf_next_line(&frame->buf, &line, &len, MAX_PIPEREAD_LINE))
 		return 0;
-	piperead_execute_line(frame, line, len, eventp, tmp_win, context,
-	    Module);
+	piperead_execute_line(
+	    frame, line, len, eventp, tmp_win, context, Module);
 	return 1;
 }
 
@@ -275,9 +272,9 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
     unsigned long context, int *Module, const char *cmdname)
 {
 	struct piperead_frame frame;
-	int idle_loops = 0;
-	int helper_fd;
-	int start_failed = 0;
+	int		      idle_loops = 0;
+	int		      helper_fd;
+	int		      start_failed = 0;
 
 	memset(&frame, 0, sizeof(frame));
 	frame.id = piperead_next_id++;
@@ -292,13 +289,13 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 	}
 
 	while (!frame.eof && !frame.error && !frame.timed_out) {
-		fd_set readfds;
+		fd_set	       readfds;
 		struct timeval tv;
-		int ready;
+		int	       ready;
 
 		/* Process whatever is already buffered. */
-		while (piperead_process_lines(&frame, eventp, tmp_win,
-		    context, Module))
+		while (piperead_process_lines(
+		    &frame, eventp, tmp_win, context, Module))
 			;
 		if (frame.eof || frame.error)
 			break;
@@ -310,8 +307,8 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		tv.tv_sec = PIPE_READ_INTERVAL_SEC;
 		tv.tv_usec = 0;
 
-		ready = select((helper_fd >= 0 ? helper_fd : 0) + 1,
-		    &readfds, NULL, NULL, &tv);
+		ready = select((helper_fd >= 0 ? helper_fd : 0) + 1, &readfds,
+		    NULL, NULL, &tv);
 		if (ready < 0) {
 			if (errno == EINTR)
 				continue;
@@ -347,22 +344,21 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 	 * error the partial command is dropped.
 	 */
 	if (frame.eof && !frame.error && !frame.timed_out) {
-		while (piperead_process_lines(&frame, eventp, tmp_win,
-		    context, Module))
+		while (piperead_process_lines(
+		    &frame, eventp, tmp_win, context, Module))
 			;
 		if (frame.lbuf_len > 0) {
 			if (frame.prev_continued)
 				frame.lbuf_len -= 2;
 			frame.lbuf[frame.lbuf_len] = '\0';
-			ExecuteFunction(frame.lbuf, tmp_win, eventp,
-			    context, *Module);
+			ExecuteFunction(
+			    frame.lbuf, tmp_win, eventp, context, *Module);
 		}
 	}
 
 	if (frame.timed_out)
 		fvwm_msg(WARN, cmdname,
-		    "command '%s' did not close pipe, terminating it",
-		    command);
+		    "command '%s' did not close pipe, terminating it", command);
 
 	active_frames = frame.next;
 	pipebuf_free(&frame.buf);
@@ -384,20 +380,20 @@ extern void StartupStuff(void);
  * Arg 2 (optional) "Quiet" to suppress message on missing file.
  */
 static void
-ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win,
-    unsigned long context, char *action, int *Module, int piperead)
+ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
+    char *action, int *Module, int piperead)
 {
 	if (numfilesread >= MAX_NESTING_DEPTH) {
 		fvwm_msg(ERR, piperead ? "PipeRead" : "Read",
 		    "nesting depth exceeded (%d)", MAX_NESTING_DEPTH);
 		return;
 	}
-	char *filename = NULL, *Home, *home_file, *ofilename = NULL;
-	char *option; /* optional arg to read */
-	char *rest, *tline, line[1024];
-	FILE *stream = NULL;
-	char missing_quiet; /* missing file msg control */
-	char *cmdname;
+	char  *filename = NULL, *Home, *home_file, *ofilename = NULL;
+	char  *option; /* optional arg to read */
+	char  *rest, *tline, line[1024];
+	FILE  *stream = NULL;
+	char   missing_quiet; /* missing file msg control */
+	char  *cmdname;
 	size_t len;
 
 	/* domivogt (30-Dec-1998: I tried using conditional evaluation instead
@@ -420,9 +416,9 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win,
 		last_read_failed = 1;
 		return;
 	}
-	missing_quiet = 'n';                /* init */
+	missing_quiet = 'n';		    /* init */
 	rest = GetNextToken(rest, &option); /* read optional arg */
-	if (option != NULL) {               /* if there is a second arg */
+	if (option != NULL) {		    /* if there is a second arg */
 		if (strncasecmp(option, "Quiet", 5) ==
 		    0) { /* is the arg "quiet"? */
 			missing_quiet =
@@ -443,12 +439,13 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win,
 		 * the request fails instead of falling back to a
 		 * sandboxed fork.
 		 */
-		start_failed = piperead_run(ofilename, eventp, tmp_win,
-		    context, Module, cmdname);
+		start_failed = piperead_run(
+		    ofilename, eventp, tmp_win, context, Module, cmdname);
 		if (start_failed && missing_quiet == 'n') {
 			fvwm_msg(ERR, cmdname,
 			    "command '%s' not run "
-			    "(fvwm_exec unavailable)", ofilename);
+			    "(fvwm_exec unavailable)",
+			    ofilename);
 		}
 		free(ofilename);
 		if (start_failed)
@@ -471,8 +468,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win,
 			stream = NULL;
 		}
 		if (stream == NULL) {
-			if ((filename != NULL) &&
-			    (filename != ofilename))
+			if ((filename != NULL) && (filename != ofilename))
 				free(filename);
 			Home = FVWM_CONFIGDIR;
 			len = strlen(Home) + strlen(ofilename) + 3;
@@ -516,8 +512,9 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win,
 			break;
 		{
 			int l;
-			while ((l = strlen(line)) < (int)sizeof(line) && l >= 2 &&
-			    line[l - 2] == '\\' && line[l - 1] == '\n') {
+			while ((l = strlen(line)) < (int)sizeof(line) &&
+			    l >= 2 && line[l - 2] == '\\' &&
+			    line[l - 1] == '\n') {
 				char *cont = fgets(
 				    line + l - 2, sizeof(line) - l + 1, stream);
 				if (cont == NULL)

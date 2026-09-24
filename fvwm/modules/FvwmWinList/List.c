@@ -11,14 +11,13 @@
  *
  */
 
-#include "List.h"
-
 #include <X11/Xmd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "../../fvwm/module.h"
 #include "FvwmWinList.h"
+#include "List.h"
 #include "config.h"
 
 static void
@@ -76,7 +75,7 @@ int
 FindItem(List *list, long id)
 {
 	Item *temp;
-	int i;
+	int   i;
 
 	for (i = 0, temp = list->head; temp != NULL && temp->id != id;
 	    i++, temp = temp->next)
@@ -93,7 +92,7 @@ int
 FindItemDesk(List *list, long id, long desk)
 {
 	Item *temp;
-	int i;
+	int   i;
 
 	for (i = 0, temp = list->head;
 	    temp != NULL && (temp->id != id || temp->desk != desk);
@@ -111,7 +110,7 @@ int
 UpdateItemName(List *list, long id, char *string)
 {
 	Item *temp;
-	int i;
+	int   i;
 
 	for (i = 0, temp = list->head; temp != NULL && id != temp->id;
 	    i++, temp = temp->next)
@@ -157,7 +156,7 @@ int
 UpdateItemFlags(List *list, long id, long flags)
 {
 	Item *temp;
-	int i;
+	int   i;
 	for (i = 0, temp = list->head; temp != NULL && id != temp->id;
 	    i++, temp = temp->next)
 		;
@@ -188,7 +187,7 @@ int
 DeleteItem(List *list, long id)
 {
 	Item *temp, *temp2;
-	int i;
+	int   i;
 
 	if (list->head == NULL)
 		return -1;
@@ -242,7 +241,7 @@ PrintList(List *list)
 	ConsoleMessage("   %10s %-15s %-15s %-15s %-15s Flgs\n", "ID", "Name",
 	    "I-Name", "R-Name", "R-Class");
 	ConsoleMessage("   ---------- --------------- --------------- "
-	    "--------------- --------------- ----\n");
+		       "--------------- --------------- ----\n");
 	for (temp = list->head; temp != NULL; temp = temp->next) {
 		ConsoleMessage("   %10ld %-15.15s %4ld\n", temp->id,
 		    (temp->name == NULL) ? "<null>" : temp->name, temp->flags);
@@ -256,7 +255,7 @@ char *
 ItemName(List *list, int n)
 {
 	Item *temp;
-	int i;
+	int   i;
 
 	for (i = 0, temp = list->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
@@ -309,8 +308,8 @@ long
 XorFlags(List *list, int n, long value)
 {
 	Item *temp;
-	int i;
-	long ret;
+	int   i;
+	long  ret;
 
 	for (i = 0, temp = list->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
@@ -338,7 +337,7 @@ int
 ItemCountDesk(List *list, long desk)
 {
 	Item *temp;
-	int count = 0;
+	int   count = 0;
 
 	/*return list->count;*/
 
@@ -357,7 +356,7 @@ long
 ItemID(List *list, int n)
 {
 	Item *temp;
-	int i;
+	int   i;
 
 	for (i = 0, temp = list->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
@@ -374,7 +373,7 @@ void
 CopyItem(List *dest, List *source, int n)
 {
 	Item *temp;
-	int i;
+	int   i;
 
 	for (i = 0, temp = source->head; temp != NULL && i < n;
 	    i++, temp = temp->next)

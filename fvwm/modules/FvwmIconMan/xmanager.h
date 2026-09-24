@@ -12,7 +12,7 @@
 extern void draw_managers(void);
 extern void draw_manager(WinManager *man);
 
-extern int which_box(WinManager *man, int x, int y);
+extern int     which_box(WinManager *man, int x, int y);
 extern Button *xy_to_button(WinManager *man, int x, int y);
 
 extern void delete_windows_button(WinData *win);
@@ -35,7 +35,7 @@ extern void add_win_state(WinData *win, int flag);
 extern void del_win_state(WinData *win, int flag);
 extern void set_win_displaystring(WinData *win);
 extern void set_manager_width(WinManager *man, int width);
-extern int change_windows_manager(WinData *win);
+extern int  change_windows_manager(WinData *win);
 extern void check_in_window(WinData *win);
 extern void set_manager_window_mapping(WinManager *man, int flag);
 extern void man_exposed(WinManager *man, XEvent *theEvent);

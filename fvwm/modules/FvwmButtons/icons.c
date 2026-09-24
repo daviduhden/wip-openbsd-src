@@ -55,7 +55,7 @@ void
 CreateIconWindow(button_info *b)
 {
 #ifndef NO_ICONS
-	unsigned long valuemask;         /* mask for create windows */
+	unsigned long	     valuemask;	 /* mask for create windows */
 	XSetWindowAttributes attributes; /* attributes for create windows */
 
 	if (!(b->flags & b_Icon))
@@ -90,9 +90,9 @@ CreateIconWindow(button_info *b)
 #endif
 
 	if (b->icon->depth == 0) {
-		XGCValues gcv;
+		XGCValues     gcv;
 		unsigned long gcm = 0;
-		Pixmap temp;
+		Pixmap	      temp;
 
 		gcm = GCForeground | GCBackground;
 		gcv.background = buttonBack(b);
@@ -129,11 +129,11 @@ void
 ConfigureIconWindow(button_info *b)
 {
 #ifndef NO_ICONS
-	int x, y, w, h;
-	int xoff, yoff;
-	int framew, xpad, ypad;
+	int	     x, y, w, h;
+	int	     xoff, yoff;
+	int	     framew, xpad, ypad;
 	XFontStruct *font;
-	int BW, BH;
+	int	     BW, BH;
 
 	if (!b || !(b->flags & b_Icon))
 		return;
@@ -196,7 +196,7 @@ ConfigureIconWindow(button_info *b)
 	if (b->icon->mask!=None)
 	  {
 	    XShapeCombineMask(Dpy,b->IconWin,ShapeBounding,0,0,
-	                      b->icon->mask,ShapeSet);
+			      b->icon->mask,ShapeSet);
 	  }
       #endif
       #endif

@@ -98,8 +98,8 @@ sandbox_save_state(const char *progname)
 static inline void
 sandbox_cpp_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
-	    NULL) == -1)
+	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet", NULL) ==
+	    -1)
 		err(1, "%s: pledge", progname);
 }
 
@@ -110,8 +110,8 @@ sandbox_cpp_preproc(const char *progname)
 static inline void
 sandbox_m4_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
-	    NULL) == -1)
+	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet", NULL) ==
+	    -1)
 		err(1, "%s: pledge", progname);
 }
 

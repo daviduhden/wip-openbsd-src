@@ -8,7 +8,7 @@
 static Button *get_select_button(void);
 
 static struct {
-	Button *current_button;
+	Button	 *current_button;
 	Function *fp;
 } function_context;
 
@@ -79,9 +79,9 @@ get_current_button(void)
 static Button *
 button_move(ButtonValue *bv)
 {
-	Button *b = NULL, *cur;
+	Button	   *b = NULL, *cur;
 	WinManager *man;
-	int i;
+	int	    i;
 
 	cur = get_current_button();
 
@@ -153,7 +153,7 @@ button_move(ButtonValue *bv)
 int
 builtin_gotobutton(int numargs, BuiltinArg *args)
 {
-	Button *b;
+	Button	    *b;
 	ButtonValue *bv;
 
 	ConsoleDebug(FUNCTIONS, "gotobutton: ");
@@ -173,8 +173,8 @@ int
 builtin_gotomanager(int numargs, BuiltinArg *args)
 {
 	ButtonValue *bv;
-	WinManager *man, *new;
-	int i;
+	WinManager  *man, *new;
+	int	     i;
 
 	ConsoleDebug(FUNCTIONS, "gotomanager: ");
 	print_args(numargs, args);
@@ -198,7 +198,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 	case AbsoluteButton: {
 		/* Now we find the manager modulo the VISIBLE managers */
 		static WinManager **wa = NULL;
-		int i, num_mapped, n;
+		int		    i, num_mapped, n;
 
 		n = globals.num_managers;
 		if (n) {
@@ -208,7 +208,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 			}
 			for (i = 0, num_mapped = 0; i < n; i++) {
 				if (globals.managers[i].buttons.num_windows >
-				    0 &&
+					0 &&
 				    globals.managers[i].window_mapped) {
 					wa[num_mapped++] = &globals.managers[i];
 				}
@@ -222,15 +222,13 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 				new = NULL;
 			}
 		}
-	}
-		break;
+	} break;
 
 	case NextButton:
 		if (man) {
 			for (i = man->index + 1, new = man + 1;
-			    i < globals.num_managers && new->buttons
-			    .num_windows ==
-			    0;
+			    i < globals.num_managers &&
+			    new->buttons.num_windows == 0;
 			    i++, new++)
 				;
 			if (i == globals.num_managers)
@@ -241,8 +239,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 	case PrevButton:
 		if (man) {
 			for (i = man->index - 1, new = man - 1;
-			    i > -1 && new->buttons.num_windows == 0;
-			    i--, new--)
+			    i > -1 && new->buttons.num_windows == 0; i--, new--)
 				;
 			if (i == -1)
 				new = man;
@@ -339,7 +336,7 @@ do_jmp(int off)
 static int
 eval_if(ButtonValue *bv)
 {
-	Button *cur;
+	Button	   *cur;
 	WinManager *man;
 
 	switch (bv->base) {
@@ -467,8 +464,8 @@ int
 builtin_searchforward(int numargs, BuiltinArg *args)
 {
 	(void)numargs;
-	char *s;
-	Button *b, *cur;
+	char	   *s;
+	Button	   *b, *cur;
 	WinManager *man;
 
 	s = args[0].value.string_value;
@@ -501,8 +498,8 @@ int
 builtin_searchback(int numargs, BuiltinArg *args)
 {
 	(void)numargs;
-	char *s;
-	Button *b, *cur;
+	char	   *s;
+	Button	   *b, *cur;
 	WinManager *man;
 
 	s = args[0].value.string_value;
@@ -536,9 +533,9 @@ builtin_warp(int numargs, BuiltinArg *args)
 {
 	(void)numargs;
 	(void)args;
-	Button *cur;
+	Button	   *cur;
 	WinManager *man;
-	int x, y;
+	int	    x, y;
 
 	ConsoleDebug(FUNCTIONS, "warp\n");
 

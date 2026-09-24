@@ -48,7 +48,7 @@
 #define NULLCNT 2      /* number of null blocks in trailer */
 #define CHK_OFFSET 148 /* start of chksum field */
 #define BLNKSUM 256L   /* sum of checksum field using ' ' */
-#endif                 /* _PAX_ */
+#endif		       /* _PAX_ */
 
 /*
  * Values used in typeflag field in all tar formats
@@ -105,13 +105,13 @@
  */
 typedef struct {
 	char name[TNMSZ];     /* name of entry */
-	char mode[8];         /* mode */
-	char uid[8];          /* uid */
-	char gid[8];          /* gid */
-	char size[12];        /* size */
-	char mtime[12];       /* modification time */
+	char mode[8];	      /* mode */
+	char uid[8];	      /* uid */
+	char gid[8];	      /* gid */
+	char size[12];	      /* size */
+	char mtime[12];	      /* modification time */
 	char chksum[CHK_LEN]; /* checksum */
-	char linkflag;        /* norm, hard, or sym. */
+	char linkflag;	      /* norm, hard, or sym. */
 	char linkname[TNMSZ]; /* linked to name */
 } HD_TAR;
 
@@ -143,22 +143,22 @@ typedef struct {
 #define TVERSLEN 2
 
 typedef struct {
-	char name[TNMSZ];       /* name of entry */
-	char mode[8];           /* mode */
-	char uid[8];            /* uid */
-	char gid[8];            /* gid */
-	char size[12];          /* size */
-	char mtime[12];         /* modification time */
-	char chksum[CHK_LEN];   /* checksum */
-	char typeflag;          /* type of file. */
-	char linkname[TNMSZ];   /* linked to name */
-	char magic[TMAGLEN];    /* magic cookie */
+	char name[TNMSZ];	/* name of entry */
+	char mode[8];		/* mode */
+	char uid[8];		/* uid */
+	char gid[8];		/* gid */
+	char size[12];		/* size */
+	char mtime[12];		/* modification time */
+	char chksum[CHK_LEN];	/* checksum */
+	char typeflag;		/* type of file. */
+	char linkname[TNMSZ];	/* linked to name */
+	char magic[TMAGLEN];	/* magic cookie */
 	char version[TVERSLEN]; /* version */
-	char uname[32];         /* ascii owner name */
-	char gname[32];         /* ascii group name */
-	char devmajor[8];       /* major device number */
-	char devminor[8];       /* minor device number */
-	char prefix[TPFSZ];     /* linked to name */
+	char uname[32];		/* ascii owner name */
+	char gname[32];		/* ascii group name */
+	char devmajor[8];	/* major device number */
+	char devminor[8];	/* minor device number */
+	char prefix[TPFSZ];	/* linked to name */
 } HD_USTAR;
 
 /*
@@ -170,16 +170,13 @@ typedef struct {
  */
 static_assert(CHK_LEN == 8, "tar checksum field must be 8 bytes");
 static_assert(TNMSZ == 100, "tar name field must be 100 bytes");
-static_assert(sizeof(HD_TAR) == (size_t)257,
-    "old tar header layout changed");
-static_assert(sizeof(HD_USTAR) == (size_t)500,
-    "ustar header layout changed");
+static_assert(sizeof(HD_TAR) == (size_t)257, "old tar header layout changed");
+static_assert(sizeof(HD_USTAR) == (size_t)500, "ustar header layout changed");
 static_assert(sizeof(((HD_TAR *)0)->chksum) == (size_t)CHK_LEN,
     "old tar checksum field must match CHK_LEN");
 static_assert(sizeof(((HD_USTAR *)0)->chksum) == (size_t)CHK_LEN,
     "ustar checksum field must match CHK_LEN");
-static_assert(sizeof(TMAGIC) == (size_t)TMAGLEN,
-    "ustar magic length mismatch");
+static_assert(sizeof(TMAGIC) == (size_t)TMAGLEN, "ustar magic length mismatch");
 
 #ifdef _PAX_
 static_assert(offsetof(HD_TAR, chksum) == (size_t)CHK_OFFSET,

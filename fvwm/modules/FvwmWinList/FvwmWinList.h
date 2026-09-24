@@ -25,10 +25,10 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#define STICKY (1 << 2)     /* Does window stick to glass? */
-#define ONTOP (1 << 1)      /* does window stay on top */
+#define STICKY (1 << 2)	    /* Does window stick to glass? */
+#define ONTOP (1 << 1)	    /* does window stay on top */
 #define BORDER (1 << 13)    /* Is this decorated with border*/
-#define TITLE (1 << 14)     /* Is this decorated with title */
+#define TITLE (1 << 14)	    /* Is this decorated with title */
 #define ICONIFIED (1 << 16) /* is it an icon now? */
 #define TRANSIENT (1 << 17) /* is it a transient window? */
 #define WINDOWLISTSKIP (1 << 3)
@@ -38,7 +38,7 @@ typedef struct {
 	CARD32 flags;
 	CARD32 functions;
 	CARD32 decorations;
-	INT32 inputMode;
+	INT32  inputMode;
 } PropMotifWmHints;
 
 typedef PropMotifWmHints PropMwmHints;
@@ -81,29 +81,29 @@ typedef PropMotifWmHints PropMwmHints;
 /*************************************************************************
   Subroutine Prototypes
 **************************************************************************/
-void MainEventLoop(void);
-void ReadFvwmPipe(void);
-void ProcessMessage(unsigned long type, unsigned long *body);
-void SendFvwmPipe(char *message, unsigned long window);
+void		  MainEventLoop(void);
+void		  ReadFvwmPipe(void);
+void		  ProcessMessage(unsigned long type, unsigned long *body);
+void		  SendFvwmPipe(char *message, unsigned long window);
 [[noreturn]] void DeadPipe(int nonsense);
-void MakeMeWindow(void);
-void WaitForExpose(void);
-void RedrawWindow(int force);
-void StartMeUp(void);
-void ShutMeDown(void);
+void		  MakeMeWindow(void);
+void		  WaitForExpose(void);
+void		  RedrawWindow(int force);
+void		  StartMeUp(void);
+void		  ShutMeDown(void);
 void ConsoleMessage(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-int OpenConsole(void);
+int  OpenConsole(void);
 void ParseConfig(void);
 void LoopOnEvents(void);
 void AdjustWindow(void);
 char *makename(const char *string, long flags);
-void ChangeWindowName(char *str);
-void LinkAction(char *string);
-void AddToSkipList(char *string);
-int InSkipList(char *string);
-void PrintSkipList(void);
-void FvwmNameMessage(long *body);
-void SetMwmHints(unsigned int value, unsigned int funcs, unsigned int input);
+void  ChangeWindowName(char *str);
+void  LinkAction(char *string);
+void  AddToSkipList(char *string);
+int   InSkipList(char *string);
+void  PrintSkipList(void);
+void  FvwmNameMessage(long *body);
+void  SetMwmHints(unsigned int value, unsigned int funcs, unsigned int input);
 
 int ErrorHandler(Display *d, XErrorEvent *event);
 

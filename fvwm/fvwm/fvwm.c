@@ -10,8 +10,6 @@
  * fvwm - "F? Virtual Window Manager"
  ***********************************************************************/
 
-#include "fvwm.h"
-
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <X11/Xresource.h>
@@ -25,6 +23,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "fvwm.h"
 #include "fvwm_sandbox.h"
 #include "menus.h"
 #include "misc.h"
@@ -45,20 +44,20 @@
 int master_pid; /* process number of 1st fvwm process */
 
 ScreenInfo Scr; /* structures for the screen */
-Display *dpy;   /* which display are we talking to */
+Display	  *dpy; /* which display are we talking to */
 
-Window BlackoutWin = None;  /* window to hide window captures */
-Bool fFvwmInStartup = True; /* Set to False when startup has finished */
+Window BlackoutWin = None;    /* window to hide window captures */
+Bool   fFvwmInStartup = True; /* Set to False when startup has finished */
 
 char *default_config_command = "Read " FVWMRC;
 
 #define MAX_CFG_CMDS 10
 static char *config_commands[MAX_CFG_CMDS];
-static int num_config_commands = 0;
+static int   num_config_commands = 0;
 
-int FvwmErrorHandler(Display *, XErrorEvent *);
-int CatchFatal(Display *);
-int CatchRedirectError(Display *, XErrorEvent *);
+int  FvwmErrorHandler(Display *, XErrorEvent *);
+int  CatchFatal(Display *);
+int  CatchRedirectError(Display *, XErrorEvent *);
 void newhandler(int sig);
 void CreateCursors(void);
 void ChildDied(int nonsense);
@@ -70,14 +69,14 @@ void StartupStuff(void);
 XContext FvwmContext; /* context for fvwm windows */
 XContext MenuContext; /* context for fvwm menus */
 
-int JunkX = 0, JunkY = 0;
-Window JunkRoot, JunkChild; /* junk window */
+int	     JunkX = 0, JunkY = 0;
+Window	     JunkRoot, JunkChild; /* junk window */
 unsigned int JunkWidth, JunkHeight, JunkBW, JunkDepth, JunkMask;
 
 Boolean debugging = False, PPosOverride, Blackout = False;
 
 char **g_argv;
-int g_argc;
+int    g_argc;
 
 /*
  * Absolute path of the running fvwm binary, recorded with
@@ -97,15 +96,15 @@ static char g_bits[] = {0x02, 0x01};
 static char l_g_bits[] = {0x08, 0x02};
 
 #ifdef SHAPE
-int ShapeEventBase, ShapeErrorBase;
+int	ShapeEventBase, ShapeErrorBase;
 Boolean ShapesSupported = False;
 #endif
 
-long isIconicState = 0;
+long	      isIconicState = 0;
 extern XEvent Event;
-Bool Restarting = False;
-int fd_width, x_fd;
-char *display_name = NULL;
+Bool	      Restarting = False;
+int	      fd_width, x_fd;
+char	     *display_name = NULL;
 
 typedef enum { FVWM_RUNNING = 0, FVWM_DONE, FVWM_RESTART } FVWM_STATE;
 
@@ -116,7 +115,7 @@ typedef enum { FVWM_RUNNING = 0, FVWM_DONE, FVWM_RESTART } FVWM_STATE;
  * object-file ...
  */
 static volatile sig_atomic_t fvwmRunState = FVWM_RUNNING;
-volatile sig_atomic_t isTerminated = False;
+volatile sig_atomic_t	     isTerminated = False;
 /**/
 
 /***********************************************************************
@@ -131,17 +130,17 @@ static void InternUsefulAtoms(void);
 int
 main(int argc, char **argv)
 {
-	unsigned long valuemask;         /* mask for create windows */
+	unsigned long	     valuemask;	 /* mask for create windows */
 	XSetWindowAttributes attributes; /* attributes for create windows */
-	int i;
-	extern int x_fd;
-	int len;
-	char *display_string;
-	char message[255];
-	Bool single = False;
-	Bool option_error = FALSE;
-	int x, y;
-	size_t buflen;
+	int		     i;
+	extern int	     x_fd;
+	int		     len;
+	char		    *display_string;
+	char		     message[255];
+	Bool		     single = False;
+	Bool		     option_error = FALSE;
+	int		     x, y;
+	size_t		     buflen;
 
 	g_argv = argv;
 	g_argc = argc;
@@ -280,7 +279,7 @@ main(int argc, char **argv)
 	master_pid = getpid();
 
 	if (!single) {
-		int myscreen = 0;
+		int   myscreen = 0;
 		char *cp;
 
 		strlcpy(message, XDisplayString(dpy), sizeof(message));
@@ -299,7 +298,7 @@ main(int argc, char **argv)
 					cp = strchr(cp, '.');
 					if (cp != NULL)
 						*cp = '\0'; /* truncate at
-						               display part */
+							       display part */
 				}
 				snprintf(message + strlen(message),
 				    sizeof(message) - strlen(message), ".%d",
@@ -381,8 +380,8 @@ main(int argc, char **argv)
 	XSetIOErrorHandler(CatchFatal);
 	XSelectInput(dpy, Scr.Root,
 	    LeaveWindowMask | EnterWindowMask | PropertyChangeMask |
-	    SubstructureRedirectMask | KeyPressMask |
-	    SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask);
+		SubstructureRedirectMask | KeyPressMask |
+		SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask);
 	XSync(dpy, 0);
 
 	XSetErrorHandler(FvwmErrorHandler);
@@ -429,7 +428,7 @@ main(int argc, char **argv)
 	attributes.override_redirect = True;
 	Scr.NoFocusWin =
 	    XCreateWindow(dpy, Scr.Root, -10, -10, 10, 10, 0, 0, InputOnly,
-	    CopyFromParent, CWEventMask | CWOverrideRedirect, &attributes);
+		CopyFromParent, CWEventMask | CWOverrideRedirect, &attributes);
 	XMapWindow(dpy, Scr.NoFocusWin);
 
 	SetMWM_INFO(Scr.NoFocusWin);
@@ -509,7 +508,7 @@ main(int argc, char **argv)
 	 */
 	{
 		const char *home = getenv("HOME");
-		char *slash;
+		char	   *slash;
 
 		if (unveil(FVWMLIBDIR, "rx") == -1)
 			err(1, "unveil %s", FVWMLIBDIR);
@@ -517,8 +516,7 @@ main(int argc, char **argv)
 			err(1, "unveil /etc/X11/fvwm");
 		if (unveil("/tmp", "rwc") == -1)
 			err(1, "unveil /tmp");
-		if (home != NULL && *home != '\0' &&
-		    unveil(home, "rwc") == -1)
+		if (home != NULL && *home != '\0' && unveil(home, "rwc") == -1)
 			err(1, "unveil %s", home);
 		if (unveil("/etc", "r") == -1)
 			err(1, "unveil /etc");
@@ -552,8 +550,7 @@ main(int argc, char **argv)
 			slash = strrchr(dir, '/');
 			if (slash != NULL && slash != dir) {
 				*slash = '\0';
-				if (unveil(dir, "rx") == -1 &&
-				    errno != ENOENT)
+				if (unveil(dir, "rx") == -1 && errno != ENOENT)
 					err(1, "unveil %s", dir);
 			}
 		}
@@ -573,7 +570,7 @@ main(int argc, char **argv)
 		 * bounds where they apply.
 		 */
 		if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
-		    NULL) == -1)
+			NULL) == -1)
 			err(1, "pledge");
 	}
 
@@ -641,16 +638,16 @@ StartupStuff(void)
 void
 CaptureAllWindows(void)
 {
-	int i, j;
-	unsigned int nchildren;
-	Window root, parent, *children;
-	FvwmWindow *tmp, *next; /* temp fvwm window structure */
-	Window w;
-	unsigned long data[1];
+	int	       i, j;
+	unsigned int   nchildren;
+	Window	       root, parent, *children;
+	FvwmWindow    *tmp, *next; /* temp fvwm window structure */
+	Window	       w;
+	unsigned long  data[1];
 	unsigned char *prop;
-	Atom atype;
-	int aformat;
-	unsigned long nitems, bytes_remain;
+	Atom	       atype;
+	int	       aformat;
+	unsigned long  nitems, bytes_remain;
 
 	MyXGrabServer(dpy);
 
@@ -675,7 +672,7 @@ CaptureAllWindows(void)
 						    j++) {
 							if (children[j] ==
 							    wmhintsp
-							    ->icon_window) {
+								->icon_window) {
 								children[j] =
 								    None;
 								break;
@@ -702,12 +699,12 @@ CaptureAllWindows(void)
 		tmp = Scr.FvwmRoot.next;
 		for (i = 0; i < (int)nchildren; i++) {
 			if (XFindContext(dpy, children[i], FvwmContext,
-			    (caddr_t *)&tmp) != XCNOENT) {
+				(caddr_t *)&tmp) != XCNOENT) {
 				isIconicState = DontCareState;
 				if (XGetWindowProperty(dpy, tmp->w,
-				    _XA_WM_STATE, 0L, 3L, False,
-				    _XA_WM_STATE, &atype, &aformat, &nitems,
-				    &bytes_remain, &prop) == Success) {
+					_XA_WM_STATE, 0L, 3L, False,
+					_XA_WM_STATE, &atype, &aformat, &nitems,
+					&bytes_remain, &prop) == Success) {
 					if (prop != NULL) {
 						isIconicState = *(long *)prop;
 						XFree(prop);
@@ -755,18 +752,18 @@ SetRCDefaults(void)
 {
 	/* set up default colors, fonts, etc */
 	char *defaults[] = {"HilightColor black grey", "XORValue 0",
-		"DefaultFont fixed", "DefaultColors black grey",
-		"MenuStyle * fvwm, Foreground black, Background grey, Greyed "
-		"slategrey",
-		"TitleStyle Centered -- Raised",
-		"Style \"*\" Color lightgrey/dimgrey, Title",
-		"Style \"*\" RandomPlacement, SmartPlacement",
-		"AddToMenu builtin_menu \"Builtin Menu\" Title",
-		"+ \"Exit FVWM\" Quit", "Mouse 1 R N Popup builtin_menu",
-		"AddToFunc WindowListFunc \"I\" WindowId $0 Iconify -1",
-		"+ \"I\" WindowId $0 FlipFocus", "+ \"I\" WindowId $0 Raise",
-		"+ \"I\" WindowId $0 WarpToWindow 5p 5p", NULL};
-	int i = 0;
+	    "DefaultFont fixed", "DefaultColors black grey",
+	    "MenuStyle * fvwm, Foreground black, Background grey, Greyed "
+	    "slategrey",
+	    "TitleStyle Centered -- Raised",
+	    "Style \"*\" Color lightgrey/dimgrey, Title",
+	    "Style \"*\" RandomPlacement, SmartPlacement",
+	    "AddToMenu builtin_menu \"Builtin Menu\" Title",
+	    "+ \"Exit FVWM\" Quit", "Mouse 1 R N Popup builtin_menu",
+	    "AddToFunc WindowListFunc \"I\" WindowId $0 Iconify -1",
+	    "+ \"I\" WindowId $0 FlipFocus", "+ \"I\" WindowId $0 Raise",
+	    "+ \"I\" WindowId $0 WarpToWindow 5p 5p", NULL};
+	int   i = 0;
 
 	while (defaults[i]) {
 		ExecuteFunction(defaults[i], NULL, &Event, C_ROOT, 1);
@@ -793,10 +790,10 @@ int
 MappedNotOverride(Window w)
 {
 	XWindowAttributes wa;
-	Atom atype;
-	int aformat;
-	unsigned long nitems, bytes_remain;
-	unsigned char *prop;
+	Atom		  atype;
+	int		  aformat;
+	unsigned long	  nitems, bytes_remain;
+	unsigned char	 *prop;
 
 	isIconicState = DontCareState;
 
@@ -804,8 +801,8 @@ MappedNotOverride(Window w)
 		return False;
 
 	if (XGetWindowProperty(dpy, w, _XA_WM_STATE, 0L, 3L, False,
-	    _XA_WM_STATE, &atype, &aformat, &nitems, &bytes_remain,
-	    &prop) == Success) {
+		_XA_WM_STATE, &atype, &aformat, &nitems, &bytes_remain,
+		&prop) == Success) {
 		if (prop != NULL) {
 			isIconicState = *(long *)prop;
 			XFree(prop);
@@ -827,16 +824,16 @@ MappedNotOverride(Window w)
  *
  ***********************************************************************
  */
-Atom _XA_MIT_PRIORITY_COLORS;
-Atom _XA_WM_CHANGE_STATE;
-Atom _XA_WM_STATE;
-Atom _XA_WM_COLORMAP_WINDOWS;
+Atom	    _XA_MIT_PRIORITY_COLORS;
+Atom	    _XA_WM_CHANGE_STATE;
+Atom	    _XA_WM_STATE;
+Atom	    _XA_WM_COLORMAP_WINDOWS;
 extern Atom _XA_WM_PROTOCOLS;
-Atom _XA_WM_TAKE_FOCUS;
-Atom _XA_WM_DELETE_WINDOW;
-Atom _XA_WM_DESKTOP;
-Atom _XA_MwmAtom;
-Atom _XA_MOTIF_WM;
+Atom	    _XA_WM_TAKE_FOCUS;
+Atom	    _XA_WM_DELETE_WINDOW;
+Atom	    _XA_WM_DESKTOP;
+Atom	    _XA_MwmAtom;
+Atom	    _XA_MOTIF_WM;
 
 Atom _XA_OL_WIN_ATTR;
 Atom _XA_OL_WT_BASE;
@@ -1176,12 +1173,12 @@ void
 ResetAllButtons(FvwmDecor *fl)
 {
 	TitleButton *leftp, *rightp;
-	int i = 0;
+	int	     i = 0;
 
 	for (leftp = fl->left_buttons, rightp = fl->right_buttons; i < 5;
 	    ++i, ++leftp, ++rightp) {
 		ButtonFace *lface, *rface;
-		int j;
+		int	    j;
 
 		leftp->flags = 0;
 		rightp->flags = 0;
@@ -1258,7 +1255,7 @@ DestroyFvwmDecor(FvwmDecor *fl)
 void
 InitFvwmDecor(FvwmDecor *fl)
 {
-	int i;
+	int	   i;
 	ButtonFace tmpbf;
 
 	fl->HiReliefGC = NULL;
@@ -1394,15 +1391,15 @@ InitVariables(void)
 	/* Multiple desks are available even in non-virtual
 	 * compilations */
 	{
-		Atom atype;
-		int aformat;
-		unsigned long nitems, bytes_remain;
+		Atom	       atype;
+		int	       aformat;
+		unsigned long  nitems, bytes_remain;
 		unsigned char *prop;
 
 		Scr.CurrentDesk = 0;
 		if ((XGetWindowProperty(dpy, Scr.Root, _XA_WM_DESKTOP, 0L, 1L,
-		    True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
-		    &bytes_remain, &prop)) == Success) {
+			True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
+			&bytes_remain, &prop)) == Success) {
 			if (prop != NULL) {
 				Restarting = True;
 				Scr.CurrentDesk = *(unsigned long *)prop;
@@ -1532,7 +1529,7 @@ Done(int restart, char *command)
 
 		{
 			char *my_argv[10];
-			int i, j;
+			int   i, j;
 
 			if (strstr(command, "fvwm") != NULL) {
 				i = 0;
@@ -1650,7 +1647,7 @@ usage(void)
 void
 SaveDesktopState(void)
 {
-	FvwmWindow *t;
+	FvwmWindow   *t;
 	unsigned long data[1];
 
 	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
@@ -1672,7 +1669,7 @@ SetMWM_INFO(Window window)
 	(void)window;
 #ifdef MODALITY_IS_EVIL
 	struct mwminfo {
-		long flags;
+		long   flags;
 		Window win;
 	} motif_wm_info;
 
@@ -1690,7 +1687,7 @@ void
 BlackoutScreen(void)
 {
 	XSetWindowAttributes attributes;
-	unsigned long valuemask;
+	unsigned long	     valuemask;
 
 	if (Blackout && (BlackoutWin == None) && !debugging) {
 		DBUG("BlackoutScreen", "Blacking out screen during init...");

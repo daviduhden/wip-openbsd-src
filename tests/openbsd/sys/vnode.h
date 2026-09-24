@@ -7,7 +7,7 @@
 #include <sys/buf.h>
 
 struct vnode {
-	int	v_dummy;
+	int v_dummy;
 };
 
 #endif /* EXT4FS_TEST_VNODE_H */

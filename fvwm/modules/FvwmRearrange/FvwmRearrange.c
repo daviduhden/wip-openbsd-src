@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/time.h>
 #include <sys/types.h>
+#include <sys/time.h>
 
 #include <ctype.h>
 #include <signal.h>
@@ -26,8 +26,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -42,50 +42,50 @@
 void DeadPipe(int sig);
 
 typedef struct ClientNode {
-	Window frame;
-	int title_height;
-	int border_width;
-	unsigned long width;
-	unsigned long height;
+	Window		   frame;
+	int		   title_height;
+	int		   border_width;
+	unsigned long	   width;
+	unsigned long	   height;
 	struct ClientNode *prev;
 	struct ClientNode *next;
 } ClientNode;
 
 typedef struct ModuleState {
-	Display *display;
-	int screen_width;
-	int screen_height;
-	char *program_name;
-	int pipe_fd[2];
-	int fd_width;
+	Display	   *display;
+	int	    screen_width;
+	int	    screen_height;
+	char	   *program_name;
+	int	    pipe_fd[2];
+	int	    fd_width;
 	ClientNode *head;
 	ClientNode *tail;
-	int client_count;
-	FILE *log;
-	int offset_x;
-	int offset_y;
-	int limit_width;
-	int limit_height;
-	int bound_x;
-	int bound_y;
-	int include_untitled;
-	int include_transients;
-	int include_maximized;
-	int include_sticky;
-	int include_all;
-	int entire_desk;
-	int reverse_order;
-	int raise_clients;
-	int resize_clients;
-	int avoid_stretch;
-	int flat_x;
-	int flat_y;
-	int step_x;
-	int step_y;
-	int tile_horizontal;
-	int tile_limit;
-	char run_tile;
-	char run_cascade;
+	int	    client_count;
+	FILE	   *log;
+	int	    offset_x;
+	int	    offset_y;
+	int	    limit_width;
+	int	    limit_height;
+	int	    bound_x;
+	int	    bound_y;
+	int	    include_untitled;
+	int	    include_transients;
+	int	    include_maximized;
+	int	    include_sticky;
+	int	    include_all;
+	int	    entire_desk;
+	int	    reverse_order;
+	int	    raise_clients;
+	int	    resize_clients;
+	int	    avoid_stretch;
+	int	    flat_x;
+	int	    flat_y;
+	int	    step_x;
+	int	    step_y;
+	int	    tile_horizontal;
+	int	    tile_limit;
+	char	    run_tile;
+	char	    run_cascade;
 } ModuleState;
 
 static ModuleState g_state = {.raise_clients = 1};
@@ -152,7 +152,7 @@ detach_client(ModuleState *state, ClientNode *node)
 static int
 window_matches(ModuleState *state, unsigned long *body)
 {
-	unsigned long flags = body[8];
+	unsigned long	  flags = body[8];
 	XWindowAttributes xwa;
 
 	if ((flags & WINDOWLISTSKIP) && !state->include_all) {
@@ -182,7 +182,7 @@ window_matches(ModuleState *state, unsigned long *body)
 		int w = (int)body[5];
 		int h = (int)body[6];
 		if (!((x < state->screen_width) && (y < state->screen_height) &&
-		    (x + w > 0) && (y + h > 0))) {
+			(x + w > 0) && (y + h > 0))) {
 			return 0;
 		}
 	}
@@ -198,10 +198,10 @@ window_matches(ModuleState *state, unsigned long *body)
 static int
 collect_client(ModuleState *state)
 {
-	unsigned long header[HEADER_SIZE];
+	unsigned long  header[HEADER_SIZE];
 	unsigned long *body;
-	fd_set infds;
-	int keep_running = 1;
+	fd_set	       infds;
+	int	       keep_running = 1;
 
 	FD_ZERO(&infds);
 	FD_SET(state->pipe_fd[1], &infds);
@@ -211,8 +211,8 @@ collect_client(ModuleState *state)
 		switch (header[1]) {
 		case M_CONFIGURE_WINDOW:
 			if (window_matches(state, body)) {
-				ClientNode *node = (ClientNode *)xmalloc(
-				    sizeof(ClientNode));
+				ClientNode *node =
+				    (ClientNode *)xmalloc(sizeof(ClientNode));
 				node->frame = (Window)body[1];
 				node->title_height = (int)body[9];
 				node->border_width = (int)body[10];
@@ -251,9 +251,9 @@ static int
 await_configure(ModuleState *state, ClientNode *node)
 {
 	for (;;) {
-		unsigned long header[HEADER_SIZE];
+		unsigned long  header[HEADER_SIZE];
 		unsigned long *body;
-		fd_set infds;
+		fd_set	       infds;
 
 		FD_ZERO(&infds);
 		FD_SET(state->pipe_fd[1], &infds);
@@ -297,7 +297,7 @@ static int
 parse_metric(const char *token, unsigned long reference)
 {
 	char *endptr;
-	long value;
+	long  value;
 
 	if (!token || !*token) {
 		return 0;
@@ -333,13 +333,13 @@ static void
 tile_clients(ModuleState *state)
 {
 	ClientNode *cursor = state->reverse_order ? state->tail : state->head;
-	int stripes = 1;
-	int slots_per_stripe;
-	int wdiv;
-	int hdiv;
-	int current_x = state->offset_x;
-	int current_y = state->offset_y;
-	int limit = state->tile_limit;
+	int	    stripes = 1;
+	int	    slots_per_stripe;
+	int	    wdiv;
+	int	    hdiv;
+	int	    current_x = state->offset_x;
+	int	    current_y = state->offset_y;
+	int	    limit = state->tile_limit;
 
 	if (state->tile_horizontal) {
 		if ((limit > 0) && (limit < state->client_count)) {
@@ -380,11 +380,11 @@ tile_clients(ModuleState *state)
 					}
 					send_resize(state, cursor,
 					    (new_width > 0) ?
-					    (unsigned long)new_width :
-					    cursor->width,
+						(unsigned long)new_width :
+						cursor->width,
 					    (new_height > 0) ?
-					    (unsigned long)new_height :
-					    cursor->height);
+						(unsigned long)new_height :
+						cursor->height);
 				}
 
 				send_move(state, cursor, current_x, current_y);
@@ -397,9 +397,10 @@ tile_clients(ModuleState *state)
 				{
 					int alive =
 					    await_configure(state, cursor);
-					ClientNode *next = state->reverse_order
-					    ?
-					    cursor->prev : cursor->next;
+					ClientNode *next =
+					    state->reverse_order ?
+					    cursor->prev :
+					    cursor->next;
 					if (!alive) {
 						detach_client(state, cursor);
 					}
@@ -448,11 +449,11 @@ tile_clients(ModuleState *state)
 					}
 					send_resize(state, cursor,
 					    (new_width > 0) ?
-					    (unsigned long)new_width :
-					    cursor->width,
+						(unsigned long)new_width :
+						cursor->width,
 					    (new_height > 0) ?
-					    (unsigned long)new_height :
-					    cursor->height);
+						(unsigned long)new_height :
+						cursor->height);
 				}
 
 				send_move(state, cursor, current_x, current_y);
@@ -465,9 +466,10 @@ tile_clients(ModuleState *state)
 				{
 					int alive =
 					    await_configure(state, cursor);
-					ClientNode *next = state->reverse_order
-					    ?
-					    cursor->prev : cursor->next;
+					ClientNode *next =
+					    state->reverse_order ?
+					    cursor->prev :
+					    cursor->next;
 					if (!alive) {
 						detach_client(state, cursor);
 					}
@@ -484,14 +486,14 @@ static void
 cascade_clients(ModuleState *state)
 {
 	ClientNode *cursor = state->reverse_order ? state->tail : state->head;
-	int current_x = state->offset_x;
-	int current_y = state->offset_y;
+	int	    current_x = state->offset_x;
+	int	    current_y = state->offset_y;
 
 	while (cursor) {
 		unsigned long target_width = 0;
 		unsigned long target_height = 0;
-		int advance_x = state->step_x;
-		int advance_y = state->step_y;
+		int	      advance_x = state->step_x;
+		int	      advance_y = state->step_y;
 
 		if (state->raise_clients) {
 			SendInfo(state->pipe_fd, "Raise", cursor->frame);
@@ -503,13 +505,13 @@ cascade_clients(ModuleState *state)
 			if (state->avoid_stretch) {
 				if (state->limit_width &&
 				    cursor->width >
-				    (unsigned long)state->limit_width) {
+					(unsigned long)state->limit_width) {
 					target_width =
 					    (unsigned long)state->limit_width;
 				}
 				if (state->limit_height &&
 				    cursor->height >
-				    (unsigned long)state->limit_height) {
+					(unsigned long)state->limit_height) {
 					target_height =
 					    (unsigned long)state->limit_height;
 				}
@@ -522,7 +524,7 @@ cascade_clients(ModuleState *state)
 				send_resize(state, cursor,
 				    target_width ? target_width : cursor->width,
 				    target_height ? target_height :
-				    cursor->height);
+						    cursor->height);
 			}
 		}
 
@@ -535,7 +537,7 @@ cascade_clients(ModuleState *state)
 		}
 
 		{
-			int alive = await_configure(state, cursor);
+			int	    alive = await_configure(state, cursor);
 			ClientNode *next =
 			    state->reverse_order ? cursor->prev : cursor->next;
 			if (!alive) {
@@ -643,7 +645,7 @@ static int
 tokenise_config(char *line, char ***argv_out)
 {
 	char *tokens[48];
-	int count = 0;
+	int   count = 0;
 	char *cursor = strtok(line, " \t");
 
 	while (cursor && count < 48) {
@@ -672,13 +674,13 @@ LoadConfigLine(const char *filename, const char *match)
 {
 	FILE *f = fopen(filename, "r");
 	if (f) {
-		char line[256];
+		char   line[256];
 		size_t match_len = strlen(match);
 
 		while (fgets(line, sizeof(line), f)) {
 			if (strncmp(line, match, match_len) == 0) {
 				size_t len = strlen(line);
-				char *copy = (char *)xmalloc(len + 1);
+				char  *copy = (char *)xmalloc(len + 1);
 
 				strcpy(copy, line);
 				if (len && copy[len - 1] == '\n') {
@@ -708,7 +710,7 @@ main(int argc, char *argv[])
 	ModuleState *state = &g_state;
 
 #ifdef USERC
-	char match[128];
+	char  match[128];
 	char *config_line;
 #endif
 
@@ -760,7 +762,7 @@ main(int argc, char *argv[])
 	config_line = LoadConfigLine(argv[3], match);
 	if (config_line) {
 		char **args = NULL;
-		int arg_count = tokenise_config(config_line, &args);
+		int    arg_count = tokenise_config(config_line, &args);
 
 		parse_arguments(state, "config args", arg_count, args, 0);
 		free(args);
@@ -771,7 +773,7 @@ main(int argc, char *argv[])
 	while (config_line) {
 		if (strncmp(match, config_line, strlen(match)) == 0) {
 			char **args = NULL;
-			int len = strlen(config_line);
+			int    len = strlen(config_line);
 			if (len && config_line[len - 1] == '\n') {
 				config_line[len - 1] = '\0';
 			}
@@ -790,7 +792,7 @@ main(int argc, char *argv[])
 
 	if (strcmp(state->program_name, "FvwmCascade") &&
 	    (!strcmp(state->program_name, "FvwmTile") ||
-	     (argc >= 7 && !strcmp(argv[6], "-tile")))) {
+		(argc >= 7 && !strcmp(argv[6], "-tile")))) {
 		state->run_tile = 1;
 		state->run_cascade = 0;
 		state->resize_clients = 1;
@@ -807,7 +809,7 @@ main(int argc, char *argv[])
 		char msg[256];
 		snprintf(msg, sizeof(msg), "SET_MASK %lu\n",
 		    (unsigned long)(M_CONFIGURE_WINDOW | M_DESTROY_WINDOW |
-		    M_END_WINDOWLIST));
+			M_END_WINDOWLIST));
 		SendInfo(state->pipe_fd, msg, 0);
 
 #ifdef FVWM1_MOVENULL

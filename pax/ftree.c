@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <errno.h>
 #include <fts.h>
@@ -45,18 +45,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * Data structure used to store the file args to be handed to fts().
  * It keeps track of which args generated a "selected" member.
  */
 typedef struct ftree {
-	char *fname;       /* file tree name */
-	int refcnt;        /* had a selected (or skipped) file? */
-	int chflg;         /* change directory flag */
-	struct ftree *fow; /* pointer to next entry on list */
+	char	     *fname;  /* file tree name */
+	int	      refcnt; /* had a selected (or skipped) file? */
+	int	      chflg;  /* change directory flag */
+	struct ftree *fow;    /* pointer to next entry on list */
 } FTREE;
 
 /*
@@ -73,16 +73,16 @@ typedef struct ftree {
  * pax, they are read from stdin
  */
 
-static FTS *ftsp = NULL;     /* current FTS handle */
-static int ftsopts;          /* options to be used on fts_open */
-static char *farray[2];      /* array for passing each arg to fts */
-static FTREE *fthead = NULL; /* head of linked list of file args */
-static FTREE *fttail = NULL; /* tail of linked list of file args */
-static FTREE *ftcur = NULL;  /* current file arg being processed */
-static FTSENT *ftent = NULL; /* current file tree entry */
-static int ftree_skip;       /* when set skip to next file arg */
+static FTS    *ftsp = NULL;   /* current FTS handle */
+static int     ftsopts;	      /* options to be used on fts_open */
+static char   *farray[2];     /* array for passing each arg to fts */
+static FTREE  *fthead = NULL; /* head of linked list of file args */
+static FTREE  *fttail = NULL; /* tail of linked list of file args */
+static FTREE  *ftcur = NULL;  /* current file arg being processed */
+static FTSENT *ftent = NULL;  /* current file tree entry */
+static int     ftree_skip;    /* when set skip to next file arg */
 
-static int ftree_arg(void);
+static int   ftree_arg(void);
 static char *getpathname(char *, int);
 
 /*
@@ -150,7 +150,7 @@ int
 ftree_add(char *str, int chflg)
 {
 	FTREE *ft;
-	int len;
+	int    len;
 
 	/*
 	 * simple check for bad args
@@ -242,7 +242,7 @@ void
 ftree_chk(void)
 {
 	FTREE *ft;
-	int wban = 0;
+	int    wban = 0;
 
 	/*
 	 * make sure all dir access times were reset.
@@ -484,7 +484,7 @@ next_file(ARCHD *arcn)
 			 * have to read the symlink path from the file
 			 */
 			if ((cnt = readlink(ftent->fts_path, arcn->ln_name,
-			    PAXPATHLEN)) == -1) {
+				 PAXPATHLEN)) == -1) {
 				syswarn(1, errno, "Unable to read symlink %s",
 				    ftent->fts_path);
 				continue;
@@ -532,7 +532,7 @@ static char *
 getpathname(char *buf, int buflen)
 {
 	char *bp, *ep;
-	int ch, term;
+	int   ch, term;
 
 	if (zeroflag) {
 		/*
@@ -542,7 +542,8 @@ getpathname(char *buf, int buflen)
 		for (bp = buf, ep = buf + buflen; bp < ep; bp++) {
 			if ((ch = getchar()) == EOF) {
 				if (bp != buf)
-					paxwarn(1, "Ignoring unterminated "
+					paxwarn(1,
+					    "Ignoring unterminated "
 					    "pathname at EOF");
 				return (NULL);
 			}

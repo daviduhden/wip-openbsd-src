@@ -20,8 +20,8 @@
 #include "parse.h"
 #include "screen.h"
 
-FvwmWindow *colormap_win;
-Colormap last_cmap = None;
+FvwmWindow	  *colormap_win;
+Colormap	   last_cmap = None;
 extern FvwmWindow *Tmp_win;
 
 /***********************************************************************
@@ -38,7 +38,7 @@ void
 HandleColormapNotify(void)
 {
 	XColormapEvent *cevent = (XColormapEvent *)&Event;
-	Bool ReInstall = False;
+	Bool		ReInstall = False;
 
 	if (!Tmp_win) {
 		return;
@@ -57,7 +57,7 @@ HandleColormapNotify(void)
 
 	while (XCheckTypedEvent(dpy, ColormapNotify, &Event)) {
 		if (XFindContext(dpy, cevent->window, FvwmContext,
-		    (caddr_t *)&Tmp_win) == XCNOENT)
+			(caddr_t *)&Tmp_win) == XCNOENT)
 			Tmp_win = NULL;
 		if ((Tmp_win) && (cevent->new)) {
 			XGetWindowAttributes(dpy, Tmp_win->w, &(Tmp_win->attr));
@@ -112,10 +112,10 @@ ReInstallActiveColormap(void)
 void
 InstallWindowColormaps(FvwmWindow *tmp)
 {
-	int i;
+	int		  i;
 	XWindowAttributes attributes;
-	Window w;
-	Bool ThisWinInstalled = False;
+	Window		  w;
+	Bool		  ThisWinInstalled = False;
 
 	/* If no window, then install root colormap */
 	if (!tmp)
@@ -223,7 +223,7 @@ FetchWmColormapWindows(FvwmWindow *tmp)
 		XFree((void *)tmp->cmap_windows);
 
 	if (!XGetWMColormapWindows(dpy, tmp->w, &(tmp->cmap_windows),
-	    &(tmp->number_cmap_windows))) {
+		&(tmp->number_cmap_windows))) {
 		tmp->number_cmap_windows = 0;
 		tmp->cmap_windows = NULL;
 	}

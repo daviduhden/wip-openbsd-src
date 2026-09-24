@@ -24,8 +24,8 @@
  * ********************************************************************
  */
 
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 
 #include <ctype.h>
 #include <fcntl.h>
@@ -47,13 +47,13 @@ extern unsigned long *PipeMask; /* in module.c */
 extern Boolean debugging;
 
 struct moduleInfoList {
-	char *data;
+	char		      *data;
 	struct moduleInfoList *next;
 };
 
 struct moduleInfoList *modlistroot = NULL;
 
-void AddToModList(char *tline); /* prototypes */
+void	    AddToModList(char *tline); /* prototypes */
 extern void StartupStuff(void);
 
 /*
@@ -90,7 +90,7 @@ void
 AddToModList(char *tline)
 {
 	struct moduleInfoList *t, *prev, *this;
-	size_t len;
+	size_t		       len;
 
 	/* Find end of list */
 	t = modlistroot;
@@ -101,8 +101,7 @@ AddToModList(char *tline)
 		t = t->next;
 	}
 
-	this =
-	    (struct moduleInfoList *)xmalloc(sizeof(struct moduleInfoList));
+	this = (struct moduleInfoList *)xmalloc(sizeof(struct moduleInfoList));
 	len = strlen(tline) + 1;
 	this->data = (char *)xmalloc(len);
 	this->next = NULL;
@@ -182,10 +181,10 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)context;
 	(void)action;
 	struct moduleInfoList *t;
-	char *message, msg2[32];
-	extern char *IconPath;
-	extern char *PixmapPath;
-	size_t len;
+	char		      *message, msg2[32];
+	extern char	      *IconPath;
+	extern char	      *PixmapPath;
+	size_t		       len;
 
 	if (IconPath && strlen(IconPath)) {
 		len = strlen(IconPath) + 11;

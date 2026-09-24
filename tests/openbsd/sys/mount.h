@@ -5,7 +5,7 @@
 #define EXT4FS_TEST_MOUNT_H
 
 struct mount {
-	int	m_dummy;
+	int m_dummy;
 };
 
 #endif /* EXT4FS_TEST_MOUNT_H */

@@ -10,23 +10,23 @@
  * in the Public Domain for your edification and enjoyment.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 int
 getoldopt(int argc, char **argv, const char *optstring)
 {
-	static char *key;       /* Points to next keyletter */
-	static char use_getopt; /* !=0 if argv[1][0] was '-' */
-	char c;
-	char *place;
+	static char *key;	 /* Points to next keyletter */
+	static char  use_getopt; /* !=0 if argv[1][0] was '-' */
+	char	     c;
+	char	    *place;
 
 	optarg = NULL;
 

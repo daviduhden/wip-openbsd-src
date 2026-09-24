@@ -23,19 +23,19 @@
 #include "config.h"
 
 extern ScreenInfo Scr;
-extern Display *dpy;
+extern Display	 *dpy;
 
-Pixel back_pix, fore_pix, hi_pix;
-Pixel focus_pix;
-Pixel focus_fore_pix;
+Pixel	     back_pix, fore_pix, hi_pix;
+Pixel	     focus_pix;
+Pixel	     focus_fore_pix;
 extern Pixel win_back_pix, win_fore_pix, win_hi_back_pix, win_hi_fore_pix;
-extern int window_w, window_h, window_x, window_y, usposition, uselabel, xneg,
-	   yneg;
+extern int   window_w, window_h, window_x, window_y, usposition, uselabel, xneg,
+    yneg;
 extern int StartIconic;
 extern int MiniIcons;
 extern int ShowBalloons, ShowPagerBalloons, ShowIconBalloons;
 
-extern int icon_w, icon_h, icon_x, icon_y;
+extern int   icon_w, icon_h, icon_x, icon_y;
 XFontStruct *font, *windowFont;
 
 GC NormalGC, DashedGC, HiliteGC, rvGC;
@@ -45,7 +45,7 @@ GC BalloonGC;
 
 extern PagerWindow *Start;
 extern PagerWindow *FocusWin;
-static Atom wm_del_win;
+static Atom	    wm_del_win;
 
 extern char *MyName;
 
@@ -58,8 +58,8 @@ int desk_h = 0;
 int label_h = 0;
 
 DeskInfo *Desks;
-int Wait = 0;
-int FvwmErrorHandler(Display *, XErrorEvent *);
+int	  Wait = 0;
+int	  FvwmErrorHandler(Display *, XErrorEvent *);
 
 /* assorted gray bitmaps for decorative borders */
 #define g_width 2
@@ -74,8 +74,8 @@ static char l_g_bits[] = {0x08, 0x02};
 #define s_g_height 4
 static char s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
 
-Window icon_win;       /* icon window */
-BalloonWindow balloon; /* balloon window */
+Window	      icon_win; /* icon window */
+BalloonWindow balloon;	/* balloon window */
 
 /***********************************************************************
  *
@@ -86,35 +86,35 @@ BalloonWindow balloon; /* balloon window */
  *	x,y location of the window
  *
  ***********************************************************************/
-char *pager_name = "Fvwm Pager";
+char	  *pager_name = "Fvwm Pager";
 XSizeHints sizehints = {
-	(PMinSize | PResizeInc | PBaseSize | PWinGravity), 0, 0, 100,
-	100,               /* x, y, width and height */
-	1, 1,              /* Min width and height */
-	0, 0,              /* Max width and height */
-	1, 1,              /* Width and height increments */
-	{0, 0}, {0, 0},    /* Aspect ratio - not used */
-	1, 1,              /* base size */
-	(NorthWestGravity) /* gravity */
+    (PMinSize | PResizeInc | PBaseSize | PWinGravity), 0, 0, 100,
+    100,	       /* x, y, width and height */
+    1, 1,	       /* Min width and height */
+    0, 0,	       /* Max width and height */
+    1, 1,	       /* Width and height increments */
+    {0, 0}, {0, 0},    /* Aspect ratio - not used */
+    1, 1,	       /* base size */
+    (NorthWestGravity) /* gravity */
 };
 
 void
 initialize_pager(void)
 {
-	XWMHints wmhints;
+	XWMHints   wmhints;
 	XClassHint class1;
 
-	XTextProperty name;
-	unsigned long valuemask;
+	XTextProperty	     name;
+	unsigned long	     valuemask;
 	XSetWindowAttributes attributes;
-	extern char *PagerFore, *PagerBack, *HilightC;
-	extern char *WindowBack, *WindowFore, *WindowHiBack, *WindowHiFore;
-	extern char *BalloonFore, *BalloonBack, *BalloonFont;
-	extern char *BalloonBorderColor;
-	extern int BalloonBorderWidth, BalloonYOffset;
-	extern char *font_string, *smallFont;
-	int n, m, w, h, i, x, y;
-	XGCValues gcv;
+	extern char	    *PagerFore, *PagerBack, *HilightC;
+	extern char  *WindowBack, *WindowFore, *WindowHiBack, *WindowHiFore;
+	extern char  *BalloonFore, *BalloonBack, *BalloonFont;
+	extern char  *BalloonBorderColor;
+	extern int    BalloonBorderWidth, BalloonYOffset;
+	extern char  *font_string, *smallFont;
+	int	      n, m, w, h, i, x, y;
+	XGCValues     gcv;
 	unsigned long gcm;
 
 #if 1
@@ -161,10 +161,10 @@ initialize_pager(void)
 		    g_bits, g_width, g_height, fore_pix, back_pix, Scr.d_depth);
 		Scr.light_gray_pixmap =
 		    XCreatePixmapFromBitmapData(dpy, Scr.Root, l_g_bits,
-		    l_g_width, l_g_height, fore_pix, back_pix, Scr.d_depth);
+			l_g_width, l_g_height, fore_pix, back_pix, Scr.d_depth);
 		Scr.sticky_gray_pixmap =
 		    XCreatePixmapFromBitmapData(dpy, Scr.Root, s_g_bits,
-		    s_g_width, s_g_height, fore_pix, back_pix, Scr.d_depth);
+			s_g_width, s_g_height, fore_pix, back_pix, Scr.d_depth);
 	}
 
 	n = Scr.VxMax / Scr.MyDisplayWidth;
@@ -207,14 +207,13 @@ initialize_pager(void)
 		    (window_h + 2 - Rows * (label_h - m - 1));
 	}
 	if (window_w <= 0)
-		window_w =
-		    Columns *
-		    ((Scr.VxMax + Scr.MyDisplayWidth) / Scr.VScale + n) +
+		window_w = Columns *
+			((Scr.VxMax + Scr.MyDisplayWidth) / Scr.VScale + n) +
 		    Columns - 1;
 	if (window_h <= 0) {
-		window_h =
-		    Rows * ((Scr.VyMax + Scr.MyDisplayHeight) / Scr.VScale + m +
-		    label_h + 1) -
+		window_h = Rows *
+			((Scr.VyMax + Scr.MyDisplayHeight) / Scr.VScale + m +
+			    label_h + 1) -
 		    2;
 	}
 
@@ -430,9 +429,9 @@ initialize_pager(void)
 		/* now create the window */
 		balloon.w =
 		    XCreateWindow(dpy, Scr.Root, 0, 0, /* coords set later */
-		    1,                             /* width set later */
-		    balloon.height, balloon.border, CopyFromParent,
-		    InputOutput, CopyFromParent, valuemask, &attributes);
+			1,			       /* width set later */
+			balloon.height, balloon.border, CopyFromParent,
+			InputOutput, CopyFromParent, valuemask, &attributes);
 
 		/* set font */
 		gcv.font = balloon.font->fid;
@@ -459,7 +458,7 @@ initialize_pager(void)
 Pixel
 GetColor(char *name)
 {
-	XColor color;
+	XColor		  color;
 	XWindowAttributes attributes;
 
 	XGetWindowAttributes(dpy, Scr.Root, &attributes);
@@ -486,9 +485,9 @@ nocolor(char *a, char *b)
 void
 DispatchEvent(XEvent *Event)
 {
-	int i, x, y;
-	Window JunkRoot, JunkChild;
-	int JunkX, JunkY;
+	int	 i, x, y;
+	Window	 JunkRoot, JunkChild;
+	int	 JunkX, JunkY;
 	unsigned JunkMask;
 
 	switch (Event->xany.type) {
@@ -539,8 +538,8 @@ DispatchEvent(XEvent *Event)
 		if (ShowBalloons)
 			UnmapBalloonWindow();
 		if (((Event->xbutton.button == 2) ||
-		    ((Event->xbutton.button == 3) &&
-		     (Event->xbutton.state & Mod1Mask))) &&
+			((Event->xbutton.button == 3) &&
+			    (Event->xbutton.state & Mod1Mask))) &&
 		    (Event->xbutton.subwindow != None)) {
 			MoveWindow(Event);
 		} else if (Event->xbutton.button == 3) {
@@ -601,7 +600,7 @@ DispatchEvent(XEvent *Event)
 void
 HandleExpose(XEvent *Event)
 {
-	int i;
+	int	     i;
 	PagerWindow *t;
 
 	/* ric@giccs.georgetown.edu */
@@ -640,9 +639,9 @@ HandleExpose(XEvent *Event)
 void
 ReConfigure(void)
 {
-	Window root;
+	Window	 root;
 	unsigned border_width, depth;
-	int n, m, w, h, n1, m1, x, y, i, j, k;
+	int	 n, m, w, h, n1, m1, x, y, i, j, k;
 
 	XGetGeometry(dpy, Scr.Pager_w, &root, &x, &y, (unsigned *)&window_w,
 	    (unsigned *)&window_h, &border_width, &depth);
@@ -702,10 +701,10 @@ ReConfigure(void)
 void
 MovePage(void)
 {
-	int n1, m1, x, y, n, m, i;
+	int	      n1, m1, x, y, n, m, i;
 	XTextProperty name;
-	char str[100], *sptr;
-	static int icon_desk_shown = -1000;
+	char	      str[100], *sptr;
+	static int    icon_desk_shown = -1000;
 
 	Wait = 0;
 	n1 = Scr.Vx / Scr.MyDisplayWidth;
@@ -760,7 +759,7 @@ void
 ReConfigureIcons(void)
 {
 	PagerWindow *t;
-	int x, y, w, h, n, m, n1, m1;
+	int	     x, y, w, h, n, m, n1, m1;
 
 	n = (Scr.VxMax) / Scr.MyDisplayWidth;
 	m = (Scr.VyMax) / Scr.MyDisplayHeight;
@@ -770,16 +769,16 @@ ReConfigureIcons(void)
 		n1 = (Scr.Vx + t->x) / Scr.MyDisplayWidth;
 		m1 = (Scr.Vy + t->y) / Scr.MyDisplayHeight;
 		x = (Scr.Vx + t->x) * (icon_w - n) /
-		    (Scr.VxMax + Scr.MyDisplayWidth) +
+			(Scr.VxMax + Scr.MyDisplayWidth) +
 		    n1;
 		y = (Scr.Vy + t->y) * (icon_h - m) /
-		    (Scr.VyMax + Scr.MyDisplayHeight) +
+			(Scr.VyMax + Scr.MyDisplayHeight) +
 		    m1;
 		w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-		    (Scr.VxMax + Scr.MyDisplayWidth) -
+			(Scr.VxMax + Scr.MyDisplayWidth) -
 		    2 - x + n1;
 		h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-		    (Scr.VyMax + Scr.MyDisplayHeight) -
+			(Scr.VyMax + Scr.MyDisplayHeight) -
 		    2 - y + m1;
 
 		if (w < 1)
@@ -805,8 +804,8 @@ ReConfigureIcons(void)
 void
 DrawGrid(int i, int erase)
 {
-	int y, y1, y2, x, x1, x2, d, hor_off, w;
-	int MaxW, MaxH;
+	int  y, y1, y2, x, x1, x2, d, hor_off, w;
+	int  MaxW, MaxH;
 	char str[15], *ptr;
 
 	if ((i < 0) || (i >= ndesks))
@@ -936,9 +935,9 @@ SwitchToDeskAndPage(int Desk, XEvent *Event)
 	} else {
 		snprintf(command, sizeof(command), "GotoPage %d %d\n",
 		    Event->xbutton.x * (Scr.VxMax + Scr.MyDisplayWidth) /
-		    (desk_w * Scr.MyDisplayWidth),
+			(desk_w * Scr.MyDisplayWidth),
 		    Event->xbutton.y * (Scr.VyMax + Scr.MyDisplayHeight) /
-		    (desk_h * Scr.MyDisplayHeight));
+			(desk_h * Scr.MyDisplayHeight));
 		SendInfo(fd, command, 0);
 	}
 #endif
@@ -953,9 +952,9 @@ IconSwitchPage(XEvent *Event)
 
 	snprintf(command, sizeof(command), "GotoPage %d %d\n",
 	    Event->xbutton.x * (Scr.VxMax + Scr.MyDisplayWidth) /
-	    (icon_w * Scr.MyDisplayWidth),
+		(icon_w * Scr.MyDisplayWidth),
 	    Event->xbutton.y * (Scr.VyMax + Scr.MyDisplayHeight) /
-	    (icon_h * Scr.MyDisplayHeight));
+		(icon_h * Scr.MyDisplayHeight));
 	SendInfo(fd, command, 0);
 #endif
 	Wait = 1;
@@ -964,9 +963,9 @@ IconSwitchPage(XEvent *Event)
 void
 AddNewWindow(PagerWindow *t)
 {
-	unsigned long valuemask;
+	unsigned long	     valuemask;
 	XSetWindowAttributes attributes;
-	int i, x, y, w, h, n, m, n1, m1;
+	int		     i, x, y, w, h, n, m, n1, m1;
 
 	i = t->desk - desk1;
 	n = (Scr.VxMax) / Scr.MyDisplayWidth;
@@ -978,10 +977,10 @@ AddNewWindow(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (desk_w - n) /
-	    (Scr.VxMax + Scr.MyDisplayWidth) -
+		(Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (desk_h - m) /
-	    (Scr.VyMax + Scr.MyDisplayHeight) -
+		(Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1014,10 +1013,10 @@ AddNewWindow(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-	    (Scr.VxMax + Scr.MyDisplayWidth) -
+		(Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-	    (Scr.VyMax + Scr.MyDisplayHeight) -
+		(Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1029,7 +1028,7 @@ AddNewWindow(PagerWindow *t)
 	if (Scr.CurrentDesk == t->desk) {
 		t->IconView =
 		    XCreateWindow(dpy, icon_win, x, y, w, h, 1, CopyFromParent,
-		    InputOutput, CopyFromParent, valuemask, &attributes);
+			InputOutput, CopyFromParent, valuemask, &attributes);
 		XGrabButton(dpy, 2, AnyModifier, t->IconView, True,
 		    ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
 		    GrabModeAsync, GrabModeAsync, None, None);
@@ -1066,10 +1065,10 @@ ChangeDeskForWindow(PagerWindow *t, long newdesk)
 	y = (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (desk_w - n) /
-	    (Scr.VxMax + Scr.MyDisplayWidth) -
+		(Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (desk_h - m) /
-	    (Scr.VyMax + Scr.MyDisplayHeight) -
+		(Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1091,10 +1090,10 @@ ChangeDeskForWindow(PagerWindow *t, long newdesk)
 	y = (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-	    (Scr.VxMax + Scr.MyDisplayWidth) -
+		(Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-	    (Scr.VyMax + Scr.MyDisplayHeight) -
+		(Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 	if (w < 1)
 		w = 1;
@@ -1122,10 +1121,10 @@ MoveResizePagerView(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (desk_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (desk_w - n) /
-	    (Scr.VxMax + Scr.MyDisplayWidth) -
+		(Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (desk_h - m) /
-	    (Scr.VyMax + Scr.MyDisplayHeight) -
+		(Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 
 	if (w < 1)
@@ -1147,10 +1146,10 @@ MoveResizePagerView(PagerWindow *t)
 	y = (Scr.Vy + t->y) * (icon_h - m) / (Scr.VyMax + Scr.MyDisplayHeight) +
 	    m1;
 	w = (Scr.Vx + t->x + t->width + 2) * (icon_w - n) /
-	    (Scr.VxMax + Scr.MyDisplayWidth) -
+		(Scr.VxMax + Scr.MyDisplayWidth) -
 	    2 - x + n1;
 	h = (Scr.Vy + t->y + t->height + 2) * (icon_h - m) /
-	    (Scr.VyMax + Scr.MyDisplayHeight) -
+		(Scr.VyMax + Scr.MyDisplayHeight) -
 	    2 - y + m1;
 
 	if (w < 1)
@@ -1243,7 +1242,7 @@ Scroll(int window_w, int window_h, int x, int y, int Desk)
 {
 #ifndef NON_VIRTUAL
 	char command[256];
-	int sx, sy;
+	int  sx, sy;
 	if (Wait == 0) {
 		/* Desk < 0 means we want to scroll an icon window */
 		if (Desk >= 0 && Desk + desk1 != Scr.CurrentDesk) {
@@ -1260,11 +1259,13 @@ Scroll(int window_w, int window_h, int x, int y, int Desk)
 		if (y > window_h)
 			y = window_h;
 
-		sx = (100 * (x * (Scr.VxMax + Scr.MyDisplayWidth) / window_w -
-		    Scr.Vx)) /
+		sx = (100 *
+			 (x * (Scr.VxMax + Scr.MyDisplayWidth) / window_w -
+			     Scr.Vx)) /
 		    Scr.MyDisplayWidth;
-		sy = (100 * (y * (Scr.VyMax + Scr.MyDisplayHeight) / window_h -
-		    Scr.Vy)) /
+		sy = (100 *
+			 (y * (Scr.VyMax + Scr.MyDisplayHeight) / window_h -
+			     Scr.Vy)) /
 		    Scr.MyDisplayHeight;
 		/* Make sure we don't get stuck a few pixels fromt the top/left
 		 * border. Since sx/sy are ints, values between 0 and 1 are
@@ -1286,13 +1287,13 @@ MoveWindow(XEvent *Event)
 {
 	char command[100];
 	int x1, y1, finished = 0, wx, wy, n, x, y, xi = 0, yi = 0, wx1, wy1, x2,
-	    y2;
-	Window dumwin;
+		    y2;
+	Window	     dumwin;
 	PagerWindow *t;
-	int m, n1, m1;
-	int NewDesk, KeepMoving = 0;
-	int moved = 0;
-	int row, column;
+	int	     m, n1, m1;
+	int	     NewDesk, KeepMoving = 0;
+	int	     moved = 0;
+	int	     row, column;
 
 	t = Start;
 	while ((t != NULL) && (t->PagerView != Event->xbutton.subwindow))
@@ -1414,10 +1415,10 @@ MoveWindow(XEvent *Event)
 		m1 = y2 * (Scr.VyMax + Scr.MyDisplayHeight) /
 		    (desk_h * Scr.MyDisplayHeight);
 		x = (x2 - n1) * (Scr.VxMax + Scr.MyDisplayWidth) /
-		    (desk_w - n) -
+			(desk_w - n) -
 		    Scr.Vx;
 		y = (y2 - m1) * (Scr.VyMax + Scr.MyDisplayHeight) /
-		    (desk_h - m) -
+			(desk_h - m) -
 		    Scr.Vy;
 		if (x + t->frame_width + Scr.Vx < 0)
 			x = -Scr.Vx;
@@ -1443,7 +1444,7 @@ MoveWindow(XEvent *Event)
 		}
 		if (NewDesk + desk1 != t->desk) {
 			if (((t->flags & ICONIFIED) &&
-			    (t->flags & StickyIcon)) ||
+				(t->flags & StickyIcon)) ||
 			    (t->flags & STICKY)) {
 				NewDesk = Scr.CurrentDesk - desk1;
 				if (t->desk != Scr.CurrentDesk)
@@ -1466,7 +1467,7 @@ MoveWindow(XEvent *Event)
 					XMoveWindow(dpy, t->w,
 					    x + t->border_width,
 					    y + t->title_height +
-					    t->border_width);
+						t->border_width);
 				XSync(dpy, 0);
 			} else
 				MoveResizePagerView(t);
@@ -1516,7 +1517,7 @@ FvwmErrorHandler(Display *dpy, XErrorEvent *event)
 void
 LabelWindow(PagerWindow *t)
 {
-	XGCValues Globalgcv;
+	XGCValues     Globalgcv;
 	unsigned long Globalgcm;
 
 	if (windowFont == NULL) {
@@ -1549,7 +1550,7 @@ LabelWindow(PagerWindow *t)
 void
 LabelIconWindow(PagerWindow *t)
 {
-	XGCValues Globalgcv;
+	XGCValues     Globalgcv;
 	unsigned long Globalgcm;
 
 	if (windowFont == NULL) {
@@ -1581,10 +1582,10 @@ LabelIconWindow(PagerWindow *t)
 void
 PictureWindow(PagerWindow *t)
 {
-	XGCValues Globalgcv;
+	XGCValues     Globalgcv;
 	unsigned long Globalgcm;
-	int iconX;
-	int iconY;
+	int	      iconX;
+	int	      iconY;
 	if (MiniIcons) {
 		if (t->mini_icon.picture && (t->PagerView != None)) {
 			if (t->pager_view_width > (int)t->mini_icon.width)
@@ -1599,11 +1600,12 @@ PictureWindow(PagerWindow *t)
 				iconX = 0;
 			if (t->pager_view_height > (int)t->mini_icon.height)
 				iconY = (t->pager_view_height -
-				    t->mini_icon.height) /
+					    t->mini_icon.height) /
 				    2;
-			else if (t->pager_view_height < (int)t->mini_icon.height)
+			else if (t->pager_view_height <
+			    (int)t->mini_icon.height)
 				iconY = -((t->mini_icon.height -
-				    t->pager_view_height) /
+					      t->pager_view_height) /
 				    2);
 			else
 				iconY = 0;
@@ -1631,10 +1633,10 @@ PictureWindow(PagerWindow *t)
 void
 PictureIconWindow(PagerWindow *t)
 {
-	XGCValues Globalgcv;
+	XGCValues     Globalgcv;
 	unsigned long Globalgcm;
-	int iconX;
-	int iconY;
+	int	      iconX;
+	int	      iconY;
 	if (MiniIcons) {
 		if (t->mini_icon.picture && (t->IconView != None)) {
 			if (t->icon_view_width > (int)t->mini_icon.width)
@@ -1649,11 +1651,11 @@ PictureIconWindow(PagerWindow *t)
 				iconX = 0;
 			if (t->icon_view_height > (int)t->mini_icon.height)
 				iconY = (t->icon_view_height -
-				    t->mini_icon.height) /
+					    t->mini_icon.height) /
 				    2;
 			else if (t->icon_view_height < (int)t->mini_icon.height)
 				iconY = -((t->mini_icon.height -
-				    t->icon_view_height) /
+					      t->icon_view_height) /
 				    2);
 			else
 				iconY = 0;
@@ -1681,12 +1683,12 @@ PictureIconWindow(PagerWindow *t)
 void
 IconMoveWindow(XEvent *Event, PagerWindow *t)
 {
-	char command[100];
-	int x1, y1, finished = 0, n, x = 0, y = 0, xi = 0, yi = 0;
+	char   command[100];
+	int    x1, y1, finished = 0, n, x = 0, y = 0, xi = 0, yi = 0;
 	Window dumwin;
-	int m, n1, m1;
-	int moved = 0;
-	int KeepMoving = 0;
+	int    m, n1, m1;
+	int    moved = 0;
+	int    KeepMoving = 0;
 
 	if (t == NULL)
 		return;
@@ -1754,7 +1756,7 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 		x = (x - n1) * (Scr.VxMax + Scr.MyDisplayWidth) / (icon_w - n) -
 		    Scr.Vx;
 		y = (y - m1) * (Scr.VyMax + Scr.MyDisplayHeight) /
-		    (icon_h - m) -
+			(icon_h - m) -
 		    Scr.Vy;
 
 		if (((t->flags & ICONIFIED) && (t->flags & StickyIcon)) ||
@@ -1798,13 +1800,13 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 void
 MapBalloonWindow(XEvent *event)
 {
-	PagerWindow *t;
+	PagerWindow   *t;
 	XWindowChanges window_changes;
-	Window view, dummy;
-	int view_width, view_height;
-	int matched_window = 0;
-	int x, y;
-	extern char *BalloonBack;
+	Window	       view, dummy;
+	int	       view_width, view_height;
+	int	       matched_window = 0;
+	int	       x, y;
+	extern char   *BalloonBack;
 
 	/* is this the best way to match X event window ID to PagerWindow ID? */
 	t = Start;

@@ -1154,7 +1154,7 @@ ext4fs_buf_alloc(struct inode *ip, u_int64_t lbn, int size,
 				u_int16_t lent = letoh16(leh->eh_entries);
 				u_int16_t lcap =
 				    (fs->m_block_size -
-				    sizeof(struct ext4fs_extent_header)) /
+				     sizeof(struct ext4fs_extent_header)) /
 				    sizeof(struct ext4fs_extent);
 				if (lent > 0 && lent <= lcap &&
 				    letoh16(leh->eh_magic) ==

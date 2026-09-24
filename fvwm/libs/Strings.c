@@ -49,7 +49,7 @@ CatString3(char *a, char *b, char *c)
 void
 CopyString(char **dest, char *source)
 {
-	int len;
+	int   len;
 	char *start;
 
 	if (source == NULL) {
@@ -68,8 +68,8 @@ CopyString(char **dest, char *source)
 	}
 
 	source--;
-	while ((isspace((unsigned char)*source)) && (*source != 0) &&
-	    (len > 0)) {
+	while (
+	    (isspace((unsigned char)*source)) && (*source != 0) && (len > 0)) {
 		len--;
 		source--;
 	}
@@ -88,7 +88,7 @@ char *
 stripcpy(char *source)
 {
 	char *tmp, *ptr;
-	int len;
+	int   len;
 
 	if (source == NULL)
 		return NULL;

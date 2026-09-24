@@ -38,22 +38,23 @@ unveil(const char *p, const char *q)
 
 static int failures;
 
-#define CHECK(cond, msg) do {						\
-	if (!(cond)) {							\
-		fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,	\
-		    __LINE__);						\
-		failures++;						\
-	}								\
-} while (0)
+#define CHECK(cond, msg)                                                       \
+	do {                                                                   \
+		if (!(cond)) {                                                 \
+			fprintf(stderr, "FAIL: %s (%s:%d)\n", msg, __FILE__,   \
+			    __LINE__);                                         \
+			failures++;                                            \
+		}                                                              \
+	} while (0)
 
 static void
 run_decode(const char *payload, size_t len, int want_rc, int want_argc,
     int want_envc, const char *want_argv0)
 {
 	struct imsg imsg;
-	char **av = NULL, **ev = NULL;
-	char *buf;
-	int rc;
+	char	  **av = NULL, **ev = NULL;
+	char	   *buf;
+	int	    rc;
 
 	buf = malloc(len);
 	memcpy(buf, payload, len);
@@ -81,8 +82,7 @@ run_decode(const char *payload, size_t len, int want_rc, int want_argc,
 }
 
 static size_t
-mk_payload(char *buf, int cargc, int envc, const char **argv,
-    const char **envp)
+mk_payload(char *buf, int cargc, int envc, const char **argv, const char **envp)
 {
 	char *p = buf;
 
@@ -104,10 +104,10 @@ mk_payload(char *buf, int cargc, int envc, const char **argv,
 static void
 test_valid_payload(void)
 {
-	char payload[512];
-	const char *av[] = { "/bin/sh", "-c", "xterm" };
-	const char *ev[] = { "HOME=/tmp", "PATH=/usr/bin" };
-	size_t len;
+	char	    payload[512];
+	const char *av[] = {"/bin/sh", "-c", "xterm"};
+	const char *ev[] = {"HOME=/tmp", "PATH=/usr/bin"};
+	size_t	    len;
 
 	len = mk_payload(payload, 3, 2, av, ev);
 	run_decode(payload, len, 0, 3, 2, "/bin/sh");
@@ -116,7 +116,7 @@ test_valid_payload(void)
 static void
 test_short_header(void)
 {
-	char payload[8] = { 0 };
+	char payload[8] = {0};
 
 	run_decode(payload, 4, -1, 0, 0, NULL);
 }
@@ -125,7 +125,7 @@ static void
 test_negative_argc(void)
 {
 	char payload[64];
-	int cargc = -1, envc = 0;
+	int  cargc = -1, envc = 0;
 
 	memcpy(payload, &cargc, 4);
 	memcpy(payload + 4, &envc, 4);
@@ -137,7 +137,7 @@ static void
 test_huge_argc(void)
 {
 	char payload[64];
-	int cargc = 0x7fffffff, envc = 0;
+	int  cargc = 0x7fffffff, envc = 0;
 
 	memcpy(payload, &cargc, 4);
 	memcpy(payload + 4, &envc, 4);
@@ -148,8 +148,8 @@ static void
 test_missing_nul(void)
 {
 	char payload[64];
-	int cargc = 1, envc = 0;
-	int i;
+	int  cargc = 1, envc = 0;
+	int  i;
 
 	memcpy(payload, &cargc, 4);
 	memcpy(payload + 4, &envc, 4);
@@ -162,8 +162,8 @@ static void
 test_argc_exceeding_payload(void)
 {
 	char payload[64];
-	int cargc = 100, envc = 0;
-	int i;
+	int  cargc = 100, envc = 0;
+	int  i;
 
 	memcpy(payload, &cargc, 4);
 	memcpy(payload + 4, &envc, 4);
@@ -176,7 +176,7 @@ static void
 test_zero_argc(void)
 {
 	char payload[64];
-	int cargc = 0, envc = 0;
+	int  cargc = 0, envc = 0;
 
 	memcpy(payload, &cargc, 4);
 	memcpy(payload + 4, &envc, 4);
@@ -188,7 +188,7 @@ test_exact_boundary(void)
 {
 	/* One empty argv[0] exactly fills the payload: must decode. */
 	char payload[64];
-	int cargc = 1, envc = 0;
+	int  cargc = 1, envc = 0;
 
 	memcpy(payload, &cargc, 4);
 	memcpy(payload + 4, &envc, 4);
@@ -197,11 +197,11 @@ test_exact_boundary(void)
 }
 
 static void
-run_piperead_decode(const char *payload, size_t len, int want_rc,
-    const char *want_cmd)
+run_piperead_decode(
+    const char *payload, size_t len, int want_rc, const char *want_cmd)
 {
 	struct imsg imsg;
-	char *cmd;
+	char	   *cmd;
 
 	memset(&imsg, 0, sizeof(imsg));
 	imsg.data = (char *)payload;
@@ -223,8 +223,8 @@ run_piperead_decode(const char *payload, size_t len, int want_rc,
 static void
 test_piperead_decode(void)
 {
-	char payload[256];
-	u_int32_t id = 0x11223344;
+	char	    payload[256];
+	u_int32_t   id = 0x11223344;
 	const char *cmd = "xterm -e /bin/sh";
 
 	memcpy(payload, &id, 4);
@@ -276,8 +276,7 @@ main(void)
 
 /* Link stubs for the libutil imsg API (not exercised by the tests). */
 long long
-strtonum(const char *n, long long lo, long long hi,
-    const char **es)
+strtonum(const char *n, long long lo, long long hi, const char **es)
 {
 	(void)n;
 	(void)lo;

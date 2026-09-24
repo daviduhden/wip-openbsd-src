@@ -3,21 +3,20 @@
  * for any purpose.
  */
 
-#include "FvwmIconMan.h"
-
 #include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "../../fvwm/module.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "../../fvwm/module.h"
+#include "FvwmIconMan.h"
 #include "readconfig.h"
 #include "x.h"
 #include "xmanager.h"
 
-static int fd_width;
+static int		     fd_width;
 static volatile sig_atomic_t isTerminated = False;
 
 static char *IM_VERSION = "1.3";
@@ -210,15 +209,15 @@ main(int argc, char **argv)
 	assert(globals.managers);
 	fd_width = GetFdWidth();
 
-	SetMessageMask(Fvwm_fd, M_CONFIGURE_WINDOW | M_RES_CLASS | M_RES_NAME |
-	    M_ADD_WINDOW | M_DESTROY_WINDOW |
-	    M_ICON_NAME | M_DEICONIFY | M_ICONIFY |
-	    M_END_WINDOWLIST | M_NEW_DESK | M_NEW_PAGE |
-	    M_FOCUS_CHANGE | M_WINDOW_NAME |
+	SetMessageMask(Fvwm_fd,
+	    M_CONFIGURE_WINDOW | M_RES_CLASS | M_RES_NAME | M_ADD_WINDOW |
+		M_DESTROY_WINDOW | M_ICON_NAME | M_DEICONIFY | M_ICONIFY |
+		M_END_WINDOWLIST | M_NEW_DESK | M_NEW_PAGE | M_FOCUS_CHANGE |
+		M_WINDOW_NAME |
 #ifdef MINI_ICONS
-	    M_MINI_ICON |
+		M_MINI_ICON |
 #endif
-	    M_STRING);
+		M_STRING);
 
 	SendInfo(Fvwm_fd, "Send_WindowList", 0);
 

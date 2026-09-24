@@ -48,13 +48,13 @@
 #define POSITION 0     /* upper Left corner cursor */
 #define TITLE_CURSOR 1 /* title-bar cursor */
 #define DEFAULT 2      /* cursor for apps to inherit */
-#define SYS 3          /* sys-menu and iconify boxes cursor */
-#define MOVE 4         /* resize cursor */
+#define SYS 3	       /* sys-menu and iconify boxes cursor */
+#define MOVE 4	       /* resize cursor */
 #ifdef WAIT
 #undef WAIT
-#endif            /*WAIT */
-#define WAIT 5    /* wait a while cursor */
-#define MENU 6    /* menu cursor */
+#endif		  /*WAIT */
+#define WAIT 5	  /* wait a while cursor */
+#define MENU 6	  /* menu cursor */
 #define SELECT 7  /* dot cursor for f.move, etc. from menus */
 #define DESTROY 8 /* skull and cross bones, f.destroy */
 #define TOP 9
@@ -74,7 +74,7 @@
 #ifndef NON_VIRTUAL
 typedef struct {
 	Window win;
-	int isMapped;
+	int    isMapped;
 } PanFrame;
 #endif
 
@@ -135,7 +135,7 @@ typedef struct ButtonFace {
 		Pixel back;
 #ifdef GRADIENT_BUTTONS
 		struct {
-			int npixels;
+			int    npixels;
 			Pixel *pixels;
 		} grad;
 #endif
@@ -175,7 +175,7 @@ enum ButtonState {
 };
 
 typedef struct {
-	int flags;
+	int	   flags;
 	ButtonFace state[MaxButtonState];
 } TitleButton;
 
@@ -185,11 +185,11 @@ typedef struct FvwmDecor {
 #endif
 	ColorPair HiColors; /* standard fore/back colors */
 	ColorPair HiRelief;
-	GC HiReliefGC; /* GC for highlighted window relief */
-	GC HiShadowGC; /* GC for highlighted window shadow */
+	GC	  HiReliefGC; /* GC for highlighted window relief */
+	GC	  HiShadowGC; /* GC for highlighted window shadow */
 
-	int TitleHeight;   /* height of the title bar window */
-	MyFont WindowFont; /* font structure for window titles */
+	int    TitleHeight; /* height of the title bar window */
+	MyFont WindowFont;  /* font structure for window titles */
 
 	/* titlebar buttons */
 	TitleButton left_buttons[5];
@@ -207,16 +207,16 @@ typedef struct FvwmDecor {
 
 typedef struct ScreenInfo {
 	unsigned long screen;
-	int d_depth;         /* copy of DefaultDepth(dpy, screen) */
-	int NumberOfScreens; /* number of screens on display */
-	int MyDisplayWidth;  /* my copy of DisplayWidth(dpy, screen) */
+	int	      d_depth;	       /* copy of DefaultDepth(dpy, screen) */
+	int	      NumberOfScreens; /* number of screens on display */
+	int	      MyDisplayWidth; /* my copy of DisplayWidth(dpy, screen) */
 	int MyDisplayHeight; /* my copy of DisplayHeight(dpy, screen) */
 
-	FvwmWindow FvwmRoot; /* the head of the fvwm window list */
-	Window Root;         /* the root window */
-	Window SizeWindow;   /* the resize dimensions window */
-	Window NoFocusWin;   /* Window which will own focus when no other
-	                      * windows have it */
+	FvwmWindow FvwmRoot;   /* the head of the fvwm window list */
+	Window	   Root;       /* the root window */
+	Window	   SizeWindow; /* the resize dimensions window */
+	Window	   NoFocusWin; /* Window which will own focus when no other
+				* windows have it */
 #ifndef NON_VIRTUAL
 	PanFrame PanFrameTop, PanFrameLeft, PanFrameRight, PanFrameBottom;
 #endif
@@ -228,33 +228,33 @@ typedef struct ScreenInfo {
 
 	Binding *AllBindings;
 
-	int root_pushes;           /* current push level to install root
-	                                           colormap windows */
+	int root_pushes;	   /* current push level to install root
+						   colormap windows */
 	FvwmWindow *pushed_window; /* saved window to install when pushes drops
-	                                          to zero */
+						  to zero */
 	Cursor FvwmCursors[MAX_CURSORS];
 
-	name_list *TheList; /* list of window names with attributes */
-	char *DefaultIcon;  /* Icon to use when no other icons are found */
+	name_list *TheList;	/* list of window names with attributes */
+	char	  *DefaultIcon; /* Icon to use when no other icons are found */
 
 	ColorPair StdColors; /* standard fore/back colors */
 	ColorPair StdRelief;
 
 	MenuGlobals menus;
 
-	MyFont StdFont;  /* font structure */
+	MyFont StdFont;	 /* font structure */
 	MyFont IconFont; /* for icon labels */
 
 #if defined(PIXMAP_BUTTONS) || defined(GRADIENT_BUTTONS)
 	GC TransMaskGC; /* GC for transparency masks */
 #endif
-	GC StdGC;
-	GC StdReliefGC;
-	GC StdShadowGC;
-	GC DrawGC; /* GC to draw lines for move and resize */
-	GC ScratchGC1;
-	GC ScratchGC2;
-	GC ScratchGC3;
+	GC  StdGC;
+	GC  StdReliefGC;
+	GC  StdShadowGC;
+	GC  DrawGC; /* GC to draw lines for move and resize */
+	GC  ScratchGC1;
+	GC  ScratchGC2;
+	GC  ScratchGC3;
 	int SizeStringWidth; /* minimum width of size window */
 	int CornerWidth;     /* corner width for decoratedwindows */
 	int BoundaryWidth;   /* frame width for decorated windows */
@@ -265,42 +265,42 @@ typedef struct ScreenInfo {
 	int nr_left_buttons;  /* number of left-side title-bar buttons */
 	int nr_right_buttons; /* number of right-side title-bar buttons */
 
-	FvwmWindow *Hilite;       /* the fvwm window that is highlighted
-	                           * except for networking delays, this is the
-	                           * window which REALLY has the focus */
-	FvwmWindow *Focus;        /* Last window which Fvwm gave the focus to
-	                           * NOT the window that really has the focus */
+	FvwmWindow *Hilite;	  /* the fvwm window that is highlighted
+				   * except for networking delays, this is the
+				   * window which REALLY has the focus */
+	FvwmWindow *Focus;	  /* Last window which Fvwm gave the focus to
+				   * NOT the window that really has the focus */
 	Window UnknownWinFocused; /* None, if the focus is nowhere or on an fvwm
-	                           * managed window. Set to id of otherwindow
-	                           * with focus otherwise */
+				   * managed window. Set to id of otherwindow
+				   * with focus otherwise */
 	FvwmWindow *Ungrabbed;
 	FvwmWindow *PreviousFocus;  /* Window which had focus before fvwm stole
-	                             * it  to do moves/menus/etc. */
-	int EdgeScrollX;            /* #pixels to scroll on screen edge */
-	int EdgeScrollY;            /* #pixels to scroll on screen edge */
+				     * it  to do moves/menus/etc. */
+	int	      EdgeScrollX;  /* #pixels to scroll on screen edge */
+	int	      EdgeScrollY;  /* #pixels to scroll on screen edge */
 	unsigned char buttons2grab; /* buttons to grab in click to focus mode */
 	unsigned long flags;
-	int NumBoxes;
-	int randomx; /* values used for randomPlacement */
-	int randomy;
+	int	      NumBoxes;
+	int	      randomx; /* values used for randomPlacement */
+	int	      randomy;
 	FvwmWindow *LastWindowRaised; /* Last window which was raised. Used for
-	                               * raise lower func. */
+				       * raise lower func. */
 	int VxMax; /* Max location for top left of virt desk*/
 	int VyMax;
 	int Vx; /* Current loc for top left of virt desk */
 	int Vy;
 
-	int ClickTime;        /*Max button-click delay for Function built-in*/
+	int ClickTime;	      /*Max button-click delay for Function built-in*/
 	int ScrollResistance; /* resistance to scrolling in desktop */
 	int MoveResistance;   /* res to moving windows over viewport edge */
 	int SnapAttraction;   /* attractiveness of window edges */
-	int SnapMode;         /* mode of snap attraction */
-	int SnapGridX;        /* snap grid X size */
-	int SnapGridY;        /* snap grid Y size */
+	int SnapMode;	      /* mode of snap attraction */
+	int SnapGridX;	      /* snap grid X size */
+	int SnapGridY;	      /* snap grid Y size */
 	int OpaqueSize;
 	int CurrentDesk;   /* The current desktop number */
 	int ColormapFocus; /* colormap focus style */
-	int ColorLimit;    /* Limit on colors used in pixmaps */
+	int ColorLimit;	   /* Limit on colors used in pixmaps */
 
 	/*
 	** some additional global options which will probably become window
@@ -313,10 +313,13 @@ typedef struct ScreenInfo {
 	int StipledTitles;
 	struct {
 		unsigned int ModifyUSP:1; /* - RBW - 11/02/1998  */
-		unsigned int CaptureHonorsStartsOnPage:1; /* - RBW - 11/02/1998  */
-		unsigned int RecaptureHonorsStartsOnPage:1; /* - RBW - 11/02/1998  */
-		unsigned int ActivePlacementHonorsStartsOnPage:1; /* - RBW - 11/02/1998  */
-	} go;            /* global options */
+		unsigned int CaptureHonorsStartsOnPage
+		    :1; /* - RBW - 11/02/1998  */
+		unsigned int RecaptureHonorsStartsOnPage
+		    :1; /* - RBW - 11/02/1998  */
+		unsigned int ActivePlacementHonorsStartsOnPage
+		    :1; /* - RBW - 11/02/1998  */
+	} go;		/* global options */
 	struct {
 		unsigned int EmulateMWM:1;
 		unsigned int EmulateWIN:1;

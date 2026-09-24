@@ -5,14 +5,14 @@
 
 struct queue_buff_struct {
 	struct queue_buff_struct *next;
-	unsigned long *data;
-	int size;
-	int done;
+	unsigned long		 *data;
+	int			  size;
+	int			  done;
 };
 
-extern int npipes;
-extern int *readPipes;
-extern int *writePipes;
+extern int			  npipes;
+extern int			 *readPipes;
+extern int			 *writePipes;
 extern struct queue_buff_struct **pipeQueue;
 
 #define START_FLAG 0xffffffff

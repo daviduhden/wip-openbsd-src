@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <ctype.h>
 #include <grp.h>
@@ -46,8 +46,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * data structure for storing uid/grp selects (-U, -G non standard options)
@@ -57,12 +57,12 @@
 #define GRP_TB_SZ 317 /* user selection table size */
 
 typedef struct usrt {
-	uid_t uid;
+	uid_t	     uid;
 	struct usrt *fow; /* next uid */
 } USRT;
 
 typedef struct grpt {
-	gid_t gid;
+	gid_t	     gid;
 	struct grpt *fow; /* next gid */
 } GRPT;
 
@@ -70,20 +70,20 @@ typedef struct grpt {
  * data structure for storing user supplied time ranges (-T option)
  */
 
-#define ATOI2(ar)							\
-	((ar)[0] - '0') * 10 + ((ar)[1] - '0');				\
+#define ATOI2(ar)                                                              \
+	((ar)[0] - '0') * 10 + ((ar)[1] - '0');                                \
 	(ar) += 2;
 
 typedef struct time_rng {
-	time_t low_time;            /* lower inclusive time limit */
-	time_t high_time;           /* higher inclusive time limit */
-	int flgs;                   /* option flags */
-#define HASLOW 0x01                 /* has lower time limit */
-#define HASHIGH 0x02                /* has higher time limit */
-#define CMPMTME 0x04                /* compare file modification time */
-#define CMPCTME 0x08                /* compare inode change time */
+	time_t low_time;	    /* lower inclusive time limit */
+	time_t high_time;	    /* higher inclusive time limit */
+	int    flgs;		    /* option flags */
+#define HASLOW 0x01		    /* has lower time limit */
+#define HASHIGH 0x02		    /* has higher time limit */
+#define CMPMTME 0x04		    /* compare file modification time */
+#define CMPCTME 0x08		    /* compare inode change time */
 #define CMPBOTH (CMPMTME | CMPCTME) /* compare inode and mod time */
-	struct time_rng *fow;       /* next pattern */
+	struct time_rng *fow;	    /* next pattern */
 } TIME_RNG;
 
 static int str_sec(const char *, time_t *);
@@ -93,8 +93,8 @@ static int trng_match(ARCHD *);
 
 static TIME_RNG *trhead = NULL; /* time range list head */
 static TIME_RNG *trtail = NULL; /* time range list tail */
-static USRT **usrtb = NULL;     /* user selection table */
-static GRPT **grptb = NULL;     /* group selection table */
+static USRT    **usrtb = NULL;	/* user selection table */
+static GRPT    **grptb = NULL;	/* group selection table */
 
 /*
  * Routines for selection of archive members
@@ -351,10 +351,10 @@ int
 trng_add(char *str)
 {
 	TIME_RNG *pt;
-	char *up_pt = NULL;
-	char *stpt;
-	char *flgpt;
-	int dot = 0;
+	char	 *up_pt = NULL;
+	char	 *stpt;
+	char	 *flgpt;
+	int	  dot = 0;
 
 	/*
 	 * throw out the badly formed time ranges
@@ -507,11 +507,11 @@ trng_match(ARCHD *arcn)
 			 * time range
 			 */
 			if (((pt->flgs & HASLOW) &&
-			    (arcn->sb.st_mtime < pt->low_time) &&
-			    (arcn->sb.st_ctime < pt->low_time)) ||
+				(arcn->sb.st_mtime < pt->low_time) &&
+				(arcn->sb.st_ctime < pt->low_time)) ||
 			    ((pt->flgs & HASHIGH) &&
-			     (arcn->sb.st_mtime > pt->high_time) &&
-			     (arcn->sb.st_ctime > pt->high_time))) {
+				(arcn->sb.st_mtime > pt->high_time) &&
+				(arcn->sb.st_ctime > pt->high_time))) {
 				pt = pt->fow;
 				continue;
 			}
@@ -521,9 +521,9 @@ trng_match(ARCHD *arcn)
 			 * user wants only ctime checked for this time range
 			 */
 			if (((pt->flgs & HASLOW) &&
-			    (arcn->sb.st_ctime < pt->low_time)) ||
+				(arcn->sb.st_ctime < pt->low_time)) ||
 			    ((pt->flgs & HASHIGH) &&
-			     (arcn->sb.st_ctime > pt->high_time))) {
+				(arcn->sb.st_ctime > pt->high_time))) {
 				pt = pt->fow;
 				continue;
 			}
@@ -534,9 +534,9 @@ trng_match(ARCHD *arcn)
 			 * user wants only mtime checked for this time range
 			 */
 			if (((pt->flgs & HASLOW) &&
-			    (arcn->sb.st_mtime < pt->low_time)) ||
+				(arcn->sb.st_mtime < pt->low_time)) ||
 			    ((pt->flgs & HASHIGH) &&
-			     (arcn->sb.st_mtime > pt->high_time))) {
+				(arcn->sb.st_mtime > pt->high_time))) {
 				pt = pt->fow;
 				continue;
 			}
@@ -561,11 +561,11 @@ trng_match(ARCHD *arcn)
 static int
 str_sec(const char *p, time_t *tval)
 {
-	struct tm *lt;
+	struct tm  *lt;
 	const char *dot, *t;
-	size_t len;
-	int bigyear;
-	int yearset;
+	size_t	    len;
+	int	    bigyear;
+	int	    yearset;
 
 	yearset = 0;
 	len = strlen(p);
@@ -613,8 +613,8 @@ str_sec(const char *p, time_t *tval)
 		if ((lt->tm_mon > 12) || !lt->tm_mon)
 			return (-1);
 		--lt->tm_mon; /* time struct is 0 - 11 */
-			      [[fallthrough]];
-	case 6:               /* dd */
+		[[fallthrough]];
+	case 6: /* dd */
 		lt->tm_mday = ATOI2(p);
 		if ((lt->tm_mday > 31) || !lt->tm_mday)
 			return (-1);

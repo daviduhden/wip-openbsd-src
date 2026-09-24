@@ -54,7 +54,7 @@
 static void
 strDel(char *s, int idx, int n)
 {
-	int l;
+	int   l;
 	char *p;
 
 	if (idx >= (l = strlen(s)))
@@ -89,7 +89,7 @@ strDel(char *s, int idx, int n)
 static void
 strIns(char *s, const char *ins, int idx, int maxstrlen)
 {
-	int l, li, move;
+	int   l, li, move;
 	char *p1, *p2;
 
 	if (idx > (l = strlen(s)))
@@ -139,8 +139,8 @@ strIns(char *s, const char *ins, int idx, int maxstrlen)
 static char *
 findEnvVar(const char *s, int *len)
 {
-	int brace = 0;
-	char *ret = NULL;
+	int	    brace = 0;
+	char	   *ret = NULL;
 	const char *next;
 
 	if (!s)
@@ -149,14 +149,13 @@ findEnvVar(const char *s, int *len)
 		next = s + 1;
 		if (*s == '$' &&
 		    (isalpha((unsigned char)*next) || *next == '_' ||
-		     *next == '{')) {
+			*next == '{')) {
 			ret = (char *)s++;
 			if (*s == '{') {
 				brace = 1;
 				++s;
 			}
-			while (*s &&
-			    (isalnum((unsigned char)*s) || *s == '_'))
+			while (*s && (isalnum((unsigned char)*s) || *s == '_'))
 				++s;
 			*len = s - ret;
 			if (brace) {
@@ -189,7 +188,7 @@ static const char *
 getEnv(const char *name)
 {
 	static char *empty = "";
-	char *ret, *tmp, *p, *p2;
+	char	    *ret, *tmp, *p, *p2;
 
 	if ((tmp = strdup(name)) == NULL)
 		return empty; /* better than no test at all. */
@@ -236,9 +235,9 @@ getEnv(const char *name)
 int
 envExpand(char *s, int maxstrlen)
 {
-	char *var, *s2, save;
+	char	   *var, *s2, save;
 	const char *env;
-	int len, ret = 0;
+	int	    len, ret = 0;
 
 	s2 = s;
 	while ((var = findEnvVar(s2, &len)) != NULL) {
@@ -281,9 +280,9 @@ envExpand(char *s, int maxstrlen)
 char *
 envDupExpand(const char *s, int extra)
 {
-	char *var, *ret, save;
+	char	   *var, *ret, save;
 	const char *env, *s2;
-	int len, slen, elen, bufflen;
+	int	    len, slen, elen, bufflen;
 
 	/*
 	 *  calculate length needed.

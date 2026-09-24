@@ -18,23 +18,23 @@
 
 char *PeekArgument(const char *pstr);
 char *GetArgument(char **pstr);
-int CmpArgument(const char *pstr, char *tok);
-int MatchArgument(const char *pstr, char *tok);
+int   CmpArgument(const char *pstr, char *tok);
+int   MatchArgument(const char *pstr, char *tok);
 #define NukeArgument(pstr) free(GetArgument(pstr))
 
 /*
    function:		FindToken
    description:		find the entry of type 'struct_entry'
-                        holding 'key' in 'table'
+			holding 'key' in 'table'
    returns:		pointer to the matching entry
-                        NULL if not found
+			NULL if not found
 
    table must be sorted in ascending order for FindToken.
 */
 
-#define FindToken(key, table, struct_entry)				\
-	(struct_entry *)bsearch(key, (char *)(table),			\
-	    sizeof(table) / sizeof(struct_entry), sizeof(struct_entry),	\
+#define FindToken(key, table, struct_entry)                                    \
+	(struct_entry *)bsearch(key, (char *)(table),                          \
+	    sizeof(table) / sizeof(struct_entry), sizeof(struct_entry),        \
 	    XCmpToken)
 
 int XCmpToken(const void *s, const void *t);

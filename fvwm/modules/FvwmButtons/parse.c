@@ -27,10 +27,10 @@
 */
 
 #include "FvwmButtons.h"
-#include "parse.h"
 #include "button.h"
+#include "parse.h"
 
-extern int w, h, x, y, xneg, yneg; /* used in ParseConfigLine */
+extern int   w, h, x, y, xneg, yneg; /* used in ParseConfigLine */
 extern char *config_file;
 
 /* contains the character that terminated the last string from seekright */
@@ -83,7 +83,7 @@ seekright_command(char **s)
 
 		size_t len_command = strlen(command);
 		size_t len_next = strlen(next);
-		char *combined = xmalloc(len_command + len_next + 2);
+		char  *combined = xmalloc(len_command + len_next + 2);
 
 		memcpy(combined, command, len_command);
 		combined[len_command] = ' ';
@@ -106,7 +106,7 @@ ParseBack(char **ss)
 {
 	char *opts[] = {"icon", NULL};
 	char *t, *s = *ss;
-	int r = 0;
+	int   r = 0;
 
 	while (*s && *s != ')') {
 		s = trimleft(s);
@@ -144,7 +144,7 @@ ParseBoxSize(char **ss, unsigned long *flags)
 {
 	char *opts[] = {"dumb", "fixed", "smart", NULL};
 	char *s = *ss;
-	int m;
+	int   m;
 
 	if (!s)
 		return;
@@ -226,8 +226,8 @@ static void
 ParseSwallow(char **ss, byte *flags, byte *mask)
 {
 	char *swallowopts[] = {"nohints", "hints", "nokill", "kill", "noclose",
-		"close", "respawn", "norespawn", "useold", "noold", "usetitle",
-		"notitle", NULL};
+	    "close", "respawn", "norespawn", "useold", "noold", "usetitle",
+	    "notitle", NULL};
 	char *t, *s = *ss;
 
 	while (*s && *s != ')') {
@@ -306,9 +306,9 @@ static void
 ParseContainer(char **ss, button_info *b)
 {
 	char *conts[] = {"columns", "rows", "font", "frame", "back", "fore",
-		"padding", "title", "swallow", "nosize", "size", "boxsize", NULL};
+	    "padding", "title", "swallow", "nosize", "size", "boxsize", NULL};
 	char *t, *o, *s = *ss;
-	int i, j;
+	int   i, j;
 
 	while (*s && *s != ')') {
 		s = trimleft(s);
@@ -463,25 +463,25 @@ static void
 match_string(button_info **uberb, char *s)
 {
 	button_info *b, *ub = *uberb;
-	int i, j;
-	char *t, *o;
+	int	     i, j;
+	char	    *t, *o;
 	b = alloc_button(ub, (ub->c->num_buttons)++);
 	s = trimleft(s);
 
 	if (*s == '(' && s++) {
 		char *opts[] = {"back", "fore", "font", "title", "icon",
-			"frame", "padding", "swallow", "action", "container", "end",
-			"nosize", "size", "panel", "left", "right", "center", NULL};
+		    "frame", "padding", "swallow", "action", "container", "end",
+		    "nosize", "size", "panel", "left", "right", "center", NULL};
 		s = trimleft(s);
 		while (*s && *s != ')') {
 			if ((*s >= '0' && *s <= '9') || *s == '+' ||
 			    *s == '-') {
 				char *geom;
-				int x, y, w, h, flags;
+				int   x, y, w, h, flags;
 				geom = seekright(&s);
 				if (geom) {
-					flags = XParseGeometry(
-					    geom, &x, &y, (unsigned int *)&w,
+					flags = XParseGeometry(geom, &x, &y,
+					    (unsigned int *)&w,
 					    (unsigned int *)&h);
 					if (flags & WidthValue)
 						b->BWidth = w;
@@ -650,16 +650,16 @@ match_string(button_info **uberb, char *s)
 					if (!(b->swallow & b_NoHints))
 						b->hints =
 						    (XSizeHints *)xmalloc(
-						    sizeof(XSizeHints));
+							sizeof(XSizeHints));
 					if (o) {
 						if (!(buttonSwallow(b) &
-						    b_UseOld))
+							b_UseOld))
 							SendText(fd, o, 0);
 						if (b->spawn)
 							free(b->spawn);
 						b->spawn =
 						    o; /* Might be needed if
-						          respawning sometime */
+							  respawning sometime */
 					}
 				} else {
 					fprintf(stderr,
@@ -769,7 +769,7 @@ match_string(button_info **uberb, char *s)
 					else if (strncasecmp(t, "down", 4) == 0)
 						t = "panel-d";
 					else if (strncasecmp(
-					    t, "geometry", 8) == 0)
+						     t, "geometry", 8) == 0)
 						t = "panel-g";
 					else
 						t = "panel-u";
@@ -779,8 +779,8 @@ match_string(button_info **uberb, char *s)
 
 				b->IconWin = None;
 				t = seekright(&s);
-				b->hangon =
-				    (t) ? t :
+				b->hangon = (t) ?
+				    t :
 				    strdup(""); /* which panel to popup */
 				break;
 
@@ -889,15 +889,15 @@ static void
 ParseConfigLine(button_info **ubb, char *s)
 {
 	button_info *ub = *ubb;
-	char *opts[] = {"geometry", "font", "padding", "columns", "rows",
-		"back", "fore", "frame", "file", "pixmap", "panel", "boxsize",
-		NULL};
-	int i, j, k;
+	char	    *opts[] = {"geometry", "font", "padding", "columns", "rows",
+	    "back", "fore", "frame", "file", "pixmap", "panel", "boxsize",
+	    NULL};
+	int	     i, j, k;
 
 	switch (GetTokenIndex(s, opts, -1, &s)) {
 	case 0: /* Geometry */ {
-		char geom[64];
-		int flags, g_x, g_y;
+		char	     geom[64];
+		int	     flags, g_x, g_y;
 		unsigned int width, height;
 		i = sscanf(s, "%63s", geom);
 		if (i == 1) {
@@ -1014,9 +1014,9 @@ ParseConfigLine(button_info **ubb, char *s)
 static void
 ParseConfigFile(button_info *ub)
 {
-	char s[1024], *t;
+	char  s[1024], *t;
 	FILE *f = fopen(config_file, "r");
-	int l;
+	int   l;
 	if (!f) {
 		fprintf(stderr, "%s: Couldn't open config file %s\n", MyName,
 		    config_file);

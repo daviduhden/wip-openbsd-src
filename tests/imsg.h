@@ -10,6 +10,7 @@
 #define STUB_IMSG_H
 
 #include <sys/types.h>
+
 #include <stdint.h>
 
 struct imsghdr {
@@ -24,21 +25,21 @@ struct imsghdr {
 
 struct imsg {
 	struct imsghdr hdr;
-	int fd;
-	void *data;
+	int	       fd;
+	void	      *data;
 };
 
 struct imsgbuf {
 	int fd;
 };
 
-int	 imsgbuf_init(struct imsgbuf *, int);
-int	 imsgbuf_read(struct imsgbuf *);
-int	 imsgbuf_flush(struct imsgbuf *);
-void	 imsgbuf_clear(struct imsgbuf *);
-int	 imsgbuf_get(struct imsgbuf *, struct imsg *);
-int	 imsg_compose(struct imsgbuf *, uint32_t, uint32_t, pid_t, int,
-    const void *, uint16_t);
-void	 imsg_free(struct imsg *);
+int  imsgbuf_init(struct imsgbuf *, int);
+int  imsgbuf_read(struct imsgbuf *);
+int  imsgbuf_flush(struct imsgbuf *);
+void imsgbuf_clear(struct imsgbuf *);
+int  imsgbuf_get(struct imsgbuf *, struct imsg *);
+int  imsg_compose(
+    struct imsgbuf *, uint32_t, uint32_t, pid_t, int, const void *, uint16_t);
+void imsg_free(struct imsg *);
 
 #endif

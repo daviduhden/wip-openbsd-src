@@ -35,24 +35,24 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * data structure for storing user supplied replacement strings (-s)
  */
 typedef struct replace {
-	char *nstr;   /* the new string we will substitute with */
+	char   *nstr; /* the new string we will substitute with */
 	regex_t rcmp; /* compiled regular expression used to match */
-	int flgs;     /* print conversions? global in operation?  */
+	int	flgs; /* print conversions? global in operation?  */
 #define PRNT 0x1
 #define GLOB 0x2
 	struct replace *fow; /* pointer to next pattern */
@@ -65,18 +65,18 @@ typedef struct replace {
  * routines.
  */
 
-#define MAXSUBEXP 10            /* max subexpressions, DO NOT CHANGE */
+#define MAXSUBEXP 10		/* max subexpressions, DO NOT CHANGE */
 static PATTERN *pathead = NULL; /* file pattern match list head */
 static PATTERN *pattail = NULL; /* file pattern match list tail */
 static REPLACE *rephead = NULL; /* replacement string list head */
 static REPLACE *reptail = NULL; /* replacement string list tail */
 
-static int rep_name(char *, size_t, int *, int);
-static int tty_rename(ARCHD *);
-static int fix_path(char *, int *, char *, int);
-static int fn_match(char *, char *, char **);
+static int   rep_name(char *, size_t, int *, int);
+static int   tty_rename(ARCHD *);
+static int   fix_path(char *, int *, char *, int);
+static int   fn_match(char *, char *, char **);
 static char *range_match(char *, int);
-static int resub(regex_t *, regmatch_t *, char *, char *, char *, char *);
+static int   resub(regex_t *, regmatch_t *, char *, char *, char *, char *);
 
 /*
  * rep_add()
@@ -97,11 +97,11 @@ static int resub(regex_t *, regmatch_t *, char *, char *, char *, char *);
 int
 rep_add(char *str)
 {
-	char *pt1;
-	char *pt2;
+	char	*pt1;
+	char	*pt2;
 	REPLACE *rep;
-	int res;
-	char rebuf[BUFSIZ];
+	int	 res;
+	char	 rebuf[BUFSIZ];
 
 	/*
 	 * throw out the bad parameters
@@ -268,7 +268,7 @@ void
 pat_chk(void)
 {
 	PATTERN *pt;
-	int wban = 0;
+	int	 wban = 0;
 
 	/*
 	 * walk down the list checking the flags to make sure MTCH was set,
@@ -304,9 +304,9 @@ pat_chk(void)
 int
 pat_sel(ARCHD *arcn)
 {
-	PATTERN *pt;
+	PATTERN	 *pt;
 	PATTERN **ppt;
-	size_t len;
+	size_t	  len;
 
 	/*
 	 * if no patterns just return
@@ -573,8 +573,8 @@ range_match(char *pattern, int test)
 {
 	char c;
 	char c2;
-	int negate;
-	int ok = 0;
+	int  negate;
+	int  ok = 0;
 
 	if ((negate = (*pattern == '!')) != 0)
 		++pattern;
@@ -649,7 +649,8 @@ mod_name(ARCHD *arcn)
 		}
 		if (rmleadslash < 2) {
 			rmleadslash = 2;
-			paxwarn(0, "Removing leading / from absolute path "
+			paxwarn(0,
+			    "Removing leading / from absolute path "
 			    "names in the archive");
 		}
 	}
@@ -664,7 +665,8 @@ mod_name(ARCHD *arcn)
 		}
 		if (rmleadslash < 2) {
 			rmleadslash = 2;
-			paxwarn(0, "Removing leading / from absolute path "
+			paxwarn(0,
+			    "Removing leading / from absolute path "
 			    "names in the archive");
 		}
 	}
@@ -719,12 +721,12 @@ mod_name(ARCHD *arcn)
 		 * name if any.
 		 */
 		if ((res = rep_name(arcn->name, sizeof(arcn->name),
-		    &(arcn->nlen), 1)) != 0)
+			 &(arcn->nlen), 1)) != 0)
 			return (res);
 
 		if (PAX_IS_LINK(arcn->type)) {
 			if ((res = rep_name(arcn->ln_name,
-			    sizeof(arcn->ln_name), &(arcn->ln_nlen), 0)) !=
+				 sizeof(arcn->ln_name), &(arcn->ln_nlen), 0)) !=
 			    0)
 				return (res);
 		}
@@ -762,7 +764,7 @@ static int
 tty_rename(ARCHD *arcn)
 {
 	char tmpname[PAXPATHLEN + 2];
-	int res;
+	int  res;
 
 	/*
 	 * question user for the replacement name for a file, keep trying until
@@ -858,7 +860,7 @@ fix_path(char *or_name, int *or_len, char *dir_name, int dir_len)
 	char *src;
 	char *dest;
 	char *start;
-	int len;
+	int   len;
 
 	/*
 	 * we shift the or_name to the right enough to tack in the dir_name
@@ -919,16 +921,16 @@ fix_path(char *or_name, int *or_len, char *dir_name, int dir_len)
 static int
 rep_name(char *name, size_t nsize, int *nlen, int prnt)
 {
-	REPLACE *pt;
-	char *inpt;
-	char *outpt;
-	char *endpt;
-	char *rpt;
-	int found = 0;
-	int res;
+	REPLACE	  *pt;
+	char	  *inpt;
+	char	  *outpt;
+	char	  *endpt;
+	char	  *rpt;
+	int	   found = 0;
+	int	   res;
 	regmatch_t pm[MAXSUBEXP];
-	char nname[PAXPATHLEN + 1]; /* final result of all replacements */
-	char buf1[PAXPATHLEN + 1];  /* where we work on the name */
+	char	   nname[PAXPATHLEN + 1]; /* final result of all replacements */
+	char	   buf1[PAXPATHLEN + 1];  /* where we work on the name */
 
 	/*
 	 * copy the name into buf1, where we will work on it. We need to keep
@@ -979,7 +981,7 @@ rep_name(char *name, size_t nsize, int *nlen, int prnt)
 			 * final output. If we have problems, skip it.
 			 */
 			if ((res = resub(&(pt->rcmp), pm, pt->nstr, oinpt,
-			    outpt, endpt)) < 0) {
+				 outpt, endpt)) < 0) {
 				if (prnt)
 					paxwarn(1, "Replacement name error %s",
 					    name);
@@ -1068,12 +1070,12 @@ static int
 resub(regex_t *rp, regmatch_t *pm, char *src, char *inpt, char *dest,
     char *destend)
 {
-	char *spt;
-	char *dpt;
-	char c;
+	char	   *spt;
+	char	   *dpt;
+	char	    c;
 	regmatch_t *pmpt;
-	int len;
-	int subexcnt;
+	int	    len;
+	int	    subexcnt;
 
 	spt = src;
 	dpt = dest;

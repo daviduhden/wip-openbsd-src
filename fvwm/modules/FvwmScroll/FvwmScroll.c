@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -40,15 +40,15 @@
 #include "FvwmScroll.h"
 
 char *MyName;
-int fd_width;
-int fd[2];
+int   fd_width;
+int   fd[2];
 
 Display *dpy; /* which display are we talking to */
-Window Root;
-int screen;
-int x_fd;
-int d_depth;
-int ScreenWidth, ScreenHeight;
+Window	 Root;
+int	 screen;
+int	 x_fd;
+int	 d_depth;
+int	 ScreenWidth, ScreenHeight;
 
 char *BackColor = "black";
 
@@ -67,7 +67,7 @@ main(int argc, char **argv)
 {
 	char *temp, *s;
 	char *display_name = NULL;
-	int Clength;
+	int   Clength;
 	char *tline;
 
 	/* Save the program name for error messages and config parsing */
@@ -129,7 +129,7 @@ main(int argc, char **argv)
 	while (tline != (char *)0) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline, CatString3(MyName, "Back", ""),
-			    Clength + 4) == 0) {
+				Clength + 4) == 0) {
 				CopyString(&BackColor, &tline[Clength + 4]);
 			}
 		}
@@ -181,7 +181,7 @@ void
 GetTargetWindow(Window *app_win)
 {
 	XEvent eventp;
-	int val = -10, trials;
+	int    val = -10, trials;
 	Window target_win;
 
 	trials = 0;
@@ -224,20 +224,20 @@ nocolor(char *a, char *b)
 Window
 ClientWindow(Window input)
 {
-	Atom _XA_WM_STATE;
-	unsigned int nchildren;
-	Window root, parent, *children, target;
-	unsigned long nitems, bytesafter;
+	Atom	       _XA_WM_STATE;
+	unsigned int   nchildren;
+	Window	       root, parent, *children, target;
+	unsigned long  nitems, bytesafter;
 	unsigned char *prop;
-	Atom atype;
-	int aformat;
-	int i;
+	Atom	       atype;
+	int	       aformat;
+	int	       i;
 
 	_XA_WM_STATE = XInternAtom(dpy, "WM_STATE", False);
 
 	if (XGetWindowProperty(dpy, input, _XA_WM_STATE, 0L, 3L, False,
-	    _XA_WM_STATE, &atype, &aformat, &nitems, &bytesafter,
-	    &prop) == Success) {
+		_XA_WM_STATE, &atype, &aformat, &nitems, &bytesafter,
+		&prop) == Success) {
 		if (prop != NULL) {
 			XFree(prop);
 			return input;

@@ -14,9 +14,6 @@
 #define ALL 2
 #define PROP_SIZE 1024
 
-#include "config.h"
-#include "../../fvwm/fvwm_sandbox.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -24,6 +21,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../../fvwm/fvwm_sandbox.h"
+#include "config.h"
 
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -43,11 +43,11 @@
 #include "FvwmTalk.h"
 
 char *MyName;
-int fd_width, screen, d_depth;
-int fd[2];
+int   fd_width, screen, d_depth;
+int   fd[2];
 
-int x_fd;
-Window Root;
+int	 x_fd;
+Window	 Root;
 Display *dpy;
 /* char *font_string = "helvetica"; */
 char *font_string = "fixed";
@@ -55,36 +55,36 @@ char *ForeColor = "green";
 char *BackColor = "black";
 char *display_name = NULL;
 
-XFontStruct *font;
-Pixel fore_pix, back_pix;
-static Atom wm_del_win;
-unsigned long valuemask;
+XFontStruct	    *font;
+Pixel		     fore_pix, back_pix;
+static Atom	     wm_del_win;
+unsigned long	     valuemask;
 XSetWindowAttributes attributes;
-XWMHints wmhints;
-Window window;
-char last_error[256], previous_line[256];
-char Text[256];
-int pos = 0;
+XWMHints	     wmhints;
+Window		     window;
+char		     last_error[256], previous_line[256];
+char		     Text[256];
+int		     pos = 0;
 
 XSizeHints sizehints = {
-	(PMinSize | PResizeInc | PBaseSize | PWinGravity | PMaxSize), 0, 0, 100,
-	100,               /* x, y, width and height */
-	1, 1,              /* Min width and height */
-	0, 0,              /* Max width and height */
-	1, 1,              /* Width and height increments */
-	{0, 0}, {0, 0},    /* Aspect ratio - not used */
-	1, 1,              /* base size */
-	(NorthWestGravity) /* gravity */
+    (PMinSize | PResizeInc | PBaseSize | PWinGravity | PMaxSize), 0, 0, 100,
+    100,	       /* x, y, width and height */
+    1, 1,	       /* Min width and height */
+    0, 0,	       /* Max width and height */
+    1, 1,	       /* Width and height increments */
+    {0, 0}, {0, 0},    /* Aspect ratio - not used */
+    1, 1,	       /* base size */
+    (NorthWestGravity) /* gravity */
 };
 
-Pixel GetColor(char *name);
-void nocolor(char *a, char *b);
+Pixel	  GetColor(char *name);
+void	  nocolor(char *a, char *b);
 XGCValues gcv;
-GC myGC;
-int My_XNextEvent(Display *dpy, XEvent *event);
-void DrawWindow(int mode);
-void paste_primary(int window, int property, int Delete);
-void request_selection(int time);
+GC	  myGC;
+int	  My_XNextEvent(Display *dpy, XEvent *event);
+void	  DrawWindow(int mode);
+void	  paste_primary(int window, int property, int Delete);
+void	  request_selection(int time);
 
 /***********************************************************************
  *
@@ -95,9 +95,9 @@ void request_selection(int time);
 int
 main(int argc, char **argv)
 {
-	char *temp, *s;
-	XWMHints wm_hints;
-	XClassHint class_hints;
+	char	     *temp, *s;
+	XWMHints      wm_hints;
+	XClassHint    class_hints;
 	XTextProperty window_name;
 
 	/* Save the program name - its used for error messages and option
@@ -216,11 +216,11 @@ main(int argc, char **argv)
 void
 Loop(int *fd)
 {
-	KeySym keysym;
+	KeySym		      keysym;
 	static XComposeStatus compose = {NULL, 0};
-	XEvent event;
-	char kbuf[100];
-	int count;
+	XEvent		      event;
+	char		      kbuf[100];
+	int		      count;
 
 	pos = 0;
 	Text[0] = 0;
@@ -267,7 +267,8 @@ Loop(int *fd)
 				break;
 			case ClientMessage:
 				if ((event.xclient.format == 32) &&
-				    ((Atom)event.xclient.data.l[0] == wm_del_win)) {
+				    ((Atom)event.xclient.data.l[0] ==
+					wm_del_win)) {
 					exit(0);
 				}
 				break;
@@ -303,7 +304,7 @@ DeadPipe(int nonsense)
 Pixel
 GetColor(char *name)
 {
-	XColor color;
+	XColor		  color;
 	XWindowAttributes attributes;
 
 	XGetWindowAttributes(dpy, Root, &attributes);
@@ -330,10 +331,10 @@ nocolor(char *a, char *b)
 int
 My_XNextEvent(Display *dpy, XEvent *event)
 {
-	fd_set in_fdset;
-	unsigned long header[HEADER_SIZE];
-	int count;
-	static int miss_counter = 0;
+	fd_set	       in_fdset;
+	unsigned long  header[HEADER_SIZE];
+	int	       count;
+	static int     miss_counter = 0;
 	unsigned long *body;
 
 	if (XPending(dpy)) {
@@ -392,9 +393,9 @@ request_selection(int time)
 void
 paste_primary(int window, int property, int Delete)
 {
-	Atom actual_type;
-	int actual_format, i;
-	unsigned long nitems, bytes_after, nread;
+	Atom	       actual_type;
+	int	       actual_format, i;
+	unsigned long  nitems, bytes_after, nread;
 	unsigned char *data, *data2;
 
 	if (property == None)
@@ -403,9 +404,9 @@ paste_primary(int window, int property, int Delete)
 	nread = 0;
 	do {
 		if (XGetWindowProperty(dpy, window, property, nread / 4,
-		    PROP_SIZE, Delete, AnyPropertyType, &actual_type,
-		    &actual_format, &nitems, &bytes_after,
-		    (unsigned char **)&data) != Success)
+			PROP_SIZE, Delete, AnyPropertyType, &actual_type,
+			&actual_format, &nitems, &bytes_after,
+			(unsigned char **)&data) != Success)
 			return;
 		if (actual_type != XA_STRING)
 			return;
@@ -453,5 +454,5 @@ DrawWindow(int mode)
 	XDrawLine(dpy, window, myGC, 4 + w,
 	    2 * (font->ascent + font->descent + 2) + 2, 4 + w,
 	    2 * (font->ascent + font->descent + 2) + font->ascent +
-	    font->descent);
+		font->descent);
 }

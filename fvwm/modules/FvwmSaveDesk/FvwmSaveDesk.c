@@ -22,8 +22,6 @@
 #define TRUE 1
 #define FALSE 0
 
-#include "FvwmSaveDesk.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -40,18 +38,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../../fvwm/module.h"
-#include "config.h"
 #include "../../fvwm/fvwm_sandbox.h"
+#include "../../fvwm/module.h"
+#include "FvwmSaveDesk.h"
+#include "config.h"
 
 char *MyName;
-int fd[2];
+int   fd[2];
 
 struct list *list_root = NULL;
 
 Display *dpy; /* which display are we talking to */
-int ScreenWidth, ScreenHeight;
-int screen;
+int	 ScreenWidth, ScreenHeight;
+int	 screen;
 
 long Vx, Vy;
 
@@ -123,7 +122,7 @@ void
 Loop(int *fd)
 {
 	unsigned long header[HEADER_SIZE], *body;
-	int count;
+	int	      count;
 
 	unveil_home_write("FvwmSaveDesk");
 	unveil(NULL, NULL);
@@ -161,8 +160,7 @@ process_message(unsigned long type, unsigned long *body)
 			l->name = (char *)xmalloc(name_len + 1);
 			strlcpy(l->name, (char *)&body[3], name_len + 1);
 		}
-	}
-		break;
+	} break;
 	case M_NEW_PAGE:
 		list_new_page(body);
 		break;
@@ -299,11 +297,11 @@ static void
 do_save_command(
     FILE *out, struct list *t, int *curdesk, int emit_wait, int *isfirstline)
 {
-	char tname[200], loc[30];
+	char   tname[200], loc[30];
 	char **command_list;
-	int dwidth, dheight, xtermline = 0;
-	int x1, x2, y1, y2, i, command_count;
-	long tVx, tVy;
+	int    dwidth, dheight, xtermline = 0;
+	int    x1, x2, y1, y2, i, command_count;
+	long   tVx, tVy;
 
 	tname[0] = 0;
 
@@ -414,12 +412,12 @@ void
 do_save(void)
 {
 	struct list *t;
-	char fnbuf[200];
-	FILE *out;
-	int maxdesk = 0;
-	int actdesk = -1;
-	int curdesk;
-	int isfirstline = 1;
+	char	     fnbuf[200];
+	FILE	    *out;
+	int	     maxdesk = 0;
+	int	     actdesk = -1;
+	int	     curdesk;
+	int	     isfirstline = 1;
 
 	for (t = list_root; t != NULL; t = t->next)
 		if (t->desk > maxdesk)
@@ -429,8 +427,8 @@ do_save(void)
 	    getenv("HOME") ? getenv("HOME") : ".");
 	out = fopen(fnbuf, "w");
 	if (out == NULL) {
-		fprintf(stderr, "%s: couldn't open %s for writing\n",
-		    MyName, fnbuf);
+		fprintf(stderr, "%s: couldn't open %s for writing\n", MyName,
+		    fnbuf);
 		return;
 	}
 

@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <ctype.h>
 #include <grp.h>
@@ -52,15 +52,15 @@
 #include <utmp.h>
 #include <vis.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 
 /*
  * a collection of general purpose subroutines used by pax
  */
 
 /* Accumulated format string for -o listopt=. */
-static char *listopt_format;
+static char  *listopt_format;
 static size_t listopt_len;
 
 /* Scratch context tracking dynamically duplicated strings. */
@@ -107,7 +107,7 @@ listopt_ctx_free(struct listopt_ctx *ctx)
 static const char *
 listopt_store(struct listopt_ctx *ctx, const char *str)
 {
-	char *dup;
+	char  *dup;
 	char **tmp;
 
 	if (str == NULL)
@@ -145,7 +145,7 @@ listopt_parse_spec(
 	while (*p != '\0') {
 		if (*p == '(') {
 			const char *start = ++p;
-			size_t len;
+			size_t	    len;
 
 			while (*p != '\0' && *p != ')')
 				p++;
@@ -216,7 +216,7 @@ listopt_parse_spec(
 				p++;
 				/* Support double h/l modifiers */
 				if ((spec->length[0] == 'h' ||
-				    spec->length[0] == 'l') &&
+					spec->length[0] == 'l') &&
 				    spec->length[1] == '\0' &&
 				    (*p == spec->length[0])) {
 					if (strlen(spec->length) + 1 <
@@ -254,7 +254,7 @@ listopt_keyword_string(
     struct listopt_ctx *ctx, ARCHD *arcn, const char *keyword)
 {
 	const char *val;
-	char *dup;
+	char	   *dup;
 
 	if (keyword == NULL || *keyword == '\0' || strcmp(keyword, "path") == 0)
 		return arcn->name;
@@ -293,7 +293,7 @@ listopt_keyword_time(struct listopt_ctx *ctx, ARCHD *arcn, const char *keyword,
 {
 	(void)ctx;
 	const char *val;
-	char *end;
+	char	   *end;
 
 	if (keyword == NULL || *keyword == '\0' ||
 	    strcmp(keyword, "mtime") == 0) {
@@ -317,7 +317,7 @@ listopt_keyword_time(struct listopt_ctx *ctx, ARCHD *arcn, const char *keyword,
 		return -1;
 	if (*end == '.') {
 		long nsec = 0;
-		int digits = 0;
+		int  digits = 0;
 		for (end++; *end && isdigit((unsigned char)*end) && digits < 9;
 		    end++, digits++)
 			nsec = nsec * 10 + (*end - '0');
@@ -333,7 +333,7 @@ static int
 listopt_keyword_sll(ARCHD *arcn, const char *keyword, long long *out)
 {
 	const char *val;
-	char *end;
+	char	   *end;
 
 	if (keyword == NULL)
 		return -1;
@@ -367,7 +367,7 @@ static int
 listopt_keyword_ull(ARCHD *arcn, const char *keyword, unsigned long long *out)
 {
 	const char *val;
-	char *end;
+	char	   *end;
 
 	if (keyword == NULL)
 		return -1;
@@ -414,10 +414,10 @@ void
 ls_list(ARCHD *arcn, time_t now, FILE *fp)
 {
 	struct stat *sbp;
-	struct tm *tm;
-	char f_mode[MODELEN];
-	char f_date[DATELEN];
-	int term;
+	struct tm   *tm;
+	char	     f_mode[MODELEN];
+	char	     f_date[DATELEN];
+	int	     term;
 
 	term = zeroflag ? '\0' : '\n'; /* path termination character */
 
@@ -453,7 +453,7 @@ ls_list(ARCHD *arcn, time_t now, FILE *fp)
 	if ((tm = localtime(&(sbp->st_mtime))) == NULL)
 		f_date[0] = '\0';
 	else if (strftime(f_date, sizeof(f_date), TIMEFMT(sbp->st_mtime, now),
-	    tm) == 0)
+		     tm) == 0)
 		f_date[0] = '\0';
 	(void)fprintf(fp, "%s%2u %-*.*s %-*.*s ", f_mode, sbp->st_nlink,
 	    NAME_WIDTH, UT_NAMESIZE, user_from_uid(sbp->st_uid, 0), NAME_WIDTH,
@@ -496,9 +496,9 @@ void
 ls_tty(ARCHD *arcn)
 {
 	struct tm *tm;
-	char f_date[DATELEN];
-	char f_mode[MODELEN];
-	time_t now = time(NULL);
+	char	   f_date[DATELEN];
+	char	   f_mode[MODELEN];
+	time_t	   now = time(NULL);
 
 	/*
 	 * convert time to string, and print
@@ -506,7 +506,7 @@ ls_tty(ARCHD *arcn)
 	if ((tm = localtime(&(arcn->sb.st_mtime))) == NULL)
 		f_date[0] = '\0';
 	else if (strftime(
-	    f_date, DATELEN, TIMEFMT(arcn->sb.st_mtime, now), tm) == 0)
+		     f_date, DATELEN, TIMEFMT(arcn->sb.st_mtime, now), tm) == 0)
 		f_date[0] = '\0';
 	strmode(arcn->sb.st_mode, f_mode);
 	tty_prnt("%s%s %s\n", f_mode, f_date, arcn->name);
@@ -515,7 +515,7 @@ ls_tty(ARCHD *arcn)
 void
 safe_print(const char *str, FILE *fp)
 {
-	char visbuf[5];
+	char	    visbuf[5];
 	const char *cp;
 
 	/*
@@ -535,7 +535,7 @@ safe_print(const char *str, FILE *fp)
 int
 listopt_append(const char *chunk)
 {
-	char *tmp;
+	char  *tmp;
 	size_t add;
 
 	if (chunk == NULL)
@@ -574,12 +574,12 @@ listopt_reset(void)
 static void
 listopt_output(ARCHD *arcn, FILE *fp)
 {
-	const char *fmt = listopt_get();
-	struct listopt_ctx ctx;
+	const char	   *fmt = listopt_get();
+	struct listopt_ctx  ctx;
 	struct listopt_spec spec;
-	const char *next;
-	char fmtbuf[64];
-	char outbuf[PATH_MAX * 2];
+	const char	   *next;
+	char		    fmtbuf[64];
+	char		    outbuf[PATH_MAX * 2];
 
 	if (fmt == NULL || *fmt == '\0')
 		return;
@@ -613,7 +613,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 		case 'c': {
 			const char *str = listopt_keyword_string(&ctx, arcn,
 			    spec.keyword[0] ? spec.keyword : "path");
-			char ch = (str && *str) ? *str : ' ';
+			char	    ch = (str && *str) ? *str : ' ';
 			snprintf(fmtbuf, sizeof(fmtbuf), "%%%s%s%s%c",
 			    spec.flags, spec.width, spec.precision, 'c');
 			(void)fprintf(fp, fmtbuf, ch);
@@ -647,8 +647,8 @@ listopt_output(ARCHD *arcn, FILE *fp)
 		}
 		case 'T': {
 			struct timespec ts;
-			struct tm tm;
-			const char *key =
+			struct tm	tm;
+			const char     *key =
 			    spec.keyword[0] ? spec.keyword : "mtime";
 			const char *tfmt =
 			    spec.subfmt[0] ? spec.subfmt : "%b %e %H:%M %Y";
@@ -681,7 +681,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 			} else if (spec.keyword[0]) {
 				unsigned long long val = 0;
 				if (listopt_keyword_ull(
-				    arcn, spec.keyword, &val) == 0) {
+					arcn, spec.keyword, &val) == 0) {
 					snprintf(outbuf, sizeof(outbuf), "%llu",
 					    val);
 					use = outbuf;
@@ -704,12 +704,12 @@ listopt_output(ARCHD *arcn, FILE *fp)
 				outbuf[0] = '\0';
 				if (tmp != NULL) {
 					char *token;
-					int first = 1;
+					int   first = 1;
 					while ((token = strsep(&tmp, ",")) !=
 					    NULL) {
 						const char *part =
 						    listopt_keyword_string(
-						    &ctx, arcn, token);
+							&ctx, arcn, token);
 						if (!first)
 							strlcat(outbuf, "/",
 							    sizeof(outbuf));
@@ -789,7 +789,7 @@ pax_kv_lookup(const ARCHD *arcn, const char *key)
 u_long
 asc_ul(char *str, int len, int base)
 {
-	char *stop;
+	char  *stop;
 	u_long tval = 0;
 
 	stop = str + len;
@@ -832,7 +832,7 @@ asc_ul(char *str, int len, int base)
 int
 ul_asc(u_long val, char *str, int len, int base)
 {
-	char *pt;
+	char  *pt;
 	u_long digit;
 
 	/*
@@ -887,7 +887,7 @@ ul_asc(u_long val, char *str, int len, int base)
 unsigned long long
 asc_ull(char *str, int len, int base)
 {
-	char *stop;
+	char		  *stop;
 	unsigned long long tval = 0;
 
 	stop = str + len;
@@ -930,7 +930,7 @@ asc_ull(char *str, int len, int base)
 int
 ull_asc(unsigned long long val, char *str, int len, int base)
 {
-	char *pt;
+	char		  *pt;
 	unsigned long long digit;
 
 	/*
@@ -979,9 +979,9 @@ ull_asc(unsigned long long val, char *str, int len, int base)
 size_t
 fieldcpy(char *buf, size_t bufsz, const char *field, size_t fieldsz)
 {
-	char *p = buf;
+	char	   *p = buf;
 	const char *q = field;
-	size_t i = 0;
+	size_t	    i = 0;
 
 	if (fieldsz > bufsz)
 		fieldsz = bufsz;

@@ -32,11 +32,10 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 
-#include <imsg.h>
-
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <imsg.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,12 +45,12 @@
 #include "config.h"
 #include "exec_imsg.h"
 #include "fvwm.h"
-#include "module.h"
 #include "misc.h"
+#include "module.h"
 
-static struct imsgbuf	*exec_ibuf;
-static int		 exec_fd = -1;
-static pid_t		 exec_pid = -1;
+static struct imsgbuf *exec_ibuf;
+static int	       exec_fd = -1;
+static pid_t	       exec_pid = -1;
 
 /*
  * exec_helper_start -- fork and exec the execution helper.
@@ -192,8 +191,8 @@ int
 exec_helper_drain(int (*cb)(struct imsg *, void *), void *arg)
 {
 	struct imsg imsg;
-	ssize_t n;
-	int processed = 0;
+	ssize_t	    n;
+	int	    processed = 0;
 
 	if (exec_ibuf == NULL)
 		return -1;
@@ -241,7 +240,7 @@ int
 exec_helper_piperead_start(u_int32_t id, const char *command)
 {
 	struct ibuf *buf;
-	size_t clen;
+	size_t	     clen;
 
 	if (exec_ibuf == NULL)
 		return -1;
@@ -252,8 +251,8 @@ exec_helper_piperead_start(u_int32_t id, const char *command)
 		return -1;
 	}
 
-	buf = imsg_create(exec_ibuf, IMSG_PIPEREAD_RUN, 0, 0,
-	    sizeof(id) + clen);
+	buf =
+	    imsg_create(exec_ibuf, IMSG_PIPEREAD_RUN, 0, 0, sizeof(id) + clen);
 	if (buf == NULL)
 		return -1;
 	if (imsg_add(buf, &id, sizeof(id)) == -1)
@@ -277,8 +276,7 @@ exec_helper_piperead_kill(u_int32_t id)
 	if (exec_ibuf == NULL)
 		return -1;
 
-	buf = imsg_create(exec_ibuf, IMSG_PIPEREAD_KILL, 0, 0,
-	    sizeof(id));
+	buf = imsg_create(exec_ibuf, IMSG_PIPEREAD_KILL, 0, 0, sizeof(id));
 	if (buf == NULL)
 		return -1;
 	if (imsg_add(buf, &id, sizeof(id)) == -1)
@@ -299,10 +297,10 @@ int
 exec_helper_launch(int argc, char **argv, char **envp)
 {
 	struct ibuf *buf;
-	size_t datalen;
-	int cargc = argc; /* include argv[0], the program path */
-	int envc = 0;
-	int i;
+	size_t	     datalen;
+	int	     cargc = argc; /* include argv[0], the program path */
+	int	     envc = 0;
+	int	     i;
 
 	if (exec_ibuf == NULL)
 		return -1;
@@ -342,8 +340,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 	}
 	if (envp) {
 		for (i = 0; envp[i] != NULL; i++) {
-			if (imsg_add(buf, envp[i],
-			    strlen(envp[i]) + 1) == -1)
+			if (imsg_add(buf, envp[i], strlen(envp[i]) + 1) == -1)
 				return -1;
 		}
 	}

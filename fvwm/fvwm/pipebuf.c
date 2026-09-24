@@ -106,8 +106,8 @@ pipebuf_trim(struct pipebuf *pb, size_t limit)
 }
 
 int
-pipebuf_next_line(struct pipebuf *pb, char **linep, size_t *linelen,
-    size_t maxline)
+pipebuf_next_line(
+    struct pipebuf *pb, char **linep, size_t *linelen, size_t maxline)
 {
 	size_t i, start;
 
@@ -165,5 +165,5 @@ pipebuf_next_line(struct pipebuf *pb, char **linep, size_t *linelen,
 		}
 	}
 
-	return 0;	/* need more data */
+	return 0; /* need more data */
 }

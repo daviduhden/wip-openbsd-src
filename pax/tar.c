@@ -35,9 +35,9 @@
  * SUCH DAMAGE.
  */
 
+#include <sys/types.h>
 #include <sys/queue.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include <ctype.h>
 #include <errno.h>
@@ -53,30 +53,30 @@
 #include <unistd.h>
 #include <wchar.h>
 
-#include "pax.h"
 #include "extern.h"
+#include "pax.h"
 #include "tar.h"
 
 SLIST_HEAD(xheader, xheader_record);
 struct xheader_record {
 	SLIST_ENTRY(xheader_record) entry;
 	size_t reclen;
-	char *record;
+	char  *record;
 };
 
 /* Command-line controlled pax state shared across parsing and I/O. */
-static PAXKEY *pax_global_xattr;
-static int pax_opt_linkdata;
-static int pax_opt_times;
+static PAXKEY		      *pax_global_xattr;
+static int		       pax_opt_linkdata;
+static int		       pax_opt_times;
 static enum pax_invalid_action pax_opt_invalid = PAX_INVALID_BYPASS;
-static char *pax_opt_exthdr_name;
-static char *pax_opt_globexthdr_name;
-static PAXDEL *pax_opt_delete_list;
-static PAXOPKV *pax_opt_keywords_global;
-static PAXOPKV *pax_opt_keywords_local;
-static int pax_keywords_prepared;
+static char		      *pax_opt_exthdr_name;
+static char		      *pax_opt_globexthdr_name;
+static PAXDEL		      *pax_opt_delete_list;
+static PAXOPKV		      *pax_opt_keywords_global;
+static PAXOPKV		      *pax_opt_keywords_local;
+static int		       pax_keywords_prepared;
 #ifndef SMALL
-static int pax_global_written;
+static int	    pax_global_written;
 static unsigned int pax_global_seq = 1;
 #endif
 
@@ -89,27 +89,27 @@ static unsigned int pax_global_seq = 1;
 
 static size_t expandname(char *, size_t, char **, const char *, size_t);
 static u_long tar_chksm(char *, int);
-static char *name_split(char *, int);
-static int ul_oct(u_long, char *, int, int);
-static int ull_oct(unsigned long long, char *, int, int);
-static int rd_xheader(ARCHD *, int, off_t);
+static char  *name_split(char *, int);
+static int    ul_oct(u_long, char *, int, int);
+static int    ull_oct(unsigned long long, char *, int, int);
+static int    rd_xheader(ARCHD *, int, off_t);
 #ifndef SMALL
 static int wr_xheader(const char *, HD_USTAR *, struct xheader *, int,
     const char *, unsigned int);
 static int needs_hdrcharset_binary(const char *);
 static int xheader_contains(const struct xheader *, const char *);
 #endif
-static int pax_store_kv(PAXKEY **, const char *, const char *);
-static int pax_component_too_long(const char *);
+static int  pax_store_kv(PAXKEY **, const char *, const char *);
+static int  pax_component_too_long(const char *);
 static void pax_apply_global(ARCHD *);
 static void pax_global_free(void);
-static int pax_keyword_deleted(const char *);
+static int  pax_keyword_deleted(const char *);
 static void pax_prepare_user_keywords(void);
 static void pax_apply_local_option_keywords(ARCHD *);
-static int pax_format_xhdr_name(
+static int  pax_format_xhdr_name(
     char *, size_t, const char *, const char *, unsigned int);
 static void pax_option_apply_local_xhdr(struct xheader *);
-static int pax_write_global_header(void);
+static int  pax_write_global_header(void);
 
 static uid_t uid_nobody;
 static uid_t uid_warn;
@@ -120,7 +120,7 @@ static gid_t gid_warn;
  * Routines common to all versions of tar
  */
 
-int tar_nodir;         /* do not write dirs under old tar */
+int   tar_nodir;       /* do not write dirs under old tar */
 char *gnu_name_string; /* GNU ././@LongLink hackery name */
 char *gnu_link_string; /* GNU ././@LongLink hackery link */
 
@@ -318,8 +318,8 @@ ull_oct(unsigned long long val, char *str, int len, int term)
 static u_long
 tar_chksm(char *blk, int len)
 {
-	char *stop;
-	char *pt;
+	char  *stop;
+	char  *pt;
 	u_long chksm = BLNKSUM; /* initial value is checksum field sum */
 
 	/*
@@ -359,7 +359,7 @@ tar_chksm(char *blk, int len)
 int
 tar_id(char *blk, int size)
 {
-	HD_TAR *hd;
+	HD_TAR	 *hd;
 	HD_USTAR *uhd;
 
 	if (size < BLKMULT)
@@ -433,9 +433,9 @@ tar_opt(void)
 int
 tar_rd(ARCHD *arcn, char *buf)
 {
-	HD_TAR *hd;
+	HD_TAR		  *hd;
 	unsigned long long val;
-	char *pt;
+	char		  *pt;
 
 	/*
 	 * we only get proper sized buffers passed to us
@@ -576,8 +576,8 @@ int
 tar_wr(ARCHD *arcn)
 {
 	HD_TAR *hd;
-	int len;
-	char hdblk[sizeof(HD_TAR)];
+	int	len;
+	char	hdblk[sizeof(HD_TAR)];
 
 	/*
 	 * check for those file system types which tar cannot store
@@ -689,7 +689,7 @@ tar_wr(ARCHD *arcn)
 	 */
 	if (ul_oct(arcn->sb.st_mode, hd->mode, sizeof(hd->mode), 0) ||
 	    ull_oct(arcn->sb.st_mtime < 0 ? 0 : arcn->sb.st_mtime, hd->mtime,
-	    sizeof(hd->mtime), 1) ||
+		sizeof(hd->mtime), 1) ||
 	    ul_oct(arcn->sb.st_uid, hd->uid, sizeof(hd->uid), 0) ||
 	    ul_oct(arcn->sb.st_gid, hd->gid, sizeof(hd->gid), 0))
 		goto out;
@@ -700,7 +700,7 @@ tar_wr(ARCHD *arcn)
 	 * to be written
 	 */
 	if (ul_oct(tar_chksm(hdblk, sizeof(HD_TAR)), hd->chksum,
-	    sizeof(hd->chksum), 3))
+		sizeof(hd->chksum), 3))
 		goto out;
 	if (wr_rdbuf(hdblk, sizeof(HD_TAR)) < 0 ||
 	    wr_skip(BLKMULT - sizeof(HD_TAR)) < 0) {
@@ -767,11 +767,11 @@ ustar_id(char *blk, int size)
 int
 ustar_rd(ARCHD *arcn, char *buf)
 {
-	HD_USTAR *hd = (HD_USTAR *)buf;
-	char *dest;
-	int cnt = 0;
-	dev_t devmajor;
-	dev_t devminor;
+	HD_USTAR	  *hd = (HD_USTAR *)buf;
+	char		  *dest;
+	int		   cnt = 0;
+	dev_t		   devmajor;
+	dev_t		   devminor;
 	unsigned long long val;
 
 	/*
@@ -792,7 +792,7 @@ reset:
 	/* Process Extended headers. */
 	if (hd->typeflag == XHDRTYPE || hd->typeflag == GHDRTYPE) {
 		if (rd_xheader(arcn, hd->typeflag == GHDRTYPE,
-		    (off_t)asc_ull(hd->size, sizeof(hd->size), OCT)) < 0)
+			(off_t)asc_ull(hd->size, sizeof(hd->size), OCT)) < 0)
 			return (-1);
 
 		/* Update and check the ustar header. */
@@ -824,10 +824,9 @@ reset:
 
 		if (hd->typeflag != LONGLINKTYPE &&
 		    hd->typeflag != LONGNAMETYPE) {
-			arcn->nlen =
-			    cnt + expandname(dest, sizeof(arcn->name) - cnt,
-			    &gnu_name_string, hd->name,
-			    sizeof(hd->name));
+			arcn->nlen = cnt +
+			    expandname(dest, sizeof(arcn->name) - cnt,
+				&gnu_name_string, hd->name, sizeof(hd->name));
 			if (pax_component_too_long(arcn->name))
 				(void)pax_handle_invalid_path(
 				    arcn, "path", arcn->name);
@@ -974,9 +973,9 @@ reset:
 static int
 needs_hdrcharset_binary(const char *str)
 {
-	mbstate_t st;
+	mbstate_t   st;
 	const char *p;
-	size_t len;
+	size_t	    len;
 
 	if (str == NULL)
 		return 0;
@@ -1001,7 +1000,7 @@ static int
 xheader_contains(const struct xheader *xhdr, const char *keyword)
 {
 	const struct xheader_record *rec;
-	size_t klen;
+	size_t			     klen;
 
 	if (xhdr == NULL || keyword == NULL)
 		return 0;
@@ -1028,8 +1027,8 @@ static int
 xheader_add(struct xheader *xhdr, const char *keyword, const char *value)
 {
 	struct xheader_record *rec;
-	int reclen, tmplen;
-	char *s;
+	int		       reclen, tmplen;
+	char		      *s;
 
 	if (pax_keyword_deleted(keyword))
 		return 0;
@@ -1063,8 +1062,8 @@ xheader_add_ull(
     struct xheader *xhdr, const char *keyword, unsigned long long value)
 {
 	struct xheader_record *rec;
-	int reclen, tmplen;
-	char *s;
+	int		       reclen, tmplen;
+	char		      *s;
 
 	if (pax_keyword_deleted(keyword))
 		return 0;
@@ -1098,9 +1097,9 @@ xheader_add_ts(
     struct xheader *xhdr, const char *keyword, const struct timespec *value)
 {
 	struct xheader_record *rec;
-	int reclen, tmplen;
-	char frac[sizeof(".111222333")] = "";
-	char *s;
+	int		       reclen, tmplen;
+	char		       frac[sizeof(".111222333")] = "";
+	char		      *s;
 
 	if (pax_keyword_deleted(keyword))
 		return 0;
@@ -1133,7 +1132,7 @@ xheader_add_ts(
 		return -1;
 	rec->reclen = reclen;
 	if (asprintf(&s, "%d %s=%lld%s\n", reclen, keyword,
-	    (long long)value->tv_sec, frac) < 0) {
+		(long long)value->tv_sec, frac) < 0) {
 		free(rec);
 		return -1;
 	}
@@ -1161,11 +1160,11 @@ static int
 wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
     const char *override_name, unsigned int seq)
 {
-	char hdblk[sizeof(HD_USTAR)];
-	HD_USTAR *hd;
-	char buf[sizeof(hd->name) + 1];
+	char		       hdblk[sizeof(HD_USTAR)];
+	HD_USTAR	      *hd;
+	char		       buf[sizeof(hd->name) + 1];
 	struct xheader_record *rec;
-	size_t size;
+	size_t		       size;
 
 	size = 0;
 	SLIST_FOREACH(rec, xhdr, entry)
@@ -1185,7 +1184,7 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 		    pax_option_globexthdr_name();
 		if (fmt != NULL) {
 			if (pax_format_xhdr_name(buf, sizeof(buf), fmt,
-			    fname ? fname : "", seq) == -1)
+				fname ? fname : "", seq) == -1)
 				goto out;
 		} else {
 			const char *tmpdir = getenv("TMPDIR");
@@ -1200,10 +1199,10 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 		    pax_option_exthdr_name();
 		if (fmt != NULL) {
 			if (pax_format_xhdr_name(buf, sizeof(buf), fmt,
-			    fname ? fname : "", 0) == -1)
+				fname ? fname : "", 0) == -1)
 				goto out;
 		} else if (fname != NULL) {
-			char *opath = NULL, *odirbuf = NULL;
+			char	   *opath = NULL, *odirbuf = NULL;
 			const char *obase = fname;
 			const char *odir = ".";
 
@@ -1228,7 +1227,7 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 		memcpy(hd->gid, fhd->gid, sizeof(hd->gid));
 	}
 	if (ul_oct(tar_chksm(hdblk, sizeof(HD_USTAR)), hd->chksum,
-	    sizeof(hd->chksum), 3))
+		sizeof(hd->chksum), 3))
 		goto out;
 
 	if (wr_rdbuf(hdblk, sizeof(HD_USTAR)) < 0 ||
@@ -1260,7 +1259,7 @@ static int
 pax_store_kv(PAXKEY **head, const char *keyword, const char *value)
 {
 	PAXKEY **curp, *kv;
-	char *dup;
+	char	*dup;
 
 	if (head == NULL || keyword == NULL || value == NULL)
 		return -1;
@@ -1323,7 +1322,7 @@ static int
 pax_component_too_long(const char *path)
 {
 	const char *start, *slash;
-	size_t len;
+	size_t	    len;
 
 	if (path == NULL || *path == '\0')
 		return 0;
@@ -1414,9 +1413,9 @@ pax_write_global_header(void)
 {
 	const PAXOPKV *kv;
 	struct xheader xhdr = SLIST_HEAD_INITIALIZER(xhdr);
-	int have = 0;
-	HD_USTAR dummy;
-	int ret;
+	int	       have = 0;
+	HD_USTAR       dummy;
+	int	       ret;
 
 	if (pax_global_written)
 		return 0;
@@ -1632,11 +1631,11 @@ static int
 pax_format_xhdr_name(char *buf, size_t bufsz, const char *fmt, const char *path,
     unsigned int seq)
 {
-	char *path_copy = NULL, *dir_copy = NULL;
+	char	   *path_copy = NULL, *dir_copy = NULL;
 	const char *dir = ".";
 	const char *file = path;
-	char *bp;
-	size_t remaining = bufsz;
+	char	   *bp;
+	size_t	    remaining = bufsz;
 
 	if (fmt == NULL || buf == NULL || bufsz == 0)
 		return -1;
@@ -1664,8 +1663,8 @@ pax_format_xhdr_name(char *buf, size_t bufsz, const char *fmt, const char *path,
 			break;
 		fmt++;
 		const char *ins = NULL;
-		char tmp[32];
-		size_t inslen = 0;
+		char	    tmp[32];
+		size_t	    inslen = 0;
 		switch (to_insert) {
 		case 'd':
 			ins = dir;
@@ -1775,9 +1774,9 @@ pax_mark_skip(ARCHD *arcn)
 static int
 wr_ustar_or_pax(ARCHD *arcn, int ustar)
 {
-	HD_USTAR *hd;
+	HD_USTAR   *hd;
 	const char *name;
-	char *pt, hdblk[sizeof(HD_USTAR)];
+	char	   *pt, hdblk[sizeof(HD_USTAR)];
 #ifndef SMALL
 	struct xheader xhdr = SLIST_HEAD_INITIALIZER(xhdr);
 #endif
@@ -1880,7 +1879,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	if (!ustar && pax_option_invalid() == PAX_INVALID_BINARY) {
 		if (needs_hdrcharset_binary(arcn->name) ||
 		    (PAX_IS_LINK(arcn->type) &&
-		     needs_hdrcharset_binary(arcn->ln_name)))
+			needs_hdrcharset_binary(arcn->ln_name)))
 			need_hdrcharset_binary = 1;
 	}
 #endif
@@ -1901,9 +1900,9 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 		else
 			hd->typeflag = BLKTYPE;
 		if (ul_oct(MAJOR(arcn->sb.st_rdev), hd->devmajor,
-		    sizeof(hd->devmajor), 3) ||
+			sizeof(hd->devmajor), 3) ||
 		    ul_oct(MINOR(arcn->sb.st_rdev), hd->devminor,
-		    sizeof(hd->devminor), 3) ||
+			sizeof(hd->devminor), 3) ||
 		    ul_oct(0, hd->size, sizeof(hd->size), 3))
 			goto out;
 		break;
@@ -1928,7 +1927,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 			if (!ustar && pax_option_linkdata()) {
 				arcn->pad = TAR_PAD(arcn->sb.st_size);
 				if (ull_oct(arcn->sb.st_size, hd->size,
-				    sizeof(hd->size), 3))
+					sizeof(hd->size), 3))
 					goto out;
 				write_data = 1;
 			} else {
@@ -1956,7 +1955,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 			}
 #ifndef SMALL
 			else if (xheader_add_ull(
-			    &xhdr, "size", arcn->sb.st_size) == -1) {
+				     &xhdr, "size", arcn->sb.st_size) == -1) {
 				paxwarn(1, "File is too long for pax %s",
 				    arcn->org_name);
 				xheader_free(&xhdr);
@@ -2028,7 +2027,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 			}
 		}
 		if ((pax_option_times() || bad_mtime || arcn->sb.st_mtime < 0 ||
-		    arcn->sb.st_mtim.tv_nsec != 0) &&
+			arcn->sb.st_mtim.tv_nsec != 0) &&
 		    xheader_add_ts(&xhdr, "mtime", &arcn->sb.st_mtim) == -1) {
 			paxwarn(1, "Couldn't preserve %s in pax format for %s",
 			    "mtime", arcn->org_name);
@@ -2074,7 +2073,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	 * needs to be written
 	 */
 	if (ul_oct(tar_chksm(hdblk, sizeof(HD_USTAR)), hd->chksum,
-	    sizeof(hd->chksum), 3))
+		sizeof(hd->chksum), 3))
 		goto out;
 	if (wr_rdbuf(hdblk, sizeof(HD_USTAR)) < 0 ||
 	    wr_skip(BLKMULT - sizeof(HD_USTAR)) < 0) {
@@ -2228,7 +2227,7 @@ pax_opt(void)
 			pax_option_set_times(1);
 		} else if (opt->assign != OPT_ASSIGN_NONE) {
 			if (pax_option_add_keyword(
-			    opt->name, opt->value, opt->assign) < 0) {
+				opt->name, opt->value, opt->assign) < 0) {
 				paxwarn(1, "Unable to record pax keyword %s=%s",
 				    opt->name, opt->value);
 				free(opt->name);
@@ -2342,8 +2341,8 @@ static int
 rd_time(struct timespec *ts, const char *keyword, char *p)
 {
 	const char *errstr;
-	char *q;
-	int multiplier;
+	char	   *q;
+	int	    multiplier;
 
 	if ((q = strchr(p, '.')) != NULL)
 		*q = '\0';
@@ -2394,11 +2393,11 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 	 * The pax format supposedly supports arbitrarily sized extended
 	 * record headers, this implementation doesn't.
 	 */
-	char buf[sizeof("30xx linkpath=") - 1 + PAXPATHLEN + sizeof("\n")];
-	long len;
+	char  buf[sizeof("30xx linkpath=") - 1 + PAXPATHLEN + sizeof("\n")];
+	long  len;
 	char *delim, *keyword;
 	char *nextp, *p, *end;
-	int pad, ret = 0;
+	int   pad, ret = 0;
 
 	/* before we alter size, make note of how much we have to skip */
 	pad = TAR_PAD((unsigned)size);
@@ -2469,7 +2468,7 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 			continue;
 		}
 		if (pax_store_kv(global ? &pax_global_xattr : &arcn->xattr,
-		    keyword, p) == -1) {
+			keyword, p) == -1) {
 			paxwarn(1, "Unable to store extended header keyword %s",
 			    keyword);
 			ret = -1;

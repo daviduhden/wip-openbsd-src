@@ -54,7 +54,7 @@ typedef struct {
 	unsigned long flags;
 	unsigned long functions;
 	unsigned long decorations;
-	long inputMode;
+	long	      inputMode;
 } PropMotifWmHints;
 
 typedef PropMotifWmHints PropMwmHints;
@@ -89,8 +89,8 @@ typedef PropMotifWmHints PropMwmHints;
 #define OL_DECOR_RESIZEH (1L << 1)
 #define OL_DECOR_HEADER (1L << 2)
 #define OL_DECOR_ICON_NAME (1L << 3)
-#define OL_DECOR_ALL							\
-	(OL_DECOR_CLOSE | OL_DECOR_RESIZEH | OL_DECOR_HEADER |		\
+#define OL_DECOR_ALL                                                           \
+	(OL_DECOR_CLOSE | OL_DECOR_RESIZEH | OL_DECOR_HEADER |                 \
 	    OL_DECOR_ICON_NAME)
 
 extern FvwmWindow *Tmp_win;
@@ -103,13 +103,13 @@ extern FvwmWindow *Tmp_win;
 void
 GetMwmHints(FvwmWindow *t)
 {
-	int actual_format;
-	Atom actual_type;
+	int	      actual_format;
+	Atom	      actual_type;
 	unsigned long nitems, bytesafter;
 
 	if (XGetWindowProperty(dpy, t->w, _XA_MwmAtom, 0L, 20L, False,
-	    _XA_MwmAtom, &actual_type, &actual_format, &nitems, &bytesafter,
-	    (unsigned char **)&t->mwm_hints) == Success) {
+		_XA_MwmAtom, &actual_type, &actual_format, &nitems, &bytesafter,
+		(unsigned char **)&t->mwm_hints) == Success) {
 		if (nitems >= PROP_MOTIF_WM_HINTS_ELEMENTS) {
 			return;
 		}
@@ -148,18 +148,18 @@ GetMwmHints(FvwmWindow *t)
 void
 GetOlHints(FvwmWindow *t)
 {
-	int actual_format;
-	Atom actual_type;
+	int	      actual_format;
+	Atom	      actual_type;
 	unsigned long nitems, bytesafter;
-	Atom *hints;
-	int i;
-	Atom win_type;
+	Atom	     *hints;
+	int	      i;
+	Atom	      win_type;
 
 	t->ol_hints = OL_DECOR_ALL;
 
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_WIN_ATTR, 0L, 20L, False,
-	    _XA_OL_WIN_ATTR, &actual_type, &actual_format, &nitems,
-	    &bytesafter, (unsigned char **)&hints) == Success) {
+		_XA_OL_WIN_ATTR, &actual_type, &actual_format, &nitems,
+		&bytesafter, (unsigned char **)&hints) == Success) {
 		if (nitems > 0) {
 			if (nitems == 3)
 				win_type = hints[0];
@@ -173,14 +173,12 @@ GetOlHints(FvwmWindow *t)
 			else if (win_type == _XA_OL_WT_CMD)
 				t->ol_hints = OL_DECOR_ALL & ~OL_DECOR_CLOSE;
 			else if (win_type == _XA_OL_WT_HELP)
-				t->ol_hints =
-				    OL_DECOR_ALL &
+				t->ol_hints = OL_DECOR_ALL &
 				    ~(OL_DECOR_CLOSE | OL_DECOR_RESIZEH);
 			else if (win_type == _XA_OL_WT_NOTICE)
-				t->ol_hints =
-				    OL_DECOR_ALL &
+				t->ol_hints = OL_DECOR_ALL &
 				    ~(OL_DECOR_CLOSE | OL_DECOR_RESIZEH |
-				    OL_DECOR_HEADER | OL_DECOR_ICON_NAME);
+					OL_DECOR_HEADER | OL_DECOR_ICON_NAME);
 			else if (win_type == _XA_OL_WT_OTHER)
 				t->ol_hints = 0;
 			else
@@ -195,8 +193,8 @@ GetOlHints(FvwmWindow *t)
 	}
 
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_DECOR_ADD, 0L, 20L, False,
-	    XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
-	    (unsigned char **)&hints) == Success) {
+		XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
+		(unsigned char **)&hints) == Success) {
 		for (i = 0; i < (int)nitems; i++) {
 			if (hints[i] == _XA_OL_DECOR_CLOSE)
 				t->ol_hints |= OL_DECOR_CLOSE;
@@ -212,8 +210,8 @@ GetOlHints(FvwmWindow *t)
 	}
 
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_DECOR_DEL, 0L, 20L, False,
-	    XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
-	    (unsigned char **)&hints) == Success) {
+		XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
+		(unsigned char **)&hints) == Success) {
 		for (i = 0; i < (int)nitems; i++) {
 			if (hints[i] == _XA_OL_DECOR_CLOSE)
 				t->ol_hints &= ~OL_DECOR_CLOSE;
@@ -239,7 +237,7 @@ void
 SelectDecor(
     FvwmWindow *t, unsigned long tflags, int border_width, int resize_width)
 {
-	int decor, i;
+	int	      decor, i;
 	PropMwmHints *prop;
 
 	if (!(tflags & BW_FLAG))
@@ -274,7 +272,7 @@ SelectDecor(
 		t->functions &= ~MWM_FUNC_ALL;
 		t->functions =
 		    (MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE |
-		     MWM_FUNC_MAXIMIZE | MWM_FUNC_CLOSE) &
+			MWM_FUNC_MAXIMIZE | MWM_FUNC_CLOSE) &
 		    (~(t->functions));
 	}
 	if ((tflags & MWM_FUNCTIONS_FLAG) && (t->flags & TRANSIENT)) {
@@ -286,8 +284,8 @@ SelectDecor(
 		 * ALL except the other things... */
 		decor &= ~MWM_DECOR_ALL;
 		decor = (MWM_DECOR_BORDER | MWM_DECOR_RESIZEH |
-		    MWM_DECOR_TITLE | MWM_DECOR_MENU |
-		    MWM_DECOR_MINIMIZE | MWM_DECOR_MAXIMIZE) &
+			    MWM_DECOR_TITLE | MWM_DECOR_MENU |
+			    MWM_DECOR_MINIMIZE | MWM_DECOR_MAXIMIZE) &
 		    (~decor);
 	}
 
@@ -467,9 +465,10 @@ SelectDecor(
 static int
 check_if_function_allowed(int function, FvwmWindow *t, MenuItem *mi)
 {
-	if (t) { /* should always be ok */
-		if (!mi) { /* no menu item, must be exec check, so allow overrides
-		          */
+	if (t) {	   /* should always be ok */
+		if (!mi) { /* no menu item, must be exec check, so allow
+			    * overrides
+			    */
 			if (t->flags & HintOverride)
 				return 1;
 		}
