@@ -43,8 +43,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 
 /*
  * data structure for storing user supplied replacement strings (-s)

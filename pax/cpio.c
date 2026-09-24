@@ -44,9 +44,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "pax.h"
 #include "cpio.h"
 #include "extern.h"
-#include "pax.h"
 
 static int rd_nm(ARCHD *, int);
 static int rd_ln_nm(ARCHD *);

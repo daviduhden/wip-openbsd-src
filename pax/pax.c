@@ -51,8 +51,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "extern.h"
 #include "pax.h"
+#include "extern.h"
 static int  gen_init(void);
 static void sig_cleanup(int);
 

@@ -47,9 +47,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "pax.h"
 #include "cpio.h"
 #include "extern.h"
-#include "pax.h"
 #include "tar.h"
 
 static int   bad_opt(void);
