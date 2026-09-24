@@ -12,6 +12,7 @@ CC =		clang
 DEBUGGER =	lldb
 
 CFLAGS_COMMON =	-std=c23 -Wall -Wextra -Wpedantic \
+		-isystem ${.CURDIR}/../../compat \
 		-I${X11BASE}/include \
 		-I${.CURDIR} -I${.CURDIR}/.. -I${.CURDIR}/../libs
 CFLAGS =	-O2 -pipe ${CFLAGS_COMMON}

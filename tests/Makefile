@@ -39,20 +39,29 @@ X11INCS ?=	-I/usr/X11R6/include -I/usr/local/include
 SANITIZE != if [ "`uname -s`" = OpenBSD ]; then echo "-fsanitize=undefined -fsanitize-minimal-runtime -Wl,--no-execute-only"; else echo "-fsanitize=address,undefined"; fi
 SANITIZE ?=	-fsanitize=address,undefined
 
-TESTS =		fvwm-parse-tests fvwm-exec-tests fvwm-pipebuf-tests \
-		ext4fs-jbd2-tests ext4fs-inode-tests
+TESTS =		stdckdint-tests fvwm-parse-tests fvwm-exec-tests \
+		fvwm-pipebuf-tests ext4fs-jbd2-tests ext4fs-inode-tests
 
 all: $(TESTS)
 
+# Exercise the fallback implementation of the C23 <stdckdint.h> API even
+# when the host provides a native header.  xalloc.h is included so the
+# real consumer (xreallocarray) is covered as well.
+stdckdint-tests: stdckdint-tests.c ../compat/stdckdint.h \
+    ../fvwm/fvwm/xalloc.h
+	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../compat -I../fvwm/fvwm \
+	    -DFVWM_STDCKDINT_FORCE_FALLBACK stdckdint-tests.c -o $@$(SUFFIX)
+
 fvwm-parse-tests: fvwm-parse-tests.c ../fvwm/libs/Parse.c \
     ../fvwm/libs/Strings.c ../fvwm/libs/System.c openbsd-shims.c
-	$(CC) $(CFLAGS) $(SANITIZE) $(X11INCS) -I../fvwm -I../fvwm/libs \
-	    -I../fvwm/fvwm -I. fvwm-parse-tests.c ../fvwm/libs/Strings.c \
-	    ../fvwm/libs/System.c openbsd-shims.c -o $@$(SUFFIX)
+	$(CC) $(CFLAGS) $(SANITIZE) $(X11INCS) -isystem ../compat -I../fvwm \
+	    -I../fvwm/libs -I../fvwm/fvwm -I. fvwm-parse-tests.c \
+	    ../fvwm/libs/Strings.c ../fvwm/libs/System.c \
+	    openbsd-shims.c -o $@$(SUFFIX)
 
 fvwm-exec-tests: fvwm-exec-tests.c ../fvwm/fvwm/fvwm_exec.c
-	$(CC) $(CFLAGS) $(SANITIZE) -I. -I../fvwm -I../fvwm/fvwm \
-	    fvwm-exec-tests.c -o $@$(SUFFIX)
+	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../compat -I. -I../fvwm \
+	    -I../fvwm/fvwm fvwm-exec-tests.c -o $@$(SUFFIX)
 
 fvwm-pipebuf-tests: fvwm-pipebuf-tests.c ../fvwm/fvwm/pipebuf.c \
     ../fvwm/fvwm/pipebuf.h
@@ -75,6 +84,7 @@ ext4fs-inode-tests: ext4fs-inode-tests.c $(EXT4SRC)/ext4fs_crc32c.c \
 	    ext4fs-inode-tests.c -o $@$(SUFFIX)
 
 run: $(TESTS)
+	ASAN_OPTIONS=detect_leaks=0 ./stdckdint-tests
 	ASAN_OPTIONS=detect_leaks=0 ./fvwm-parse-tests
 	ASAN_OPTIONS=detect_leaks=0 ./fvwm-exec-tests
 	ASAN_OPTIONS=detect_leaks=0 ./fvwm-pipebuf-tests
