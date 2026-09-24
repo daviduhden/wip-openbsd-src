@@ -42,6 +42,8 @@
  */
 #include <stddef.h>
 
+#include "pax.h"
+
 #define CHK_LEN 8 /* length of checksum field */
 #define TNMSZ 100 /* size of name field */
 #ifdef _PAX_

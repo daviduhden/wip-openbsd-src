@@ -37,6 +37,8 @@
  *	@(#)extern.h	8.2 (Berkeley) 4/18/94
  */
 
+#include "pax.h"
+
 /*
  * External references from each source file
  */

@@ -37,6 +37,8 @@
  *	@(#)cpio.h	8.1 (Berkeley) 5/31/93
  */
 
+#include "pax.h"
+
 /*
  * Defines common to all versions of cpio
  */

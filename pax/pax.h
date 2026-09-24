@@ -41,6 +41,9 @@
  * BSD PAX global data structures and constants.
  */
 
+#ifndef PAX_H
+#define PAX_H
+
 #define MAXBLK 64512	   /* MAX blocksize supported (posix SPEC) */
 			   /* WARNING: increasing MAXBLK past 32256 */
 			   /* will violate posix spec. */
@@ -304,3 +307,5 @@ typedef struct oplist {
 #define _PAX_ 1
 #define _TFILE_BASE "paxXXXXXXXXXX"
 #define MAX_TIME_T (sizeof(time_t) == sizeof(long long) ? LLONG_MAX : INT_MAX)
+
+#endif /* PAX_H */
