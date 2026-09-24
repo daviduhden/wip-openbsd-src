@@ -85,7 +85,7 @@ static int exec_children_count;
 static pid_t pending_reaps[MAX_PENDING_REAPS];
 static int pending_reaps_count;
 
-__dead static void
+[[noreturn]] static void
 usage(void)
 {
 	extern char *__progname;
@@ -95,9 +95,8 @@ usage(void)
 }
 
 static void
-sigchld_handler(int sig)
+sigchld_handler(int)
 {
-	(void)sig;
 	got_sigchld = 1;
 }
 
@@ -108,7 +107,7 @@ sigchld_handler(int sig)
  * unrestricted: the launched program needs the user's full
  * privileges.
  */
-__dead static void
+[[noreturn]] static void
 exec_child(char **argv, char **envp)
 {
 	closefrom(3);
@@ -421,11 +420,10 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
  * period; the deadline is enforced in the main loop.
  */
 static void
-piperead_kill(struct imsgbuf *ibuf, u_int32_t id)
+piperead_kill(struct imsgbuf *, u_int32_t id)
 {
 	int i;
 
-	(void)ibuf;
 	for (i = 0; i < PIPEREAD_SLOTS; i++) {
 		struct piperead_slot *slot = &piperead_slots[i];
 
@@ -447,7 +445,7 @@ main(int argc, char **argv)
 {
 	struct imsgbuf ibuf;
 	struct imsg imsg;
-	const char *errstr;
+	const char *errstr = NULL;
 	ssize_t n;
 	int s;
 

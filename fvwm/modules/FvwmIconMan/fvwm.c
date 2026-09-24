@@ -6,7 +6,7 @@
 #include "x.h"
 #include "xmanager.h"
 
-static char const rcsid[] __unused =
+[[maybe_unused]] static char const rcsid[] =
     "$Id: fvwm.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 typedef struct {

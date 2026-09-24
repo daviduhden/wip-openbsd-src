@@ -159,7 +159,7 @@ MatchArgument(const char *pstr, char *tok)
  * space, and must be freed after use.
  *
  **************************************************************************/
-__unused static char *
+[[maybe_unused]] static char *
 GetNextArgument(char *indata, char **token)
 {
 	char *t, *start, *end, *text;

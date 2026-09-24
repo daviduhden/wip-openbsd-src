@@ -151,6 +151,24 @@ struct jbd2_revoke_header {
 	u_int32_t		r_count;	/* bytes used in this block */
 } __attribute__((packed));
 
+/*
+ * The journal structures are an on-disk ABI shared with Linux jbd2.
+ * The packed attribute fixes the layout; these assertions make any
+ * change to a field type, size or order a compile-time error.
+ */
+_Static_assert(sizeof(struct jbd2_header) == (size_t)12,
+    "jbd2 header must be 12 bytes");
+_Static_assert(sizeof(struct jbd2_superblock) == (size_t)1024,
+    "jbd2 superblock must be 1024 bytes");
+_Static_assert(sizeof(struct jbd2_block_tag3) == (size_t)16,
+    "jbd2 block tag v3 must be 16 bytes");
+_Static_assert(sizeof(struct jbd2_block_tag) == (size_t)12,
+    "jbd2 block tag must be 12 bytes");
+_Static_assert(sizeof(struct jbd2_journal_block_tail) == (size_t)4,
+    "jbd2 checksum tail must be 4 bytes");
+_Static_assert(sizeof(struct jbd2_revoke_header) == (size_t)16,
+    "jbd2 revoke header must be 16 bytes");
+
 /* Revocation table entry */
 struct jbd2_revoke_entry {
 	u_int64_t	re_block;

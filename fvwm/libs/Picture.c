@@ -322,7 +322,7 @@ static Color_Info base_array[] = {
 #define NColors (sizeof(base_array) / sizeof(Color_Info))
 
 /* if c_color isn't set, copy it from one of the other colours */
-__unused static Bool
+[[maybe_unused]] static Bool
 xpmcolor_require_c_color(XpmColor *p)
 {
 	if (p->c_color != NULL)

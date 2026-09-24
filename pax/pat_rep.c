@@ -558,7 +558,7 @@ fn_match(char *pattern, char *string, char **pend)
 		case '\\':
 			if ((c = *pattern++) == '\0')
 				return (-1);
-			/* FALLTHROUGH */
+			[[fallthrough]];
 		default:
 			if (c != *string++)
 				return (-1);
@@ -679,7 +679,8 @@ mod_name(ARCHD *arcn)
 			p += 2;
 		}
 		if (last != NULL) {
-			last++;
+			while (*last == '/')
+				last++;
 			paxwarn(1, "Removing leading \"%.*s\"",
 			    (int)(last - arcn->name), arcn->name);
 			arcn->nlen = strlen(last);

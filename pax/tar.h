@@ -40,6 +40,8 @@
 /*
  * defines and data structures common to all tar formats
  */
+#include <stddef.h>
+
 #define CHK_LEN 8 /* length of checksum field */
 #define TNMSZ 100 /* size of name field */
 #ifdef _PAX_
@@ -158,3 +160,32 @@ typedef struct {
 	char devminor[8];       /* minor device number */
 	char prefix[TPFSZ];     /* linked to name */
 } HD_USTAR;
+
+/*
+ * The tar on-disk layouts are fixed by the archive format.  These
+ * assertions make any accidental change to a field type, size or order
+ * a compile-time error instead of silently producing archives that
+ * other tar implementations cannot read.  Every member has type char,
+ * so no padding is possible.
+ */
+static_assert(CHK_LEN == 8, "tar checksum field must be 8 bytes");
+static_assert(TNMSZ == 100, "tar name field must be 100 bytes");
+static_assert(sizeof(HD_TAR) == (size_t)257,
+    "old tar header layout changed");
+static_assert(sizeof(HD_USTAR) == (size_t)500,
+    "ustar header layout changed");
+static_assert(sizeof(((HD_TAR *)0)->chksum) == (size_t)CHK_LEN,
+    "old tar checksum field must match CHK_LEN");
+static_assert(sizeof(((HD_USTAR *)0)->chksum) == (size_t)CHK_LEN,
+    "ustar checksum field must match CHK_LEN");
+static_assert(sizeof(TMAGIC) == (size_t)TMAGLEN,
+    "ustar magic length mismatch");
+
+#ifdef _PAX_
+static_assert(offsetof(HD_TAR, chksum) == (size_t)CHK_OFFSET,
+    "old tar checksum offset changed");
+static_assert(offsetof(HD_USTAR, chksum) == (size_t)CHK_OFFSET,
+    "ustar checksum offset changed");
+static_assert(BLNKSUM == (long)CHK_LEN * ' ',
+    "tar checksum blank sum must equal CHK_LEN spaces");
+#endif /* _PAX_ */

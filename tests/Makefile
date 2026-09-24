@@ -26,8 +26,8 @@
 
 CC =		clang
 DEBUGGER =	lldb
-CFLAGS =	-O2 -pipe -std=c17 -D_GNU_SOURCE -Wall -Wextra -Wpedantic
-DEBUG_CFLAGS =	-O0 -g -std=c17 -D_GNU_SOURCE -Wall -Wextra -Wpedantic
+CFLAGS =	-O2 -pipe -std=c23 -D_GNU_SOURCE -Wall -Wextra -Wpedantic
+DEBUG_CFLAGS =	-O0 -g -std=c23 -D_GNU_SOURCE -Wall -Wextra -Wpedantic
 SUFFIX =
 
 # Nonexistent include directories are harmless; point X11INCS at

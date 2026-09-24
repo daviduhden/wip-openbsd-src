@@ -257,14 +257,14 @@ static_checks() {
 	fi
 }
 
-c17_policy() {
+c23_policy() {
 	relf=$1
 	case "$relf" in
 	pax/Makefile | fvwm/Makefile.inc | fvwm/modules/Makefile.inc)
-		if grep -q -- '-std=c17' "$ROOT/$relf"; then
-			ok "$relf: C17 policy: -std=c17 present"
+		if grep -q -- '-std=c23' "$ROOT/$relf"; then
+			ok "$relf: C23 policy: -std=c23 present"
 		else
-			fail "$relf: C17 policy: -std=c17 missing"
+			fail "$relf: C23 policy: -std=c23 missing"
 		fi
 		;;
 	ext4fs/sbin/mount_ext4fs/Makefile)
@@ -454,7 +454,7 @@ for file in $FILES; do
 	syntax_check "$file"
 	raw_bmake "$file"
 	static_checks "$file"
-	c17_policy "$relf"
+	c23_policy "$relf"
 	checkmake_check "$file"
 	mbake_check "$file"
 	semantic_check "$file"

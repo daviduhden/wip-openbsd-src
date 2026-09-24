@@ -5,7 +5,7 @@
 #include "readconfig.h"
 #include "xmanager.h"
 
-static char const rcsid[] __unused =
+[[maybe_unused]] static char const rcsid[] =
     "$Id: x.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
 #define GRAB_EVENTS							\

@@ -7,7 +7,7 @@
 #include "config.h"
 #include "x.h"
 
-static char const rcsid[] __unused =
+[[maybe_unused]] static char const rcsid[] =
     "$Id: xmanager.c,v 1.1.1.1 2006/11/26 10:53:51 matthieu Exp $";
 
 #ifdef SHAPE

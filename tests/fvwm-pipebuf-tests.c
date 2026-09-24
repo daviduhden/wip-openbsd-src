@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cdefs-shim.h"
-
 #include "../fvwm/fvwm/pipebuf.c"
 
 static int failures;

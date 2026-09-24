@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cdefs-shim.h"
-
 /* Independent bitwise reference crc32c. */
 static const uint32_t ref_poly = 0x82F63B78;
 

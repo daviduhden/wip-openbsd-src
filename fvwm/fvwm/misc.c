@@ -357,7 +357,7 @@ StashEventTime(XEvent *ev)
 	return True;
 }
 
-__unused static void
+[[maybe_unused]] static void
 ComputeActualPosition(int x, int y, int x_unit, int y_unit, int width,
     int height, int *pfinalX, int *pfinalY)
 {

@@ -18,10 +18,11 @@
 #define FVWM_XALLOC_H
 
 #include <err.h>
+#include <stdckdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-static inline void *
+[[nodiscard]] static inline void *
 xmalloc(size_t size)
 {
 	void *ptr;
@@ -34,7 +35,7 @@ xmalloc(size_t size)
 	return ptr;
 }
 
-static inline void *
+[[nodiscard]] static inline void *
 xcalloc(size_t nmemb, size_t size)
 {
 	void *ptr;
@@ -49,7 +50,7 @@ xcalloc(size_t nmemb, size_t size)
 	return ptr;
 }
 
-static inline void *
+[[nodiscard]] static inline void *
 xrealloc(void *ptr, size_t size)
 {
 	void *newptr;
@@ -62,13 +63,17 @@ xrealloc(void *ptr, size_t size)
 	return newptr;
 }
 
-static inline void *
+[[nodiscard]] static inline void *
 xreallocarray(void *ptr, size_t nmemb, size_t size)
 {
-	return xrealloc(ptr, nmemb * size);
+	size_t total;
+
+	if (ckd_mul(&total, nmemb, size))
+		err(1, "reallocarray");
+	return xrealloc(ptr, total);
 }
 
-static inline char *
+[[nodiscard]] static inline char *
 xstrdup(const char *s)
 {
 	char *copy;
@@ -79,7 +84,7 @@ xstrdup(const char *s)
 	return copy;
 }
 
-static inline char *
+[[nodiscard]] static inline char *
 xstrndup(const char *s, size_t n)
 {
 	char *copy;

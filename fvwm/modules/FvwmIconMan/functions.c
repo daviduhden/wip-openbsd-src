@@ -2,7 +2,7 @@
 #include "readconfig.h"
 #include "xmanager.h"
 
-static char const rcsid[] __unused =
+[[maybe_unused]] static char const rcsid[] =
     "$Id: functions.c,v 1.2 2021/01/24 09:21:21 matthieu Exp $";
 
 static Button *get_select_button(void);

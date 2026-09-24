@@ -64,6 +64,18 @@
 #include <ufs/ext4fs/ext4fs.h>
 #include <ufs/ext4fs/ext4fs_crc32c.h>
 
+/*
+ * Number of extent (or index) entries that fit in the inode's inline
+ * i_block[] area beyond the extent header.  struct ext4fs_extent and
+ * struct ext4fs_extent_idx are both 12 bytes, so this single bound
+ * covers the depth-0 leaf array and the depth>0 root index array.
+ * On-disk eh_entries/eh_max values must never exceed it before the
+ * arrays are indexed or shifted.
+ */
+#define EXT4FS_INLINE_EXTENT_MAX \
+	((sizeof(((struct ext4fs_dinode *)0)->i_block) - \
+	  sizeof(struct ext4fs_extent_header)) / sizeof(struct ext4fs_extent))
+
 /* Convert ext4 directory entry file type to BSD dirent type */
 static const u_int8_t ext4fs_type_to_dt[EXT4FS_FT_MAX] = {
 	[EXT4FS_FT_UNKNOWN]	= DT_UNKNOWN,
@@ -1012,6 +1024,15 @@ ext4fs_extent_insert(struct inode *ip, u_int32_t lbn, u_int64_t pblk,
 	entries = letoh16(eh->eh_entries);
 	maxe = letoh16(eh->eh_max);
 
+	/*
+	 * Both counts are on-disk fields; a value past the inline array
+	 * would make the merge check and the insertion memmove() walk
+	 * past i_block[].  Reject the inode instead.
+	 */
+	if (entries > EXT4FS_INLINE_EXTENT_MAX ||
+	    maxe > EXT4FS_INLINE_EXTENT_MAX)
+		return (EIO);
+
 	/* Try to merge with last extent */
 	if (entries > 0) {
 		struct ext4fs_extent *last = &ext[entries - 1];
@@ -1076,6 +1097,18 @@ ext4fs_buf_alloc(struct inode *ip, u_int64_t lbn, int size,
 	u_int64_t pblk, goal, ncontig, i_blocks;
 	int error;
 
+	/*
+	 * The root extent header is on-disk input used to index
+	 * din->i_extent[]/i_extent_idx[] below; refuse a corrupt tree
+	 * before any of it is dereferenced (ext4fs_extent_pblk()
+	 * started the same check but its error is not fatal here).
+	 */
+	if (letoh16(din->i_extent_header.eh_entries) >
+	    EXT4FS_INLINE_EXTENT_MAX ||
+	    letoh16(din->i_extent_header.eh_depth) >
+	    EXT4FS_MAX_EXTENT_DEPTH)
+		return (EIO);
+
 	/* Check if already mapped */
 	error = ext4fs_extent_pblk(ip, lbn, &pblk, &ncontig);
 	if (error == 0 && pblk != 0) {
@@ -1119,7 +1152,12 @@ ext4fs_buf_alloc(struct inode *ip, u_int64_t lbn, int size,
 				struct ext4fs_extent_header *leh =
 				    (struct ext4fs_extent_header *)gbp->b_data;
 				u_int16_t lent = letoh16(leh->eh_entries);
-				if (lent > 0 && letoh16(leh->eh_magic) ==
+				u_int16_t lcap =
+				    (fs->m_block_size -
+				    sizeof(struct ext4fs_extent_header)) /
+				    sizeof(struct ext4fs_extent);
+				if (lent > 0 && lent <= lcap &&
+				    letoh16(leh->eh_magic) ==
 				    EXT4FS_EXTENT_HEADER_MAGIC) {
 					struct ext4fs_extent *le =
 					    (struct ext4fs_extent *)(leh + 1);
@@ -1380,6 +1418,15 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 		return (ext4fs_update(ip, 1));
 	}
 
+	/*
+	 * Shrinking walks din->i_extent[]/i_extent_idx[] using the
+	 * on-disk counts; reject a corrupt root before indexing them.
+	 * The grow path above does not touch the extent arrays.
+	 */
+	if (depth > EXT4FS_MAX_EXTENT_DEPTH ||
+	    entries > EXT4FS_INLINE_EXTENT_MAX)
+		return (EIO);
+
 	/* Shrink */
 	blocks_freed = 0;
 
@@ -1420,6 +1467,12 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 				}
 
 				leaf_entries = letoh16(leaf_eh->eh_entries);
+				if (leaf_entries > (fs->m_block_size -
+				    sizeof(struct ext4fs_extent_header)) /
+				    sizeof(struct ext4fs_extent)) {
+					brelse(bp);
+					continue;
+				}
 				leaf_ext = (struct ext4fs_extent *)
 				    (leaf_eh + 1);
 
@@ -1510,6 +1563,12 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 				}
 
 				leaf_entries = letoh16(leaf_eh->eh_entries);
+				if (leaf_entries > (fs->m_block_size -
+				    sizeof(struct ext4fs_extent_header)) /
+				    sizeof(struct ext4fs_extent)) {
+					brelse(bp);
+					continue;
+				}
 				leaf_ext = (struct ext4fs_extent *)
 				    (leaf_eh + 1);
 

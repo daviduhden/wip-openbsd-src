@@ -39,7 +39,7 @@
 #define MAXHOSTNAME 255
 
 #ifndef lint
-static char sccsid[] __unused = "@(#)fvwm.c " VERSION " fvwm";
+[[maybe_unused]] static char sccsid[] = "@(#)fvwm.c " VERSION " fvwm";
 #endif
 
 int master_pid; /* process number of 1st fvwm process */

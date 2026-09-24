@@ -51,6 +51,14 @@ int numfilesread = 0;
 #define MAX_NESTING_DEPTH 128
 
 /*
+ * The execution helper tracks one slot per concurrently running
+ * PipeRead command.  A nesting limit above the slot count would let
+ * the main process start a command the helper cannot track.
+ */
+static_assert(MAX_NESTING_DEPTH <= PIPEREAD_SLOTS,
+    "MAX_NESTING_DEPTH must not exceed PIPEREAD_SLOTS");
+
+/*
  * Bound for one assembled PipeRead command line.  The historical
  * implementation split lines at the 1023-byte fgets() buffer; the
  * limit here is far more generous while still bounding memory, so
@@ -106,12 +114,10 @@ static u_int32_t		 piperead_next_id = 1;
  * response.
  */
 static int
-piperead_msg(struct imsg *imsg, void *arg)
+piperead_msg(struct imsg *imsg, void *)
 {
 	struct piperead_frame *frame;
 	u_int32_t id;
-
-	(void)arg;
 
 	switch (imsg->hdr.type) {
 	case IMSG_PIPEREAD_DATA:
@@ -192,6 +198,7 @@ piperead_execute_line(struct piperead_frame *frame, char *line,
 {
 	int continued = 0;
 	size_t need;
+	char *nbuf;
 
 	if (len >= 2 && line[len - 2] == '\\' && line[len - 1] == '\n')
 		continued = 1;
@@ -207,14 +214,17 @@ piperead_execute_line(struct piperead_frame *frame, char *line,
 
 		while (ncap < need)
 			ncap *= 2;
-		frame->lbuf = realloc(frame->lbuf, ncap);
-		if (frame->lbuf == NULL) {
+		/* Keep the original block on failure: realloc() leaves it
+		 * allocated and the frame still owns it. */
+		nbuf = realloc(frame->lbuf, ncap);
+		if (nbuf == NULL) {
 			/* Out of memory: drop the partial command. */
 			frame->lbuf_len = 0;
 			frame->lbuf_cap = 0;
 			frame->prev_continued = 0;
 			return;
 		}
+		frame->lbuf = nbuf;
 		frame->lbuf_cap = ncap;
 	}
 	memcpy(frame->lbuf + frame->lbuf_len, line, len);
@@ -374,11 +384,9 @@ extern void StartupStuff(void);
  * Arg 2 (optional) "Quiet" to suppress message on missing file.
  */
 static void
-ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
+ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module, int piperead)
 {
-	(void)junk;
-
 	if (numfilesread >= MAX_NESTING_DEPTH) {
 		fvwm_msg(ERR, piperead ? "PipeRead" : "Read",
 		    "nesting depth exceeded (%d)", MAX_NESTING_DEPTH);
@@ -488,8 +496,7 @@ ReadSubFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		}
 		if (filename && filename != ofilename)
 			free(filename);
-		if (filename != ofilename)
-			free(ofilename);
+		free(ofilename);
 		last_read_failed = 1;
 		return;
 	}

@@ -490,6 +490,27 @@ struct ext4fs_directory_tail {
 	u_int32_t det_checksum;
 } __attribute__((packed));
 
+/*
+ * ext4 on-disk ABI.  The packed structures have no padding, so their
+ * sizes are fully determined by the field list; the assertions record
+ * the format constants the driver assumes when it reads and writes the
+ * superblock, group descriptors and directory tails.
+ */
+_Static_assert((size_t)EXT4FS_SUPER_BLOCK_SIZE == sizeof(struct ext4fs),
+    "ext4 superblock structure must match EXT4FS_SUPER_BLOCK_SIZE");
+_Static_assert(EXT4FS_SUPER_BLOCK_OFFSET == 1024,
+    "ext4 superblock offset must be 1024");
+_Static_assert(sizeof(struct ext4fs_block_group_descriptor) == (size_t)64,
+    "ext4 group descriptor must be 64 bytes");
+_Static_assert(sizeof(struct ext4fs_directory_tail) ==
+    (size_t)EXT4FS_DIR_TAIL_SIZE,
+    "ext4 directory tail must match EXT4FS_DIR_TAIL_SIZE");
+_Static_assert(EXT4FS_EXTENT_DEPTH_MAX == EXT4FS_MAX_EXTENT_DEPTH,
+    "ext4 extent depth limits have drifted apart");
+_Static_assert((size_t)EXT4FS_SYMLINK_LEN_MAX ==
+    sizeof(((struct ext4fs_dinode *)0)->i_block),
+    "fast symlink storage must fit the inode i_block area");
+
 struct ext4fs_feature {
 	int		 f_mask;
 	const char	*f_name;

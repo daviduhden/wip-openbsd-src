@@ -129,6 +129,25 @@ struct ext4fs_dinode {
 #define EXT4FS_DINODE_SIZE	sizeof(struct ext4fs_dinode)
 #define EXT4FS_GOOD_OLD_INODE_SIZE	128
 
+/*
+ * These structures are an on-disk ABI.  The packed attribute fixes the
+ * layout (no padding), and the assertions below pin the sizes and the
+ * inline extent area so a field edit cannot silently change what is
+ * read from or written to disk.
+ */
+_Static_assert(sizeof(struct ext4fs_extent_header) == (size_t)12,
+    "ext4 extent header must be 12 bytes");
+_Static_assert(sizeof(struct ext4fs_extent) == (size_t)12,
+    "ext4 extent must be 12 bytes");
+_Static_assert(sizeof(struct ext4fs_extent_idx) == (size_t)12,
+    "ext4 extent index must be 12 bytes");
+_Static_assert(sizeof(((struct ext4fs_dinode *)0)->i_block) == (size_t)60,
+    "ext4 i_block area must be 60 bytes");
+_Static_assert(EXT4FS_DINODE_SIZE == (size_t)160,
+    "ext4 inode core must be 160 bytes");
+_Static_assert(EXT4FS_GOOD_OLD_INODE_SIZE == 128,
+    "ext4 good-old inode size must be 128 bytes");
+
 struct ext4fs_dinode_large {
 	struct ext4fs_dinode dinode;
 	/*

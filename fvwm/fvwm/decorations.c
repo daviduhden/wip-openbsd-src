@@ -478,7 +478,7 @@ check_if_function_allowed(int function, FvwmWindow *t, MenuItem *mi)
 		case F_DELETE:
 			if (!(t->flags & DoesWmDeleteWindow))
 				return 0;
-			/* fall through to close clause */
+			[[fallthrough]];
 		case F_CLOSE:
 			if (!(t->functions & MWM_FUNC_CLOSE))
 				return 0;

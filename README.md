@@ -14,7 +14,7 @@ the POSIX.1-2024 pax/tar/cpio semantics: the default extraction
 removes leading '/' from pathnames (POSIX C-1) and the tar
 default block size is 10240 bytes (POSIX M-2).  Includes tar(1),
 cpio(1), and pax(1) in a single multicall binary, compiled as
-ISO C17.
+ISO C23.
 
 ### fvwm
 
@@ -33,7 +33,7 @@ sandbox.  The main process, all 17 modules, and xpmroot apply
 per-process pledge(2) policies; the main process additionally
 restricts its filesystem view with unveil(2) (the modules are
 launched by the main process and inherit that view).  Compiled as
-ISO C17 with complete function prototypes; numeric configuration
+ISO C23 with complete function prototypes; numeric configuration
 parsing goes through FvwmParseInteger() (historical atoi(3)
 prefix semantics with defined overflow behaviour) or strtonum(3)
 for strict values.
@@ -152,7 +152,7 @@ $ ./validate-make.sh check
 
 It parses every Makefile with BSD make syntax (using bmake with
 stubbed /usr/share/mk includes, labelled syntax-only), scans for
-GNU make constructs, enforces the C17 policy, and runs checkmake
+GNU make constructs, enforces the C23 policy, and runs checkmake
 and mbake in advisory roles with per-finding classification.
 OpenBSD make(1) and /usr/share/mk remain authoritative; the script
 reports failures only for findings that are genuinely actionable.

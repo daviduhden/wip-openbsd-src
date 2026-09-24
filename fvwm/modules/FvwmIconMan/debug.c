@@ -4,7 +4,7 @@
 #include "FvwmIconMan.h"
 #include "debuglevels.h"
 
-static char const rcsid[] __unused =
+[[maybe_unused]] static char const rcsid[] =
     "$Id: debug.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 static FILE *console = NULL;

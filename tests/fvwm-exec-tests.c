@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cdefs-shim.h"
-
 /* strtonum lives in glibc (>= 2.38) but its declaration needs
  * _GNU_SOURCE; declare it here for the include below. */
 long long strtonum(const char *, long long, long long, const char **);

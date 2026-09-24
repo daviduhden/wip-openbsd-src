@@ -78,7 +78,7 @@ extern void SaveButtons(button_info *);
 
 /* ------------------------------ prototypes ------------------------------- */
 
-void DeadPipe(int nonsense) __attribute__((__noreturn__));
+[[noreturn]] void DeadPipe(int nonsense);
 static void DeadPipeCleanup(void);
 static void TerminateHandler(int sig);
 void SetButtonSize(button_info *, int, int);
@@ -87,7 +87,7 @@ void Loop(void);
 void RedrawWindow(button_info *);
 void RecursiveLoadData(button_info *, int *, int *);
 void CreateWindow(button_info *, int, int);
-void nocolor(const char *a, const char *b) __attribute__((__noreturn__));
+[[noreturn]] void nocolor(const char *a, const char *b);
 Pixel GetColor(char *name);
 int My_XNextEvent(Display *dpy, XEvent *event);
 void process_message(unsigned long type, unsigned long *body);
@@ -890,8 +890,8 @@ Loop(void)
 						Slide(seekpanel(b), b);
 					break;
 				} else /* i.e. action is Popup */
-					XUngrabPointer(Dpy,
-					    CurrentTime); /* And fall through */
+					XUngrabPointer(Dpy, CurrentTime);
+				[[fallthrough]];
 
 			case KeyRelease:
 			case ButtonRelease:

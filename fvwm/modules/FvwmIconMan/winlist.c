@@ -3,7 +3,7 @@
 
 #include "FvwmIconMan.h"
 
-static char const rcsid[] __unused =
+[[maybe_unused]] static char const rcsid[] =
     "$Id: winlist.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
 #define HASHTAB_SIZE 257

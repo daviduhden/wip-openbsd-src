@@ -85,7 +85,7 @@ void MainEventLoop(void);
 void ReadFvwmPipe(void);
 void ProcessMessage(unsigned long type, unsigned long *body);
 void SendFvwmPipe(char *message, unsigned long window);
-void DeadPipe(int nonsense) __attribute__((noreturn));
+[[noreturn]] void DeadPipe(int nonsense);
 void MakeMeWindow(void);
 void WaitForExpose(void);
 void RedrawWindow(int force);

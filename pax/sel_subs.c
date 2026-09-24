@@ -598,7 +598,7 @@ str_sec(const char *p, time_t *tval)
 		bigyear = ATOI2(p);
 		lt->tm_year = (bigyear * 100) - 1900;
 		yearset = 1;
-		/* FALLTHROUGH */
+		[[fallthrough]];
 	case 10: /* yy */
 		if (yearset) {
 			lt->tm_year += ATOI2(p);
@@ -607,23 +607,23 @@ str_sec(const char *p, time_t *tval)
 			if (lt->tm_year < 69) /* hack for 2000 ;-} */
 				lt->tm_year += (2000 - 1900);
 		}
-		/* FALLTHROUGH */
+		[[fallthrough]];
 	case 8: /* mm */
 		lt->tm_mon = ATOI2(p);
 		if ((lt->tm_mon > 12) || !lt->tm_mon)
 			return (-1);
 		--lt->tm_mon; /* time struct is 0 - 11 */
-			      /* FALLTHROUGH */
+			      [[fallthrough]];
 	case 6:               /* dd */
 		lt->tm_mday = ATOI2(p);
 		if ((lt->tm_mday > 31) || !lt->tm_mday)
 			return (-1);
-		/* FALLTHROUGH */
+		[[fallthrough]];
 	case 4: /* HH */
 		lt->tm_hour = ATOI2(p);
 		if (lt->tm_hour > 23)
 			return (-1);
-		/* FALLTHROUGH */
+		[[fallthrough]];
 	case 2: /* MM */
 		lt->tm_min = ATOI2(p);
 		if (lt->tm_min > 59)

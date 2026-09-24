@@ -705,7 +705,7 @@ pax_options(int argc, char **argv)
 		}
 		--argc;
 		dirptr = argv[argc];
-		/* FALL THROUGH */
+		[[fallthrough]];
 	case ARCHIVE:
 	case APPND:
 		for (; optind < argc; optind++)
@@ -1449,7 +1449,7 @@ cpio_options(int argc, char **argv)
 			cpio_usage();
 		--argc;
 		++argv;
-		/* FALL THROUGH */
+		[[fallthrough]];
 	case ARCHIVE:
 	case APPND:
 		if (*argv != NULL)
@@ -1743,8 +1743,10 @@ str_offt(char *val)
 	char *expr;
 	off_t num, t;
 
-	if (++depth > 32)
+	if (++depth > 32) {
+		--depth;
 		return (0);
+	}
 
 	num = strtoll(val, &expr, 0);
 	if ((num == LLONG_MAX) || (num <= 0) || (expr == val)) {

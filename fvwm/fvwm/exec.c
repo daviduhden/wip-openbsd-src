@@ -153,9 +153,8 @@ exec_helper_stop(void)
  * PipeRead pump in read.c instead.
  */
 int
-exec_helper_dispatch(struct imsg *imsg, void *arg)
+exec_helper_dispatch(struct imsg *imsg, void *)
 {
-	(void)arg;
 	switch (imsg->hdr.type) {
 	case IMSG_EXEC_OK: {
 		pid_t pid;
@@ -301,7 +300,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 {
 	struct ibuf *buf;
 	size_t datalen;
-	int cargc = argc - 1; /* skip argv[0] which is the path */
+	int cargc = argc; /* include argv[0], the program path */
 	int envc = 0;
 	int i;
 
@@ -310,7 +309,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 
 	/* Calculate total payload size: sizeof(int)*2 + all strings */
 	datalen = sizeof(int) * 2;
-	for (i = 1; i < argc; i++)
+	for (i = 0; i < argc; i++)
 		datalen += strlen(argv[i]) + 1;
 	if (envp) {
 		for (i = 0; envp[i] != NULL; i++) {
@@ -336,8 +335,8 @@ exec_helper_launch(int argc, char **argv, char **envp)
 	/* envc */
 	if (imsg_add(buf, &envc, sizeof(int)) == -1)
 		return -1;
-	/* strings */
-	for (i = 1; i < argc; i++) {
+	/* strings (argv[0..argc-1], matching decode_exec_msg()) */
+	for (i = 0; i < argc; i++) {
 		if (imsg_add(buf, argv[i], strlen(argv[i]) + 1) == -1)
 			return -1;
 	}

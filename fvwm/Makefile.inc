@@ -11,7 +11,7 @@ MANDIR ?=	${X11BASE}/man/man
 CC =		clang
 DEBUGGER =	lldb
 
-CFLAGS_COMMON =	-std=c17 -Wall -Wextra -Wpedantic \
+CFLAGS_COMMON =	-std=c23 -Wall -Wextra -Wpedantic \
 		-I${X11BASE}/include \
 		-I${.CURDIR} -I${.CURDIR}/.. -I${.CURDIR}/../libs
 CFLAGS =	-O2 -pipe ${CFLAGS_COMMON}
