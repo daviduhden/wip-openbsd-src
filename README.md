@@ -123,6 +123,13 @@ $ doas make install
 $ doas ./build.ksh all install
 ```
 
+A single component can be installed on its own:
+
+```
+$ doas make install-pax       # install only pax
+$ doas make install-fvwm      # install only fvwm
+```
+
 DESTDIR staging is supported everywhere:
 
 ```

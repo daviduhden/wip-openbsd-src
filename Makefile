@@ -10,6 +10,8 @@
 #   make pax        build only pax
 #   make fvwm       build only fvwm
 #   make install    install both components (run as root or via doas)
+#   make install-pax    install only pax
+#   make install-fvwm   install only fvwm
 #   make clean      remove build artifacts
 #   make obj        create objdirs (pax only; fvwm builds in place)
 #   make debug      build each component as <prog>_debug and run it under lldb
@@ -33,6 +35,14 @@ SUBDIR = pax fvwm
 # Recurse into each component, build <prog>_debug and start it under lldb.
 debug: _SUBDIRUSE
 
+# Install a single component; the recursive install target would
+# otherwise reach both pax and fvwm.  Run as root or via doas.
+.for dir in ${SUBDIR}
+install-${dir}:
+	@echo "===> ${dir} (install)"
+	@${MAKE} -C ${.CURDIR}/${dir} ${MAKE_FLAGS} install
+.endfor
+
 # Run the host-side test suite.
 test:
 	@${MAKE} -C ${.CURDIR}/tests test
@@ -40,4 +50,4 @@ test:
 # Clean and rebuild everything from scratch.
 rebuild: clean .WAIT all
 
-.PHONY: debug test rebuild
+.PHONY: debug test rebuild ${SUBDIR:S/^/install-/}
