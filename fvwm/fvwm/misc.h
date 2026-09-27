@@ -181,6 +181,7 @@ extern void RestoreWithdrawnLocation(FvwmWindow *, Bool);
 extern void Destroy(FvwmWindow *);
 extern void GetGravityOffsets(FvwmWindow *, int *, int *);
 extern void MoveViewport(int newx, int newy, Bool);
+extern void UpdateScreenSize(int new_width, int new_height);
 extern FvwmWindow *AddWindow(Window w);
 extern int	   MappedNotOverride(Window w);
 extern void	   GrabButtons(FvwmWindow *);

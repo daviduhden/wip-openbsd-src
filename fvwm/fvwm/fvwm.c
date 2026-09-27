@@ -381,7 +381,8 @@ main(int argc, char **argv)
 	XSelectInput(dpy, Scr.Root,
 	    LeaveWindowMask | EnterWindowMask | PropertyChangeMask |
 		SubstructureRedirectMask | KeyPressMask |
-		SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask);
+		SubstructureNotifyMask | ButtonPressMask | ButtonReleaseMask |
+		StructureNotifyMask);
 	XSync(dpy, 0);
 
 	XSetErrorHandler(FvwmErrorHandler);

@@ -81,6 +81,8 @@ extern int ShapeEventBase;
 void	   HandleShapeNotify(void);
 #endif /* SHAPE */
 
+void HandleConfigureNotify(void);
+
 Window PressedW;
 
 /*
@@ -119,6 +121,7 @@ InitEventHandlerJumpTable(void)
 	EventHandlerJumpTable[LeaveNotify] = HandleLeaveNotify;
 	EventHandlerJumpTable[FocusIn] = HandleFocusIn;
 	EventHandlerJumpTable[ConfigureRequest] = HandleConfigureRequest;
+	EventHandlerJumpTable[ConfigureNotify] = HandleConfigureNotify;
 	EventHandlerJumpTable[ClientMessage] = HandleClientMessage;
 	EventHandlerJumpTable[PropertyNotify] = HandlePropertyNotify;
 	EventHandlerJumpTable[KeyPress] = HandleKeyPress;
@@ -1181,6 +1184,28 @@ HandleLeaveNotify(void)
 			}
 		}
 	}
+}
+
+/***********************************************************************
+ *
+ *  Procedure:
+ *	HandleConfigureNotify - ConfigureNotify event handler
+ *
+ *  Only the root window is of interest here.  Its resize is how a
+ *  core-protocol client learns that the X screen changed size (for
+ *  example after an RandR output switch).  ConfigureNotify events for
+ *  client windows are ignored, exactly as before.
+ *
+ ************************************************************************/
+void
+HandleConfigureNotify(void)
+{
+	XConfigureEvent *ce = &Event.xconfigure;
+
+	if (ce->window != Scr.Root)
+		return;
+
+	UpdateScreenSize(ce->width, ce->height);
 }
 
 /***********************************************************************

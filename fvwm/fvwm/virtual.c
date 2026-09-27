@@ -603,6 +603,120 @@ MoveViewport(int newx, int newy, Bool grab)
 		MyXUngrabServer(dpy);
 }
 
+/***************************************************************************
+ *
+ *  The X screen (root window) changed size, e.g. because an RandR
+ *  output was enabled or its mode changed.  FVWM caches the screen
+ *  size in Scr.MyDisplayWidth/Height at startup and derives the page
+ *  size, the desktop limits and every window position from it, so all
+ *  of those values must be recomputed together.
+ *
+ *  The number of pages (DesktopSize) and the current page are
+ *  preserved: only the size of a single page changes.  Every window is
+ *  moved so that it stays on the same page with the same offset inside
+ *  that page (frame_x + Scr.Vx is the desktop coordinate).  Sticky
+ *  windows are not bound to a page and are left where the user put
+ *  them.  If the size did not actually change nothing happens, so a
+ *  running FVWM is unaffected unless the screen is resized.
+ *
+ ***************************************************************************/
+void
+UpdateScreenSize(int new_width, int new_height)
+{
+	int	    old_width = Scr.MyDisplayWidth;
+	int	    old_height = Scr.MyDisplayHeight;
+	int	    old_vx = Scr.Vx;
+	int	    old_vy = Scr.Vy;
+	int	    pages_x, pages_y, page_x, page_y;
+	FvwmWindow *t;
+
+	if (new_width <= 0 || new_height <= 0 ||
+	    (new_width == old_width && new_height == old_height))
+		return;
+	if (old_width <= 0 || old_height <= 0)
+		return; /* not initialised yet */
+
+	/*
+	 * DesktopSize is not stored on its own; recover the page counts
+	 * from VxMax/VyMax, which were computed as
+	 * (pages - 1) * MyDisplayWidth/Height.
+	 */
+	pages_x = Scr.VxMax / old_width + 1;
+	pages_y = Scr.VyMax / old_height + 1;
+	if (pages_x < 1)
+		pages_x = 1;
+	if (pages_y < 1)
+		pages_y = 1;
+
+	/* Keep the user on the page they are looking at. */
+	page_x = Scr.Vx / old_width;
+	page_y = Scr.Vy / old_height;
+	if (page_x < 0)
+		page_x = 0;
+	if (page_y < 0)
+		page_y = 0;
+	if (page_x > pages_x - 1)
+		page_x = pages_x - 1;
+	if (page_y > pages_y - 1)
+		page_y = pages_y - 1;
+
+	MyXGrabServer(dpy);
+
+	Scr.MyDisplayWidth = new_width;
+	Scr.MyDisplayHeight = new_height;
+	Scr.VxMax = (pages_x - 1) * new_width;
+	Scr.VyMax = (pages_y - 1) * new_height;
+	Scr.Vx = page_x * new_width;
+	Scr.Vy = page_y * new_height;
+
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+		int dx, dy, px, py, deltax, deltay;
+
+		if (t->flags & STICKY)
+			continue;
+
+		/* Frame position in desktop coordinates. */
+		dx = t->frame_x + old_vx;
+		dy = t->frame_y + old_vy;
+		/* Page, and offset inside that page. */
+		px = dx / old_width;
+		py = dy / old_height;
+		dx = px * new_width + (dx - px * old_width);
+		dy = py * new_height + (dy - py * old_height);
+
+		deltax = (dx - Scr.Vx) - t->frame_x;
+		deltay = (dy - Scr.Vy) - t->frame_y;
+		SetupFrame(t, dx - Scr.Vx, dy - Scr.Vy, t->frame_width,
+		    t->frame_height, False);
+
+		/* Keep icons on the same page too (cf. MoveViewport). */
+		if (!(t->flags & StickyIcon)) {
+			t->icon_x_loc += deltax;
+			t->icon_xl_loc += deltax;
+			t->icon_y_loc += deltay;
+			if (t->icon_pixmap_w != None)
+				XMoveWindow(dpy, t->icon_pixmap_w,
+				    t->icon_x_loc, t->icon_y_loc);
+			if (t->icon_w != None)
+				XMoveWindow(dpy, t->icon_w, t->icon_x_loc,
+				    t->icon_y_loc + t->icon_p_height);
+		}
+	}
+
+	/*
+	 * Pan frames are sized from MyDisplayWidth/Height; force
+	 * checkPanFrames() to resize them even though the edge thickness
+	 * itself did not change (it caches the old size).
+	 */
+	last_edge_thickness = -1;
+	checkPanFrames();
+
+	BroadcastPacket(M_NEW_PAGE, 5, Scr.Vx, Scr.Vy, Scr.CurrentDesk,
+	    Scr.VxMax, Scr.VyMax);
+
+	MyXUngrabServer(dpy);
+}
+
 /**************************************************************************
  *
  * Parse arguments for "Desk" and "MoveToDesk" (formerly "WindowsDesk"):
