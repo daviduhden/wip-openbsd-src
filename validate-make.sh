@@ -351,7 +351,10 @@ mbake_check() {
 	rc=$?
 	case "$output" in
 	*"Unknown special target"* | *"Error"*)
-		skip "$(rel "$file"): mbake: cannot parse BSD make constructs ($(printf '%s\n' "$output" | grep -m1 -o "Unknown special target '[^']*'" || printf 'syntax error'))"
+		detail=$(printf '%s\n' "$output" |
+			grep -m1 -o "Unknown special target '[^']*'" ||
+			printf 'syntax error')
+		skip "$(rel "$file"): mbake: cannot parse BSD make constructs ($detail)"
 		;;
 	"")
 		if [ $rc -eq 0 ]; then
