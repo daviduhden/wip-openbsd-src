@@ -46,6 +46,7 @@ ButtonNew(char *title, FvwmPicture *p, int up)
 	Button *new;
 
 	new = (Button *)xmalloc(sizeof(Button));
+	memset((void *)new, 0, sizeof(*new));
 	size_t title_len = strlen(title);
 	new->title = xmalloc(title_len + 1);
 	strlcpy(new->title, title, title_len + 1);
@@ -219,12 +220,14 @@ RemoveButton(ButtonArray *array, int butnum)
 {
 	Button *temp, *temp2;
 
+	if (array->head == NULL)
+		return;
 	if (butnum == 0) {
 		temp2 = array->head;
 		temp = array->head = array->head->next;
 	} else {
 		temp = find_n(array, butnum - 1);
-		if (temp == NULL)
+		if (temp == NULL || temp->next == NULL)
 			return;
 		temp2 = temp->next;
 		temp->next = temp2->next;
@@ -234,6 +237,7 @@ RemoveButton(ButtonArray *array, int butnum)
 		array->tail = temp;
 
 	FreeButton(temp2);
+	array->count--;
 
 	if (temp != array->head)
 		temp = temp->next;
@@ -281,6 +285,8 @@ FreeAllButtons(ButtonArray *array)
 		temp = temp->next;
 		FreeButton(temp2);
 	}
+	array->head = array->tail = NULL;
+	array->count = 0;
 }
 
 /******************************************************************************
@@ -336,7 +342,8 @@ DoButton(Button *button, int x, int y, int w, int h)
 
 	if (!LeftJustify) {
 		if (TruncateLeft && (w - button->tw) / 2 < 4) {
-			if (button->truncatewidth == w)
+			if (button->truncatewidth > 0 &&
+			    button->truncatewidth == w)
 				string = button->truncate_title;
 			else {
 				string = button->title;
@@ -398,6 +405,8 @@ SwitchButton(ButtonArray *array, int butnum)
 	Button *btn;
 
 	btn = find_n(array, butnum);
+	if (btn == NULL)
+		return;
 	btn->up = !btn->up;
 	btn->needsupdate = 1;
 	DrawButtonArray(array, 0);

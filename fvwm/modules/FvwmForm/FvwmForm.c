@@ -246,6 +246,49 @@ append_item_to_line(Line *line, Item *item)
 	}
 }
 
+/*
+ * Grow the items array.  Items are referenced by pointers stored in
+ * lines[].items, in choice.sel and in the caller's cur_sel/cur_button
+ * variables, so a moving realloc has to rebase all of them.
+ */
+static void
+grow_items(Item **pcur_sel, Item **pcur_button)
+{
+	Item *old_items = items;
+	int   old_cap = items_capacity;
+	long  delta;
+	int   i, j;
+
+	items_capacity = items_capacity ? items_capacity * 2 :
+	    INITIAL_ITEMS_CAPACITY;
+	items = (Item *)realloc(items, sizeof(Item) * items_capacity);
+	if (items == NULL) {
+		fprintf(fp_err, "%s: out of memory\n", prog_name);
+		exit(1);
+	}
+	memset((void *)(items + old_cap), 0,
+	    sizeof(Item) * (items_capacity - old_cap));
+	if (items == old_items)
+		return;
+	delta = (char *)items - (char *)old_items;
+	for (i = 0; i < lines_capacity; i++)
+		for (j = 0; j < lines[i].n; j++)
+			if (lines[i].items[j] != NULL)
+				lines[i].items[j] =
+				    (Item *)((char *)lines[i].items[j] +
+					delta);
+	for (i = 0; i < n_items; i++)
+		if (items[i].type == I_CHOICE && items[i].choice.sel != NULL)
+			items[i].choice.sel =
+			    (Item *)((char *)items[i].choice.sel + delta);
+	if (cur_text != NULL)
+		cur_text = (Item *)((char *)cur_text + delta);
+	if (*pcur_sel != NULL)
+		*pcur_sel = (Item *)((char *) *pcur_sel + delta);
+	if (*pcur_button != NULL && *pcur_button != &def_button)
+		*pcur_button = (Item *)((char *) *pcur_button + delta);
+}
+
 /* copy a string until '\0', or up to n chars, and delete trailing spaces */
 static char *
 CopyNString(char *cp, int n)
@@ -284,7 +327,12 @@ CopyQuotedString(char *cp)
 	while (1) {
 		switch (c = *(cp++)) {
 		case '\\':
-			*(dp++) = *(cp++);
+			c = *(cp++);
+			if (c == '\0') {
+				*dp = '\0';
+				return bp;
+			}
+			*(dp++) = c;
 			break;
 		case '\"':
 		case '\n':
@@ -308,9 +356,14 @@ CopySolidString(char *cp)
 	while (1) {
 		c = *(cp++);
 		if (c == '\\') {
+			c = *(cp++);
+			if (c == '\0') {
+				*dp = '\0';
+				return bp;
+			}
 			*(dp++) = '\\';
-			*(dp++) = *(cp++);
-		} else if (isspace(c) || c == '\0') {
+			*(dp++) = c;
+		} else if (isspace((unsigned char)c) || c == '\0') {
 			*dp = '\0';
 			return bp;
 		} else
@@ -346,6 +399,11 @@ ReadConfig(void)
 	if (!items) {
 		items_capacity = INITIAL_ITEMS_CAPACITY;
 		items = (Item *)malloc(sizeof(Item) * items_capacity);
+		if (items == NULL) {
+			fprintf(fp_err, "%s: out of memory\n", prog_name);
+			exit(1);
+		}
+		memset(items, 0, sizeof(Item) * items_capacity);
 	}
 
 	n_items = 0;
@@ -394,7 +452,7 @@ ReadConfig(void)
 			while (isspace((unsigned char)*cp))
 				cp++;
 			gx = FvwmParseInteger(cp);
-			while (!isspace((unsigned char)*cp))
+			while (*cp && !isspace((unsigned char)*cp))
 				cp++;
 			while (isspace((unsigned char)*cp))
 				cp++;
@@ -488,13 +546,8 @@ ReadConfig(void)
 		} else if (strncmp(cp, "Text", 4) == 0) {
 			/* syntax: *FFText "<text>" */
 			cp += 4;
-			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity ?
-				    items_capacity * 2 :
-				    INITIAL_ITEMS_CAPACITY;
-				items = (Item *)realloc(
-				    items, sizeof(Item) * items_capacity);
-			}
+			if (n_items + 1 > items_capacity)
+				grow_items(&cur_sel, &cur_button);
 			item = &items[n_items++];
 			item->type = I_TEXT;
 			item->header.name = "";
@@ -519,13 +572,8 @@ ReadConfig(void)
 		} else if (strncmp(cp, "Input", 5) == 0) {
 			/* syntax: *FFInput <name> <size> "<init_value>" */
 			cp += 5;
-			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity ?
-				    items_capacity * 2 :
-				    INITIAL_ITEMS_CAPACITY;
-				items = (Item *)realloc(
-				    items, sizeof(Item) * items_capacity);
-			}
+			if (n_items + 1 > items_capacity)
+				grow_items(&cur_sel, &cur_button);
 			item = &items[n_items++];
 			item->type = I_INPUT;
 			while (isspace((unsigned char)*cp))
@@ -535,7 +583,9 @@ ReadConfig(void)
 			while (isspace((unsigned char)*cp))
 				cp++;
 			item->input.size = FvwmParseInteger(cp);
-			while (!isspace((unsigned char)*cp))
+			if (item->input.size < 1)
+				item->input.size = 1;
+			while (*cp && !isspace((unsigned char)*cp))
 				cp++;
 			while (isspace((unsigned char)*cp))
 				cp++;
@@ -560,13 +610,8 @@ ReadConfig(void)
 		} else if (strncmp(cp, "Selection", 9) == 0) {
 			/* syntax: *FFSelection <name> single | multiple */
 			cp += 9;
-			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity ?
-				    items_capacity * 2 :
-				    INITIAL_ITEMS_CAPACITY;
-				items = (Item *)realloc(
-				    items, sizeof(Item) * items_capacity);
-			}
+			if (n_items + 1 > items_capacity)
+				grow_items(&cur_sel, &cur_button);
 			cur_sel = &items[n_items++];
 			cur_sel->type = I_SELECT;
 			while (isspace((unsigned char)*cp))
@@ -609,13 +654,8 @@ ReadConfig(void)
 					sizeof(Item *) *
 					    cur_sel->select.choices_cap);
 			}
-			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity ?
-				    items_capacity * 2 :
-				    INITIAL_ITEMS_CAPACITY;
-				items = (Item *)realloc(
-				    items, sizeof(Item) * items_capacity);
-			}
+			if (n_items + 1 > items_capacity)
+				grow_items(&cur_sel, &cur_button);
 			item = &items[n_items++];
 			item->type = I_CHOICE;
 			item->choice.sel = cur_sel;
@@ -659,13 +699,8 @@ ReadConfig(void)
 			/* syntax: *FFButton continue | restart | quit "<text>"
 			 */
 			cp += 6;
-			if (n_items + 1 > items_capacity) {
-				items_capacity = items_capacity ?
-				    items_capacity * 2 :
-				    INITIAL_ITEMS_CAPACITY;
-				items = (Item *)realloc(
-				    items, sizeof(Item) * items_capacity);
-			}
+			if (n_items + 1 > items_capacity)
+				grow_items(&cur_sel, &cur_button);
 			item = &items[n_items++];
 			item->type = I_BUTTON;
 			item->header.name = "";
@@ -677,7 +712,7 @@ ReadConfig(void)
 				item->button.key = IB_QUIT;
 			else
 				item->button.key = IB_CONTINUE;
-			while (!isspace((unsigned char)*cp))
+			while (*cp && !isspace((unsigned char)*cp))
 				cp++;
 			while (isspace((unsigned char)*cp))
 				cp++;
@@ -1175,14 +1210,27 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 			vp = var;
 			while (1) {
 				x = *(sp++);
-				if (x == '\\') {
-					*(vp++) = '\\';
-					*(vp++) = *(sp++);
-				} else if (x == ')' || x == '?' || x == '!') {
-					*(vp++) = '\0';
+				if (x == '\0') {
+					*vp = '\0';
 					break;
-				} else if (!isspace(x))
-					*(vp++) = x;
+				}
+				if (x == '\\') {
+					if (vp < var + sizeof(var) - 2)
+						*(vp++) = '\\';
+					x = *(sp++);
+					if (x == '\0') {
+						*vp = '\0';
+						break;
+					}
+					if (vp < var + sizeof(var) - 1)
+						*(vp++) = x;
+				} else if (x == ')' || x == '?' || x == '!') {
+					*vp = '\0';
+					break;
+				} else if (!isspace((unsigned char)x)) {
+					if (vp < var + sizeof(var) - 1)
+						*(vp++) = x;
+				}
 			}
 			for (i = 0; i < n_items; i++) {
 				item = items + i;

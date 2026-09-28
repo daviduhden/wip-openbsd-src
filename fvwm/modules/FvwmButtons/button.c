@@ -356,6 +356,10 @@ void
 MakeContainer(button_info *b)
 {
 	b->c = (container_info *)xmalloc(sizeof(container_info));
+	/* xmalloc() does not clear the memory, and ParseContainer()
+	 * frees back/fore/font_string without checking their flags, so
+	 * every field must start out NULL/zero. */
+	memset((void *)b->c, 0, sizeof(*b->c));
 	b->flags |= b_Container;
 	b->c->buttons = NULL;
 	b->c->num_buttons = 0;

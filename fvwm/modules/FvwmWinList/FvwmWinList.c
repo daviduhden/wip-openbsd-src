@@ -346,6 +346,10 @@ ProcessMessage(unsigned long type, unsigned long *body)
 		string = (char *)&body[3];
 		name = makename(string, ItemFlags(&windows, body[0]));
 		if (UpdateButton(&buttons, i, name, -1) == -1) {
+			/* Keep buttons aligned with windows: pad with empty
+			 * buttons so the new button lands at index i. */
+			while (buttons.count < i)
+				AddButton(&buttons, "", NULL, 0);
 			AddButton(&buttons, name, NULL, 1);
 			UpdateButtonSet(&buttons, i,
 			    ItemFlags(&windows, body[0]) & ICONIFIED ? 1 : 0);
@@ -670,11 +674,15 @@ LoopOnEvents(void)
 				num = WhichButton(
 				    &buttons, Event.xbutton.x, Event.xbutton.y);
 				if (num != -1) {
-					SendFvwmPipe(
-					    ClickAction[(Transient) ?
-						    0 :
-						    Event.xbutton.button - 1],
-					    ItemID(&windows, num));
+					if (Event.xbutton.button >= 1 &&
+					    Event.xbutton.button <= 3)
+						SendFvwmPipe(
+						    ClickAction[(Transient) ?
+							    0 :
+							    Event.xbutton
+								    .button -
+							    1],
+						    ItemID(&windows, num));
 					SwitchButton(&buttons, num);
 				}
 			}
@@ -712,6 +720,7 @@ LoopOnEvents(void)
 			if ((Event.xclient.format == 32) &&
 			    ((Atom)Event.xclient.data.l[0] == wm_del_win))
 				exit(0);
+			break;
 		case EnterNotify:
 			if (!SomeButtonDown(Event.xcrossing.state))
 				break;

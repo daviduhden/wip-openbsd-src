@@ -35,36 +35,52 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 	extern void DeadPipe(int);
 
 	errno = 0;
-	if ((count = read(fd, header, HEADER_SIZE * sizeof(unsigned long))) >
-	    0) {
-		if (header[0] == START_FLAG) {
-			if (header[2] < HEADER_SIZE ||
-			    header[2] > HEADER_SIZE + MAX_BODY_SIZE)
-				return -1;
-			body_length = header[2] - HEADER_SIZE;
-			*body = (unsigned long *)xmalloc(
-			    body_length * sizeof(unsigned long));
-			cbody = (char *)(*body);
-			total = 0;
-			while (total <
-			    (int)(body_length * sizeof(unsigned long))) {
-				errno = 0;
-				if ((count2 = read(fd, &cbody[total],
-					 body_length * sizeof(unsigned long) -
-					     total)) > 0) {
-					total += count2;
-				} else {
-					/* EOF or read error: the pipe is gone.
-					 * Report a dead pipe instead of
-					 * spinning on a closed connection. */
-					free(*body);
-					*body = NULL;
-					return -1;
-				}
-			}
-		} else
-			count = 0;
+
+	/*
+	 * A pipe read may return less than the whole header.  Acting on a
+	 * partially filled header would leave header[2] undetermined and
+	 * turn body_length into garbage, so read the header in full first.
+	 */
+	total = 0;
+	while (total < (int)(HEADER_SIZE * sizeof(unsigned long))) {
+		errno = 0;
+		if ((count = read(fd, (char *)header + total,
+			 HEADER_SIZE * sizeof(unsigned long) - total)) > 0)
+			total += count;
+		else {
+			DeadPipe(errno);
+			return -1;
+		}
 	}
+
+	if (header[0] == START_FLAG) {
+		if (header[2] < HEADER_SIZE ||
+		    header[2] > HEADER_SIZE + MAX_BODY_SIZE)
+			return -1;
+		body_length = header[2] - HEADER_SIZE;
+		*body = (unsigned long *)xmalloc(
+		    body_length * sizeof(unsigned long));
+		cbody = (char *)(*body);
+		total = 0;
+		while (total <
+		    (int)(body_length * sizeof(unsigned long))) {
+			errno = 0;
+			if ((count2 = read(fd, &cbody[total],
+				 body_length * sizeof(unsigned long) -
+				     total)) > 0) {
+				total += count2;
+			} else {
+				/* EOF or read error: the pipe is gone.
+				 * Report a dead pipe instead of
+				 * spinning on a closed connection. */
+				free(*body);
+				*body = NULL;
+				return -1;
+			}
+		}
+	} else
+		count = 0;
+
 	if (count <= 0)
 		DeadPipe(errno);
 	return count;
@@ -127,8 +143,10 @@ GetConfigLine(int *fd, char **tline)
 	static char  *line = NULL;
 	unsigned long header[HEADER_SIZE];
 
-	if (line != NULL)
+	if (line != NULL) {
 		free(line);
+		line = NULL;
+	}
 
 	if (first_pass) {
 		SendInfo(fd, "Send_ConfigInfo", 0);

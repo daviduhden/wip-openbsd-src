@@ -227,6 +227,7 @@ FreeList(List *list)
 		temp = temp->next;
 		FreeItem(temp2);
 	}
+	list->head = list->tail = NULL;
 	list->count = 0;
 }
 

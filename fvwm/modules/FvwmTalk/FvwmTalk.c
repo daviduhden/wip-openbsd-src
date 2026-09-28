@@ -83,7 +83,7 @@ XGCValues gcv;
 GC	  myGC;
 int	  My_XNextEvent(Display *dpy, XEvent *event);
 void	  DrawWindow(int mode);
-void	  paste_primary(int window, int property, int Delete);
+void	  paste_primary(Window window, Atom property, Bool Delete);
 void	  request_selection(int time);
 
 /***********************************************************************
@@ -190,9 +190,13 @@ main(int argc, char **argv)
 	XSetWMProtocols(dpy, window, &wm_del_win, 1);
 	XSetWMNormalHints(dpy, window, &sizehints);
 	/* XStringListToTextProperty(&(argv[0]), 1, &window_name); */
-	XStringListToTextProperty(&temp, 1, &window_name);
+	memset(&window_name, 0, sizeof(window_name));
+	if (!XStringListToTextProperty(&temp, 1, &window_name))
+		window_name.value = NULL;
 	XSetWMProperties(dpy, window, &window_name, &window_name, argv, argc,
 	    &sizehints, &wm_hints, &class_hints);
+	if (window_name.value != NULL)
+		XFree(window_name.value);
 
 	gcv.foreground = fore_pix;
 	gcv.background = back_pix;
@@ -275,6 +279,7 @@ Loop(int *fd)
 			case SelectionNotify:
 				paste_primary(event.xselection.requestor,
 				    event.xselection.property, True);
+				break;
 			default:
 				break;
 			}
@@ -335,13 +340,18 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	unsigned long  header[HEADER_SIZE];
 	int	       count;
 	static int     miss_counter = 0;
-	unsigned long *body;
+	unsigned long *body = NULL;
 
 	if (XPending(dpy)) {
 		XNextEvent(dpy, event);
 		return 1;
 	}
 
+	if (x_fd >= FD_SETSIZE || fd[1] >= FD_SETSIZE) {
+		fprintf(stderr,
+		    "FvwmTalk: file descriptor out of select() range\n");
+		DeadPipe(0);
+	}
 	FD_ZERO(&in_fdset);
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
@@ -362,11 +372,15 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	if (FD_ISSET(fd[1], &in_fdset)) {
 		if ((count = ReadFvwmPacket(fd[1], header, &body)) > 0) {
 			if (header[1] == M_ERROR || header[1] == M_STRING) {
-				strncpy(last_error, (char *)(&body[3]), 255);
-				/*last_error[strlen(last_error)-1] = 0;*/
-				last_error[strlen(last_error)] = 0;
-				last_error[255] = 0;
-				XClearArea(dpy, window, 0, 0, 10000, 10000, 1);
+				if (body != NULL) {
+					strncpy(last_error,
+					    (char *)(&body[3]),
+					    sizeof(last_error) - 1);
+					last_error[sizeof(last_error) - 1] =
+					    '\0';
+					XClearArea(dpy, window, 0, 0, 10000,
+					    10000, 1);
+				}
 			}
 
 			free(body);
@@ -391,11 +405,11 @@ request_selection(int time)
 }
 
 void
-paste_primary(int window, int property, int Delete)
+paste_primary(Window window, Atom property, Bool Delete)
 {
 	Atom	       actual_type;
 	int	       actual_format, i;
-	unsigned long  nitems, bytes_after, nread;
+	unsigned long  nitems, bytes_after, nread, off;
 	unsigned char *data, *data2;
 
 	if (property == None)
@@ -403,13 +417,16 @@ paste_primary(int window, int property, int Delete)
 
 	nread = 0;
 	do {
-		if (XGetWindowProperty(dpy, window, property, nread / 4,
+		off = nread / 4;
+		if (XGetWindowProperty(dpy, window, property, off,
 			PROP_SIZE, Delete, AnyPropertyType, &actual_type,
 			&actual_format, &nitems, &bytes_after,
 			(unsigned char **)&data) != Success)
 			return;
-		if (actual_type != XA_STRING)
+		if (actual_type != XA_STRING) {
+			XFree(data);
 			return;
+		}
 
 		data2 = data;
 		/* want to make a \n to \r mapping for cut and paste only */
@@ -419,15 +436,28 @@ paste_primary(int window, int property, int Delete)
 			data++;
 		}
 
-		if (255 - pos > 0) {
-			if (pos + (int)nitems < 255)
-				strncat(Text, (char *)data2,
-				    255 - pos - (int)nitems);
-			pos = strlen(Text);
+		/*
+		 * The property data is not NUL terminated, so copy at most
+		 * nitems bytes (bounded by the remaining space in Text) and
+		 * terminate the string ourselves.
+		 */
+		if (pos < (int)sizeof(Text) - 1) {
+			size_t avail = (size_t)((int)sizeof(Text) - 1 - pos);
+			size_t copy = (nitems < avail) ? (size_t)nitems :
+							 avail;
+
+			memcpy(Text + pos, data2, copy);
+			pos += (int)copy;
+			Text[pos] = '\0';
 			DrawWindow(UPDATE_ONLY);
 		}
+
 		nread += nitems;
 		XFree(data2);
+
+		/* Never re-read the same 32-bit word. */
+		if (nitems == 0 || nread / 4 <= off)
+			nread = (off + 1) * 4;
 	} while (bytes_after > 0);
 }
 
