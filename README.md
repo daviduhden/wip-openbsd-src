@@ -22,7 +22,7 @@ FVWM 2.2.5 window manager with privilege separation.  Both Exec
 and PipeRead commands run in the fvwm_exec helper (imsg(3)
 protocol over a socketpair), which is started before the main
 process locks its filesystem view and deliberately applies no
-pledge(2)/unveil(2) -- both are inherited across execve(2) and
+pledge(2)/unveil(2); both are inherited across execve(2) and
 would cripple the arbitrary programs fvwm launches.  PipeRead
 output is streamed back over IMSG_PIPEREAD_DATA messages and
 parsed with the historical line semantics (bounded line lengths,
