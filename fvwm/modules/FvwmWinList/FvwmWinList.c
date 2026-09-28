@@ -681,7 +681,7 @@ LoopOnEvents(void)
 							    0 :
 							    Event.xbutton
 								    .button -
-							    1],
+								1],
 						    ItemID(&windows, num));
 					SwitchButton(&buttons, num);
 				}

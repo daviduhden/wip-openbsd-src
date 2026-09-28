@@ -259,8 +259,8 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 	long  delta;
 	int   i, j;
 
-	items_capacity = items_capacity ? items_capacity * 2 :
-	    INITIAL_ITEMS_CAPACITY;
+	items_capacity =
+	    items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
 	items = (Item *)realloc(items, sizeof(Item) * items_capacity);
 	if (items == NULL) {
 		fprintf(fp_err, "%s: out of memory\n", prog_name);
@@ -275,8 +275,7 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 		for (j = 0; j < lines[i].n; j++)
 			if (lines[i].items[j] != NULL)
 				lines[i].items[j] =
-				    (Item *)((char *)lines[i].items[j] +
-					delta);
+				    (Item *)((char *)lines[i].items[j] + delta);
 	for (i = 0; i < n_items; i++)
 		if (items[i].type == I_CHOICE && items[i].choice.sel != NULL)
 			items[i].choice.sel =
@@ -284,9 +283,9 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 	if (cur_text != NULL)
 		cur_text = (Item *)((char *)cur_text + delta);
 	if (*pcur_sel != NULL)
-		*pcur_sel = (Item *)((char *) *pcur_sel + delta);
+		*pcur_sel = (Item *)((char *)*pcur_sel + delta);
 	if (*pcur_button != NULL && *pcur_button != &def_button)
-		*pcur_button = (Item *)((char *) *pcur_button + delta);
+		*pcur_button = (Item *)((char *)*pcur_button + delta);
 }
 
 /* copy a string until '\0', or up to n chars, and delete trailing spaces */

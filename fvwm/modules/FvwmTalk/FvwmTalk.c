@@ -373,13 +373,12 @@ My_XNextEvent(Display *dpy, XEvent *event)
 		if ((count = ReadFvwmPacket(fd[1], header, &body)) > 0) {
 			if (header[1] == M_ERROR || header[1] == M_STRING) {
 				if (body != NULL) {
-					strncpy(last_error,
-					    (char *)(&body[3]),
+					strncpy(last_error, (char *)(&body[3]),
 					    sizeof(last_error) - 1);
 					last_error[sizeof(last_error) - 1] =
 					    '\0';
-					XClearArea(dpy, window, 0, 0, 10000,
-					    10000, 1);
+					XClearArea(
+					    dpy, window, 0, 0, 10000, 10000, 1);
 				}
 			}
 
@@ -418,9 +417,9 @@ paste_primary(Window window, Atom property, Bool Delete)
 	nread = 0;
 	do {
 		off = nread / 4;
-		if (XGetWindowProperty(dpy, window, property, off,
-			PROP_SIZE, Delete, AnyPropertyType, &actual_type,
-			&actual_format, &nitems, &bytes_after,
+		if (XGetWindowProperty(dpy, window, property, off, PROP_SIZE,
+			Delete, AnyPropertyType, &actual_type, &actual_format,
+			&nitems, &bytes_after,
 			(unsigned char **)&data) != Success)
 			return;
 		if (actual_type != XA_STRING) {
@@ -443,8 +442,7 @@ paste_primary(Window window, Atom property, Bool Delete)
 		 */
 		if (pos < (int)sizeof(Text) - 1) {
 			size_t avail = (size_t)((int)sizeof(Text) - 1 - pos);
-			size_t copy = (nitems < avail) ? (size_t)nitems :
-							 avail;
+			size_t copy = (nitems < avail) ? (size_t)nitems : avail;
 
 			memcpy(Text + pos, data2, copy);
 			pos += (int)copy;
