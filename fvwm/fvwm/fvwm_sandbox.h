@@ -57,15 +57,18 @@
 
 /*
  * sandbox_x11_only -- process that only needs X11 + stdio + fvwm pipes.
- * No filesystem access, no network beyond X11, no process creation.
+ * Xlib still reads files: XGetErrorText(3) opens the X error database
+ * from an X error handler (including the default one) and locale data
+ * is loaded from disk, so rpath is required.  No write, no network
+ * beyond X11, no process creation.
  * Used by: FvwmAuto, FvwmBanner, FvwmBacker, FvwmIdent, FvwmIconBox,
  *          FvwmPager, FvwmScroll, FvwmTalk, FvwmWinList
  */
 static inline void
 sandbox_x11_only(const char *progname)
 {
-	if (pledge("stdio inet dns", NULL) == -1)
-		err(1, "%s: pledge stdio", progname);
+	if (pledge("stdio rpath inet dns", NULL) == -1)
+		err(1, "%s: pledge stdio rpath", progname);
 }
 
 /*

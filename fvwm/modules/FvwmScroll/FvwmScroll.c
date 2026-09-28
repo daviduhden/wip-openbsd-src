@@ -138,7 +138,6 @@ main(int argc, char **argv)
 
 	/* sever our connection with fvwm */
 
-	sandbox_x11_only("FvwmScroll");
 	close(fd[0]);
 	close(fd[1]);
 	if (app_win == 0)
@@ -146,6 +145,13 @@ main(int argc, char **argv)
 
 	if (app_win == 0)
 		return 0;
+
+	/*
+	 * Restrict the process only now: GetTargetWindow() calls
+	 * XCreateFontCursor(), which makes libX11 load libXcursor.so with
+	 * mmap(PROT_EXEC), impossible once prot_exec is gone.
+	 */
+	sandbox_x11_only("FvwmScroll");
 
 	fd_width = GetFdWidth();
 

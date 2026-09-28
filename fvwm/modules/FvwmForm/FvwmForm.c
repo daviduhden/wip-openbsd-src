@@ -322,7 +322,6 @@ CopyQuotedString(char *cp)
 {
 	char *dp, *bp, c;
 	bp = dp = (char *)malloc(strlen(cp) + 1);
-	sandbox_x11_config("FvwmForm");
 
 	while (1) {
 		switch (c = *(cp++)) {
@@ -1946,6 +1945,14 @@ static void
 MainLoop(void)
 {
 	fd_set fds;
+
+	/*
+	 * Restrict the process only now: XCreateFontCursor() in
+	 * OpenWindows() makes libX11 load libXcursor.so, which needs
+	 * mmap(PROT_EXEC) and therefore the prot_exec promise that a
+	 * later pledge can no longer grant.
+	 */
+	sandbox_x11_config("FvwmForm");
 
 	while (1) {
 		FD_ZERO(&fds);
