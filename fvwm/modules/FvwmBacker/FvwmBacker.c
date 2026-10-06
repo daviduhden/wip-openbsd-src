@@ -81,14 +81,14 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *displayName = NULL;
+	char *displayName = nullptr;
 
-	commands = NULL;
+	commands = nullptr;
 
 	/* Save the program name for error messages and config parsing */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != NULL)
+	if (s != nullptr)
 		temp = s + 1;
 
 	Module = temp;
@@ -117,7 +117,7 @@ main(int argc, char **argv)
 	/* Open a log file if necessary */
 #ifdef LOGFILE
 	logFile = fopen(LOGFILE, "a");
-	if (logFile != NULL)
+	if (logFile != nullptr)
 		fprintf(logFile, "Initialising FvwmBacker\n");
 #endif
 
@@ -159,10 +159,10 @@ EndLessLoop(void)
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
 
-		if (!select(fd_width, &readset, NULL, NULL, &tv)) {
+		if (!select(fd_width, &readset, nullptr, nullptr, &tv)) {
 			FD_ZERO(&readset);
 			FD_SET(Fvwm_fd[1], &readset);
-			select(fd_width, &readset, NULL, NULL, NULL);
+			select(fd_width, &readset, nullptr, nullptr, nullptr);
 		}
 
 		if (!FD_ISSET(Fvwm_fd[1], &readset))
@@ -182,7 +182,7 @@ ReadFvwmPipe(void)
 	int	      count;
 	unsigned long header[HEADER_SIZE], *body;
 
-	body = NULL;
+	body = nullptr;
 	if ((count = ReadFvwmPacket(Fvwm_fd[1], header, &body)) > 0) {
 		ProcessMessage(header[1], body);
 		free(body);
@@ -234,7 +234,7 @@ ProcessMessage(unsigned long type, unsigned long *body)
 			fprintf(logFile, "Color set.\n");
 			fflush(logFile);
 #endif
-		} else if (commands[body[0]].cmdStr != NULL) {
+		} else if (commands[body[0]].cmdStr != nullptr) {
 			SendFvwmPipe(
 			    commands[body[0]].cmdStr, (unsigned long)0);
 		}
@@ -255,7 +255,7 @@ SendFvwmPipe(char *message, unsigned long window)
 
 	while (1) {
 		temp = strchr(hold, ',');
-		if (temp != NULL) {
+		if (temp != nullptr) {
 			temp_msg = malloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
@@ -285,7 +285,7 @@ SendFvwmPipe(char *message, unsigned long window)
     Based on DeadPipe() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
  **********************************************************************/
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -328,7 +328,7 @@ AddCommand(char *string)
 	while (isspace((unsigned char)*temp))
 		temp++;
 	num = FvwmParseInteger(temp);
-	while (!isspace((unsigned char)*temp))
+	while (*temp && !isspace((unsigned char)*temp))
 		temp++;
 	while (isspace((unsigned char)*temp))
 		temp++;
@@ -350,11 +350,11 @@ AddCommand(char *string)
 		char *tmp;
 		/* Process a solid color request */
 
-		color = &temp[7];
+		color = &temp[6];
 		while (isspace((unsigned char)*color))
 			color++;
 		tmp = color;
-		while (!isspace((unsigned char)*tmp))
+		while (*tmp && !isspace((unsigned char)*tmp))
 			tmp++;
 		*tmp = 0;
 		commands[num].type = 1;

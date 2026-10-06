@@ -110,7 +110,7 @@ static int
 com_rd(ARCHD *arcn)
 {
 	arcn->skip = 0;
-	arcn->pat = NULL;
+	arcn->pat = nullptr;
 	arcn->org_name = arcn->name;
 	switch (arcn->sb.st_mode & C_IFMT) {
 	case C_ISFIFO:

@@ -50,7 +50,7 @@ ButtonNew(char *title, FvwmPicture *p, int up)
 	size_t title_len = strlen(title);
 	new->title = xmalloc(title_len + 1);
 	strlcpy(new->title, title, title_len + 1);
-	if (p != NULL) {
+	if (p != nullptr) {
 		new->p.picture = p->picture;
 		new->p.mask = p->mask;
 		new->p.width = p->width;
@@ -61,7 +61,7 @@ ButtonNew(char *title, FvwmPicture *p, int up)
 		new->p.picture = 0;
 
 	new->up = up;
-	new->next = NULL;
+	new->next = nullptr;
 	new->needsupdate = 1;
 
 	return new;
@@ -74,7 +74,7 @@ void
 InitArray(ButtonArray *array, int x, int y, int w, int h)
 {
 	array->count = 0;
-	array->head = array->tail = NULL;
+	array->head = array->tail = nullptr;
 	array->x = x;
 	array->y = y;
 	array->w = w;
@@ -97,7 +97,7 @@ UpdateArray(ButtonArray *array, int x, int y, int w, int h)
 		array->w = w;
 	if (h != -1)
 		array->h = h;
-	for (temp = array->head; temp != NULL; temp = temp->next)
+	for (temp = array->head; temp != nullptr; temp = temp->next)
 		temp->needsupdate = 1;
 }
 
@@ -110,7 +110,7 @@ AddButton(ButtonArray *array, char *title, FvwmPicture *p, int up)
 	Button *new;
 
 	new = ButtonNew(title, p, up);
-	if (array->head == NULL) {
+	if (array->head == nullptr) {
 		array->head = array->tail = new;
 	} else {
 		array->tail->next = new;
@@ -123,7 +123,7 @@ AddButton(ButtonArray *array, char *title, FvwmPicture *p, int up)
 
 	new->tw = XTextWidth(ButtonFont, title, strlen(title));
 	new->truncatewidth = 0;
-	new->next = NULL;
+	new->next = nullptr;
 	new->needsupdate = 1;
 	new->set = 0;
 
@@ -139,8 +139,8 @@ UpdateButton(ButtonArray *array, int butnum, char *title, int up)
 	Button *temp;
 
 	temp = find_n(array, butnum);
-	if (temp != NULL) {
-		if (title != NULL) {
+	if (temp != nullptr) {
+		if (title != nullptr) {
 			size_t title_len = strlen(title);
 			temp->title =
 			    (char *)xrealloc(temp->title, title_len + 1);
@@ -164,7 +164,7 @@ UpdateButtonPicture(ButtonArray *array, int butnum, FvwmPicture *p)
 {
 	Button *temp;
 	temp = find_n(array, butnum);
-	if (temp == NULL)
+	if (temp == nullptr)
 		return -1;
 	if (temp->p.picture != p->picture || temp->p.mask != p->mask) {
 		temp->p.picture = p->picture;
@@ -186,7 +186,7 @@ UpdateButtonSet(ButtonArray *array, int butnum, int set)
 	Button *btn;
 
 	btn = find_n(array, butnum);
-	if (btn != NULL) {
+	if (btn != nullptr) {
 		if ((btn->set & 1) != set) {
 			btn->set = (btn->set & 2) | set;
 			btn->needsupdate = 1;
@@ -205,7 +205,7 @@ UpdateButtonDesk(ButtonArray *array, int butnum, long desk)
 	Button *btn;
 
 	btn = find_n(array, butnum);
-	if (btn != NULL) {
+	if (btn != nullptr) {
 		btn->desk = desk;
 	} else
 		return -1;
@@ -220,14 +220,14 @@ RemoveButton(ButtonArray *array, int butnum)
 {
 	Button *temp, *temp2;
 
-	if (array->head == NULL)
+	if (array->head == nullptr)
 		return;
 	if (butnum == 0) {
 		temp2 = array->head;
 		temp = array->head = array->head->next;
 	} else {
 		temp = find_n(array, butnum - 1);
-		if (temp == NULL || temp->next == NULL)
+		if (temp == nullptr || temp->next == nullptr)
 			return;
 		temp2 = temp->next;
 		temp->next = temp2->next;
@@ -241,7 +241,7 @@ RemoveButton(ButtonArray *array, int butnum)
 
 	if (temp != array->head)
 		temp = temp->next;
-	for (; temp != NULL; temp = temp->next)
+	for (; temp != nullptr; temp = temp->next)
 		temp->needsupdate = 1;
 }
 
@@ -255,7 +255,7 @@ find_n(ButtonArray *array, int n)
 	int	i;
 
 	temp = array->head;
-	for (i = 0; i < n && temp != NULL; i++, temp = temp->next)
+	for (i = 0; i < n && temp != nullptr; i++, temp = temp->next)
 		;
 	return temp;
 }
@@ -266,8 +266,8 @@ find_n(ButtonArray *array, int n)
 void
 FreeButton(Button *ptr)
 {
-	if (ptr != NULL) {
-		if (ptr->title != NULL)
+	if (ptr != nullptr) {
+		if (ptr->title != nullptr)
 			free(ptr->title);
 		free(ptr);
 	}
@@ -280,12 +280,12 @@ void
 FreeAllButtons(ButtonArray *array)
 {
 	Button *temp, *temp2;
-	for (temp = array->head; temp != NULL;) {
+	for (temp = array->head; temp != nullptr;) {
 		temp2 = temp;
 		temp = temp->next;
 		FreeButton(temp2);
 	}
-	array->head = array->tail = NULL;
+	array->head = array->tail = nullptr;
 	array->count = 0;
 }
 
@@ -384,7 +384,7 @@ DrawButtonArray(ButtonArray *barray, int all)
 	Button *btn;
 	int	i = 0; /* buttons displayed */
 
-	for (btn = barray->head; btn != NULL; btn = btn->next) {
+	for (btn = barray->head; btn != nullptr; btn = btn->next) {
 		if ((!ShowCurrentDesk) || (btn->desk == CurrentDesk)) {
 			if (btn->needsupdate || all) {
 				DoButton(btn, barray->x,
@@ -405,7 +405,7 @@ SwitchButton(ButtonArray *array, int butnum)
 	Button *btn;
 
 	btn = find_n(array, butnum);
-	if (btn == NULL)
+	if (btn == nullptr)
 		return;
 	btn->up = !btn->up;
 	btn->needsupdate = 1;
@@ -421,7 +421,7 @@ RadioButton(ButtonArray *array, int butnum)
 	Button *temp;
 	int	i;
 
-	for (temp = array->head, i = 0; temp != NULL; temp = temp->next, i++) {
+	for (temp = array->head, i = 0; temp != nullptr; temp = temp->next, i++) {
 		if (i == butnum) {
 			if (ShowFocus && temp->up) {
 				temp->up = 0;
@@ -464,7 +464,7 @@ WhichButton(ButtonArray *array, int x, int y)
 		int	i, n;
 
 		temp = array->head;
-		for (i = 0, n = 0; n < (num + 1) && temp != NULL;
+		for (i = 0, n = 0; n < (num + 1) && temp != nullptr;
 		    temp = temp->next, i++) {
 			if (temp->desk == CurrentDesk)
 				n++;
@@ -495,7 +495,7 @@ PrintButtons(ButtonArray *array)
 	Button *temp;
 
 	ConsoleMessage("List of Buttons:\n");
-	for (temp = array->head; temp != NULL; temp = temp->next)
+	for (temp = array->head; temp != nullptr; temp = temp->next)
 		ConsoleMessage(
 		    "   %s is %s\n", temp->title, (temp->up) ? "Up" : "Down");
 }

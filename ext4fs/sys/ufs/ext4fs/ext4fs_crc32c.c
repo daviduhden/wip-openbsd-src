@@ -454,6 +454,16 @@ ext4fs_extent_block_csum_set(struct m_ext4fs *fs, u_int32_t ino,
 	/* Tail is right after eh_max entries */
 	tail_offset = sizeof(struct ext4fs_extent_header) +
 	    (size_t)letoh16(eh->eh_max) * sizeof(struct ext4fs_extent);
+
+	/*
+	 * eh_max is read from disk.  Callers validate it against the
+	 * block capacity before getting here, but keep the write itself
+	 * bounded as well: a corrupt header must never make the checksum
+	 * tail spill past the block buffer.
+	 */
+	if (tail_offset > fs->m_block_size - sizeof(u_int32_t))
+		return;
+
 	tail = (u_int32_t *)((char *)buf + tail_offset);
 
 	seed = ext4fs_csum_seed(fs);

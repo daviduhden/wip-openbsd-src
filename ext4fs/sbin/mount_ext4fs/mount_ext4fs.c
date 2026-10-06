@@ -58,6 +58,7 @@ main(int argc, char *argv[])
 	char fs_name[PATH_MAX], *errcause;
 
 	mntflags = 0;
+	memset(&args, 0, sizeof(args));
 	optind = optreset = 1;		/* Reset for parse of new argv. */
 	while ((ch = getopt(argc, argv, "o:")) != -1)
 		switch (ch) {

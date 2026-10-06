@@ -7,14 +7,14 @@
 [[maybe_unused]] static char const rcsid[] =
     "$Id: debug.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
-static FILE *console = NULL;
+static FILE *console = nullptr;
 
 void
 ConsoleMessage(const char *fmt, ...)
 {
 	va_list args;
 
-	assert(console != NULL);
+	assert(console != nullptr);
 
 	fputs("FvwmIconMan: ", console);
 
@@ -28,7 +28,7 @@ OpenConsole(const char *filenm)
 {
 	if (!filenm)
 		console = stderr;
-	else if ((console = fopen(filenm, "w")) == NULL) {
+	else if ((console = fopen(filenm, "w")) == nullptr) {
 		fprintf(stderr, "%s: cannot open %s\n", Module, filenm);
 		return 0;
 	}
@@ -41,7 +41,7 @@ ConsoleDebug(int flag, const char *fmt, ...)
 {
 	(void)flag;
 	(void)fmt;
-	assert(console != NULL);
+	assert(console != nullptr);
 
 #ifdef PRINT_DEBUG
 	if (flag) {

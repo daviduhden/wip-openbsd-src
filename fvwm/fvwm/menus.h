@@ -51,10 +51,10 @@
 #define FUNC_NO_WINDOW False
 #define FUNC_NEEDS_WINDOW True
 
-#define MENU_IS_LEFT 0x01
-#define MENU_IS_RIGHT 0x02
-#define MENU_IS_UP 0x04
-#define MENU_IS_DOWN 0x08
+constexpr int MENU_IS_LEFT = 0x01;
+constexpr int MENU_IS_RIGHT = 0x02;
+constexpr int MENU_IS_UP = 0x04;
+constexpr int MENU_IS_DOWN = 0x08;
 
 typedef enum {
 	/* menu types */

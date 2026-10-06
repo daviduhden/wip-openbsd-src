@@ -51,7 +51,7 @@ struct moduleInfoList {
 	struct moduleInfoList *next;
 };
 
-struct moduleInfoList *modlistroot = NULL;
+struct moduleInfoList *modlistroot = nullptr;
 
 void	    AddToModList(char *tline); /* prototypes */
 extern void StartupStuff(void);
@@ -94,9 +94,9 @@ AddToModList(char *tline)
 
 	/* Find end of list */
 	t = modlistroot;
-	prev = NULL;
+	prev = nullptr;
 
-	while (t != NULL) {
+	while (t != nullptr) {
 		prev = t;
 		t = t->next;
 	}
@@ -104,9 +104,9 @@ AddToModList(char *tline)
 	this = (struct moduleInfoList *)xmalloc(sizeof(struct moduleInfoList));
 	len = strlen(tline) + 1;
 	this->data = (char *)xmalloc(len);
-	this->next = NULL;
+	this->next = nullptr;
 	strlcpy(this->data, tline, len);
-	if (prev == NULL) {
+	if (prev == nullptr) {
 		modlistroot = this;
 	} else
 		prev->next = this;
@@ -143,17 +143,17 @@ DestroyModConfig(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	char *mi;
 
 	GetNextToken(action, &info);
-	if (info == NULL) {
+	if (info == nullptr) {
 		return;
 	}
 
 	current = modlistroot;
-	prev = NULL;
+	prev = nullptr;
 
-	while (current != NULL) {
+	while (current != nullptr) {
 		GetNextToken(current->data, &mi);
 		next = current->next;
-		if (mi != NULL && matchWildcards(info, mi + 1)) {
+		if (mi != nullptr && matchWildcards(info, mi + 1)) {
 			free(current->data);
 			free(current);
 			if (prev) {
@@ -196,6 +196,9 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #ifdef XPM
 	if (PixmapPath && strlen(PixmapPath)) {
 		len = strlen(PixmapPath) + 13;
+		/* long enough for the "ColorLimit %d\n" line too */
+		if (len < 32)
+			len = 32;
 		message = xmalloc(len);
 		snprintf(message, len, "PixmapPath %s\n", PixmapPath);
 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, message);
@@ -211,7 +214,7 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	SendName(*Module, M_CONFIG_INFO, 0, 0, 0, msg2);
 
 	t = modlistroot;
-	while (t != NULL) {
+	while (t != nullptr) {
 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, t->data);
 		t = t->next;
 	}

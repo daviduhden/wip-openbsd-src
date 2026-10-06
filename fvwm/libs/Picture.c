@@ -56,7 +56,7 @@ static double c400_distance(XColor *, XColor *);   /* prototype */
 
 #include "fvwmlib.h"
 
-static FvwmPicture *PictureList = NULL;
+static FvwmPicture *PictureList = nullptr;
 Colormap	    PictureCMap;
 Display		   *PictureSaveDisplay; /* Save area for display pointer */
 
@@ -76,24 +76,24 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 	int	     l;
 	FvwmPicture *p;
 #ifdef XPM
-	XpmAttributes xpm_attributes;
+	XpmAttributes xpm_attributes = {0};
 	int	      rc;
 	XpmImage      my_image = {0};
 #endif
 
-	p = (FvwmPicture *)xmalloc(sizeof(FvwmPicture));
+	p = (FvwmPicture *)xcalloc(1, sizeof(FvwmPicture));
 	p->count = 1;
 	p->name = path;
-	p->next = NULL;
+	p->next = nullptr;
 
 #ifdef XPM
 	/* Try to load it as an X Pixmap first */
 	xpm_attributes.colormap = PictureCMap;
 	xpm_attributes.closeness = 40000; /* Allow for "similar" colors */
-	xpm_attributes.valuemask =
-	    XpmSize | XpmReturnPixels | XpmColormap | XpmCloseness;
+	xpm_attributes.valuemask = XpmSize | XpmReturnPixels |
+	    XpmReturnAllocPixels | XpmColormap | XpmCloseness;
 
-	rc = XpmReadFileToXpmImage(path, &my_image, NULL);
+	rc = XpmReadFileToXpmImage(path, &my_image, nullptr);
 	if (rc == XpmSuccess) {
 		color_reduce_pixmap(&my_image, color_limit);
 		rc = XpmCreatePixmapFromXpmImage(dpy, Root, &my_image,
@@ -101,11 +101,14 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 		if (rc == XpmSuccess) {
 			p->width = my_image.width;
 			p->height = my_image.height;
+			/* Keep the colour list so DestroyPicture can free it. */
+			p->xpm_attrs = xpm_attributes;
 			XpmFreeXpmImage(&my_image);
 			p->depth =
 			    DefaultDepthOfScreen(DefaultScreenOfDisplay(dpy));
 			return p;
 		}
+		XpmFreeAttributes(&xpm_attributes);
 		XpmFreeXpmImage(&my_image);
 	}
 #endif
@@ -119,7 +122,7 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 	}
 
 	free(p);
-	return NULL;
+	return nullptr;
 }
 
 FvwmPicture *
@@ -131,7 +134,7 @@ GetPicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
 
 	if (!(path = findIconFile(name, PixmapPath, R_OK)))
 		if (!(path = findIconFile(name, IconPath, R_OK)))
-			return NULL;
+			return nullptr;
 	p = LoadPicture(dpy, Root, path, color_limit);
 	if (!p)
 		free(path);
@@ -149,11 +152,11 @@ CachePicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
 #ifdef XPM
 	if (!(path = findIconFile(name, PixmapPath, R_OK)))
 		if (!(path = findIconFile(name, IconPath, R_OK)))
-			return NULL;
+			return nullptr;
 #else
 	/* Ignore the given pixmap path when compiled without XPM support */
 	if (!(path = findIconFile(name, IconPath, R_OK)))
-		return NULL;
+		return nullptr;
 #endif
 
 	/* See if the picture is already cached */
@@ -189,18 +192,31 @@ DestroyPicture(Display *dpy, FvwmPicture *p)
 {
 	FvwmPicture *q = PictureList;
 
-	if (!p) /* bag out if NULL */
+	if (!p) /* bag out if nullptr */
+		return;
+	if (p->count == 0) /* extra destroy: do not underflow */
 		return;
 	if (--(p->count) > 0) /* Remove a weight, still too heavy? */
 		return;
 
 	/* Let it fly */
-	if (p->name != NULL)
+	if (p->name != nullptr)
 		free(p->name);
 	if (p->picture != None)
 		XFreePixmap(dpy, p->picture);
 	if (p->mask != None)
 		XFreePixmap(dpy, p->mask);
+#ifdef XPM
+	/*
+	 * Release the colours XpmCreatePixmapFromXpmImage() allocated for
+	 * this pixmap.  XpmFreeAttributes frees the alloc_pixels array.
+	 */
+	if (p->xpm_attrs.alloc_pixels != nullptr) {
+		XFreeColors(dpy, p->xpm_attrs.colormap,
+		    p->xpm_attrs.alloc_pixels, p->xpm_attrs.nalloc_pixels, 0);
+	}
+	XpmFreeAttributes(&p->xpm_attrs);
+#endif
 
 	/* Link it out of the list (it might not be there) */
 	if (p == q) /* in head? simple */
@@ -233,13 +249,13 @@ findIconFile(char *icon, char *pathlist, int type)
 	size_t pathlen;
 
 	if (!icon)
-		return NULL;
+		return nullptr;
 
 	l = (pathlist) ? strlen(pathlist) : 0;
 	pathlen = strlen(icon) + l + 10;
 	path = xmalloc(pathlen);
 	*path = '\0';
-	if (*icon == '/' || pathlist == NULL || *pathlist == '\0') {
+	if (*icon == '/' || pathlist == nullptr || *pathlist == '\0') {
 		/* No search if icon begins with a slash */
 		/* No search if pathlist is empty */
 		strlcpy(path, icon, pathlen);
@@ -249,7 +265,7 @@ findIconFile(char *icon, char *pathlist, int type)
 	/* Search each element of the pathlist for the icon file */
 	while ((pathlist) && (*pathlist)) {
 		dir_end = strchr(pathlist, ':');
-		if (dir_end != NULL) {
+		if (dir_end != nullptr) {
 			strncpy(path, pathlist, dir_end - pathlist);
 			path[dir_end - pathlist] = 0;
 		} else
@@ -264,14 +280,14 @@ findIconFile(char *icon, char *pathlist, int type)
 			return path;
 
 		/* Point to next element of the path */
-		if (dir_end == NULL)
-			pathlist = NULL;
+		if (dir_end == nullptr)
+			pathlist = nullptr;
 		else
 			pathlist = dir_end + 1;
 	}
-	/* Hmm, couldn't find the file.  Return NULL */
+	/* Hmm, couldn't find the file.  Return nullptr */
 	free(path);
-	return NULL;
+	return nullptr;
 }
 
 #ifdef XPM
@@ -326,16 +342,16 @@ static Color_Info base_array[] = {
 #define NColors (sizeof(base_array) / sizeof(Color_Info))
 
 /* if c_color isn't set, copy it from one of the other colours */
-[[maybe_unused]] static Bool
+static Bool
 xpmcolor_require_c_color(XpmColor *p)
 {
-	if (p->c_color != NULL)
+	if (p->c_color != nullptr)
 		return False;
-	else if (p->g_color != NULL)
+	else if (p->g_color != nullptr)
 		p->c_color = strdup(p->g_color);
-	else if (p->g4_color != NULL)
+	else if (p->g4_color != nullptr)
 		p->c_color = strdup(p->g4_color);
-	else if (p->m_color != NULL)
+	else if (p->m_color != nullptr)
 		p->c_color = strdup(p->m_color);
 	else
 		p->c_color = strdup("none");
@@ -365,6 +381,8 @@ color_reduce_pixmap(XpmImage *image, int color_limit)
 			   doesn't appear to be part of the API.  Too bad. dje
 			   01/09/00 */
 			char **visual_color = 0;
+			/* Guarantee at least one colour field is set. */
+			xpmcolor_require_c_color(color_table_ptr);
 			if (color_table_ptr->c_color) {
 				visual_color = &color_table_ptr->c_color;
 			} else if (color_table_ptr->g_color) {

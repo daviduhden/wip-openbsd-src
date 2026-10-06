@@ -8,7 +8,7 @@
 #if 0
 #define OUTPUT_FILE "/dev/console"
 #else
-#define OUTPUT_FILE NULL
+#define OUTPUT_FILE nullptr
 #endif
 
 extern int  OpenConsole(const char *filenm);

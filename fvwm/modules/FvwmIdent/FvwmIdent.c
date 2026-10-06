@@ -8,8 +8,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#define TRUE 1
-#define FALSE
+#define TRUE true
+#define FALSE false
 
 #define YES "Yes"
 #define NO "No"
@@ -74,7 +74,7 @@ int		     found = 0;
 
 static int ListSize = 0;
 
-struct Item *itemlistRoot = NULL;
+struct Item *itemlistRoot = nullptr;
 int	     max_col1, max_col2;
 char id[15], desktop[10], swidth[10], sheight[10], borderw[10], geometry[30];
 char mymin_aspect[11], max_aspect[11];
@@ -89,14 +89,14 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *display_name = NULL;
+	char *display_name = nullptr;
 	int   Clength;
 	char *tline;
 
 	/* Save the program name for error messages and config parsing */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != NULL)
+	if (s != nullptr)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -234,7 +234,7 @@ process_message(unsigned long type, unsigned long *body)
  * Detected a broken pipe - time to exit
  *
  **********************************************************************/
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -295,7 +295,8 @@ void
 list_icon_name(unsigned long *body)
 {
 	if ((app_win == (Window)body[1]) || (app_win == (Window)body[0])) {
-		strncat(target.icon_name, (char *)&body[3], 255);
+		strncat(target.icon_name, (char *)&body[3],
+		    sizeof(target.icon_name) - strlen(target.icon_name) - 1);
 	}
 }
 
@@ -308,7 +309,8 @@ void
 list_class(unsigned long *body)
 {
 	if ((app_win == (Window)body[1]) || (app_win == (Window)body[0])) {
-		strncat(target.class, (char *)&body[3], 255);
+		strncat(target.class, (char *)&body[3],
+		    sizeof(target.class) - strlen(target.class) - 1);
 	}
 }
 
@@ -321,7 +323,8 @@ void
 list_res_name(unsigned long *body)
 {
 	if ((app_win == (Window)body[1]) || (app_win == (Window)body[0])) {
-		strncat(target.res, (char *)&body[3], 255);
+		strncat(target.res, (char *)&body[3],
+		    sizeof(target.res) - strlen(target.res) - 1);
 	}
 }
 
@@ -353,8 +356,8 @@ list_end(void)
 	close(fd[1]);
 
 	/* load the font */
-	if ((font = XLoadQueryFont(dpy, font_string)) == NULL) {
-		if ((font = XLoadQueryFont(dpy, "fixed")) == NULL)
+	if ((font = XLoadQueryFont(dpy, font_string)) == nullptr) {
+		if ((font = XLoadQueryFont(dpy, "fixed")) == nullptr)
 			exit(1);
 	}
 
@@ -495,7 +498,7 @@ RedrawWindow(void)
 
 	fontheight = font->ascent + font->descent;
 
-	while (cur != NULL) {
+	while (cur != nullptr) {
 		/* first column */
 		XDrawString(dpy, main_win, NormalGC, 5,
 		    5 + font->ascent + i * fontheight, cur->col1,
@@ -546,12 +549,12 @@ AddToList(char *s1, char *s2)
 
 	item->col1 = s1;
 	item->col2 = s2;
-	item->next = NULL;
+	item->next = nullptr;
 
-	if (cur == NULL)
+	if (cur == nullptr)
 		itemlistRoot = item;
 	else {
-		while (cur->next != NULL)
+		while (cur->next != nullptr)
 			cur = cur->next;
 		cur->next = item;
 	}
@@ -670,7 +673,7 @@ MakeList(void)
 	AddToList("Geometry:", geometry);
 
 	{
-		Atom *protocols = NULL, *ap;
+		Atom *protocols = nullptr, *ap;
 		Atom  _XA_WM_TAKE_FOCUS =
 		    XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 		XWMHints *wmhintsp = XGetWMHints(dpy, target.id);
@@ -747,7 +750,7 @@ freelist(void)
 {
 	struct Item *cur = itemlistRoot, *cur2;
 
-	while (cur != NULL) {
+	while (cur != nullptr) {
 		cur2 = cur;
 		cur = cur->next;
 		free(cur2);

@@ -192,6 +192,13 @@ jbd2_read_block(struct jbd2_replay_ctx *ctx, u_int32_t jblock,
 	struct m_ext4fs *fs = ctx->rc_fs;
 	u_int64_t fsblock;
 
+	/*
+	 * Leave *bpp defined on every path: callers brelse() the
+	 * out-parameter after an error, and bread() may still return a
+	 * buffer on I/O errors.
+	 */
+	*bpp = NULL;
+
 	if (jblock >= ctx->rc_blockmap_count) {
 		printf("ext4fs: journal block %u out of range (%u)\n",
 		    jblock, ctx->rc_blockmap_count);
@@ -508,8 +515,11 @@ jbd2_revoke_add(struct jbd2_replay_ctx *ctx, u_int64_t block,
 		struct jbd2_revoke_entry *newrev;
 		u_int32_t newalloc;
 
-		newalloc = ctx->rc_revoke_alloc ? ctx->rc_revoke_alloc * 2 :
-		    64;
+		if (ctx->rc_revoke_alloc > UINT32_MAX / 2)
+			newalloc = UINT32_MAX; /* avoid wrap; alloc will fail */
+		else
+			newalloc = ctx->rc_revoke_alloc ?
+			    ctx->rc_revoke_alloc * 2 : 64;
 		newrev = mallocarray(newalloc,
 		    sizeof(struct jbd2_revoke_entry), M_TEMP,
 		    M_WAITOK | M_ZERO);
@@ -642,6 +652,7 @@ jbd2_pass_scan(struct jbd2_replay_ctx *ctx)
 		if (error) {
 			printf("ext4fs: journal scan: read error at "
 			    "block %u\n", block);
+			brelse(bp);
 			break;
 		}
 
@@ -779,8 +790,10 @@ jbd2_pass_revoke(struct jbd2_replay_ctx *ctx)
 	    scanned < ctx->rc_maxlen * 2 + 32;
 	    scanned++) {
 		error = jbd2_read_block(ctx, block, &bp);
-		if (error)
+		if (error) {
+			brelse(bp);
 			return (error);
+		}
 
 		hdr = (struct jbd2_header *)bp->b_data;
 		if (betoh32(hdr->h_magic) != JBD2_MAGIC ||
@@ -912,8 +925,10 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
 	    scanned < ctx->rc_maxlen * 2 + 32;
 	    scanned++) {
 		error = jbd2_read_block(ctx, block, &bp);
-		if (error)
+		if (error) {
+			brelse(bp);
 			return (error);
+		}
 
 		hdr = (struct jbd2_header *)bp->b_data;
 		if (betoh32(hdr->h_magic) != JBD2_MAGIC ||
@@ -1127,7 +1142,8 @@ ext4fs_journal_replay(struct vnode *devvp, struct m_ext4fs *fs)
 		 * would otherwise drive an attacker-sized allocation
 		 * below.
 		 */
-		if (jsize / fs->m_block_size > fs->m_blocks_count) {
+		if (jsize / fs->m_block_size > fs->m_blocks_count ||
+		    jsize / fs->m_block_size > UINT32_MAX) {
 			printf("ext4fs: journal size exceeds filesystem\n");
 			return (EINVAL);
 		}

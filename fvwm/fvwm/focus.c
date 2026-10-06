@@ -81,7 +81,7 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 				/* make Fw the new start of the list */
 				Scr.FvwmRoot.next = Fw;
 				/* open the closed loop windowlist */
-				Fw->prev->next = NULL;
+				Fw->prev->next = nullptr;
 				Fw->prev = &Scr.FvwmRoot;
 			}
 		}
@@ -91,7 +91,7 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 		XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &JunkX,
 		    &JunkY, &JunkX, &JunkY, &JunkMask);
 		if (JunkRoot != Scr.Root) {
-			if ((Scr.Ungrabbed != NULL) &&
+			if ((Scr.Ungrabbed != nullptr) &&
 			    (Scr.Ungrabbed->flags & ClickToFocus)) {
 				/* Need to grab buttons for focus window */
 				XSync(dpy, 0);
@@ -109,8 +109,8 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 						    GrabModeSync, GrabModeAsync,
 						    None, Scr.FvwmCursors[SYS]);
 					}
-				Scr.Focus = NULL;
-				Scr.Ungrabbed = NULL;
+				Scr.Focus = nullptr;
+				Scr.Ungrabbed = nullptr;
 				XSetInputFocus(dpy, Scr.NoFocusWin,
 				    RevertToParent, lastTimestamp);
 			}
@@ -118,7 +118,7 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 		}
 	}
 
-	if (Fw != NULL) {
+	if (Fw != nullptr) {
 		/*
 		      Make sure at least part of window is on this page
 		      before giving it focus...
@@ -132,12 +132,12 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 		}
 	}
 
-	if ((Fw != NULL) && (!OnThisPage)) {
-		Fw = NULL;
+	if ((Fw != nullptr) && (!OnThisPage)) {
+		Fw = nullptr;
 		w = Scr.NoFocusWin;
 	}
 
-	if ((Scr.Ungrabbed != NULL) && (Scr.Ungrabbed->flags & ClickToFocus) &&
+	if ((Scr.Ungrabbed != nullptr) && (Scr.Ungrabbed->flags & ClickToFocus) &&
 	    (Scr.Ungrabbed != Fw)) {
 		/* need to grab all buttons for window that we are about to
 		 * unfocus */
@@ -148,11 +148,11 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 				    Scr.Ungrabbed->frame, True, ButtonPressMask,
 				    GrabModeSync, GrabModeAsync, None,
 				    Scr.FvwmCursors[SYS]);
-		Scr.Ungrabbed = NULL;
+		Scr.Ungrabbed = nullptr;
 	}
 	/* if we do click to focus, remove the grab on mouse events that
 	 * was made to detect the focus change */
-	if ((Fw != NULL) && (Fw->flags & ClickToFocus)) {
+	if ((Fw != nullptr) && (Fw->flags & ClickToFocus)) {
 		for (i = 0; i < 3; i++)
 			if (Scr.buttons2grab & (1 << i)) {
 				XUngrabButton(dpy, (i + 1), 0, Fw->frame);
@@ -192,7 +192,7 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 	} else {
 		XSetInputFocus(
 		    dpy, Scr.NoFocusWin, RevertToParent, lastTimestamp);
-		Scr.Focus = NULL;
+		Scr.Focus = nullptr;
 	}
 
 	if ((Fw) && (Fw->flags & DoesWmTakeFocus))

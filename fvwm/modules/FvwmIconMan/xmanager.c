@@ -20,23 +20,23 @@
 #endif
 
 /* button dirty bits: */
-#define ICON_STATE_CHANGED 1
-#define STATE_CHANGED 2
-#define PICTURE_CHANGED 4
-#define WINDOW_CHANGED 8
-#define STRING_CHANGED 16
-#define REDRAW_BUTTON 32
-#define GEOMETRY_CHANGED 64
+constexpr int ICON_STATE_CHANGED = 1;
+constexpr int STATE_CHANGED = 2;
+constexpr int PICTURE_CHANGED = 4;
+constexpr int WINDOW_CHANGED = 8;
+constexpr int STRING_CHANGED = 16;
+constexpr int REDRAW_BUTTON = 32;
+constexpr int GEOMETRY_CHANGED = 64;
 
 /* manager dirty bits: */
 /*      GEOMETRY_CHANGED    64 same as with button */
-#define MAPPING_CHANGED 2
-#define SHAPE_CHANGED 4
-#define REDRAW_MANAGER 8
+constexpr int MAPPING_CHANGED = 2;
+constexpr int SHAPE_CHANGED = 4;
+constexpr int REDRAW_MANAGER = 8;
 
 /* ButtonArray dirty bits: */
-#define NUM_BUTTONS_CHANGED 1
-#define NUM_WINDOWS_CHANGED 2
+constexpr int NUM_BUTTONS_CHANGED = 1;
+constexpr int NUM_WINDOWS_CHANGED = 2;
 
 #define ALL_CHANGED 0x7f /* high bit is special */
 
@@ -473,7 +473,7 @@ xy_to_button(WinManager *man, int x, int y)
 			return man->buttons.buttons[index];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /***************************************************************************/
@@ -494,7 +494,7 @@ static void
 clear_button(Button *b)
 {
 	assert(b);
-	b->drawn_state.win = NULL;
+	b->drawn_state.win = nullptr;
 	b->drawn_state.dirty_flags = REDRAW_BUTTON;
 }
 
@@ -540,7 +540,7 @@ set_num_buttons(ButtonArray *buttons, int n)
 			buttons->buttons[i]->drawn_state.dirty_flags = 0;
 			buttons->buttons[i]->drawn_state.w = 0;
 			buttons->buttons[i]->drawn_state.h = 0;
-			buttons->buttons[i]->drawn_state.win = NULL;
+			buttons->buttons[i]->drawn_state.win = nullptr;
 		}
 
 		buttons->dirty_flags |= NUM_BUTTONS_CHANGED;
@@ -699,7 +699,7 @@ set_win_displaystring(WinData *win)
 	copy_string(&win->display_string,
 	    make_display_string(win, man->formatstring, maxlen));
 	if (used_resource_placeholder)
-		win->resname = NULL;
+		win->resname = nullptr;
 	if (win->button)
 		win->button->drawn_state.dirty_flags |= STRING_CHANGED;
 }
@@ -864,7 +864,7 @@ init_button_array(ButtonArray *array)
 {
 	array->num_buttons = 0;
 	array->num_windows = 0;
-	array->buttons = NULL;
+	array->buttons = nullptr;
 }
 
 /* Pretty much like resize_manager, but used only to figure the
@@ -1172,7 +1172,7 @@ check_in_window(WinData *win)
 	if (win->manager && win->complete &&
 	    !(win->manager->usewinlist && (win->fvwm_flags & WINDOWLISTSKIP))) {
 		in_viewport = win_in_viewport(win);
-		if (win->button == NULL && in_viewport) {
+		if (win->button == nullptr && in_viewport) {
 			insert_windows_button(win);
 			if (win->manager->window_up == 0 &&
 			    globals.got_window_list)
@@ -1686,9 +1686,9 @@ delete_windows_button(WinData *win)
 	    win->manager, spot + 1, buttons->num_windows - 1, -1);
 	clear_button(buttons->buttons[buttons->num_windows - 1]);
 	increase_num_windows(buttons, -1);
-	win->button = NULL;
+	win->button = nullptr;
 	if (globals.focus_win == win) {
-		globals.focus_win = NULL;
+		globals.focus_win = nullptr;
 	}
 	if (selected_index >= 0) {
 		ConsoleDebug(X11,
@@ -1748,7 +1748,7 @@ move_highlight(WinManager *man, Button *b)
 
 	if (old && old->button) {
 		del_win_state(old, SELECT_CONTEXT);
-		old->manager->select_button = NULL;
+		old->manager->select_button = nullptr;
 		draw_button(old->manager, old->button->index, 0);
 	}
 	if (b && b->drawn_state.win) {
@@ -1756,7 +1756,7 @@ move_highlight(WinManager *man, Button *b)
 		draw_button(man, b->index, 0);
 		globals.select_win = b->drawn_state.win;
 	} else {
-		globals.select_win = NULL;
+		globals.select_win = nullptr;
 	}
 
 	man->select_button = b;

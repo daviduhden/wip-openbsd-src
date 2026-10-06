@@ -19,8 +19,8 @@
  *
  */
 
-#define TRUE 1
-#define FALSE 0
+#define TRUE true
+#define FALSE false
 
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -46,7 +46,7 @@
 char *MyName;
 int   fd[2];
 
-struct list *list_root = NULL;
+struct list *list_root = nullptr;
 
 Display *dpy; /* which display are we talking to */
 int	 ScreenWidth, ScreenHeight;
@@ -66,13 +66,13 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *display_name = NULL;
+	char *display_name = nullptr;
 
 	/* Record the program name for error messages */
 	temp = argv[0];
 
 	s = strrchr(argv[0], '/');
-	if (s != NULL)
+	if (s != nullptr)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -125,7 +125,7 @@ Loop(int *fd)
 	int	      count;
 
 	unveil_home_write("FvwmSaveDesk");
-	unveil(NULL, NULL);
+	unveil(nullptr, nullptr);
 	sandbox_save_state("FvwmSaveDesk");
 
 	while (1) {
@@ -186,14 +186,14 @@ find_window(unsigned long id)
 {
 	struct list *l;
 
-	if (list_root == NULL)
-		return NULL;
+	if (list_root == nullptr)
+		return nullptr;
 
-	for (l = list_root; l != NULL; l = l->next) {
+	for (l = list_root; l != nullptr; l = l->next) {
 		if (l->id == id)
 			return l;
 	}
-	return NULL;
+	return nullptr;
 }
 
 /***********************************************************************
@@ -249,7 +249,7 @@ list_new_page(unsigned long *body)
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -419,14 +419,14 @@ do_save(void)
 	int	     curdesk;
 	int	     isfirstline = 1;
 
-	for (t = list_root; t != NULL; t = t->next)
+	for (t = list_root; t != nullptr; t = t->next)
 		if (t->desk > maxdesk)
 			maxdesk = t->desk;
 
 	snprintf(fnbuf, sizeof(fnbuf), "%s/.fvwm2desk",
 	    getenv("HOME") ? getenv("HOME") : ".");
 	out = fopen(fnbuf, "w");
-	if (out == NULL) {
+	if (out == nullptr) {
 		fprintf(stderr, "%s: couldn't open %s for writing\n", MyName,
 		    fnbuf);
 		return;
@@ -439,7 +439,7 @@ do_save(void)
 	 * Generate all Desks except 'CurDesk'
 	 */
 	for (curdesk = 0; curdesk <= maxdesk; curdesk++) {
-		for (t = list_root; t != NULL; t = t->next) {
+		for (t = list_root; t != nullptr; t = t->next) {
 			if (t->desk != CurDesk && curdesk == t->desk)
 				do_save_command(
 				    out, t, &actdesk, 1, &isfirstline);
@@ -448,7 +448,7 @@ do_save(void)
 	/*
 	 * Generate 'CurDesk'
 	 */
-	for (t = list_root; t != NULL; t = t->next) {
+	for (t = list_root; t != nullptr; t = t->next) {
 		if (t->desk == CurDesk)
 			do_save_command(out, t, &actdesk, 0, &isfirstline);
 	}

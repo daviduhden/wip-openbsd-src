@@ -10,8 +10,8 @@
  * Full original copyright is described in COPYRIGHT.
  */
 
-#define TRUE 1
-#define FALSE 0
+#define TRUE true
+#define FALSE false
 
 #define NONE 0
 #define VERTICAL 1
@@ -49,8 +49,8 @@
 
 /* just as same as wild.c */
 #ifndef TRUE
-#define TRUE 1
-#define FALSE 0
+#define TRUE true
+#define FALSE false
 #endif
 
 #include "FvwmIconBox.h"
@@ -134,23 +134,23 @@ int	     margin1 = 8;
 int	     margin2 = 6;
 
 Pixmap IconwinPixmap = None;
-char  *IconwinPixmapFile = NULL;
+char  *IconwinPixmapFile = nullptr;
 
 int h_margin;
 int v_margin;
 
 int fd[2];
 
-struct icon_info *Head = NULL;
-struct icon_info *Tail = NULL;
-struct iconfile	 *IconListHead = NULL;
-struct iconfile	 *IconListTail = NULL;
-struct iconfile	 *DefaultIcon = NULL;
-struct mousefunc *MouseActions = NULL;
-struct keyfunc	 *KeyActions = NULL;
-char		 *iconPath = NULL;
-char		 *pixmapPath = NULL;
-char		 *FvwmDefaultIcon = NULL;
+struct icon_info *Head = nullptr;
+struct icon_info *Tail = nullptr;
+struct iconfile	 *IconListHead = nullptr;
+struct iconfile	 *IconListTail = nullptr;
+struct iconfile	 *DefaultIcon = nullptr;
+struct mousefunc *MouseActions = nullptr;
+struct keyfunc	 *KeyActions = nullptr;
+char		 *iconPath = nullptr;
+char		 *pixmapPath = nullptr;
+char		 *FvwmDefaultIcon = nullptr;
 
 static Atom wm_del_win;
 Atom	    _XA_WM_PROTOCOLS;
@@ -170,14 +170,14 @@ int save_color_limit; /* color limit from config */
 int
 main(int argc, char **argv)
 {
-	char	  *display_name = NULL;
+	char	  *display_name = nullptr;
 	char	  *temp, *s;
 	XIconSize *size;
 
 	temp = argv[0];
 
 	s = strrchr(argv[0], '/');
-	if (s != NULL)
+	if (s != nullptr)
 		temp = s + 1;
 
 	{
@@ -223,7 +223,7 @@ main(int argc, char **argv)
 	SetMessageMask(fd, m_mask);
 
 	if ((local_flags & SETWMICONSIZE) &&
-	    (size = XAllocIconSize()) != NULL) {
+	    (size = XAllocIconSize()) != nullptr) {
 		size->max_width = size->min_width =
 		    max_icon_width + icon_relief;
 		size->max_height = size->min_height =
@@ -269,7 +269,7 @@ Loop(void)
 						RedrawWindow();
 					} else {
 						tmp = Head;
-						while (tmp != NULL) {
+						while (tmp != nullptr) {
 							if (Event.xany.window ==
 							    tmp->icon_pixmap_w) {
 								RedrawIcon(
@@ -383,7 +383,7 @@ Loop(void)
 					}
 				}
 				if ((tmp = Search(Event.xbutton.window)) !=
-				    NULL)
+				    nullptr)
 					ExecuteAction(Event.xbutton.x,
 					    Event.xbutton.y, tmp);
 				break;
@@ -447,10 +447,10 @@ Loop(void)
 				break;
 			case EnterNotify:
 				if ((tmp = Search(Event.xcrossing.window)) !=
-				    NULL)
+				    nullptr)
 					if ((exhilite = Hilite) != tmp) {
 						Hilite = tmp;
-						if (exhilite != NULL)
+						if (exhilite != nullptr)
 							RedrawIcon(exhilite,
 							    redraw_flag);
 						RedrawIcon(tmp, redraw_flag);
@@ -459,9 +459,9 @@ Loop(void)
 
 			case LeaveNotify:
 				if ((tmp = Search(Event.xcrossing.window)) !=
-					NULL &&
+					nullptr &&
 				    tmp == Hilite) {
-					Hilite = NULL;
+					Hilite = nullptr;
 					RedrawIcon(tmp, redraw_flag);
 				}
 				if (!(local_flags & HIDE_H) &&
@@ -500,15 +500,15 @@ Loop(void)
 						break;
 					tmp = Head;
 					i = 0;
-					while (tmp != NULL) {
+					while (tmp != nullptr) {
 						if (Event.xproperty.window ==
 						    (Window)tmp->id)
 							break;
 						tmp = tmp->next;
 						++i;
 					}
-					if (tmp == NULL ||
-					    tmp->wmhints == NULL ||
+					if (tmp == nullptr ||
+					    tmp->wmhints == nullptr ||
 					    !(tmp->extra_flags & DEFAULTICON))
 						break;
 					if (tmp->wmhints)
@@ -597,12 +597,12 @@ Search(Window w)
 	struct icon_info *tmp;
 
 	tmp = Head;
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->IconWin == w || tmp->icon_pixmap_w == w)
 			return tmp;
 		tmp = tmp->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 /************************************************************************
@@ -655,7 +655,7 @@ RedrawIcons(void)
 	struct icon_info *tmp;
 
 	tmp = Head;
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (desk_cond(tmp))
 			RedrawIcon(tmp, redraw_flag);
 		tmp = tmp->next;
@@ -1042,8 +1042,8 @@ CreateWindow(void)
 	_XA_WM_PROTOCOLS = XInternAtom(dpy, "WM_PROTOCOLS", False);
 
 	/* load the font */
-	if ((font = XLoadQueryFont(dpy, font_string)) == NULL) {
-		if ((font = XLoadQueryFont(dpy, "fixed")) == NULL) {
+	if ((font = XLoadQueryFont(dpy, font_string)) == nullptr) {
+		if ((font = XLoadQueryFont(dpy, "fixed")) == nullptr) {
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
 		}
@@ -1123,15 +1123,15 @@ CreateWindow(void)
 
 	/* set normal_hits, wm_hints, and, class_hints */
 	list[0] = MyName;
-	list[1] = NULL;
+	list[1] = nullptr;
 	if (XStringListToTextProperty(list, 1, &name) == 0) {
 		fprintf(stderr, "%s: cannot allocate window name", MyName);
 		return;
 	}
 	class_hints.res_name = MyName;
 	class_hints.res_class = "FvwmIconBox";
-	XSetWMProperties(dpy, main_win, &name, &name, NULL, 0, &mysizehints,
-	    NULL, &class_hints);
+	XSetWMProperties(dpy, main_win, &name, &name, nullptr, 0, &mysizehints,
+	    nullptr, &class_hints);
 	XFree(name.value);
 
 	mysizehints.width -= h_margin;
@@ -1301,7 +1301,7 @@ SendFvwmPipe(int *fd, char *message, unsigned long window)
 
 	while (1) {
 		temp = strchr(hold, ',');
-		if (temp != NULL) {
+		if (temp != nullptr) {
 			temp_msg = malloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
@@ -1360,20 +1360,20 @@ Next(void)
 
 	old = new = Hilite;
 
-	if (new != NULL)
+	if (new != nullptr)
 		new = new->next;
 
-	if (new != NULL)
+	if (new != nullptr)
 		Hilite = new;
 	else
 		new = Hilite = Head;
 
-	if (new == NULL)
+	if (new == nullptr)
 		return;
 
-	if (old != NULL)
+	if (old != nullptr)
 		RedrawIcon(old, redraw_flag);
-	if (new != NULL)
+	if (new != nullptr)
 		RedrawIcon(new, redraw_flag);
 
 	i = 0;
@@ -1407,20 +1407,20 @@ Prev(void)
 
 	old = new = Hilite;
 
-	if (new != NULL)
+	if (new != nullptr)
 		new = new->prev;
 
-	if (new != NULL)
+	if (new != nullptr)
 		Hilite = new;
 	else
 		new = Hilite = Tail;
 
-	if (new == NULL)
+	if (new == nullptr)
 		return;
 
-	if (old != NULL)
+	if (old != nullptr)
 		RedrawIcon(old, redraw_flag);
-	if (new != NULL)
+	if (new != nullptr)
 		RedrawIcon(new, redraw_flag);
 
 	i = 0;
@@ -1451,7 +1451,7 @@ Prev(void)
  * 	Based on DeadPipe() from GoodStuff:
  *		Copyright 1993, Robert Nation.
  ***********************************************************************/
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -1466,14 +1466,14 @@ DeadPipe(int nonsense)
 void
 ParseOptions(void)
 {
-	char *tline = NULL, *tmp;
+	char *tline = nullptr, *tmp;
 	int   Clength;
 
 	Clength = strlen(MyName);
 
 	GetConfigLine(fd, &tline);
 
-	while (tline != NULL) {
+	while (tline != nullptr) {
 		int	 g_x, g_y, flags;
 		unsigned width, height;
 
@@ -1486,7 +1486,8 @@ ParseOptions(void)
 					   (*tmp != '\n')) &&
 				    (*tmp != 0))
 					tmp++;
-				tmp[strlen(tmp) - 1] = 0;
+				if (*tmp != '\0')
+					tmp[strlen(tmp) - 1] = 0;
 				flags = XParseGeometry(
 				    tmp, &g_x, &g_y, &width, &height);
 				if (flags & WidthValue)
@@ -1509,7 +1510,8 @@ ParseOptions(void)
 					   (*tmp != '\n')) &&
 				    (*tmp != 0))
 					tmp++;
-				tmp[strlen(tmp) - 1] = 0;
+				if (*tmp != '\0')
+					tmp[strlen(tmp) - 1] = 0;
 
 				flags = XParseGeometry(
 				    tmp, &g_x, &g_y, &width, &height);
@@ -1673,19 +1675,20 @@ parseicon(char *tline)
 
 	/* windowname */
 	tmp->name = stripcpy2(tline);
-	if (tmp->name == NULL) {
+	if (tmp->name == nullptr) {
 		free(tmp);
 		return;
 	}
 
 	/* skip windowname, based on strpcpy3 of configure.c */
-	while ((*tline != '"') && (tline != NULL))
+	while ((*tline != '"') && (tline != nullptr))
 		tline++;
 	if (*tline != 0)
 		tline++;
-	while ((*tline != '"') && (tline != NULL))
+	while ((*tline != '"') && (tline != nullptr))
 		tline++;
 	if (*tline == 0) {
+		free(tmp->name);
 		free(tmp);
 		return;
 	}
@@ -1709,9 +1712,9 @@ parseicon(char *tline)
 	if (strcmp(tmp->name, "*") == 0)
 		DefaultIcon = tmp;
 
-	tmp->next = NULL;
+	tmp->next = nullptr;
 
-	if (IconListHead == NULL)
+	if (IconListHead == nullptr)
 		IconListHead = IconListTail = tmp;
 	else {
 		IconListTail->next = tmp;
@@ -1722,9 +1725,9 @@ parseicon(char *tline)
 void
 parseplacement(char *tline)
 {
-	char p[240], s[240];
+	char p[240] = "", s[240] = "";
 
-	sscanf(tline, "%s %s", p, s);
+	sscanf(tline, "%239s %239s", p, s);
 
 	if (strncasecmp(p, "Left", 4) == 0)
 		primary = LEFT;
@@ -1748,12 +1751,12 @@ parseplacement(char *tline)
 void
 parsemouse(char *tline)
 {
-	struct mousefunc *f = NULL;
+	struct mousefunc *f = nullptr;
 	int		  len;
 	char		 *ptr, *start, *end, *tmp;
 
 	f = (struct mousefunc *)xmalloc(sizeof(struct mousefunc));
-	f->next = NULL;
+	f->next = nullptr;
 	f->mouse = 0;
 
 	/* skip spaces */
@@ -1874,7 +1877,7 @@ parsekey(char *tline)
 			int	width;
 
 			mapping = XGetKeyboardMapping(dpy, i, 1, &width);
-			if (mapping == NULL)
+			if (mapping == nullptr)
 				continue;
 
 			for (int col = 0; col < width; col++) {
@@ -1941,7 +1944,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	select(fd_width, &in_fdset, 0, 0, NULL);
+	select(fd_width, &in_fdset, 0, 0, nullptr);
 
 	if (FD_ISSET(x_fd, &in_fdset)) {
 		if (XPending(dpy)) {
@@ -1982,7 +1985,7 @@ process_message(unsigned long type, unsigned long *body)
 			if (!(local_flags & CURRENT_ONLY))
 				break;
 			tmp = Head;
-			while (tmp != NULL) {
+			while (tmp != nullptr) {
 				if (tmp->id == (long)body[0]) {
 					if ((tmp->desk != (long)body[7]) &&
 					    !(tmp->flags & STICKY)) {
@@ -1993,7 +1996,7 @@ process_message(unsigned long type, unsigned long *body)
 							if (tmp->desk ==
 								CurrentDesk &&
 							    sortby != UNSORT)
-								SortItem(NULL);
+								SortItem(nullptr);
 							num_icons =
 							    AdjustIconWindows();
 							GetIconwinSize(
@@ -2116,14 +2119,14 @@ process_message(unsigned long type, unsigned long *body)
 		break;
 	case M_WINDOW_NAME:
 		tmp = UpdateItem(type, body[0], (char *)&body[3]);
-		if (!ready || tmp == NULL)
+		if (!ready || tmp == nullptr)
 			break;
 		if (sortby == WINDOWNAME && tmp->IconWin != None &&
 		    desk_cond(tmp) && SortItem(tmp) == True)
 			AdjustIconWindows();
 		break;
 	case M_RES_NAME:
-		if ((tmp = UpdateItem(type, body[0], (char *)&body[3])) == NULL)
+		if ((tmp = UpdateItem(type, body[0], (char *)&body[3])) == nullptr)
 			break;
 		if (LookInList(tmp) && ready) {
 			if (sortby != UNSORT)
@@ -2144,7 +2147,7 @@ process_message(unsigned long type, unsigned long *body)
 		break;
 	case M_ICON_NAME:
 		tmp = UpdateItem(type, body[0], (char *)&body[3]);
-		if (!ready || tmp == NULL)
+		if (!ready || tmp == nullptr)
 			break;
 		if (sortby != UNSORT && tmp->IconWin != None &&
 		    desk_cond(tmp) && SortItem(tmp) == True)
@@ -2155,27 +2158,29 @@ process_message(unsigned long type, unsigned long *body)
 	case M_DEFAULTICON:
 		str = (char *)xmalloc(strlen((char *)&body[3]) + 1);
 		strlcpy(str, (char *)&body[3], strlen((char *)&body[3]) + 1);
+		if (FvwmDefaultIcon != NULL)
+			free(FvwmDefaultIcon);
 		FvwmDefaultIcon = str;
 		break;
 	case M_ICONIFY:
 	case M_DEICONIFY:
-		if (ready && (tmp = SetFlag(body[0], type)) != NULL)
+		if (ready && (tmp = SetFlag(body[0], type)) != nullptr)
 			RedrawIcon(tmp, 2);
 		break;
 	case M_FOCUS_CHANGE:
 		if (!ready)
 			break;
 		tmp = Head;
-		while (tmp != NULL) {
+		while (tmp != nullptr) {
 			if (tmp->id == (long)body[0])
 				break;
 			tmp = tmp->next;
 		}
 		old = Hilite;
 		Hilite = tmp;
-		if (old != NULL)
+		if (old != nullptr)
 			RedrawIcon(old, redraw_flag);
-		if (tmp != NULL)
+		if (tmp != nullptr)
 			RedrawIcon(tmp, redraw_flag);
 		break;
 	case M_NEW_DESK:
@@ -2185,7 +2190,7 @@ process_message(unsigned long type, unsigned long *body)
 			    ready) { /* 10000 is a "magic" number used in
 					FvwmPager */
 				if (sortby != UNSORT)
-					SortItem(NULL);
+					SortItem(nullptr);
 				num_icons = AdjustIconWindows();
 				GetIconwinSize(&diffx, &diffy);
 				icon_win_x = icon_win_y = 0;
@@ -2208,13 +2213,13 @@ process_message(unsigned long type, unsigned long *body)
 	case M_END_WINDOWLIST:
 		GetIconwinSize(&diffx, &diffy);
 		tmp = Head;
-		while (tmp != NULL) {
+		while (tmp != nullptr) {
 			CreateIconWindow(tmp);
 			ConfigureIconWindow(tmp);
 			tmp = tmp->next;
 		}
 		if (sortby != UNSORT)
-			SortItem(NULL);
+			SortItem(nullptr);
 		if (primary == BOTTOM || secondary == BOTTOM)
 			icon_win_y = icon_win_height - Height;
 		if (primary == RIGHT || secondary == RIGHT)
@@ -2239,7 +2244,7 @@ SetFlag(unsigned long id, int t)
 	struct icon_info *tmp;
 	tmp = Head;
 
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->id == (long)id) {
 			if (t == M_ICONIFY)
 				tmp->flags |= ICONIFIED;
@@ -2249,7 +2254,7 @@ SetFlag(unsigned long id, int t)
 		}
 		tmp = tmp->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void
@@ -2258,7 +2263,7 @@ mapicons(void)
 	struct icon_info *tmp;
 	tmp = Head;
 
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (desk_cond(tmp)) {
 			XMapWindow(dpy, tmp->IconWin);
 			if (max_icon_height != 0)
@@ -2275,7 +2280,7 @@ AdjustIconWindows(void)
 	int		  i = 0;
 	tmp = Head;
 
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (desk_cond(tmp) && tmp->IconWin != None)
 			AdjustIconWindow(tmp, i++);
 		tmp = tmp->next;
@@ -2307,7 +2312,7 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 	if (id == main_win || (flags & TRANSIENT) || !(flags & SUPPRESSICON))
 		return False;
 
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->id == (long)id ||
 		    (tmp->wmhints && (tmp->wmhints->flags & IconWindowHint) &&
 			tmp->wmhints->icon_window == id))
@@ -2316,12 +2321,12 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 	}
 
 	new = (struct icon_info *)xmalloc(sizeof(struct icon_info));
-	new->name = NULL;
-	new->window_name = NULL;
-	new->res_class = NULL;
-	new->res_name = NULL;
-	new->action = NULL;
-	new->icon_file = NULL;
+	new->name = nullptr;
+	new->window_name = nullptr;
+	new->res_class = nullptr;
+	new->res_name = nullptr;
+	new->action = nullptr;
+	new->icon_file = nullptr;
 	new->icon_w = 0;
 	new->icon_h = 0;
 	new->IconWin = None;
@@ -2333,13 +2338,13 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 	new->id = id;
 	new->extra_flags = DEFAULTICON;
 	new->flags = flags | ICON_OURS;
-	new->wmhints = NULL;
+	new->wmhints = nullptr;
 
 	/* add new item to the head of the list
 
-	new->prev = NULL;
+	new->prev = nullptr;
 	new->next = Head;
-	if (Head != NULL)
+	if (Head != nullptr)
 	  Head->prev = new;
 	else
 	  Tail = new;
@@ -2347,8 +2352,8 @@ AddItem(unsigned long id, long desk, unsigned long flags)
 
 	/* add new item to the tail of the list */
 	new->prev = Tail;
-	new->next = NULL;
-	if (Tail != NULL)
+	new->next = nullptr;
+	if (Tail != nullptr)
 		Tail->next = new;
 	else
 		Head = new;
@@ -2370,12 +2375,12 @@ DeleteItem(unsigned long id)
 {
 	struct icon_info *tmp = Head;
 
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->id == (long)id) {
 			if (desk_cond(tmp))
 				num_icons--;
 			if (Hilite == tmp)
-				Hilite = NULL;
+				Hilite = nullptr;
 			if ((tmp->icon_pixmap_w != None) &&
 			    (tmp->flags & ICON_OURS))
 				XDestroyWindow(dpy, tmp->icon_pixmap_w);
@@ -2383,15 +2388,15 @@ DeleteItem(unsigned long id)
 				XDestroyWindow(dpy, tmp->IconWin);
 			if (tmp == Head) {
 				Head = tmp->next;
-				if (Head != NULL)
-					Head->prev = NULL;
+				if (Head != nullptr)
+					Head->prev = nullptr;
 				else
-					Tail = NULL;
+					Tail = nullptr;
 			} else {
 				if (Tail == tmp)
 					Tail = tmp->prev;
 				tmp->prev->next = tmp->next;
-				if (tmp->next != NULL)
+				if (tmp->next != nullptr)
 					tmp->next->prev = tmp->prev;
 			}
 			freeitem(tmp, 1);
@@ -2416,7 +2421,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 	int		  ret;
 
 	tmp = Head;
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->id == (long)id) {
 			size_t item_len = strlen(item) + 1;
 			str = (char *)xmalloc(item_len);
@@ -2424,20 +2429,26 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 
 			switch (type) {
 			case M_ICON_NAME:
-				if (tmp->name != NULL)
+				if (tmp->name != nullptr)
 					free(tmp->name);
 				tmp->name = str;
 				return tmp;
 			case M_ICON_FILE:
+				if ((tmp->extra_flags & ICONFILE_OWNED) &&
+				    tmp->icon_file != nullptr)
+					free(tmp->icon_file);
 				tmp->icon_file = str;
+				tmp->extra_flags |= ICONFILE_OWNED;
 				tmp->extra_flags &= ~DEFAULTICON;
 				return tmp;
 			case M_WINDOW_NAME:
-				if (tmp->window_name != NULL)
+				if (tmp->window_name != nullptr)
 					free(tmp->window_name);
 				tmp->window_name = str;
 				return tmp;
 			case M_RES_CLASS:
+				if (tmp->res_class != nullptr)
+					free(tmp->res_class);
 				tmp->res_class = str;
 				ret = 0;
 				if (sortby == RESCLASS &&
@@ -2447,13 +2458,15 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 					tmp->extra_flags |= NOCLASS;
 				}
 				if (ret) {
-					if (classhint.res_class != NULL)
+					if (classhint.res_class != nullptr)
 						XFree(classhint.res_class);
-					if (classhint.res_name != NULL)
+					if (classhint.res_name != nullptr)
 						XFree(classhint.res_name);
 				}
 				return tmp;
 			case M_RES_NAME:
+				if (tmp->res_name != nullptr)
+					free(tmp->res_name);
 				tmp->res_name = str;
 				ret = 0;
 				if (sortby == RESNAME &&
@@ -2462,9 +2475,9 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 					  dpy, tmp->id, &classhint)))
 					tmp->extra_flags |= NONAME;
 				if (ret) {
-					if (classhint.res_class != NULL)
+					if (classhint.res_class != nullptr)
 						XFree(classhint.res_class);
-					if (classhint.res_name != NULL)
+					if (classhint.res_name != nullptr)
 						XFree(classhint.res_name);
 				}
 				return tmp;
@@ -2472,7 +2485,7 @@ UpdateItem(unsigned long type, unsigned long id, char *item)
 		}
 		tmp = tmp->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 Bool
@@ -2480,15 +2493,15 @@ SortItem(struct icon_info *item)
 {
 	struct icon_info *tmp1 = Head, *a, *b, *tmp2;
 
-	if (tmp1 == NULL)
+	if (tmp1 == nullptr)
 		return False;
 
-	if (item != NULL &&
+	if (item != nullptr &&
 	    ((itemcmp(item->prev, item) <= 0) &&
 		(itemcmp(item->next, item) >= 0)))
 		return False;
 
-	while (tmp1->next != NULL) {
+	while (tmp1->next != nullptr) {
 		tmp2 = MinItem(tmp1);
 		if (tmp1 == tmp2) {
 			tmp1 = tmp1->next;
@@ -2498,13 +2511,13 @@ SortItem(struct icon_info *item)
 			Head = tmp2;
 		a = tmp1->prev;
 		b = tmp1->next;
-		if (tmp1->prev != NULL)
+		if (tmp1->prev != nullptr)
 			tmp1->prev->next = tmp2;
 		if (b != tmp2)
 			tmp1->next->prev = tmp2;
 		if (b != tmp2)
 			tmp2->prev->next = tmp1;
-		if (tmp2->next != NULL)
+		if (tmp2->next != nullptr)
 			tmp2->next->prev = tmp1;
 		if (b == tmp2) {
 			tmp1->prev = tmp2;
@@ -2529,12 +2542,12 @@ MinItem(struct icon_info *head)
 {
 	struct icon_info *tmp, *i_min;
 
-	if (head == NULL)
-		return NULL;
+	if (head == nullptr)
+		return nullptr;
 
 	i_min = head;
 	tmp = head->next;
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (itemcmp(i_min, tmp) > 0)
 			i_min = tmp;
 		tmp = tmp->next;
@@ -2547,12 +2560,12 @@ itemcmp(struct icon_info *item1, struct icon_info *item2)
 {
 	int ret1, ret2;
 
-	if (item1 == NULL) {
-		if (item2 == NULL)
+	if (item1 == nullptr) {
+		if (item2 == nullptr)
 			return 0;
 		else
 			return -1;
-	} else if (item2 == NULL)
+	} else if (item2 == nullptr)
 		return 1;
 
 	/* skip items not on the current desk */
@@ -2603,10 +2616,10 @@ void ShowItem(struct icon_info *head)
 
   fprintf(stderr, "The contents of item are as follows:\n");
   tmp = head;
-  while (tmp != NULL){
+  while (tmp != nullptr){
     fprintf(stderr, "id:%x  name:%s resname:%s class%s iconfile:%s\n",
 	    tmp->id,
-	    tmp->name == NULL ? "NULL" : tmp->name, tmp->res_name,
+	    tmp->name == nullptr ? "NULL" : tmp->name, tmp->res_name,
 	    tmp->res_class, tmp->icon_file);
     tmp = tmp->next;
   }
@@ -2617,7 +2630,7 @@ void ShowAction(void)
   struct mousefunc *tmp;
 
   tmp = MouseActions;
-  while (tmp != NULL){
+  while (tmp != nullptr){
     fprintf(stderr, "mouse:%d type %d action:%s\n", tmp->mouse,
 	    tmp->type, tmp->action);
     tmp = tmp->next;
@@ -2629,7 +2642,7 @@ void ShowKAction(void)
   struct keyfunc *tmp;
 
   tmp = KeyActions;
-  while (tmp != NULL){
+  while (tmp != nullptr){
     fprintf(stderr, "key:%s keycode:%d action:%s\n", tmp->name,
 	    tmp->keycode, tmp->action);
     tmp = tmp->next;
@@ -2640,7 +2653,7 @@ void ShowKAction(void)
 void
 freeitem(struct icon_info *item, int d)
 {
-	if (item == NULL)
+	if (item == nullptr)
 		return;
 
 	if (!(item->flags & ICON_OURS)) {
@@ -2650,22 +2663,25 @@ freeitem(struct icon_info *item, int d)
 			XReparentWindow(dpy, item->icon_pixmap_w, Root, 0, 0);
 	}
 
-	if (item->name != NULL)
+	if (item->name != nullptr)
 		free(item->name);
-	if (item->window_name != NULL)
+	if (item->window_name != nullptr)
 		free(item->window_name);
-	if (item->res_name != NULL)
+	if (item->res_name != nullptr)
 		free(item->res_name);
-	if (item->res_class != NULL)
+	if (item->res_class != nullptr)
 		free(item->res_class);
-	if (item->wmhints != NULL)
-		XFree(item->wmhints);
+	if ((item->extra_flags & ICONFILE_OWNED) && item->icon_file != nullptr)
+		free(item->icon_file);
 	if (item->iconPixmap != None)
 		XFreePixmap(dpy, item->iconPixmap);
 	if (item->icon_maskPixmap != None &&
-	    (item->wmhints == NULL ||
+	    (item->wmhints == nullptr ||
 		!(item->wmhints->flags & (IconPixmapHint | IconWindowHint))))
 		XFreePixmap(dpy, item->icon_maskPixmap);
+	/* Free the hints only after the flags above have been read. */
+	if (item->wmhints != nullptr)
+		XFree(item->wmhints);
 
 	free(item);
 }
@@ -2729,7 +2745,7 @@ ExecuteAction(int x, int y, struct icon_info *item)
 	}
 	tmp = MouseActions;
 
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->mouse == (int)d.xbutton.button && tmp->type == type) {
 			SendFvwmPipe(fd, tmp->action, item->id);
 			return;
@@ -2744,8 +2760,8 @@ ExecuteKey(XEvent event)
 	struct icon_info *item;
 	struct keyfunc	 *tmp;
 
-	if ((item = Hilite) == NULL)
-		if ((item = Head) == NULL)
+	if ((item = Hilite) == nullptr)
+		if ((item = Head) == nullptr)
 			return;
 
 	tmp = KeyActions;
@@ -2755,7 +2771,7 @@ ExecuteKey(XEvent event)
 
 		mapping =
 		    XGetKeyboardMapping(dpy, event.xkey.keycode, 1, &width);
-		if (mapping != NULL) {
+		if (mapping != nullptr) {
 			KeySym	primary = width > 0 ? mapping[0] : NoSymbol;
 			KeyCode canonical = (primary != NoSymbol) ?
 			    XKeysymToKeycode(dpy, primary) :
@@ -2765,7 +2781,7 @@ ExecuteKey(XEvent event)
 			XFree(mapping);
 		}
 	}
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (tmp->keycode == event.xkey.keycode) {
 			SendFvwmPipe(fd, tmp->action, item->id);
 			return;
@@ -2781,21 +2797,40 @@ ExecuteKey(XEvent event)
 	Copyright 1989, Massachusetts Institute of Technology,
 	Copyright 1993, Robert Nation.
  ***********************************************************************/
+/*
+ * Set item->icon_file to an owned copy of "file" (or NULL).  Always
+ * owning the string lets M_DEFAULTICON replace FvwmDefaultIcon without
+ * dangling any item, and lets freeitem() release it unconditionally.
+ */
+static void
+set_icon_file(struct icon_info *item, const char *file)
+{
+	if ((item->extra_flags & ICONFILE_OWNED) && item->icon_file != NULL)
+		free(item->icon_file);
+	if (file != NULL) {
+		item->icon_file = xstrdup(file);
+		item->extra_flags |= ICONFILE_OWNED;
+	} else {
+		item->icon_file = NULL;
+		item->extra_flags &= ~ICONFILE_OWNED;
+	}
+}
+
 int
 LookInList(struct icon_info *item)
 {
 	int		 isdefault = 1;
-	char		*value = NULL;
+	char		*value = nullptr;
 	struct iconfile *nptr;
 
-	if (IconListHead == NULL) {
+	if (IconListHead == nullptr) {
 		if ((item->extra_flags & DEFAULTICON) &&
-		    (FvwmDefaultIcon != NULL))
-			item->icon_file = FvwmDefaultIcon;
+		    (FvwmDefaultIcon != nullptr))
+			set_icon_file(item, FvwmDefaultIcon);
 		return 1;
 	}
 
-	for (nptr = IconListHead; nptr != NULL; nptr = nptr->next) {
+	for (nptr = IconListHead; nptr != nullptr; nptr = nptr->next) {
 		if (nptr == DefaultIcon)
 			isdefault = 1;
 
@@ -2819,17 +2854,17 @@ LookInList(struct icon_info *item)
 	}
 
 	if (!isdefault) {
-		item->icon_file = value;
+		set_icon_file(item, value);
 		item->extra_flags &= ~DEFAULTICON;
 	} else if ((item->extra_flags & DEFAULTICON)) {
-		if (DefaultIcon != NULL)
-			item->icon_file = DefaultIcon->iconfile;
-		else if (FvwmDefaultIcon != NULL)
-			item->icon_file = FvwmDefaultIcon;
+		if (DefaultIcon != nullptr)
+			set_icon_file(item, DefaultIcon->iconfile);
+		else if (FvwmDefaultIcon != nullptr)
+			set_icon_file(item, FvwmDefaultIcon);
 	}
 
 	/* Icon is not shown if "-" is specified */
-	if (item->icon_file != NULL && (strcmp(item->icon_file, "-") == 0)) {
+	if (item->icon_file != nullptr && (strcmp(item->icon_file, "-") == 0)) {
 		DeleteItem(item->id);
 		return 0;
 	}

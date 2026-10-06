@@ -51,9 +51,9 @@ static void parseOptions(int fd[2]);
 XpmIcon view;
 Window	win;
 
-char *pixmapPath = NULL;
-char *pixmapName = NULL;
-char *myName = NULL;
+char *pixmapPath = nullptr;
+char *pixmapName = nullptr;
+char *myName = nullptr;
 
 int timeout = 3000000; /* default time of 3 seconds */
 
@@ -79,7 +79,7 @@ Colormap    colormap;
 int
 main(int argc, char **argv)
 {
-	char	      *display_name = NULL, *string = NULL;
+	char	      *display_name = nullptr, *string = nullptr;
 	int	       retval = 0;
 	XEvent	       Event;
 	fd_set	       in_fdset;
@@ -243,7 +243,7 @@ GetXPMData(char **data)
 void
 GetXPMFile(char *file, char *path)
 {
-	char *full_file = NULL;
+	char *full_file = nullptr;
 
 	view.attributes.valuemask =
 	    XpmReturnPixels | XpmCloseness | XpmExtensions;
@@ -273,12 +273,12 @@ nocolor(char *a, char *b)
 static void
 parseOptions(int fd[2])
 {
-	char *tline = NULL;
+	char *tline = nullptr;
 	int   clength;
 
 	clength = strlen(myName);
 
-	while (GetConfigLine(fd, &tline), tline != NULL) {
+	while (GetConfigLine(fd, &tline), tline != nullptr) {
 		if (strlen(tline) > 1) {
 			if (strncasecmp(tline,
 				CatString3("*", myName, "Pixmap"),
@@ -339,9 +339,9 @@ change_window_name(char *str)
  ***********************************************************************/
 
 /*ARGSUSED*/
-void DeadPipe(int nonsense);
+[[noreturn]] void DeadPipe(int nonsense);
 
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;

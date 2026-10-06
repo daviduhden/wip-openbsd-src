@@ -2,9 +2,9 @@
 #define IN_XMANAGER_H
 
 #define FONT_STRING "8x13"
-#define DEFAULT_BUTTON_WIDTH 200
-#define DEFAULT_BUTTON_HEIGHT 17
-#define DEFAULT_NUM_COLS 1
+constexpr int DEFAULT_BUTTON_WIDTH = 200;
+constexpr int DEFAULT_BUTTON_HEIGHT = 17;
+constexpr int DEFAULT_NUM_COLS = 1;
 #define DEFAULT_NUM_ROWS 0
 
 #include "FvwmIconMan.h"

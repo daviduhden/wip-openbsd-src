@@ -15,13 +15,13 @@ GetFontOrFixed(Display *disp, char *fontname)
 {
 	XFontStruct *fnt;
 
-	if ((fnt = XLoadQueryFont(disp, fontname)) == NULL) {
+	if ((fnt = XLoadQueryFont(disp, fontname)) == nullptr) {
 		fprintf(stderr,
 		    "[GetFontOrFixed]: WARNING -- can't get font %s, trying "
 		    "'fixed'",
 		    fontname);
 		/* fixed should always be avail, so try that */
-		if ((fnt = XLoadQueryFont(disp, "fixed")) == NULL) {
+		if ((fnt = XLoadQueryFont(disp, "fixed")) == nullptr) {
 			fprintf(stderr,
 			    "[GetFontOrFixed]: ERROR -- can't get "
 			    "font 'fixed'");

@@ -25,7 +25,9 @@ f_db_print(const char *fmt, ...)
 {
 	va_list ap;
 
-	fprintf(stderr, "%s:%ld: ", f_db_info.filenm, f_db_info.lineno);
+	fprintf(stderr, "%s:%lu: ",
+	    f_db_info.filenm ? f_db_info.filenm : "(unknown)",
+	    f_db_info.lineno);
 
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);

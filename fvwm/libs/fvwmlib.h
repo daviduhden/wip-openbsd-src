@@ -41,11 +41,11 @@ extern void		f_db_print(const char *fmt, ...)
 
 char *CatString3(char *a, char *b, char *c);
 void  CopyString(char **dest, char *source);
-char *stripcpy(char *source);
+[[nodiscard]] char *stripcpy(char *source);
 int   StrEquals(char *s1, char *s2);
 
 int   envExpand(char *s, int maxstrlen);
-char *envDupExpand(const char *s, int extra);
+[[nodiscard]] char *envDupExpand(const char *s, int extra);
 
 int matchWildcards(char *pattern, char *string);
 
@@ -62,7 +62,7 @@ int matchWildcards(char *pattern, char *string);
 #define IsBlockEnd(c, cs)                                                      \
 	(((c) == ']' && (cs) == '[') || ((c) == '}' && (cs) == '{') ||         \
 	    ((c) == ')' && (cs) == '('))
-#define MAX_TOKEN_LENGTH 255
+constexpr int MAX_TOKEN_LENGTH = 255;
 
 char *SkipQuote(
     char *s, const char *qlong, const char *qstart, const char *qend);
@@ -111,6 +111,9 @@ void SetMessageMask(int *fd, unsigned long mask);
 /***********************************************************************
  * Stuff for dealing w/ bitmaps & pixmaps:
  ***********************************************************************/
+#ifdef XPM
+#include <X11/xpm.h> /* XpmAttributes, stored in FvwmPicture */
+#endif
 typedef struct PictureThing {
 	struct PictureThing *next;
 	char		    *name;
@@ -120,6 +123,9 @@ typedef struct PictureThing {
 	unsigned int	     width;
 	unsigned int	     height;
 	unsigned int	     count;
+#ifdef XPM
+	XpmAttributes	     xpm_attrs; /* colours allocated for this pixmap */
+#endif
 } FvwmPicture;
 
 void	     InitPictureCMap(Display *, Window);

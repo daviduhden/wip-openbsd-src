@@ -73,7 +73,7 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 				 * Report a dead pipe instead of
 				 * spinning on a closed connection. */
 				free(*body);
-				*body = NULL;
+				*body = nullptr;
 				return -1;
 			}
 		}
@@ -95,7 +95,7 @@ SendText(int *fd, char *message, unsigned long window)
 {
 	int w;
 
-	if (message != NULL) {
+	if (message != nullptr) {
 		write(fd[0], &window, sizeof(unsigned long));
 
 		w = strlen(message);
@@ -124,7 +124,7 @@ SetMessageMask(int *fd, unsigned long mask)
 }
 
 /***************************************************************************
- * Gets a module configuration line from fvwm. Returns NULL if there are
+ * Gets a module configuration line from fvwm. Returns nullptr if there are
  * no more lines to be had. "line" is a pointer to a char *.
  *
  * Changed 10/19/98 by Dan Espen:
@@ -139,12 +139,12 @@ GetConfigLine(int *fd, char **tline)
 	static int    first_pass = 1;
 	int	      count, done = 0;
 	int	      body_size;
-	static char  *line = NULL;
+	static char  *line = nullptr;
 	unsigned long header[HEADER_SIZE];
 
-	if (line != NULL) {
+	if (line != nullptr) {
 		free(line);
-		line = NULL;
+		line = nullptr;
 	}
 
 	if (first_pass) {
@@ -153,10 +153,15 @@ GetConfigLine(int *fd, char **tline)
 	}
 
 	while (!done) {
+		/* Drop the body of any packet we are skipping. */
+		if (line != nullptr) {
+			free(line);
+			line = nullptr;
+		}
 		count = ReadFvwmPacket(fd[1], header, (unsigned long **)&line);
 		/* DB(("Packet count is %d", count)); */
 		if (count <= 0)
-			*tline = NULL;
+			*tline = nullptr;
 		else {
 			*tline = &line[3 * sizeof(long)];
 			body_size = header[2] - HEADER_SIZE;
@@ -174,10 +179,10 @@ GetConfigLine(int *fd, char **tline)
 			done = 1;
 		else if (header[1] == M_END_CONFIG_INFO) {
 			done = 1;
-			if (line != NULL)
+			if (line != nullptr)
 				free(line);
-			line = NULL;
-			*tline = NULL;
+			line = nullptr;
+			*tline = nullptr;
 		}
 	}
 }

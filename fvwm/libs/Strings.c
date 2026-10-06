@@ -21,23 +21,23 @@ CatString3(char *a, char *b, char *c)
 {
 	int len = 0;
 
-	if (a != NULL)
+	if (a != nullptr)
 		len += strlen(a);
-	if (b != NULL)
+	if (b != nullptr)
 		len += strlen(b);
-	if (c != NULL)
+	if (c != nullptr)
 		len += strlen(c);
 
 	if (len > 255)
-		return NULL;
+		return nullptr;
 
-	if (a == NULL)
+	if (a == nullptr)
 		CatS[0] = 0;
 	else
 		strlcpy(CatS, a, sizeof(CatS));
-	if (b != NULL)
+	if (b != nullptr)
 		strlcat(CatS, b, sizeof(CatS));
-	if (c != NULL)
+	if (c != nullptr)
 		strlcat(CatS, c, sizeof(CatS));
 	return CatS;
 }
@@ -52,8 +52,8 @@ CopyString(char **dest, char *source)
 	int   len;
 	char *start;
 
-	if (source == NULL) {
-		*dest = NULL;
+	if (source == nullptr) {
+		*dest = nullptr;
 		return;
 	}
 	while (((isspace((unsigned char)*source)) && (*source != '\n')) &&
@@ -68,8 +68,8 @@ CopyString(char **dest, char *source)
 	}
 
 	source--;
-	while (
-	    (isspace((unsigned char)*source)) && (*source != 0) && (len > 0)) {
+	while ((len > 0) && (isspace((unsigned char)*source)) &&
+	    (*source != 0)) {
 		len--;
 		source--;
 	}
@@ -90,15 +90,20 @@ stripcpy(char *source)
 	char *tmp, *ptr;
 	int   len;
 
-	if (source == NULL)
-		return NULL;
+	if (source == nullptr)
+		return nullptr;
 
 	while (isspace((unsigned char)*source))
 		source++;
 	len = strlen(source);
+	if (len == 0) {
+		ptr = xmalloc(1);
+		ptr[0] = 0;
+		return ptr;
+	}
 	tmp = source + len - 1;
-	while (((isspace((unsigned char)*tmp)) || (*tmp == '\n')) &&
-	    (tmp >= source)) {
+	while ((tmp >= source) &&
+	    ((isspace((unsigned char)*tmp)) || (*tmp == '\n'))) {
 		tmp--;
 		len--;
 	}

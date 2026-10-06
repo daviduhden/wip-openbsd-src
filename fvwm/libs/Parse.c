@@ -39,7 +39,7 @@ FvwmParseInteger(const char *string)
 	unsigned long value = 0;
 	int	      digits = 0;
 
-	if (s == NULL)
+	if (s == nullptr)
 		return 0;
 
 	while (isspace((unsigned char)*s))
@@ -98,7 +98,7 @@ FvwmParseFd(const char *arg)
 	int	    fd;
 
 	fd = (int)strtonum(arg, 0, INT_MAX, &errstr);
-	if (errstr != NULL) {
+	if (errstr != nullptr) {
 		fprintf(stderr,
 		    "fvwm module: invalid descriptor "
 		    "argument '%s': %s\n",
@@ -127,14 +127,14 @@ FvwmParseFd(const char *arg)
  * qstart  - string of pair quote start characters (defaults to empty string)
  * qend    - string of pair quote end characters (defaults to empty string)
  *
- * The defaults are used if NULL is passed for the corresponding string.
+ * The defaults are used if nullptr is passed for the corresponding string.
  */
 char *
 SkipQuote(char *s, const char *qlong, const char *qstart, const char *qend)
 {
-	char *t;
+	const char *t;
 
-	if (s == NULL || *s == 0)
+	if (s == nullptr || *s == 0)
 		return s;
 	if (!qlong)
 		qlong = "\"'`";
@@ -158,8 +158,9 @@ SkipQuote(char *s, const char *qlong, const char *qstart, const char *qend)
 		if (*s == c)
 			s++;
 		return s;
-	} else if (*qstart && (t = strchr(qstart, *s))) {
-		char c = *((t - qstart) + qend);
+	} else if (*qstart && (t = strchr(qstart, *s)) &&
+	    (size_t)(t - qstart) < strlen(qend)) {
+		char c = qend[t - qstart];
 
 		while (*s && *s != c)
 			s = SkipQuote(s, qlong, "", "");
@@ -181,7 +182,7 @@ GetQuotedString(char *sin, char **sout, const char *delims, const char *qlong,
 	unsigned int len;
 
 	if (!sout || !sin)
-		return NULL;
+		return nullptr;
 
 	while (*t && !strchr(delims, *t))
 		t = SkipQuote(t, qlong, qstart, qend);
@@ -208,13 +209,13 @@ GetQuotedString(char *sin, char **sout, const char *delims, const char *qlong,
 char *
 PeekToken(const char *pstr)
 {
-	char	   *tok = NULL;
+	char	   *tok = nullptr;
 	const char *p;
 	char	    bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
 	int	    len = 0;
 
 	if (!pstr)
-		return NULL;
+		return nullptr;
 
 	p = pstr;
 	EatWS(p); /* skip leading space */
@@ -250,7 +251,7 @@ PeekToken(const char *pstr)
 		/* sanity checks: */
 		if (bc && !be) { /* did we have block start, but not end? */
 			/* should yell about this */
-			return NULL;
+			return nullptr;
 		}
 
 		if (len) {
@@ -303,10 +304,10 @@ NukeToken(char **pstr)
 {
 	char *tok;
 	char *next;
-	char *temp = NULL;
+	char *temp = nullptr;
 
 	next = GetNextToken(*pstr, &tok);
-	if (next != NULL)
+	if (next != nullptr)
 		temp = strdup(next);
 	if (pstr && *pstr)
 		free(*pstr);
@@ -324,7 +325,7 @@ NukeToken(char **pstr)
  * token is the extracted word, which is copied into a malloced
  * space, and must be freed after use. DoGetNextToken *never* returns an
  * empty string or token. If the token consists only of whitespace or
- * delimiters, the returned token is NULL instead. If out_delim is given,
+ * delimiters, the returned token is nullptr instead. If out_delim is given,
  * the character ending the string is returned therein.
  *
  * spaces = string of characters to treat as spaces
@@ -344,11 +345,11 @@ DoGetNextToken(
 
 	snum = (spaces) ? strlen(spaces) : 0;
 	dnum = (delims) ? strlen(delims) : 0;
-	if (indata == NULL) {
+	if (indata == nullptr) {
 		if (out_delim)
 			*out_delim = '\0';
-		*token = NULL;
-		return NULL;
+		*token = nullptr;
+		return nullptr;
 	}
 	t = indata;
 	while ((*t != 0) &&
@@ -412,7 +413,7 @@ DoGetNextToken(
 
 	if (**token == 0) {
 		free(*token);
-		*token = NULL;
+		*token = nullptr;
 	}
 	return end;
 }
@@ -420,13 +421,13 @@ DoGetNextToken(
 char *
 GetNextToken(char *indata, char **token)
 {
-	return DoGetNextToken(indata, token, NULL, NULL, NULL);
+	return DoGetNextToken(indata, token, nullptr, nullptr, nullptr);
 }
 
 char *
 GetNextOption(char *indata, char **token)
 {
-	return DoGetNextToken(indata, token, ",", NULL, NULL);
+	return DoGetNextToken(indata, token, ",", nullptr, nullptr);
 }
 
 char *
@@ -450,7 +451,7 @@ SkipNTokens(char *indata, unsigned int n)
  *
  * If *indata begins with a "*" followed by the string module_name,
  * it returns the string following directly after module_name as the
- * new token. Otherwise NULL is returned.
+ * new token. Otherwise nullptr is returned.
  * e.g. GetModuleResource("*FvwmPagerGeometry", &token, "FvwmPager")
  * returns "Geometry" in token.
  *
@@ -462,7 +463,7 @@ GetModuleResource(char *indata, char **resource, char *module_name)
 	char *next;
 
 	if (!module_name) {
-		*resource = NULL;
+		*resource = nullptr;
 		return indata;
 	}
 	next = GetNextToken(indata, &tmp);
@@ -471,7 +472,8 @@ GetModuleResource(char *indata, char **resource, char *module_name)
 
 	if (tmp[0] != '*' ||
 	    strncasecmp(tmp + 1, module_name, strlen(module_name))) {
-		*resource = NULL;
+		*resource = nullptr;
+		free(tmp);
 		return indata;
 	}
 	CopyString(resource, tmp + 1 + strlen(module_name));
@@ -483,7 +485,7 @@ GetModuleResource(char *indata, char **resource, char *module_name)
  *
  * This function uses GetNextToken to parse action for up to num integer
  * arguments. The number of values actually found is returned.
- * If ret_action is non-NULL, a pointer to the next token is returned there.
+ * If ret_action is non-nullptr, a pointer to the next token is returned there.
  *
  **************************************************************************/
 int
@@ -494,18 +496,18 @@ GetIntegerArguments(char *action, char **ret_action, int retvals[], int num)
 
 	for (i = 0; i < num && action; i++) {
 		action = GetNextToken(action, &token);
-		if (token == NULL)
+		if (token == nullptr)
 			break;
 		errno = 0;
 		retvals[i] = FvwmParseInteger(token);
 		free(token);
-		token = NULL;
+		token = nullptr;
 		if (errno == EINVAL)
 			break;
 	}
 	if (token)
 		free(token);
-	if (ret_action != NULL)
+	if (ret_action != nullptr)
 		*ret_action = action;
 
 	return i;
@@ -515,13 +517,13 @@ GetIntegerArguments(char *action, char **ret_action, int retvals[], int num)
  *
  * This function tries to match a token with a list of strings and returns
  * the position of token in the array or -1 if no match is found. The last
- * entry in the list must be NULL.
+ * entry in the list must be nullptr.
  *
  * len = 0 : only exact matches
  * len < 0 : match, if token begins with one of the strings in list
  * len > 0 : match, if the first len characters do match
  *
- * if next is non-NULL, *next will be set to point to the first character
+ * if next is non-nullptr, *next will be set to point to the first character
  * in token after the match.
  *
  **************************************************************************/
@@ -534,11 +536,11 @@ GetTokenIndex(char *token, char *list[], int len, char **next)
 
 	if (!token || !list) {
 		if (next)
-			*next = NULL;
+			*next = nullptr;
 		return -1;
 	}
 	l = (len) ? len : strlen(token);
-	for (i = 0; list[i] != NULL; i++) {
+	for (i = 0; list[i] != nullptr; i++) {
 		k = strlen(list[i]);
 		if (len < 0)
 			l = k;
@@ -576,7 +578,7 @@ GetNextTokenIndex(char *action, char *list[], int len, int *index)
 		*index = -1;
 		return action;
 	}
-	*index = GetTokenIndex(token, list, len, NULL);
+	*index = GetTokenIndex(token, list, len, nullptr);
 	free(token);
 
 	return (*index == -1) ? action : next;

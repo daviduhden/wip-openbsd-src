@@ -14,14 +14,14 @@
 
 /* Default option table */
 static XrmOptionDescRec default_opts[] = {
-    {"-fg", "*Foreground", XrmoptionSepArg, NULL},
-    {"-bg", "*Background", XrmoptionSepArg, NULL},
-    {"-fn", "*Font", XrmoptionSepArg, NULL},
-    {"-geometry", "*Geometry", XrmoptionSepArg, NULL},
-    {"-title", "*Title", XrmoptionSepArg, NULL}
+    {"-fg", "*Foreground", XrmoptionSepArg, nullptr},
+    {"-bg", "*Background", XrmoptionSepArg, nullptr},
+    {"-fn", "*Font", XrmoptionSepArg, nullptr},
+    {"-geometry", "*Geometry", XrmoptionSepArg, nullptr},
+    {"-title", "*Title", XrmoptionSepArg, nullptr}
     /* Remember to update NUM_DEFAULT_OPTIONS if you change this list! */
 };
-#define NUM_DEFAULT_OPTS 5
+constexpr int NUM_DEFAULT_OPTS = 5;
 
 /* internal function */
 static void
@@ -38,7 +38,7 @@ DoMergeString(char *resource, XrmDatabase *ptarget, Bool override)
 /***************************************************************************
  *
  * Merges all X resources for the display/screen into a Xrm database.
- * If the database does not exist (*pdb == NULL), a new database is created.
+ * If the database does not exist (*pdb == nullptr), a new database is created.
  * If override is True, existing entries of the same name are overwritten.
  *
  * Please remember to destroy the database with XrmDestroyDatabase(*pdb)
@@ -52,14 +52,21 @@ MergeXResources(Display *dpy, XrmDatabase *pdb, Bool override)
 		/* create new database */
 		XrmPutStringResource(pdb, "", "");
 	DoMergeString(XResourceManagerString(dpy), pdb, override);
-	DoMergeString(
-	    XScreenResourceString(DefaultScreenOfDisplay(dpy)), pdb, override);
+	{
+		/* XScreenResourceString() returns an XFree()-owned string. */
+		char *scr =
+		    XScreenResourceString(DefaultScreenOfDisplay(dpy));
+
+		DoMergeString(scr, pdb, override);
+		if (scr != nullptr)
+			XFree(scr);
+	}
 }
 
 /***************************************************************************
  *
  * Parses the command line given through pargc/argv and puts recognized
- * entries into the Xrm database *pdb (if *pdb is NULL a new database is
+ * entries into the Xrm database *pdb (if *pdb is nullptr a new database is
  * created). The caller may provide an option list in XrmOptionDescList
  * format (see XrmParseCommand manpage) and/or parse only standard options
  * (fg, bg, geometry, fn, title). User given options have precedence over
@@ -87,7 +94,7 @@ MergeCmdLineResources(XrmDatabase *pdb, XrmOptionDescList opts, int num_opts,
 /***************************************************************************
  *
  * Takes a line from a config file and puts a corresponding value into the
- * Xrm database *pdb (will be created if *pdb is NULL). 'prefix' is the
+ * Xrm database *pdb (will be created if *pdb is nullptr). 'prefix' is the
  * name of the module. A specific type of binding in the database must be
  * provided in bindstr (either "*" or "."). Leading unquoted whitespace are
  * stripped from value. Existing values in the database are overwritten.
@@ -137,8 +144,8 @@ MergeConfigLineResource(
 	while (*value && isspace((unsigned char)*value))
 		value++;
 
-	/* prefix*suffix: value */
-	reslen = len + (end - line) + 2;
+	/* prefix*binding*suffix: value */
+	reslen = (size_t)len + strlen(bindstr) + (size_t)(end - line) + 1;
 	resource = (char *)xmalloc(reslen);
 	strlcpy(resource, prefix, reslen);
 	strlcat(resource, bindstr, reslen);
@@ -147,7 +154,7 @@ MergeConfigLineResource(
 	len = strlen(value);
 	myvalue = (char *)xmalloc(len + 1);
 	strlcpy(myvalue, value, len + 1);
-	for (len--; len >= 0 && isspace(myvalue[len]); len--)
+	for (len--; len >= 0 && isspace((unsigned char)myvalue[len]); len--)
 		myvalue[len] = 0;
 
 	/* merge string into database */
@@ -163,10 +170,10 @@ MergeConfigLineResource(
  * Reads the string-value for the pair prefix/resource from the Xrm database
  * db and returns a pointer to it. The string may only be read and must not
  * be freed by the caller. 'prefix' is the class name (usually the name of
- * the module). If no value is found in the database, *val will be NULL.
+ * the module). If no value is found in the database, *val will be nullptr.
  * True is returned if a value was found, False if not. If you are only
  * interested if there is a string, but not it's value, you can set val to
- * NULL.
+ * nullptr.
  *
  * Example:
  *
@@ -179,7 +186,7 @@ Bool
 GetResourceString(
     XrmDatabase db, const char *resource, const char *prefix, char **val)
 {
-	XrmValue xval = {0, NULL};
+	XrmValue xval = {0, nullptr};
 	char	*str_type;
 	char	*name;
 	size_t	 len;
@@ -191,10 +198,10 @@ GetResourceString(
 	strlcat(name, resource, len);
 
 	if (!XrmGetResource(db, name, name, &str_type, &xval) ||
-	    xval.addr == NULL) {
+	    xval.addr == nullptr) {
 		free(name);
 		if (val)
-			*val = NULL;
+			*val = nullptr;
 		return False;
 	}
 	free(name);

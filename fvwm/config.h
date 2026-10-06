@@ -1,5 +1,8 @@
 /* config.h -- OpenBSD fvwm configuration */
 
+#ifndef FVWM_CONFIG_H
+#define FVWM_CONFIG_H
+
 #define FVWM_ICONDIR "/usr/X11R6/lib/X11/fvwm/icons"
 
 #define XPM 1
@@ -23,8 +26,8 @@
 #define HAVE_SIGACTION 1
 #define HAVE_SIGINTERRUPT 1
 #define HAVE_SYS_SELECT_H 1
-#define HAVE_SYS_WAIT_H 1
-#define HAVE_WAITPID 1
+constexpr int HAVE_SYS_WAIT_H = 1;
+constexpr int HAVE_WAITPID = 1;
 
 #include <sys/types.h>
 
@@ -41,3 +44,5 @@
 #ifndef abs
 #define abs(a) (((a) >= 0) ? (a) : -(a))
 #endif
+
+#endif /* FVWM_CONFIG_H */

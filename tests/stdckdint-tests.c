@@ -29,7 +29,6 @@
  * overflow builtins store.
  */
 #include <limits.h>
-#include <stdbool.h>
 #include <stdckdint.h>
 #include <stddef.h>
 #include <stdint.h>

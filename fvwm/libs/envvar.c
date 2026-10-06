@@ -19,10 +19,6 @@
 
 #include "fvwmlib.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 /**************************************************************************
  *                                                                        *
  *                       P R I V A T E    D A T A                         *
@@ -123,7 +119,7 @@ strIns(char *s, const char *ins, int idx, int maxstrlen)
  *
  *  OUTPUT        len     length of variable, including $ and { }.
  *
- *  RETURNS       Pointer to the $ that introduces the variable, or NULL
+ *  RETURNS       Pointer to the $ that introduces the variable, or nullptr
  *                if no variable is found.
  *
  *  DESCRIPTION   Searches for matches like $NAME and ${NAME}, where NAME is
@@ -140,11 +136,11 @@ static char *
 findEnvVar(const char *s, int *len)
 {
 	int	    brace = 0;
-	char	   *ret = NULL;
+	char	   *ret = nullptr;
 	const char *next;
 
 	if (!s)
-		return NULL;
+		return nullptr;
 	while (*s) {
 		next = s + 1;
 		if (*s == '$' &&
@@ -163,7 +159,7 @@ findEnvVar(const char *s, int *len)
 					++*len;
 					break;
 				}
-				ret = NULL;
+				ret = nullptr;
 			} else
 				break;
 		}
@@ -190,17 +186,17 @@ getEnv(const char *name)
 	static char *empty = "";
 	char	    *ret, *tmp, *p, *p2;
 
-	if ((tmp = strdup(name)) == NULL)
+	if ((tmp = strdup(name)) == nullptr)
 		return empty; /* better than no test at all. */
 	p = tmp;
 	if (*p == '$')
 		++p;
 	if (*p == '{') {
 		++p;
-		if ((p2 = strchr(p, '}')) != NULL)
+		if ((p2 = strchr(p, '}')) != nullptr)
 			*p2 = '\0';
 	}
-	if ((ret = getenv(p)) == NULL)
+	if ((ret = getenv(p)) == nullptr)
 		ret = empty;
 	free(tmp);
 	return ret;
@@ -240,15 +236,27 @@ envExpand(char *s, int maxstrlen)
 	int	    len, ret = 0;
 
 	s2 = s;
-	while ((var = findEnvVar(s2, &len)) != NULL) {
+	while ((var = findEnvVar(s2, &len)) != nullptr) {
+		int idx, inslen;
+
 		++ret;
 		save = var[len];
 		var[len] = '\0';
 		env = getEnv(var);
 		var[len] = save;
-		strDel(s, var - s, len);
-		strIns(s, env, var - s, maxstrlen);
-		s2 = var + strlen(env);
+		idx = var - s;
+		strDel(s, idx, len);
+		/*
+		 * strIns() clamps the inserted text to the buffer, so
+		 * advance past the bytes it actually wrote rather than
+		 * strlen(env); otherwise s2 could end up beyond the
+		 * terminator when the expansion is truncated.
+		 */
+		inslen = strlen(env);
+		if (inslen > maxstrlen - idx - 1)
+			inslen = maxstrlen - idx - 1;
+		strIns(s, env, idx, maxstrlen);
+		s2 = var + inslen;
 	}
 	return ret;
 }
@@ -271,7 +279,7 @@ envExpand(char *s, int maxstrlen)
  *                variables expanded.
  *                Use free() to deallocate the buffer when it is no
  *                longer needed.
- *                NULL is returned if there is not enough memory.
+ *                nullptr is returned if there is not enough memory.
  *
  *  NOTES         A non-existing variable is substituted with the empty
  *                string.
@@ -285,12 +293,19 @@ envDupExpand(const char *s, int extra)
 	int	    len, slen, elen, bufflen;
 
 	/*
+	 * A negative "extra" would make the envExpand() limit larger
+	 * than the allocation below; treat it as no reserve.
+	 */
+	if (extra < 0)
+		extra = 0;
+
+	/*
 	 *  calculate length needed.
 	 */
 	s2 = s;
 	slen = strlen(s);
 	bufflen = slen + 1 + extra;
-	while ((var = findEnvVar(s2, &len)) != NULL) {
+	while ((var = findEnvVar(s2, &len)) != nullptr) {
 		save = var[len];
 		var[len] = '\0';
 		env = getEnv(var);

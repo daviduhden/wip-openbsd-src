@@ -7,7 +7,7 @@ extern int	screen;
 extern int	d_depth;
 extern int	x_fd, fd_width;
 
-void   DeadPipe(int nonsense);
+[[noreturn]] void   DeadPipe(int nonsense);
 void   GetTargetWindow(Window *app_win);
 void   CopyString(char **dest, char *source);
 char  *CatString2(char *a, char *b);

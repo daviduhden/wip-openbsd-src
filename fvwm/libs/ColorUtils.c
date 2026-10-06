@@ -107,10 +107,11 @@ adjust_pixel_brightness(Pixel pixel, double factor)
 {
 	extern Colormap PictureCMap;
 	extern Display *PictureSaveDisplay;
-	XColor		color_spec;
+	XColor		color_spec = { 0 };
 
 	color_spec.pixel = pixel;
-	XQueryColor(PictureSaveDisplay, PictureCMap, &color_spec);
+	if (!XQueryColor(PictureSaveDisplay, PictureCMap, &color_spec))
+		return pixel;
 	color_mult(
 	    &color_spec.red, &color_spec.green, &color_spec.blue, factor);
 	XAllocColor(PictureSaveDisplay, PictureCMap, &color_spec);

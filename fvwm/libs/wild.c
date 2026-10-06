@@ -4,8 +4,8 @@
 #include "fvwmlib.h"
 
 #ifndef TRUE
-#define TRUE 1
-#define FALSE 0
+#define TRUE true
+#define FALSE false
 #endif
 
 /*****************************************************************************
@@ -20,15 +20,15 @@
 int
 matchWildcards(char *pattern, char *string)
 {
-	if (string == NULL) {
-		if (pattern == NULL)
+	if (string == nullptr) {
+		if (pattern == nullptr)
 			return TRUE;
 		else if (strcmp(pattern, "*") == 0)
 			return TRUE;
 		else
 			return FALSE;
 	}
-	if (pattern == NULL)
+	if (pattern == nullptr)
 		return TRUE;
 
 	while (*string && *pattern) {

@@ -5,4 +5,4 @@
  * Subroutine Prototypes
  *
  *************************************************************************/
-void DeadPipe(int nonsense);
+[[noreturn]] void DeadPipe(int nonsense);

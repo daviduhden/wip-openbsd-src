@@ -83,7 +83,7 @@ exec_helper_start(void)
 		 * No pledge here: it would be inherited by every
 		 * program the helper launches.  See fvwm_exec.c.
 		 */
-		execl(FVWMLIBDIR "/fvwm_exec", "fvwm_exec", NULL);
+		execl(FVWMLIBDIR "/fvwm_exec", "fvwm_exec", (char *)nullptr);
 		err(1, "execl %s/fvwm_exec", FVWMLIBDIR);
 	}
 
@@ -98,7 +98,7 @@ exec_helper_start(void)
 		err(1, "fcntl");
 
 	exec_ibuf = malloc(sizeof(struct imsgbuf));
-	if (exec_ibuf == NULL)
+	if (exec_ibuf == nullptr)
 		err(1, "malloc");
 	if (imsgbuf_init(exec_ibuf, exec_fd) == -1)
 		err(1, "imsgbuf_init");
@@ -121,7 +121,7 @@ exec_helper_fd(void)
 int
 exec_helper_running(void)
 {
-	return exec_ibuf != NULL;
+	return exec_ibuf != nullptr;
 }
 
 /*
@@ -130,18 +130,18 @@ exec_helper_running(void)
 void
 exec_helper_stop(void)
 {
-	if (exec_ibuf == NULL)
+	if (exec_ibuf == nullptr)
 		return;
 
 	imsgbuf_clear(exec_ibuf);
 	close(exec_fd);
 	free(exec_ibuf);
-	exec_ibuf = NULL;
+	exec_ibuf = nullptr;
 	exec_fd = -1;
 
 	if (exec_pid > 0) {
 		kill(exec_pid, SIGTERM);
-		waitpid(exec_pid, NULL, 0);
+		waitpid(exec_pid, nullptr, 0);
 		exec_pid = -1;
 	}
 }
@@ -194,7 +194,7 @@ exec_helper_drain(int (*cb)(struct imsg *, void *), void *arg)
 	ssize_t	    n;
 	int	    processed = 0;
 
-	if (exec_ibuf == NULL)
+	if (exec_ibuf == nullptr)
 		return -1;
 
 	n = imsgbuf_read(exec_ibuf);
@@ -228,7 +228,7 @@ exec_helper_drain(int (*cb)(struct imsg *, void *), void *arg)
 void
 exec_helper_handle(void)
 {
-	exec_helper_drain(exec_helper_dispatch, NULL);
+	exec_helper_drain(exec_helper_dispatch, nullptr);
 }
 
 /*
@@ -242,7 +242,7 @@ exec_helper_piperead_start(u_int32_t id, const char *command)
 	struct ibuf *buf;
 	size_t	     clen;
 
-	if (exec_ibuf == NULL)
+	if (exec_ibuf == nullptr)
 		return -1;
 
 	clen = strlen(command) + 1;
@@ -253,7 +253,7 @@ exec_helper_piperead_start(u_int32_t id, const char *command)
 
 	buf =
 	    imsg_create(exec_ibuf, IMSG_PIPEREAD_RUN, 0, 0, sizeof(id) + clen);
-	if (buf == NULL)
+	if (buf == nullptr)
 		return -1;
 	if (imsg_add(buf, &id, sizeof(id)) == -1)
 		return -1;
@@ -273,11 +273,11 @@ exec_helper_piperead_kill(u_int32_t id)
 {
 	struct ibuf *buf;
 
-	if (exec_ibuf == NULL)
+	if (exec_ibuf == nullptr)
 		return -1;
 
 	buf = imsg_create(exec_ibuf, IMSG_PIPEREAD_KILL, 0, 0, sizeof(id));
-	if (buf == NULL)
+	if (buf == nullptr)
 		return -1;
 	if (imsg_add(buf, &id, sizeof(id)) == -1)
 		return -1;
@@ -290,7 +290,7 @@ exec_helper_piperead_kill(u_int32_t id)
 /*
  * exec_helper_launch -- request the helper to execute a command.
  * argv is the full argument vector (argv[0] is the program);
- * envp may be NULL to inherit the helper's environment (which is
+ * envp may be nullptr to inherit the helper's environment (which is
  * fvwm's environment).  Returns 0 on success, -1 on failure.
  */
 int
@@ -302,7 +302,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 	int	     envc = 0;
 	int	     i;
 
-	if (exec_ibuf == NULL)
+	if (exec_ibuf == nullptr)
 		return -1;
 
 	/* Calculate total payload size: sizeof(int)*2 + all strings */
@@ -310,7 +310,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 	for (i = 0; i < argc; i++)
 		datalen += strlen(argv[i]) + 1;
 	if (envp) {
-		for (i = 0; envp[i] != NULL; i++) {
+		for (i = 0; envp[i] != nullptr; i++) {
 			datalen += strlen(envp[i]) + 1;
 			envc++;
 		}
@@ -324,7 +324,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 	/* Compose and send the request.  imsg_add advances the buffer
 	 * itself and frees it on failure; check every call. */
 	buf = imsg_create(exec_ibuf, IMSG_EXEC_RUN, 0, 0, datalen);
-	if (buf == NULL)
+	if (buf == nullptr)
 		return -1;
 
 	/* argc */
@@ -339,7 +339,7 @@ exec_helper_launch(int argc, char **argv, char **envp)
 			return -1;
 	}
 	if (envp) {
-		for (i = 0; envp[i] != NULL; i++) {
+		for (i = 0; envp[i] != nullptr; i++) {
 			if (imsg_add(buf, envp[i], strlen(envp[i]) + 1) == -1)
 				return -1;
 		}

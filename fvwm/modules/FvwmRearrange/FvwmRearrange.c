@@ -39,7 +39,7 @@
 #include "../../fvwm/module.h"
 #include "fvwmlib.h"
 
-void DeadPipe(int sig);
+[[noreturn]] void DeadPipe(int sig);
 
 typedef struct ClientNode {
 	Window		   frame;
@@ -93,7 +93,7 @@ static ModuleState g_state = {.raise_clients = 1};
 static void
 prepend_client(ModuleState *state, ClientNode *node)
 {
-	node->prev = NULL;
+	node->prev = nullptr;
 	node->next = state->head;
 	if (state->head) {
 		state->head->prev = node;
@@ -113,8 +113,8 @@ release_clients(ModuleState *state)
 		free(cursor);
 		cursor = next;
 	}
-	state->head = NULL;
-	state->tail = NULL;
+	state->head = nullptr;
+	state->tail = nullptr;
 	state->client_count = 0;
 }
 
@@ -126,7 +126,7 @@ find_client(ModuleState *state, Window frame)
 			return cursor;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 static void
@@ -177,10 +177,10 @@ window_matches(ModuleState *state, unsigned long *body)
 		return 0;
 	}
 	if (!state->entire_desk) {
-		int x = (int)body[3];
-		int y = (int)body[4];
-		int w = (int)body[5];
-		int h = (int)body[6];
+		auto x = (int)body[3];
+		auto y = (int)body[4];
+		auto w = (int)body[5];
+		auto h = (int)body[6];
 		if (!((x < state->screen_width) && (y < state->screen_height) &&
 			(x + w > 0) && (y + h > 0))) {
 			return 0;
@@ -205,7 +205,7 @@ collect_client(ModuleState *state)
 
 	FD_ZERO(&infds);
 	FD_SET(state->pipe_fd[1], &infds);
-	select(state->fd_width, &infds, NULL, NULL, NULL);
+	select(state->fd_width, &infds, nullptr, nullptr, nullptr);
 
 	if (ReadFvwmPacket(state->pipe_fd[1], header, &body) > 0) {
 		switch (header[1]) {
@@ -257,7 +257,7 @@ await_configure(ModuleState *state, ClientNode *node)
 
 		FD_ZERO(&infds);
 		FD_SET(state->pipe_fd[1], &infds);
-		select(state->fd_width, &infds, NULL, NULL, NULL);
+		select(state->fd_width, &infds, nullptr, nullptr, nullptr);
 
 		if (ReadFvwmPacket(state->pipe_fd[1], header, &body) > 0) {
 			switch (header[1]) {
@@ -269,7 +269,7 @@ await_configure(ModuleState *state, ClientNode *node)
 				break;
 			case M_DESTROY_WINDOW:
 				if (body) {
-					Window frame = (Window)body[1];
+					auto frame = (Window)body[1];
 					if (frame == node->frame) {
 						free(body);
 						return 0;
@@ -649,7 +649,7 @@ tokenise_config(char *line, char ***argv_out)
 	char *cursor = strtok(line, " \t");
 
 	while (cursor && count < 48) {
-		cursor = strtok(NULL, " \t");
+		cursor = strtok(nullptr, " \t");
 		if (!cursor) {
 			break;
 		}
@@ -662,7 +662,7 @@ tokenise_config(char *line, char ***argv_out)
 			(*argv_out)[i] = tokens[i];
 		}
 	} else {
-		*argv_out = NULL;
+		*argv_out = nullptr;
 	}
 
 	return count;
@@ -692,7 +692,7 @@ LoadConfigLine(const char *filename, const char *match)
 		}
 		fclose(f);
 	}
-	return NULL;
+	return nullptr;
 }
 #endif /* FVWM1 */
 #endif /* USERC */
@@ -737,10 +737,10 @@ main(int argc, char *argv[])
 	state->pipe_fd[0] = FvwmParseFd(argv[1]);
 	state->pipe_fd[1] = FvwmParseFd(argv[2]);
 
-	state->display = XOpenDisplay(NULL);
+	state->display = XOpenDisplay(nullptr);
 	if (!state->display) {
 		fprintf(state->log, "%s: couldn't open display %s\n",
-		    state->program_name, XDisplayName(NULL));
+		    state->program_name, XDisplayName(nullptr));
 		exit(1);
 	}
 
@@ -761,7 +761,7 @@ main(int argc, char *argv[])
 #ifdef FVWM1
 	config_line = LoadConfigLine(argv[3], match);
 	if (config_line) {
-		char **args = NULL;
+		char **args = nullptr;
 		int    arg_count = tokenise_config(config_line, &args);
 
 		parse_arguments(state, "config args", arg_count, args, 0);
@@ -772,7 +772,7 @@ main(int argc, char *argv[])
 	GetConfigLine(state->pipe_fd, &config_line);
 	while (config_line) {
 		if (strncmp(match, config_line, strlen(match)) == 0) {
-			char **args = NULL;
+			char **args = nullptr;
 			int    len = strlen(config_line);
 			if (len && config_line[len - 1] == '\n') {
 				config_line[len - 1] = '\0';
@@ -860,7 +860,7 @@ main(int argc, char *argv[])
 	return 0;
 }
 
-void
+[[noreturn]] void
 DeadPipe(int sig)
 {
 	(void)sig;

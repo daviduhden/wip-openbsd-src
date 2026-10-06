@@ -42,29 +42,29 @@ dummy(FILE *f, const char *fmt, ...)
 #define fprintf dummy
 #endif
 
-#define TEXT_SPC 3
-#define BOX_SPC 3
-#define ITEM_HSPC 10
-#define ITEM_VSPC 5
+constexpr int TEXT_SPC = 3;
+constexpr int BOX_SPC = 3;
+constexpr int ITEM_HSPC = 10;
+constexpr int ITEM_VSPC = 5;
 
 /* initial allocation sizes, structures grow dynamically as needed */
-#define INITIAL_LINE_CAPACITY 8
-#define INITIAL_LINE_ITEMS_CAPACITY 8
-#define INITIAL_ITEMS_CAPACITY 128
-#define INITIAL_CHOICES_CAPACITY 8
+constexpr int INITIAL_LINE_CAPACITY = 8;
+constexpr int INITIAL_LINE_ITEMS_CAPACITY = 8;
+constexpr int INITIAL_ITEMS_CAPACITY = 128;
+constexpr int INITIAL_CHOICES_CAPACITY = 8;
 
-#define I_TEXT 1
-#define I_INPUT 2
-#define I_SELECT 3
-#define I_CHOICE 4
-#define I_BUTTON 5
+constexpr int I_TEXT = 1;
+constexpr int I_INPUT = 2;
+constexpr int I_SELECT = 3;
+constexpr int I_CHOICE = 4;
+constexpr int I_BUTTON = 5;
 
-#define IS_SINGLE 1
-#define IS_MULTIPLE 2
+constexpr int IS_SINGLE = 1;
+constexpr int IS_MULTIPLE = 2;
 
-#define IB_CONTINUE 1
-#define IB_RESTART 2
-#define IB_QUIT 3
+constexpr int IB_CONTINUE = 1;
+constexpr int IB_RESTART = 2;
+constexpr int IB_QUIT = 3;
 
 typedef union _item {
 	int type;      /* item type, one of I_TEXT .. I_BUTTON */
@@ -120,10 +120,10 @@ typedef union _item {
 	} button;
 } Item;
 
-#define L_LEFT 1
-#define L_RIGHT 2
-#define L_CENTER 3
-#define L_LEFTRIGHT 4
+constexpr int L_LEFT = 1;
+constexpr int L_RIGHT = 2;
+constexpr int L_CENTER = 3;
+constexpr int L_LEFTRIGHT = 4;
 
 typedef struct _line {
 	int    n;	       /* number of items on the line */
@@ -137,10 +137,10 @@ int   fd_in;  /* fd for Fvwm->Module packets */
 int   fd_out; /* fd for Module->Fvwm packets */
 FILE *fp_err;
 
-Line *lines = NULL;
+Line *lines = nullptr;
 int   n_lines;
 int   lines_capacity = 0;
-Item *items = NULL;
+Item *items = nullptr;
 int   n_items;
 int   items_capacity = 0;
 Item  def_button;
@@ -182,6 +182,31 @@ int   rel_cursor;
 static char *buf;
 static int   N = 8;
 
+/* Allocation helpers that fail fast, matching grow_items()'s policy. */
+static void *
+form_xmalloc(size_t n)
+{
+	void *p = malloc(n);
+
+	if (p == nullptr) {
+		fprintf(fp_err, "%s: out of memory\n", prog_name);
+		exit(1);
+	}
+	return p;
+}
+
+static void *
+form_xrealloc(void *p, size_t n)
+{
+	void *q = realloc(p, n);
+
+	if (q == nullptr) {
+		fprintf(fp_err, "%s: out of memory\n", prog_name);
+		exit(1);
+	}
+	return q;
+}
+
 static void
 ensure_line_capacity(int count)
 {
@@ -192,13 +217,13 @@ ensure_line_capacity(int count)
 	while (new_cap < count) {
 		new_cap *= 2;
 	}
-	lines = (Line *)realloc(lines, sizeof(Line) * new_cap);
+	lines = (Line *)form_xrealloc(lines, sizeof(Line) * new_cap);
 	for (int i = lines_capacity; i < new_cap; ++i) {
 		lines[i].n = 0;
 		lines[i].justify = L_CENTER;
 		lines[i].size_x = 0;
 		lines[i].size_y = 0;
-		lines[i].items = NULL;
+		lines[i].items = nullptr;
 		lines[i].items_cap = 0;
 	}
 	lines_capacity = new_cap;
@@ -215,7 +240,7 @@ ensure_line_item_capacity(Line *line, int count)
 	while (new_cap < count) {
 		new_cap *= 2;
 	}
-	line->items = (Item **)realloc(line->items, sizeof(Item *) * new_cap);
+	line->items = (Item **)form_xrealloc(line->items, sizeof(Item *) * new_cap);
 	line->items_cap = new_cap;
 }
 
@@ -261,11 +286,7 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 
 	items_capacity =
 	    items_capacity ? items_capacity * 2 : INITIAL_ITEMS_CAPACITY;
-	items = (Item *)realloc(items, sizeof(Item) * items_capacity);
-	if (items == NULL) {
-		fprintf(fp_err, "%s: out of memory\n", prog_name);
-		exit(1);
-	}
+	items = (Item *)form_xrealloc(items, sizeof(Item) * items_capacity);
 	memset((void *)(items + old_cap), 0,
 	    sizeof(Item) * (items_capacity - old_cap));
 	if (items == old_items)
@@ -273,18 +294,27 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 	delta = (char *)items - (char *)old_items;
 	for (i = 0; i < lines_capacity; i++)
 		for (j = 0; j < lines[i].n; j++)
-			if (lines[i].items[j] != NULL)
+			if (lines[i].items[j] != nullptr)
 				lines[i].items[j] =
 				    (Item *)((char *)lines[i].items[j] + delta);
-	for (i = 0; i < n_items; i++)
-		if (items[i].type == I_CHOICE && items[i].choice.sel != NULL)
+	for (i = 0; i < n_items; i++) {
+		if (items[i].type == I_CHOICE && items[i].choice.sel != nullptr)
 			items[i].choice.sel =
 			    (Item *)((char *)items[i].choice.sel + delta);
-	if (cur_text != NULL)
+		if (items[i].type == I_SELECT) {
+			int k;
+
+			for (k = 0; k < items[i].select.n; k++)
+				items[i].select.choices[k] =
+				    (Item *)((char *)
+				    items[i].select.choices[k] + delta);
+		}
+	}
+	if (cur_text != nullptr)
 		cur_text = (Item *)((char *)cur_text + delta);
-	if (*pcur_sel != NULL)
+	if (*pcur_sel != nullptr)
 		*pcur_sel = (Item *)((char *)*pcur_sel + delta);
-	if (*pcur_button != NULL && *pcur_button != &def_button)
+	if (*pcur_button != nullptr && *pcur_button != &def_button)
 		*pcur_button = (Item *)((char *)*pcur_button + delta);
 }
 
@@ -298,14 +328,14 @@ CopyNString(char *cp, int n)
 	if (n == 0)
 		n = strlen(cp);
 	if (n <= 0) {
-		bp = malloc(1);
-		if (bp != NULL)
+		bp = form_xmalloc(1);
+		if (bp != nullptr)
 			*bp = '\0';
 		return bp;
 	}
-	bp = dp = (char *)malloc(n + 1);
-	if (bp == NULL)
-		return NULL;
+	bp = dp = (char *)form_xmalloc(n + 1);
+	if (bp == nullptr)
+		return nullptr;
 	len = n;
 	while (len-- > 0)
 		*dp++ = *cp++;
@@ -320,7 +350,7 @@ static char *
 CopyQuotedString(char *cp)
 {
 	char *dp, *bp, c;
-	bp = dp = (char *)malloc(strlen(cp) + 1);
+	bp = dp = (char *)form_xmalloc(strlen(cp) + 1);
 
 	while (1) {
 		switch (c = *(cp++)) {
@@ -350,7 +380,7 @@ static char *
 CopySolidString(char *cp)
 {
 	char *dp, *bp, c;
-	bp = dp = (char *)malloc(strlen(cp) + 1);
+	bp = dp = (char *)form_xmalloc(strlen(cp) + 1);
 	while (1) {
 		c = *(cp++);
 		if (c == '\\') {
@@ -396,11 +426,7 @@ ReadConfig(void)
 	/* ensure items array capacity (dynamic) */
 	if (!items) {
 		items_capacity = INITIAL_ITEMS_CAPACITY;
-		items = (Item *)malloc(sizeof(Item) * items_capacity);
-		if (items == NULL) {
-			fprintf(fp_err, "%s: out of memory\n", prog_name);
-			exit(1);
-		}
+		items = (Item *)form_xmalloc(sizeof(Item) * items_capacity);
 		memset(items, 0, sizeof(Item) * items_capacity);
 	}
 
@@ -416,11 +442,11 @@ ReadConfig(void)
 	def_button.button.n = 0;
 	if (!def_button.button.commands) {
 		def_button.button.commands =
-		    (char **)malloc(sizeof(char *) * 8);
+		    (char **)form_xmalloc(sizeof(char *) * 8);
 		def_button.button.commands_cap = 8;
 	}
 	def_button.button.key = IB_CONTINUE;
-	cur_sel = NULL;
+	cur_sel = nullptr;
 
 	/* default fonts in case the *FFFont's are missing */
 	xfs[f_text] = xfs[f_input] = xfs[f_button] =
@@ -591,11 +617,11 @@ ReadConfig(void)
 				item->input.init_value = CopyQuotedString(++cp);
 			else
 				item->input.init_value = "";
-			item->input.blanks = (char *)malloc(item->input.size);
+			item->input.blanks = (char *)form_xmalloc(item->input.size);
 			for (j = 0; j < item->input.size; j++)
 				item->input.blanks[j] = ' ';
 			item->input.buf = strlen(item->input.init_value) + 1;
-			item->input.value = (char *)malloc(item->input.buf);
+			item->input.value = (char *)form_xmalloc(item->input.buf);
 			item->header.size_x =
 			    FontWidth(xfs[f_input]) * item->input.size +
 			    2 * TEXT_SPC + 2 * BOX_SPC;
@@ -624,7 +650,7 @@ ReadConfig(void)
 				cur_sel->select.key = IS_SINGLE;
 			cur_sel->select.n = 0;
 			cur_sel->select.choices_cap = INITIAL_CHOICES_CAPACITY;
-			cur_sel->select.choices = (Item **)malloc(
+			cur_sel->select.choices = (Item **)form_xmalloc(
 			    sizeof(Item *) * cur_sel->select.choices_cap);
 			cur_sel->header.size_x = 0;
 			cur_sel->header.size_y = 0;
@@ -638,7 +664,7 @@ ReadConfig(void)
 			cp += 6;
 			while (isspace((unsigned char)*cp))
 				cp++;
-			if (cur_sel == NULL) {
+			if (cur_sel == nullptr) {
 				fprintf(fp_err,
 				    "Choice specified before "
 				    "Selection, skipping\n");
@@ -648,7 +674,7 @@ ReadConfig(void)
 			    cur_sel->select.choices_cap) {
 				cur_sel->select.choices_cap *= 2;
 				cur_sel->select.choices =
-				    (Item **)realloc(cur_sel->select.choices,
+				    (Item **)form_xrealloc(cur_sel->select.choices,
 					sizeof(Item *) *
 					    cur_sel->select.choices_cap);
 			}
@@ -731,7 +757,7 @@ ReadConfig(void)
 			item->button.len = strlen(item->button.text);
 			item->button.n = 0;
 			item->button.commands =
-			    (char **)malloc(sizeof(char *) * 8);
+			    (char **)form_xmalloc(sizeof(char *) * 8);
 			item->button.commands_cap = 8;
 			item->header.size_y = FontHeight(xfs[f_button]) +
 			    2 * TEXT_SPC + 2 * BOX_SPC;
@@ -749,7 +775,7 @@ ReadConfig(void)
 			if (cur_button->button.n + 1 >
 			    cur_button->button.commands_cap) {
 				cur_button->button.commands_cap *= 2;
-				cur_button->button.commands = (char **)realloc(
+				cur_button->button.commands = (char **)form_xrealloc(
 				    cur_button->button.commands,
 				    sizeof(char *) *
 					cur_button->button.commands_cap);
@@ -863,7 +889,7 @@ ReadConfig(void)
 	}
 }
 
-#define MAX_INTENSITY 65535
+constexpr int MAX_INTENSITY = 65535;
 
 /* allocate color cells */
 static void
@@ -909,7 +935,7 @@ GetColors(void)
 		    GetShadow(colors[c_itemback]); /* alloc shadow */
 		colors[c_itemhi] =
 		    GetHilite(colors[c_itemback]); /* alloc shadow */
-	} else if (!XAllocColorCells(dpy, d_cmap, 0, NULL, 0, colors, 6)) {
+	} else if (!XAllocColorCells(dpy, d_cmap, 0, nullptr, 0, colors, 6)) {
 		colors[c_back] = colors[c_itemback] = WhitePixel(dpy, screen);
 		colors[c_fore] = colors[c_itemfore] = colors[c_itemlo] =
 		    colors[c_itemhi] = BlackPixel(dpy, screen);
@@ -961,7 +987,7 @@ Restart(void)
 	int   i;
 	Item *item;
 
-	cur_text = NULL;
+	cur_text = nullptr;
 	abs_cursor = rel_cursor = 0;
 	for (i = 0; i < n_items; i++) {
 		item = items + i;
@@ -1179,7 +1205,7 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 	{                                                                      \
 		if (dn >= N) {                                                 \
 			N *= 2;                                                \
-			buf = (char *)realloc(buf, N);                         \
+			buf = (char *)form_xrealloc(buf, N);                         \
 		}                                                              \
 		buf[dn++] = (chr);                                             \
 	}
@@ -1510,7 +1536,7 @@ ReadXServer(void)
 				break;
 			case KeyPress: /* we do text input here */
 				n = XLookupString(
-				    &event.xkey, (char *)buf, 10, &ks, NULL);
+				    &event.xkey, (char *)buf, 10, &ks, nullptr);
 				keypress = buf[0];
 				fprintf(fp_err, "Keypress [%s]\n", buf);
 				if (n == 0) { /* not a regular key, translate it
@@ -1738,7 +1764,7 @@ ReadXServer(void)
 							    cur_text->input
 								.size;
 							cur_text->input.value =
-							    (char *)realloc(
+							    (char *)form_xrealloc(
 								cur_text->input
 								    .value,
 								cur_text->input
@@ -1959,7 +1985,7 @@ MainLoop(void)
 		FD_SET(fd_x, &fds);
 
 		XFlush(dpy);
-		if (select(32, &fds, NULL, NULL, NULL) > 0) {
+		if (select(32, &fds, nullptr, nullptr, nullptr) > 0) {
 			if (FD_ISSET(fd_in, &fds))
 				ReadFvwm();
 			if (FD_ISSET(fd_x, &fds))
@@ -1974,7 +2000,7 @@ main(int argc, char **argv)
 {
 	int i;
 
-	buf = (char *)malloc(N); /* some kludge */
+	buf = (char *)form_xmalloc(N); /* some kludge */
 
 #ifdef DEBUG
 	fd_err = open(".FvwmFormErrors", O_WRONLY | O_CREAT, 0777);
@@ -2007,7 +2033,7 @@ main(int argc, char **argv)
 			prog_name = argv[6];
 		fd_out = FvwmParseFd(argv[1]);
 		fd_in = FvwmParseFd(argv[2]);
-		ref = strtol(argv[4], NULL, 16);
+		ref = strtol(argv[4], nullptr, 16);
 		if (ref == 0)
 			ref = None;
 #ifdef DEBUG
@@ -2018,7 +2044,7 @@ main(int argc, char **argv)
 	fd[0] = fd_out;
 	fd[1] = fd_in;
 
-	if (!(dpy = XOpenDisplay(NULL))) {
+	if (!(dpy = XOpenDisplay(nullptr))) {
 		fprintf(fp_err, "%s: can't open display.\n", prog_name);
 		exit(1);
 	}
@@ -2040,9 +2066,9 @@ main(int argc, char **argv)
 	return 0;
 }
 
-void DeadPipe(int nonsense);
+[[noreturn]] void DeadPipe(int nonsense);
 
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;

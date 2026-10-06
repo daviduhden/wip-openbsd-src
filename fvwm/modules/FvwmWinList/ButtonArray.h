@@ -32,7 +32,7 @@ typedef struct {
 	int	x, y, w, h;
 } ButtonArray;
 
-#define MAX_COLOUR_SETS 4
+constexpr int MAX_COLOUR_SETS = 4;
 
 /* Function Prototypes */
 Button *ButtonNew(char *title, FvwmPicture *p, int up);

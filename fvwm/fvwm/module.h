@@ -15,7 +15,7 @@ extern int			 *readPipes;
 extern int			 *writePipes;
 extern struct queue_buff_struct **pipeQueue;
 
-#define START_FLAG 0xffffffff
+constexpr unsigned int START_FLAG = 0xffffffffu;
 
 #define M_NEW_PAGE (1)
 #define M_NEW_DESK (1 << 1)

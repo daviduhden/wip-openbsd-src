@@ -37,7 +37,7 @@ get_select_button(void)
 {
 	if (globals.select_win)
 		return globals.select_win->button;
-	return NULL;
+	return nullptr;
 }
 
 static Button *
@@ -45,7 +45,7 @@ get_focus_button(void)
 {
 	if (globals.focus_win)
 		return globals.focus_win->button;
-	return NULL;
+	return nullptr;
 }
 
 static WinManager *
@@ -57,7 +57,7 @@ get_current_man(void)
 		return globals.managers;
 	if (b && b->drawn_state.win)
 		return b->drawn_state.win->manager;
-	return NULL;
+	return nullptr;
 }
 
 static WinData *
@@ -67,7 +67,7 @@ get_current_win(void)
 
 	if (b && b->drawn_state.win)
 		return b->drawn_state.win;
-	return NULL;
+	return nullptr;
 }
 
 static Button *
@@ -79,7 +79,7 @@ get_current_button(void)
 static Button *
 button_move(ButtonValue *bv)
 {
-	Button	   *b = NULL, *cur;
+	Button	   *b = nullptr, *cur;
 	WinManager *man;
 	int	    i;
 
@@ -113,7 +113,7 @@ button_move(ButtonValue *bv)
 		if (!cur) {
 			ConsoleDebug(
 			    FUNCTIONS, "\tno current button, skipping\n");
-			return NULL;
+			return nullptr;
 		}
 
 		switch (bv->base) {
@@ -197,12 +197,12 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 
 	case AbsoluteButton: {
 		/* Now we find the manager modulo the VISIBLE managers */
-		static WinManager **wa = NULL;
+		static WinManager **wa = nullptr;
 		int		    i, num_mapped, n;
 
 		n = globals.num_managers;
 		if (n) {
-			if (wa == NULL) {
+			if (wa == nullptr) {
 				wa = (WinManager **)xmalloc(
 				    n * sizeof(WinManager *));
 			}
@@ -219,7 +219,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 					i += num_mapped;
 				new = wa[i];
 			} else {
-				new = NULL;
+				new = nullptr;
 			}
 		}
 	} break;
@@ -438,7 +438,7 @@ builtin_ret(int numargs, BuiltinArg *args)
 {
 	(void)numargs;
 	(void)args;
-	function_context.fp = NULL;
+	function_context.fp = nullptr;
 	return 0;
 }
 
@@ -482,7 +482,7 @@ builtin_searchforward(int numargs, BuiltinArg *args)
 				break;
 			b = button_next(man, cur);
 			if (b == cur) {
-				cur = NULL;
+				cur = nullptr;
 				break;
 			}
 			cur = b;
@@ -516,7 +516,7 @@ builtin_searchback(int numargs, BuiltinArg *args)
 				break;
 			b = button_prev(man, cur);
 			if (b == cur) {
-				cur = NULL;
+				cur = nullptr;
 				break;
 			}
 			cur = b;

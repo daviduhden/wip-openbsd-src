@@ -186,7 +186,7 @@ setPath(char **p_path, char *newpath, int free_old_path)
 	char *oldpath = *p_path;
 	int   oldlen = strlen(oldpath);
 	char *stripped_path = stripcpy(newpath);
-	int   found_plus = strchr(newpath, '+') != NULL;
+	int   found_plus = strchr(newpath, '+') != nullptr;
 
 	/** Leave room for the old path, if we find a '+' in newpath **/
 	*p_path = envDupExpand(stripped_path, found_plus ? oldlen : 0);
@@ -194,10 +194,12 @@ setPath(char **p_path, char *newpath, int free_old_path)
 
 	if (found_plus) {
 		char *p = strchr(*p_path, '+');
-		memmove(p + oldlen, p + 1, strlen(p + 1));
 
-		/* copy oldlen+1 bytes to include the trailing NUL */
-		strncpy(p, oldpath, oldlen + 1);
+		/* Move the suffix (and its NUL) after the old path. */
+		memmove(p + oldlen, p + 1, strlen(p + 1) + 1);
+
+		/* Insert the old path in place of the '+'. */
+		memcpy(p, oldpath, oldlen);
 	}
 
 	if (free_old_path)
@@ -233,10 +235,10 @@ FindBuiltinFunction(char *func)
 	static int func_config_size = 0;
 
 	if (!func)
-		return NULL;
+		return nullptr;
 
 	if (!func_config_size) {
-		/* remove finial NULL entry from size */
+		/* remove finial nullptr entry from size */
 		func_config_size =
 		    ((sizeof(func_config)) / (sizeof(struct functions))) - 1;
 	}
@@ -285,14 +287,14 @@ ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
 	   the asterisk. */
 	if (Action[0] == '*') { /* a module config command */
 		ModuleConfig(
-		    NULL, 0, 0, 0, Action, 0); /* process the command */
+		    nullptr, 0, 0, 0, Action, 0); /* process the command */
 		return;			       /* done */
 	}
 
 	for (j = 0; j < 10; j++)
-		arguments[j] = NULL;
+		arguments[j] = nullptr;
 
-	if (tmp_win == NULL)
+	if (tmp_win == nullptr)
 		w = Scr.Root;
 	else
 		w = tmp_win->w;
@@ -332,7 +334,7 @@ ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
 
 	if (function)
 		free(function);
-	if (taction != NULL)
+	if (taction != nullptr)
 		free(taction);
 	return;
 }

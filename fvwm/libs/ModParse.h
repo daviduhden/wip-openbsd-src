@@ -27,7 +27,7 @@ int   MatchArgument(const char *pstr, char *tok);
    description:		find the entry of type 'struct_entry'
 			holding 'key' in 'table'
    returns:		pointer to the matching entry
-			NULL if not found
+			nullptr if not found
 
    table must be sorted in ascending order for FindToken.
 */

@@ -20,7 +20,7 @@ extern void  CopyString(char **dest, char *source);
 extern void  RelieveWindow(
     Window win, int x, int y, int w, int h, GC rGC, GC sGC);
 extern void SendFvwmPipe(int *, char *text, unsigned long window);
-extern void DeadPipe(int nonsense);
+extern [[noreturn]] void DeadPipe(int nonsense);
 extern void CreateIconWindow(struct icon_info *item);
 extern void ConfigureIconWindow(struct icon_info *item);
 extern void DrawIconWindow(struct icon_info *item);
@@ -150,7 +150,7 @@ extern char *pixmapPath;
 
 extern int icon_relief;
 
-#define NOPLACE -1
+constexpr int NOPLACE = -1;
 #define LEFT 0
 #define RIGHT 1
 #define TOP 2
@@ -165,10 +165,10 @@ extern int icon_relief;
 
 /* sorting */
 #define UNSORT 0
-#define WINDOWNAME 1
-#define ICONNAME 2
-#define RESNAME 3
-#define RESCLASS 4
+constexpr int WINDOWNAME = 1;
+constexpr int ICONNAME = 2;
+constexpr int RESNAME = 3;
+constexpr int RESCLASS = 4;
 
 /* local flags */
 #define HIDE_H (1 << 0)
@@ -179,3 +179,5 @@ extern int icon_relief;
 #define DEFAULTICON (1 << 0)
 #define NONAME (1 << 1)
 #define NOCLASS (1 << 2)
+/* icon_file points at a heap copy we own and must free */
+#define ICONFILE_OWNED (1L << 3)

@@ -106,16 +106,21 @@ GetMwmHints(FvwmWindow *t)
 	int	      actual_format;
 	Atom	      actual_type;
 	unsigned long nitems, bytesafter;
+	unsigned char *prop = nullptr;
 
 	if (XGetWindowProperty(dpy, t->w, _XA_MwmAtom, 0L, 20L, False,
 		_XA_MwmAtom, &actual_type, &actual_format, &nitems, &bytesafter,
-		(unsigned char **)&t->mwm_hints) == Success) {
-		if (nitems >= PROP_MOTIF_WM_HINTS_ELEMENTS) {
+		&prop) == Success) {
+		if (prop != nullptr && actual_format == 32 &&
+		    nitems >= PROP_MOTIF_WM_HINTS_ELEMENTS) {
+			t->mwm_hints = (int *)prop;
 			return;
 		}
+		if (prop != nullptr)
+			XFree(prop);
 	}
 
-	t->mwm_hints = NULL;
+	t->mwm_hints = nullptr;
 }
 
 /****************************************************************************
@@ -160,7 +165,7 @@ GetOlHints(FvwmWindow *t)
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_WIN_ATTR, 0L, 20L, False,
 		_XA_OL_WIN_ATTR, &actual_type, &actual_format, &nitems,
 		&bytesafter, (unsigned char **)&hints) == Success) {
-		if (nitems > 0) {
+		if (actual_format == 32 && nitems > 0) {
 			if (nitems == 3)
 				win_type = hints[0];
 			else
@@ -195,15 +200,17 @@ GetOlHints(FvwmWindow *t)
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_DECOR_ADD, 0L, 20L, False,
 		XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
 		(unsigned char **)&hints) == Success) {
-		for (i = 0; i < (int)nitems; i++) {
-			if (hints[i] == _XA_OL_DECOR_CLOSE)
-				t->ol_hints |= OL_DECOR_CLOSE;
-			else if (hints[i] == _XA_OL_DECOR_RESIZE)
-				t->ol_hints |= OL_DECOR_RESIZEH;
-			else if (hints[i] == _XA_OL_DECOR_HEADER)
-				t->ol_hints |= OL_DECOR_HEADER;
-			else if (hints[i] == _XA_OL_DECOR_ICON_NAME)
-				t->ol_hints |= OL_DECOR_ICON_NAME;
+		if (actual_format == 32) {
+			for (i = 0; i < (int)nitems; i++) {
+				if (hints[i] == _XA_OL_DECOR_CLOSE)
+					t->ol_hints |= OL_DECOR_CLOSE;
+				else if (hints[i] == _XA_OL_DECOR_RESIZE)
+					t->ol_hints |= OL_DECOR_RESIZEH;
+				else if (hints[i] == _XA_OL_DECOR_HEADER)
+					t->ol_hints |= OL_DECOR_HEADER;
+				else if (hints[i] == _XA_OL_DECOR_ICON_NAME)
+					t->ol_hints |= OL_DECOR_ICON_NAME;
+			}
 		}
 		if (hints)
 			XFree(hints);
@@ -212,15 +219,17 @@ GetOlHints(FvwmWindow *t)
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_DECOR_DEL, 0L, 20L, False,
 		XA_ATOM, &actual_type, &actual_format, &nitems, &bytesafter,
 		(unsigned char **)&hints) == Success) {
-		for (i = 0; i < (int)nitems; i++) {
-			if (hints[i] == _XA_OL_DECOR_CLOSE)
-				t->ol_hints &= ~OL_DECOR_CLOSE;
-			else if (hints[i] == _XA_OL_DECOR_RESIZE)
-				t->ol_hints &= ~OL_DECOR_RESIZEH;
-			else if (hints[i] == _XA_OL_DECOR_HEADER)
-				t->ol_hints &= ~OL_DECOR_HEADER;
-			else if (hints[i] == _XA_OL_DECOR_ICON_NAME)
-				t->ol_hints &= ~OL_DECOR_ICON_NAME;
+		if (actual_format == 32) {
+			for (i = 0; i < (int)nitems; i++) {
+				if (hints[i] == _XA_OL_DECOR_CLOSE)
+					t->ol_hints &= ~OL_DECOR_CLOSE;
+				else if (hints[i] == _XA_OL_DECOR_RESIZE)
+					t->ol_hints &= ~OL_DECOR_RESIZEH;
+				else if (hints[i] == _XA_OL_DECOR_HEADER)
+					t->ol_hints &= ~OL_DECOR_HEADER;
+				else if (hints[i] == _XA_OL_DECOR_ICON_NAME)
+					t->ol_hints &= ~OL_DECOR_ICON_NAME;
+			}
 		}
 		if (hints)
 			XFree(hints);
@@ -579,5 +588,5 @@ check_allowed_function(MenuItem *mi)
 int
 check_allowed_function2(int function, FvwmWindow *t)
 {
-	return check_if_function_allowed(function, t, NULL);
+	return check_if_function_allowed(function, t, nullptr);
 }

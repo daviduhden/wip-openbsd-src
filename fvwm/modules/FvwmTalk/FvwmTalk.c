@@ -7,12 +7,12 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
-#define TRUE 1
-#define FALSE
+#define TRUE true
+#define FALSE false
 
-#define UPDATE_ONLY 1
-#define ALL 2
-#define PROP_SIZE 1024
+constexpr int UPDATE_ONLY = 1;
+constexpr int ALL = 2;
+constexpr int PROP_SIZE = 1024;
 
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -53,7 +53,7 @@ Display *dpy;
 char *font_string = "fixed";
 char *ForeColor = "green";
 char *BackColor = "black";
-char *display_name = NULL;
+char *display_name = nullptr;
 
 XFontStruct	    *font;
 Pixel		     fore_pix, back_pix;
@@ -105,7 +105,7 @@ main(int argc, char **argv)
 	temp = argv[0];
 
 	s = strrchr(argv[0], '/');
-	if (s != NULL)
+	if (s != nullptr)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -148,8 +148,8 @@ main(int argc, char **argv)
 	wm_del_win = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 
 	/* load the font */
-	if ((font = XLoadQueryFont(dpy, font_string)) == NULL) {
-		if ((font = XLoadQueryFont(dpy, "fixed")) == NULL) {
+	if ((font = XLoadQueryFont(dpy, font_string)) == nullptr) {
+		if ((font = XLoadQueryFont(dpy, "fixed")) == nullptr) {
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
 		}
@@ -192,10 +192,10 @@ main(int argc, char **argv)
 	/* XStringListToTextProperty(&(argv[0]), 1, &window_name); */
 	memset(&window_name, 0, sizeof(window_name));
 	if (!XStringListToTextProperty(&temp, 1, &window_name))
-		window_name.value = NULL;
+		window_name.value = nullptr;
 	XSetWMProperties(dpy, window, &window_name, &window_name, argv, argc,
 	    &sizehints, &wm_hints, &class_hints);
-	if (window_name.value != NULL)
+	if (window_name.value != nullptr)
 		XFree(window_name.value);
 
 	gcv.foreground = fore_pix;
@@ -221,7 +221,7 @@ void
 Loop(int *fd)
 {
 	KeySym		      keysym;
-	static XComposeStatus compose = {NULL, 0};
+	static XComposeStatus compose = {nullptr, 0};
 	XEvent		      event;
 	char		      kbuf[100];
 	int		      count;
@@ -293,7 +293,7 @@ Loop(int *fd)
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-void
+[[noreturn]] void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -340,7 +340,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	unsigned long  header[HEADER_SIZE];
 	int	       count;
 	static int     miss_counter = 0;
-	unsigned long *body = NULL;
+	unsigned long *body = nullptr;
 
 	if (XPending(dpy)) {
 		XNextEvent(dpy, event);
@@ -356,7 +356,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	select(fd_width, &in_fdset, 0, 0, NULL);
+	select(fd_width, &in_fdset, 0, 0, nullptr);
 
 	if (FD_ISSET(x_fd, &in_fdset)) {
 		if (XPending(dpy)) {
@@ -372,7 +372,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	if (FD_ISSET(fd[1], &in_fdset)) {
 		if ((count = ReadFvwmPacket(fd[1], header, &body)) > 0) {
 			if (header[1] == M_ERROR || header[1] == M_STRING) {
-				if (body != NULL) {
+				if (body != nullptr) {
 					strncpy(last_error, (char *)(&body[3]),
 					    sizeof(last_error) - 1);
 					last_error[sizeof(last_error) - 1] =
@@ -441,7 +441,7 @@ paste_primary(Window window, Atom property, Bool Delete)
 		 * terminate the string ourselves.
 		 */
 		if (pos < (int)sizeof(Text) - 1) {
-			size_t avail = (size_t)((int)sizeof(Text) - 1 - pos);
+			auto avail = (size_t)((int)sizeof(Text) - 1 - pos);
 			size_t copy = (nitems < avail) ? (size_t)nitems : avail;
 
 			memcpy(Text + pos, data2, copy);

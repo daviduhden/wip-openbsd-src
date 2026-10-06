@@ -138,11 +138,11 @@ typedef struct {
 /*
  * Data Interchange Format - Extended tar header format - POSIX 1003.1-1990
  */
-#define TPFSZ 155
+constexpr int TPFSZ = 155;
 #define TMAGIC "ustar" /* ustar and a null */
-#define TMAGLEN 6
+constexpr int TMAGLEN = 6;
 #define TVERSION "00" /* 00 and no null */
-#define TVERSLEN 2
+constexpr int TVERSLEN = 2;
 
 typedef struct {
 	char name[TNMSZ];	/* name of entry */

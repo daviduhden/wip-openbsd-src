@@ -56,11 +56,11 @@ trimleft(char *s)
 static char *
 seekright(char **s)
 {
-	char *token = NULL;
+	char *token = nullptr;
 	char *line = *s;
 
-	line = DoGetNextToken(line, &token, NULL, "),", &terminator);
-	if (*s != NULL && line == NULL)
+	line = DoGetNextToken(line, &token, nullptr, "),", &terminator);
+	if (*s != nullptr && line == nullptr)
 		line = strchr(*s, '\0');
 	*s = line;
 
@@ -72,13 +72,13 @@ seekright_command(char **s)
 {
 	char *command = seekright(s);
 
-	if (command == NULL)
-		return NULL;
+	if (command == nullptr)
+		return nullptr;
 
 	while (terminator != '\0' && terminator != ')' && terminator != ',') {
 		char *next = seekright(s);
 
-		if (next == NULL)
+		if (next == nullptr)
 			break;
 
 		size_t len_command = strlen(command);
@@ -104,7 +104,7 @@ seekright_command(char **s)
 static int
 ParseBack(char **ss)
 {
-	char *opts[] = {"icon", NULL};
+	char *opts[] = {"icon", nullptr};
 	char *t, *s = *ss;
 	int   r = 0;
 
@@ -142,7 +142,7 @@ ParseBack(char **ss)
 static void
 ParseBoxSize(char **ss, unsigned long *flags)
 {
-	char *opts[] = {"dumb", "fixed", "smart", NULL};
+	char *opts[] = {"dumb", "fixed", "smart", nullptr};
 	char *s = *ss;
 	int   m;
 
@@ -177,7 +177,7 @@ ParseBoxSize(char **ss, unsigned long *flags)
 static void
 ParseTitle(char **ss, byte *flags, byte *mask)
 {
-	char *titleopts[] = {"left", "right", "center", "side", NULL};
+	char *titleopts[] = {"left", "right", "center", "side", nullptr};
 	char *t, *s = *ss;
 
 	while (*s && *s != ')') {
@@ -227,7 +227,7 @@ ParseSwallow(char **ss, byte *flags, byte *mask)
 {
 	char *swallowopts[] = {"nohints", "hints", "nokill", "kill", "noclose",
 	    "close", "respawn", "norespawn", "useold", "noold", "usetitle",
-	    "notitle", NULL};
+	    "notitle", nullptr};
 	char *t, *s = *ss;
 
 	while (*s && *s != ')') {
@@ -306,7 +306,7 @@ static void
 ParseContainer(char **ss, button_info *b)
 {
 	char *conts[] = {"columns", "rows", "font", "frame", "back", "fore",
-	    "padding", "title", "swallow", "nosize", "size", "boxsize", NULL};
+	    "padding", "title", "swallow", "nosize", "size", "boxsize", nullptr};
 	char *t, *o, *s = *ss;
 	int   i, j;
 
@@ -471,7 +471,7 @@ match_string(button_info **uberb, char *s)
 	if (*s == '(' && s++) {
 		char *opts[] = {"back", "fore", "font", "title", "icon",
 		    "frame", "padding", "swallow", "action", "container", "end",
-		    "nosize", "size", "panel", "left", "right", "center", NULL};
+		    "nosize", "size", "panel", "left", "right", "center", nullptr};
 		s = trimleft(s);
 		while (*s && *s != ')') {
 			if ((*s >= '0' && *s <= '9') || *s == '+' ||
@@ -685,17 +685,18 @@ match_string(button_info **uberb, char *s)
 						    "%s: Couldn't parse "
 						    "action\n",
 						    MyName);
+					} else {
+						s += 5;
+						i = strtol(s, &t, 10);
+						s = t;
 					}
-					s += 5;
-					i = strtol(s, &t, 10);
-					s = t;
 					while (*s && *s != ')')
 						s++;
 					if (*s == ')')
 						s++;
 				}
 				s = GetQuotedString(
-				    s, &t, ",)", NULL, NULL, NULL);
+				    s, &t, ",)", nullptr, nullptr, nullptr);
 				if (t) {
 					AddButtonAction(b, i, t);
 					free(t);
@@ -720,7 +721,7 @@ match_string(button_info **uberb, char *s)
 
 			case 10: /* End */
 				*uberb = ub->parent;
-				ub->c->buttons[--(ub->c->num_buttons)] = NULL;
+				ub->c->buttons[--(ub->c->num_buttons)] = nullptr;
 				if (!ub->parent) {
 					fprintf(stderr,
 					    "%s: Unmatched END in config "
@@ -762,17 +763,29 @@ match_string(button_info **uberb, char *s)
 							s++;
 					if (*s == ')')
 						s++;
-					if (strncasecmp(t, "right", 5) == 0)
-						t = "panel-r";
-					else if (strncasecmp(t, "left", 4) == 0)
-						t = "panel-l";
-					else if (strncasecmp(t, "down", 4) == 0)
-						t = "panel-d";
-					else if (strncasecmp(
-						     t, "geometry", 8) == 0)
-						t = "panel-g";
-					else
+					if (t == nullptr)
 						t = "panel-u";
+					else {
+						char *kind;
+
+						if (strncasecmp(
+							t, "right", 5) == 0)
+							kind = "panel-r";
+						else if (strncasecmp(
+							     t, "left", 4) == 0)
+							kind = "panel-l";
+						else if (strncasecmp(
+							     t, "down", 4) == 0)
+							kind = "panel-d";
+						else if (strncasecmp(
+							     t, "geometry",
+							     8) == 0)
+							kind = "panel-g";
+						else
+							kind = "panel-u";
+						free(t);
+						t = kind;
+					}
 				} else
 					t = "panel-u";
 				AddButtonAction(b, 0, t);
@@ -891,7 +904,7 @@ ParseConfigLine(button_info **ubb, char *s)
 	button_info *ub = *ubb;
 	char	    *opts[] = {"geometry", "font", "padding", "columns", "rows",
 	    "back", "fore", "frame", "file", "pixmap", "panel", "boxsize",
-	    NULL};
+	    nullptr};
 	int	     i, j, k;
 
 	switch (GetTokenIndex(s, opts, -1, &s)) {
@@ -982,13 +995,13 @@ ParseConfigLine(button_info **ubb, char *s)
 		memset(CurrentPanel, 0, sizeof(panel_info));
 		CurrentPanel->geom_w = -1;
 		CurrentPanel->geom_h = -1;
-		CurrentPanel->next = NULL;
+		CurrentPanel->next = nullptr;
 		CurrentPanel->uber = UberButton =
 		    (button_info *)xmalloc(sizeof(button_info));
 		memset(UberButton, 0, sizeof(button_info));
 		UberButton->title = seekright(&s);
 		UberButton->flags = 0;
-		UberButton->parent = NULL;
+		UberButton->parent = nullptr;
 		UberButton->BWidth = 1;
 		UberButton->BHeight = 1;
 		UberButton->swallow = 0; /* subpanel is hidden initially */
@@ -1026,8 +1039,10 @@ ParseConfigFile(button_info *ub)
 	while (fgets(s, 1023, f)) {
 		/* Allow for line continuation: */
 		while ((l = strlen(s)) < (int)sizeof(s) && l >= 2 &&
-		    s[l - 1] == '\n' && s[l - 2] == '\\')
-			fgets(s + l - 2, sizeof(s) - l, f);
+		    s[l - 1] == '\n' && s[l - 2] == '\\') {
+			if (fgets(s + l - 2, sizeof(s) - l, f) == nullptr)
+				break;
+		}
 
 		/* And comments: */
 		t = s;
@@ -1055,7 +1070,7 @@ void
 ParseOptions(button_info *ub)
 {
 	char *s;
-	char *items[] = {"iconpath", "pixmappath", "colorlimit", NULL, NULL};
+	char *items[] = {"iconpath", "pixmappath", "colorlimit", nullptr, nullptr};
 
 	size_t name_len = strlen(MyName);
 	items[3] = xmalloc(name_len + 2);

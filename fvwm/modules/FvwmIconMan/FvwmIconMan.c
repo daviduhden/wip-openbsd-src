@@ -45,7 +45,7 @@ copy_string(char **target, char *src)
 void
 Free(void *p)
 {
-	if (p != NULL)
+	if (p != nullptr)
 		free(p);
 }
 
@@ -63,7 +63,7 @@ ShutMeDown(int flag)
 	exit(flag);
 }
 
-void
+[[noreturn]] void
 DeadPipe(int nothing)
 {
 	(void)nothing;
@@ -80,7 +80,7 @@ SendFvwmPipe(char *message, unsigned long window)
 
 	while (1) {
 		temp = strchr(hold, ',');
-		if (temp != NULL) {
+		if (temp != nullptr) {
 			temp_msg = (char *)xmalloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
@@ -112,7 +112,7 @@ main_loop(void)
 		 * there is nothing there yet ...
 		 */
 		readset = saveset;
-		if (select(fd_width, &readset, NULL, NULL, NULL) < 0) {
+		if (select(fd_width, &readset, nullptr, nullptr, nullptr) < 0) {
 			ConsoleMessage(
 			    "Internal error with select: errno=%d\n", errno);
 		} else {
@@ -145,7 +145,7 @@ main(int argc, char **argv)
 		if (fork() == 0) {
 			chdir("/home/bradym/src/FvwmIconMan");
 			execl("/usr/local/bin/ddd", "/usr/local/bin/ddd",
-			    "FvwmIconMan", buf, NULL);
+			    "FvwmIconMan", buf, nullptr);
 		} else {
 			int i, done = 0;
 			for (i = 0; i < (1 << 27) && !done; i++)
@@ -185,11 +185,11 @@ main(int argc, char **argv)
 #endif
 		sigact.sa_handler = TerminateHandler;
 
-		sigaction(SIGPIPE, &sigact, NULL);
-		sigaction(SIGINT, &sigact, NULL);
-		sigaction(SIGHUP, &sigact, NULL);
-		sigaction(SIGTERM, &sigact, NULL);
-		sigaction(SIGQUIT, &sigact, NULL);
+		sigaction(SIGPIPE, &sigact, nullptr);
+		sigaction(SIGINT, &sigact, nullptr);
+		sigaction(SIGHUP, &sigact, nullptr);
+		sigaction(SIGTERM, &sigact, nullptr);
+		sigaction(SIGQUIT, &sigact, nullptr);
 	}
 #else
 	/* We don't have sigaction(), so fall back to less robust methods.  */

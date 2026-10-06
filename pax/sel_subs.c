@@ -91,10 +91,10 @@ static int usr_match(ARCHD *);
 static int grp_match(ARCHD *);
 static int trng_match(ARCHD *);
 
-static TIME_RNG *trhead = NULL; /* time range list head */
-static TIME_RNG *trtail = NULL; /* time range list tail */
-static USRT    **usrtb = NULL;	/* user selection table */
-static GRPT    **grptb = NULL;	/* group selection table */
+static TIME_RNG *trhead = nullptr; /* time range list head */
+static TIME_RNG *trtail = nullptr; /* time range list tail */
+static USRT    **usrtb = nullptr;	/* user selection table */
+static GRPT    **grptb = nullptr;	/* group selection table */
 
 /*
  * Routines for selection of archive members
@@ -110,9 +110,9 @@ static GRPT    **grptb = NULL;	/* group selection table */
 int
 sel_chk(ARCHD *arcn)
 {
-	if (((usrtb != NULL) && usr_match(arcn)) ||
-	    ((grptb != NULL) && grp_match(arcn)) ||
-	    ((trhead != NULL) && trng_match(arcn)))
+	if (((usrtb != nullptr) && usr_match(arcn)) ||
+	    ((grptb != nullptr) && grp_match(arcn)) ||
+	    ((trhead != nullptr) && trng_match(arcn)))
 		return (1);
 	return (0);
 }
@@ -142,10 +142,10 @@ usr_add(char *str)
 	/*
 	 * create the table if it doesn't exist
 	 */
-	if ((str == NULL) || (*str == '\0'))
+	if ((str == nullptr) || (*str == '\0'))
 		return (-1);
-	if ((usrtb == NULL) &&
-	    ((usrtb = calloc(USR_TB_SZ, sizeof(USRT *))) == NULL)) {
+	if ((usrtb == nullptr) &&
+	    ((usrtb = calloc(USR_TB_SZ, sizeof(USRT *))) == nullptr)) {
 		paxwarn(
 		    1, "Unable to allocate memory for user selection table");
 		return (-1);
@@ -165,15 +165,15 @@ usr_add(char *str)
 			return (-1);
 		}
 	} else
-		uid = (uid_t)strtoul(str + 1, NULL, 10);
+		uid = (uid_t)strtoul(str + 1, nullptr, 10);
 	endpwent();
 
 	/*
 	 * hash it and go down the hash chain (if any) looking for it
 	 */
 	indx = ((unsigned)uid) % USR_TB_SZ;
-	if ((pt = usrtb[indx]) != NULL) {
-		while (pt != NULL) {
+	if ((pt = usrtb[indx]) != nullptr) {
+		while (pt != nullptr) {
 			if (pt->uid == uid)
 				return (0);
 			pt = pt->fow;
@@ -183,7 +183,7 @@ usr_add(char *str)
 	/*
 	 * uid is not yet in the table, add it to the front of the chain
 	 */
-	if ((pt = malloc(sizeof(USRT))) != NULL) {
+	if ((pt = malloc(sizeof(USRT))) != nullptr) {
 		pt->uid = uid;
 		pt->fow = usrtb[indx];
 		usrtb[indx] = pt;
@@ -209,7 +209,7 @@ usr_match(ARCHD *arcn)
 	 * hash and look for it in the table
 	 */
 	pt = usrtb[((unsigned)arcn->sb.st_uid) % USR_TB_SZ];
-	while (pt != NULL) {
+	while (pt != nullptr) {
 		if (pt->uid == arcn->sb.st_uid)
 			return (0);
 		pt = pt->fow;
@@ -238,10 +238,10 @@ grp_add(char *str)
 	/*
 	 * create the table if it doesn't exist
 	 */
-	if ((str == NULL) || (*str == '\0'))
+	if ((str == nullptr) || (*str == '\0'))
 		return (-1);
-	if ((grptb == NULL) &&
-	    ((grptb = calloc(GRP_TB_SZ, sizeof(GRPT *))) == NULL)) {
+	if ((grptb == nullptr) &&
+	    ((grptb = calloc(GRP_TB_SZ, sizeof(GRPT *))) == nullptr)) {
 		paxwarn(
 		    1, "Unable to allocate memory fo group selection table");
 		return (-1);
@@ -262,15 +262,15 @@ grp_add(char *str)
 			return (-1);
 		}
 	} else
-		gid = (gid_t)strtoul(str + 1, NULL, 10);
+		gid = (gid_t)strtoul(str + 1, nullptr, 10);
 	endgrent();
 
 	/*
 	 * hash it and go down the hash chain (if any) looking for it
 	 */
 	indx = ((unsigned)gid) % GRP_TB_SZ;
-	if ((pt = grptb[indx]) != NULL) {
-		while (pt != NULL) {
+	if ((pt = grptb[indx]) != nullptr) {
+		while (pt != nullptr) {
 			if (pt->gid == gid)
 				return (0);
 			pt = pt->fow;
@@ -280,7 +280,7 @@ grp_add(char *str)
 	/*
 	 * gid not in the table, add it to the front of the chain
 	 */
-	if ((pt = malloc(sizeof(GRPT))) != NULL) {
+	if ((pt = malloc(sizeof(GRPT))) != nullptr) {
 		pt->gid = gid;
 		pt->fow = grptb[indx];
 		grptb[indx] = pt;
@@ -306,7 +306,7 @@ grp_match(ARCHD *arcn)
 	 * hash and look for it in the table
 	 */
 	pt = grptb[((unsigned)arcn->sb.st_gid) % GRP_TB_SZ];
-	while (pt != NULL) {
+	while (pt != nullptr) {
 		if (pt->gid == arcn->sb.st_gid)
 			return (0);
 		pt = pt->fow;
@@ -351,7 +351,7 @@ int
 trng_add(char *str)
 {
 	TIME_RNG *pt;
-	char	 *up_pt = NULL;
+	char	 *up_pt = nullptr;
 	char	 *stpt;
 	char	 *flgpt;
 	int	  dot = 0;
@@ -359,7 +359,7 @@ trng_add(char *str)
 	/*
 	 * throw out the badly formed time ranges
 	 */
-	if ((str == NULL) || (*str == '\0')) {
+	if ((str == nullptr) || (*str == '\0')) {
 		paxwarn(1, "Empty time range string");
 		return (-1);
 	}
@@ -367,13 +367,13 @@ trng_add(char *str)
 	/*
 	 * locate optional flags suffix /{cm}.
 	 */
-	if ((flgpt = strrchr(str, '/')) != NULL)
+	if ((flgpt = strrchr(str, '/')) != nullptr)
 		*flgpt++ = '\0';
 
 	for (stpt = str; *stpt != '\0'; ++stpt) {
 		if ((*stpt >= '0') && (*stpt <= '9'))
 			continue;
-		if ((*stpt == ',') && (up_pt == NULL)) {
+		if ((*stpt == ',') && (up_pt == nullptr)) {
 			*stpt = '\0';
 			up_pt = stpt + 1;
 			dot = 0;
@@ -394,7 +394,7 @@ trng_add(char *str)
 	/*
 	 * allocate space for the time range and store the limits
 	 */
-	if ((pt = malloc(sizeof(TIME_RNG))) == NULL) {
+	if ((pt = malloc(sizeof(TIME_RNG))) == nullptr) {
 		paxwarn(1, "Unable to allocate memory for time range");
 		return (-1);
 	}
@@ -403,7 +403,7 @@ trng_add(char *str)
 	 * by default we only will check file mtime, but user can specify
 	 * mtime, ctime (inode change time) or both.
 	 */
-	if ((flgpt == NULL) || (*flgpt == '\0'))
+	if ((flgpt == nullptr) || (*flgpt == '\0'))
 		pt->flgs = CMPMTME;
 	else {
 		pt->flgs = 0;
@@ -430,7 +430,7 @@ trng_add(char *str)
 	/*
 	 * start off with the current time
 	 */
-	pt->low_time = pt->high_time = time(NULL);
+	pt->low_time = pt->high_time = time(nullptr);
 	if (*str != '\0') {
 		/*
 		 * add lower limit
@@ -443,7 +443,7 @@ trng_add(char *str)
 		pt->flgs |= HASLOW;
 	}
 
-	if ((up_pt != NULL) && (*up_pt != '\0')) {
+	if ((up_pt != nullptr) && (*up_pt != '\0')) {
 		/*
 		 * add upper limit
 		 */
@@ -467,8 +467,8 @@ trng_add(char *str)
 		}
 	}
 
-	pt->fow = NULL;
-	if (trhead == NULL) {
+	pt->fow = nullptr;
+	if (trhead == nullptr) {
 		trtail = trhead = pt;
 		return (0);
 	}
@@ -499,7 +499,7 @@ trng_match(ARCHD *arcn)
 	 * remember time range limits are inclusive.
 	 */
 	pt = trhead;
-	while (pt != NULL) {
+	while (pt != nullptr) {
 		switch (pt->flgs & CMPBOTH) {
 		case CMPBOTH:
 			/*
@@ -545,7 +545,7 @@ trng_match(ARCHD *arcn)
 		break;
 	}
 
-	if (pt == NULL)
+	if (pt == nullptr)
 		return (1);
 	return (0);
 }
@@ -570,20 +570,20 @@ str_sec(const char *p, time_t *tval)
 	yearset = 0;
 	len = strlen(p);
 
-	for (t = p, dot = NULL; *t; ++t) {
+	for (t = p, dot = nullptr; *t; ++t) {
 		if (isdigit((unsigned char)*t))
 			continue;
-		if (*t == '.' && dot == NULL) {
+		if (*t == '.' && dot == nullptr) {
 			dot = t;
 			continue;
 		}
 		return (-1);
 	}
 
-	if ((lt = localtime(tval)) == NULL)
+	if ((lt = localtime(tval)) == nullptr)
 		return (-1);
 
-	if (dot != NULL) { /* .SS */
+	if (dot != nullptr) { /* .SS */
 		if (strlen(++dot) != 2)
 			return (-1);
 		lt->tm_sec = ATOI2(dot);

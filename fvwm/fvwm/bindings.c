@@ -40,7 +40,7 @@ RegrabAllKeys(void)
 {
 	FvwmWindow *t;
 
-	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
 		GrabKeys(t);
 	}
 }
@@ -53,7 +53,7 @@ static void
 remove_binding(
     int contexts, int mods, int button, KeySym keysym, int mouse_binding)
 {
-	Binding *temp = Scr.AllBindings, *temp2, *prev = NULL;
+	Binding *temp = Scr.AllBindings, *temp2, *prev = nullptr;
 	KeyCode	 keycode = 0;
 
 	if (!mouse_binding)
@@ -77,7 +77,7 @@ remove_binding(
 				free(temp->key_name);
 				free(temp->Action);
 				free(temp);
-				temp = NULL;
+				temp = nullptr;
 			}
 		}
 		if (temp)
@@ -112,7 +112,7 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	/* tline points after the key word "Mouse" or "Key" */
 	ptr = GetNextToken(tline, &token);
-	if (token != NULL) {
+	if (token != nullptr) {
 		if (fKey)
 			n1 = sscanf(token, "%19s", key);
 		else
@@ -121,13 +121,13 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	ptr = GetNextToken(ptr, &token);
-	if (token != NULL) {
+	if (token != nullptr) {
 		n2 = sscanf(token, "%19s", context);
 		free(token);
 	}
 
 	action = GetNextToken(ptr, &token);
-	if (token != NULL) {
+	if (token != nullptr) {
 		n3 = sscanf(token, "%19s", modifiers);
 		free(token);
 	}
@@ -203,7 +203,8 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	if ((!fKey) && (contexts & C_WINDOW) &&
-	    (((mods == 0) || mods == AnyModifier))) {
+	    (((mods == 0) || mods == AnyModifier)) &&
+	    button >= 1 && button <= 8) {
 		Scr.buttons2grab &= ~(1 << (button - 1));
 	}
 
@@ -223,14 +224,14 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		maxmods = 0;
 	}
 	for (i = min; i <= max; i++) {
-		KeySym *mapping = NULL;
+		KeySym *mapping = nullptr;
 		int	mapping_width = 0;
 		int	column_limit = maxmods;
 
 		if (fKey) {
 			mapping =
 			    XGetKeyboardMapping(dpy, i, 1, &mapping_width);
-			if (mapping == NULL || mapping_width <= 0) {
+			if (mapping == nullptr || mapping_width <= 0) {
 				if (mapping)
 					XFree(mapping);
 				continue;
@@ -256,7 +257,7 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				Scr.AllBindings->IsMouse = !fKey;
 				Scr.AllBindings->Button_Key = i;
 				Scr.AllBindings->key_name =
-				    fKey ? stripcpy(key) : NULL;
+				    fKey ? stripcpy(key) : nullptr;
 				Scr.AllBindings->Context = contexts;
 				Scr.AllBindings->Modifier = mods;
 				Scr.AllBindings->Action = stripcpy(action);

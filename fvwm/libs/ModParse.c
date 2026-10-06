@@ -26,13 +26,13 @@
 static char *
 DoPeekArgument(const char *pstr, const char **pret)
 {
-	char	   *tok = NULL;
+	char	   *tok = nullptr;
 	const char *p;
 	char	    bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
 	int	    len = 0;
 
 	if (!pstr)
-		return NULL;
+		return nullptr;
 
 	p = pstr;
 	EatWS(p); /* skip leading space */
@@ -68,7 +68,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 		/* sanity checks: */
 		if (bc && !be) { /* did we have block start, but not end? */
 			/* should yell about this */
-			return NULL;
+			return nullptr;
 		}
 
 		if (len) {
@@ -88,7 +88,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 char *
 PeekArgument(const char *pstr)
 {
-	return DoPeekArgument(pstr, NULL);
+	return DoPeekArgument(pstr, nullptr);
 }
 
 /*
@@ -99,10 +99,10 @@ char *
 GetArgument(char **pstr)
 {
 	char	   *tok;
-	const char *next = NULL;
+	const char *next = nullptr;
 
 	if (!pstr || !*pstr || !(tok = DoPeekArgument(*pstr, &next)))
-		return NULL;
+		return nullptr;
 
 	*pstr = (char *)next;
 	/* skip tok and following whitespace/separators in pstr & DON'T realloc
@@ -110,7 +110,7 @@ GetArgument(char **pstr)
 	EatWS(*pstr);
 
 	if (*pstr && !**pstr)
-		*pstr = NULL; /* change \0 to NULL */
+		*pstr = nullptr; /* change \0 to nullptr */
 
 	return tok;
 }
@@ -163,9 +163,9 @@ GetNextArgument(char *indata, char **token)
 	char *t, *start, *end, *text;
 
 	t = indata;
-	if (t == NULL) {
-		*token = NULL;
-		return NULL;
+	if (t == nullptr) {
+		*token = nullptr;
+		return nullptr;
 	}
 	while (isspace((unsigned char)*t) && (*t != 0))
 		t++;
@@ -224,7 +224,7 @@ GetNextArgument(char *indata, char **token)
    function:		MatchToken
    description:	        matches one word
    returns:		pointer to delimiter character
-			NULL if no match
+			nullptr if no match
 */
 
 /*
@@ -245,9 +245,9 @@ XCmpToken(const void *vs, const void *vt)
 	const char *s = (const char *)vs;
 	const char *w = *(const char *const *)vt;
 
-	if (w == NULL)
+	if (w == nullptr)
 		return 1; /* non existant word */
-	if (s == NULL)
+	if (s == nullptr)
 		return -1; /* non existant string */
 
 #ifdef WORD_IS_UPPERCASE

@@ -775,7 +775,7 @@ ext4fs_leaf_split(struct inode *ip, struct buf *old_bp,
 		    sizeof(struct ext4fs_extent_idx);
 
 		if (old_entries > lcap || maxleaf > lcap ||
-		    root_entries > rcap) {
+		    root_entries > rcap || root_max > rcap) {
 			brelse(old_bp);
 			return (EIO);
 		}
@@ -1396,7 +1396,7 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 	u_int64_t blocks_freed;
 
 	cursize = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 
 	if (length == cursize)
 		return (0);
@@ -1461,7 +1461,8 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 				leaf_eh = (struct ext4fs_extent_header *)
 				    bp->b_data;
 				if (letoh16(leaf_eh->eh_magic) !=
-				    EXT4FS_EXTENT_HEADER_MAGIC) {
+				    EXT4FS_EXTENT_HEADER_MAGIC ||
+				    letoh16(leaf_eh->eh_depth) != 0) {
 					brelse(bp);
 					continue;
 				}
@@ -1557,13 +1558,18 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 				leaf_eh = (struct ext4fs_extent_header *)
 				    bp->b_data;
 				if (letoh16(leaf_eh->eh_magic) !=
-				    EXT4FS_EXTENT_HEADER_MAGIC) {
+				    EXT4FS_EXTENT_HEADER_MAGIC ||
+				    letoh16(leaf_eh->eh_depth) != 0) {
 					brelse(bp);
 					continue;
 				}
 
 				leaf_entries = letoh16(leaf_eh->eh_entries);
 				if (leaf_entries > (fs->m_block_size -
+				    sizeof(struct ext4fs_extent_header)) /
+				    sizeof(struct ext4fs_extent) ||
+				    letoh16(leaf_eh->eh_max) >
+				    (fs->m_block_size -
 				    sizeof(struct ext4fs_extent_header)) /
 				    sizeof(struct ext4fs_extent)) {
 					brelse(bp);
@@ -1744,7 +1750,7 @@ ext4fs_lookup(void *v)
 
 	/* Search directory for the name */
 	filesz = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 
 	if (nameiop == CREATE || nameiop == RENAME)
 		slotneeded = EXT4FS_DIRSIZ(cnp->cn_namelen);
@@ -2137,7 +2143,7 @@ ext4fs_getattr(void *v)
 	vap->va_gid |= (gid_t)letoh16(din->dinode.i_gid_hi) << 16;
 	vap->va_rdev = 0;
 	vap->va_size = letoh32(din->dinode.i_size_lo);
-	vap->va_size |= (off_t)letoh32(din->dinode.i_size_hi) << 32;
+	vap->va_size |= (off_t)((u_int64_t)letoh32(din->dinode.i_size_hi) << 32);
 
 	/* Convert timestamps; the extra (nanosecond) fields only
 	 * exist when the inode format provides them. */
@@ -2394,7 +2400,7 @@ ext4fs_read(void *v)
 		return (0);
 
 	filesz = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 
 	for (error = 0, bp = NULL; uio->uio_resid > 0; bp = NULL) {
 		bytesinfile = filesz - uio->uio_offset;
@@ -2486,7 +2492,7 @@ ext4fs_write(void *v)
 	}
 
 	filesz = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 
 	if (ioflag & IO_APPEND)
 		uio->uio_offset = filesz;
@@ -2743,6 +2749,7 @@ ext4fs_checkpath(struct inode *source, struct inode *target, struct ucred *cred)
 	struct m_ext4fs *fs = source->i_e4fs;
 	u_int32_t ino;
 	int error = 0;
+	int depth = 0;
 
 	vp = ITOV(target);
 	if (target->i_number == source->i_number) {
@@ -2757,6 +2764,15 @@ ext4fs_checkpath(struct inode *source, struct inode *target, struct ucred *cred)
 		struct buf *bp;
 		struct ext4fs_directory *dot, *dotdot;
 		u_int64_t pblk;
+
+		/*
+		 * Bound the walk: a corrupt image can chain ".." entries
+		 * into a cycle that never reaches source or the root.
+		 */
+		if (++depth > EXT4FS_LINK_MAX) {
+			error = ELOOP;
+			break;
+		}
 
 		if (vp->v_type != VDIR) {
 			error = ENOTDIR;
@@ -3072,16 +3088,38 @@ abortit:
 				    (daddr_t)EXT4FS_FSBTODB(ip->i_e4fs,
 				    dpblk), ip->i_e4fs->m_block_size, &dbp);
 				if (error == 0) {
-					dotdot = (struct ext4fs_directory *)
-					    ((char *)dbp->b_data +
-					     letoh16(
-					     ((struct ext4fs_directory *)dbp->b_data)->e4d_reclen));
-					dotdot->e4d_ino = htole32(newparent);
-					ext4fs_dir_set_csum(ip->i_e4fs,
-					    ip->i_number,
-					    ip->i_e4din->dinode.i_nfs_generation,
-					    dbp->b_data);
-					bwrite(dbp);
+					struct ext4fs_directory *dot;
+					u_int16_t dreclen;
+
+					/*
+					 * ".." follows the first (".")
+					 * entry in the first block.  Its
+					 * offset comes from the on-disk
+					 * reclen, so bound it before
+					 * indexing into the block buffer.
+					 */
+					dot = (struct ext4fs_directory *)
+					    dbp->b_data;
+					dreclen = letoh16(dot->e4d_reclen);
+					if (dreclen >=
+					    sizeof(struct ext4fs_directory) &&
+					    (u_int64_t)dreclen +
+					    sizeof(struct ext4fs_directory) <=
+					    ip->i_e4fs->m_block_size) {
+						dotdot =
+						    (struct ext4fs_directory *)
+						    ((char *)dbp->b_data +
+						    dreclen);
+						dotdot->e4d_ino =
+						    htole32(newparent);
+						ext4fs_dir_set_csum(
+						    ip->i_e4fs, ip->i_number,
+						    ip->i_e4din->dinode.
+						    i_nfs_generation,
+						    dbp->b_data);
+						bwrite(dbp);
+					} else
+						brelse(dbp);
 				} else
 					brelse(dbp);
 			}
@@ -3381,7 +3419,7 @@ ext4fs_readdir(void *v)
 		return (ENOTDIR);
 
 	filesz = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 	off = uio->uio_offset;
 
 	while (off < filesz && uio->uio_resid > 0) {
@@ -3511,7 +3549,7 @@ ext4fs_direnter(struct inode *ip, struct vnode *dvp,
 	mode = letoh16(ip->i_e4din->dinode.i_mode);
 
 	filesz = (off_t)letoh32(ddin->i_size_lo) |
-	    ((off_t)letoh32(ddin->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(ddin->i_size_hi) << 32));
 
 	if (dp->i_count == 0) {
 		/*
@@ -3520,6 +3558,19 @@ ext4fs_direnter(struct inode *ip, struct vnode *dvp,
 		 */
 		u_int64_t lbn = EXT4FS_LBLKNO(fs, filesz);
 		u_int64_t blkoff = EXT4FS_BLKOFF(fs, filesz);
+		int tail = (fs->m_feature_ro_compat &
+		    EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM) ?
+		    EXT4FS_DIR_TAIL_SIZE : 0;
+
+		/*
+		 * A non-block-aligned directory size means the last block
+		 * already holds entries up to filesz.  A corrupt size can
+		 * leave no room for the new entry (and the checksum tail);
+		 * reject it instead of writing past the block buffer.
+		 */
+		if (blkoff != 0 &&
+		    blkoff + entrysize + (u_int64_t)tail > fs->m_block_size)
+			return (EIO);
 
 		if (blkoff == 0) {
 			/* Need a new block */
@@ -3544,17 +3595,12 @@ ext4fs_direnter(struct inode *ip, struct vnode *dvp,
 		ep = (struct ext4fs_directory *)
 		    ((char *)bp->b_data + blkoff);
 		ep->e4d_ino = htole32((u_int32_t)ip->i_number);
-		{
-			int tail = (fs->m_feature_ro_compat &
-			    EXT4FS_FEATURE_RO_COMPAT_METADATA_CSUM) ?
-			    EXT4FS_DIR_TAIL_SIZE : 0;
-			if (blkoff == 0)
-				ep->e4d_reclen =
-				    htole16(fs->m_block_size - tail);
-			else
-				ep->e4d_reclen =
-				    htole16(fs->m_block_size - blkoff - tail);
-		}
+		if (blkoff == 0)
+			ep->e4d_reclen =
+			    htole16(fs->m_block_size - tail);
+		else
+			ep->e4d_reclen =
+			    htole16(fs->m_block_size - blkoff - tail);
 		ep->e4d_namlen = cnp->cn_namelen;
 		ep->e4d_type = ext4fs_mode_to_ft(mode);
 		memcpy(ep->e4d_name, cnp->cn_nameptr, cnp->cn_namelen);
@@ -3693,7 +3739,7 @@ ext4fs_dirempty(struct inode *ip, ufsino_t parentino, struct ucred *cred)
 	int error;
 
 	filesz = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 
 	for (off = 0; off < filesz;) {
 		lbn = EXT4FS_LBLKNO(fs, off);
@@ -4026,7 +4072,7 @@ ext4fs_advlock(void *v)
 	off_t filesz;
 
 	filesz = (off_t)letoh32(din->i_size_lo) |
-	    ((off_t)letoh32(din->i_size_hi) << 32);
+	    ((off_t)((u_int64_t)letoh32(din->i_size_hi) << 32));
 	return (lf_advlock(&ip->i_lockf, filesz, ap->a_id, ap->a_op,
 	    ap->a_fl, ap->a_flags));
 }

@@ -55,13 +55,13 @@ struct charstring key_modifiers[] = {{'s', ShiftMask}, {'c', ControlMask},
     {'4', Mod4Mask}, {'5', Mod5Mask}, {'a', AnyModifier}, {'n', 0}, {0, 0}};
 
 #if FVWM_VERSION == 1
-static FILE *config_fp = NULL;
+static FILE *config_fp = nullptr;
 #endif
 
 /* This is only used for printing out the .fvwmrc line if an error
    occured */
 
-#define PRINT_LINE_LENGTH 80
+constexpr int PRINT_LINE_LENGTH = 80;
 static char current_line[PRINT_LINE_LENGTH];
 
 static void
@@ -178,7 +178,7 @@ print_bindings(Binding *list)
 	(void)list;
 #ifdef PRINT_DEBUG
 	ConsoleDebug(CONFIG, "binding list:\n");
-	while (list != NULL) {
+	while (list != nullptr) {
 		print_binding(list);
 		ConsoleDebug(CONFIG, "\n");
 		list = list->NextBinding;
@@ -206,7 +206,7 @@ add_to_binding(Binding **list, Binding *binding)
 {
 	ConsoleDebug(CONFIG, "In add_to_binding:\n");
 
-	if (*list == NULL) {
+	if (*list == nullptr) {
 		*list = binding;
 	} else {
 		binding->LastBinding->NextBinding = *list;
@@ -298,7 +298,7 @@ init_config_file(char *file)
 {
 	(void)file;
 #if FVWM_VERSION == 1
-	if ((config_fp = fopen(file, "r")) == NULL) {
+	if ((config_fp = fopen(file, "r")) == nullptr) {
 		ConsoleMessage("Couldn't open file: %s\n", file);
 		return 0;
 	}
@@ -331,12 +331,12 @@ parse_button(char *string, BuiltinArg *arg, int *flag, char *pstop_char)
 	bv->offset = 0;
 	bv->base = AbsoluteButton;
 
-	rest = DoGetNextToken(string, &token, NULL, ",", pstop_char);
-	if (token == NULL) {
+	rest = DoGetNextToken(string, &token, nullptr, ",", pstop_char);
+	if (token == nullptr) {
 		bv->base = NoButton;
 		*flag = 0;
 		Free(token);
-		return NULL;
+		return nullptr;
 	}
 	if (!strcasecmp(token, "focus")) {
 		bv->base = FocusButton;
@@ -362,7 +362,7 @@ parse_button(char *string, BuiltinArg *arg, int *flag, char *pstop_char)
 		bv->base = NoButton;
 		Free(token);
 		*flag = 0;
-		return NULL;
+		return nullptr;
 	}
 
 	Free(token);
@@ -432,11 +432,11 @@ parse_function(char **line, char *pstop_char)
 
 	ConsoleDebug(CONFIG, "in parse_function\n");
 
-	ptr = DoGetNextToken(*line, &name, NULL, ",", pstop_char);
-	if (name == NULL) {
+	ptr = DoGetNextToken(*line, &name, nullptr, ",", pstop_char);
+	if (name == nullptr) {
 		Free(ftype);
-		*line = NULL;
-		return NULL;
+		*line = nullptr;
+		return nullptr;
 	}
 
 	builtin_functions_i = bsearch((void *)name, (void *)builtin_functions,
@@ -445,7 +445,7 @@ parse_function(char **line, char *pstop_char)
 		Free(name);
 		ftype->func = builtin_functions_i->func;
 		ftype->numargs = builtin_functions_i->numargs;
-		ftype->next = NULL;
+		ftype->next = nullptr;
 
 		for (j = 0;
 		    j < builtin_functions_i->numargs && *pstop_char != ',';
@@ -454,14 +454,14 @@ parse_function(char **line, char *pstop_char)
 			switch (builtin_functions_i->args[j]) {
 			case IntArg:
 				ptr = DoGetNextToken(
-				    ptr, &tok, NULL, ",", pstop_char);
+				    ptr, &tok, nullptr, ",", pstop_char);
 				if (!tok) {
 					ConsoleMessage(
 					    "%s: too few arguments\n",
 					    builtin_functions_i->name);
 					Free(ftype);
-					*line = NULL;
-					return NULL;
+					*line = nullptr;
+					return nullptr;
 				}
 				if (extract_int(tok,
 					&ftype->args[j].value.int_value) == 0) {
@@ -470,24 +470,24 @@ parse_function(char **line, char *pstop_char)
 					    builtin_functions_i->name, tok);
 					Free(tok);
 					Free(ftype);
-					*line = NULL;
-					return NULL;
+					*line = nullptr;
+					return nullptr;
 				}
 				Free(tok);
 				break;
 
 			case StringArg:
 				ptr = DoGetNextToken(ptr,
-				    &ftype->args[j].value.string_value, NULL,
+				    &ftype->args[j].value.string_value, nullptr,
 				    ",", pstop_char);
 				if (!ftype->args[j].value.string_value) {
 					ConsoleMessage(
 					    "%s: too few arguments\n",
 					    builtin_functions_i->name);
-					*line = NULL;
+					*line = nullptr;
 					Free(ftype->args[j].value.string_value);
 					Free(ftype);
-					return NULL;
+					return nullptr;
 				}
 				ftype->args[j].type =
 				    builtin_functions_i->args[j];
@@ -503,8 +503,8 @@ parse_function(char **line, char *pstop_char)
 					    "%s: too few arguments\n",
 					    builtin_functions_i->name);
 					Free(ftype);
-					*line = NULL;
-					return NULL;
+					*line = nullptr;
+					return nullptr;
 				}
 				ftype->args[j].type =
 				    builtin_functions_i->args[j];
@@ -522,15 +522,15 @@ parse_function(char **line, char *pstop_char)
 				 */
 			case JmpArg:
 				ptr = DoGetNextToken(
-				    ptr, &tok, NULL, ",", pstop_char);
+				    ptr, &tok, nullptr, ",", pstop_char);
 				if (!tok) {
 					ConsoleMessage(
 					    "%s: too few arguments\n",
 					    builtin_functions_i->name);
 					Free(tok);
 					Free(ftype);
-					*line = NULL;
-					return NULL;
+					*line = nullptr;
+					return nullptr;
 				}
 				if (extract_int(tok,
 					&ftype->args[j].value.int_value) == 0) {
@@ -547,8 +547,8 @@ parse_function(char **line, char *pstop_char)
 				ConsoleMessage(
 				    "internal error in parse_function\n");
 				Free(ftype);
-				*line = NULL;
-				return NULL;
+				*line = nullptr;
+				return nullptr;
 			}
 		}
 
@@ -556,8 +556,8 @@ parse_function(char **line, char *pstop_char)
 			ConsoleMessage("%s: too few arguments\n",
 			    builtin_functions_i->name);
 			Free(ftype);
-			*line = NULL;
-			return NULL;
+			*line = nullptr;
+			return nullptr;
 		}
 
 		*line = ptr;
@@ -567,8 +567,8 @@ parse_function(char **line, char *pstop_char)
 	ConsoleMessage("Unknown function: %s\n", name);
 	Free(name);
 
-	*line = NULL;
-	return NULL;
+	*line = nullptr;
+	return nullptr;
 }
 
 /* This is O(N^2) where N = number of instructions. Seems we could do better.
@@ -577,7 +577,7 @@ parse_function(char **line, char *pstop_char)
 static Function *
 parse_function_list(char *line)
 {
-	Function *ret = NULL, *tail = NULL, *f, *i;
+	Function *ret = nullptr, *tail = nullptr, *f, *i;
 	char	 *token;
 	int	  jump_count, j;
 	char	  stop_char;
@@ -591,7 +591,7 @@ parse_function_list(char *line)
 		if (f->func == builtin_label) {
 			/* scan backwards to fix up references */
 			jump_count = 0;
-			for (i = tail; i != NULL; i = i->prev) {
+			for (i = tail; i != nullptr; i = i->prev) {
 				/* scan the command arguments for a 'JmpArg'
 				 * type */
 				for (j = 0; j < (i->numargs); ++j) {
@@ -627,11 +627,11 @@ parse_function_list(char *line)
 			f->prev = tail;
 			tail = f;
 		}
-		DoGetNextToken(line, &token, NULL, ",", &c);
+		DoGetNextToken(line, &token, nullptr, ",", &c);
 		if (token && stop_char != ',') {
 			ConsoleMessage("Bad function list, comma expected\n");
 			Free(token);
-			return NULL;
+			return nullptr;
 		}
 		stop_char = c;
 		Free(token);
@@ -657,13 +657,13 @@ parse_function_list(char *line)
 			ConsoleMessage(
 			    "Internal Error: JmpArgs %d not accounted for!\n",
 			    JmpArgs);
-		tail = NULL;
-		f = NULL;
+		tail = nullptr;
+		f = nullptr;
 		free_function_list(ret);
-		ret = NULL;
-		return NULL;
+		ret = nullptr;
+		return nullptr;
 	}
-	if (ret == NULL)
+	if (ret == nullptr)
 		ConsoleMessage("No function defined\n");
 	return ret;
 }
@@ -678,14 +678,14 @@ ParseMouseEntry(char *tline)
 	int	 mods;
 
 	/* tline points after the key word "key" */
-	action = DoGetNextToken(tline, &token, NULL, ",", NULL);
-	if (token != NULL) {
+	action = DoGetNextToken(tline, &token, nullptr, ",", nullptr);
+	if (token != nullptr) {
 		n1 = sscanf(token, "%d", &button);
 		Free(token);
 	}
 
-	action = DoGetNextToken(action, &token, NULL, ",", NULL);
-	if (token != NULL) {
+	action = DoGetNextToken(action, &token, nullptr, ",", nullptr);
+	if (token != nullptr) {
 		n2 = sscanf(token, "%19s", modifiers);
 		Free(token);
 	}
@@ -702,18 +702,18 @@ ParseMouseEntry(char *tline)
 	new = (Binding *)xmalloc(sizeof(Binding));
 	new->IsMouse = 1;
 	new->Button_Key = button;
-	new->key_name = NULL;
+	new->key_name = nullptr;
 	new->Modifier = mods;
 	new->Action = stripcpy(action);
 	new->Function = parse_function_list(action);
-	new->NextBinding = NULL;
+	new->NextBinding = nullptr;
 	new->LastBinding = new;
 
 	if (!new->Function) {
 		ConsoleMessage("Bad action: %s\n", action);
 		Free(new->Action);
 		Free(new);
-		return NULL;
+		return nullptr;
 	}
 
 	ConsoleDebug(CONFIG, "Mouse: %d %d %s\n", new->Button_Key,
@@ -727,8 +727,8 @@ ParseKeyEntry(char *tline)
 {
 	char *action, modifiers[20], key[20], *ptr, *token, *actionstring,
 	    *keystring;
-	Binding	 *new = NULL, *temp, *last = NULL;
-	Function *func = NULL;
+	Binding	 *new = nullptr, *temp, *last = nullptr;
+	Function *func = nullptr;
 	int	  i, min, max;
 	int	  n1 = 0, n2 = 0;
 	KeySym	  keysym;
@@ -737,14 +737,14 @@ ParseKeyEntry(char *tline)
 	/* tline points after the key word "key" */
 	ptr = tline;
 
-	ptr = DoGetNextToken(ptr, &token, NULL, ",", NULL);
-	if (token != NULL) {
+	ptr = DoGetNextToken(ptr, &token, nullptr, ",", nullptr);
+	if (token != nullptr) {
 		n1 = sscanf(token, "%19s", key);
 		Free(token);
 	}
 
-	action = DoGetNextToken(ptr, &token, NULL, ",", NULL);
-	if (token != NULL) {
+	action = DoGetNextToken(ptr, &token, nullptr, ",", nullptr);
+	if (token != nullptr) {
 		n2 = sscanf(token, "%19s", modifiers);
 		Free(token);
 	}
@@ -766,7 +766,7 @@ ParseKeyEntry(char *tline)
 	if ((keysym = XStringToKeysym(key)) == NoSymbol ||
 	    XKeysymToKeycode(theDisplay, keysym) == 0) {
 		ConsoleMessage("Can't find keysym: %s\n", key);
-		return NULL;
+		return nullptr;
 	}
 
 	XDisplayKeycodes(theDisplay, &min, &max);
@@ -778,7 +778,7 @@ ParseKeyEntry(char *tline)
 			int	width;
 
 			mapping = XGetKeyboardMapping(theDisplay, i, 1, &width);
-			if (mapping == NULL)
+			if (mapping == nullptr)
 				continue;
 
 			for (int col = 0; col < width; col++) {
@@ -791,7 +791,7 @@ ParseKeyEntry(char *tline)
 							ConsoleMessage(
 							    "Bad action: %s\n",
 							    action);
-							return NULL;
+							return nullptr;
 						}
 						actionstring = stripcpy(action);
 						keystring = stripcpy(key);
@@ -825,7 +825,7 @@ ParseKeyEntry(char *tline)
 			Free(actionstring);
 			Free(keystring);
 			free_function_list(func);
-			func = NULL;
+			func = nullptr;
 		}
 	}
 	return new;
@@ -838,8 +838,8 @@ ParseSimpleEntry(char *tline)
 	Function *func;
 
 	func = parse_function_list(tline);
-	if (func == NULL)
-		return NULL;
+	if (func == nullptr)
+		return nullptr;
 
 	new = (Binding *)xmalloc(sizeof(Binding));
 	new->IsMouse = 0;
@@ -848,7 +848,7 @@ ParseSimpleEntry(char *tline)
 	new->Modifier = 0;
 	new->Action = stripcpy(tline);
 	new->Function = func;
-	new->NextBinding = NULL;
+	new->NextBinding = nullptr;
 	new->LastBinding = new;
 
 	return new;
@@ -870,7 +870,7 @@ void
 execute_function(char *string)
 {
 	Function *func = parse_function_list(string);
-	if (func == NULL) {
+	if (func == nullptr) {
 		return;
 	} else {
 		run_function_list(func);
@@ -923,9 +923,9 @@ read_next_cmd(ReadOption flag)
 	static char	 *buffer;
 	static char	 *retstring, displaced, *cur_pos;
 
-	retstring = NULL;
+	retstring = nullptr;
 	if (flag != READ_LINE && !(flag & status))
-		return NULL;
+		return nullptr;
 
 	switch (flag) {
 	case READ_LINE:
@@ -991,7 +991,7 @@ read_next_cmd(ReadOption flag)
 	}
 
 	if (retstring && retstring[0] == '\0')
-		retstring = NULL;
+		retstring = nullptr;
 
 	return retstring;
 }
@@ -1127,7 +1127,7 @@ read_in_resources(char *file)
 		save_current_line(p);
 
 		option1 = read_next_cmd(READ_OPTION);
-		if (option1 == NULL)
+		if (option1 == nullptr)
 			continue;
 
 		ConsoleDebug(CONFIG, "option1: %s\n", option1);
@@ -1164,7 +1164,7 @@ read_in_resources(char *file)
 		} else {
 			/* these all can specify a specific manager */
 
-			if (globals.managers == NULL) {
+			if (globals.managers == nullptr) {
 				ConsoleDebug(CONFIG,
 				    "I'm assuming you only want one manager\n");
 				allocate_managers(1);
@@ -1264,7 +1264,7 @@ read_in_resources(char *file)
 					break;
 				}
 
-				if (binding == NULL) {
+				if (binding == nullptr) {
 					ConsoleMessage("Offending line: %s\n",
 					    current_line);
 					ConsoleMessage("Bad action\n");
@@ -1320,14 +1320,14 @@ read_in_resources(char *file)
 						    .button_geometry_str,
 					p));
 			} else if (!strcasecmp(option1, "dontshow")) {
-				char *token = NULL;
+				char *token = nullptr;
 				p = read_next_cmd(READ_REST_OF_LINE);
 				if (!p) {
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				p = DoGetNextToken(p, &token, NULL, ",", NULL);
+				p = DoGetNextToken(p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
@@ -1353,7 +1353,7 @@ read_in_resources(char *file)
 					}
 					Free(token);
 					p = DoGetNextToken(
-					    p, &token, NULL, ",", NULL);
+					    p, &token, nullptr, ",", nullptr);
 				} while (token);
 				if (token)
 					Free(token);
@@ -1451,7 +1451,7 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				DoGetNextToken(p, &token, NULL, ",", NULL);
+				DoGetNextToken(p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					token = (char *)xmalloc(1);
 					*token = 0;
@@ -1477,7 +1477,7 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				DoGetNextToken(p, &token, NULL, ",", NULL);
+				DoGetNextToken(p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					token = (char *)xmalloc(1);
 					*token = 0;
@@ -1550,14 +1550,14 @@ read_in_resources(char *file)
 				    CONFIG, "Setting shape to: %d\n", i);
 				SET_MANAGER(manager, shaped, i);
 			} else if (!strcasecmp(option1, "show")) {
-				char *token = NULL;
+				char *token = nullptr;
 				p = read_next_cmd(READ_REST_OF_LINE);
 				if (!p) {
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				p = DoGetNextToken(p, &token, NULL, ",", NULL);
+				p = DoGetNextToken(p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
@@ -1583,7 +1583,7 @@ read_in_resources(char *file)
 					}
 					Free(token);
 					p = DoGetNextToken(
-					    p, &token, NULL, ",", NULL);
+					    p, &token, nullptr, ",", nullptr);
 				} while (token);
 				if (token)
 					Free(token);
@@ -1636,7 +1636,7 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				DoGetNextToken(p, &token, NULL, ",", NULL);
+				DoGetNextToken(p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					token = (char *)xmalloc(1);
 					*token = 0;
@@ -1692,7 +1692,7 @@ read_in_resources(char *file)
 		}
 	}
 
-	if (globals.managers == NULL) {
+	if (globals.managers == nullptr) {
 		ConsoleDebug(
 		    CONFIG, "I'm assuming you only want one manager\n");
 		allocate_managers(1);

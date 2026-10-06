@@ -6,7 +6,7 @@
 [[maybe_unused]] static char const rcsid[] =
     "$Id: winlist.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
-#define HASHTAB_SIZE 257
+constexpr int HASHTAB_SIZE = 257;
 
 typedef WinList HashTab[HASHTAB_SIZE];
 static HashTab	hash_tab;
@@ -169,7 +169,7 @@ iconmanager_show(
 	}
 
 	if (!in_dontshowlist) {
-		if (man->show.list == NULL) {
+		if (man->show.list == nullptr) {
 			in_showlist = 1;
 		} else {
 			for (string = man->show.list; string;
@@ -202,15 +202,15 @@ new_windata(void)
 	new->geometry_set = 0;
 	new->app_id = ULONG_MAX;
 	new->app_id_set = 0;
-	new->resname = NULL;
-	new->classname = NULL;
-	new->iconname = NULL;
-	new->titlename = NULL;
-	new->display_string = NULL;
-	new->manager = NULL;
-	new->win_prev = new->win_next = NULL;
+	new->resname = nullptr;
+	new->classname = nullptr;
+	new->iconname = nullptr;
+	new->titlename = nullptr;
+	new->display_string = nullptr;
+	new->manager = nullptr;
+	new->win_prev = new->win_next = nullptr;
 	new->iconified = 0;
-	new->button = NULL;
+	new->button = nullptr;
 	new->state = 0;
 	new->complete = 0;
 	new->fvwm_flags = 0;
@@ -225,13 +225,15 @@ free_windata(WinData *p)
 {
 	if (globals.select_win == p) {
 		ConsoleMessage("Internal error in free_windata\n");
-		globals.select_win = NULL;
+		globals.select_win = nullptr;
 		abort();
 	}
 
 	Free(p->resname);
 	Free(p->classname);
 	Free(p->iconname);
+	Free(p->titlename);
+	Free(p->display_string);
 	Free(p);
 }
 
@@ -263,7 +265,7 @@ figure_win_manager(WinData *win, Uchar name_mask)
 	}
 
 	/* No manager wants this window */
-	return NULL;
+	return nullptr;
 }
 
 int
@@ -323,8 +325,8 @@ init_winlists(void)
 	int i;
 	for (i = 0; i < HASHTAB_SIZE; i++) {
 		hash_tab[i].n = 0;
-		hash_tab[i].head = NULL;
-		hash_tab[i].tail = NULL;
+		hash_tab[i].head = nullptr;
+		hash_tab[i].tail = nullptr;
 	}
 }
 
@@ -372,7 +374,7 @@ insert_win_hashtab(WinData *win)
 		p->win_prev = win;
 	} else {
 		/* put win at end of list */
-		win->win_next = NULL;
+		win->win_next = nullptr;
 		win->win_prev = list->tail;
 		if (list->tail)
 			list->tail->win_next = win;

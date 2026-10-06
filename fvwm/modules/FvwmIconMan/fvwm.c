@@ -190,7 +190,7 @@ id_to_win(Ulong id)
 {
 	WinData *win;
 	win = find_win_hashtab(id);
-	if (win == NULL) {
+	if (win == nullptr) {
 		win = new_windata();
 		win->app_id = id;
 		win->app_id_set = 1;
@@ -240,8 +240,8 @@ focus_change(FvwmPacketBody *body)
 		del_win_state(globals.focus_win, FOCUS_CONTEXT);
 		if (globals.focus_win->manager &&
 		    globals.focus_win->manager->focus_button)
-			globals.focus_win->manager->focus_button = NULL;
-		globals.focus_win = NULL;
+			globals.focus_win->manager->focus_button = nullptr;
+		globals.focus_win = nullptr;
 	}
 
 	if (win->complete && win->button && win->manager &&
@@ -376,7 +376,7 @@ destroy_window(FvwmPacketBody *body)
 	app_id = body->minimal_data.app_id;
 	win = id_to_win(app_id);
 	if (win == globals.focus_win)
-		globals.focus_win = NULL;
+		globals.focus_win = nullptr;
 	delete_win_hashtab(win);
 	if (win->button) {
 		ConsoleDebug(FVWM, "destroy_window: deleting windows_button\n");

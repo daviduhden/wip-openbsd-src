@@ -35,7 +35,7 @@ init_win_manager(int id)
 	globals.managers[id].window_up = 0;
 	globals.managers[id].can_draw = 0;
 	globals.managers[id].window_mapped = 0;
-	globals.managers[id].fontname = NULL;
+	globals.managers[id].fontname = nullptr;
 	globals.managers[id].titlename = xstrdup("FvwmIconMan");
 	globals.managers[id].iconname = xstrdup("FvwmIconMan");
 	globals.managers[id].formatstring = xstrdup("%c: %i");
@@ -49,24 +49,24 @@ init_win_manager(int id)
 	init_button_array(&globals.managers[id].buttons);
 
 	for (i = 0; i < NUM_CONTEXTS; i++) {
-		globals.managers[id].backColorName[i] = NULL;
-		globals.managers[id].foreColorName[i] = NULL;
+		globals.managers[id].backColorName[i] = nullptr;
+		globals.managers[id].foreColorName[i] = nullptr;
 		globals.managers[id].buttonState[i] = contextDefaults[i].state;
 	}
-	globals.managers[id].geometry_str = NULL;
-	globals.managers[id].button_geometry_str = NULL;
-	globals.managers[id].show.list = NULL;
+	globals.managers[id].geometry_str = nullptr;
+	globals.managers[id].button_geometry_str = nullptr;
+	globals.managers[id].show.list = nullptr;
 	globals.managers[id].show.mask = ALL_NAME;
-	globals.managers[id].dontshow.list = NULL;
+	globals.managers[id].dontshow.list = nullptr;
 	globals.managers[id].dontshow.mask = ALL_NAME;
 	globals.managers[id].followFocus = 0;
 	globals.managers[id].usewinlist = 1;
 	globals.managers[id].sort = SortName;
-	globals.managers[id].focus_button = NULL;
-	globals.managers[id].select_button = NULL;
+	globals.managers[id].focus_button = nullptr;
+	globals.managers[id].select_button = nullptr;
 	globals.managers[id].bindings[MOUSE] = ParseMouseEntry(DEFAULT_MOUSE);
-	globals.managers[id].bindings[KEYPRESS] = NULL;
-	globals.managers[id].bindings[SELECT] = NULL;
+	globals.managers[id].bindings[KEYPRESS] = nullptr;
+	globals.managers[id].bindings[SELECT] = nullptr;
 	globals.managers[id].we_are_drawing = 1;
 	globals.managers[id].configures_expected = 0;
 }
@@ -142,9 +142,9 @@ init_globals(void)
 	globals.screenx = 0;
 	globals.screeny = 0;
 	globals.num_managers = 1;
-	globals.managers = NULL;
-	globals.focus_win = NULL;
-	globals.select_win = NULL;
+	globals.managers = nullptr;
+	globals.focus_win = nullptr;
+	globals.select_win = nullptr;
 	globals.transient = 0;
 	globals.shapes_supported = 0;
 	globals.got_window_list = 0;

@@ -37,6 +37,16 @@
 static int  Get_TBLR(char *, unsigned char *); /* prototype */
 static void AddToList(name_list *);	       /* prototype */
 
+/*
+ * Return an owned copy of a style string, so a style node never aliases
+ * a string owned by another node.
+ */
+static char *
+dup_style_string(const char *s)
+{
+	return (s != nullptr) ? xstrdup(s) : nullptr;
+}
+
 /* A macro for skipping over white space */
 #define SKIPSPACE                                                              \
 	while (isspace((unsigned char)*restofline))                            \
@@ -53,7 +63,7 @@ static void AddToList(name_list *);	       /* prototype */
 	SKIPSPACE;                                                             \
 	tmp = restofline;                                                      \
 	len = 0;                                                               \
-	while ((tmp != NULL) && (*tmp != 0) && (*tmp != ',') &&                \
+	while ((tmp != nullptr) && (*tmp != 0) && (*tmp != ',') &&                \
 	    (*tmp != '\n') && (!isspace((unsigned char)*tmp))) {               \
 		tmp++;                                                         \
 		len++;                                                         \
@@ -107,8 +117,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	restofline = GetNextToken(text, &tname.name); /* parse style name */
 	/* in case there was no argument! */
-	if ((tname.name == NULL) ||
-	    (restofline == NULL)) { /* If no name, or blank cmd */
+	if ((tname.name == nullptr) ||
+	    (restofline == nullptr)) { /* If no name, or blank cmd */
 		if (tname.name)
 			free(tname.name);
 		return; /* drop it. */
@@ -116,7 +126,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	SKIPSPACE; /* skip over white space */
 
-	if (restofline == NULL) {
+	if (restofline == nullptr) {
 		free(tname.name);
 		return;
 	}
@@ -170,7 +180,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIPSPACE;
 				tmp = restofline;
 				len = 0;
-				while ((tmp != NULL) && (*tmp != 0) &&
+				while ((tmp != nullptr) && (*tmp != 0) &&
 				    (*tmp != ',') && (*tmp != '\n') &&
 				    (*tmp != '/') &&
 				    (!isspace((unsigned char)*tmp))) {
@@ -193,7 +203,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						tmp++;
 					restofline = tmp;
 					len = 0;
-					while ((tmp != NULL) && (*tmp != 0) &&
+					while ((tmp != nullptr) && (*tmp != 0) &&
 					    (*tmp != ',') && (*tmp != '\n') &&
 					    (*tmp != '/') &&
 					    (!isspace((unsigned char)*tmp))) {
@@ -871,6 +881,33 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 									*/
 								tname.name =
 								    save_name; /* and the name */
+								/*
+								 * The memcpy above
+								 * aliased the strings
+								 * owned by nptr; give
+								 * this node its own
+								 * copies so no style
+								 * node is freed twice.
+								 */
+								tname.value =
+								    dup_style_string(
+									tname.value);
+#ifdef MINI_ICONS
+								tname.mini_value =
+								    dup_style_string(
+									tname.mini_value);
+#endif
+#ifdef USEDECOR
+								tname.Decor =
+								    dup_style_string(
+									tname.Decor);
+#endif
+								tname.ForeColor =
+								    dup_style_string(
+									tname.ForeColor);
+								tname.BackColor =
+								    dup_style_string(
+									tname.BackColor);
 								hit =
 								    1; /* set
 									  not
@@ -891,21 +928,24 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 								tname
 								    .on_buttons &=
 								    ~(nptr->on_buttons);
-								if (nptr->value)
-									tname
-									    .value =
-									    nptr->value;
+								if (nptr->value) {
+									free(tname.value);
+									tname.value =
+									    xstrdup(nptr->value);
+								}
 #ifdef MINI_ICONS
-								if (nptr->mini_value)
-									tname
-									    .mini_value =
-									    nptr->mini_value;
+								if (nptr->mini_value) {
+									free(tname.mini_value);
+									tname.mini_value =
+									    xstrdup(nptr->mini_value);
+								}
 #endif
 #ifdef USEDECOR
-								if (nptr->Decor)
-									tname
-									    .Decor =
-									    nptr->Decor;
+								if (nptr->Decor) {
+									free(tname.Decor);
+									tname.Decor =
+									    xstrdup(nptr->Decor);
+								}
 #endif
 								if (nptr->off_flags &
 								    STARTSONDESK_FLAG)
@@ -934,15 +974,17 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 									    .resize_width =
 									    nptr->resize_width;
 								if (nptr->off_flags &
-								    FORE_COLOR_FLAG)
-									tname
-									    .ForeColor =
-									    nptr->ForeColor;
+								    FORE_COLOR_FLAG) {
+									free(tname.ForeColor);
+									tname.ForeColor =
+									    xstrdup(nptr->ForeColor);
+								}
 								if (nptr->off_flags &
-								    BACK_COLOR_FLAG)
-									tname
-									    .BackColor =
-									    nptr->BackColor;
+								    BACK_COLOR_FLAG) {
+									free(tname.BackColor);
+									tname.BackColor =
+									    xstrdup(nptr->BackColor);
+								}
 								tname
 								    .IconBoxes =
 								    nptr->IconBoxes; /* use same chain */
@@ -1006,7 +1048,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		if (tname.off_flags & ICON_FLAG)
 			Scr.DefaultIcon = tname.value;
 		tname.off_flags &= ~ICON_FLAG;
-		tname.value = NULL;
+		tname.value = nullptr;
 	}
 	AddToList(&tname); /* add temp name list to list */
 }
@@ -1032,7 +1074,7 @@ Get_TBLR(char *restofline, unsigned char *IconFill)
 static void
 AddToList(name_list *tname)
 {
-	name_list *nptr, *lastptr = NULL;
+	name_list *nptr, *lastptr = nullptr;
 
 	/* This used to contain logic that returned if the style didn't contain
 	   anything.  I don't see why we should bother. dje. */
@@ -1043,14 +1085,14 @@ AddToList(name_list *tname)
 
 	/* seems like a pretty inefficient way to keep track of the end
 	   of the list, but how long can the style list be? dje */
-	for (nptr = Scr.TheList; nptr != NULL; nptr = nptr->next) {
+	for (nptr = Scr.TheList; nptr != nullptr; nptr = nptr->next) {
 		lastptr = nptr; /* find end of style list */
 	}
 
 	nptr = (name_list *)xmalloc(sizeof(name_list)); /* malloc area */
 	memcpy((void *)nptr, (const void *)tname,
 	    sizeof(name_list));	      /* copy term area into list */
-	if (lastptr != NULL)	      /* If not first entry in list */
+	if (lastptr != nullptr)	      /* If not first entry in list */
 		lastptr->next = nptr; /* chain this entry to the list */
 	else			      /* else first entry in list */
 		Scr.TheList = nptr;   /* set the list root pointer. */

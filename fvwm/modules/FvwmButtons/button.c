@@ -299,7 +299,7 @@ alloc_buttonlist(button_info *ub, int num)
 		bb = (button_info **)xmalloc(
 		    ub->c->allocated_buttons * sizeof(button_info *));
 		for (i = old; i < ub->c->allocated_buttons; i++)
-			bb[i] = NULL;
+			bb[i] = nullptr;
 		if (ub->c->buttons) {
 			for (i = 0; i < old; i++)
 				bb[i] = ub->c->buttons[i];
@@ -358,17 +358,17 @@ MakeContainer(button_info *b)
 	b->c = (container_info *)xmalloc(sizeof(container_info));
 	/* xmalloc() does not clear the memory, and ParseContainer()
 	 * frees back/fore/font_string without checking their flags, so
-	 * every field must start out NULL/zero. */
+	 * every field must start out nullptr/zero. */
 	memset((void *)b->c, 0, sizeof(*b->c));
 	b->flags |= b_Container;
-	b->c->buttons = NULL;
+	b->c->buttons = nullptr;
 	b->c->num_buttons = 0;
 	b->c->num_rows = 0;
 	b->c->num_columns = 0;
 	b->c->allocated_buttons = 0;
 	b->c->xpos = 0;
 	b->c->ypos = 0;
-	if (b->parent != NULL) {
+	if (b->parent != nullptr) {
 		if (b->parent->c->flags & b_IconBack ||
 		    b->parent->c->flags & b_IconParent)
 			b->c->flags = b_IconParent;
@@ -496,7 +496,7 @@ ShrinkButton(button_info *b, container_info *c)
 					    "button was stolen\n");
 					exit(1);
 				}
-				c->buttons[l] = NULL;
+				c->buttons[l] = nullptr;
 			}
 }
 
@@ -520,7 +520,7 @@ ShuffleButtons(button_info *ub)
 	    (button_info **)xmalloc(sizeof(button_info) * num_items);
 	for (i = 0; i < num_items; i++) {
 		local_buttons[i] = c->buttons[i];
-		c->buttons[i] = NULL;
+		c->buttons[i] = nullptr;
 	}
 
 	/* Allow for multi-width/height buttons */
@@ -663,7 +663,7 @@ NextButton(button_info **ub, button_info **b, int *i, int all)
 		*ub = (*b)->parent;
 		/* End of the world as we know it */
 		if (!(*ub)) {
-			*b = NULL;
+			*b = nullptr;
 			return *b;
 		}
 		*i = (*b)->n;
@@ -700,7 +700,7 @@ button_belongs_to(button_info *ub, int button)
 {
 	int	     x, y, xx, yy;
 	button_info *b;
-	if (!ub || button < 0 || button > ub->c->num_buttons)
+	if (!ub || button < 0 || button >= ub->c->num_buttons)
 		return -1;
 	if (ub->c->buttons[button])
 		return button;
@@ -719,7 +719,7 @@ button_belongs_to(button_info *ub, int button)
 
 /**
 *** select_button()
-*** Given (x,y) and uberbutton, returns pointer to referred button, or NULL
+*** Given (x,y) and uberbutton, returns pointer to referred button, or nullptr
 **/
 button_info *
 select_button(button_info *ub, int x, int y)

@@ -46,8 +46,8 @@ void CleverPlacement(FvwmWindow *t, int *x, int *y, int pdeltax, int pdeltay);
  * place one there.  The same rules apply for the other "AVOID" factors.
  * (for CleverPlacement)
  */
-#define AVOIDONTOP 5
-#define AVOIDSTICKY 1
+constexpr int AVOIDONTOP = 5;
+constexpr int AVOIDSTICKY = 1;
 #ifdef NO_STUBBORN_PLACEMENT
 #define AVOIDICON 0 /*  Ignore Icons.  Place windows over them  */
 #else
@@ -226,7 +226,7 @@ get_next_x(FvwmWindow *t, int x, int y, int pdeltax, int pdeltay)
 	if (xtest > x)
 		xnew = MIN(xnew, xtest);
 	/* Test the values of the right edges of every window */
-	for (testw = Scr.FvwmRoot.next; testw != NULL; testw = testw->next) {
+	for (testw = Scr.FvwmRoot.next; testw != nullptr; testw = testw->next) {
 		if ((testw == t) ||
 		    ((testw->Desk != t->Desk) && (!(testw->flags & STICKY))))
 			continue;
@@ -289,7 +289,7 @@ get_next_y(FvwmWindow *t, int y, int pdeltay)
 	if (ytest > y)
 		ynew = MIN(ynew, ytest);
 	/* Test the values of the bottom edge of every window */
-	for (testw = Scr.FvwmRoot.next; testw != NULL; testw = testw->next) {
+	for (testw = Scr.FvwmRoot.next; testw != nullptr; testw = testw->next) {
 		if ((testw == t) ||
 		    ((testw->Desk != t->Desk) && (!(testw->flags & STICKY))))
 			continue;
@@ -346,7 +346,7 @@ test_fit(FvwmWindow *t, int x11, int y11, int aoimin, int pdeltax, int pdeltay)
 		return -1;
 	if (x12 > PageRight) /* No room in x direction */
 		return -2;
-	for (testw = Scr.FvwmRoot.next; testw != NULL; testw = testw->next) {
+	for (testw = Scr.FvwmRoot.next; testw != nullptr; testw = testw->next) {
 		if ((testw == t) ||
 		    ((testw->Desk != t->Desk) && (!(testw->flags & STICKY))))
 			continue;
@@ -494,7 +494,7 @@ PlaceWindow(
 		    (tmp_win->wmhints->window_group != Scr.Root)) {
 			/* Try to find the group leader or another window
 			 * in the group */
-			for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+			for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
 				if ((t->w == tmp_win->wmhints->window_group) ||
 				    ((t->wmhints) &&
 					(t->wmhints->flags & WindowGroupHint) &&
@@ -507,7 +507,7 @@ PlaceWindow(
 		    (tmp_win->transientfor != None) &&
 		    (tmp_win->transientfor != Scr.Root)) {
 			/* Try to find the parent's desktop */
-			for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+			for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
 				if (t->w == tmp_win->transientfor)
 					tmp_win->Desk = t->Desk;
 			}
@@ -516,7 +516,7 @@ PlaceWindow(
 		if ((XGetWindowProperty(dpy, tmp_win->w, _XA_WM_DESKTOP, 0L, 1L,
 			True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
 			&bytes_remain, &prop)) == Success) {
-			if (prop != NULL) {
+			if (prop != nullptr) {
 				tmp_win->Desk = *(unsigned long *)prop;
 				XFree(prop);
 			}

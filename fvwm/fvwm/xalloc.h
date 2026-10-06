@@ -30,7 +30,7 @@ xmalloc(size_t size)
 	if (size == 0)
 		size = 1;
 	ptr = malloc(size);
-	if (ptr == NULL)
+	if (ptr == nullptr)
 		err(1, "malloc");
 	return ptr;
 }
@@ -45,7 +45,7 @@ xcalloc(size_t nmemb, size_t size)
 		size = 1;
 	}
 	ptr = calloc(nmemb, size);
-	if (ptr == NULL)
+	if (ptr == nullptr)
 		err(1, "calloc");
 	return ptr;
 }
@@ -58,7 +58,7 @@ xrealloc(void *ptr, size_t size)
 	if (size == 0)
 		size = 1;
 	newptr = realloc(ptr, size);
-	if (newptr == NULL)
+	if (newptr == nullptr)
 		err(1, "realloc");
 	return newptr;
 }
@@ -79,7 +79,7 @@ xstrdup(const char *s)
 	char *copy;
 
 	copy = strdup(s);
-	if (copy == NULL)
+	if (copy == nullptr)
 		err(1, "strdup");
 	return copy;
 }
@@ -90,7 +90,7 @@ xstrndup(const char *s, size_t n)
 	char *copy;
 
 	copy = strndup(s, n);
-	if (copy == NULL)
+	if (copy == nullptr)
 		err(1, "strndup");
 	return copy;
 }

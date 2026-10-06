@@ -415,6 +415,7 @@ int
 ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 {
 	u_int32_t mask, tmp;
+	u_int32_t bsize;
 	int i;
 
 	tmp = letoh16(sble->sb_magic);
@@ -435,14 +436,24 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 		printf("ext2fs: wrong log2(block size) %d\n", tmp);
 		return (EIO);	   /* XXX needs translation */
 	}
+	bsize = 1024U << tmp;
 
-	if (letoh32(sble->sb_blocks_per_group) == 0) {
-		printf("ext4fs: zero blocks per group\n");
+	/*
+	 * The per-group block and inode bitmaps each occupy exactly one
+	 * filesystem block, so a group can describe at most 8 * bsize
+	 * units.  Both counts are used directly as bit indices and as
+	 * checksum lengths over those bitmaps; a larger on-disk value
+	 * would index (and checksum) far past the block buffer.
+	 */
+	tmp = letoh32(sble->sb_blocks_per_group);
+	if (tmp == 0 || tmp > bsize * 8) {
+		printf("ext4fs: invalid blocks per group %u\n", tmp);
 		return (EIO);
 	}
 
-	if (letoh32(sble->sb_inodes_per_group) == 0) {
-		printf("ext4fs: zero inodes per group\n");
+	tmp = letoh32(sble->sb_inodes_per_group);
+	if (tmp == 0 || tmp > bsize * 8) {
+		printf("ext4fs: invalid inodes per group %u\n", tmp);
 		return (EIO);
 	}
 

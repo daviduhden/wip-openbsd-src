@@ -44,11 +44,11 @@
 
 extern Boolean debugging;
 
-char *fvwm_file = NULL;
+char *fvwm_file = nullptr;
 
 int numfilesread = 0;
 
-#define MAX_NESTING_DEPTH 128
+constexpr int MAX_NESTING_DEPTH = 128;
 
 /*
  * The execution helper tracks one slot per concurrently running
@@ -81,8 +81,8 @@ static int last_read_failed = 0;
 
 static const char *read_system_rc_cmd = "Read system" FVWMRC;
 
-#define PIPE_READ_INTERVAL_SEC 1
-#define PIPE_READ_MAX_IDLE_LOOPS 10
+constexpr int PIPE_READ_INTERVAL_SEC = 1;
+constexpr int PIPE_READ_MAX_IDLE_LOOPS = 10;
 
 /*
  * One active PipeRead invocation.  Frames are linked into a stack:
@@ -124,7 +124,7 @@ piperead_msg(struct imsg *imsg, void *)
 		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
-		for (frame = active_frames; frame != NULL;
+		for (frame = active_frames; frame != nullptr;
 		    frame = frame->next) {
 			if (frame->id == id) {
 				pipebuf_append(&frame->buf,
@@ -153,7 +153,7 @@ piperead_msg(struct imsg *imsg, void *)
 		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id) + sizeof(int))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
-		for (frame = active_frames; frame != NULL;
+		for (frame = active_frames; frame != nullptr;
 		    frame = frame->next) {
 			if (frame->id == id) {
 				memcpy(&frame->exit_status,
@@ -168,7 +168,7 @@ piperead_msg(struct imsg *imsg, void *)
 		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
-		for (frame = active_frames; frame != NULL;
+		for (frame = active_frames; frame != nullptr;
 		    frame = frame->next) {
 			if (frame->id == id) {
 				frame->error = 1;
@@ -177,7 +177,7 @@ piperead_msg(struct imsg *imsg, void *)
 		}
 		break;
 	default:
-		exec_helper_dispatch(imsg, NULL);
+		exec_helper_dispatch(imsg, nullptr);
 		break;
 	}
 	return 0;
@@ -215,7 +215,7 @@ piperead_execute_line(struct piperead_frame *frame, char *line, size_t len,
 		/* Keep the original block on failure: realloc() leaves it
 		 * allocated and the frame still owns it. */
 		nbuf = realloc(frame->lbuf, ncap);
-		if (nbuf == NULL) {
+		if (nbuf == nullptr) {
 			/* Out of memory: drop the partial command. */
 			frame->lbuf_len = 0;
 			frame->lbuf_cap = 0;
@@ -308,7 +308,7 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		tv.tv_usec = 0;
 
 		ready = select((helper_fd >= 0 ? helper_fd : 0) + 1, &readfds,
-		    NULL, NULL, &tv);
+		    nullptr, nullptr, &tv);
 		if (ready < 0) {
 			if (errno == EINTR)
 				continue;
@@ -325,7 +325,7 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		}
 
 		if (helper_fd >= 0 && FD_ISSET(helper_fd, &readfds)) {
-			if (exec_helper_drain(piperead_msg, NULL) == -1) {
+			if (exec_helper_drain(piperead_msg, nullptr) == -1) {
 				/* The helper is gone. */
 				frame.error = 1;
 				break;
@@ -388,10 +388,10 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 		    "nesting depth exceeded (%d)", MAX_NESTING_DEPTH);
 		return;
 	}
-	char  *filename = NULL, *Home, *home_file, *ofilename = NULL;
+	char  *filename = nullptr, *Home, *home_file, *ofilename = nullptr;
 	char  *option; /* optional arg to read */
 	char  *rest, *tline, line[1024];
-	FILE  *stream = NULL;
+	FILE  *stream = nullptr;
 	char   missing_quiet; /* missing file msg control */
 	char  *cmdname;
 	size_t len;
@@ -411,14 +411,15 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 	/*  fvwm_msg(INFO,cmdname,"action == '%s'",action); */
 
 	rest = GetNextToken(action, &ofilename); /* read file name arg */
-	if (ofilename == NULL) {
+	if (ofilename == nullptr) {
 		fvwm_msg(ERR, cmdname, "missing parameter");
 		last_read_failed = 1;
+		numfilesread--;
 		return;
 	}
 	missing_quiet = 'n';		    /* init */
 	rest = GetNextToken(rest, &option); /* read optional arg */
-	if (option != NULL) {		    /* if there is a second arg */
+	if (option != nullptr) {		    /* if there is a second arg */
 		if (strncasecmp(option, "Quiet", 5) ==
 		    0) { /* is the arg "quiet"? */
 			missing_quiet =
@@ -450,13 +451,14 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 		free(ofilename);
 		if (start_failed)
 			last_read_failed = 1;
+		numfilesread--;
 		return;
 	}
 
 	filename = ofilename;
 	if (ofilename[0] != '/') {
 		Home = getenv("HOME");
-		if (Home != NULL) {
+		if (Home != nullptr) {
 			len = strlen(Home) + strlen(ofilename) + 3;
 			home_file = xmalloc(len);
 			strlcpy(home_file, Home, len);
@@ -465,10 +467,10 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 			filename = home_file;
 			stream = fopen(filename, "r");
 		} else {
-			stream = NULL;
+			stream = nullptr;
 		}
-		if (stream == NULL) {
-			if ((filename != NULL) && (filename != ofilename))
+		if (stream == nullptr) {
+			if ((filename != nullptr) && (filename != ofilename))
 				free(filename);
 			Home = FVWM_CONFIGDIR;
 			len = strlen(Home) + strlen(ofilename) + 3;
@@ -483,7 +485,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 		stream = fopen(filename, "r");
 	}
 
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		if (missing_quiet == 'n') {
 			fvwm_msg(ERR, cmdname,
 			    "file '%s' not found in $HOME "
@@ -494,21 +496,22 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 			free(filename);
 		free(ofilename);
 		last_read_failed = 1;
+		numfilesread--;
 		return;
 	}
 
-	if (filename != ofilename && ofilename != NULL) {
+	if (filename != ofilename && ofilename != nullptr) {
 		free(ofilename);
-		ofilename = NULL;
+		ofilename = nullptr;
 	}
 	fcntl(fileno(stream), F_SETFD, 1);
-	if (fvwm_file != NULL)
+	if (fvwm_file != nullptr)
 		free(fvwm_file);
 	fvwm_file = filename;
 
 	while (stream) {
 		tline = fgets(line, (sizeof line) - 1, stream);
-		if (tline == NULL)
+		if (tline == nullptr)
 			break;
 		{
 			int l;
@@ -517,7 +520,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 			    line[l - 1] == '\n') {
 				char *cont = fgets(
 				    line + l - 2, sizeof(line) - l + 1, stream);
-				if (cont == NULL)
+				if (cont == nullptr)
 					break;
 			}
 		}
@@ -531,6 +534,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 
 	fclose(stream);
 	last_read_failed = 0;
+	numfilesread--;
 }
 
 void
@@ -548,7 +552,7 @@ ReadFile(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	if (last_read_failed && this_read == 0) {
 		fvwm_msg(INFO, "Read", "trying to read system rc file");
 		ExecuteFunction(
-		    (char *)read_system_rc_cmd, NULL, &Event, C_ROOT, -1);
+		    (char *)read_system_rc_cmd, nullptr, &Event, C_ROOT, -1);
 	}
 
 	if (this_read == 0) {
@@ -575,7 +579,7 @@ PipeRead(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	if (last_read_failed && this_read == 0) {
 		fvwm_msg(INFO, "PipeRead", "trying to read system rc file");
 		ExecuteFunction(
-		    (char *)read_system_rc_cmd, NULL, &Event, C_ROOT, -1);
+		    (char *)read_system_rc_cmd, nullptr, &Event, C_ROOT, -1);
 	}
 
 	if (this_read == 0) {

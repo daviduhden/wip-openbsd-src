@@ -114,6 +114,42 @@ test_integers(void)
 }
 
 static void
+test_strings(void)
+{
+	char *d;
+
+	/* Empty and whitespace-only inputs must not read before the
+	 * buffer (Strings.c CopyString/stripcpy regression). */
+	CopyString(&d, "");
+	CHECK(d != NULL && d[0] == '\0', "CopyString empty");
+	free(d);
+
+	CopyString(&d, "   ");
+	CHECK(d != NULL && d[0] == '\0', "CopyString whitespace-only");
+	free(d);
+
+	CopyString(&d, "\n");
+	CHECK(d != NULL && d[0] == '\0', "CopyString newline-only");
+	free(d);
+
+	CopyString(&d, "  hello world  ");
+	CHECK(d != NULL && strcmp(d, "hello world") == 0, "CopyString trim");
+	free(d);
+
+	d = stripcpy("");
+	CHECK(d != NULL && d[0] == '\0', "stripcpy empty");
+	free(d);
+
+	d = stripcpy("   ");
+	CHECK(d != NULL && d[0] == '\0', "stripcpy whitespace-only");
+	free(d);
+
+	d = stripcpy("  hi there \n");
+	CHECK(d != NULL && strcmp(d, "hi there") == 0, "stripcpy trim");
+	free(d);
+}
+
+static void
 test_long_lines(void)
 {
 	char  big[8192];
@@ -196,6 +232,7 @@ main(void)
 	test_escapes();
 	test_empty_and_missing();
 	test_integers();
+	test_strings();
 	test_long_lines();
 	test_fvwm_parse_integer();
 

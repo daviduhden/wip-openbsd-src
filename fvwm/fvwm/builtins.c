@@ -69,7 +69,7 @@ DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
 	original_w = *w;
 
 	if ((*context != C_ROOT) && (*context != C_NO_CONTEXT) &&
-	    (tmp_win != NULL)) {
+	    (tmp_win != nullptr)) {
 		if ((FinishEvent == ButtonPress) ||
 		    ((FinishEvent == ButtonRelease) &&
 			(eventp->type != ButtonPress))) {
@@ -94,7 +94,7 @@ DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
 		StashEventTime(eventp);
 
 		if (eventp->type == KeyPress)
-			Keyboard_shortcuts(eventp, NULL, FinishEvent);
+			Keyboard_shortcuts(eventp, nullptr, FinishEvent);
 		if (eventp->type == FinishEvent)
 			finished = 1;
 		if (eventp->type == ButtonPress) {
@@ -124,7 +124,7 @@ DeferExecution(XEvent *eventp, Window *w, FvwmWindow **tmp_win,
 		return TRUE;
 	}
 	if (XFindContext(dpy, *w, FvwmContext, (caddr_t *)tmp_win) == XCNOENT) {
-		*tmp_win = NULL;
+		*tmp_win = nullptr;
 		XBell(dpy, 0);
 		UngrabEm();
 		return (TRUE);
@@ -306,7 +306,7 @@ Maximize(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 		eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
-	if (tmp_win == NULL)
+	if (tmp_win == nullptr)
 		return;
 
 	if (check_allowed_function2(F_MAXIMIZE, tmp_win) == 0
@@ -434,12 +434,12 @@ FindPopup(char *action)
 
 	GetNextToken(action, &tmp);
 
-	if (tmp == NULL)
-		return NULL;
+	if (tmp == nullptr)
+		return nullptr;
 
 	mr = Scr.menus.all;
-	while (mr != NULL) {
-		if (mr->name != NULL)
+	while (mr != nullptr) {
+		if (mr->name != nullptr)
 			if (strcasecmp(tmp, mr->name) == 0) {
 				free(tmp);
 				return mr;
@@ -447,7 +447,7 @@ FindPopup(char *action)
 		mr = mr->next;
 	}
 	free(tmp);
-	return NULL;
+	return nullptr;
 }
 
 void
@@ -464,9 +464,9 @@ Bell(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 }
 
 #ifdef USEDECOR
-static FvwmDecor *last_decor = NULL, *cur_decor = NULL;
+static FvwmDecor *last_decor = nullptr, *cur_decor = nullptr;
 #endif
-MenuRoot *last_menu = NULL;
+MenuRoot *last_menu = nullptr;
 void
 add_item_to_menu(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
@@ -481,14 +481,14 @@ add_item_to_menu(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	char	 *token, *rest, *item;
 
 #ifdef USEDECOR
-	last_decor = NULL;
+	last_decor = nullptr;
 #endif
 
 	rest = GetNextToken(action, &token);
 	if (!token)
 		return;
 	mr = FollowMenuContinuations(FindPopup(token), &mrPrior);
-	if (mr == NULL)
+	if (mr == nullptr)
 		mr = NewMenuRoot(token, False);
 	last_menu = mr;
 
@@ -497,7 +497,7 @@ add_item_to_menu(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (item)
 		free(item);
 	/* These lines are correct! We must not release token if the string is
-	 * empty. It cannot be NULL! GetNextToken never returns an empty string!
+	 * empty. It cannot be nullptr! GetNextToken never returns an empty string!
 	 */
 	if (*token)
 		free(token);
@@ -522,9 +522,9 @@ add_another_item(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	MenuRoot *mrPrior;
 	char	 *rest, *item;
 
-	if (last_menu != NULL) {
+	if (last_menu != nullptr) {
 		mr = FollowMenuContinuations(last_menu, &mrPrior);
-		if (mr == NULL)
+		if (mr == nullptr)
 			return;
 		rest = GetNextToken(action, &item);
 		AddToMenu(mr, item, rest, TRUE /* pixmap scan */, FALSE);
@@ -533,7 +533,7 @@ add_another_item(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		MakeMenu(mr);
 	}
 #ifdef USEDECOR
-	else if (last_decor != NULL) {
+	else if (last_decor != nullptr) {
 		FvwmDecor *tmp = &Scr.DefaultDecor;
 		for (; tmp; tmp = tmp->next)
 			if (tmp == last_decor)
@@ -566,7 +566,7 @@ destroy_menu(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	free(token);
 	while (mr) {
 		if (mr == last_menu)
-			last_menu = NULL;
+			last_menu = nullptr;
 		mrContinuation =
 		    mr->continuation; /* save continuation before destroy */
 		DestroyMenu(mr);
@@ -592,7 +592,7 @@ add_item_to_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (!token)
 		return;
 	mr = FindPopup(token);
-	if (mr == NULL)
+	if (mr == nullptr)
 		mr = NewMenuRoot(token, True);
 	last_menu = mr;
 	if (token)
@@ -707,7 +707,7 @@ iconify_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
 
-	GetIntegerArguments(action, NULL, &val, 1);
+	GetIntegerArguments(action, nullptr, &val, 1);
 
 	if (tmp_win->flags & ICONIFIED) {
 		if (val <= 0)
@@ -855,7 +855,7 @@ exec_setup(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char	   *arg = NULL;
+	char	   *arg = nullptr;
 	static char shell_set = 0;
 
 	if (shell_set)
@@ -881,7 +881,7 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char *cmd = NULL;
+	char *cmd = nullptr;
 	char *shell_argv[4];
 
 	cmd = strdup(action);
@@ -898,7 +898,7 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	shell_argv[0] = exec_shell_name;
 	shell_argv[1] = "-c";
 	shell_argv[2] = cmd;
-	shell_argv[3] = NULL;
+	shell_argv[3] = nullptr;
 
 	if (exec_helper_launch(3, shell_argv, environ) == 0) {
 		free(cmd);
@@ -907,7 +907,7 @@ exec_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	if (!(fork())) { /* child process */
 		if (execl(exec_shell_name, exec_shell_name, "-c", cmd,
-			(char *)NULL) == -1) {
+			(char *)nullptr) == -1) {
 			fvwm_msg(ERR, "exec_function", "execl failed (%s)",
 			    strerror(errno));
 			_exit(100);
@@ -1083,28 +1083,28 @@ menu_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 {
 	extern int  menuFromFrameOrWindowOrTitlebar;
 	MenuRoot   *menu;
-	MenuItem   *miExecuteAction = NULL;
+	MenuItem   *miExecuteAction = nullptr;
 	MenuOptions mops;
-	char	   *menu_name = NULL;
+	char	   *menu_name = nullptr;
 	XEvent	   *teventp;
 
 	mops.flags.allflags = 0;
 	action = GetNextToken(action, &menu_name);
-	action = GetMenuOptions(action, w, tmp_win, NULL, &mops);
+	action = GetMenuOptions(action, w, tmp_win, nullptr, &mops);
 	while (action && *action && isspace((unsigned char)*action))
 		action++;
 	if (action && *action == 0)
-		action = NULL;
+		action = nullptr;
 	menu = FindPopup(menu_name);
-	if (menu == NULL) {
-		if (menu_name != NULL) {
+	if (menu == nullptr) {
+		if (menu_name != nullptr) {
 			fvwm_msg(
 			    ERR, "menu_func", "No such menu %s", menu_name);
 			free(menu_name);
 		}
 		return;
 	}
-	if (menu_name != NULL)
+	if (menu_name != nullptr)
 		free(menu_name);
 	menuFromFrameOrWindowOrTitlebar = FALSE;
 
@@ -1112,7 +1112,7 @@ menu_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 		teventp = (XEvent *)1;
 	else
 		teventp = eventp;
-	if ((do_menu(menu, NULL, &miExecuteAction, 0, fStaysUp, teventp,
+	if ((do_menu(menu, nullptr, &miExecuteAction, 0, fStaysUp, teventp,
 		 &mops) == MENU_DOUBLE_CLICKED) &&
 	    action) {
 		ExecuteFunction(action, tmp_win, eventp, context, *Module);
@@ -1147,7 +1147,7 @@ quit_func(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	(void)Module;
 	if (master_pid != getpid())
 		kill(master_pid, SIGTERM);
-	Done(0, NULL);
+	Done(0, nullptr);
 }
 
 void
@@ -1160,7 +1160,7 @@ quit_screen_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)context;
 	(void)action;
 	(void)Module;
-	Done(0, NULL);
+	Done(0, nullptr);
 }
 
 void
@@ -1195,7 +1195,7 @@ raiselower_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (DeferExecution(
 		eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
-	if (tmp_win == NULL)
+	if (tmp_win == nullptr)
 		return;
 
 	if ((tmp_win == Scr.LastWindowRaised) || (tmp_win->flags & VISIBLE)) {
@@ -1263,7 +1263,7 @@ SetEdgeResistance(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	int val[2];
 
-	if (GetIntegerArguments(action, NULL, val, 2) != 2) {
+	if (GetIntegerArguments(action, nullptr, val, 2) != 2) {
 		fvwm_msg(ERR, "SetEdgeResistance",
 		    "EdgeResistance requires two arguments");
 		return;
@@ -1305,7 +1305,7 @@ SetClick(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	(void)Module;
 	int val;
 
-	if (GetIntegerArguments(action, NULL, &val, 1) != 1) {
+	if (GetIntegerArguments(action, nullptr, &val, 1) != 1) {
 		Scr.ClickTime = DEFAULT_CLICKTIME;
 	} else {
 		Scr.ClickTime = (val < 0) ? 0 : val;
@@ -1337,7 +1337,7 @@ SetSnapAttraction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	Scr.SnapAttraction = val;
 
 	action = GetNextToken(action, &token);
-	if (token == NULL) {
+	if (token == nullptr) {
 		return;
 	}
 
@@ -1368,7 +1368,7 @@ SetSnapGrid(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	int val[2];
 
-	if (GetIntegerArguments(action, NULL, &val[0], 2) != 2) {
+	if (GetIntegerArguments(action, nullptr, &val[0], 2) != 2) {
 		fvwm_msg(
 		    ERR, "SetSnapGrid", "SetSnapGrid requires 2 arguments");
 		return;
@@ -1397,7 +1397,7 @@ SetXOR(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	XGCValues     gcv;
 	unsigned long gcm;
 
-	if (GetIntegerArguments(action, NULL, &val, 1) != 1) {
+	if (GetIntegerArguments(action, nullptr, &val, 1) != 1) {
 		fvwm_msg(ERR, "SetXOR", "XORValue requires 1 argument");
 		return;
 	}
@@ -1432,7 +1432,7 @@ SetOpaque(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	(void)Module;
 	int val;
 
-	if (GetIntegerArguments(action, NULL, &val, 1) != 1) {
+	if (GetIntegerArguments(action, nullptr, &val, 1) != 1) {
 		fvwm_msg(
 		    ERR, "SetOpaque", "OpaqueMoveSize requires 1 argument");
 		return;
@@ -1452,7 +1452,7 @@ SetDeskSize(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	int val[2];
 
-	if (GetIntegerArguments(action, NULL, val, 2) != 2 &&
+	if (GetIntegerArguments(action, nullptr, val, 2) != 2 &&
 	    GetRectangleArguments(action, &val[0], &val[1]) != 2) {
 		fvwm_msg(
 		    ERR, "SetDeskSize", "DesktopSize requires two arguments");
@@ -1486,13 +1486,13 @@ setPixmapPath(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)context;
 	(void)Module;
 #ifdef XPM
-	static char *ptemp = NULL;
+	static char *ptemp = nullptr;
 	char	    *tmp;
 
-	if (ptemp == NULL)
+	if (ptemp == nullptr)
 		ptemp = PixmapPath;
 
-	if ((PixmapPath != ptemp) && (PixmapPath != NULL))
+	if ((PixmapPath != ptemp) && (PixmapPath != nullptr))
 		free(PixmapPath);
 	tmp = stripcpy(action);
 	PixmapPath = envDupExpand(tmp, 0);
@@ -1513,13 +1513,13 @@ setIconPath(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	static char *ptemp = NULL;
+	static char *ptemp = nullptr;
 	char	    *tmp;
 
-	if (ptemp == NULL)
+	if (ptemp == nullptr)
 		ptemp = IconPath;
 
-	if ((IconPath != ptemp) && (IconPath != NULL))
+	if ((IconPath != ptemp) && (IconPath != nullptr))
 		free(IconPath);
 	tmp = stripcpy(action);
 	IconPath = envDupExpand(tmp, 0);
@@ -1540,7 +1540,7 @@ setModulePath(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	static int need_to_free = 0;
 	char	  *tmp;
 
-	if (need_to_free && ModulePath != NULL)
+	if (need_to_free && ModulePath != nullptr)
 		free(ModulePath);
 
 	tmp = stripcpy(action);
@@ -1560,7 +1560,7 @@ SetHiColor(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	(void)Module;
 	XGCValues     gcv;
 	unsigned long gcm;
-	char	     *hifore = NULL, *hiback = NULL;
+	char	     *hifore = nullptr, *hiback = nullptr;
 	FvwmWindow   *hilight;
 #ifdef USEDECOR
 	FvwmDecor *fl = cur_decor ? cur_decor : &Scr.DefaultDecor;
@@ -1571,10 +1571,10 @@ SetHiColor(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	action = GetNextToken(action, &hifore);
 	GetNextToken(action, &hiback);
 	if (Scr.d_depth > 2) {
-		if (hifore != NULL) {
+		if (hifore != nullptr) {
 			fl->HiColors.fore = GetColor(hifore);
 		}
-		if (hiback != NULL) {
+		if (hiback != nullptr) {
 			fl->HiColors.back = GetColor(hiback);
 		}
 		fl->HiRelief.back = GetShadow(fl->HiColors.back);
@@ -1598,19 +1598,19 @@ SetHiColor(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
 	gcv.function = GXcopy;
 	gcv.graphics_exposures = False;
 	gcv.line_width = 0;
-	if (fl->HiReliefGC != NULL) {
+	if (fl->HiReliefGC != nullptr) {
 		XFreeGC(dpy, fl->HiReliefGC);
 	}
 	fl->HiReliefGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 	gcv.foreground = fl->HiRelief.back;
 	gcv.background = fl->HiRelief.fore;
-	if (fl->HiShadowGC != NULL) {
+	if (fl->HiShadowGC != nullptr) {
 		XFreeGC(dpy, fl->HiShadowGC);
 	}
 	fl->HiShadowGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
-	if ((Scr.flags & WindowsCaptured) && (Scr.Hilite != NULL)) {
+	if ((Scr.flags & WindowsCaptured) && (Scr.Hilite != nullptr)) {
 		hilight = Scr.Hilite;
 		SetBorder(Scr.Hilite, False, True, True, None);
 		SetBorder(hilight, True, True, True, None);
@@ -1633,7 +1633,7 @@ CursorStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char	   *cname = NULL, *newcursor = NULL;
+	char	   *cname = nullptr, *newcursor = nullptr;
 	int	    index, nc, i;
 	FvwmWindow *fw;
 	MenuRoot   *mr;
@@ -1704,7 +1704,7 @@ CursorStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 
 	/* redefine all the windows using cursors */
 	fw = Scr.FvwmRoot.next;
-	while (fw != NULL) {
+	while (fw != nullptr) {
 		for (i = 0; i < 4; i++) {
 			SafeDefineCursor(
 			    fw->corners[i], Scr.FvwmCursors[TOP_LEFT + i]);
@@ -1723,7 +1723,7 @@ CursorStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 
 	/* Do the menus for good measure */
 	mr = Scr.menus.all;
-	while (mr != NULL) {
+	while (mr != nullptr) {
 		SafeDefineCursor(mr->w, Scr.FvwmCursors[MENU]);
 		mr = mr->next;
 	}
@@ -1734,12 +1734,12 @@ FindMenuStyle(char *name)
 {
 	MenuStyle *ms = Scr.menus.DefaultStyle;
 
-	while (ms != NULL) {
+	while (ms != nullptr) {
 		if (strcasecmp(ms->name, name) == 0)
 			return ms;
 		ms = ms->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 static void
@@ -1751,7 +1751,7 @@ FreeMenuStyle(MenuStyle *ms)
 	if (!ms)
 		return;
 	mr = Scr.menus.all;
-	while (mr != NULL) {
+	while (mr != nullptr) {
 		if (mr->ms == ms)
 			mr->ms = Scr.menus.DefaultStyle;
 		mr = mr->next;
@@ -1773,7 +1773,7 @@ FreeMenuStyle(MenuStyle *ms)
 	if (ms->look.f.hasSideColor == 1)
 		FreeColors(&ms->look.sideColor, 1);
 
-	while (before != NULL && before->next != ms)
+	while (before != nullptr && before->next != ms)
 		before = before->next;
 
 	before->next = ms->next;
@@ -1790,18 +1790,18 @@ DestroyMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	MenuStyle *ms = NULL;
-	char	  *name = NULL;
+	MenuStyle *ms = nullptr;
+	char	  *name = nullptr;
 	MenuRoot  *mr;
 
 	action = GetNextToken(action, &name);
-	if (name == NULL) {
+	if (name == nullptr) {
 		fvwm_msg(ERR, "DestroyMenuStyle", "needs one parameter");
 		return;
 	}
 
 	ms = FindMenuStyle(name);
-	if (ms == NULL)
+	if (ms == nullptr)
 		fvwm_msg(ERR, "DestroyMenuStyle", "cannot find style %s", name);
 	else if (ms == Scr.menus.DefaultStyle)
 		fvwm_msg(ERR, "DestroyMenuStyle",
@@ -1812,7 +1812,7 @@ DestroyMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		MakeMenus();
 	}
 	free(name);
-	for (mr = Scr.menus.all; mr != NULL; mr = mr->next) {
+	for (mr = Scr.menus.all; mr != nullptr; mr = mr->next) {
 		if (mr->ms == ms)
 			mr->ms = Scr.menus.DefaultStyle;
 	}
@@ -1825,7 +1825,7 @@ UpdateMenuStyle(MenuStyle *ms)
 	XGCValues     gcv;
 	unsigned long gcm;
 
-	if (ms->look.pStdFont != NULL && ms->look.pStdFont != &Scr.StdFont) {
+	if (ms->look.pStdFont != nullptr && ms->look.pStdFont != &Scr.StdFont) {
 		ms->look.pStdFont->y = ms->look.pStdFont->font->ascent;
 		ms->look.pStdFont->height = ms->look.pStdFont->font->ascent +
 		    ms->look.pStdFont->font->descent;
@@ -1862,13 +1862,13 @@ UpdateMenuStyle(MenuStyle *ms)
 
 	gcv.foreground = ms->look.MenuRelief.fore;
 	gcv.background = ms->look.MenuRelief.back;
-	if (ms->look.MenuReliefGC != NULL)
+	if (ms->look.MenuReliefGC != nullptr)
 		XFreeGC(dpy, ms->look.MenuReliefGC);
 	ms->look.MenuReliefGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 	gcv.foreground = ms->look.MenuRelief.back;
 	gcv.background = ms->look.MenuRelief.fore;
-	if (ms->look.MenuShadowGC != NULL)
+	if (ms->look.MenuShadowGC != nullptr)
 		XFreeGC(dpy, ms->look.MenuShadowGC);
 	ms->look.MenuShadowGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
@@ -1878,23 +1878,23 @@ UpdateMenuStyle(MenuStyle *ms)
 	gcv.background = (ms->look.f.hasActiveFore) ?
 	    ms->look.MenuActiveColors.fore :
 	    ms->look.MenuRelief.fore;
-	if (ms->look.MenuActiveBackGC != NULL)
+	if (ms->look.MenuActiveBackGC != nullptr)
 		XFreeGC(dpy, ms->look.MenuActiveBackGC);
 	ms->look.MenuActiveBackGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 	gcv.foreground = ms->look.MenuColors.fore;
 	gcv.background = ms->look.MenuColors.back;
-	if (ms->look.MenuGC != NULL)
+	if (ms->look.MenuGC != nullptr)
 		XFreeGC(dpy, ms->look.MenuGC);
 	ms->look.MenuGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 	gcv.foreground = ms->look.MenuActiveColors.fore;
 	gcv.background = ms->look.MenuActiveColors.back;
-	if (ms->look.MenuActiveGC != NULL)
+	if (ms->look.MenuActiveGC != nullptr)
 		XFreeGC(dpy, ms->look.MenuActiveGC);
 	ms->look.MenuActiveGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
-	if (ms->look.MenuStippleGC != NULL)
+	if (ms->look.MenuStippleGC != nullptr)
 		XFreeGC(dpy, ms->look.MenuStippleGC);
 	if (Scr.d_depth < 2) {
 		gcv.fill_style = FillStippled;
@@ -1925,8 +1925,8 @@ GetMenuStyleIndex(char *option)
 	    "TitleUnderlines1", "TitleUnderlines2", "SeparatorsLong",
 	    "SeparatorsShort", "TrianglesSolid", "TrianglesRelief",
 	    "PopupImmediately", "PopupDelayed", "DoubleClickTime", "SidePic",
-	    "SideColor", NULL};
-	return GetTokenIndex(option, optlist, 0, NULL);
+	    "SideColor", nullptr};
+	return GetTokenIndex(option, optlist, 0, nullptr);
 }
 
 static void
@@ -1939,8 +1939,8 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)context;
 	(void)Module;
 	char	    *name;
-	char	    *option = NULL;
-	char	    *optstring = NULL;
+	char	    *option = nullptr;
+	char	    *optstring = nullptr;
 	char	    *args;
 	char	    *arg1;
 	MenuStyle   *ms;
@@ -1950,7 +1950,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	Bool	     is_default_style = False;
 	int	     val[2];
 	int	     n;
-	XFontStruct *xfs = NULL;
+	XFontStruct *xfs = nullptr;
 	int	     i;
 
 	action = GetNextToken(action, &name);
@@ -1963,7 +1963,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	tmpms = (MenuStyle *)xmalloc(sizeof(MenuStyle));
 	memset(tmpms, 0, sizeof(MenuStyle));
 	ms = FindMenuStyle(name);
-	if (ms != NULL) {
+	if (ms != nullptr) {
 		/* copy the structure over our temporary menu face. */
 		memcpy(tmpms, ms, sizeof(MenuStyle));
 		if (ms == Scr.menus.DefaultStyle)
@@ -1992,7 +1992,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			 * or \0). */
 			args = action;
 			action = GetQuotedString(
-			    action, &optstring, ",", NULL, NULL, NULL);
+			    action, &optstring, ",", nullptr, nullptr, nullptr);
 			if (!optstring)
 				break;
 
@@ -2058,7 +2058,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			tmpms->look.f.hasSideColor = 0;
 			if (tmpms->look.sidePic) {
 				DestroyPicture(dpy, tmpms->look.sidePic);
-				tmpms->look.sidePic = NULL;
+				tmpms->look.sidePic = nullptr;
 			}
 
 			if (is_initialised == False) {
@@ -2090,7 +2090,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			if (tmpms->look.f.hasStippleFore)
 				FreeColors(
 				    &tmpms->look.MenuStippleColors.fore, 1);
-			if (arg1 == NULL) {
+			if (arg1 == nullptr) {
 				tmpms->look.f.hasStippleFore = 0;
 			} else {
 				tmpms->look.MenuStippleColors.fore =
@@ -2104,7 +2104,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			if (tmpms->look.f.hasActiveBack)
 				FreeColors(
 				    &tmpms->look.MenuActiveColors.back, 1);
-			if (arg1 == NULL) {
+			if (arg1 == nullptr) {
 				tmpms->look.f.hasActiveBack = 0;
 			} else {
 				tmpms->look.MenuActiveColors.back =
@@ -2124,7 +2124,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			if (tmpms->look.f.hasActiveFore)
 				FreeColors(
 				    &tmpms->look.MenuActiveColors.fore, 1);
-			if (arg1 == NULL) {
+			if (arg1 == nullptr) {
 				tmpms->look.f.hasActiveFore = 0;
 			} else {
 				tmpms->look.MenuActiveColors.fore =
@@ -2160,8 +2160,8 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			break;
 
 		case 15: /* Font */
-			if (arg1 != NULL &&
-			    (xfs = GetFontOrFixed(dpy, arg1)) == NULL) {
+			if (arg1 != nullptr &&
+			    (xfs = GetFontOrFixed(dpy, arg1)) == nullptr) {
 				fvwm_msg(ERR, "NewMenuStyle",
 				    "Couldn't load font '%s' or 'fixed'\n",
 				    arg1);
@@ -2169,12 +2169,12 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			}
 			if (tmpms->look.pStdFont &&
 			    tmpms->look.pStdFont != &Scr.StdFont) {
-				if (tmpms->look.pStdFont->font != NULL)
+				if (tmpms->look.pStdFont->font != nullptr)
 					XFreeFont(
 					    dpy, tmpms->look.pStdFont->font);
 				free(tmpms->look.pStdFont);
 			}
-			if (arg1 == NULL) {
+			if (arg1 == nullptr) {
 				/* reset to screen font */
 				tmpms->look.pStdFont = &Scr.StdFont;
 			} else {
@@ -2193,7 +2193,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			break;
 
 		case 17: /* PopupDelay */
-			if (GetIntegerArguments(args, NULL, val, 1) == 0 ||
+			if (GetIntegerArguments(args, nullptr, val, 1) == 0 ||
 			    *val < 0)
 				Scr.menus.PopupDelay10ms = DEFAULT_POPUP_DELAY;
 			else
@@ -2207,7 +2207,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			break;
 
 		case 18: /* PopupOffset */
-			if ((n = GetIntegerArguments(args, NULL, val, 2)) ==
+			if ((n = GetIntegerArguments(args, nullptr, val, 2)) ==
 			    0) {
 				fvwm_msg(ERR, "NewMenuStyle",
 				    "PopupOffset requires one or two "
@@ -2266,7 +2266,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			break;
 
 		case 30: /* DoubleClickTime */
-			if (GetIntegerArguments(args, NULL, val, 1) == 0 ||
+			if (GetIntegerArguments(args, nullptr, val, 1) == 0 ||
 			    *val < 0)
 				Scr.menus.DoubleClickTime =
 				    DEFAULT_MENU_CLICKTIME;
@@ -2283,9 +2283,9 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		case 31: /* SidePic */
 			if (tmpms->look.sidePic) {
 				DestroyPicture(dpy, tmpms->look.sidePic);
-				tmpms->look.sidePic = NULL;
+				tmpms->look.sidePic = nullptr;
 			}
-			if (arg1 != NULL) {
+			if (arg1 != nullptr) {
 				tmpms->look.sidePic =
 				    CachePicture(dpy, Scr.Root, IconPath,
 					PixmapPath, arg1, Scr.ColorLimit);
@@ -2300,7 +2300,7 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				FreeColors(&tmpms->look.sideColor, 1);
 				tmpms->look.f.hasSideColor = 0;
 			}
-			if (arg1 != NULL) {
+			if (arg1 != nullptr) {
 				tmpms->look.sideColor = GetColor(arg1);
 				tmpms->look.f.hasSideColor = 1;
 			}
@@ -2314,13 +2314,13 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 		if (option) {
 			free(option);
-			option = NULL;
+			option = nullptr;
 		}
 		free(optstring);
-		optstring = NULL;
+		optstring = nullptr;
 		if (arg1) {
 			free(arg1);
-			arg1 = NULL;
+			arg1 = nullptr;
 		}
 	} /* while */
 
@@ -2328,11 +2328,11 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		UpdateMenuStyle(tmpms);
 	} /* if (gc_changed) */
 
-	if (Scr.menus.DefaultStyle == NULL) {
+	if (Scr.menus.DefaultStyle == nullptr) {
 		/* First MenuStyle MUST be the default style */
 		Scr.menus.DefaultStyle = tmpms;
-		tmpms->next = NULL;
-	} else if (ms != NULL) {
+		tmpms->next = nullptr;
+	} else if (ms != nullptr) {
 		/* copy our new menu face over the old one */
 		memcpy(ms, tmpms, sizeof(MenuStyle));
 		free(tmpms);
@@ -2340,8 +2340,8 @@ NewMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		MenuStyle *before = Scr.menus.DefaultStyle;
 
 		/* add a new menu face to list */
-		tmpms->next = NULL;
-		while (before->next != NULL)
+		tmpms->next = nullptr;
+		while (before->next != nullptr)
 			before = before->next;
 		before->next = tmpms;
 	}
@@ -2376,24 +2376,24 @@ OldMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		    "* %s, Foreground %s, Background %s, Greyed %s, Font %s, "
 		    "%s",
 		    style, fore, back, stipple, font,
-		    (animated != NULL && StrEquals(animated, "anim")) ?
+		    (animated != nullptr && StrEquals(animated, "anim")) ?
 			"Animation" :
 			"AnimationOff");
 		NewMenuStyle(eventp, w, tmp_win, context, buffer, Module);
 		free(buffer);
 	}
 
-	if (fore != NULL)
+	if (fore != nullptr)
 		free(fore);
-	if (back != NULL)
+	if (back != nullptr)
 		free(back);
-	if (stipple != NULL)
+	if (stipple != nullptr)
 		free(stipple);
-	if (font != NULL)
+	if (font != nullptr)
 		free(font);
-	if (style != NULL)
+	if (style != nullptr)
 		free(style);
-	if (animated != NULL)
+	if (animated != nullptr)
 		free(animated);
 }
 
@@ -2404,7 +2404,7 @@ SetMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	char *option;
 
 	GetNextOption(SkipNTokens(action, 1), &option);
-	if (option == NULL || GetMenuStyleIndex(option) != -1)
+	if (option == nullptr || GetMenuStyleIndex(option) != -1)
 		NewMenuStyle(eventp, w, tmp_win, context, action, Module);
 	else
 		OldMenuStyle(eventp, w, tmp_win, context, action, Module);
@@ -2422,19 +2422,19 @@ ChangeMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char	  *name = NULL, *menuname = NULL;
-	MenuStyle *ms = NULL;
-	MenuRoot  *mr = NULL;
+	char	  *name = nullptr, *menuname = nullptr;
+	MenuStyle *ms = nullptr;
+	MenuRoot  *mr = nullptr;
 
 	action = GetNextToken(action, &name);
-	if (name == NULL) {
+	if (name == nullptr) {
 		fvwm_msg(
 		    ERR, "ChangeMenuStyle", "needs at least two parameters");
 		return;
 	}
 
 	ms = FindMenuStyle(name);
-	if (ms == NULL) {
+	if (ms == nullptr) {
 		fvwm_msg(ERR, "ChangeMenuStyle", "cannot find style %s", name);
 		free(name);
 		return;
@@ -2442,9 +2442,9 @@ ChangeMenuStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	free(name);
 
 	action = GetNextToken(action, &menuname);
-	while (menuname != NULL && *menuname) {
+	while (menuname != nullptr && *menuname) {
 		mr = FindPopup(menuname);
-		if (mr == NULL) {
+		if (mr == nullptr) {
 			fvwm_msg(ERR, "ChangeMenuStyle", "cannot find menu %s",
 			    menuname);
 			free(menuname);
@@ -2475,7 +2475,7 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char *parm = NULL, *prev = action;
+	char *parm = nullptr, *prev = action;
 #ifdef USEDECOR
 	FvwmDecor *fl = cur_decor ? cur_decor : &Scr.DefaultDecor;
 #else
@@ -2490,10 +2490,10 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			ButtonFace tmpbf, *bf;
 			tmpbf.style = SimpleButton;
 #ifdef MULTISTYLE
-			tmpbf.next = NULL;
+			tmpbf.next = nullptr;
 #endif
 #ifdef MINI_ICONS
-			tmpbf.u.p = NULL;
+			tmpbf.u.p = nullptr;
 #endif
 			if (StrEquals(parm, "active"))
 				bf = &fl->BorderStyle.active;
@@ -2541,10 +2541,10 @@ SetBorderStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			ButtonFace tmpbf;
 			tmpbf.style = SimpleButton;
 #ifdef MULTISTYLE
-			tmpbf.next = NULL;
+			tmpbf.next = nullptr;
 #endif
 #ifdef MINI_ICONS
-			tmpbf.u.p = NULL;
+			tmpbf.u.p = nullptr;
 #endif
 			if (ReadButtonFace(prev, &tmpbf, -1, True)) {
 				FreeButtonFace(dpy, &fl->BorderStyle.active);
@@ -2584,7 +2584,7 @@ AddTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #else
 	FvwmDecor *fl = &Scr.DefaultDecor;
 #endif
-	char *parm = NULL;
+	char *parm = nullptr;
 
 	/* See if there's a next token.  We actually don't care what it is, so
 	     GetNextToken allocating memory is overkill, but... */
@@ -2592,7 +2592,7 @@ AddTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	while (parm) {
 		free(parm);
 		if ((action = ReadTitleButton(
-			 action, &fl->titlebar, True, -1)) == NULL)
+			 action, &fl->titlebar, True, -1)) == nullptr)
 			break;
 		GetNextToken(action, &parm);
 	}
@@ -2608,7 +2608,7 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char *parm = NULL, *prev = action;
+	char *parm = nullptr, *prev = action;
 #ifdef USEDECOR
 	FvwmDecor *fl = cur_decor ? cur_decor : &Scr.DefaultDecor;
 #else
@@ -2650,7 +2650,7 @@ SetTitleStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 				tmp = Scr.FvwmRoot.next;
 				hi = Scr.Hilite;
-				while (tmp != NULL) {
+				while (tmp != nullptr) {
 					if (!(tmp->flags & TITLE)
 #ifdef USEDECOR
 					    || (tmp->fl != fl)
@@ -2725,19 +2725,19 @@ ApplyDefaultFontAndColors(void)
 
 	gcv.foreground = Scr.StdColors.fore;
 	gcv.background = Scr.StdColors.back;
-	if (Scr.StdGC != NULL)
+	if (Scr.StdGC != nullptr)
 		XFreeGC(dpy, Scr.StdGC);
 	Scr.StdGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 	gcv.foreground = Scr.StdRelief.fore;
 	gcv.background = Scr.StdRelief.back;
-	if (Scr.StdReliefGC != NULL)
+	if (Scr.StdReliefGC != nullptr)
 		XFreeGC(dpy, Scr.StdReliefGC);
 	Scr.StdReliefGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
 	gcv.foreground = Scr.StdRelief.back;
 	gcv.background = Scr.StdRelief.fore;
-	if (Scr.StdShadowGC != NULL)
+	if (Scr.StdShadowGC != nullptr)
 		XFreeGC(dpy, Scr.StdShadowGC);
 	Scr.StdShadowGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
@@ -2767,7 +2767,7 @@ ApplyDefaultFontAndColors(void)
 		ApplyWindowFont(&Scr.DefaultDecor);
 	}
 
-	for (ms = Scr.menus.DefaultStyle; ms != NULL; ms = ms->next) {
+	for (ms = Scr.menus.DefaultStyle; ms != nullptr; ms = ms->next) {
 		if (ms->look.pStdFont == &Scr.StdFont)
 			ms->look.EntryHeight =
 			    Scr.StdFont.height + HEIGHT_EXTRA;
@@ -2785,8 +2785,8 @@ SetDefaultColors(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char *fore = NULL;
-	char *back = NULL;
+	char *fore = nullptr;
+	char *back = nullptr;
 
 	action = GetNextToken(action, &fore);
 	action = GetNextToken(action, &back);
@@ -2794,7 +2794,7 @@ SetDefaultColors(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (!back)
 		back = strdup("grey");
 	if (!fore)
-		back = strdup("black");
+		fore = strdup("black");
 
 	if (!StrEquals(fore, "-")) {
 		FreeColors(&Scr.StdColors.fore, 1);
@@ -2824,7 +2824,7 @@ LoadDefaultFont(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)context;
 	(void)Module;
 	char	    *font;
-	XFontStruct *xfs = NULL;
+	XFontStruct *xfs = nullptr;
 
 	action = GetNextToken(action, &font);
 	if (!font) {
@@ -2832,17 +2832,17 @@ LoadDefaultFont(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		font = strdup("");
 	}
 
-	if ((xfs = GetFontOrFixed(dpy, font)) == NULL) {
+	if ((xfs = GetFontOrFixed(dpy, font)) == nullptr) {
 		fvwm_msg(ERR, "SetDefaultFont",
 		    "Couldn't load font '%s' or 'fixed'\n", font);
 		free(font);
-		if (Scr.StdFont.font == NULL)
+		if (Scr.StdFont.font == nullptr)
 			exit(1);
 		else
 			return;
 	}
 	free(font);
-	if (Scr.StdFont.font != NULL)
+	if (Scr.StdFont.font != nullptr)
 		XFreeFont(dpy, Scr.StdFont.font);
 	Scr.StdFont.font = xfs;
 
@@ -2859,7 +2859,7 @@ ApplyIconFont(void)
 	Scr.IconFont.y = Scr.IconFont.font->ascent;
 
 	tmp = Scr.FvwmRoot.next;
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		RedoIconName(tmp);
 
 		if (tmp->flags & ICONIFIED) {
@@ -2893,8 +2893,8 @@ LoadIconFont(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		return;
 	}
 
-	if ((newfont = GetFontOrFixed(dpy, font)) != NULL) {
-		if (Scr.IconFont.font != NULL && Scr.hasIconFont == True)
+	if ((newfont = GetFontOrFixed(dpy, font)) != nullptr) {
+		if (Scr.IconFont.font != nullptr && Scr.hasIconFont == True)
 			XFreeFont(dpy, Scr.IconFont.font);
 		Scr.hasIconFont = True;
 		Scr.IconFont.font = newfont;
@@ -2922,7 +2922,7 @@ ApplyWindowFont(FvwmDecor *fl)
 
 	tmp = Scr.FvwmRoot.next;
 	hi = Scr.Hilite;
-	while (tmp != NULL) {
+	while (tmp != nullptr) {
 		if (!(tmp->flags & TITLE)
 #ifdef USEDECOR
 		    || (tmp->fl != fl)
@@ -2976,8 +2976,8 @@ LoadWindowFont(XEvent *eventp, Window win, FvwmWindow *tmp_win,
 		return;
 	}
 
-	if ((newfont = GetFontOrFixed(dpy, font)) != NULL) {
-		if (fl->WindowFont.font != NULL &&
+	if ((newfont = GetFontOrFixed(dpy, font)) != nullptr) {
+		if (fl->WindowFont.font != nullptr &&
 		    (fl != &Scr.DefaultDecor || Scr.hasWindowFont == True))
 			XFreeFont(dpy, fl->WindowFont.font);
 		if (fl == &Scr.DefaultDecor)
@@ -3005,7 +3005,7 @@ FreeButtonFace(Display *dpy, ButtonFace *bf)
 				bf->u.grad.pixels, bf->u.grad.npixels,
 				AllPlanes); */
 		free(bf->u.grad.pixels);
-		bf->u.grad.pixels = NULL;
+		bf->u.grad.pixels = nullptr;
 		break;
 #endif
 
@@ -3014,7 +3014,7 @@ FreeButtonFace(Display *dpy, ButtonFace *bf)
 	case TiledPixmapButton:
 		if (bf->u.p)
 			DestroyPicture(dpy, bf->u.p);
-		bf->u.p = NULL;
+		bf->u.p = nullptr;
 		break;
 #endif
 	default:
@@ -3026,7 +3026,7 @@ FreeButtonFace(Display *dpy, ButtonFace *bf)
 		FreeButtonFace(dpy, bf->next);
 		free(bf->next);
 	}
-	bf->next = NULL;
+	bf->next = nullptr;
 #endif
 	bf->style = SimpleButton;
 }
@@ -3043,7 +3043,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 	char  style[256], *file;
 	char *action = s;
 
-	if (sscanf(s, "%s%n", style, &offset) < 1) {
+	if (sscanf(s, "%255s%n", style, &offset) < 1) {
 		if (verbose)
 			fvwm_msg(
 			    ERR, "ReadButtonFace", "error in face `%s'", s);
@@ -3147,7 +3147,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 			int    npixels, nsegs, i, sum, *perc;
 			Pixel *pixels;
 
-			if (!(s = GetNextToken(s, &item)) || (item == NULL)) {
+			if (!(s = GetNextToken(s, &item)) || (item == nullptr)) {
 				if (verbose)
 					fvwm_msg(ERR, "ReadButtonFace",
 					    "expected number of colors to "
@@ -3159,7 +3159,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 			npixels = FvwmParseInteger(item);
 			free(item);
 
-			if (!(s = GetNextToken(s, &item)) || (item == NULL)) {
+			if (!(s = GetNextToken(s, &item)) || (item == nullptr)) {
 				if (verbose)
 					fvwm_msg(ERR, "ReadButtonFace",
 					    "incomplete gradient style");
@@ -3251,7 +3251,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 			s = GetNextToken(s, &file);
 			bf->u.p = CachePicture(dpy, Scr.Root, IconPath,
 			    PixmapPath, file, Scr.ColorLimit);
-			if (bf->u.p == NULL) {
+			if (bf->u.p == nullptr) {
 				if (file) {
 					if (verbose)
 						fvwm_msg(ERR, "ReadButtonFace",
@@ -3263,7 +3263,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 			}
 			if (file) {
 				free(file);
-				file = NULL;
+				file = nullptr;
 			}
 
 			if (strncasecmp(style, "Tiled", 5) == 0)
@@ -3274,7 +3274,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 #ifdef MINI_ICONS
 		else if (strncasecmp(style, "MiniIcon", 8) == 0) {
 			bf->style = MiniIconButton;
-			bf->u.p = NULL; /* pixmap read in when the window is
+			bf->u.p = nullptr; /* pixmap read in when the window is
 					   created */
 		}
 #endif
@@ -3412,7 +3412,7 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 char *
 ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 {
-	char		*end = NULL, *spec;
+	char		*end = nullptr, *spec;
 	ButtonFace	 tmpbf;
 	enum ButtonState bs = MaxButtonState;
 	int		 i = 0, all = 0, pstyle = 0;
@@ -3437,7 +3437,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 		if (!(end = strchr(++s, ')'))) {
 			fvwm_msg(ERR, "ReadTitleButton",
 			    "missing parenthesis: %s", s);
-			return NULL;
+			return nullptr;
 		}
 		len = end - s + 1;
 		spec = xmalloc(len);
@@ -3451,10 +3451,10 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 	/* setup temporary in case button read fails */
 	tmpbf.style = SimpleButton;
 #ifdef MULTISTYLE
-	tmpbf.next = NULL;
+	tmpbf.next = nullptr;
 #endif
 #ifdef MINI_ICONS
-	tmpbf.u.p = NULL;
+	tmpbf.u.p = nullptr;
 #endif
 
 	if (strncmp(spec, "--", 2) == 0) {
@@ -3482,7 +3482,7 @@ ReadTitleButton(char *s, TitleButton *tb, Boolean append, int button)
 					tail->next = (ButtonFace *)xmalloc(
 					    sizeof(ButtonFace));
 					tail->next->style = SimpleButton;
-					tail->next->next = NULL;
+					tail->next->next = nullptr;
 					ReadButtonFace(
 					    spec, tail->next, button, False);
 				}
@@ -3521,7 +3521,7 @@ FreeMenuFace(Display *dpy, MenuFace *mf)
 		 *                        ms->u.grad.pixels, ms->u.grad.npixels,
 		 *                        AllPlanes); */
 		free(mf->u.grad.pixels);
-		mf->u.grad.pixels = NULL;
+		mf->u.grad.pixels = nullptr;
 		break;
 #endif
 
@@ -3530,7 +3530,7 @@ FreeMenuFace(Display *dpy, MenuFace *mf)
 	case TiledPixmapMenu:
 		if (mf->u.p)
 			DestroyPicture(dpy, mf->u.p);
-		mf->u.p = NULL;
+		mf->u.p = nullptr;
 		break;
 #endif
 	case SolidMenu:
@@ -3710,7 +3710,7 @@ ReadMenuFace(char *s, MenuFace *mf, int verbose)
 		if (token) {
 			mf->u.p = CachePicture(dpy, Scr.Root, IconPath,
 			    PixmapPath, token, Scr.ColorLimit);
-			if (mf->u.p == NULL) {
+			if (mf->u.p == nullptr) {
 				if (verbose)
 					fvwm_msg(ERR, "ReadMenuFace",
 					    "couldn't load pixmap %s", token);
@@ -3760,8 +3760,8 @@ AddToDecor(FvwmDecor *fl, char *s)
 	if (!*s)
 		return;
 	cur_decor = fl;
-	ExecuteFunction(s, NULL, &Event, C_ROOT, -1);
-	cur_decor = NULL;
+	ExecuteFunction(s, nullptr, &Event, C_ROOT, -1);
+	cur_decor = nullptr;
 }
 
 /*****************************************************************************
@@ -3776,7 +3776,7 @@ ChangeDecor(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	char	  *item;
 	int	   x, y, width, height, old_height, extra_height;
-	FvwmDecor *fl = &Scr.DefaultDecor, *found = NULL;
+	FvwmDecor *fl = &Scr.DefaultDecor, *found = nullptr;
 	if (DeferExecution(
 		eventp, &w, &tmp_win, &context, SELECT, ButtonRelease))
 		return;
@@ -3829,7 +3829,7 @@ DestroyDecor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)context;
 	char	  *item;
 	FvwmDecor *fl = Scr.DefaultDecor.next;
-	FvwmDecor *prev = &Scr.DefaultDecor, *found = NULL;
+	FvwmDecor *prev = &Scr.DefaultDecor, *found = nullptr;
 
 	action = GetNextToken(action, &item);
 	if (!action || !item) {
@@ -3851,7 +3851,7 @@ DestroyDecor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 
 	if (found && (found != &Scr.DefaultDecor)) {
 		FvwmWindow *fw = Scr.FvwmRoot.next;
-		while (fw != NULL) {
+		while (fw != nullptr) {
 			if (fw->fl == found)
 				ExecuteFunction("ChangeDecor Default", fw,
 				    eventp, C_WINDOW, *Module);
@@ -3877,10 +3877,10 @@ add_item_to_decor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	FvwmDecor *fl, *found = NULL;
-	char	  *item = NULL, *s = action;
+	FvwmDecor *fl, *found = nullptr;
+	char	  *item = nullptr, *s = action;
 
-	last_menu = NULL;
+	last_menu = nullptr;
 
 	s = GetNextToken(s, &item);
 
@@ -3930,8 +3930,8 @@ UpdateDecor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)Module;
 	FvwmWindow *fw = Scr.FvwmRoot.next;
 #ifdef USEDECOR
-	FvwmDecor *fl = &Scr.DefaultDecor, *found = NULL;
-	char	  *item = NULL;
+	FvwmDecor *fl = &Scr.DefaultDecor, *found = nullptr;
+	char	  *item = nullptr;
 	action = GetNextToken(action, &item);
 	if (item) {
 		/* search for tag */
@@ -3945,7 +3945,7 @@ UpdateDecor(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	}
 #endif
 
-	for (; fw != NULL; fw = fw->next) {
+	for (; fw != nullptr; fw = fw->next) {
 #ifdef USEDECOR
 		/* update specific decor, or all */
 		if (found) {
@@ -4008,8 +4008,8 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	int	     button = 0, n;
 	int	     multi = 0;
 	char	    *text = action, *prev;
-	char	    *parm = NULL;
-	TitleButton *tb = NULL;
+	char	    *parm = nullptr;
+	TitleButton *tb = nullptr;
 #ifdef USEDECOR
 	FvwmDecor *fl = cur_decor ? cur_decor : &Scr.DefaultDecor;
 #else
@@ -4020,7 +4020,7 @@ ButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	if (parm && isdigit((unsigned char)*parm))
 		button = FvwmParseInteger(parm);
 
-	if ((parm == NULL) || (button > 10) || (button < 0)) {
+	if ((parm == nullptr) || (button > 10) || (button < 0)) {
 		fvwm_msg(ERR, "ButtonStyle", "Bad button style (1) in line %s",
 		    action);
 		if (parm)
@@ -4186,8 +4186,8 @@ AddButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	int	     button = 0, n;
 	int	     multi = 0;
 	char	    *text = action, *prev;
-	char	    *parm = NULL;
-	TitleButton *tb = NULL;
+	char	    *parm = nullptr;
+	TitleButton *tb = nullptr;
 #ifdef USEDECOR
 	FvwmDecor *fl = cur_decor ? cur_decor : &Scr.DefaultDecor;
 #else
@@ -4198,7 +4198,7 @@ AddButtonStyle(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	if (parm && isdigit((unsigned char)*parm))
 		button = FvwmParseInteger(parm);
 
-	if ((parm == NULL) || (button > 10) || (button < 0)) {
+	if ((parm == nullptr) || (button > 10) || (button < 0)) {
 		fvwm_msg(ERR, "ButtonStyle", "Bad button style (1) in line %s",
 		    action);
 		if (parm)
@@ -4278,9 +4278,9 @@ SetEnv(XEvent *eventp, Window junk, FvwmWindow *tmp_win, unsigned long context,
 	(void)tmp_win;
 	(void)context;
 	(void)Module;
-	char  *szVar = NULL;
-	char  *szValue = NULL;
-	char  *szPutenv = NULL;
+	char  *szVar = nullptr;
+	char  *szValue = nullptr;
+	char  *szPutenv = nullptr;
 	size_t len;
 
 	action = GetNextToken(action, &szVar);
@@ -4334,8 +4334,8 @@ CreateFlagString(char *string, char **restptr)
 			if (*c == 0) {
 				fvwm_msg(ERR, "CreateConditionMask",
 				    "Conditionals require closing parenthesis");
-				*restptr = NULL;
-				return NULL;
+				*restptr = nullptr;
+				return nullptr;
 			}
 			c++;
 			length++;
@@ -4350,7 +4350,7 @@ CreateFlagString(char *string, char **restptr)
 
 		*restptr = c + 1;
 	} else {
-		retval = NULL;
+		retval = nullptr;
 		*restptr = c;
 	}
 
@@ -4374,7 +4374,7 @@ FreeConditionMask(WindowConditionMask *mask)
 static void
 DefaultConditionMask(WindowConditionMask *mask)
 {
-	mask->name = NULL;
+	mask->name = nullptr;
 	mask->needsCurrentDesk = 0;
 	mask->needsCurrentPage = 0;
 	mask->needsName = 0;
@@ -4393,10 +4393,10 @@ static void
 CreateConditionMask(char *flags, WindowConditionMask *mask)
 {
 	char *condition;
-	char *prev_condition = NULL;
+	char *prev_condition = nullptr;
 	char *tmp;
 
-	if (flags == NULL)
+	if (flags == nullptr)
 		return;
 
 	/* Next parse the flags in the string. */
@@ -4443,7 +4443,7 @@ CreateConditionMask(char *flags, WindowConditionMask *mask)
 		else if (!mask->needsName && !mask->needsNotName) {
 			/* only 1st name to avoid mem leak */
 			mask->name = condition;
-			condition = NULL;
+			condition = nullptr;
 			if (mask->name[0] == '!') {
 				mask->needsNotName = 1;
 				mask->name++;
@@ -4458,7 +4458,7 @@ CreateConditionMask(char *flags, WindowConditionMask *mask)
 		tmp = GetNextToken(tmp, &condition);
 	}
 
-	if (prev_condition != NULL)
+	if (prev_condition != nullptr)
 		free(prev_condition);
 }
 
@@ -4535,7 +4535,7 @@ static FvwmWindow *
 Circulate(char *action, int Direction, char **restofline)
 {
 	int		    pass = 0;
-	FvwmWindow	   *fw, *found = NULL;
+	FvwmWindow	   *fw, *found = nullptr;
 	WindowConditionMask mask;
 	char		   *flags;
 
@@ -4550,7 +4550,7 @@ Circulate(char *action, int Direction, char **restofline)
 	if (flags)
 		free(flags);
 
-	if (Scr.Focus != NULL) {
+	if (Scr.Focus != nullptr) {
 		if (Direction == 1)
 			fw = Scr.Focus->prev;
 		else if (Direction == -1)
@@ -4558,11 +4558,11 @@ Circulate(char *action, int Direction, char **restofline)
 		else
 			fw = Scr.Focus;
 	} else
-		fw = NULL;
+		fw = nullptr;
 
-	while ((pass < 3) && (found == NULL)) {
+	while ((pass < 3) && (found == nullptr)) {
 		while (
-		    (fw != NULL) && (found == NULL) && (fw != &Scr.FvwmRoot)) {
+		    (fw != nullptr) && (found == nullptr) && (fw != &Scr.FvwmRoot)) {
 #ifdef FVWM_DEBUG_MSGS
 			fvwm_msg(DBG, "Circulate", "Trying %s", fw->name);
 #endif /* FVWM_DEBUG_MSGS */
@@ -4581,11 +4581,11 @@ Circulate(char *action, int Direction, char **restofline)
 				return found;
 			}
 		}
-		if ((fw == NULL) || (fw == &Scr.FvwmRoot)) {
+		if ((fw == nullptr) || (fw == &Scr.FvwmRoot)) {
 			if (Direction == 1) {
 				/* Go to end of list */
 				fw = &Scr.FvwmRoot;
-				while ((fw) && (fw->next != NULL)) {
+				while ((fw) && (fw->next != nullptr)) {
 					fw = fw->next;
 				}
 			} else {
@@ -4610,7 +4610,7 @@ PrevFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	char	   *restofline;
 
 	found = Circulate(action, -1, &restofline);
-	if (found != NULL && restofline != NULL) {
+	if (found != nullptr && restofline != nullptr) {
 		ExecuteFunction(restofline, found, eventp, C_WINDOW, *Module);
 	}
 }
@@ -4626,7 +4626,7 @@ NextFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	char	   *restofline;
 
 	found = Circulate(action, 1, &restofline);
-	if (found != NULL && restofline != NULL) {
+	if (found != nullptr && restofline != nullptr) {
 		ExecuteFunction(restofline, found, eventp, C_WINDOW, *Module);
 	}
 }
@@ -4642,8 +4642,8 @@ NoneFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	char	   *restofline;
 
 	found = Circulate(action, 1, &restofline);
-	if (found == NULL && restofline != NULL) {
-		ExecuteFunction(restofline, NULL, eventp, C_ROOT, *Module);
+	if (found == nullptr && restofline != nullptr) {
+		ExecuteFunction(restofline, nullptr, eventp, C_ROOT, *Module);
 	}
 }
 
@@ -4658,7 +4658,7 @@ CurrentFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	char	   *restofline;
 
 	found = Circulate(action, 0, &restofline);
-	if (found != NULL && restofline != NULL) {
+	if (found != nullptr && restofline != nullptr) {
 		ExecuteFunction(restofline, found, eventp, C_WINDOW, *Module);
 	}
 }
@@ -4686,7 +4686,7 @@ DirectionFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)junk;
 	(void)context;
 	char *directions[] = {"North", "East", "South", "West", "NorthEast",
-	    "SouthEast", "SouthWest", "NorthWest", NULL};
+	    "SouthEast", "SouthWest", "NorthWest", nullptr};
 	int   my_x;
 	int   my_y;
 	int   his_x;
@@ -4705,7 +4705,7 @@ DirectionFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 
 	/* Parse the direction. */
 	action = GetNextToken(action, &tmp);
-	dir = GetTokenIndex(tmp, directions, 0, NULL);
+	dir = GetTokenIndex(tmp, directions, 0, nullptr);
 	if (dir == -1) {
 		fvwm_msg(
 		    ERR, "Direction", "Invalid direction %s", (tmp) ? tmp : "");
@@ -4730,7 +4730,7 @@ DirectionFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 
 	/* If there is a focused window, use that as a starting point.
 	 * Otherwise we use the pointer as a starting point. */
-	if (tmp_win != NULL) {
+	if (tmp_win != nullptr) {
 		GetDirectionReference(tmp_win, &my_x, &my_y);
 	} else
 		XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &my_x,
@@ -4739,9 +4739,9 @@ DirectionFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	/* Next we iterate through all windows and choose the closest one in
 	 * the wanted direction.
 	 */
-	best_window = NULL;
+	best_window = nullptr;
 	best_score = -1;
-	for (window = Scr.FvwmRoot.next; window != NULL;
+	for (window = Scr.FvwmRoot.next; window != nullptr;
 	    window = window->next) {
 		/* Skip every window that does not match conditionals.
 		 * Skip also currently focused window.  That would be too close.
@@ -4799,7 +4799,7 @@ DirectionFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 		}
 	} /* for */
 
-	if (best_window != NULL)
+	if (best_window != nullptr)
 		ExecuteFunction(
 		    restofline, best_window, eventp, C_WINDOW, *Module);
 
@@ -4813,7 +4813,7 @@ WindowIdFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	(void)junk;
 	(void)tmp_win;
 	(void)context;
-	FvwmWindow   *found = NULL, *t;
+	FvwmWindow   *found = nullptr, *t;
 	char	     *num;
 	unsigned long win;
 
@@ -4821,11 +4821,11 @@ WindowIdFunc(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 
 	if (num) {
 		win = (unsigned long)strtol(
-		    num, NULL, 0); /* SunOS doesn't have strtoul */
+		    num, nullptr, 0); /* SunOS doesn't have strtoul */
 		free(num);
 	} else
 		win = 0;
-	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
 		if (t->w == win) {
 			found = t;
 			break;
@@ -4994,7 +4994,7 @@ SetColorLimit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	int val;
 
-	if (GetIntegerArguments(action, NULL, &val, 1) != 1) {
+	if (GetIntegerArguments(action, nullptr, &val, 1) != 1) {
 		fvwm_msg(
 		    ERR, "SetColorLimit", "ColorLimit requires one argument");
 		return;
@@ -5039,6 +5039,13 @@ set_animation(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	cmsDelayDefault = delay;
 	action = GetNextToken(action, &opt);
 	while (opt) {
+		if (i >= (int)(sizeof(rgpctMovementDefault) /
+		    sizeof(rgpctMovementDefault[0]))) {
+			fvwm_msg(ERR, "SetAnimation",
+			    "Too many animation percentage values");
+			free(opt);
+			return;
+		}
 		if (sscanf(opt, "%f", &pct) != 1) {
 			fvwm_msg(ERR, "SetAnimation",
 			    "Use fractional values ending in 1.0 as args 2 and "
@@ -5051,7 +5058,9 @@ set_animation(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		action = GetNextToken(action, &opt);
 	}
 	/* No pct entries means don't change them at all */
-	if (i > 0 && rgpctMovementDefault[i - 1] != 1.0) {
+	if (i > 0 && rgpctMovementDefault[i - 1] != 1.0 &&
+	    i < (int)(sizeof(rgpctMovementDefault) /
+	    sizeof(rgpctMovementDefault[0]))) {
 		rgpctMovementDefault[i++] = 1.0;
 	}
 }

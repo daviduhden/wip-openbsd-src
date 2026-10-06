@@ -73,13 +73,13 @@ typedef struct ftree {
  * pax, they are read from stdin
  */
 
-static FTS    *ftsp = NULL;   /* current FTS handle */
+static FTS    *ftsp = nullptr;   /* current FTS handle */
 static int     ftsopts;	      /* options to be used on fts_open */
 static char   *farray[2];     /* array for passing each arg to fts */
-static FTREE  *fthead = NULL; /* head of linked list of file args */
-static FTREE  *fttail = NULL; /* tail of linked list of file args */
-static FTREE  *ftcur = NULL;  /* current file arg being processed */
-static FTSENT *ftent = NULL;  /* current file tree entry */
+static FTREE  *fthead = nullptr; /* head of linked list of file args */
+static FTREE  *fttail = nullptr; /* tail of linked list of file args */
+static FTREE  *ftcur = nullptr;  /* current file arg being processed */
+static FTSENT *ftent = nullptr;  /* current file tree entry */
 static int     ftree_skip;    /* when set skip to next file arg */
 
 static int   ftree_arg(void);
@@ -125,8 +125,8 @@ ftree_start(void)
 	if (Xflag)
 		ftsopts |= FTS_XDEV;
 
-	if ((fthead == NULL) &&
-	    ((farray[0] = malloc(PAXPATHLEN + 2)) == NULL)) {
+	if ((fthead == nullptr) &&
+	    ((farray[0] = malloc(PAXPATHLEN + 2)) == nullptr)) {
 		paxwarn(1, "Unable to allocate memory for file name buffer");
 		return (-1);
 	}
@@ -155,7 +155,7 @@ ftree_add(char *str, int chflg)
 	/*
 	 * simple check for bad args
 	 */
-	if ((str == NULL) || (*str == '\0')) {
+	if ((str == nullptr) || (*str == '\0')) {
 		paxwarn(0, "Invalid file name argument");
 		return (-1);
 	}
@@ -165,7 +165,7 @@ ftree_add(char *str, int chflg)
 	 * processed in the same order they were passed to pax). Get rid of any
 	 * trailing / the user may pass us. (watch out for / by itself).
 	 */
-	if ((ft = malloc(sizeof(FTREE))) == NULL) {
+	if ((ft = malloc(sizeof(FTREE))) == nullptr) {
 		paxwarn(0, "Unable to allocate memory for filename");
 		return (-1);
 	}
@@ -175,8 +175,8 @@ ftree_add(char *str, int chflg)
 	ft->fname = str;
 	ft->refcnt = 0;
 	ft->chflg = chflg;
-	ft->fow = NULL;
-	if (fthead == NULL) {
+	ft->fow = nullptr;
+	if (fthead == nullptr) {
 		fttail = fthead = ft;
 		return (0);
 	}
@@ -199,7 +199,7 @@ ftree_sel(ARCHD *arcn)
 	 * when file trees are supplied pax as args. The list is not used when
 	 * the trees are read from stdin.
 	 */
-	if (ftcur != NULL)
+	if (ftcur != nullptr)
 		ftcur->refcnt = 1;
 
 	/*
@@ -214,7 +214,7 @@ ftree_sel(ARCHD *arcn)
 	if (!dflag || (arcn->type != PAX_DIR))
 		return;
 
-	if (ftent != NULL)
+	if (ftent != nullptr)
 		(void)fts_set(ftsp, ftent, FTS_SKIP);
 }
 
@@ -228,7 +228,7 @@ ftree_skipped_newer(ARCHD *arcn)
 {
 	(void)arcn;
 	/* skipped due to -u/-D, mark accordingly */
-	if (ftcur != NULL)
+	if (ftcur != nullptr)
 		ftcur->refcnt = 1;
 }
 
@@ -254,7 +254,7 @@ ftree_chk(void)
 	 * walk down list and check reference count. Print out those members
 	 * that never had a match
 	 */
-	for (ft = fthead; ft != NULL; ft = ft->fow) {
+	for (ft = fthead; ft != nullptr; ft = ft->fow) {
 		if ((ft->refcnt > 0) || ft->chflg)
 			continue;
 		if (wban == 0) {
@@ -283,9 +283,9 @@ ftree_arg(void)
 	/*
 	 * close off the current file tree
 	 */
-	if (ftsp != NULL) {
+	if (ftsp != nullptr) {
 		(void)fts_close(ftsp);
-		ftsp = NULL;
+		ftsp = nullptr;
 	}
 
 	/*
@@ -293,20 +293,20 @@ ftree_arg(void)
 	 * reach the end of the list (or get an eof on stdin)
 	 */
 	for (;;) {
-		if (fthead == NULL) {
+		if (fthead == nullptr) {
 			/*
 			 * the user didn't supply any args, get the file trees
 			 * to process from stdin;
 			 */
-			if (getpathname(farray[0], PAXPATHLEN + 1) == NULL)
+			if (getpathname(farray[0], PAXPATHLEN + 1) == nullptr)
 				return (-1);
 		} else {
 			/*
 			 * the user supplied the file args as arguments to pax
 			 */
-			if (ftcur == NULL)
+			if (ftcur == nullptr)
 				ftcur = fthead;
-			else if ((ftcur = ftcur->fow) == NULL)
+			else if ((ftcur = ftcur->fow) == nullptr)
 				return (-1);
 			if (ftcur->chflg) {
 				/* First fchdir() back... */
@@ -335,7 +335,7 @@ ftree_arg(void)
 		 * files (the -n and -d flags need this). If the open is
 		 * successful, return a 0.
 		 */
-		if ((ftsp = fts_open(farray, ftsopts, NULL)) != NULL)
+		if ((ftsp = fts_open(farray, ftsopts, nullptr)) != nullptr)
 			break;
 	}
 	return (0);
@@ -372,7 +372,7 @@ next_file(ARCHD *arcn)
 	 * loop until we get a valid file to process
 	 */
 	for (;;) {
-		if ((ftent = fts_read(ftsp)) == NULL) {
+		if ((ftent = fts_read(ftsp)) == nullptr) {
 			if (errno)
 				syswarn(1, errno, "next_file");
 			/*
@@ -525,7 +525,7 @@ next_file(ARCHD *arcn)
  * getpathname()
  *	Reads a pathname from stdin, handling NUL- or newline-termination.
  * Return:
- *	NULL at end of file, otherwise the NUL-terminated buffer.
+ *	nullptr at end of file, otherwise the NUL-terminated buffer.
  */
 
 static char *
@@ -545,7 +545,7 @@ getpathname(char *buf, int buflen)
 					paxwarn(1,
 					    "Ignoring unterminated "
 					    "pathname at EOF");
-				return (NULL);
+				return (nullptr);
 			}
 			if ((*bp = ch) == '\0')
 				return (buf);
@@ -554,10 +554,10 @@ getpathname(char *buf, int buflen)
 		*--bp = '\0';
 		term = '\0';
 	} else {
-		if (fgets(buf, buflen, stdin) == NULL)
-			return (NULL);
-		if ((bp = strchr(buf, '\n')) != NULL || feof(stdin)) {
-			if (bp != NULL)
+		if (fgets(buf, buflen, stdin) == nullptr)
+			return (nullptr);
+		if ((bp = strchr(buf, '\n')) != nullptr || feof(stdin)) {
+			if (bp != nullptr)
 				*bp = '\0';
 			return (buf);
 		}
@@ -567,5 +567,5 @@ getpathname(char *buf, int buflen)
 	while ((ch = getchar()) != term && ch != EOF)
 		continue;
 	paxwarn(1, "Ignoring too-long pathname: %s", buf);
-	return (NULL);
+	return (nullptr);
 }

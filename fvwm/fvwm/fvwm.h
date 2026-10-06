@@ -49,7 +49,7 @@
 /* the maximum number of mouse buttons fvwm knows about */
 /* don't think that upping this to 5 will make everything
  * hunky-dory with 5 button mouses */
-#define MAX_BUTTONS 3
+constexpr int MAX_BUTTONS = 3;
 
 #include <X11/Intrinsic.h>
 
@@ -62,20 +62,20 @@
 #define HEIGHT_SEPARATOR 4   /* Height of separator lines */
 
 #ifndef TRUE
-#define TRUE 1
-#define FALSE 0
+#define TRUE true
+#define FALSE false
 #endif
 
-#define NULLSTR ((char *)NULL)
+#define NULLSTR ((char *)nullptr)
 
 /* contexts for button presses */
 #define C_NO_CONTEXT 0x00
-#define C_WINDOW 0x01
-#define C_TITLE 0x02
-#define C_ICON 0x04
-#define C_ROOT 0x08
-#define C_FRAME 0x10
-#define C_SIDEBAR 0x20
+constexpr int C_WINDOW = 0x01;
+constexpr int C_TITLE = 0x02;
+constexpr int C_ICON = 0x04;
+constexpr int C_ROOT = 0x08;
+constexpr int C_FRAME = 0x10;
+constexpr int C_SIDEBAR = 0x20;
 #define C_L1 0x40
 #define C_L2 0x80
 #define C_L3 0x100
@@ -336,16 +336,16 @@ typedef struct WindowConditionMask {
 #define MWMBorders (1 << 31)
 
 /* flags to suppress/enable title bar buttons */
-#define BUTTON1 1
-#define BUTTON2 2
-#define BUTTON3 4
-#define BUTTON4 8
-#define BUTTON5 16
-#define BUTTON6 32
-#define BUTTON7 64
-#define BUTTON8 128
-#define BUTTON9 256
-#define BUTTON10 512
+constexpr int BUTTON1 = 1;
+constexpr int BUTTON2 = 2;
+constexpr int BUTTON3 = 4;
+constexpr int BUTTON4 = 8;
+constexpr int BUTTON5 = 16;
+constexpr int BUTTON6 = 32;
+constexpr int BUTTON7 = 64;
+constexpr int BUTTON8 = 128;
+constexpr int BUTTON9 = 256;
+constexpr int BUTTON10 = 512;
 
 #ifdef WINDOWSHADE
 /* we're sticking this at the end of the buttons window member

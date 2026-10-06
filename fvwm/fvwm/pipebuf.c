@@ -26,12 +26,12 @@
 
 #include "pipebuf.h"
 
-#define PIPEBUF_CHUNK 4096
+constexpr int PIPEBUF_CHUNK = 4096;
 
 void
 pipebuf_init(struct pipebuf *pb)
 {
-	pb->data = NULL;
+	pb->data = nullptr;
 	pb->len = 0;
 	pb->off = 0;
 	pb->cap = 0;
@@ -42,7 +42,7 @@ void
 pipebuf_free(struct pipebuf *pb)
 {
 	free(pb->data);
-	pb->data = NULL;
+	pb->data = nullptr;
 	pb->len = 0;
 	pb->off = 0;
 	pb->cap = 0;
@@ -71,7 +71,7 @@ pipebuf_append(struct pipebuf *pb, const void *data, size_t len)
 		while (ncap < need)
 			ncap *= 2;
 		pb->data = realloc(pb->data, ncap);
-		if (pb->data == NULL)
+		if (pb->data == nullptr)
 			err(1, "realloc");
 		pb->cap = ncap;
 	}

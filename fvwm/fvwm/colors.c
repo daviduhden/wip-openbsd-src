@@ -110,7 +110,7 @@ AllocNonlinearGradient(char *s_colors[], int clen[], int nsegs, int npixels)
 		fvwm_msg(ERR, "AllocNonlinearGradient",
 		    "must specify at least one segment");
 		free(pixels);
-		return NULL;
+		return nullptr;
 	}
 	for (; i < npixels; i++)
 		pixels[i] = 0;
@@ -123,7 +123,7 @@ AllocNonlinearGradient(char *s_colors[], int clen[], int nsegs, int npixels)
 			fvwm_msg(ERR, "AllocNonlinearGradient",
 			    "couldn't allocate gradient");
 			free(pixels);
-			return NULL;
+			return nullptr;
 		}
 		for (; j < n; ++j)
 			pixels[curpixel + j] = p[j];
@@ -152,16 +152,16 @@ AllocLinearGradient(char *s_from, char *s_to, int npixels)
 	if (npixels < 1) {
 		fvwm_msg(ERR, "AllocLinearGradient",
 		    "Invalid number of pixels: %d", npixels);
-		return NULL;
+		return nullptr;
 	}
 	if (!s_from ||
 	    !XParseColor(dpy, Scr.FvwmRoot.attr.colormap, s_from, &from)) {
 		nocolor("parse", s_from);
-		return NULL;
+		return nullptr;
 	}
 	if (!s_to || !XParseColor(dpy, Scr.FvwmRoot.attr.colormap, s_to, &to)) {
 		nocolor("parse", s_to);
-		return NULL;
+		return nullptr;
 	}
 	c = from;
 	r = from.red;

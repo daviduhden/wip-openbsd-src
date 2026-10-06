@@ -21,7 +21,7 @@ Atom _XA_WM_PROTOCOLS = None;
 void
 send_clientmessage(Display *disp, Window w, Atom a, Time timestamp)
 {
-	XClientMessageEvent ev;
+	XClientMessageEvent ev = { 0 };
 
 	if (_XA_WM_PROTOCOLS == None)
 		_XA_WM_PROTOCOLS = XInternAtom(disp, "WM_PROTOCOLS", False);
