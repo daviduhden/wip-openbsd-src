@@ -27,7 +27,6 @@
 constexpr int ICON_STATE_CHANGED = 1;
 constexpr int STATE_CHANGED = 2;
 constexpr int PICTURE_CHANGED = 4;
-constexpr int WINDOW_CHANGED = 8;
 constexpr int STRING_CHANGED = 16;
 constexpr int REDRAW_BUTTON = 32;
 constexpr int GEOMETRY_CHANGED = 64;
