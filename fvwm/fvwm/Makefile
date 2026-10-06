@@ -30,6 +30,8 @@ CLEANFILES += fvwm.1 fvwm_exec
 # hand because bsd.prog.mk supports only a single BINDIR per dir.
 all: fvwm_exec
 
+.PHONY: all
+
 fvwm_exec: ${.CURDIR}/fvwm_exec.c ${.CURDIR}/../config.h
 	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} -o ${.TARGET} \
 	    ${.CURDIR}/fvwm_exec.c -lutil

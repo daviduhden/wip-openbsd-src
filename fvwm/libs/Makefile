@@ -15,5 +15,7 @@ NOPIC = yes
 # libfvwm.a is internal to the window manager; never installed.
 install:
 
+.PHONY: install
+
 .include <bsd.lib.mk>
 .include <bsd.xorg.mk>

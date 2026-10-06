@@ -47,13 +47,11 @@ all: $(TESTS)
 # Exercise the fallback implementation of the C23 <stdckdint.h> API even
 # when the host provides a native header.  xalloc.h is included so the
 # real consumer (xreallocarray) is covered as well.
-stdckdint-tests: stdckdint-tests.c ../compat/stdckdint.h \
-    ../fvwm/fvwm/xalloc.h
+stdckdint-tests: stdckdint-tests.c ../compat/stdckdint.h ../fvwm/fvwm/xalloc.h
 	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../compat -I../fvwm/fvwm \
 	    -DFVWM_STDCKDINT_FORCE_FALLBACK stdckdint-tests.c -o $@$(SUFFIX)
 
-fvwm-parse-tests: fvwm-parse-tests.c ../fvwm/libs/Parse.c \
-    ../fvwm/libs/Strings.c ../fvwm/libs/System.c openbsd-shims.c
+fvwm-parse-tests: fvwm-parse-tests.c ../fvwm/libs/Parse.c ../fvwm/libs/Strings.c ../fvwm/libs/System.c openbsd-shims.c
 	$(CC) $(CFLAGS) $(SANITIZE) $(X11INCS) -isystem ../compat -I../fvwm \
 	    -I../fvwm/libs -I../fvwm/fvwm -I. fvwm-parse-tests.c \
 	    ../fvwm/libs/Strings.c ../fvwm/libs/System.c \
@@ -63,8 +61,7 @@ fvwm-exec-tests: fvwm-exec-tests.c ../fvwm/fvwm/fvwm_exec.c
 	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../compat -I. -I../fvwm \
 	    -I../fvwm/fvwm fvwm-exec-tests.c -o $@$(SUFFIX)
 
-fvwm-pipebuf-tests: fvwm-pipebuf-tests.c ../fvwm/fvwm/pipebuf.c \
-    ../fvwm/fvwm/pipebuf.h
+fvwm-pipebuf-tests: fvwm-pipebuf-tests.c ../fvwm/fvwm/pipebuf.c ../fvwm/fvwm/pipebuf.h
 	$(CC) $(CFLAGS) $(SANITIZE) -I. fvwm-pipebuf-tests.c -o $@$(SUFFIX)
 
 # The ext4fs kernel sources are included directly by the test
@@ -72,14 +69,11 @@ fvwm-pipebuf-tests: fvwm-pipebuf-tests.c ../fvwm/fvwm/pipebuf.c \
 # the exact production parsing/checksum code is exercised.
 EXT4SRC =	../ext4fs/sys/ufs/ext4fs
 
-ext4fs-jbd2-tests: ext4fs-jbd2-tests.c $(EXT4SRC)/ext4fs_journal.c \
-    $(EXT4SRC)/ext4fs_crc32c.c $(EXT4SRC)/ext4fs_journal.h \
-    $(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h
+ext4fs-jbd2-tests: ext4fs-jbd2-tests.c $(EXT4SRC)/ext4fs_journal.c $(EXT4SRC)/ext4fs_crc32c.c $(EXT4SRC)/ext4fs_journal.h $(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h
 	$(CC) $(CFLAGS) $(SANITIZE) -I. -Iopenbsd -I../ext4fs/sys \
 	    ext4fs-jbd2-tests.c -o $@$(SUFFIX)
 
-ext4fs-inode-tests: ext4fs-inode-tests.c $(EXT4SRC)/ext4fs_crc32c.c \
-    $(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h
+ext4fs-inode-tests: ext4fs-inode-tests.c $(EXT4SRC)/ext4fs_crc32c.c $(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h
 	$(CC) $(CFLAGS) $(SANITIZE) -I. -Iopenbsd -I../ext4fs/sys \
 	    ext4fs-inode-tests.c -o $@$(SUFFIX)
 

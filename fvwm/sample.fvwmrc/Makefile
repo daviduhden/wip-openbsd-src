@@ -4,6 +4,8 @@
 
 RM ?= rm
 
+.PHONY: depend all install clean cleandir
+
 depend:
 
 all:

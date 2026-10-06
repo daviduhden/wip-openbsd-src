@@ -4,6 +4,8 @@
 
 NOOBJ = Yes
 
+.PHONY: depend all install clean cleandir
+
 BITMAPS = \
 	fvwm.bitmap \
 	ccode.icon \
