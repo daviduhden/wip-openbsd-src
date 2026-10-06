@@ -22,7 +22,7 @@ extern void  CopyString(char **dest, char *source);
 extern void  RelieveWindow(
     Window win, int x, int y, int w, int h, GC rGC, GC sGC);
 extern void		 SendFvwmPipe(int *, char *text, unsigned long window);
-extern [[noreturn]] void DeadPipe(int nonsense);
+[[noreturn]] extern void DeadPipe(int nonsense);
 extern void		 CreateIconWindow(struct icon_info *item);
 extern void		 ConfigureIconWindow(struct icon_info *item);
 extern void		 DrawIconWindow(struct icon_info *item);

@@ -333,7 +333,7 @@ extern void			      ReadFvwmPipe(void);
 extern void			     *Malloc(size_t size);
 extern void			      Free(void *p);
 [[noreturn]] extern void	      ShutMeDown(int flag);
-[[noreturn]] extern [[noreturn]] void DeadPipe(int nothing);
+[[noreturn]] extern void DeadPipe(int nothing);
 extern void  SendFvwmPipe(char *message, unsigned long window);
 extern char *copy_string(char **target, char *src);
 
