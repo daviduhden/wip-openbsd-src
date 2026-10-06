@@ -174,6 +174,14 @@ ftree_add(char *str, int chflg)
 
 	if (((len = strlen(str) - 1) > 0) && (str[len] == '/'))
 		str[len] = '\0';
+	/*
+	 * This name is a file to read (archive/append) or the target of a
+	 * change directory, and unveil() has not been locked yet.  Unveil it
+	 * read-only so paths outside the current directory or TMPDIR (e.g.
+	 * absolute archive inputs) stay reachable; errors are ignored since
+	 * the name may be relative to a -C directory unveiled elsewhere.
+	 */
+	(void)unveil(str, "r");
 	ft->fname = str;
 	ft->refcnt = 0;
 	ft->chflg = chflg;

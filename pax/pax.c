@@ -316,15 +316,19 @@ main(int argc, char **argv)
 	} else if (act == EXTRACT || act == COPY) {
 		if (unveil(".", "rwc") == -1)
 			err(1, "unveil");
-	} else if (act == ARCHIVE) {
+	} else if (act == ARCHIVE || act == APPND) {
 		/*
-		 * Archiving reads the named files relative to the current
-		 * directory, so it must be readable; write/create is not
-		 * needed here (the archive path is unveiled separately).
+		 * Archiving/appending reads the named files relative to the
+		 * current directory, so it must be readable; write/create is
+		 * not needed here (the archive path is unveiled separately).
 		 */
 		if (unveil(".", "r") == -1)
 			err(1, "unveil");
 	}
+
+	/* Unveil the copy destination directory (pax -rw). */
+	if (act == COPY && dirptr != nullptr)
+		(void)unveil(dirptr, "rwc");
 
 	/* Unveil the temporary file directory. */
 	{
