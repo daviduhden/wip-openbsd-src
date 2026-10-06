@@ -7,6 +7,10 @@ obj/
 
 pax/pax
 
+# Host-side test binaries (see tests/Makefile)
+tests/*-tests
+tests/*_debug
+
 fvwm/libs/libfvwm.a
 fvwm/fvwm/fvwm
 fvwm/fvwm/fvwm_exec
