@@ -259,6 +259,13 @@ main(int argc, char **argv)
 		memcpy(tempfile, tmpdir, tdlen);
 	tempbase = tempfile + tdlen;
 	*tempbase++ = '/';
+	/*
+	 * The template (_TFILE_BASE) is only copied into tempbase when a
+	 * scratch file is first needed (see ftime_start()).  Until then
+	 * terminate tempfile here so it is a valid string for the unveil
+	 * below instead of reading uninitialized heap memory.
+	 */
+	*tempbase = '\0';
 
 	/*
 	 * keep passwd and group files open for faster lookups.
@@ -308,6 +315,14 @@ main(int argc, char **argv)
 			err(1, "unveil");
 	} else if (act == EXTRACT || act == COPY) {
 		if (unveil(".", "rwc") == -1)
+			err(1, "unveil");
+	} else if (act == ARCHIVE) {
+		/*
+		 * Archiving reads the named files relative to the current
+		 * directory, so it must be readable; write/create is not
+		 * needed here (the archive path is unveiled separately).
+		 */
+		if (unveil(".", "r") == -1)
 			err(1, "unveil");
 	}
 
