@@ -6,6 +6,7 @@
  * this program or anything related to it.
  ****************************************************************************/
 
+// clang-format off
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xos.h>
@@ -18,6 +19,7 @@
 #include "../fvwm/fvwm_sandbox.h"
 #include "../libs/fvwmlib.h"
 #include "config.h"
+// clang-format on
 
 Display	   *dpy;
 int	    screen;
@@ -120,9 +122,10 @@ FreePreviousResources(
 	int	       format;
 	unsigned long  length, after;
 	unsigned char *data = nullptr;
-	int	       visual_class =
-	    (root_attr->visual != nullptr) ? root_attr->visual->class : StaticGray;
-	Bool can_free_colors = (visual_class == PseudoColor ||
+	int	       visual_class = (root_attr->visual != nullptr) ?
+	    root_attr->visual->class :
+	    StaticGray;
+	Bool	       can_free_colors = (visual_class == PseudoColor ||
 	    visual_class == GrayScale || visual_class == DirectColor);
 
 	if (XGetWindowProperty(dpy, root, colors_atom, 0L, (~0L), True,

@@ -14,6 +14,7 @@
 
 /* ------------------------------- includes -------------------------------- */
 
+// clang-format off
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -30,6 +31,7 @@
 #include "draw.h"
 #include "icons.h" /* ConfigureIconWindow() */
 #include "misc.h"  /* ConstrainSize() */
+// clang-format on
 
 /* ---------------- Functions that design and draw buttons ----------------- */
 

@@ -1,7 +1,9 @@
+// clang-format off
 #include <limits.h>
 #include <string.h>
 
 #include "FvwmIconMan.h"
+// clang-format on
 
 [[maybe_unused]] static char const rcsid[] =
     "$Id: winlist.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";

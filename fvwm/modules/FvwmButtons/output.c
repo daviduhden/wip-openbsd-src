@@ -12,6 +12,7 @@
 
 */
 
+// clang-format off
 #include <X11/Intrinsic.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -19,6 +20,7 @@
 #include <unistd.h>
 
 #include "FvwmButtons.h"
+// clang-format on
 
 /**
 *** DumpButtons()

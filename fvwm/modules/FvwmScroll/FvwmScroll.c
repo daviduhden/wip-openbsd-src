@@ -11,6 +11,7 @@
 #define TRUE true
 #define FALSE false
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -38,6 +39,7 @@
 
 #include "../../fvwm/module.h"
 #include "FvwmScroll.h"
+// clang-format on
 
 char *MyName;
 int   fd_width;

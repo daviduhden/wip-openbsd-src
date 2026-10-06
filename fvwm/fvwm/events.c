@@ -35,6 +35,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -60,6 +61,7 @@
 #include <X11/extensions/shape.h>
 #endif /* SHAPE */
 #include "module.h"
+// clang-format on
 
 unsigned int mods_used = (ShiftMask | ControlMask | Mod1Mask | Mod2Mask |
     Mod3Mask | Mod4Mask | Mod5Mask);

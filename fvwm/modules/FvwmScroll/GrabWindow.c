@@ -11,6 +11,7 @@
 #define FALSE false
 #define MAX_ICON_NAME_LEN 255
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -35,6 +36,7 @@
 
 #include "../../fvwm/module.h"
 #include "FvwmScroll.h"
+// clang-format on
 
 int Width = 300, Height = 300;
 int target_width, target_height;

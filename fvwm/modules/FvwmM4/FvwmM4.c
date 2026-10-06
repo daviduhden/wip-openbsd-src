@@ -11,6 +11,7 @@
 #define TRUE true
 #define FALSE false
 
+// clang-format off
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -39,6 +40,7 @@
 #include "../../libs/fvwmlib.h"
 #include "FvwmM4.h"
 #include "config.h"
+// clang-format on
 #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
 
 char *MyName;

@@ -12,7 +12,9 @@
 
 */
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+// clang-format on
 
 void ConstrainSize(XSizeHints *hints, int *widthp, int *heightp);

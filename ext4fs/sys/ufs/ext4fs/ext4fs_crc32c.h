@@ -17,7 +17,9 @@
 #ifndef _EXT4FS_CRC32C_H_
 #define _EXT4FS_CRC32C_H_
 
+// clang-format off
 #include <sys/types.h>
+// clang-format on
 
 /*
  * CRC32C uses the Castagnoli polynomial: 0x1EDC6F41

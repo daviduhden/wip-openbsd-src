@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -54,6 +55,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 /*
  * a collection of general purpose subroutines used by pax
@@ -256,7 +258,8 @@ listopt_keyword_string(
 	const char *val;
 	char	   *dup;
 
-	if (keyword == nullptr || *keyword == '\0' || strcmp(keyword, "path") == 0)
+	if (keyword == nullptr || *keyword == '\0' ||
+	    strcmp(keyword, "path") == 0)
 		return arcn->name;
 	if (strcmp(keyword, "linkpath") == 0)
 		return arcn->ln_name;

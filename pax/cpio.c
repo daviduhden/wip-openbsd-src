@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -47,6 +48,7 @@
 #include "cpio.h"
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 static int rd_nm(ARCHD *, int);
 static int rd_ln_nm(ARCHD *);

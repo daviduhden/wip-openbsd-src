@@ -12,6 +12,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,6 +26,7 @@
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif
 
 void DrawButton(FvwmWindow *t, Window win, int W, int H, ButtonFace *bf,

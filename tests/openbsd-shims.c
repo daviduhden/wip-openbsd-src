@@ -5,8 +5,10 @@
  * NOT part of the production build; OpenBSD libc provides these.
  */
 
+// clang-format off
 #include <stddef.h>
 #include <string.h>
+// clang-format on
 
 size_t
 strlcpy(char *dst, const char *src, size_t dsize)

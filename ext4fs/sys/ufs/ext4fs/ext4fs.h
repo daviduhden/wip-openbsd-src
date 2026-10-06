@@ -31,6 +31,7 @@
  *
  * Modified for ext4fs by kmx.io.
  */
+// clang-format off
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -42,6 +43,7 @@
 #include <ufs/ufs/dinode.h>
 #include <ufs/ext4fs/ext4fs_crc32c.h>
 #include <ufs/ext4fs/ext4fs_dinode.h>
+// clang-format on
 
 #ifndef _EXT4FS_H_
 #define _EXT4FS_H_

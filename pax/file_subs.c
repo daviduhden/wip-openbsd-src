@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/stat.h>
 
 #include <err.h>
@@ -48,6 +49,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 static int  fset_ids(char *, int, uid_t, gid_t);
 static int  unlnk_exist(char *, int);

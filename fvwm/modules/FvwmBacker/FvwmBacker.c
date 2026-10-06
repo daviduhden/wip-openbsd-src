@@ -25,6 +25,7 @@
  * A. Davison
  * Septmber 1994.
  */
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -47,6 +48,7 @@
 
 #include "../../fvwm/module.h"
 #include "FvwmBacker.h"
+// clang-format on
 
 typedef struct {
 	int type;		  /* The command type.

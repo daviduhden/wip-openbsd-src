@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -46,14 +47,15 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 /*
  * routines that deal with I/O to and from the user
  */
 
-#define DEVTTY "/dev/tty"    /* device for interactive i/o */
+#define DEVTTY "/dev/tty"	/* device for interactive i/o */
 static FILE *ttyoutf = nullptr; /* output pointing at control tty */
-static FILE *ttyinf = nullptr;  /* input pointing at control tty */
+static FILE *ttyinf = nullptr;	/* input pointing at control tty */
 
 /*
  * tty_init()

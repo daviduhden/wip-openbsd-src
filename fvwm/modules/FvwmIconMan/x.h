@@ -1,12 +1,14 @@
 #ifndef IN_X_H
 #define IN_X_H
 
+// clang-format off
 #include <X11/Xlib.h>
 
 #include "FvwmIconMan.h"
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif
 
 extern Display *theDisplay;

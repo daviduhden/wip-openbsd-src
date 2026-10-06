@@ -11,6 +11,7 @@
  *
  */
 
+// clang-format off
 #include <X11/Xmd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +20,7 @@
 #include "FvwmWinList.h"
 #include "List.h"
 #include "config.h"
+// clang-format on
 
 static void
 UpdateString(char **string, char *value)
@@ -245,7 +247,8 @@ PrintList(List *list)
 		       "--------------- --------------- ----\n");
 	for (temp = list->head; temp != nullptr; temp = temp->next) {
 		ConsoleMessage("   %10ld %-15.15s %4ld\n", temp->id,
-		    (temp->name == nullptr) ? "<null>" : temp->name, temp->flags);
+		    (temp->name == nullptr) ? "<null>" : temp->name,
+		    temp->flags);
 	}
 }
 

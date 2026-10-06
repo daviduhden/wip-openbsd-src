@@ -16,11 +16,13 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <stdio.h>
 
 #include "Colors.h"
 #include "config.h"
+// clang-format on
 
 extern Display *dpy;
 extern Window	Root;

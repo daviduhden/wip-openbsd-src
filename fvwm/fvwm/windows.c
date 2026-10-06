@@ -11,6 +11,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <limits.h>
 #include <signal.h>
 #include <stdio.h>
@@ -24,6 +25,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 #define SHOW_GEOMETRY (1 << 0)
 #define SHOW_ALLDESKS (1 << 1)
@@ -73,7 +75,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	int	     last_desk_displayed = INT_MIN;
 	int	     next_desk = 0;
 	char	    *t_hot = nullptr; /* Menu label with hotkey added */
-	char	     scut = '0';   /* Current short cut key */
+	char	     scut = '0';      /* Current short cut key */
 	char	    *line = nullptr, *tok = nullptr;
 	int	     desk = Scr.CurrentDesk;
 	int	     flags = SHOW_EVERYTHING;
@@ -148,8 +150,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				if (default_action != nullptr)
 					free(default_action);
 				default_action = strdup(tok);
-			}
-			else {
+			} else {
 				fvwm_msg(ERR, "WindowList",
 				    "Unknown option '%s'", tok);
 			}
@@ -242,8 +243,8 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				 * top */
 				if (t->Desk != last_desk_displayed) {
 					if (last_desk_displayed != INT_MIN)
-						AddToMenu(mr, nullptr, nullptr, FALSE,
-						    FALSE);
+						AddToMenu(mr, nullptr, nullptr,
+						    FALSE, FALSE);
 					last_desk_displayed = t->Desk;
 				}
 

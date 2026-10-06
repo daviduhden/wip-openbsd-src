@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/mtio.h>
@@ -52,6 +53,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 /*
  * Routines which deal directly with the archive I/O device/file.

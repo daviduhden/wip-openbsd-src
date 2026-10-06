@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -52,6 +53,7 @@
 #include "extern.h"
 #include "pax.h"
 #include "tar.h"
+// clang-format on
 
 static int   bad_opt(void);
 static int   opt_add(const char *);
@@ -137,9 +139,9 @@ constexpr int VF = 0x00008000;
  * Routines which handle command line options
  */
 
-static char    flgch[] = FLGCH; /* list of all possible flags */
-static OPLIST *ophead = nullptr;	/* head for format specific options -x */
-static OPLIST *optail = nullptr;	/* option tail */
+static char    flgch[] = FLGCH;	 /* list of all possible flags */
+static OPLIST *ophead = nullptr; /* head for format specific options -x */
+static OPLIST *optail = nullptr; /* option tail */
 
 static int   no_op(void);
 static void  printflg(unsigned int);
@@ -223,17 +225,17 @@ FSUB fsub[] = {
     {},
 #else
     /* 6: compress, to detect failure to use -Z */
-    {nullptr, 0, 4, 0, 0, 0, 0, compress_id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-	nullptr, nullptr},
+    {nullptr, 0, 4, 0, 0, 0, 0, compress_id, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr},
     /* 7: xz, to detect failure to decompress it */
-    {nullptr, 0, 4, 0, 0, 0, 0, xz_id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-	nullptr},
+    {nullptr, 0, 4, 0, 0, 0, 0, xz_id, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr},
     /* 8: bzip2, to detect failure to use -j */
-    {nullptr, 0, 4, 0, 0, 0, 0, bzip2_id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-	nullptr},
+    {nullptr, 0, 4, 0, 0, 0, 0, bzip2_id, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr},
     /* 9: gzip, to detect failure to use -z */
-    {nullptr, 0, 4, 0, 0, 0, 0, gzip_id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-	nullptr},
+    {nullptr, 0, 4, 0, 0, 0, 0, gzip_id, nullptr, nullptr, nullptr, nullptr,
+	nullptr, nullptr, nullptr, nullptr},
     /* 10: POSIX PAX */
     {"pax", 10240, BLKMULT, 0, 1, BLKMULT, 0, pax_id, no_op, ustar_rd,
 	tar_endrd, no_op, pax_wr, tar_endwr, tar_trail, pax_opt},
@@ -763,8 +765,8 @@ tar_options(int argc, char **argv)
 				off_t blk = str_offt(optarg);
 
 				if (blk <= 0 || blk > INT_MAX / 512) {
-					paxwarn(1, "Invalid block size %s",
-					    optarg);
+					paxwarn(
+					    1, "Invalid block size %s", optarg);
 					tar_usage();
 				}
 				wrblksz = (int)blk * 512;

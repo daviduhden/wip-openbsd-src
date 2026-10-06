@@ -7,11 +7,13 @@
  * expected values come from the independent reference generator
  * (see the vectors documented below).
  */
+// clang-format off
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+// clang-format on
 
 /* Independent bitwise reference crc32c. */
 static const uint32_t ref_poly = 0x82F63B78;
@@ -31,7 +33,9 @@ ref_crc32c(uint32_t init, const void *data, size_t len)
 }
 
 #define main inode_test_unused_main
+// clang-format off
 #include "../ext4fs/sys/ufs/ext4fs/ext4fs_crc32c.c"
+// clang-format on
 #undef main
 
 static int failures;

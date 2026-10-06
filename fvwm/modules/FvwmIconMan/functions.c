@@ -1,6 +1,8 @@
+// clang-format off
 #include "FvwmIconMan.h"
 #include "readconfig.h"
 #include "xmanager.h"
+// clang-format on
 
 [[maybe_unused]] static char const rcsid[] =
     "$Id: functions.c,v 1.2 2021/01/24 09:21:21 matthieu Exp $";

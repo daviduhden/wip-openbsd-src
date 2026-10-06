@@ -1,7 +1,9 @@
 #ifndef READCONFIG_H
 #define READCONFIG_H
 
+// clang-format off
 #include "FvwmIconMan.h"
+// clang-format on
 
 typedef enum {
 	READ_LINE = 1,

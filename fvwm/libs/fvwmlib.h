@@ -1,6 +1,7 @@
 #ifndef FVWMLIB_H
 #define FVWMLIB_H
 
+// clang-format off
 #include <X11/Intrinsic.h> /* needed for xpm.h and Pixel defn */
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
@@ -8,6 +9,7 @@
 #include <ctype.h>
 
 #include "../fvwm/xalloc.h"
+// clang-format on
 
 /***********************************************************************
  * Generic debugging
@@ -39,12 +41,12 @@ extern void		f_db_print(const char *fmt, ...)
  * Routines for dealing with strings
  ***********************************************************************/
 
-char *CatString3(char *a, char *b, char *c);
-void  CopyString(char **dest, char *source);
+char		   *CatString3(char *a, char *b, char *c);
+void		    CopyString(char **dest, char *source);
 [[nodiscard]] char *stripcpy(char *source);
-int   StrEquals(char *s1, char *s2);
+int		    StrEquals(char *s1, char *s2);
 
-int   envExpand(char *s, int maxstrlen);
+int		    envExpand(char *s, int maxstrlen);
 [[nodiscard]] char *envDupExpand(const char *s, int extra);
 
 int matchWildcards(char *pattern, char *string);
@@ -112,7 +114,9 @@ void SetMessageMask(int *fd, unsigned long mask);
  * Stuff for dealing w/ bitmaps & pixmaps:
  ***********************************************************************/
 #ifdef XPM
+// clang-format off
 #include <X11/xpm.h> /* XpmAttributes, stored in FvwmPicture */
+// clang-format on
 #endif
 typedef struct PictureThing {
 	struct PictureThing *next;
@@ -124,7 +128,7 @@ typedef struct PictureThing {
 	unsigned int	     height;
 	unsigned int	     count;
 #ifdef XPM
-	XpmAttributes	     xpm_attrs; /* colours allocated for this pixmap */
+	XpmAttributes xpm_attrs; /* colours allocated for this pixmap */
 #endif
 } FvwmPicture;
 
@@ -137,7 +141,9 @@ void DestroyPicture(Display *, FvwmPicture *);
 
 char *findIconFile(char *icon, char *pathlist, int type);
 #ifdef XPM
+// clang-format off
 #include <X11/xpm.h> /* needed for next prototype */
+// clang-format on
 void color_reduce_pixmap(XpmImage *, int);
 #endif
 

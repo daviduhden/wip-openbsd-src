@@ -17,10 +17,12 @@
 #ifndef FVWM_XALLOC_H
 #define FVWM_XALLOC_H
 
+// clang-format off
 #include <err.h>
 #include <stdckdint.h>
 #include <stdlib.h>
 #include <string.h>
+// clang-format on
 
 [[nodiscard]] static inline void *
 xmalloc(size_t size)

@@ -1,3 +1,4 @@
+// clang-format off
 #include <stdlib.h>
 #include <string.h>
 
@@ -5,11 +6,13 @@
 #include "config.h"
 #include "x.h"
 #include "xmanager.h"
+// clang-format on
 
 [[maybe_unused]] static char const rcsid[] =
     "$Id: xmanager.c,v 1.1.1.1 2006/11/26 10:53:51 matthieu Exp $";
 
 #ifdef SHAPE
+// clang-format off
 #include <X11/extensions/shape.h>
 #endif
 
@@ -17,6 +20,7 @@
 #include "fvwm.h"
 #else
 #include "../../fvwm/fvwm.h"
+// clang-format on
 #endif
 
 /* button dirty bits: */

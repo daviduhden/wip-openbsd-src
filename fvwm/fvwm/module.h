@@ -1,7 +1,9 @@
 #ifndef MODULE_H
 #define MODULE_H
 
+// clang-format off
 #include "xalloc.h"
+// clang-format on
 
 struct queue_buff_struct {
 	struct queue_buff_struct *next;

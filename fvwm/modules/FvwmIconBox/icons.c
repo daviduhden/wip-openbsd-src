@@ -15,6 +15,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -41,6 +42,7 @@
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif /* SHAPE */
 
 extern int save_color_limit;
@@ -363,7 +365,8 @@ GetBackPixmap(void)
 	if (IconwinPixmapFile == nullptr)
 		return False;
 
-	if ((path = findIconFile(IconwinPixmapFile, iconPath, R_OK)) != nullptr) {
+	if ((path = findIconFile(IconwinPixmapFile, iconPath, R_OK)) !=
+	    nullptr) {
 		if (XReadBitmapFile(dpy, Root, path, (unsigned int *)&w,
 			(unsigned int *)&h, &tmp_bitmap, (int *)&x,
 			(int *)&y) != BitmapSuccess)

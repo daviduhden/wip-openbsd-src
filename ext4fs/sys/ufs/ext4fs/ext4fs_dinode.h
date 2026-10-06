@@ -32,7 +32,9 @@
  * Modified for ext4fs by kmx.io.
  */
 
+// clang-format off
 #include <sys/stat.h>
+// clang-format on
 
 #ifndef _EXT4FS_DINODE_H_
 #define _EXT4FS_DINODE_H_

@@ -11,6 +11,7 @@
 #define TRUE true
 #define FALSE false
 
+// clang-format off
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -39,6 +40,7 @@
 #include "../../libs/fvwmlib.h"
 #include "FvwmCpp.h"
 #include "config.h"
+// clang-format on
 #define Resolution(pixels, mm) ((((pixels) * 100000 / (mm)) + 50) / 100)
 
 char *MyName;
@@ -49,12 +51,12 @@ struct list *list_root = nullptr;
 int ScreenWidth, ScreenHeight;
 int Mscreen;
 
-long	     Vx, Vy;
-static char *MkDef(const char *name, const char *def);
-static char *MkNum(const char *name, int def);
-static int   cpp_process(Display *display, const char *host, char *options,
+long	      Vx, Vy;
+static char  *MkDef(const char *name, const char *def);
+static char  *MkNum(const char *name, int def);
+static int    cpp_process(Display *display, const char *host, char *options,
     const char *config_file, int keep_output);
-static int   is_cpp_linemarker(const char *line);
+static int    is_cpp_linemarker(const char *line);
 constexpr int MAXHOSTNAME = 255;
 #define EXTRA 20
 

@@ -41,10 +41,12 @@
 #ifndef FVWM_SANDBOX_H
 #define FVWM_SANDBOX_H
 
+// clang-format off
 #include <err.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
+// clang-format on
 
 #ifndef FVWMLIBDIR
 #define FVWMLIBDIR "/usr/X11R6/lib/X11/fvwm"
@@ -103,8 +105,8 @@ sandbox_save_state(const char *progname)
 static inline void
 sandbox_cpp_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet", nullptr) ==
-	    -1)
+	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
+		nullptr) == -1)
 		err(1, "%s: pledge", progname);
 }
 
@@ -115,8 +117,8 @@ sandbox_cpp_preproc(const char *progname)
 static inline void
 sandbox_m4_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet", nullptr) ==
-	    -1)
+	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
+		nullptr) == -1)
 		err(1, "%s: pledge", progname);
 }
 

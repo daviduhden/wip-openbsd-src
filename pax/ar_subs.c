@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -48,6 +49,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 static void	wr_archive(ARCHD *, int is_app);
 static int	get_arc(void);

@@ -11,6 +11,7 @@
  * window resizing borrowed from the "wm" window manager
  *
  ***********************************************************************/
+// clang-format off
 #include <X11/keysym.h>
 #include <stdio.h>
 
@@ -19,6 +20,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 typedef struct geom {
 	int x;

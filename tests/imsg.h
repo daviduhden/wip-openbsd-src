@@ -9,9 +9,11 @@
 #ifndef STUB_IMSG_H
 #define STUB_IMSG_H
 
+// clang-format off
 #include <sys/types.h>
 
 #include <stdint.h>
+// clang-format on
 
 struct imsghdr {
 	uint32_t type;

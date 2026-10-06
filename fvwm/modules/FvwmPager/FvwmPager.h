@@ -98,12 +98,12 @@ constexpr int ON = 1;
  * Subroutine Prototypes
  *
  *************************************************************************/
-char *GetNextToken(char *indata, char **token);
-void  Loop(int *fd);
-void  SendInfo(int *fd, char *message, unsigned long window);
-[[noreturn]] void  DeadPipe(int nonsense);
-void  process_message(unsigned long type, unsigned long *body);
-void  ParseOptions(void);
+char		 *GetNextToken(char *indata, char **token);
+void		  Loop(int *fd);
+void		  SendInfo(int *fd, char *message, unsigned long window);
+[[noreturn]] void DeadPipe(int nonsense);
+void		  process_message(unsigned long type, unsigned long *body);
+void		  ParseOptions(void);
 
 void list_add(unsigned long *body);
 void list_configure(unsigned long *body);

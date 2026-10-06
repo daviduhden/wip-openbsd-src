@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -31,6 +32,7 @@
 
 #include "../../icons/fvwm2_big.xpm"
 #include "../../libs/fvwmlib.h"
+// clang-format on
 
 typedef struct _XpmIcon {
 	Pixmap	      pixmap;

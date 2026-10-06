@@ -1,9 +1,11 @@
 #ifndef FVWM_WINLIST_H
 #define FVWM_WINLIST_H
 
+// clang-format off
 #include <X11/Xmd.h>
 
 #include "fvwmlib.h"
+// clang-format on
 
 /* FvwmWinList Module for Fvwm.
  *

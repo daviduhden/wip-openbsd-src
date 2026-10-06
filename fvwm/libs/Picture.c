@@ -31,6 +31,7 @@
  *
  ****************************************************************************/
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -45,6 +46,7 @@
 #include <unistd.h>
 
 #include "config.h"
+// clang-format on
 
 #ifdef XPM
 /* static function prototypes */
@@ -54,7 +56,9 @@ static void   c300_color_to_rgb(char *, XColor *); /* prototype */
 static double c400_distance(XColor *, XColor *);   /* prototype */
 #endif
 
+// clang-format off
 #include "fvwmlib.h"
+// clang-format on
 
 static FvwmPicture *PictureList = nullptr;
 Colormap	    PictureCMap;
@@ -101,7 +105,8 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 		if (rc == XpmSuccess) {
 			p->width = my_image.width;
 			p->height = my_image.height;
-			/* Keep the colour list so DestroyPicture can free it. */
+			/* Keep the colour list so DestroyPicture can free it.
+			 */
 			p->xpm_attrs = xpm_attributes;
 			XpmFreeXpmImage(&my_image);
 			p->depth =

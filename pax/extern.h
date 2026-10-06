@@ -37,7 +37,9 @@
  *	@(#)extern.h	8.2 (Berkeley) 4/18/94
  */
 
+// clang-format off
 #include "pax.h"
+// clang-format on
 
 /*
  * External references from each source file

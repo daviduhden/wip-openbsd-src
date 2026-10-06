@@ -42,9 +42,11 @@
 #ifndef _MENUS_
 #define _MENUS_
 
+// clang-format off
 #include "../libs/fvwmlib.h"
 #include "config.h"
 #include "fvwm.h"
+// clang-format on
 
 /* Function types used for formatting menus */
 

@@ -31,6 +31,7 @@
  *
  * Modified for ext4fs by kmx.io.
  */
+// clang-format off
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/namei.h>
@@ -62,6 +63,7 @@
 #include <ufs/ext4fs/ext4fs.h>
 #include <ufs/ext4fs/ext4fs_extern.h>
 #include <ufs/ext4fs/ext4fs_journal.h>
+// clang-format on
 
 struct pool ext4fs_inode_pool;
 

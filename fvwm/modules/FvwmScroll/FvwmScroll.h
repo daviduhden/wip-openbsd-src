@@ -1,4 +1,6 @@
+// clang-format off
 #include "fvwmlib.h"
+// clang-format on
 
 extern Display *dpy;
 extern char    *MyName;
@@ -7,13 +9,13 @@ extern int	screen;
 extern int	d_depth;
 extern int	x_fd, fd_width;
 
-[[noreturn]] void   DeadPipe(int nonsense);
-void   GetTargetWindow(Window *app_win);
-void   CopyString(char **dest, char *source);
-char  *CatString2(char *a, char *b);
-void   nocolor(char *a, char *b);
-char  *CatString3(char *a, char *b, char *c);
-Window ClientWindow(Window input);
+[[noreturn]] void DeadPipe(int nonsense);
+void		  GetTargetWindow(Window *app_win);
+void		  CopyString(char **dest, char *source);
+char		 *CatString2(char *a, char *b);
+void		  nocolor(char *a, char *b);
+char		 *CatString3(char *a, char *b, char *c);
+Window		  ClientWindow(Window input);
 
 void  RelieveWindow(Window win, int x, int y, int w, int h, GC rgc, GC sgc);
 void  CreateWindow(int x, int y, int w, int h);

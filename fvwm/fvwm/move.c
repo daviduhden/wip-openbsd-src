@@ -12,6 +12,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <X11/keysym.h>
 #include <signal.h>
 #include <stdio.h>
@@ -25,6 +26,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 extern XEvent Event;
 extern int    menuFromFrameOrWindowOrTitlebar;
@@ -187,7 +189,8 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		if (fAnimated) {
 			AnimatedMoveOfWindow(tmp_win->icon_w, -1, -1,
 			    tmp_win->icon_xl_loc,
-			    FinalY + tmp_win->icon_p_height, fWarp, -1, nullptr);
+			    FinalY + tmp_win->icon_p_height, fWarp, -1,
+			    nullptr);
 		} else {
 			XMoveWindow(dpy, tmp_win->icon_w, tmp_win->icon_xl_loc,
 			    FinalY + tmp_win->icon_p_height);

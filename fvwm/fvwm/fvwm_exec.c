@@ -37,6 +37,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <sys/socket.h>
 #include <sys/wait.h>
 
@@ -54,6 +55,7 @@
 
 #include "config.h"
 #include "exec_imsg.h"
+// clang-format on
 
 static volatile sig_atomic_t got_sigchld;
 
@@ -75,8 +77,8 @@ static struct piperead_slot piperead_slots[PIPEREAD_SLOTS];
 
 /* Pids of detached (Exec) children, for exit reporting. */
 constexpr int MAX_EXEC_CHILDREN = 512;
-static pid_t exec_children[MAX_EXEC_CHILDREN];
-static int   exec_children_count;
+static pid_t  exec_children[MAX_EXEC_CHILDREN];
+static int    exec_children_count;
 
 /* PipeRead children whose pipe closed before they exited; reaped
  * once SIGCHLD shows they are gone. */

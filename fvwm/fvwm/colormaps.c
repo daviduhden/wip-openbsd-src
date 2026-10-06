@@ -9,6 +9,7 @@
  * warrantees of any sort whatsoever are given or implied or anything.
  ****************************************************************************/
 
+// clang-format off
 #include <X11/Xatom.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -19,6 +20,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 FvwmWindow	  *colormap_win;
 Colormap	   last_cmap = None;

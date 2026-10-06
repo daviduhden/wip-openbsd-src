@@ -3,6 +3,7 @@
  * for any purpose.
  */
 
+// clang-format off
 #include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -15,6 +16,7 @@
 #include "readconfig.h"
 #include "x.h"
 #include "xmanager.h"
+// clang-format on
 
 static int		     fd_width;
 static volatile sig_atomic_t isTerminated = False;

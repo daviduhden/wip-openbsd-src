@@ -1,4 +1,6 @@
+// clang-format off
 #include "../../libs/fvwmlib.h"
+// clang-format on
 
 /*************************************************************************
  *

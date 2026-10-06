@@ -1,3 +1,4 @@
+// clang-format off
 #include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
@@ -11,6 +12,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 /*
  * dje 12/19/98

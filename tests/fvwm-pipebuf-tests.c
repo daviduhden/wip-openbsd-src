@@ -7,6 +7,7 @@
  * EOF without final newline, NUL handling, oversized lines, and
  * the backpressure-related boundedness of the buffer.
  */
+// clang-format off
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -14,6 +15,7 @@
 #include <string.h>
 
 #include "../fvwm/fvwm/pipebuf.c"
+// clang-format on
 
 static int failures;
 

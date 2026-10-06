@@ -8,11 +8,13 @@
  *       6 Nov 1998 - Paul D. Smith <psmith@BayNetworks.com>
  */
 
+// clang-format off
 #include <stdarg.h>
 #include <stdio.h>
 
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 int f_db_level = 0;
 
@@ -25,8 +27,8 @@ f_db_print(const char *fmt, ...)
 {
 	va_list ap;
 
-	fprintf(stderr, "%s:%lu: ",
-	    f_db_info.filenm ? f_db_info.filenm : "(unknown)",
+	fprintf(stderr,
+	    "%s:%lu: ", f_db_info.filenm ? f_db_info.filenm : "(unknown)",
 	    f_db_info.lineno);
 
 	va_start(ap, fmt);

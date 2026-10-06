@@ -1,9 +1,11 @@
+// clang-format off
 #include "../fvwm/fvwm.h"
 #include "../fvwm/module.h"
 #include "FvwmIconMan.h"
 #include "config.h"
 #include "x.h"
 #include "xmanager.h"
+// clang-format on
 
 [[maybe_unused]] static char const rcsid[] =
     "$Id: fvwm.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";

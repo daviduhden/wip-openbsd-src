@@ -35,6 +35,7 @@
  * the window
  *
  **********************************************************************/
+// clang-format off
 #include <X11/Xatom.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +50,7 @@
 #include <X11/extensions/shape.h>
 #endif /* SHAPE */
 #include "module.h"
+// clang-format on
 
 /* Parse client command line for desktop hints (-workspace N, -xrm).
  * Only a single desk resource is checked; multiple -workspace flags
@@ -59,10 +61,10 @@ static XrmOptionDescRec table[] = {
      * to specify the desktop. I have to include dummy options that
      * are meaningless since Xrm seems to allow -w to match -workspace
      * if there would be no ambiguity. */
-    {"-workspacf", "*junk", XrmoptionSepArg, (caddr_t)nullptr},
-    {"-workspace", "*desk", XrmoptionSepArg, (caddr_t)nullptr},
-    {"-xrn", nullptr, XrmoptionResArg, (caddr_t)nullptr},
-    {"-xrm", nullptr, XrmoptionResArg, (caddr_t)nullptr},
+    {"-workspacf", "*junk", XrmoptionSepArg, (caddr_t) nullptr},
+    {"-workspace", "*desk", XrmoptionSepArg, (caddr_t) nullptr},
+    {"-xrn", nullptr, XrmoptionResArg, (caddr_t) nullptr},
+    {"-xrm", nullptr, XrmoptionResArg, (caddr_t) nullptr},
 };
 
 extern char *IconPath;
@@ -924,8 +926,7 @@ FetchWmProtocols(FvwmWindow *tmp)
 				    i++, ap++) {
 					if (*ap == (Atom)_XA_WM_TAKE_FOCUS)
 						flags |= DoesWmTakeFocus;
-					if (*ap ==
-					    (Atom)_XA_WM_DELETE_WINDOW)
+					if (*ap == (Atom)_XA_WM_DELETE_WINDOW)
 						flags |= DoesWmDeleteWindow;
 				}
 			}

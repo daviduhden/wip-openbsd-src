@@ -29,6 +29,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <sys/socket.h>
 #include <sys/wait.h>
 
@@ -47,6 +48,7 @@
 #include "fvwm.h"
 #include "misc.h"
 #include "module.h"
+// clang-format on
 
 static struct imsgbuf *exec_ibuf;
 static int	       exec_fd = -1;

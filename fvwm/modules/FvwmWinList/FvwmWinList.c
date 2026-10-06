@@ -32,6 +32,7 @@
 #define YES "Yes"
 #define NO "No"
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -64,6 +65,7 @@
 #include "Colors.h"
 #include "FvwmWinList.h"
 #include "List.h"
+// clang-format on
 
 #define GRAB_EVENTS                                                            \
 	(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |              \
@@ -706,7 +708,8 @@ LoopOnEvents(void)
 				RedrawWindow(1);
 			break;
 		case KeyPress:
-			num = XLookupString(&Event.xkey, buffer, 10, nullptr, 0);
+			num =
+			    XLookupString(&Event.xkey, buffer, 10, nullptr, 0);
 			if (num == 1) {
 				if (buffer[0] == 'q' || buffer[0] == 'Q')
 					exit(0);
@@ -969,10 +972,12 @@ MakeMeWindow(void)
 			back[i] = GetColor("white");
 			fore[i] = GetColor("black");
 		} else {
-			back[i] = GetColor(
-			    BackColor[i] == nullptr ? BackColor[0] : BackColor[i]);
-			fore[i] = GetColor(
-			    ForeColor[i] == nullptr ? ForeColor[0] : ForeColor[i]);
+			back[i] =
+			    GetColor(BackColor[i] == nullptr ? BackColor[0] :
+							       BackColor[i]);
+			fore[i] =
+			    GetColor(ForeColor[i] == nullptr ? ForeColor[0] :
+							       ForeColor[i]);
 		}
 
 	win = XCreateSimpleWindow(dpy, Root, hints.x, hints.y, hints.width,

@@ -11,10 +11,12 @@
    itself for parsing.
 */
 
+// clang-format off
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> /* for free() */
 #include <string.h>
+// clang-format on
 
 char *PeekArgument(const char *pstr);
 char *GetArgument(char **pstr);

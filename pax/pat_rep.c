@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -45,6 +46,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 /*
  * data structure for storing user supplied replacement strings (-s)
@@ -65,7 +67,7 @@ typedef struct replace {
  * routines.
  */
 
-#define MAXSUBEXP 10		/* max subexpressions, DO NOT CHANGE */
+#define MAXSUBEXP 10		   /* max subexpressions, DO NOT CHANGE */
 static PATTERN *pathead = nullptr; /* file pattern match list head */
 static PATTERN *pattail = nullptr; /* file pattern match list tail */
 static REPLACE *rephead = nullptr; /* replacement string list head */

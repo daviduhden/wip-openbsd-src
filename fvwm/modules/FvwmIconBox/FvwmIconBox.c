@@ -17,6 +17,7 @@
 #define VERTICAL 1
 #define HORIZONTAL 2
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -45,6 +46,7 @@
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif /* SHAPE */
 
 /* just as same as wild.c */
@@ -53,7 +55,9 @@
 #define FALSE false
 #endif
 
+// clang-format off
 #include "FvwmIconBox.h"
+// clang-format on
 
 char *MyName;
 
@@ -1996,7 +2000,8 @@ process_message(unsigned long type, unsigned long *body)
 							if (tmp->desk ==
 								CurrentDesk &&
 							    sortby != UNSORT)
-								SortItem(nullptr);
+								SortItem(
+								    nullptr);
 							num_icons =
 							    AdjustIconWindows();
 							GetIconwinSize(
@@ -2126,7 +2131,8 @@ process_message(unsigned long type, unsigned long *body)
 			AdjustIconWindows();
 		break;
 	case M_RES_NAME:
-		if ((tmp = UpdateItem(type, body[0], (char *)&body[3])) == nullptr)
+		if ((tmp = UpdateItem(type, body[0], (char *)&body[3])) ==
+		    nullptr)
 			break;
 		if (LookInList(tmp) && ready) {
 			if (sortby != UNSORT)

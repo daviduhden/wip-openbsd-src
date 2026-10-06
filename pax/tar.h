@@ -40,9 +40,11 @@
 /*
  * defines and data structures common to all tar formats
  */
+// clang-format off
 #include <stddef.h>
 
 #include "pax.h"
+// clang-format on
 
 #define CHK_LEN 8 /* length of checksum field */
 #define TNMSZ 100 /* size of name field */

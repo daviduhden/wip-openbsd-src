@@ -5,6 +5,7 @@
  * risk.  Permission to use, modify, and redistribute this program is hereby
  * given, provided that this copyright is kept intact.
  */
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -26,8 +27,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
+// clang-format on
 #define XK_MISCELLANY
+// clang-format off
 #include <X11/keysymdef.h>
+// clang-format on
 
 static void
 dummy(FILE *f, const char *fmt, ...)
@@ -240,7 +244,8 @@ ensure_line_item_capacity(Line *line, int count)
 	while (new_cap < count) {
 		new_cap *= 2;
 	}
-	line->items = (Item **)form_xrealloc(line->items, sizeof(Item *) * new_cap);
+	line->items =
+	    (Item **)form_xrealloc(line->items, sizeof(Item *) * new_cap);
 	line->items_cap = new_cap;
 }
 
@@ -306,8 +311,9 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 
 			for (k = 0; k < items[i].select.n; k++)
 				items[i].select.choices[k] =
-				    (Item *)((char *)
-				    items[i].select.choices[k] + delta);
+				    (Item *)((char *)items[i]
+						 .select.choices[k] +
+					delta);
 		}
 	}
 	if (cur_text != nullptr)
@@ -617,11 +623,13 @@ ReadConfig(void)
 				item->input.init_value = CopyQuotedString(++cp);
 			else
 				item->input.init_value = "";
-			item->input.blanks = (char *)form_xmalloc(item->input.size);
+			item->input.blanks =
+			    (char *)form_xmalloc(item->input.size);
 			for (j = 0; j < item->input.size; j++)
 				item->input.blanks[j] = ' ';
 			item->input.buf = strlen(item->input.init_value) + 1;
-			item->input.value = (char *)form_xmalloc(item->input.buf);
+			item->input.value =
+			    (char *)form_xmalloc(item->input.buf);
 			item->header.size_x =
 			    FontWidth(xfs[f_input]) * item->input.size +
 			    2 * TEXT_SPC + 2 * BOX_SPC;
@@ -674,7 +682,8 @@ ReadConfig(void)
 			    cur_sel->select.choices_cap) {
 				cur_sel->select.choices_cap *= 2;
 				cur_sel->select.choices =
-				    (Item **)form_xrealloc(cur_sel->select.choices,
+				    (Item **)form_xrealloc(
+					cur_sel->select.choices,
 					sizeof(Item *) *
 					    cur_sel->select.choices_cap);
 			}
@@ -775,10 +784,11 @@ ReadConfig(void)
 			if (cur_button->button.n + 1 >
 			    cur_button->button.commands_cap) {
 				cur_button->button.commands_cap *= 2;
-				cur_button->button.commands = (char **)form_xrealloc(
-				    cur_button->button.commands,
-				    sizeof(char *) *
-					cur_button->button.commands_cap);
+				cur_button->button.commands =
+				    (char **)form_xrealloc(
+					cur_button->button.commands,
+					sizeof(char *) *
+					    cur_button->button.commands_cap);
 			}
 			cur_button->button.commands[cur_button->button.n++] =
 			    CopyNString(cp, 0);
@@ -1205,7 +1215,7 @@ ParseCommand(int dn, char *sp, char end, int *dn1, char **sp1)
 	{                                                                      \
 		if (dn >= N) {                                                 \
 			N *= 2;                                                \
-			buf = (char *)form_xrealloc(buf, N);                         \
+			buf = (char *)form_xrealloc(buf, N);                   \
 		}                                                              \
 		buf[dn++] = (chr);                                             \
 	}
@@ -1763,8 +1773,9 @@ ReadXServer(void)
 							cur_text->input.buf +=
 							    cur_text->input
 								.size;
-							cur_text->input.value =
-							    (char *)form_xrealloc(
+							cur_text->input
+							    .value = (char *)
+							    form_xrealloc(
 								cur_text->input
 								    .value,
 								cur_text->input

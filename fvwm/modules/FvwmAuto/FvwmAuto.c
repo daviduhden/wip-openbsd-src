@@ -21,6 +21,7 @@
 #define TRUE true
 #define FALSE false
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -42,6 +43,7 @@
 
 #include "../../fvwm/module.h"
 #include "../../libs/fvwmlib.h"
+// clang-format on
 
 /***********************************************************************
  *

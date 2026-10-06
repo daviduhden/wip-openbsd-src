@@ -1,9 +1,11 @@
+// clang-format off
 #include "fvwmlib.h"
 /*
 ** MyXGrabServer & MyXUngrabServer - to handle nested grab server calls
 */
 
 #include <X11/Xlib.h>
+// clang-format on
 
 /* Made into global for module interface.  See module.c. */
 int myxgrabcount = 0;

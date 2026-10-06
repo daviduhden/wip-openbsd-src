@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -47,6 +48,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 /*
  * Data structure used to store the file args to be handed to fts().
@@ -73,14 +75,14 @@ typedef struct ftree {
  * pax, they are read from stdin
  */
 
-static FTS    *ftsp = nullptr;   /* current FTS handle */
-static int     ftsopts;	      /* options to be used on fts_open */
-static char   *farray[2];     /* array for passing each arg to fts */
+static FTS    *ftsp = nullptr;	 /* current FTS handle */
+static int     ftsopts;		 /* options to be used on fts_open */
+static char   *farray[2];	 /* array for passing each arg to fts */
 static FTREE  *fthead = nullptr; /* head of linked list of file args */
 static FTREE  *fttail = nullptr; /* tail of linked list of file args */
-static FTREE  *ftcur = nullptr;  /* current file arg being processed */
-static FTSENT *ftent = nullptr;  /* current file tree entry */
-static int     ftree_skip;    /* when set skip to next file arg */
+static FTREE  *ftcur = nullptr;	 /* current file arg being processed */
+static FTSENT *ftent = nullptr;	 /* current file tree entry */
+static int     ftree_skip;	 /* when set skip to next file arg */
 
 static int   ftree_arg(void);
 static char *getpathname(char *, int);

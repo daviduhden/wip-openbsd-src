@@ -14,11 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "FvwmBacker.h"
+// clang-format on
 
 extern Display *dpy;
 extern int	screen;

@@ -29,11 +29,13 @@
 constexpr int HAVE_SYS_WAIT_H = 1;
 constexpr int HAVE_WAITPID = 1;
 
+// clang-format off
 #include <sys/types.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+// clang-format on
 
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))

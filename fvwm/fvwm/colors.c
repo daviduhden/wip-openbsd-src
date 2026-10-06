@@ -10,6 +10,7 @@
  * *************************************************************************
  */
 
+// clang-format off
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <ctype.h>
@@ -27,6 +28,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 /***********************************************************************
  *

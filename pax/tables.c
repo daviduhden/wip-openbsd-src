@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -49,6 +50,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 static u_int st_hash(const char *, int, int);
 
 /*
@@ -202,9 +204,9 @@ static DEVT **dtab = nullptr; /* device/inode mapping tables */
 #endif
 static ATDIR  **atab = nullptr; /* file tree directory time reset table */
 static DIRDATA *dirp = nullptr; /* storage for setting created dir time/mode */
-static size_t	dirsize;     /* size of dirp table */
-static size_t	dircnt = 0;  /* entries in dir time/mode storage */
-static int	ffd = -1;    /* tmp file for file time table name storage */
+static size_t	dirsize;	/* size of dirp table */
+static size_t	dircnt = 0;	/* entries in dir time/mode storage */
+static int	ffd = -1;	/* tmp file for file time table name storage */
 
 /*
  * hard link table routines
@@ -1570,7 +1572,8 @@ dir_start(void)
 		return (0);
 
 	dirsize = DIRP_SIZE;
-	if ((dirp = reallocarray(nullptr, dirsize, sizeof(DIRDATA))) == nullptr) {
+	if ((dirp = reallocarray(nullptr, dirsize, sizeof(DIRDATA))) ==
+	    nullptr) {
 		paxwarn(1, "Unable to allocate memory for directory times");
 		return (-1);
 	}

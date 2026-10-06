@@ -32,7 +32,9 @@
 #ifndef FVWM_PIPEBUF_H
 #define FVWM_PIPEBUF_H
 
+// clang-format off
 #include <stddef.h>
+// clang-format on
 
 struct pipebuf {
 	char  *data;

@@ -1,3 +1,4 @@
+// clang-format off
 #include <X11/keysym.h>
 #include <ctype.h>
 #include <signal.h>
@@ -11,6 +12,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 struct charstring {
 	char key;
@@ -203,8 +205,8 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	if ((!fKey) && (contexts & C_WINDOW) &&
-	    (((mods == 0) || mods == AnyModifier)) &&
-	    button >= 1 && button <= 8) {
+	    (((mods == 0) || mods == AnyModifier)) && button >= 1 &&
+	    button <= 8) {
 		Scr.buttons2grab &= ~(1 << (button - 1));
 	}
 

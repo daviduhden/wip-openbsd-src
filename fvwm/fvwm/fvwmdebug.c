@@ -10,10 +10,12 @@
 #ifndef _DEBUG_
 #define _DEBUG_
 
+// clang-format off
 #include <stdio.h>
 
 #include "config.h"
 #include "fvwm.h"
+// clang-format on
 
 /* Don't put this into the #ifdef, since some compilers don't like completely
  * empty source files.

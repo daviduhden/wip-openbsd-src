@@ -6,12 +6,14 @@
 #ifndef EXT4FS_TEST_PARAM_H
 #define EXT4FS_TEST_PARAM_H
 
+// clang-format off
 #include <sys/types.h>
 
 #include <endian.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
+// clang-format on
 
 typedef uint32_t ufsino_t;
 

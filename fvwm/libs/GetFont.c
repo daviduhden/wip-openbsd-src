@@ -1,3 +1,4 @@
+// clang-format off
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <stdio.h>
@@ -6,6 +7,7 @@
 
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 /*
 ** loads font or "fixed" on failure

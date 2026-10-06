@@ -34,7 +34,9 @@
 
 /* -------------------------------- more  ---------------------------------- */
 
+// clang-format off
 #include "../../libs/fvwmlib.h"
+// clang-format on
 
 /* ------------------------------- structs --------------------------------- */
 
@@ -159,7 +161,9 @@ struct panel_info_struct {
 	int	     geom_h; /* requested height, -1 if unset */
 };
 
+// clang-format off
 #include "button.h"
+// clang-format on
 
 /* -------------------------------- prototypes ----------------------------- */
 void AddButtonAction(button_info *, int, char *);

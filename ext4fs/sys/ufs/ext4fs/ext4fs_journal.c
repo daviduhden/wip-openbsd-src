@@ -26,6 +26,7 @@
  * All JBD2 on-disk fields are big-endian.
  */
 
+// clang-format off
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/buf.h>
@@ -40,6 +41,7 @@
 
 #include <ufs/ext4fs/ext4fs.h>
 #include <ufs/ext4fs/ext4fs_journal.h>
+// clang-format on
 
 /*
  * Build the journal block map from sb_jnl_blocks[0..14].

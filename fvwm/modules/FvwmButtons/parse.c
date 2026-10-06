@@ -12,6 +12,7 @@
 
 */
 
+// clang-format off
 #include <X11/Intrinsic.h>
 #include <X11/Xlib.h>
 #include <ctype.h>
@@ -29,6 +30,7 @@
 #include "FvwmButtons.h"
 #include "button.h"
 #include "parse.h"
+// clang-format on
 
 extern int   w, h, x, y, xneg, yneg; /* used in ParseConfigLine */
 extern char *config_file;
@@ -306,7 +308,8 @@ static void
 ParseContainer(char **ss, button_info *b)
 {
 	char *conts[] = {"columns", "rows", "font", "frame", "back", "fore",
-	    "padding", "title", "swallow", "nosize", "size", "boxsize", nullptr};
+	    "padding", "title", "swallow", "nosize", "size", "boxsize",
+	    nullptr};
 	char *t, *o, *s = *ss;
 	int   i, j;
 
@@ -471,7 +474,8 @@ match_string(button_info **uberb, char *s)
 	if (*s == '(' && s++) {
 		char *opts[] = {"back", "fore", "font", "title", "icon",
 		    "frame", "padding", "swallow", "action", "container", "end",
-		    "nosize", "size", "panel", "left", "right", "center", nullptr};
+		    "nosize", "size", "panel", "left", "right", "center",
+		    nullptr};
 		s = trimleft(s);
 		while (*s && *s != ')') {
 			if ((*s >= '0' && *s <= '9') || *s == '+' ||
@@ -721,7 +725,8 @@ match_string(button_info **uberb, char *s)
 
 			case 10: /* End */
 				*uberb = ub->parent;
-				ub->c->buttons[--(ub->c->num_buttons)] = nullptr;
+				ub->c->buttons[--(ub->c->num_buttons)] =
+				    nullptr;
 				if (!ub->parent) {
 					fprintf(stderr,
 					    "%s: Unmatched END in config "
@@ -777,8 +782,8 @@ match_string(button_info **uberb, char *s)
 						else if (strncasecmp(
 							     t, "down", 4) == 0)
 							kind = "panel-d";
-						else if (strncasecmp(
-							     t, "geometry",
+						else if (strncasecmp(t,
+							     "geometry",
 							     8) == 0)
 							kind = "panel-g";
 						else
@@ -1070,7 +1075,8 @@ void
 ParseOptions(button_info *ub)
 {
 	char *s;
-	char *items[] = {"iconpath", "pixmappath", "colorlimit", nullptr, nullptr};
+	char *items[] = {
+	    "iconpath", "pixmappath", "colorlimit", nullptr, nullptr};
 
 	size_t name_len = strlen(MyName);
 	items[3] = xmalloc(name_len + 2);

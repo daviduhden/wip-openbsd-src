@@ -19,6 +19,7 @@
  * semantics as before.  See exec.c and fvwm_exec.c.
  * *************************************************************************
  */
+// clang-format off
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/time.h>
@@ -41,6 +42,7 @@
 #include "parse.h"
 #include "pipebuf.h"
 #include "screen.h"
+// clang-format on
 
 extern Boolean debugging;
 
@@ -419,7 +421,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 	}
 	missing_quiet = 'n';		    /* init */
 	rest = GetNextToken(rest, &option); /* read optional arg */
-	if (option != nullptr) {		    /* if there is a second arg */
+	if (option != nullptr) {	    /* if there is a second arg */
 		if (strncasecmp(option, "Quiet", 5) ==
 		    0) { /* is the arg "quiet"? */
 			missing_quiet =

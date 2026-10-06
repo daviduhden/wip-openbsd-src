@@ -12,6 +12,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -31,6 +32,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 int    npipes;
 int   *readPipes;
@@ -94,9 +96,9 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
     unsigned long context, char *action, int *Module)
 {
 	(void)w;
-	int	     fvwm_to_app[2], app_to_fvwm[2];
-	int	     i, val, nargs = 0;
-	char	    *cptr;
+	int   fvwm_to_app[2], app_to_fvwm[2];
+	int   i, val, nargs = 0;
+	char *cptr;
 	/*
 	 * Room for 20 arguments plus the nullptr terminator: the loop
 	 * below may fill args[0..19] and then writes args[nargs] = 0.
@@ -183,7 +185,8 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	args[4] = arg5;
 	args[5] = arg6;
 	nargs = 6;
-	while ((action != nullptr) && (nargs < 20) && (args[nargs - 1] != nullptr)) {
+	while ((action != nullptr) && (nargs < 20) &&
+	    (args[nargs - 1] != nullptr)) {
 		args[nargs] = 0;
 		action = GetNextToken(action, &args[nargs]);
 		nargs++;

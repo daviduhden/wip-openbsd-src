@@ -28,6 +28,7 @@
  * mathematical result wrapped to its width, which is exactly what the
  * overflow builtins store.
  */
+// clang-format off
 #include <limits.h>
 #include <stdckdint.h>
 #include <stddef.h>
@@ -37,6 +38,7 @@
 #include <string.h>
 
 #include "xalloc.h"
+// clang-format on
 
 #if !defined(FVWM_COMPAT_STDCKDINT_FALLBACK)
 #error "build stdckdint-tests with -DFVWM_STDCKDINT_FORCE_FALLBACK"

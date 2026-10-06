@@ -8,6 +8,7 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -28,6 +29,7 @@
 #include "../../fvwm/module.h"
 #include "FvwmSave.h"
 #include "config.h"
+// clang-format on
 
 char *MyName;
 int   fd[2];

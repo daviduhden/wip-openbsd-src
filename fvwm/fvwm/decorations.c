@@ -33,6 +33,7 @@
  *
  ****************************************************************************/
 
+// clang-format off
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <stdio.h>
@@ -46,6 +47,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 extern Atom _XA_MwmAtom;
 
@@ -103,9 +105,9 @@ extern FvwmWindow *Tmp_win;
 void
 GetMwmHints(FvwmWindow *t)
 {
-	int	      actual_format;
-	Atom	      actual_type;
-	unsigned long nitems, bytesafter;
+	int	       actual_format;
+	Atom	       actual_type;
+	unsigned long  nitems, bytesafter;
 	unsigned char *prop = nullptr;
 
 	if (XGetWindowProperty(dpy, t->w, _XA_MwmAtom, 0L, 20L, False,

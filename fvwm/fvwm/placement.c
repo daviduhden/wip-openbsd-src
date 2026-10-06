@@ -9,6 +9,7 @@
  * warrantees of any sort whatsoever are given or implied or anything.
  ****************************************************************************/
 
+// clang-format off
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -19,6 +20,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 #ifndef MIN
 #define MIN(A, B) ((A) < (B) ? (A) : (B))

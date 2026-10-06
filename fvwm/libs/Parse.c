@@ -2,6 +2,7 @@
 ** Parse.c: routines for parsing in fvwm & modules
 */
 
+// clang-format off
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -11,6 +12,7 @@
 
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 /*
  * FvwmParseInteger -- historical atoi(3) configuration parsing made

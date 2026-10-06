@@ -9,8 +9,10 @@
    itself for parsing.
 */
 
+// clang-format off
 #include "ModParse.h"
 #include "fvwmlib.h"
+// clang-format on
 
 /*
 ** PeekArgument: returns next token from string, leaving string intact

@@ -1,3 +1,4 @@
+// clang-format off
 #include "fvwmlib.h"
 /***************************************************************************
  *
@@ -15,13 +16,14 @@
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+// clang-format on
 
 Atom _XA_WM_PROTOCOLS = None;
 
 void
 send_clientmessage(Display *disp, Window w, Atom a, Time timestamp)
 {
-	XClientMessageEvent ev = { 0 };
+	XClientMessageEvent ev = {0};
 
 	if (_XA_WM_PROTOCOLS == None)
 		_XA_WM_PROTOCOLS = XInternAtom(disp, "WM_PROTOCOLS", False);

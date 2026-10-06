@@ -1,6 +1,7 @@
 #ifndef FVWMICONMAN_H
 #define FVWMICONMAN_H
 
+// clang-format off
 #include <sys/time.h>
 
 #include <X11/Intrinsic.h>
@@ -10,12 +11,14 @@
 
 #include "../../libs/fvwmlib.h"
 #include "config.h"
+// clang-format on
 
 #ifndef FVWM_VERSION
 #define FVWM_VERSION 2
 #endif
 
 #ifdef COMPILE_STANDALONE
+// clang-format off
 #include "fvwmlib.h"
 #else
 #include "../../libs/fvwmlib.h"
@@ -26,6 +29,7 @@
 #endif
 
 #include "debug.h"
+// clang-format on
 
 #ifndef DEFAULT_ACTION
 #define DEFAULT_ACTION "Iconify"
@@ -45,7 +49,9 @@ constexpr int MAX_ARGS = 3;
 
 #ifdef DMALLOC
 /*  What the heck is this??  */
+// clang-format off
 #include <dmalloc.h>
+// clang-format on
 #endif
 
 typedef unsigned long Ulong;
@@ -323,13 +329,13 @@ extern char	      *Module;
 extern int	       ModuleLen;
 extern ContextDefaults contextDefaults[];
 
-extern void		 ReadFvwmPipe(void);
-extern void		*Malloc(size_t size);
-extern void		 Free(void *p);
-[[noreturn]] extern void ShutMeDown(int flag);
+extern void			      ReadFvwmPipe(void);
+extern void			     *Malloc(size_t size);
+extern void			      Free(void *p);
+[[noreturn]] extern void	      ShutMeDown(int flag);
 [[noreturn]] extern [[noreturn]] void DeadPipe(int nothing);
-extern void		 SendFvwmPipe(char *message, unsigned long window);
-extern char		*copy_string(char **target, char *src);
+extern void  SendFvwmPipe(char *message, unsigned long window);
+extern char *copy_string(char **target, char *src);
 
 extern void init_globals(void);
 extern int  allocate_managers(int num);

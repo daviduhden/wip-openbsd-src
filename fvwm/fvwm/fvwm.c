@@ -10,6 +10,7 @@
  * fvwm - "F? Virtual Window Manager"
  ***********************************************************************/
 
+// clang-format off
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <X11/Xresource.h>
@@ -33,6 +34,7 @@
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif /* SHAPE */
 
 constexpr int MAXHOSTNAME = 255;
@@ -52,8 +54,8 @@ Bool   fFvwmInStartup = True; /* Set to False when startup has finished */
 char *default_config_command = "Read " FVWMRC;
 
 constexpr int MAX_CFG_CMDS = 10;
-static char *config_commands[MAX_CFG_CMDS];
-static int   num_config_commands = 0;
+static char  *config_commands[MAX_CFG_CMDS];
+static int    num_config_commands = 0;
 
 int  FvwmErrorHandler(Display *, XErrorEvent *);
 int  CatchFatal(Display *);
@@ -89,11 +91,11 @@ static char execpath[PATH_MAX];
 /* assorted gray bitmaps for decorative borders */
 constexpr int g_width = 2;
 constexpr int g_height = 2;
-static char g_bits[] = {0x02, 0x01};
+static char   g_bits[] = {0x02, 0x01};
 
 constexpr int l_g_width = 4;
 constexpr int l_g_height = 2;
-static char l_g_bits[] = {0x08, 0x02};
+static char   l_g_bits[] = {0x08, 0x02};
 
 #ifdef SHAPE
 int	ShapeEventBase, ShapeErrorBase;
@@ -517,7 +519,8 @@ main(int argc, char **argv)
 			err(1, "unveil /etc/X11/fvwm");
 		if (unveil("/tmp", "rwc") == -1)
 			err(1, "unveil /tmp");
-		if (home != nullptr && *home != '\0' && unveil(home, "rwc") == -1)
+		if (home != nullptr && *home != '\0' &&
+		    unveil(home, "rwc") == -1)
 			err(1, "unveil %s", home);
 		if (unveil("/etc", "r") == -1)
 			err(1, "unveil /etc");
@@ -622,8 +625,8 @@ StartupStuff(void)
 	} else {
 		mr = FindPopup("InitFunction");
 		if (mr != nullptr)
-			ExecuteFunction(
-			    "Function InitFunction", nullptr, &Event, C_ROOT, 1);
+			ExecuteFunction("Function InitFunction", nullptr,
+			    &Event, C_ROOT, 1);
 	}
 } /* StartupStuff */
 

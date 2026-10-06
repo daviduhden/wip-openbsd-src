@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -48,6 +49,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 /*
  * data structure for storing uid/grp selects (-U, -G non standard options)
@@ -93,8 +95,8 @@ static int trng_match(ARCHD *);
 
 static TIME_RNG *trhead = nullptr; /* time range list head */
 static TIME_RNG *trtail = nullptr; /* time range list tail */
-static USRT    **usrtb = nullptr;	/* user selection table */
-static GRPT    **grptb = nullptr;	/* group selection table */
+static USRT    **usrtb = nullptr;  /* user selection table */
+static GRPT    **grptb = nullptr;  /* group selection table */
 
 /*
  * Routines for selection of archive members

@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/queue.h>
 #include <sys/stat.h>
@@ -56,6 +57,7 @@
 #include "extern.h"
 #include "pax.h"
 #include "tar.h"
+// clang-format on
 
 SLIST_HEAD(xheader, xheader_record);
 struct xheader_record {
@@ -1078,8 +1080,8 @@ xheader_add_ull(
 	tmplen = MINXHDRSZ;
 	do {
 		reclen = tmplen;
-		tmplen =
-		    snprintf(nullptr, 0, "%d %s=%llu\n", reclen, keyword, value);
+		tmplen = snprintf(
+		    nullptr, 0, "%d %s=%llu\n", reclen, keyword, value);
 	} while (tmplen >= 0 && tmplen != reclen);
 	if (tmplen < 0)
 		return -1;
@@ -2266,8 +2268,8 @@ pax_opt(void)
  * Return
  *	character pointer to split point (always the / that is to be removed
  *	if the split is not needed, the points is set to the start of the file
- *	name (it would violate the spec to split there). A nullptr is returned if
- *	the file name is too long
+ *	name (it would violate the spec to split there). A nullptr is returned
+ * if the file name is too long
  */
 
 static char *

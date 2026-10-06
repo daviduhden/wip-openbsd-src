@@ -18,16 +18,18 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+// clang-format off
 #include "../../libs/fvwmlib.h"
+// clang-format on
 
 /* Function Prototypes */
 
-void EndLessLoop(void);
-void ReadFvwmPipe(void);
-void ProcessMessage(unsigned long type, unsigned long *body);
-void SendFvwmPipe(char *message, unsigned long window);
+void		  EndLessLoop(void);
+void		  ReadFvwmPipe(void);
+void		  ProcessMessage(unsigned long type, unsigned long *body);
+void		  SendFvwmPipe(char *message, unsigned long window);
 [[noreturn]] void DeadPipe(int nonsense);
-void ParseConfig(void);
-void AddCommand(char *string);
+void		  ParseConfig(void);
+void		  AddCommand(char *string);
 
 unsigned long GetColor(char *color);

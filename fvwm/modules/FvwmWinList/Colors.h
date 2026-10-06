@@ -9,7 +9,9 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+// clang-format off
 #include <X11/Intrinsic.h>
+// clang-format on
 
 /* Function Prototypes */
 Pixel GetColor(char *name);

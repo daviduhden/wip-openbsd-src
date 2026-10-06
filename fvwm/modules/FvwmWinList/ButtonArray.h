@@ -14,7 +14,9 @@
 #ifndef BUTTONARRAY_H
 #define BUTTONARRAY_H
 
+// clang-format off
 #include "../../libs/fvwmlib.h"
+// clang-format on
 
 /* Struct definitions */
 typedef struct button {

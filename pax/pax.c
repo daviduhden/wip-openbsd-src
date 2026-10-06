@@ -35,6 +35,7 @@
  * SUCH DAMAGE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
@@ -53,6 +54,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 static int  gen_init(void);
 static void sig_cleanup(int);
 
@@ -64,7 +66,7 @@ static void sig_cleanup(int);
  * Variables that can be accessed by any routine within pax
  */
 int	     act = DEFOP;     /* read/write/append/copy */
-FSUB	    *frmt = nullptr;     /* archive format type */
+FSUB	    *frmt = nullptr;  /* archive format type */
 int	     cflag;	      /* match all EXCEPT pattern/file */
 int	     cwdfd;	      /* starting cwd */
 int	     dflag;	      /* directory member match only  */

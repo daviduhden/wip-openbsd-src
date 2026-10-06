@@ -1,8 +1,10 @@
+// clang-format off
 #include <assert.h>
 #include <stdarg.h>
 
 #include "FvwmIconMan.h"
 #include "debuglevels.h"
+// clang-format on
 
 [[maybe_unused]] static char const rcsid[] =
     "$Id: debug.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";

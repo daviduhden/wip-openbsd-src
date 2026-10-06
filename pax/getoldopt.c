@@ -10,6 +10,7 @@
  * in the Public Domain for your edification and enjoyment.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -19,6 +20,7 @@
 
 #include "extern.h"
 #include "pax.h"
+// clang-format on
 
 int
 getoldopt(int argc, char **argv, const char *optstring)

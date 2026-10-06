@@ -24,6 +24,7 @@
  * ********************************************************************
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -41,6 +42,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 extern unsigned long *PipeMask; /* in module.c */
 

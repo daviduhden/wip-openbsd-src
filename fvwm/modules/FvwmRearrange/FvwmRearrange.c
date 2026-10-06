@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -38,6 +39,7 @@
 #include "../../fvwm/fvwm.h"
 #include "../../fvwm/module.h"
 #include "fvwmlib.h"
+// clang-format on
 
 [[noreturn]] void DeadPipe(int sig);
 

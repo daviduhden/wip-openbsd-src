@@ -37,6 +37,7 @@
  * Modified for ext4fs by kmx.io.
  */
 
+// clang-format off
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/namei.h>
@@ -63,6 +64,7 @@
 
 #include <ufs/ext4fs/ext4fs.h>
 #include <ufs/ext4fs/ext4fs_crc32c.h>
+// clang-format on
 
 /*
  * Number of extent (or index) entries that fit in the inode's inline
@@ -1570,7 +1572,7 @@ ext4fs_truncate(struct inode *ip, off_t length, int flags, struct ucred *cred)
 				    sizeof(struct ext4fs_extent) ||
 				    letoh16(leaf_eh->eh_max) >
 				    (fs->m_block_size -
-				    sizeof(struct ext4fs_extent_header)) /
+				     sizeof(struct ext4fs_extent_header)) /
 				    sizeof(struct ext4fs_extent)) {
 					brelse(bp);
 					continue;
@@ -2143,7 +2145,8 @@ ext4fs_getattr(void *v)
 	vap->va_gid |= (gid_t)letoh16(din->dinode.i_gid_hi) << 16;
 	vap->va_rdev = 0;
 	vap->va_size = letoh32(din->dinode.i_size_lo);
-	vap->va_size |= (off_t)((u_int64_t)letoh32(din->dinode.i_size_hi) << 32);
+	vap->va_size |= (off_t)((u_int64_t)letoh32(din->dinode.i_size_hi) <<
+	    32);
 
 	/* Convert timestamps; the extra (nanosecond) fields only
 	 * exist when the inode format provides them. */
@@ -3109,13 +3112,12 @@ abortit:
 						dotdot =
 						    (struct ext4fs_directory *)
 						    ((char *)dbp->b_data +
-						    dreclen);
+						     dreclen);
 						dotdot->e4d_ino =
 						    htole32(newparent);
 						ext4fs_dir_set_csum(
 						    ip->i_e4fs, ip->i_number,
-						    ip->i_e4din->dinode.
-						    i_nfs_generation,
+						    ip->i_e4din->dinode.i_nfs_generation,
 						    dbp->b_data);
 						bwrite(dbp);
 					} else

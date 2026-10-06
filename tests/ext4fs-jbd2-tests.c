@@ -7,11 +7,13 @@
  * the exact production code is exercised; only the pure parsing and
  * checksum functions are called (no kernel I/O).
  */
+// clang-format off
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+// clang-format on
 
 /* Reference crc32c implementation (bitwise, independent of the
  * table-driven kernel code) used to validate the checksum vectors. */
@@ -32,8 +34,10 @@ ref_crc32c(uint32_t init, const void *data, size_t len)
 }
 
 #define main journal_test_unused_main
+// clang-format off
 #include "../ext4fs/sys/ufs/ext4fs/ext4fs_crc32c.c"
 #include "../ext4fs/sys/ufs/ext4fs/ext4fs_journal.c"
+// clang-format on
 #undef main
 
 /* Link stubs for the kernel buffer interface; the tests only reach

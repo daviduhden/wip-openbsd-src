@@ -21,6 +21,7 @@
  * code for parsing the fvwm style command
  *
  ***********************************************************************/
+// clang-format off
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +34,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 static int  Get_TBLR(char *, unsigned char *); /* prototype */
 static void AddToList(name_list *);	       /* prototype */
@@ -63,7 +65,7 @@ dup_style_string(const char *s)
 	SKIPSPACE;                                                             \
 	tmp = restofline;                                                      \
 	len = 0;                                                               \
-	while ((tmp != nullptr) && (*tmp != 0) && (*tmp != ',') &&                \
+	while ((tmp != nullptr) && (*tmp != 0) && (*tmp != ',') &&             \
 	    (*tmp != '\n') && (!isspace((unsigned char)*tmp))) {               \
 		tmp++;                                                         \
 		len++;                                                         \
@@ -203,9 +205,9 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						tmp++;
 					restofline = tmp;
 					len = 0;
-					while ((tmp != nullptr) && (*tmp != 0) &&
-					    (*tmp != ',') && (*tmp != '\n') &&
-					    (*tmp != '/') &&
+					while ((tmp != nullptr) &&
+					    (*tmp != 0) && (*tmp != ',') &&
+					    (*tmp != '\n') && (*tmp != '/') &&
 					    (!isspace((unsigned char)*tmp))) {
 						tmp++;
 						len++;
@@ -882,32 +884,44 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 								tname.name =
 								    save_name; /* and the name */
 								/*
-								 * The memcpy above
-								 * aliased the strings
-								 * owned by nptr; give
-								 * this node its own
-								 * copies so no style
-								 * node is freed twice.
+								 * The memcpy
+								 * above aliased
+								 * the strings
+								 * owned by
+								 * nptr; give
+								 * this node its
+								 * own copies so
+								 * no style node
+								 * is freed
+								 * twice.
 								 */
 								tname.value =
 								    dup_style_string(
-									tname.value);
+									tname
+									    .value);
 #ifdef MINI_ICONS
-								tname.mini_value =
+								tname
+								    .mini_value =
 								    dup_style_string(
-									tname.mini_value);
+									tname
+									    .mini_value);
 #endif
 #ifdef USEDECOR
 								tname.Decor =
 								    dup_style_string(
-									tname.Decor);
+									tname
+									    .Decor);
 #endif
-								tname.ForeColor =
+								tname
+								    .ForeColor =
 								    dup_style_string(
-									tname.ForeColor);
-								tname.BackColor =
+									tname
+									    .ForeColor);
+								tname
+								    .BackColor =
 								    dup_style_string(
-									tname.BackColor);
+									tname
+									    .BackColor);
 								hit =
 								    1; /* set
 									  not
@@ -929,22 +943,32 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 								    .on_buttons &=
 								    ~(nptr->on_buttons);
 								if (nptr->value) {
-									free(tname.value);
-									tname.value =
-									    xstrdup(nptr->value);
+									free(
+									    tname
+										.value);
+									tname
+									    .value = xstrdup(
+									    nptr->value);
 								}
 #ifdef MINI_ICONS
 								if (nptr->mini_value) {
-									free(tname.mini_value);
-									tname.mini_value =
-									    xstrdup(nptr->mini_value);
+									free(
+									    tname
+										.mini_value);
+									tname
+									    .mini_value =
+									    xstrdup(
+										nptr->mini_value);
 								}
 #endif
 #ifdef USEDECOR
 								if (nptr->Decor) {
-									free(tname.Decor);
-									tname.Decor =
-									    xstrdup(nptr->Decor);
+									free(
+									    tname
+										.Decor);
+									tname
+									    .Decor = xstrdup(
+									    nptr->Decor);
 								}
 #endif
 								if (nptr->off_flags &
@@ -975,15 +999,23 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 									    nptr->resize_width;
 								if (nptr->off_flags &
 								    FORE_COLOR_FLAG) {
-									free(tname.ForeColor);
-									tname.ForeColor =
-									    xstrdup(nptr->ForeColor);
+									free(
+									    tname
+										.ForeColor);
+									tname
+									    .ForeColor =
+									    xstrdup(
+										nptr->ForeColor);
 								}
 								if (nptr->off_flags &
 								    BACK_COLOR_FLAG) {
-									free(tname.BackColor);
-									tname.BackColor =
-									    xstrdup(nptr->BackColor);
+									free(
+									    tname
+										.BackColor);
+									tname
+									    .BackColor =
+									    xstrdup(
+										nptr->BackColor);
 								}
 								tname
 								    .IconBoxes =

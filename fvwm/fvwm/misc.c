@@ -12,6 +12,7 @@
  *
  **************************************************************************/
 
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -30,6 +31,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 FvwmWindow *FocusOnNextTimeStamp = nullptr;
 
@@ -465,7 +467,7 @@ GetOneMenuPositionArgument(
 	char  c;
 	int   val;
 	int   chars;
-	auto factor = (float)w / 100;
+	auto  factor = (float)w / 100;
 
 	naction = GetNextToken(action, &token);
 	if (token == nullptr)
@@ -1155,8 +1157,7 @@ fvwm_msg(int type, const char *id, const char *msg, ...)
 				   for now */
 		size_t len;
 
-		snprintf(tmp, sizeof(tmp), "[FVWM][%s]: %s ", id,
-		    typestr);
+		snprintf(tmp, sizeof(tmp), "[FVWM][%s]: %s ", id, typestr);
 		vsnprintf(
 		    tmp + strlen(tmp), sizeof(tmp) - strlen(tmp), msg, args2);
 		len = strlen(tmp);

@@ -3,7 +3,9 @@
  * Subroutine Prototypes
  *
  *************************************************************************/
+// clang-format off
 #include "../../libs/fvwmlib.h"
+// clang-format on
 struct icon_info;
 Bool	     ExecIconBoxFunction(char *msg);
 extern void  CreateWindow(void);
@@ -19,15 +21,15 @@ extern int   My_XNextEvent(Display *dpy, XEvent *event);
 extern void  CopyString(char **dest, char *source);
 extern void  RelieveWindow(
     Window win, int x, int y, int w, int h, GC rGC, GC sGC);
-extern void SendFvwmPipe(int *, char *text, unsigned long window);
+extern void		 SendFvwmPipe(int *, char *text, unsigned long window);
 extern [[noreturn]] void DeadPipe(int nonsense);
-extern void CreateIconWindow(struct icon_info *item);
-extern void ConfigureIconWindow(struct icon_info *item);
-extern void DrawIconWindow(struct icon_info *item);
-extern void GetBitmapFile(struct icon_info *item);
-extern void GetXPMFile(struct icon_info *item);
-extern void GetIconWindow(struct icon_info *item);
-extern void GetIconBitmap(struct icon_info *item);
+extern void		 CreateIconWindow(struct icon_info *item);
+extern void		 ConfigureIconWindow(struct icon_info *item);
+extern void		 DrawIconWindow(struct icon_info *item);
+extern void		 GetBitmapFile(struct icon_info *item);
+extern void		 GetXPMFile(struct icon_info *item);
+extern void		 GetIconWindow(struct icon_info *item);
+extern void		 GetIconBitmap(struct icon_info *item);
 extern void process_message(unsigned long type, unsigned long *body);
 extern Bool AddItem(unsigned long id, long desk, unsigned long flags);
 extern Bool DeleteItem(unsigned long id);
@@ -156,7 +158,9 @@ constexpr int NOPLACE = -1;
 #define TOP 2
 #define BOTTOM 3
 
+// clang-format off
 #include "../../fvwm/fvwm.h"
+// clang-format on
 
 #define NO_CLICK 0
 #define CLICK 1

@@ -22,6 +22,7 @@
 #define TRUE true
 #define FALSE false
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -42,6 +43,7 @@
 #include "../../fvwm/module.h"
 #include "FvwmSaveDesk.h"
 #include "config.h"
+// clang-format on
 
 char *MyName;
 int   fd[2];

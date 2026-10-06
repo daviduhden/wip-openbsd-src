@@ -14,6 +14,7 @@ constexpr int UPDATE_ONLY = 1;
 constexpr int ALL = 2;
 constexpr int PROP_SIZE = 1024;
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -41,6 +42,7 @@ constexpr int PROP_SIZE = 1024;
 
 #include "../../fvwm/module.h"
 #include "FvwmTalk.h"
+// clang-format on
 
 char *MyName;
 int   fd_width, screen, d_depth;
@@ -441,7 +443,7 @@ paste_primary(Window window, Atom property, Bool Delete)
 		 * terminate the string ourselves.
 		 */
 		if (pos < (int)sizeof(Text) - 1) {
-			auto avail = (size_t)((int)sizeof(Text) - 1 - pos);
+			auto   avail = (size_t)((int)sizeof(Text) - 1 - pos);
 			size_t copy = (nitems < avail) ? (size_t)nitems : avail;
 
 			memcpy(Text + pos, data2, copy);

@@ -1,8 +1,10 @@
+// clang-format off
 #include <ctype.h>
 #include <stdlib.h>
 
 #include "FvwmIconMan.h"
 #include "readconfig.h"
+// clang-format on
 
 [[maybe_unused]] static char const rcsid[] =
     "$Id: readconfig.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
@@ -62,7 +64,7 @@ static FILE *config_fp = nullptr;
    occured */
 
 constexpr int PRINT_LINE_LENGTH = 80;
-static char current_line[PRINT_LINE_LENGTH];
+static char   current_line[PRINT_LINE_LENGTH];
 
 static void
 save_current_line(char *s)
@@ -1327,7 +1329,8 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				p = DoGetNextToken(p, &token, nullptr, ",", nullptr);
+				p = DoGetNextToken(
+				    p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
@@ -1451,7 +1454,8 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				DoGetNextToken(p, &token, nullptr, ",", nullptr);
+				DoGetNextToken(
+				    p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					token = (char *)xmalloc(1);
 					*token = 0;
@@ -1477,7 +1481,8 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				DoGetNextToken(p, &token, nullptr, ",", nullptr);
+				DoGetNextToken(
+				    p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					token = (char *)xmalloc(1);
 					*token = 0;
@@ -1557,7 +1562,8 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				p = DoGetNextToken(p, &token, nullptr, ",", nullptr);
+				p = DoGetNextToken(
+				    p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					ConsoleMessage(
 					    "Bad line: %s\n", current_line);
@@ -1636,7 +1642,8 @@ read_in_resources(char *file)
 					    "Bad line: %s\n", current_line);
 					continue;
 				}
-				DoGetNextToken(p, &token, nullptr, ",", nullptr);
+				DoGetNextToken(
+				    p, &token, nullptr, ",", nullptr);
 				if (!token) {
 					token = (char *)xmalloc(1);
 					*token = 0;

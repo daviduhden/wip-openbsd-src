@@ -17,6 +17,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -44,6 +45,7 @@
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif /* SHAPE */
 
 /****************************************************************************

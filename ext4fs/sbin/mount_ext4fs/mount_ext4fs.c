@@ -30,6 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+// clang-format off
 #include <sys/types.h>
 #include <sys/mount.h>
 
@@ -41,6 +42,7 @@
 #include <unistd.h>
 
 #include "mntopts.h"
+// clang-format on
 
 void ext4fs_usage(void);
 

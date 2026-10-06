@@ -1,8 +1,10 @@
+// clang-format off
 #include <limits.h>
 
 #include "FvwmIconMan.h"
 #include "readconfig.h"
 #include "xmanager.h"
+// clang-format on
 
 #define DEFAULT_MOUSE "0 N sendcommand Iconify"
 

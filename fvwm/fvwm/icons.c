@@ -11,6 +11,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -34,6 +35,7 @@
 
 #ifdef SHAPE
 #include <X11/extensions/shape.h>
+// clang-format on
 #endif /* SHAPE */
 
 void GrabIconButtons(FvwmWindow *, Window);
@@ -478,7 +480,7 @@ AutoPlace(FvwmWindow *t)
 				    dim[i].base; /* adjust both to base */
 				dim[i].end_at += dim[i].base;
 			} /* end 2 dimensions */
-			if (HRZ_FILL) { /* if hrz first */
+			if (HRZ_FILL) {	       /* if hrz first */
 				dimension tmp; /* save */
 
 				tmp = dim[0];

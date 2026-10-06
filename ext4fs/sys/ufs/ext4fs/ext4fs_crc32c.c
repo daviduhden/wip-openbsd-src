@@ -15,12 +15,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/systm.h>
 
 #include <ufs/ext4fs/ext4fs_dinode.h>
 #include <ufs/ext4fs/ext4fs.h>
+// clang-format on
 
 /*
  * CRC32C lookup table, generated using the Castagnoli polynomial

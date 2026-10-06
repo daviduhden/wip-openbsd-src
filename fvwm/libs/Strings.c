@@ -2,12 +2,14 @@
 ** Strings.c: various routines for dealing with strings
 */
 
+// clang-format off
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "fvwmlib.h"
+// clang-format on
 
 /************************************************************************
  *
@@ -68,8 +70,8 @@ CopyString(char **dest, char *source)
 	}
 
 	source--;
-	while ((len > 0) && (isspace((unsigned char)*source)) &&
-	    (*source != 0)) {
+	while (
+	    (len > 0) && (isspace((unsigned char)*source)) && (*source != 0)) {
 		len--;
 		source--;
 	}

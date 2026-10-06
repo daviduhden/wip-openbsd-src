@@ -11,6 +11,7 @@
  *
  */
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
 #include <stdio.h>
@@ -20,6 +21,7 @@
 #include "ButtonArray.h"
 #include "FvwmWinList.h"
 #include "config.h"
+// clang-format on
 
 extern XFontStruct *ButtonFont;
 extern Display	   *dpy;
@@ -421,7 +423,8 @@ RadioButton(ButtonArray *array, int butnum)
 	Button *temp;
 	int	i;
 
-	for (temp = array->head, i = 0; temp != nullptr; temp = temp->next, i++) {
+	for (temp = array->head, i = 0; temp != nullptr;
+	    temp = temp->next, i++) {
 		if (i == butnum) {
 			if (ShowFocus && temp->up) {
 				temp->up = 0;

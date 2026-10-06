@@ -1,6 +1,7 @@
 /*
 ** Module.c: code for modules to communicate with fvwm
 */
+// clang-format off
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -9,6 +10,7 @@
 #include "../fvwm/module.h"
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 /************************************************************************
  *

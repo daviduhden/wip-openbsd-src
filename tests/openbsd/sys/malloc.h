@@ -4,7 +4,9 @@
 #ifndef EXT4FS_TEST_MALLOC_H
 #define EXT4FS_TEST_MALLOC_H
 
+// clang-format off
 #include <stdlib.h>
+// clang-format on
 
 #define M_TEMP 0
 #define M_WAITOK 0x0000

@@ -24,7 +24,9 @@
 #ifndef FVWM_EXEC_IMSG_H
 #define FVWM_EXEC_IMSG_H
 
+// clang-format off
 #include <imsg.h>
+// clang-format on
 
 enum imsg_exec_type {
 	/* fvwm -> helper: launch a program (plain Exec).

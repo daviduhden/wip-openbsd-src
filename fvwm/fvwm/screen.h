@@ -32,12 +32,14 @@
 #ifndef _SCREEN_
 #define _SCREEN_
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
 
 #include "menus.h"
 #include "misc.h"
+// clang-format on
 
 constexpr int SIZE_HINDENT = 5;
 constexpr int SIZE_VINDENT = 3;

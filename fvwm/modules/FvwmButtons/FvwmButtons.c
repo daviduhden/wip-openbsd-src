@@ -13,6 +13,7 @@
 */
 
 /* ------------------------------- includes -------------------------------- */
+// clang-format off
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -52,6 +53,7 @@
 #include "icons.h" /* CreateIconWindow(), ConfigureIconWindow() */
 #include "misc.h"  /* ConstrainSize() */
 #include "parse.h" /* ParseOptions() */
+// clang-format on
 
 #define MW_EVENTS                                                              \
 	(ExposureMask | StructureNotifyMask | ButtonReleaseMask |              \
@@ -877,8 +879,8 @@ Loop(void)
 				}
 
 				if (!b || !(b->flags & b_Action) ||
-				    ((act = GetButtonAction(
-					  b, Event.xbutton.button)) == nullptr &&
+				    ((act = GetButtonAction(b,
+					  Event.xbutton.button)) == nullptr &&
 					(act = GetButtonAction(b, 0)) ==
 					    nullptr)) {
 					CurrentButton = nullptr;
@@ -924,7 +926,8 @@ Loop(void)
 					if (strncasecmp(act, "Exec", 4) == 0) {
 						/* close current subpanel */
 						if (PanelIndex != MainPanel)
-							Slide(PanelIndex, nullptr);
+							Slide(PanelIndex,
+							    nullptr);
 
 						/* Look for Exec "identifier",
 						   in which case the button
@@ -1000,8 +1003,8 @@ Loop(void)
 				if (Event.xclient.format == 32 &&
 				    (Atom)Event.xclient.data.l[0] ==
 					_XA_WM_DEL_WIN) {
-					for (ppi = MainPanel->next; ppi != nullptr;
-					    ppi = ppi->next) {
+					for (ppi = MainPanel->next;
+					    ppi != nullptr; ppi = ppi->next) {
 						if (ppi->uber->IconWinParent ==
 						    Event.xany.window) {
 							/* Only close the panel
@@ -1138,7 +1141,8 @@ DrainDestroyEvents(void)
 
 /**
 *** RedrawWindow()
-*** Draws the window by traversing the button tree, draws all if nullptr is given,
+*** Draws the window by traversing the button tree, draws all if nullptr is
+* given,
 *** otherwise only the given button.
 **/
 void
@@ -1517,8 +1521,8 @@ CreateWindow(button_info *ub, int maxx, int maxy)
 			    MyName);
 			exit(1);
 		}
-		XSetWMProperties(Dpy, MyWindow, &mynametext, &mynametext, nullptr,
-		    0, &mysizehints, nullptr, &myclasshints);
+		XSetWMProperties(Dpy, MyWindow, &mynametext, &mynametext,
+		    nullptr, 0, &mysizehints, nullptr, &myclasshints);
 		XFree(mynametext.value);
 	}
 

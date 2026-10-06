@@ -1,4 +1,6 @@
+// clang-format off
 #include "fvwmlib.h"
+// clang-format on
 
 #define STICKY 1
 #define ICONIFIED 32 /* is it an icon now? */
@@ -25,11 +27,11 @@ struct list {
  * Subroutine Prototypes
  *
  *************************************************************************/
-void	     Loop(int *fd);
-void	     SendInfo(int *fd, char *message, unsigned long window);
-struct list *find_window(unsigned long id);
-void	     add_window(unsigned long new_win, unsigned long *body);
-[[noreturn]] void	     DeadPipe(int nonsense);
-void	     process_message(unsigned long type, unsigned long *body);
-void	     do_save(void);
-void	     list_new_page(unsigned long *body);
+void		  Loop(int *fd);
+void		  SendInfo(int *fd, char *message, unsigned long window);
+struct list	 *find_window(unsigned long id);
+void		  add_window(unsigned long new_win, unsigned long *body);
+[[noreturn]] void DeadPipe(int nonsense);
+void		  process_message(unsigned long type, unsigned long *body);
+void		  do_save(void);
+void		  list_new_page(unsigned long *body);

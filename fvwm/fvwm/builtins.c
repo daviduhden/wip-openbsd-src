@@ -6,6 +6,7 @@
  *     copyright remains in the source code and all documentation
  ****************************************************************************/
 
+// clang-format off
 #include <X11/keysym.h>
 #include <ctype.h>
 #include <errno.h>
@@ -22,6 +23,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 static Boolean ReadMenuFace(char *s, MenuFace *mf, int verbose);
 static void    FreeMenuFace(Display *dpy, MenuFace *mf);
@@ -423,8 +425,10 @@ WindowShade(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #endif /* WINDOWSHADE */
 
 /* For Ultrix 4.2 */
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
+// clang-format on
 
 MenuRoot *
 FindPopup(char *action)
@@ -497,7 +501,8 @@ add_item_to_menu(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (item)
 		free(item);
 	/* These lines are correct! We must not release token if the string is
-	 * empty. It cannot be nullptr! GetNextToken never returns an empty string!
+	 * empty. It cannot be nullptr! GetNextToken never returns an empty
+	 * string!
 	 */
 	if (*token)
 		free(token);
@@ -3147,7 +3152,8 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 			int    npixels, nsegs, i, sum, *perc;
 			Pixel *pixels;
 
-			if (!(s = GetNextToken(s, &item)) || (item == nullptr)) {
+			if (!(s = GetNextToken(s, &item)) ||
+			    (item == nullptr)) {
 				if (verbose)
 					fvwm_msg(ERR, "ReadButtonFace",
 					    "expected number of colors to "
@@ -3159,7 +3165,8 @@ ReadButtonFace(char *s, ButtonFace *bf, int button, int verbose)
 			npixels = FvwmParseInteger(item);
 			free(item);
 
-			if (!(s = GetNextToken(s, &item)) || (item == nullptr)) {
+			if (!(s = GetNextToken(s, &item)) ||
+			    (item == nullptr)) {
 				if (verbose)
 					fvwm_msg(ERR, "ReadButtonFace",
 					    "incomplete gradient style");
@@ -4561,8 +4568,8 @@ Circulate(char *action, int Direction, char **restofline)
 		fw = nullptr;
 
 	while ((pass < 3) && (found == nullptr)) {
-		while (
-		    (fw != nullptr) && (found == nullptr) && (fw != &Scr.FvwmRoot)) {
+		while ((fw != nullptr) && (found == nullptr) &&
+		    (fw != &Scr.FvwmRoot)) {
 #ifdef FVWM_DEBUG_MSGS
 			fvwm_msg(DBG, "Circulate", "Trying %s", fw->name);
 #endif /* FVWM_DEBUG_MSGS */
@@ -5040,7 +5047,7 @@ set_animation(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	action = GetNextToken(action, &opt);
 	while (opt) {
 		if (i >= (int)(sizeof(rgpctMovementDefault) /
-		    sizeof(rgpctMovementDefault[0]))) {
+			     sizeof(rgpctMovementDefault[0]))) {
 			fvwm_msg(ERR, "SetAnimation",
 			    "Too many animation percentage values");
 			free(opt);
@@ -5060,7 +5067,7 @@ set_animation(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	/* No pct entries means don't change them at all */
 	if (i > 0 && rgpctMovementDefault[i - 1] != 1.0 &&
 	    i < (int)(sizeof(rgpctMovementDefault) /
-	    sizeof(rgpctMovementDefault[0]))) {
+		    sizeof(rgpctMovementDefault[0]))) {
 		rgpctMovementDefault[i++] = 1.0;
 	}
 }

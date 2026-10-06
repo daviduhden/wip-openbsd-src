@@ -7,7 +7,9 @@ constexpr int DEFAULT_BUTTON_HEIGHT = 17;
 constexpr int DEFAULT_NUM_COLS = 1;
 #define DEFAULT_NUM_ROWS 0
 
+// clang-format off
 #include "FvwmIconMan.h"
+// clang-format on
 
 extern void draw_managers(void);
 extern void draw_manager(WinManager *man);

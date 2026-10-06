@@ -12,6 +12,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <ctype.h>
 #include <signal.h>
 #include <stdio.h>
@@ -25,6 +26,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 extern XEvent	   Event;
 extern FvwmWindow *Tmp_win;
@@ -288,7 +290,7 @@ ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
 	if (Action[0] == '*') { /* a module config command */
 		ModuleConfig(
 		    nullptr, 0, 0, 0, Action, 0); /* process the command */
-		return;			       /* done */
+		return;				  /* done */
 	}
 
 	for (j = 0; j < 10; j++)

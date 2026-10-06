@@ -14,6 +14,7 @@
 #define YES "Yes"
 #define NO "No"
 
+// clang-format off
 #include <sys/time.h>
 #include <sys/wait.h>
 
@@ -41,6 +42,7 @@
 
 #include "../../fvwm/module.h"
 #include "FvwmIdent.h"
+// clang-format on
 
 char *MyName;
 int   fd_width;

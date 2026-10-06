@@ -1,6 +1,7 @@
 #ifndef MISC_H
 #define MISC_H
 
+// clang-format off
 #include <ctype.h>
 #include <stdio.h>
 
@@ -13,9 +14,10 @@
  ************************************************************************/
 #include <sys/types.h>
 #include <sys/wait.h>
+// clang-format on
 
 #define ReapChildren()                                                         \
-	while ((waitpid(-1, nullptr, WNOHANG)) > 0)                               \
+	while ((waitpid(-1, nullptr, WNOHANG)) > 0)                            \
 		;
 
 typedef struct name_list_struct {
@@ -486,6 +488,6 @@ constexpr int DBG = -1;
 #define INFO 0
 constexpr int WARN = 1;
 constexpr int ERR = 2;
-void fvwm_msg(int type, const char *id, const char *msg, ...);
+void	      fvwm_msg(int type, const char *id, const char *msg, ...);
 
 #endif /* MISC_H */

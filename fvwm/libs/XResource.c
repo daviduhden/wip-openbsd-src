@@ -5,12 +5,14 @@
 ** file lines) in the same way (Xrm database).
 */
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <string.h>
 
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 /* Default option table */
 static XrmOptionDescRec default_opts[] = {
@@ -54,8 +56,7 @@ MergeXResources(Display *dpy, XrmDatabase *pdb, Bool override)
 	DoMergeString(XResourceManagerString(dpy), pdb, override);
 	{
 		/* XScreenResourceString() returns an XFree()-owned string. */
-		char *scr =
-		    XScreenResourceString(DefaultScreenOfDisplay(dpy));
+		char *scr = XScreenResourceString(DefaultScreenOfDisplay(dpy));
 
 		DoMergeString(scr, pdb, override);
 		if (scr != nullptr)

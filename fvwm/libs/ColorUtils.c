@@ -14,11 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <X11/Xproto.h>
 #include <stdio.h>
 
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 #define SCALE 65535.0
 #define HALF_SCALE (SCALE * 0.5)
@@ -107,7 +109,7 @@ adjust_pixel_brightness(Pixel pixel, double factor)
 {
 	extern Colormap PictureCMap;
 	extern Display *PictureSaveDisplay;
-	XColor		color_spec = { 0 };
+	XColor		color_spec = {0};
 
 	color_spec.pixel = pixel;
 	if (!XQueryColor(PictureSaveDisplay, PictureCMap, &color_spec))

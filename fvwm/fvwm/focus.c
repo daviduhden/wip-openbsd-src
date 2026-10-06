@@ -12,6 +12,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,6 +24,7 @@
 #include "module.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 /********************************************************************
  *
@@ -137,8 +139,8 @@ SetFocus(Window w, FvwmWindow *Fw, Bool FocusByMouse)
 		w = Scr.NoFocusWin;
 	}
 
-	if ((Scr.Ungrabbed != nullptr) && (Scr.Ungrabbed->flags & ClickToFocus) &&
-	    (Scr.Ungrabbed != Fw)) {
+	if ((Scr.Ungrabbed != nullptr) &&
+	    (Scr.Ungrabbed->flags & ClickToFocus) && (Scr.Ungrabbed != Fw)) {
 		/* need to grab all buttons for window that we are about to
 		 * unfocus */
 		XSync(dpy, 0);

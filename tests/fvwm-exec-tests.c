@@ -6,9 +6,11 @@
  * helper with hostile payloads: oversized counts, missing NUL
  * terminators, truncated messages, and exact-fit boundaries.
  */
+// clang-format off
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+// clang-format on
 
 /* strtonum lives in glibc (>= 2.38) but its declaration needs
  * _GNU_SOURCE; declare it here for the include below. */
@@ -16,7 +18,9 @@ long long strtonum(const char *, long long, long long, const char **);
 
 /* fvwm_exec.c internals under test; its main() is renamed. */
 #define main fvwm_exec_main
+// clang-format off
 #include "../fvwm/fvwm/fvwm_exec.c"
+// clang-format on
 #undef main
 
 /* Link stubs for the sandbox calls referenced by fvwm_exec.c. */

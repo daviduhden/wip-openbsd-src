@@ -14,7 +14,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+// clang-format off
 #include <sys/vnode.h>
+// clang-format on
 
 extern const struct vops ext4fs_vops;
 

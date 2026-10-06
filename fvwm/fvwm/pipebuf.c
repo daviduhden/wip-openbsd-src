@@ -20,11 +20,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// clang-format off
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "pipebuf.h"
+// clang-format on
 
 constexpr int PIPEBUF_CHUNK = 4096;
 

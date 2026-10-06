@@ -8,6 +8,7 @@
  *
  ***********************************************************************/
 
+// clang-format off
 #include <X11/Intrinsic.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -21,6 +22,7 @@
 #include "../../libs/fvwmlib.h"
 #include "FvwmPager.h"
 #include "config.h"
+// clang-format on
 
 extern ScreenInfo Scr;
 extern Display	 *dpy;
@@ -64,15 +66,15 @@ int	  FvwmErrorHandler(Display *, XErrorEvent *);
 /* assorted gray bitmaps for decorative borders */
 constexpr int g_width = 2;
 constexpr int g_height = 2;
-static char g_bits[] = {0x02, 0x01};
+static char   g_bits[] = {0x02, 0x01};
 
 constexpr int l_g_width = 4;
 constexpr int l_g_height = 2;
-static char l_g_bits[] = {0x08, 0x02};
+static char   l_g_bits[] = {0x08, 0x02};
 
 constexpr int s_g_width = 4;
 constexpr int s_g_height = 4;
-static char s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
+static char   s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
 
 Window	      icon_win; /* icon window */
 BalloonWindow balloon;	/* balloon window */
@@ -128,7 +130,8 @@ initialize_pager(void)
 	wm_del_win = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 
 	/* load the font */
-	if (!uselabel || ((font = XLoadQueryFont(dpy, font_string)) == nullptr)) {
+	if (!uselabel ||
+	    ((font = XLoadQueryFont(dpy, font_string)) == nullptr)) {
 		if ((font = XLoadQueryFont(dpy, "fixed")) == nullptr) {
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
@@ -395,7 +398,8 @@ initialize_pager(void)
 		    (BalloonBack == nullptr) ? 0 : GetColor(BalloonBack);
 
 		/* get font for balloon */
-		if ((balloon.font = XLoadQueryFont(dpy, BalloonFont)) == nullptr) {
+		if ((balloon.font = XLoadQueryFont(dpy, BalloonFont)) ==
+		    nullptr) {
 			if ((balloon.font = XLoadQueryFont(dpy, "fixed")) ==
 			    nullptr) {
 				fprintf(stderr, "%s: No fonts available.\n",
@@ -1301,7 +1305,8 @@ MoveWindow(XEvent *Event)
 
 	if (t == nullptr) {
 		t = Start;
-		while ((t != nullptr) && (t->IconView != Event->xbutton.subwindow))
+		while (
+		    (t != nullptr) && (t->IconView != Event->xbutton.subwindow))
 			t = t->next;
 		if (t != nullptr) {
 			IconMoveWindow(Event, t);

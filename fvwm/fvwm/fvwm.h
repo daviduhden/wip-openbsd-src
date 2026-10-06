@@ -36,11 +36,13 @@
 #ifndef _FVWM_
 #define _FVWM_
 
+// clang-format off
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
 
 #include "xalloc.h"
+// clang-format on
 
 #ifndef WithdrawnState
 #define WithdrawnState 0
@@ -51,7 +53,9 @@
  * hunky-dory with 5 button mouses */
 constexpr int MAX_BUTTONS = 3;
 
+// clang-format off
 #include <X11/Intrinsic.h>
+// clang-format on
 
 #define BW 1		 /* border width */
 #define BOUNDARY_WIDTH 7 /* border width */
@@ -104,7 +108,9 @@ typedef struct ColorPair {
 } ColorPair;
 
 #ifdef MINI_ICONS
+// clang-format off
 #include "../libs/fvwmlib.h"
+// clang-format on
 #endif
 
 #ifdef USEDECOR
@@ -353,7 +359,9 @@ constexpr int BUTTON10 = 512;
 #define WSHADE (1 << 31)
 #endif
 
+// clang-format off
 #include <stdlib.h>
+// clang-format on
 extern void		 Reborder(void);
 extern void		 SigDone(int nonsense);
 extern void		 Restart(int nonsense);
@@ -403,6 +411,8 @@ extern Atom _XA_OL_DECOR_ICON_NAME;
 
 /* include this down here because FvwmWindows must be defined when including
  * this header file. */
+// clang-format off
 #include "fvwmdebug.h"
+// clang-format on
 
 #endif /* _FVWM_ */

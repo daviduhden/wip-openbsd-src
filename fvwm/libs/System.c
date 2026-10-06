@@ -1,9 +1,11 @@
+// clang-format off
 #include <sys/utsname.h>
 
 #include <unistd.h>
 
 #include "config.h"
 #include "fvwmlib.h"
+// clang-format on
 
 #ifndef FD_SETSIZE
 #define FD_SETSIZE 2048

@@ -7,16 +7,20 @@
  * any host with a C compiler and the X11 development headers
  * (for type definitions only).
  */
+// clang-format off
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+// clang-format on
 
 /* strtonum lives in glibc (>= 2.38) but its declaration needs
  * _GNU_SOURCE; declare it here for the include below. */
 long long strtonum(const char *, long long, long long, const char **);
 
+// clang-format off
 #include "Parse.c"
+// clang-format on
 
 static int failures;
 

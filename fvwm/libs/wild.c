@@ -1,7 +1,9 @@
+// clang-format off
 #include <stdio.h>
 #include <string.h>
 
 #include "fvwmlib.h"
+// clang-format on
 
 #ifndef TRUE
 #define TRUE true

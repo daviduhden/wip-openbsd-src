@@ -1,4 +1,6 @@
+// clang-format off
 #include "../../libs/fvwmlib.h"
+// clang-format on
 #define STICKY (1 << 2)	    /* Does window stick to glass? */
 #define ONTOP (1 << 1)	    /* does window stay on top */
 #define BORDER (1 << 13)    /* Is this decorated with border*/
@@ -38,20 +40,20 @@ struct Item {
  * Subroutine Prototypes
  *
  *************************************************************************/
-void  Loop(int *fd);
-void  SendInfo(int *fd, char *message, unsigned long window);
-[[noreturn]] void  DeadPipe(int nonsense);
-void  process_message(unsigned long type, unsigned long *body);
-void  GetTargetWindow(Window *app_win);
-void  RedrawWindow(void);
-void  change_window_name(char *str);
-Pixel GetColor(char *name);
-void  nocolor(char *a, char *b);
-void  CopyString(char **dest, char *source);
-char *CatString2(char *a, char *b);
-void  AddToList(char *, char *);
-void  MakeList(void);
-void  freelist(void);
+void		  Loop(int *fd);
+void		  SendInfo(int *fd, char *message, unsigned long window);
+[[noreturn]] void DeadPipe(int nonsense);
+void		  process_message(unsigned long type, unsigned long *body);
+void		  GetTargetWindow(Window *app_win);
+void		  RedrawWindow(void);
+void		  change_window_name(char *str);
+Pixel		  GetColor(char *name);
+void		  nocolor(char *a, char *b);
+void		  CopyString(char **dest, char *source);
+char		 *CatString2(char *a, char *b);
+void		  AddToList(char *, char *);
+void		  MakeList(void);
+void		  freelist(void);
 
 void list_configure(unsigned long *body);
 void list_window_name(unsigned long *body);

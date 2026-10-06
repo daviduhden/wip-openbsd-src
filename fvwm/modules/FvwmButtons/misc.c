@@ -12,7 +12,9 @@
 
 */
 
+// clang-format off
 #include "misc.h"
+// clang-format on
 
 /**
 *** ConstrainSize()

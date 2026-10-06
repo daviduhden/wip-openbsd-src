@@ -49,6 +49,7 @@
  *
  ***********************************************************************/
 /* #define FVWM_DEBUG_MSGS */
+// clang-format off
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -67,6 +68,7 @@
 #include "misc.h"
 #include "parse.h"
 #include "screen.h"
+// clang-format on
 
 static void DrawTrianglePattern(
     Window, GC, GC, GC, GC, int, int, int, int, char);
@@ -843,7 +845,8 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 				fDoMenu = TRUE;
 			} else if (fPopupAndWarp) {
 				/* must create a real menu and warp into it */
-				if (mrPopup == nullptr || mrPopup != mrMiPopup) {
+				if (mrPopup == nullptr ||
+				    mrPopup != mrMiPopup) {
 					fPopup = TRUE;
 				} else {
 					XRaiseWindow(dpy, mrPopup->w);
@@ -970,7 +973,8 @@ MenuInteraction(MenuRoot *menu, MenuRoot *menuPrior,
 				/* move it back */
 				AnimatedMoveOfWindow(mrPopup->w, x_popup,
 				    y_popup, x_popup - mrPopup->xanimation,
-				    y_popup, FALSE /* no warp ptr */, -1, nullptr);
+				    y_popup, FALSE /* no warp ptr */, -1,
+				    nullptr);
 				mrPopup->xanimation = 0;
 			}
 			/* now check whether we should animate the current real
@@ -1217,7 +1221,8 @@ FPopupMenu(MenuRoot *menu, MenuRoot *menuPrior, int x, int y, Bool fWarpItem,
 				Tmp_win->title_height -
 			    menu->width + 1;
 		}
-		if ((Tmp_win) && (menuPrior == nullptr) && (Context & C_TITLE)) {
+		if ((Tmp_win) && (menuPrior == nullptr) &&
+		    (Context & C_TITLE)) {
 			y = Tmp_win->frame_y + Tmp_win->boundary_width +
 			    Tmp_win->title_height + 1;
 			if (x < Tmp_win->frame_x + Tmp_win->title_x)
@@ -1528,7 +1533,8 @@ GetPopupOptions(MenuItem *mi, MenuOptions *pops)
 		return;
 	pops->flags.f.has_poshints = 0;
 	/* just look past "Popup <name>" in the action */
-	GetMenuOptions(SkipNTokens(mi->action, 2), mi->mr->w, nullptr, mi, pops);
+	GetMenuOptions(
+	    SkipNTokens(mi->action, 2), mi->mr->w, nullptr, mi, pops);
 }
 
 /***********************************************************************
@@ -2397,8 +2403,8 @@ MakeMenu(MenuRoot *mr)
 
 	/* cur_prev trails one behind cur, since we need to move that
 	   into a newly-made menu if we run out of space */
-	for (y = 2, cItems = 0, cur = mr->first, cur_prev = nullptr; cur != nullptr;
-	    cur_prev = cur, cur = cur->next, cItems++) {
+	for (y = 2, cItems = 0, cur = mr->first, cur_prev = nullptr;
+	    cur != nullptr; cur_prev = cur, cur = cur->next, cItems++) {
 		cur->mr = mr;
 		cur->y_offset = y;
 		cur->x = 5 + mr->width0;

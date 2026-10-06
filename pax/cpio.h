@@ -37,7 +37,9 @@
  *	@(#)cpio.h	8.1 (Berkeley) 5/31/93
  */
 
+// clang-format off
 #include "pax.h"
+// clang-format on
 
 /*
  * Defines common to all versions of cpio
