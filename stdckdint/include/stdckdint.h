@@ -36,31 +36,31 @@
  * musl <stdckdint.h> proposal; no code is copied from either.
  */
 
-#ifndef	_STDCKDINT_H_
-#define	_STDCKDINT_H_
+#ifndef _STDCKDINT_H_
+#define _STDCKDINT_H_
 
 #if !defined(__STDC_VERSION_STDCKDINT_H__)
-#define	__STDC_VERSION_STDCKDINT_H__	202311L
+#define __STDC_VERSION_STDCKDINT_H__ 202311L
 #endif
 
 #if defined(__has_builtin)
-#if !__has_builtin(__builtin_add_overflow) || \
-    !__has_builtin(__builtin_sub_overflow) || \
+#if !__has_builtin(__builtin_add_overflow) ||                                  \
+    !__has_builtin(__builtin_sub_overflow) ||                                  \
     !__has_builtin(__builtin_mul_overflow)
 #error "<stdckdint.h> requires the compiler overflow builtins"
 #endif
 #endif
 
-#ifndef	ckd_add
-#define	ckd_add(result, a, b) \
+#ifndef ckd_add
+#define ckd_add(result, a, b)                                                  \
 	((_Bool)__builtin_add_overflow((a), (b), (result)))
 #endif
-#ifndef	ckd_sub
-#define	ckd_sub(result, a, b) \
+#ifndef ckd_sub
+#define ckd_sub(result, a, b)                                                  \
 	((_Bool)__builtin_sub_overflow((a), (b), (result)))
 #endif
-#ifndef	ckd_mul
-#define	ckd_mul(result, a, b) \
+#ifndef ckd_mul
+#define ckd_mul(result, a, b)                                                  \
 	((_Bool)__builtin_mul_overflow((a), (b), (result)))
 #endif
 

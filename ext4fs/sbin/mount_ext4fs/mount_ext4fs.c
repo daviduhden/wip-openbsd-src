@@ -46,22 +46,18 @@
 
 void ext4fs_usage(void);
 
-static const struct mntopt mopts[] = {
-	MOPT_STDOPTS,
-	MOPT_UPDATE,
-	{ NULL }
-};
+static const struct mntopt mopts[] = {MOPT_STDOPTS, MOPT_UPDATE, {NULL}};
 
 int
 main(int argc, char *argv[])
 {
-	struct ufs_args args;		/* XXX ffs_args */
-	int ch, mntflags;
-	char fs_name[PATH_MAX], *errcause;
+	struct ufs_args args; /* XXX ffs_args */
+	int		ch, mntflags;
+	char		fs_name[PATH_MAX], *errcause;
 
 	mntflags = 0;
 	memset(&args, 0, sizeof(args));
-	optind = optreset = 1;		/* Reset for parse of new argv. */
+	optind = optreset = 1; /* Reset for parse of new argv. */
 	while ((ch = getopt(argc, argv, "o:")) != -1)
 		switch (ch) {
 		case 'o':
@@ -76,11 +72,11 @@ main(int argc, char *argv[])
 	if (argc != 2)
 		ext4fs_usage();
 
-	args.fspec = argv[0];		/* The name of the device file. */
-	if (realpath(argv[1], fs_name) == NULL)	/* The mount point. */
+	args.fspec = argv[0]; /* The name of the device file. */
+	if (realpath(argv[1], fs_name) == NULL) /* The mount point. */
 		err(1, "realpath %s", argv[1]);
 
-	#define DEFAULT_ROOTUID	-2
+#define DEFAULT_ROOTUID -2
 	args.export_info.ex_root = DEFAULT_ROOTUID;
 
 	if (mntflags & MNT_RDONLY)
@@ -111,7 +107,7 @@ main(int argc, char *argv[])
 void
 ext4fs_usage(void)
 {
-	(void)fprintf(stderr,
-	    "usage: mount_ext4fs [-o options] special node\n");
+	(void)fprintf(
+	    stderr, "usage: mount_ext4fs [-o options] special node\n");
 	exit(1);
 }

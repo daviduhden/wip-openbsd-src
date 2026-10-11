@@ -37,23 +37,23 @@ u_int32_t ext4fs_crc32c_le(u_int32_t crc, const void *buf, size_t len);
 struct m_ext4fs;
 
 /* Compute block or inode bitmap checksum (group number + bitmap data) */
-u_int32_t ext4fs_bitmap_csum(struct m_ext4fs *fs, u_int32_t group,
-    void *bitmap, size_t size);
+u_int32_t ext4fs_bitmap_csum(
+    struct m_ext4fs *fs, u_int32_t group, void *bitmap, size_t size);
 
 /*
  * Write a directory block checksum tail at the end of buf.
  * ino: directory inode number, gen_le: i_nfs_generation (already LE).
  * No-op if METADATA_CSUM is not enabled.
  */
-void ext4fs_dir_set_csum(struct m_ext4fs *fs, u_int32_t ino,
-    u_int32_t gen_le, void *buf);
+void ext4fs_dir_set_csum(
+    struct m_ext4fs *fs, u_int32_t ino, u_int32_t gen_le, void *buf);
 
 /*
  * Write the extent tree block checksum tail.
  * ino: inode number, gen_le: i_nfs_generation (already LE on disk).
  * No-op if METADATA_CSUM is not enabled.
  */
-void ext4fs_extent_block_csum_set(struct m_ext4fs *fs, u_int32_t ino,
-    u_int32_t gen_le, void *buf);
+void ext4fs_extent_block_csum_set(
+    struct m_ext4fs *fs, u_int32_t ino, u_int32_t gen_le, void *buf);
 
 #endif /* _EXT4FS_CRC32C_H_ */

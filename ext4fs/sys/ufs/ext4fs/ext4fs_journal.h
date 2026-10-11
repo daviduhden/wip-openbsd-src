@@ -23,91 +23,89 @@
  * All JBD2 fields are big-endian.
  */
 
-#define JBD2_MAGIC		0xC03B3998
+#define JBD2_MAGIC 0xC03B3998
 
 /* Block types */
-#define JBD2_DESCRIPTOR_BLOCK	1
-#define JBD2_COMMIT_BLOCK	2
-#define JBD2_SUPERBLOCK_V1	3
-#define JBD2_SUPERBLOCK_V2	4
-#define JBD2_REVOKE_BLOCK	5
+#define JBD2_DESCRIPTOR_BLOCK 1
+#define JBD2_COMMIT_BLOCK 2
+#define JBD2_SUPERBLOCK_V1 3
+#define JBD2_SUPERBLOCK_V2 4
+#define JBD2_REVOKE_BLOCK 5
 
 /* Descriptor tag flags */
-#define JBD2_FLAG_ESCAPE	0x01
-#define JBD2_FLAG_SAME_UUID	0x02
-#define JBD2_FLAG_DELETED	0x04
-#define JBD2_FLAG_LAST_TAG	0x08
+#define JBD2_FLAG_ESCAPE 0x01
+#define JBD2_FLAG_SAME_UUID 0x02
+#define JBD2_FLAG_DELETED 0x04
+#define JBD2_FLAG_LAST_TAG 0x08
 
 /* Journal feature flags (in journal superblock) */
-#define JBD2_FEATURE_COMPAT_CHECKSUM	0x01
+#define JBD2_FEATURE_COMPAT_CHECKSUM 0x01
 
-#define JBD2_FEATURE_INCOMPAT_REVOKE		0x01
-#define JBD2_FEATURE_INCOMPAT_64BIT		0x02
-#define JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT	0x04
-#define JBD2_FEATURE_INCOMPAT_CSUM_V2		0x08
-#define JBD2_FEATURE_INCOMPAT_CSUM_V3		0x10
-#define JBD2_FEATURE_INCOMPAT_FAST_COMMIT	0x40
+#define JBD2_FEATURE_INCOMPAT_REVOKE 0x01
+#define JBD2_FEATURE_INCOMPAT_64BIT 0x02
+#define JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT 0x04
+#define JBD2_FEATURE_INCOMPAT_CSUM_V2 0x08
+#define JBD2_FEATURE_INCOMPAT_CSUM_V3 0x10
+#define JBD2_FEATURE_INCOMPAT_FAST_COMMIT 0x40
 
 /*
  * Incompat features this replay implementation understands.  A journal
  * with any other bit set is rejected at mount time rather than being
  * replayed incorrectly.
  */
-#define JBD2_FEATURE_INCOMPAT_SUPPORTED					\
-	(JBD2_FEATURE_INCOMPAT_REVOKE |					\
-	 JBD2_FEATURE_INCOMPAT_64BIT |					\
-	 JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT |				\
-	 JBD2_FEATURE_INCOMPAT_CSUM_V2 |				\
-	 JBD2_FEATURE_INCOMPAT_CSUM_V3)
+#define JBD2_FEATURE_INCOMPAT_SUPPORTED                                        \
+	(JBD2_FEATURE_INCOMPAT_REVOKE | JBD2_FEATURE_INCOMPAT_64BIT |          \
+	    JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT |                               \
+	    JBD2_FEATURE_INCOMPAT_CSUM_V2 | JBD2_FEATURE_INCOMPAT_CSUM_V3)
 
 /* Common block header (12 bytes) */
 struct jbd2_header {
-	u_int32_t	h_magic;
-	u_int32_t	h_blocktype;
-	u_int32_t	h_sequence;
+	u_int32_t h_magic;
+	u_int32_t h_blocktype;
+	u_int32_t h_sequence;
 } __attribute__((packed));
 
 /* Journal superblock */
 struct jbd2_superblock {
-	struct jbd2_header	s_header;
+	struct jbd2_header s_header;
 	/* 0x0C */
-	u_int32_t		s_blocksize;
-	u_int32_t		s_maxlen;
-	u_int32_t		s_first;
+	u_int32_t s_blocksize;
+	u_int32_t s_maxlen;
+	u_int32_t s_first;
 	/* 0x18 */
-	u_int32_t		s_sequence;
-	u_int32_t		s_start;
+	u_int32_t s_sequence;
+	u_int32_t s_start;
 	/* 0x20 */
-	u_int32_t		s_errno;
+	u_int32_t s_errno;
 	/* V2+ fields */
-	u_int32_t		s_feature_compat;
-	u_int32_t		s_feature_incompat;
-	u_int32_t		s_feature_ro_compat;
+	u_int32_t s_feature_compat;
+	u_int32_t s_feature_incompat;
+	u_int32_t s_feature_ro_compat;
 	/* 0x30 */
-	u_int8_t		s_uuid[16];
+	u_int8_t s_uuid[16];
 	/* 0x40 */
-	u_int32_t		s_nr_users;
-	u_int32_t		s_dynsuper;
+	u_int32_t s_nr_users;
+	u_int32_t s_dynsuper;
 	/* 0x48 */
-	u_int32_t		s_max_transaction;
-	u_int32_t		s_max_trans_data;
+	u_int32_t s_max_transaction;
+	u_int32_t s_max_trans_data;
 	/* 0x50 */
-	u_int8_t		s_checksum_type;
-	u_int8_t		s_padding2[3];
+	u_int8_t s_checksum_type;
+	u_int8_t s_padding2[3];
 	/* 0x54 */
-	u_int8_t		s_padding[168];
+	u_int8_t s_padding[168];
 	/* 0xFC */
-	u_int32_t		s_checksum;
+	u_int32_t s_checksum;
 	/* 0x100 */
-	u_int8_t		s_users[16 * 48];
+	u_int8_t s_users[16 * 48];
 } __attribute__((packed));
 
 /* Descriptor block tag v3 (CSUM_V3, 16 bytes without UUID) */
 struct jbd2_block_tag3 {
-	u_int32_t	t_blocknr;
-	u_int32_t	t_flags;
-	u_int32_t	t_blocknr_high;
-	u_int32_t	t_checksum;
+	u_int32_t t_blocknr;
+	u_int32_t t_flags;
+	u_int32_t t_blocknr_high;
+	u_int32_t t_checksum;
 } __attribute__((packed));
 
 /*
@@ -125,15 +123,15 @@ struct jbd2_block_tag3 {
  * For CSUM_V2 and CSUM_V3 the 16-bit flags live at bytes 6..7.
  */
 struct jbd2_block_tag {
-	u_int32_t	t_blocknr;
-	u_int16_t	t_checksum;
-	u_int16_t	t_flags;
-	u_int32_t	t_blocknr_high;	/* only if 64BIT */
+	u_int32_t t_blocknr;
+	u_int16_t t_checksum;
+	u_int16_t t_flags;
+	u_int32_t t_blocknr_high; /* only if 64BIT */
 } __attribute__((packed));
 
 /* 4-byte checksum tail of descriptor/revoke blocks (CSUM_V2/V3) */
 struct jbd2_journal_block_tail {
-	u_int32_t	t_checksum;
+	u_int32_t t_checksum;
 } __attribute__((packed));
 
 /*
@@ -141,14 +139,14 @@ struct jbd2_journal_block_tail {
  * journals as well as checksum-v1 (compat CHECKSUM) journals, which
  * carry no per-tag checksums.
  */
-#define JBD2_CSUM_NONE		0
-#define JBD2_CSUM_V2		2
-#define JBD2_CSUM_V3		3
+#define JBD2_CSUM_NONE 0
+#define JBD2_CSUM_V2 2
+#define JBD2_CSUM_V3 3
 
 /* Revoke block header */
 struct jbd2_revoke_header {
-	struct jbd2_header	r_header;
-	u_int32_t		r_count;	/* bytes used in this block */
+	struct jbd2_header r_header;
+	u_int32_t	   r_count; /* bytes used in this block */
 } __attribute__((packed));
 
 /*
@@ -156,8 +154,8 @@ struct jbd2_revoke_header {
  * The packed attribute fixes the layout; these assertions make any
  * change to a field type, size or order a compile-time error.
  */
-_Static_assert(sizeof(struct jbd2_header) == (size_t)12,
-    "jbd2 header must be 12 bytes");
+_Static_assert(
+    sizeof(struct jbd2_header) == (size_t)12, "jbd2 header must be 12 bytes");
 _Static_assert(sizeof(struct jbd2_superblock) == (size_t)1024,
     "jbd2 superblock must be 1024 bytes");
 _Static_assert(sizeof(struct jbd2_block_tag3) == (size_t)16,
@@ -171,48 +169,48 @@ _Static_assert(sizeof(struct jbd2_revoke_header) == (size_t)16,
 
 /* Revocation table entry */
 struct jbd2_revoke_entry {
-	u_int64_t	re_block;
-	u_int32_t	re_sequence;
+	u_int64_t re_block;
+	u_int32_t re_sequence;
 };
 
 /* Block map entry: journal block -> filesystem block */
 struct jbd2_blockmap_entry {
-	u_int64_t	jb_fsblock;	/* filesystem block number */
+	u_int64_t jb_fsblock; /* filesystem block number */
 };
 
 /* In-memory replay context */
 struct jbd2_replay_ctx {
-	struct vnode			*rc_devvp;
-	struct m_ext4fs			*rc_fs;
+	struct vnode	*rc_devvp;
+	struct m_ext4fs *rc_fs;
 
 	/* Journal geometry (from journal superblock, host order) */
-	u_int32_t			 rc_blocksize;
-	u_int32_t			 rc_maxlen;
-	u_int32_t			 rc_first;
-	u_int32_t			 rc_sequence;	/* starting sequence */
-	u_int32_t			 rc_start;	/* starting block */
+	u_int32_t rc_blocksize;
+	u_int32_t rc_maxlen;
+	u_int32_t rc_first;
+	u_int32_t rc_sequence; /* starting sequence */
+	u_int32_t rc_start;    /* starting block */
 
 	/* Journal feature flags */
-	u_int32_t			 rc_features_compat;
-	u_int32_t			 rc_features_incompat;
+	u_int32_t rc_features_compat;
+	u_int32_t rc_features_incompat;
 
 	/* Journal UUID and checksum state */
-	u_int8_t			 rc_uuid[16];
-	u_int8_t			 rc_csum_mode;	/* JBD2_CSUM_* */
-	u_int32_t			 rc_csum_seed;	/* ext4fs_crc32c seed */
+	u_int8_t  rc_uuid[16];
+	u_int8_t  rc_csum_mode; /* JBD2_CSUM_* */
+	u_int32_t rc_csum_seed; /* ext4fs_crc32c seed */
 
 	/* Block map: journal block number -> filesystem block */
-	struct jbd2_blockmap_entry	*rc_blockmap;
-	u_int32_t			 rc_blockmap_count;
+	struct jbd2_blockmap_entry *rc_blockmap;
+	u_int32_t		    rc_blockmap_count;
 
 	/* Revocation table */
-	struct jbd2_revoke_entry	*rc_revoke;
-	u_int32_t			 rc_revoke_count;
-	u_int32_t			 rc_revoke_alloc;
+	struct jbd2_revoke_entry *rc_revoke;
+	u_int32_t		  rc_revoke_count;
+	u_int32_t		  rc_revoke_alloc;
 
 	/* Scan result */
-	u_int32_t			 rc_end_sequence;
-	u_int32_t			 rc_replay_count;
+	u_int32_t rc_end_sequence;
+	u_int32_t rc_replay_count;
 };
 
 /*

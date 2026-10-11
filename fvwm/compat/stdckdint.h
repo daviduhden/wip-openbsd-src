@@ -65,8 +65,8 @@
 #endif
 
 #if defined(__has_builtin)
-#if !__has_builtin(__builtin_add_overflow) || \
-    !__has_builtin(__builtin_sub_overflow) || \
+#if !__has_builtin(__builtin_add_overflow) ||                                  \
+    !__has_builtin(__builtin_sub_overflow) ||                                  \
     !__has_builtin(__builtin_mul_overflow)
 #error "fvwm: no <stdckdint.h> and no compiler overflow builtins"
 #endif
@@ -75,15 +75,15 @@
 #endif
 
 #ifndef ckd_add
-#define ckd_add(result, a, b) \
+#define ckd_add(result, a, b)                                                  \
 	((_Bool)__builtin_add_overflow((a), (b), (result)))
 #endif
 #ifndef ckd_sub
-#define ckd_sub(result, a, b) \
+#define ckd_sub(result, a, b)                                                  \
 	((_Bool)__builtin_sub_overflow((a), (b), (result)))
 #endif
 #ifndef ckd_mul
-#define ckd_mul(result, a, b) \
+#define ckd_mul(result, a, b)                                                  \
 	((_Bool)__builtin_mul_overflow((a), (b), (result)))
 #endif
 

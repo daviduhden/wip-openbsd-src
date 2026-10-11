@@ -67,31 +67,31 @@
 
 struct pool ext4fs_inode_pool;
 
-#define PRINTF_FEATURES(mask, features)				\
-	for (i = 0; i < nitems(features); i++)			\
-		if ((mask) & (features)[i].f_mask)		\
-			printf("%s ", (features)[i].f_name)
+#define PRINTF_FEATURES(mask, features)                                        \
+	for (i = 0; i < nitems(features); i++)                                 \
+		if ((mask) & (features)[i].f_mask)                             \
+	printf("%s ", (features)[i].f_name)
 
-int	ext4fs_block_group_has_super_block(int);
-int	ext4fs_mountfs(struct vnode *, struct mount *, struct proc *);
-int	ext4fs_sbcheck(struct ext4fs *, int);
-void	ext4fs_sbload(struct ext4fs *, struct m_ext4fs *);
-int	ext4fs_sbfill(struct vnode *, struct m_ext4fs *);
+int  ext4fs_block_group_has_super_block(int);
+int  ext4fs_mountfs(struct vnode *, struct mount *, struct proc *);
+int  ext4fs_sbcheck(struct ext4fs *, int);
+void ext4fs_sbload(struct ext4fs *, struct m_ext4fs *);
+int  ext4fs_sbfill(struct vnode *, struct m_ext4fs *);
 
 const struct vfsops ext4fs_vfsops = {
-	.vfs_mount	= ext4fs_mount,
-	.vfs_start	= ufs_start,
-	.vfs_unmount	= ext4fs_unmount,
-	.vfs_root	= ufs_root,
-	.vfs_quotactl	= ufs_quotactl,
-	.vfs_statfs	= ext4fs_statfs,
-	.vfs_sync	= ext4fs_sync,
-	.vfs_vget	= ext4fs_vget,
-	.vfs_fhtovp	= ext4fs_fhtovp,
-	.vfs_vptofh	= ext4fs_vptofh,
-	.vfs_init	= ext4fs_init,
-	.vfs_sysctl	= ext4fs_sysctl,
-	.vfs_checkexp	= ufs_check_export,
+    .vfs_mount = ext4fs_mount,
+    .vfs_start = ufs_start,
+    .vfs_unmount = ext4fs_unmount,
+    .vfs_root = ufs_root,
+    .vfs_quotactl = ufs_quotactl,
+    .vfs_statfs = ext4fs_statfs,
+    .vfs_sync = ext4fs_sync,
+    .vfs_vget = ext4fs_vget,
+    .vfs_fhtovp = ext4fs_fhtovp,
+    .vfs_vptofh = ext4fs_vptofh,
+    .vfs_init = ext4fs_init,
+    .vfs_sysctl = ext4fs_sysctl,
+    .vfs_checkexp = ufs_check_export,
 };
 
 struct pool ext4fs_inode_pool;
@@ -103,8 +103,7 @@ ext4fs_block_group_has_super_block(int group)
 
 	if (group == 0 || group == 1)
 		return 1;
-	for (a3 = 3, a5 = 5, a7 = 7;
-	    a3 <= group || a5 <= group || a7 <= group;
+	for (a3 = 3, a5 = 5, a7 = 7; a3 <= group || a5 <= group || a7 <= group;
 	    a3 *= 3, a5 *= 5, a7 *= 7)
 		if (group == a3 || group == a5 || group == a7)
 			return 1;
@@ -128,7 +127,7 @@ int
 ext4fs_flushfiles(struct mount *mp, int flags, struct proc *p)
 {
 	struct ufsmount *ump;
-	int error;
+	int		 error;
 
 	ump = VFSTOUFS(mp);
 	/*
@@ -150,8 +149,8 @@ ext4fs_init(struct vfsconf *vfsp)
 {
 	int result;
 	(void)vfsp;
-	pool_init(&ext4fs_inode_pool, sizeof(struct inode), 0,
-	    IPL_NONE, PR_WAITOK, "ext4inopl", NULL);
+	pool_init(&ext4fs_inode_pool, sizeof(struct inode), 0, IPL_NONE,
+	    PR_WAITOK, "ext4inopl", NULL);
 	if ((result = ufs_init(vfsp))) {
 		return result;
 	}
@@ -163,11 +162,11 @@ ext4fs_mount(struct mount *mp, const char *path, void *data,
     struct nameidata *ndp, struct proc *p)
 {
 	struct ufs_args *args;
-	struct vnode *devvp;
-	int error;
+	struct vnode	*devvp;
+	int		 error;
 	struct m_ext4fs *mfs;
-	char fname[MNAMELEN];
-	char fspec[MNAMELEN];
+	char		 fname[MNAMELEN];
+	char		 fspec[MNAMELEN];
 	struct ufsmount *ump = NULL;
 
 	args = data;
@@ -196,7 +195,7 @@ ext4fs_mount(struct mount *mp, const char *path, void *data,
 	} else {
 		ump = VFSTOUFS(mp);
 		if (devvp != ump->um_devvp)
-			error = EINVAL;	/* XXX needs translation */
+			error = EINVAL; /* XXX needs translation */
 		else
 			vrele(devvp);
 	}
@@ -207,8 +206,8 @@ ext4fs_mount(struct mount *mp, const char *path, void *data,
 
 	strlcpy(mp->mnt_stat.f_mntfromname, fname,
 	    sizeof(mp->mnt_stat.f_mntfromname));
-	strlcpy(mp->mnt_stat.f_mntonname, path,
-	    sizeof(mp->mnt_stat.f_mntonname));
+	strlcpy(
+	    mp->mnt_stat.f_mntonname, path, sizeof(mp->mnt_stat.f_mntonname));
 
 	goto success;
 
@@ -227,12 +226,12 @@ int
 ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 {
 	struct ufsmount *ump;
-	struct buf *bp;
-	struct ext4fs *sble;
+	struct buf	*bp;
+	struct ext4fs	*sble;
 	struct m_ext4fs *mfs;
-	dev_t dev;
-	int error, ronly;
-	struct ucred *cred;
+	dev_t		 dev;
+	int		 error, ronly;
+	struct ucred	*cred;
 
 	dev = devvp->v_rdev;
 	cred = p ? p->p_ucred : NOCRED;
@@ -253,7 +252,7 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 		return (error);
 
 	ronly = (mp->mnt_flag & MNT_RDONLY) != 0;
-	error = VOP_OPEN(devvp, ronly ? FREAD : FREAD|FWRITE, FSCRED, p);
+	error = VOP_OPEN(devvp, ronly ? FREAD : FREAD | FWRITE, FSCRED, p);
 	if (error)
 		return (error);
 
@@ -263,8 +262,7 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	/*
 	 * Read the superblock from disk.
 	 */
-	error = bread(devvp, (daddr_t)(EXT4FS_SUPER_BLOCK_OFFSET /
-	    DEV_BSIZE),
+	error = bread(devvp, (daddr_t)(EXT4FS_SUPER_BLOCK_OFFSET / DEV_BSIZE),
 	    EXT4FS_SUPER_BLOCK_SIZE, &bp);
 	if (error)
 		goto out;
@@ -274,8 +272,8 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 		goto out;
 
 	ump = malloc(sizeof *ump, M_UFSMNT, M_WAITOK | M_ZERO);
-	mfs = ump->um_e4fs = malloc(sizeof(struct m_ext4fs), M_UFSMNT,
-	    M_WAITOK | M_ZERO);
+	mfs = ump->um_e4fs =
+	    malloc(sizeof(struct m_ext4fs), M_UFSMNT, M_WAITOK | M_ZERO);
 
 	/*
 	 * Copy in the superblock, compute in-memory values
@@ -304,7 +302,7 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 			error = VOP_OPEN(devvp, FREAD | FWRITE, FSCRED, p);
 			if (error) {
 				printf("ext4fs: can't reopen device r/w "
-				    "for journal replay\n");
+				       "for journal replay\n");
 				goto out;
 			}
 			reopen_ro = 1;
@@ -398,7 +396,7 @@ out:
 	if (bp)
 		brelse(bp);
 	vn_lock(devvp, LK_EXCLUSIVE | LK_RETRY);
-	(void)VOP_CLOSE(devvp, ronly ? FREAD : FREAD|FWRITE, cred, p);
+	(void)VOP_CLOSE(devvp, ronly ? FREAD : FREAD | FWRITE, cred, p);
 	VOP_UNLOCK(devvp);
 	if (ump) {
 		if (mfs && mfs->m_gd != NULL) {
@@ -418,12 +416,12 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 {
 	u_int32_t mask, tmp;
 	u_int32_t bsize;
-	int i;
+	int	  i;
 
 	tmp = letoh16(sble->sb_magic);
 	if (tmp != EXT4FS_MAGIC) {
 		printf("ext2fs: wrong magic number 0x%x\n", tmp);
-		return (EIO);		/* XXX needs translation */
+		return (EIO); /* XXX needs translation */
 	}
 
 	if (ext4fs_sb_csum_verify(sble) != 0) {
@@ -436,7 +434,7 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 		/* skewed log(block size): 1024 -> 0 | 2048 -> 1 | 4096 -> 2 */
 		tmp += 10;
 		printf("ext2fs: wrong log2(block size) %d\n", tmp);
-		return (EIO);	   /* XXX needs translation */
+		return (EIO); /* XXX needs translation */
 	}
 	bsize = 1024U << tmp;
 
@@ -462,7 +460,7 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 	tmp = letoh32(sble->sb_revision_level);
 	if (tmp != EXT4FS_REV_DYNAMIC) {
 		printf("ext2fs: wrong revision number 0x%x\n", tmp);
-		return (EIO);		/* XXX needs translation */
+		return (EIO); /* XXX needs translation */
 	}
 
 	/*
@@ -473,22 +471,20 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 	 */
 	if (ext4fs_sb_inode_size_check(sble) != 0) {
 		printf("ext4fs: invalid inode size: %u "
-		    "(must be a power of two in [%u, blocksize])\n",
-		    letoh16(sble->sb_inode_size),
-		    EXT4FS_GOOD_OLD_INODE_SIZE);
+		       "(must be a power of two in [%u, blocksize])\n",
+		    letoh16(sble->sb_inode_size), EXT4FS_GOOD_OLD_INODE_SIZE);
 		return (EINVAL);
 	}
 
 	tmp = letoh32(sble->sb_first_non_reserved_inode);
 	if (tmp != EXT4FS_INODE_FIRST) {
 		printf("ext4fs: first inode at 0x%x\n", tmp);
-		return (EINVAL);      /* XXX needs translation */
+		return (EINVAL); /* XXX needs translation */
 	}
 
 	tmp = letoh32(sble->sb_block_group_descriptor_size);
 	if (tmp != sizeof(struct ext4fs_block_group_descriptor)) {
-		printf("ext4fs: block group descriptor size is 0x%x\n",
-		    tmp);
+		printf("ext4fs: block group descriptor size is 0x%x\n", tmp);
 		return (EINVAL);
 	}
 
@@ -498,13 +494,13 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 		printf("ext4fs: unsupported incompat features: ");
 		PRINTF_FEATURES(mask, ext4fs_feature_incompat);
 		printf("\n");
-		return (EINVAL);      /* XXX needs translation */
+		return (EINVAL); /* XXX needs translation */
 	}
 
 	if (tmp & EXT4FS_FEATURE_INCOMPAT_RECOVER) {
 		printf("ext4fs: file system needs journal recovery\n");
 		if (!(letoh32(sble->sb_feature_compat) &
-		    EXT4FS_FEATURE_COMPAT_HAS_JOURNAL)) {
+			EXT4FS_FEATURE_COMPAT_HAS_JOURNAL)) {
 			printf("ext4fs: RECOVER set but no journal\n");
 			return (EINVAL);
 		}
@@ -522,7 +518,7 @@ ext4fs_sbcheck(struct ext4fs *sble, int ronly)
 
 	if (!ronly &&
 	    !(letoh32(sble->sb_feature_incompat) &
-	    EXT4FS_FEATURE_INCOMPAT_RECOVER) &&
+		EXT4FS_FEATURE_INCOMPAT_RECOVER) &&
 	    !(letoh16(sble->sb_state) & EXT4FS_STATE_VALID)) {
 		printf("ext4fs: file system not clean, run e2fsck\n");
 		return (EROFS);
@@ -535,24 +531,23 @@ int
 ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 {
 	struct ext4fs_dinode *rdp;
-	struct buf *bp;
-	daddr_t dblk;
-	u_int64_t ritb, rblk;
-	u_int32_t rgroup, rindex, roff;
-	size_t gd_size;
-	int error, i;
+	struct buf	     *bp;
+	daddr_t		      dblk;
+	u_int64_t	      ritb, rblk;
+	u_int32_t	      rgroup, rindex, roff;
+	size_t		      gd_size;
+	int		      error, i;
 
-	mfs->m_block_group_count = howmany(mfs->m_blocks_count -
-	    mfs->m_first_data_block,
-	    mfs->m_blocks_per_group);
+	mfs->m_block_group_count =
+	    howmany(mfs->m_blocks_count - mfs->m_first_data_block,
+		mfs->m_blocks_per_group);
 
-	mfs->m_block_size_shift = EXT4FS_LOG_MIN_BLOCK_SIZE +
-	    mfs->m_log_block_size;
+	mfs->m_block_size_shift =
+	    EXT4FS_LOG_MIN_BLOCK_SIZE + mfs->m_log_block_size;
 	mfs->m_block_size = 1 << mfs->m_block_size_shift;
-	mfs->m_block_group_descriptor_blocks_count =
-	    howmany(mfs->m_block_group_count,
-	    mfs->m_block_size /
-	    sizeof(struct ext4fs_block_group_descriptor));
+	mfs->m_block_group_descriptor_blocks_count = howmany(
+	    mfs->m_block_group_count,
+	    mfs->m_block_size / sizeof(struct ext4fs_block_group_descriptor));
 	mfs->m_fs_block_to_disk_block = mfs->m_log_block_size + 1;
 	/*
 	 * The inode size was validated against the block size in
@@ -561,8 +556,8 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	 * by zero or overflow the block-size arithmetic.
 	 */
 	mfs->m_inodes_per_block = mfs->m_block_size / mfs->m_inode_size;
-	mfs->m_inode_table_blocks_per_group = mfs->m_inodes_per_group /
-	    mfs->m_inodes_per_block;
+	mfs->m_inode_table_blocks_per_group =
+	    mfs->m_inodes_per_group / mfs->m_inodes_per_block;
 
 	gd_size = mfs->m_block_group_count *
 	    sizeof(struct ext4fs_block_group_descriptor);
@@ -587,11 +582,12 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 		if (off + n > gd_size)
 			n = gd_size - off;
 
-		error = bread(devvp,
-		    dblk + (i << mfs->m_fs_block_to_disk_block),
-		    mfs->m_block_size, &bp);
+		error =
+		    bread(devvp, dblk + (i << mfs->m_fs_block_to_disk_block),
+			mfs->m_block_size, &bp);
 		if (error) {
-			printf("ext4fs_sbfill: failed to read block group descriptors: %d\n",
+			printf("ext4fs_sbfill: failed to read block group "
+			       "descriptors: %d\n",
 			    error);
 			free(mfs->m_gd, M_UFSMNT, gd_size);
 			mfs->m_gd = NULL;
@@ -603,10 +599,11 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 
 	/* Verify block group descriptor checksums */
 	for (i = 0; i < mfs->m_block_group_count; i++) {
-		if ((error = ext4fs_bgd_csum_verify(mfs, &mfs->m_gd[i],
-		    i)) != 0) {
+		if ((error = ext4fs_bgd_csum_verify(mfs, &mfs->m_gd[i], i)) !=
+		    0) {
 			printf("ext4fs_sbfill: block group %d checksum "
-			    "verification failed\n", i);
+			       "verification failed\n",
+			    i);
 			free(mfs->m_gd, M_UFSMNT, gd_size);
 			mfs->m_gd = NULL;
 			return (error);
@@ -623,22 +620,22 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	ritb = letoh32(mfs->m_gd[rgroup].bgd_inode_table_block_lo);
 	if (mfs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
 		ritb |= (u_int64_t)letoh32(
-		    mfs->m_gd[rgroup].bgd_inode_table_block_hi) << 32;
+			    mfs->m_gd[rgroup].bgd_inode_table_block_hi)
+		    << 32;
 	/*
 	 * inode_size is at most the block size (validated in
 	 * ext4fs_sbcheck), so the byte offset of any inode inside its
 	 * group is bounded by the group's inode table and cannot wrap.
 	 */
-	rblk = ritb +
-	    ((u_int64_t)rindex * mfs->m_inode_size) / mfs->m_block_size;
+	rblk =
+	    ritb + ((u_int64_t)rindex * mfs->m_inode_size) / mfs->m_block_size;
 	roff = ((u_int64_t)rindex * mfs->m_inode_size) % mfs->m_block_size;
-	error = bread(devvp, (daddr_t)EXT4FS_FSBTODB(mfs, rblk),
-	    mfs->m_block_size, &bp);
+	error = bread(
+	    devvp, (daddr_t)EXT4FS_FSBTODB(mfs, rblk), mfs->m_block_size, &bp);
 	if (error) {
 		brelse(bp);
 	} else {
-		rdp = (struct ext4fs_dinode *)
-		    ((char *)bp->b_data + roff);
+		rdp = (struct ext4fs_dinode *)((char *)bp->b_data + roff);
 		mfs->m_resize_dind_block = letoh32(rdp->i_block[13]);
 		brelse(bp);
 	}
@@ -650,16 +647,15 @@ void
 ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 {
 	int feature_incompat_64bit;
-	feature_incompat_64bit = letoh32(sble->sb_feature_incompat) &
-	    EXT4FS_FEATURE_INCOMPAT_64BIT;
+	feature_incompat_64bit =
+	    letoh32(sble->sb_feature_incompat) & EXT4FS_FEATURE_INCOMPAT_64BIT;
 	/* Keep a copy of the raw little-endian superblock */
 	memcpy(&dest->m_sble, sble, sizeof(dest->m_sble));
 	dest->m_inodes_count = letoh32(sble->sb_inodes_count);
 	dest->m_blocks_count = letoh32(sble->sb_blocks_count_lo);
 	dest->m_reserved_blocks_count =
 	    letoh32(sble->sb_reserved_blocks_count_lo);
-	dest->m_free_blocks_count =
-	    letoh32(sble->sb_free_blocks_count_lo);
+	dest->m_free_blocks_count = letoh32(sble->sb_free_blocks_count_lo);
 	dest->m_free_inodes_count = letoh32(sble->sb_free_inodes_count);
 	dest->m_first_data_block = letoh32(sble->sb_first_data_block);
 	dest->m_log_block_size = letoh32(sble->sb_log_block_size);
@@ -670,8 +666,8 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_mount_time = letoh32(sble->sb_mount_time_lo);
 	dest->m_write_time = letoh32(sble->sb_write_time_lo);
 	dest->m_mount_count = letoh16(sble->sb_mount_count);
-	dest->m_max_mount_count_before_fsck = (int16_t)letoh16(
-	    sble->sb_max_mount_count_before_fsck);
+	dest->m_max_mount_count_before_fsck =
+	    (int16_t)letoh16(sble->sb_max_mount_count_before_fsck);
 	dest->m_state = letoh16(sble->sb_state);
 	dest->m_errors = letoh16(sble->sb_errors);
 	dest->m_revision_level_minor = letoh16(sble->sb_revision_level_minor);
@@ -681,34 +677,34 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_revision_level = letoh32(sble->sb_revision_level);
 	dest->m_default_reserved_uid = letoh16(sble->sb_default_reserved_uid);
 	dest->m_default_reserved_gid = letoh16(sble->sb_default_reserved_gid);
-	dest->m_first_non_reserved_inode = letoh32(
-	    sble->sb_first_non_reserved_inode);
+	dest->m_first_non_reserved_inode =
+	    letoh32(sble->sb_first_non_reserved_inode);
 	dest->m_inode_size = letoh16(sble->sb_inode_size);
 	dest->m_block_group_id = letoh16(sble->sb_block_group_id);
 	dest->m_feature_compat = letoh32(sble->sb_feature_compat);
 	dest->m_feature_incompat = letoh32(sble->sb_feature_incompat);
 	dest->m_feature_ro_compat = letoh32(sble->sb_feature_ro_compat);
-	dest->m_algorithm_usage_bitmap = letoh32(
-	    sble->sb_algorithm_usage_bitmap);
+	dest->m_algorithm_usage_bitmap =
+	    letoh32(sble->sb_algorithm_usage_bitmap);
 	dest->m_reserved_bgdt_blocks = letoh16(sble->sb_reserved_bgdt_blocks);
 	dest->m_journal_inode_number = letoh32(sble->sb_journal_inode_number);
 	dest->m_journal_device_number = letoh32(sble->sb_journal_device_number);
 	dest->m_last_orphan = letoh32(sble->sb_last_orphan);
-	dest->m_block_group_descriptor_size = letoh16(
-	    sble->sb_block_group_descriptor_size);
+	dest->m_block_group_descriptor_size =
+	    letoh16(sble->sb_block_group_descriptor_size);
 	dest->m_default_mount_opts = letoh32(sble->sb_default_mount_opts);
-	dest->m_first_meta_block_group = letoh32(
-	    sble->sb_first_meta_block_group);
+	dest->m_first_meta_block_group =
+	    letoh32(sble->sb_first_meta_block_group);
 	dest->m_newfs_time = letoh32(sble->sb_newfs_time_lo);
 	dest->m_inode_size_extra_min = letoh16(sble->sb_inode_size_extra_min);
 	dest->m_inode_size_extra_want = letoh16(sble->sb_inode_size_extra_want);
 	dest->m_flags = letoh32(sble->sb_flags);
-	dest->m_raid_stride_block_count = letoh16(
-	    sble->sb_raid_stride_block_count);
+	dest->m_raid_stride_block_count =
+	    letoh16(sble->sb_raid_stride_block_count);
 	dest->m_mmp_interval = letoh16(sble->sb_mmp_interval);
 	dest->m_mmp_block = letoh64(sble->sb_mmp_block);
-	dest->m_raid_stripe_width_block_count = letoh32(
-	    sble->sb_raid_stripe_width_block_count);
+	dest->m_raid_stripe_width_block_count =
+	    letoh32(sble->sb_raid_stripe_width_block_count);
 	dest->m_kilobytes_written = letoh64(sble->sb_kilobytes_written);
 	dest->m_error_count = letoh32(sble->sb_error_count);
 	dest->m_first_error_time = letoh32(sble->sb_first_error_time_lo);
@@ -722,10 +718,10 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_user_quota_inode = letoh32(sble->sb_user_quota_inode);
 	dest->m_group_quota_inode = letoh32(sble->sb_group_quota_inode);
 	dest->m_overhead_clusters = letoh32(sble->sb_overhead_clusters);
-	dest->m_backup_block_groups[0] = letoh32(
-	    sble->sb_backup_block_groups[0]);
-	dest->m_backup_block_groups[1] = letoh32(
-	    sble->sb_backup_block_groups[1]);
+	dest->m_backup_block_groups[0] =
+	    letoh32(sble->sb_backup_block_groups[0]);
+	dest->m_backup_block_groups[1] =
+	    letoh32(sble->sb_backup_block_groups[1]);
 	dest->m_lost_and_found_inode = letoh32(sble->sb_lost_and_found_inode);
 	dest->m_project_quota_inode = letoh32(sble->sb_project_quota_inode);
 	dest->m_checksum_seed = letoh32(sble->sb_checksum_seed);
@@ -733,23 +729,22 @@ ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 	dest->m_encoding_flags = letoh16(sble->sb_encoding_flags);
 	dest->m_orphan_file_inode = letoh16(sble->sb_orphan_file_inode);
 	if (feature_incompat_64bit) {
-		dest->m_blocks_count |= (u_int64_t)
-		    letoh32(sble->sb_blocks_count_hi) << 32;
-		dest->m_reserved_blocks_count |= (u_int64_t)
-		    letoh32(sble->sb_reserved_blocks_count_hi) <<
-		    32;
-		dest->m_free_blocks_count |= (u_int64_t)
-		    letoh32(sble->sb_free_blocks_count_hi) << 32;
-		dest->m_mount_time |= (u_int64_t)
-		    letoh32(sble->sb_mount_time_hi) << 32;
-		dest->m_check_time |= (u_int64_t)
-		    letoh32(sble->sb_check_time_hi) << 32;
-		dest->m_newfs_time |= (u_int64_t)
-		    letoh32(sble->sb_newfs_time_hi) << 32;
-		dest->m_first_error_time |= (u_int64_t)
-		    letoh32(sble->sb_first_error_time_hi) << 32;
-		dest->m_last_error_time |= (u_int64_t)
-		    letoh32(sble->sb_last_error_time_hi) << 32;
+		dest->m_blocks_count |=
+		    (u_int64_t)letoh32(sble->sb_blocks_count_hi) << 32;
+		dest->m_reserved_blocks_count |=
+		    (u_int64_t)letoh32(sble->sb_reserved_blocks_count_hi) << 32;
+		dest->m_free_blocks_count |=
+		    (u_int64_t)letoh32(sble->sb_free_blocks_count_hi) << 32;
+		dest->m_mount_time |= (u_int64_t)letoh32(sble->sb_mount_time_hi)
+		    << 32;
+		dest->m_check_time |= (u_int64_t)letoh32(sble->sb_check_time_hi)
+		    << 32;
+		dest->m_newfs_time |= (u_int64_t)letoh32(sble->sb_newfs_time_hi)
+		    << 32;
+		dest->m_first_error_time |=
+		    (u_int64_t)letoh32(sble->sb_first_error_time_hi) << 32;
+		dest->m_last_error_time |=
+		    (u_int64_t)letoh32(sble->sb_last_error_time_hi) << 32;
 	}
 }
 
@@ -758,10 +753,10 @@ ext4fs_statfs(struct mount *mp, struct statfs *sbp, struct proc *p)
 {
 	struct ufsmount *ump;
 	struct m_ext4fs *mfs;
-	const u_int32_t overhead_per_group_block_bitmap = 1;
-	const u_int32_t overhead_per_group_inode_bitmap = 1;
-	u_int32_t overhead, overhead_per_group;
-	int ngroups;
+	const u_int32_t	 overhead_per_group_block_bitmap = 1;
+	const u_int32_t	 overhead_per_group_inode_bitmap = 1;
+	u_int32_t	 overhead, overhead_per_group;
+	int		 ngroups;
 
 	(void)p;
 	ump = VFSTOUFS(mp);
@@ -772,8 +767,7 @@ ext4fs_statfs(struct mount *mp, struct statfs *sbp, struct proc *p)
 	    mfs->m_inode_table_blocks_per_group;
 	overhead = mfs->m_first_data_block +
 	    mfs->m_block_group_count * overhead_per_group;
-	if (mfs->m_feature_ro_compat &
-	    EXT4FS_FEATURE_RO_COMPAT_SPARSE_SUPER) {
+	if (mfs->m_feature_ro_compat & EXT4FS_FEATURE_RO_COMPAT_SPARSE_SUPER) {
 		int i;
 		for (i = 0, ngroups = 0; i < mfs->m_block_group_count; i++) {
 			if (ext4fs_block_group_has_super_block(i))
@@ -782,8 +776,7 @@ ext4fs_statfs(struct mount *mp, struct statfs *sbp, struct proc *p)
 	} else {
 		ngroups = mfs->m_block_group_count;
 	}
-	overhead += ngroups *
-	    (1 + mfs->m_block_group_descriptor_blocks_count);
+	overhead += ngroups * (1 + mfs->m_block_group_descriptor_blocks_count);
 
 	sbp->f_bsize = mfs->m_block_size;
 	sbp->f_iosize = mfs->m_block_size;
@@ -806,20 +799,20 @@ ext4fs_statfs(struct mount *mp, struct statfs *sbp, struct proc *p)
 int
 ext4fs_bgd_write(struct m_ext4fs *fs, struct vnode *devvp, u_int32_t group)
 {
-	struct buf *bp;
+	struct buf			     *bp;
 	struct ext4fs_block_group_descriptor *gd;
 	u_int32_t bgds_per_block, bgd_block, bgd_off;
-	daddr_t dblk;
-	int error;
+	daddr_t	  dblk;
+	int	  error;
 
-	bgds_per_block = fs->m_block_size /
-	    sizeof(struct ext4fs_block_group_descriptor);
+	bgds_per_block =
+	    fs->m_block_size / sizeof(struct ext4fs_block_group_descriptor);
 	bgd_block = group / bgds_per_block;
 	bgd_off = (group % bgds_per_block) *
 	    sizeof(struct ext4fs_block_group_descriptor);
 
-	dblk = (fs->m_first_data_block + 1 + bgd_block) <<
-	    fs->m_fs_block_to_disk_block;
+	dblk = (fs->m_first_data_block + 1 + bgd_block)
+	    << fs->m_fs_block_to_disk_block;
 
 	error = bread(devvp, dblk, fs->m_block_size, &bp);
 	if (error) {
@@ -847,10 +840,10 @@ ext4fs_sbwrite(struct mount *mp)
 {
 	struct ufsmount *ump = VFSTOUFS(mp);
 	struct m_ext4fs *fs = ump->um_e4fs;
-	struct ext4fs *sble = &fs->m_sble;
-	struct buf *bp;
-	struct timespec ts;
-	int error;
+	struct ext4fs	*sble = &fs->m_sble;
+	struct buf	*bp;
+	struct timespec	 ts;
+	int		 error;
 
 	/* Update counters in on-disk superblock */
 	sble->sb_free_blocks_count_lo =
@@ -886,21 +879,21 @@ static u_long ext4fs_gennumber;
  * Allocate an inode in the file system.
  */
 int
-ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
-    struct vnode **vpp)
+ext4fs_inode_alloc(
+    struct inode *pip, mode_t mode, struct ucred *cred, struct vnode **vpp)
 {
-	struct m_ext4fs *fs = pip->i_e4fs;
-	struct vnode *pvp = ITOV(pip);
+	struct m_ext4fs			     *fs = pip->i_e4fs;
+	struct vnode			     *pvp = ITOV(pip);
 	struct ext4fs_block_group_descriptor *gd;
-	struct buf *bp, *tbp;
-	struct inode *ip;
+	struct buf			     *bp, *tbp;
+	struct inode			     *ip;
 	u_int32_t group, ngroups, ino_in_group, pbit, tb, it_blocks;
 	u_int32_t best, best_free, fi, g, free_inodes, icsum;
 	u_int32_t itu, first_unused, dirs;
 	u_int64_t bitmap_blk, itb;
-	ufsino_t ino;
-	char *ibp;
-	int error, i;
+	ufsino_t  ino;
+	char	 *ibp;
+	int	  error, i;
 
 	*vpp = NULL;
 
@@ -932,20 +925,21 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 		free_inodes = letoh16(gd->bgd_free_inodes_count_lo);
 		if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
 			free_inodes |=
-			    (u_int32_t)letoh16(gd->bgd_free_inodes_count_hi) <<
-			    16;
+			    (u_int32_t)letoh16(gd->bgd_free_inodes_count_hi)
+			    << 16;
 		if (free_inodes == 0)
 			continue;
 
 		/* Read inode bitmap */
 		bitmap_blk = letoh32(gd->bgd_inode_bitmap_block_lo);
 		if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-			bitmap_blk |= (u_int64_t)
-			    letoh32(gd->bgd_inode_bitmap_block_hi) << 32;
+			bitmap_blk |=
+			    (u_int64_t)letoh32(gd->bgd_inode_bitmap_block_hi)
+			    << 32;
 
-		error = bread(pip->i_devvp,
-		    (daddr_t)EXT4FS_FSBTODB(fs, bitmap_blk),
-		    fs->m_block_size, &bp);
+		error =
+		    bread(pip->i_devvp, (daddr_t)EXT4FS_FSBTODB(fs, bitmap_blk),
+			fs->m_block_size, &bp);
 		if (error) {
 			brelse(bp);
 			continue;
@@ -957,8 +951,7 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 		 * If INODE_UNINIT, the bitmap is stale. Zero it,
 		 * set padding bits, and zero all inode table blocks.
 		 */
-		if (letoh16(gd->bgd_flags) &
-		    EXT4FS_BGD_FLAG_INODE_UNINIT) {
+		if (letoh16(gd->bgd_flags) & EXT4FS_BGD_FLAG_INODE_UNINIT) {
 			memset(ibp, 0, fs->m_block_size);
 			for (pbit = fs->m_inodes_per_group;
 			    pbit < fs->m_block_size * 8; pbit++)
@@ -968,19 +961,18 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 			if (fs->m_feature_incompat &
 			    EXT4FS_FEATURE_INCOMPAT_64BIT)
 				itb |= (u_int64_t)letoh32(
-				    gd->bgd_inode_table_block_hi) << 32;
+					   gd->bgd_inode_table_block_hi)
+				    << 32;
 			it_blocks = fs->m_inode_table_blocks_per_group;
 			for (tb = 0; tb < it_blocks; tb++) {
 				error = bread(pip->i_devvp,
-				    (daddr_t)EXT4FS_FSBTODB(fs,
-				    itb + tb),
+				    (daddr_t)EXT4FS_FSBTODB(fs, itb + tb),
 				    fs->m_block_size, &tbp);
 				if (error) {
 					brelse(tbp);
 					continue;
 				}
-				memset(tbp->b_data, 0,
-				    fs->m_block_size);
+				memset(tbp->b_data, 0, fs->m_block_size);
 				error = bwrite(tbp);
 			}
 		}
@@ -991,15 +983,14 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 			if (isclr(ibp, ino_in_group)) {
 				setbit(ibp, ino_in_group);
 
-				icsum = ext4fs_bitmap_csum(fs, g, ibp,
-				    fs->m_inodes_per_group / 8);
+				icsum = ext4fs_bitmap_csum(
+				    fs, g, ibp, fs->m_inodes_per_group / 8);
 				gd->bgd_inode_bitmap_checksum_lo =
 				    htole16(icsum & 0xFFFF);
 				if (fs->m_feature_incompat &
 				    EXT4FS_FEATURE_INCOMPAT_64BIT)
-					gd->bgd_inode_bitmap_checksum_hi
-					    = htole16(
-					    (icsum >> 16) & 0xFFFF);
+					gd->bgd_inode_bitmap_checksum_hi =
+					    htole16((icsum >> 16) & 0xFFFF);
 
 				error = bwrite(bp);
 				if (error)
@@ -1026,31 +1017,30 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 				    htole16(free_inodes & 0xFFFF);
 				if (fs->m_feature_incompat &
 				    EXT4FS_FEATURE_INCOMPAT_64BIT)
-					gd->bgd_free_inodes_count_hi =
-					    htole16((free_inodes >> 16) &
-					    0xFFFF);
+					gd->bgd_free_inodes_count_hi = htole16(
+					    (free_inodes >> 16) & 0xFFFF);
 
 				if ((mode & S_IFMT) == S_IFDIR) {
-					dirs = letoh16(
-					    gd->bgd_used_dirs_count_lo);
+					dirs =
+					    letoh16(gd->bgd_used_dirs_count_lo);
 					if (fs->m_feature_incompat &
 					    EXT4FS_FEATURE_INCOMPAT_64BIT)
-						dirs |= (u_int32_t)letoh16(
-						    gd->bgd_used_dirs_count_hi) <<
-						    16;
+						dirs |=
+						    (u_int32_t)letoh16(
+							gd->bgd_used_dirs_count_hi)
+						    << 16;
 					dirs++;
 					gd->bgd_used_dirs_count_lo =
 					    htole16(dirs & 0xFFFF);
 					if (fs->m_feature_incompat &
 					    EXT4FS_FEATURE_INCOMPAT_64BIT)
 						gd->bgd_used_dirs_count_hi =
-						    htole16((dirs >> 16) &
-						    0xFFFF);
+						    htole16(
+							(dirs >> 16) & 0xFFFF);
 				}
 
 				itu = letoh16(gd->bgd_inode_table_unused_lo);
-				first_unused =
-				    fs->m_inodes_per_group - itu;
+				first_unused = fs->m_inodes_per_group - itu;
 				if (ino_in_group >= first_unused) {
 					itu = fs->m_inodes_per_group -
 					    ino_in_group - 1;
@@ -1059,8 +1049,8 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 					if (fs->m_feature_incompat &
 					    EXT4FS_FEATURE_INCOMPAT_64BIT)
 						gd->bgd_inode_table_unused_hi =
-						    htole16((itu >> 16) &
-						    0xFFFF);
+						    htole16(
+							(itu >> 16) & 0xFFFF);
 				}
 
 				ext4fs_bgd_write(fs, pip->i_devvp, g);
@@ -1096,12 +1086,12 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 				if (fs->m_inode_size >
 				    EXT4FS_GOOD_OLD_INODE_SIZE)
 					ip->i_e4din->dinode.i_extra_isize =
-					    htole16(sizeof(struct ext4fs_dinode) -
-					    EXT4FS_GOOD_OLD_INODE_SIZE);
+					    htole16(
+						sizeof(struct ext4fs_dinode) -
+						EXT4FS_GOOD_OLD_INODE_SIZE);
 
 				/* Set generation number */
-				if (++ext4fs_gennumber <
-				    (u_long)gettime())
+				if (++ext4fs_gennumber < (u_long)gettime())
 					ext4fs_gennumber = gettime();
 				ip->i_e4din->dinode.i_nfs_generation =
 				    htole32(ext4fs_gennumber);
@@ -1122,13 +1112,13 @@ ext4fs_inode_alloc(struct inode *pip, mode_t mode, struct ucred *cred,
 void
 ext4fs_inode_free(struct inode *pip, ufsino_t ino, mode_t mode)
 {
-	struct m_ext4fs *fs = pip->i_e4fs;
+	struct m_ext4fs			     *fs = pip->i_e4fs;
 	struct ext4fs_block_group_descriptor *gd;
-	struct buf *bp;
-	u_int64_t bitmap_blk;
+	struct buf			     *bp;
+	u_int64_t			      bitmap_blk;
 	u_int32_t group, ino_in_group, free_inodes, icsum;
-	char *ibp;
-	int error;
+	char	 *ibp;
+	int	  error;
 
 	group = (ino - 1) / fs->m_inodes_per_group;
 	ino_in_group = (ino - 1) % fs->m_inodes_per_group;
@@ -1136,11 +1126,10 @@ ext4fs_inode_free(struct inode *pip, ufsino_t ino, mode_t mode)
 
 	bitmap_blk = letoh32(gd->bgd_inode_bitmap_block_lo);
 	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-		bitmap_blk |=
-		    (u_int64_t)letoh32(gd->bgd_inode_bitmap_block_hi) << 32;
+		bitmap_blk |= (u_int64_t)letoh32(gd->bgd_inode_bitmap_block_hi)
+		    << 32;
 
-	error = bread(pip->i_devvp,
-	    (daddr_t)EXT4FS_FSBTODB(fs, bitmap_blk),
+	error = bread(pip->i_devvp, (daddr_t)EXT4FS_FSBTODB(fs, bitmap_blk),
 	    fs->m_block_size, &bp);
 	if (error) {
 		brelse(bp);
@@ -1150,8 +1139,7 @@ ext4fs_inode_free(struct inode *pip, ufsino_t ino, mode_t mode)
 	ibp = (char *)bp->b_data;
 	clrbit(ibp, ino_in_group);
 
-	icsum = ext4fs_bitmap_csum(fs, group, ibp,
-	    fs->m_inodes_per_group / 8);
+	icsum = ext4fs_bitmap_csum(fs, group, ibp, fs->m_inodes_per_group / 8);
 	gd->bgd_inode_bitmap_checksum_lo = htole16(icsum & 0xFFFF);
 	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
 		gd->bgd_inode_bitmap_checksum_hi =
@@ -1164,8 +1152,8 @@ ext4fs_inode_free(struct inode *pip, ufsino_t ino, mode_t mode)
 	/* Update BGD */
 	free_inodes = letoh16(gd->bgd_free_inodes_count_lo);
 	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-		free_inodes |=
-		    (u_int32_t)letoh16(gd->bgd_free_inodes_count_hi) << 16;
+		free_inodes |= (u_int32_t)letoh16(gd->bgd_free_inodes_count_hi)
+		    << 16;
 	free_inodes++;
 	gd->bgd_free_inodes_count_lo = htole16(free_inodes & 0xFFFF);
 	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
@@ -1176,8 +1164,8 @@ ext4fs_inode_free(struct inode *pip, ufsino_t ino, mode_t mode)
 		u_int32_t dirs;
 		dirs = letoh16(gd->bgd_used_dirs_count_lo);
 		if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-			dirs |= (u_int32_t)
-			    letoh16(gd->bgd_used_dirs_count_hi) << 16;
+			dirs |= (u_int32_t)letoh16(gd->bgd_used_dirs_count_hi)
+			    << 16;
 		dirs--;
 		gd->bgd_used_dirs_count_lo = htole16(dirs & 0xFFFF);
 		if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
@@ -1189,8 +1177,7 @@ ext4fs_inode_free(struct inode *pip, ufsino_t ino, mode_t mode)
 
 	/* Update superblock counters */
 	fs->m_free_inodes_count++;
-	fs->m_sble.sb_free_inodes_count =
-	    htole32(fs->m_free_inodes_count);
+	fs->m_sble.sb_free_inodes_count = htole32(fs->m_free_inodes_count);
 	fs->m_fs_was_modified = 1;
 }
 
@@ -1198,8 +1185,8 @@ static int
 ext4fs_sync_vnode(struct vnode *vp, void *arg)
 {
 	struct ext4fs_sync_args *esa = arg;
-	struct inode *ip;
-	int error, s, skip;
+	struct inode		*ip;
+	int			 error, s, skip;
 
 	if (vp->v_type == VNON)
 		return (0);
@@ -1210,7 +1197,7 @@ ext4fs_sync_vnode(struct vnode *vp, void *arg)
 
 	s = splbio();
 	skip = (ip->i_flag &
-	    (IN_ACCESS | IN_CHANGE | IN_MODIFIED | IN_UPDATE)) == 0 &&
+		   (IN_ACCESS | IN_CHANGE | IN_MODIFIED | IN_UPDATE)) == 0 &&
 	    LIST_EMPTY(&vp->v_dirtyblkhd);
 	splx(s);
 
@@ -1228,13 +1215,13 @@ ext4fs_sync_vnode(struct vnode *vp, void *arg)
 }
 
 int
-ext4fs_sync(struct mount *mp, int waitfor, int stall,
-    struct ucred *cred, struct proc *p)
+ext4fs_sync(struct mount *mp, int waitfor, int stall, struct ucred *cred,
+    struct proc *p)
 {
-	struct ufsmount *ump = VFSTOUFS(mp);
-	struct m_ext4fs *fs = ump->um_e4fs;
+	struct ufsmount	       *ump = VFSTOUFS(mp);
+	struct m_ext4fs	       *fs = ump->um_e4fs;
 	struct ext4fs_sync_args esa;
-	int error;
+	int			error;
 
 	if (fs->m_read_only)
 		return (0);
@@ -1263,8 +1250,8 @@ ext4fs_sync(struct mount *mp, int waitfor, int stall,
 }
 
 int
-ext4fs_sysctl(int *name, u_int namelen, void *oldp, size_t *oldlenp,
-    void *newp, size_t newlen, struct proc *p)
+ext4fs_sysctl(int *name, u_int namelen, void *oldp, size_t *oldlenp, void *newp,
+    size_t newlen, struct proc *p)
 {
 	(void)name;
 	(void)namelen;
@@ -1282,7 +1269,7 @@ ext4fs_unmount(struct mount *mp, int mntflags, struct proc *p)
 {
 	struct ufsmount *ump;
 	struct m_ext4fs *mfs;
-	int error, flags;
+	int		 error, flags;
 
 	flags = 0;
 	if (mntflags & MNT_FORCE)
@@ -1300,8 +1287,8 @@ ext4fs_unmount(struct mount *mp, int mntflags, struct proc *p)
 	if (ump->um_devvp->v_type != VBAD)
 		ump->um_devvp->v_specmountpoint = NULL;
 	vn_lock(ump->um_devvp, LK_EXCLUSIVE | LK_RETRY);
-	(void)VOP_CLOSE(ump->um_devvp, mfs->m_read_only ? FREAD :
-	    FREAD|FWRITE, NOCRED, p);
+	(void)VOP_CLOSE(ump->um_devvp,
+	    mfs->m_read_only ? FREAD : FREAD | FWRITE, NOCRED, p);
 	vput(ump->um_devvp);
 	if (mfs->m_gd != NULL) {
 		size_t gd_size = mfs->m_block_group_count *
@@ -1318,30 +1305,29 @@ ext4fs_unmount(struct mount *mp, int mntflags, struct proc *p)
 int
 ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 {
-	struct m_ext4fs *fs;
-	struct inode *ip;
-	struct ufsmount *ump;
-	struct buf *bp;
-	struct vnode *vp;
+	struct m_ext4fs			     *fs;
+	struct inode			     *ip;
+	struct ufsmount			     *ump;
+	struct buf			     *bp;
+	struct vnode			     *vp;
 	struct ext4fs_block_group_descriptor *gd;
-	struct ext4fs_dinode *dp;
-	dev_t dev;
-	daddr_t disk_block;
-	u_int64_t inode_table_block;
+	struct ext4fs_dinode		     *dp;
+	dev_t				      dev;
+	daddr_t				      disk_block;
+	u_int64_t			      inode_table_block;
 	u_int32_t inode_group, inode_index, block_in_table, offset_in_block;
 	u_int32_t itable_unused;
 	u_int16_t bgd_flags, imode;
-	int error;
+	int	  error;
 
 	if (ino > (ufsino_t)-1)
-		panic("ext4fs_vget: alien ino_t %llu",
-		    (unsigned long long)ino);
+		panic("ext4fs_vget: alien ino_t %llu", (unsigned long long)ino);
 
 	ump = VFSTOUFS(mp);
 	dev = ump->um_dev;
 	fs = ump->um_e4fs;
 
- retry:
+retry:
 	if ((*vpp = ufs_ihashget(dev, ino)) != NULL) {
 		return (0);
 	}
@@ -1351,7 +1337,7 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 		*vpp = NULL;
 		return (error);
 	}
-	ip = pool_get(&ext4fs_inode_pool, PR_WAITOK|PR_ZERO);
+	ip = pool_get(&ext4fs_inode_pool, PR_WAITOK | PR_ZERO);
 	rrw_init_flags(&ip->i_lock, "inode", RWL_DUPOK | RWL_IS_VNODE);
 	vp->v_data = ip;
 	ip->i_vnode = vp;
@@ -1404,18 +1390,19 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 	 * ever crosses a block boundary.
 	 */
 	block_in_table = inode_index / fs->m_inodes_per_block;
-	offset_in_block = (u_int32_t)(((u_int64_t)inode_index %
-	    fs->m_inodes_per_block) * fs->m_inode_size);
+	offset_in_block =
+	    (u_int32_t)(((u_int64_t)inode_index % fs->m_inodes_per_block) *
+		fs->m_inode_size);
 
 	gd = &fs->m_gd[inode_group];
 	inode_table_block = letoh32(gd->bgd_inode_table_block_lo);
 	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-		inode_table_block |= (u_int64_t)
-		    letoh32(gd->bgd_inode_table_block_hi) << 32;
+		inode_table_block |=
+		    (u_int64_t)letoh32(gd->bgd_inode_table_block_hi) << 32;
 
 	/* Read the block containing this inode */
-	disk_block = (inode_table_block + block_in_table) <<
-	    fs->m_fs_block_to_disk_block;
+	disk_block = (inode_table_block + block_in_table)
+	    << fs->m_fs_block_to_disk_block;
 	error = bread(ump->um_devvp, disk_block, fs->m_block_size, &bp);
 	if (error) {
 		vput(vp);
@@ -1440,8 +1427,8 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 	bgd_flags = letoh16(gd->bgd_flags);
 	itable_unused = letoh16(gd->bgd_inode_table_unused_lo);
 	if (fs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
-		itable_unused |= (u_int32_t)
-		    letoh16(gd->bgd_inode_table_unused_hi) << 16;
+		itable_unused |=
+		    (u_int32_t)letoh16(gd->bgd_inode_table_unused_hi) << 16;
 	if ((bgd_flags & EXT4FS_BGD_FLAG_INODE_UNINIT) ||
 	    inode_index >= fs->m_inodes_per_group - itable_unused) {
 		memset(dp, 0, fs->m_inode_size);
@@ -1468,10 +1455,9 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 			 * of the inode (the checksum verification
 			 * itself would read past the valid region).
 			 */
-			if (!ext4fs_inode_extra_isize_valid(fs,
-			    ip->i_e4din)) {
+			if (!ext4fs_inode_extra_isize_valid(fs, ip->i_e4din)) {
 				printf("ext4fs: inode %llu has invalid "
-				    "extra_isize 0x%x\n",
+				       "extra_isize 0x%x\n",
 				    (unsigned long long)ino,
 				    letoh16(ip->i_e4din->dinode.i_extra_isize));
 				free(ip->i_e4din, M_TEMP, fs->m_inode_size);
@@ -1480,8 +1466,7 @@ ext4fs_vget(struct mount *mp, ino_t ino, struct vnode **vpp)
 				*vpp = NULL;
 				return (EINVAL);
 			}
-			error = ext4fs_inode_csum_verify(fs,
-			    ip->i_e4din, ino);
+			error = ext4fs_inode_csum_verify(fs, ip->i_e4din, ino);
 			if (error) {
 				free(ip->i_e4din, M_TEMP, fs->m_inode_size);
 				ip->i_e4din = NULL;

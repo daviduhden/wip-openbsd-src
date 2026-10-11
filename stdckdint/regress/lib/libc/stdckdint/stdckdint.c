@@ -28,12 +28,11 @@
 
 #include <limits.h>
 #include <stdbool.h>
+#include <stdckdint.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <stdckdint.h>
 
 #ifndef __STDC_VERSION_STDCKDINT_H__
 #error "stdckdint.h did not define __STDC_VERSION_STDCKDINT_H__"
@@ -44,13 +43,13 @@
 
 static int failures;
 
-#define CHECK(cond, what)							\
-	do {									\
-		if (!(cond)) {							\
-			printf("FAIL: %s (%s:%d)\n", (what), __FILE__,		\
-			    __LINE__);						\
-			failures++;						\
-		}								\
+#define CHECK(cond, what)                                                      \
+	do {                                                                   \
+		if (!(cond)) {                                                 \
+			printf(                                                \
+			    "FAIL: %s (%s:%d)\n", (what), __FILE__, __LINE__); \
+			failures++;                                            \
+		}                                                              \
 	} while (0)
 
 static unsigned probe_calls;
@@ -63,7 +62,7 @@ probe(void)
 }
 
 static size_t	slots[4];
-static unsigned	slot_index;
+static unsigned slot_index;
 
 static size_t *
 next_slot(void)
@@ -74,10 +73,10 @@ next_slot(void)
 static void
 test_boundaries(void)
 {
-	size_t		 z;
-	int		 i;
-	long long	 ll;
-	unsigned short	 h;
+	size_t		   z;
+	int		   i;
+	long long	   ll;
+	unsigned short	   h;
 	unsigned long long q;
 
 	/* int: saturation at both ends, stored value on overflow. */
@@ -94,10 +93,9 @@ test_boundaries(void)
 	z = 0;
 	CHECK(!ckd_add(&z, (size_t)SIZE_MAX, (size_t)0) && z == SIZE_MAX,
 	    "size_t MAX+0");
-	CHECK(ckd_add(&z, (size_t)SIZE_MAX, (size_t)1) && z == 0,
-	    "size_t MAX+1");
-	CHECK(ckd_sub(&z, (size_t)0, (size_t)1) && z == SIZE_MAX,
-	    "size_t 0-1");
+	CHECK(
+	    ckd_add(&z, (size_t)SIZE_MAX, (size_t)1) && z == 0, "size_t MAX+1");
+	CHECK(ckd_sub(&z, (size_t)0, (size_t)1) && z == SIZE_MAX, "size_t 0-1");
 	CHECK(!ckd_sub(&z, (size_t)SIZE_MAX, (size_t)SIZE_MAX) && z == 0,
 	    "size_t MAX-MAX");
 	CHECK(ckd_mul(&z, (size_t)SIZE_MAX, (size_t)2) && z == SIZE_MAX - 1,
@@ -107,12 +105,9 @@ test_boundaries(void)
 
 	/* long long: signed wrap. */
 	ll = 0;
-	CHECK(ckd_add(&ll, LLONG_MAX, 1LL) && ll == LLONG_MIN,
-	    "llong MAX+1");
-	CHECK(ckd_sub(&ll, LLONG_MIN, 1LL) && ll == LLONG_MAX,
-	    "llong MIN-1");
-	CHECK(ckd_mul(&ll, LLONG_MIN, -1LL) && ll == LLONG_MIN,
-	    "llong MIN*-1");
+	CHECK(ckd_add(&ll, LLONG_MAX, 1LL) && ll == LLONG_MIN, "llong MAX+1");
+	CHECK(ckd_sub(&ll, LLONG_MIN, 1LL) && ll == LLONG_MAX, "llong MIN-1");
+	CHECK(ckd_mul(&ll, LLONG_MIN, -1LL) && ll == LLONG_MIN, "llong MIN*-1");
 
 	/* narrow destination: representability is judged against it. */
 	h = 0;
@@ -123,7 +118,8 @@ test_boundaries(void)
 	 * operand type. */
 	q = 0;
 	CHECK(!ckd_add(&q, (unsigned)UINT_MAX, 1u) &&
-	    q == (unsigned long long)UINT_MAX + 1ULL, "widening add");
+		q == (unsigned long long)UINT_MAX + 1ULL,
+	    "widening add");
 
 	/* mixed signedness. */
 	CHECK(ckd_add(&q, (int)-1, 0u) && q == ULLONG_MAX, "mixed -1+0u");
@@ -149,7 +145,7 @@ test_boundaries(void)
 #ifdef __SIZEOF_INT128__
 
 /* __int128 is the reference arithmetic; silence the -Wpedantic complaint. */
-__extension__ typedef __int128 i128;
+__extension__ typedef __int128		i128;
 __extension__ typedef unsigned __int128 u128;
 
 static uint64_t
@@ -159,8 +155,8 @@ mask_of(unsigned width)
 }
 
 struct int_info {
-	unsigned	width;
-	unsigned	is_signed;
+	unsigned width;
+	unsigned is_signed;
 };
 
 static i128
@@ -204,11 +200,11 @@ oracle(int op, struct int_info ra, struct int_info rb, struct int_info rr,
 	int	 sa, sb, sign;
 
 	if (op == 0)
-		return convert(value_of(a_bits, ra) + value_of(b_bits, rb), rr,
-		    out);
+		return convert(
+		    value_of(a_bits, ra) + value_of(b_bits, rb), rr, out);
 	if (op == 1)
-		return convert(value_of(a_bits, ra) - value_of(b_bits, rb), rr,
-		    out);
+		return convert(
+		    value_of(a_bits, ra) - value_of(b_bits, rb), rr, out);
 
 	ma = mask_of(ra.width);
 	mb = mask_of(rb.width);
@@ -239,67 +235,88 @@ oracle(int op, struct int_info ra, struct int_info rb, struct int_info rr,
 }
 
 static const uint64_t vals[] = {
-	UINT64_C(0), UINT64_C(1), UINT64_C(2), UINT64_C(3),
-	UINT64_C(127), UINT64_C(128), UINT64_C(255), UINT64_C(256),
-	UINT64_C(0x7fff), UINT64_C(0x8000), UINT64_C(0xffff),
-	UINT64_C(0x10000), UINT64_C(0x7fffffff), UINT64_C(0x80000000),
-	UINT64_C(0xffffffff), UINT64_C(0x100000000),
-	UINT64_C(0x7fffffffffffffff), UINT64_C(0x8000000000000000),
-	UINT64_C(0xffffffffffffffff), UINT64_C(100), UINT64_C(1000),
-	UINT64_C(65535),
+    UINT64_C(0),
+    UINT64_C(1),
+    UINT64_C(2),
+    UINT64_C(3),
+    UINT64_C(127),
+    UINT64_C(128),
+    UINT64_C(255),
+    UINT64_C(256),
+    UINT64_C(0x7fff),
+    UINT64_C(0x8000),
+    UINT64_C(0xffff),
+    UINT64_C(0x10000),
+    UINT64_C(0x7fffffff),
+    UINT64_C(0x80000000),
+    UINT64_C(0xffffffff),
+    UINT64_C(0x100000000),
+    UINT64_C(0x7fffffffffffffff),
+    UINT64_C(0x8000000000000000),
+    UINT64_C(0xffffffffffffffff),
+    UINT64_C(100),
+    UINT64_C(1000),
+    UINT64_C(65535),
 };
 
-#define RUN_CASE(AT, AS, AUT, BT, BS, BUT, RT, RS, RUT)			\
-	do {									\
-		struct int_info ra = {sizeof(AT) * CHAR_BIT, (AS)};		\
-		struct int_info rb = {sizeof(BT) * CHAR_BIT, (BS)};		\
-		struct int_info rr = {sizeof(RT) * CHAR_BIT, (RS)};		\
-		size_t i, j;							\
-		int k;								\
-										\
-		for (i = 0; i < sizeof(vals) / sizeof(vals[0]); i++) {		\
-			for (j = 0; j < sizeof(vals) / sizeof(vals[0]); j++) {\
-				uint64_t av = vals[i] & mask_of(ra.width);	\
-				uint64_t bv = vals[j] & mask_of(rb.width);	\
-				AT a = (AT)(AUT)av;				\
-				BT b = (BT)(BUT)bv;				\
-				RT r;						\
-				uint64_t want;					\
-				int wf, gf;					\
-										\
-				for (k = 0; k < 3; k++) {			\
-					r = (RT)(RUT)UINT64_C(0x5a5a5a5a5a5a5a5a);\
-					wf = oracle(k, ra, rb, rr, av, bv, &want);\
-					switch (k) {				\
-					case 0:					\
-						gf = ckd_add(&r, a, b) != 0;	\
-						break;				\
-					case 1:					\
-						gf = ckd_sub(&r, a, b) != 0;	\
-						break;				\
-					default:				\
-						gf = ckd_mul(&r, a, b) != 0;	\
-						break;				\
-					}					\
-					if (gf != wf ||				\
-					    (uint64_t)(RUT)r != want) {		\
-						if (failures < 40)		\
-							printf("FAIL: %s op=%d "\
-							    "a=%#llx b=%#llx "\
-							    "gf=%d wf=%d "\
-							    "got=%#llx "\
-							    "want=%#llx\n",	\
-							    #RT, k,		\
-							    (unsigned long long)av,\
-							    (unsigned long long)bv,\
-							    gf, wf,		\
-							    (unsigned long long)(RUT)r,\
-							    (unsigned long long)want);\
-						failures++;			\
-					}					\
-				}						\
-			}							\
-		}								\
+#define RUN_CASE(AT, AS, AUT, BT, BS, BUT, RT, RS, RUT)                               \
+	do {                                                                          \
+		struct int_info ra = {sizeof(AT) * CHAR_BIT, (AS)};                   \
+		struct int_info rb = {sizeof(BT) * CHAR_BIT, (BS)};                   \
+		struct int_info rr = {sizeof(RT) * CHAR_BIT, (RS)};                   \
+		size_t		i, j;                                                 \
+		int		k;                                                    \
+                                                                                      \
+		for (i = 0; i < sizeof(vals) / sizeof(vals[0]); i++) {                \
+			for (j = 0; j < sizeof(vals) / sizeof(vals[0]); j++) {        \
+				uint64_t av = vals[i] & mask_of(ra.width);            \
+				uint64_t bv = vals[j] & mask_of(rb.width);            \
+				AT	 a = (AT)(AUT)av;                             \
+				BT	 b = (BT)(BUT)bv;                             \
+				RT	 r;                                           \
+				uint64_t want;                                        \
+				int	 wf, gf;                                      \
+                                                                                      \
+				for (k = 0; k < 3; k++) {                             \
+					r = (RT)(RUT)UINT64_C(                        \
+					    0x5a5a5a5a5a5a5a5a);                      \
+					wf = oracle(                                  \
+					    k, ra, rb, rr, av, bv, &want);            \
+					switch (k) {                                  \
+					case 0:                                       \
+						gf = ckd_add(&r, a, b) != 0;          \
+						break;                                \
+					case 1:                                       \
+						gf = ckd_sub(&r, a, b) != 0;          \
+						break;                                \
+					default:                                      \
+						gf = ckd_mul(&r, a, b) != 0;          \
+						break;                                \
+					}                                             \
+					if (gf != wf ||                               \
+					    (uint64_t)(RUT)r != want) {               \
+						if (failures < 40)                    \
+							printf(                       \
+							    "FAIL: %s op=%d "         \
+							    "a=%#llx b=%#llx "        \
+							    "gf=%d wf=%d "            \
+							    "got=%#llx "              \
+							    "want=%#llx\n",           \
+							    #RT, k,                   \
+							    (unsigned long long)      \
+								av,                   \
+							    (unsigned long long)      \
+								bv,                   \
+							    gf, wf,                   \
+							    (unsigned long long)(RUT) \
+								r,                    \
+							    (unsigned long long)      \
+								want);                \
+						failures++;                           \
+					}                                             \
+				}                                                     \
+			}                                                             \
+		}                                                                     \
 	} while (0)
 
 static void
@@ -313,8 +330,8 @@ test_grid(void)
 	    unsigned short);
 	RUN_CASE(unsigned short, 0, unsigned short, unsigned short, 0,
 	    unsigned short, unsigned short, 0, unsigned short);
-	RUN_CASE(int, 1, unsigned int, int, 1, unsigned int, int, 1,
-	    unsigned int);
+	RUN_CASE(
+	    int, 1, unsigned int, int, 1, unsigned int, int, 1, unsigned int);
 	RUN_CASE(unsigned int, 0, unsigned int, unsigned int, 0, unsigned int,
 	    unsigned int, 0, unsigned int);
 	RUN_CASE(long long, 1, unsigned long long, long long, 1,

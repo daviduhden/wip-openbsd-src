@@ -39,13 +39,13 @@
 #ifndef _EXT4FS_DINODE_H_
 #define _EXT4FS_DINODE_H_
 
-#define EXT4FS_EXTENT_HEADER_MAGIC  0xF30A
+#define EXT4FS_EXTENT_HEADER_MAGIC 0xF30A
 
 /*
  * Maximum extent tree depth defined by the ext4 on-disk format
  * (root + four index levels + leaf).
  */
-#define EXT4FS_MAX_EXTENT_DEPTH	5
+#define EXT4FS_MAX_EXTENT_DEPTH 5
 
 struct ext4fs_extent_header {
 	u_int16_t eh_magic;
@@ -75,13 +75,13 @@ struct ext4fs_dinode {
 	u_int32_t i_size_lo;
 	u_int32_t i_atime;
 	u_int32_t i_ctime;
-  /* 0x10 */
+	/* 0x10 */
 	u_int32_t i_mtime;
 	u_int32_t i_dtime;
 	u_int16_t i_gid_lo;
 	u_int16_t i_links_count;
 	u_int32_t i_blocks_lo;
-  /* 0x20 */
+	/* 0x20 */
 	u_int32_t i_flags;
 	u_int32_t i_version;
 	union {
@@ -89,7 +89,7 @@ struct ext4fs_dinode {
 		struct {
 			struct ext4fs_extent_header i_extent_header;
 			union {
-				struct ext4fs_extent i_extent[4];
+				struct ext4fs_extent	 i_extent[4];
 				struct ext4fs_extent_idx i_extent_idx[4];
 			};
 		};
@@ -97,7 +97,7 @@ struct ext4fs_dinode {
 	u_int32_t i_nfs_generation;
 	u_int32_t i_extended_attributes_lo;
 	u_int32_t i_size_hi;
-  /* 0x70 */
+	/* 0x70 */
 	u_int32_t i_fragment_address;
 	u_int16_t i_blocks_hi;
 	u_int16_t i_extended_attributes_hi;
@@ -105,18 +105,18 @@ struct ext4fs_dinode {
 	u_int16_t i_gid_hi;
 	u_int16_t i_checksum_lo;
 	u_int16_t i_reserved_7e;
-  /* 0x80 */
+	/* 0x80 */
 	u_int16_t i_extra_isize;
 	u_int16_t i_checksum_hi;
 	u_int32_t i_ctime_extra;
 	u_int32_t i_mtime_extra;
 	u_int32_t i_atime_extra;
-  /* 0x90 */
+	/* 0x90 */
 	u_int32_t i_crtime;
 	u_int32_t i_crtime_extra;
 	u_int32_t i_version_hi;
 	u_int32_t i_project_id;
-  /* 0xA0 */
+	/* 0xA0 */
 } __attribute__((packed));
 
 /*
@@ -128,8 +128,8 @@ struct ext4fs_dinode {
  * allocated with the full filesystem s_inode_size and this struct
  * only overlays the fixed prefix.
  */
-#define EXT4FS_DINODE_SIZE	sizeof(struct ext4fs_dinode)
-#define EXT4FS_GOOD_OLD_INODE_SIZE	128
+#define EXT4FS_DINODE_SIZE sizeof(struct ext4fs_dinode)
+#define EXT4FS_GOOD_OLD_INODE_SIZE 128
 
 /*
  * These structures are an on-disk ABI.  The packed attribute fixes the
@@ -139,14 +139,14 @@ struct ext4fs_dinode {
  */
 _Static_assert(sizeof(struct ext4fs_extent_header) == (size_t)12,
     "ext4 extent header must be 12 bytes");
-_Static_assert(sizeof(struct ext4fs_extent) == (size_t)12,
-    "ext4 extent must be 12 bytes");
+_Static_assert(
+    sizeof(struct ext4fs_extent) == (size_t)12, "ext4 extent must be 12 bytes");
 _Static_assert(sizeof(struct ext4fs_extent_idx) == (size_t)12,
     "ext4 extent index must be 12 bytes");
 _Static_assert(sizeof(((struct ext4fs_dinode *)0)->i_block) == (size_t)60,
     "ext4 i_block area must be 60 bytes");
-_Static_assert(EXT4FS_DINODE_SIZE == (size_t)160,
-    "ext4 inode core must be 160 bytes");
+_Static_assert(
+    EXT4FS_DINODE_SIZE == (size_t)160, "ext4 inode core must be 160 bytes");
 _Static_assert(EXT4FS_GOOD_OLD_INODE_SIZE == 128,
     "ext4 good-old inode size must be 128 bytes");
 
