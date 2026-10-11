@@ -67,6 +67,16 @@ checksum covers exactly the bytes the ext4 definition requires, so
 it is correct for 128-, 256-, 512-, 1024-, 2048-, and 4096-byte
 inodes alike.
 
+### stdckdint
+
+Candidate ISO C23 `<stdckdint.h>` for the OpenBSD base system, plus a
+separate FVWM vendored copy.  It is a patch-style contribution, not a
+standalone build component: `stdckdint/include/stdckdint.h` and a regress
+test are wired into the source tree with `stdckdint/stdckdint.patch`, and the
+FVWM copy lives in `fvwm/compat/` so FVWM builds on an unmodified OpenBSD
+installation that does not have the new libc header.  See
+[stdckdint/README.md](stdckdint/README.md).
+
 ## Build
 
 ### Requirements

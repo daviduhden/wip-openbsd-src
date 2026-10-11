@@ -7,6 +7,12 @@ The standalone build layout is unchanged. The copy helper maps:
 | pax/ | src checkout: bin/pax/ |
 | fvwm/ | xenocara checkout: app/fvwm/ |
 
+The `stdckdint/` component is a patch-style contribution rather than a
+directory replacement: it adds `include/stdckdint.h` and a regress test and
+hooks both into the existing `include/Makefile` and `regress/lib/libc/Makefile`.
+The copy helper does not handle it; apply `stdckdint/stdckdint.patch` from the
+`src` root instead (see `stdckdint/README.md`).
+
 Use an existing CVS or Git checkout without host provisioning:
 
 ```sh

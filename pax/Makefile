@@ -6,7 +6,7 @@ MANDIR ?=	/usr/share/man/man
 CC =		clang
 DEBUGGER =	lldb
 CFLAGS_COMMON =	-std=c23 -Wall -Wextra -Wpedantic \
-		-isystem ${.CURDIR}/../compat
+		-isystem ${.CURDIR}/../stdckdint/include
 CFLAGS =	-O2 -pipe ${CFLAGS_COMMON}
 CFLAGS_DEBUG =	-O0 -g ${CFLAGS_COMMON}
 PROG =		pax
