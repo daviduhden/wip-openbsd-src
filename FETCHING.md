@@ -26,7 +26,11 @@ only components belonging to the detected target tree are copied.
 The helper rejects the wrong tree, unknown components and symlinked roots.
 It does not replace parent directories or neighboring utilities. Old component
 directories are recoverable under TREE/.wip-backups/NAME.XXXXXXXX/component;
-nested CVS metadata is retained. Sources are made readable to build users.
+nested CVS metadata is retained. Before the swap, the files that are about to
+be removed and added are recorded in TREE/.wip-changes/NAME.created.txt and
+TREE/.wip-changes/NAME.deleted.txt (one path per line, relative to the
+component root, CVS metadata excluded), so `cvs add`, `cvs remove` and a later
+`cvs diff` can be driven from them. Sources are made readable to build users.
 
 The repository's Makefiles remain the standalone fork's Makefiles. Copying
 files is not validation of a full OpenBSD src/xenocara release build, and
