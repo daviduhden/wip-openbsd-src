@@ -1,0 +1,72 @@
+libc import -- upstream provenance
+==================================
+
+Upstream repository
+-------------------
+
+  https://github.com/openbsd/src     (the OpenBSD CVS tree mirror)
+
+Branch imported
+---------------
+
+  master
+
+Commit imported
+---------------
+
+  3c04d8eee25a53e9799f866328a11d68012a6adf
+  Date:   2026-10-14 16:37:35 +0000
+  Title:  err(3) family functions should not be used with trailing \n ok tb florian
+
+  This is the tip of OpenBSD -current at the time of the import.  The
+  official tree is the CVS repository (anoncvs.ca.openbsd.org:/cvs);
+  the GitHub mirror is a byte-for-byte copy of the same file contents,
+  so the $OpenBSD$ revision tags and the copyright headers are intact.
+  CVS/ administrative files (Entries, Repository, Root) are not part of
+  either a git checkout or the GitHub mirror, so none could be carried
+  over; the source files themselves and their $OpenBSD$ tags are
+  preserved unchanged.
+
+Import method
+-------------
+
+  A blob-filtered, single-commit (depth 1) sparse checkout of the paths
+  below, copied without modification into this component:
+
+    include/                -> libc/include/
+    lib/libc/               -> libc/lib/libc/
+    lib/libpthread/         -> libc/lib/libpthread/
+    sys/sys/                -> libc/sys/sys/                 (dependency)
+    sys/arch/amd64/include/ -> libc/sys/arch/amd64/include/  (dependency)
+    sys/arch/i386/include/  -> libc/sys/arch/i386/include/
+    sys/arch/arm/include/   -> libc/sys/arch/arm/include/
+    sys/arch/arm64/include/ -> libc/sys/arch/arm64/include/
+    sys/arch/armv7/include/ -> libc/sys/arch/armv7/include/
+    sys/arch/riscv64/include/ -> libc/sys/arch/riscv64/include/
+    sys/arch/powerpc64/include/ -> libc/sys/arch/powerpc64/include/
+    sys/arch/sparc64/include/ -> libc/sys/arch/sparc64/include/
+    regress/lib/libc/       -> libc/regress/lib/libc/        (test harness)
+
+  sys/sys and the sys/arch/*/include trees are not libc, but the public
+  libc headers include <sys/*.h> and <machine/*.h>, so the corresponding
+  kernel headers are needed for the tree to be self-hosting for
+  compilation and for the host-side tests.  The architectures imported
+  are the ones whose machine headers are needed to check the new headers
+  across OpenBSD's supported platforms (see README).  These sys/ subtrees
+  are byte-for-byte upstream and are not part of the change set.
+
+  src/lib/libpthread in OpenBSD -current contains only manual pages: the
+  thread implementation lives in lib/libc/thread/ (see
+  lib/libc/thread/Makefile.inc).  The imported libpthread/ directory is
+  therefore only the man pages, and the C11 <threads.h> implementation in
+  this tree is built into libc, next to the pthread implementation it
+  wraps.
+
+Verification
+------------
+
+  Every file under libc/ other than the ones listed in this project's
+  own README (the six headers, the new libc sources, the hidden headers,
+  the manual pages and the regress tests) is byte-for-byte upstream.  A
+  patch against the upstream revision can be produced at any time with
+  `diff -ruN` between the upstream checkout and this component.

@@ -1,0 +1,70 @@
+/*	$OpenBSD: sha2.h,v 1.8 2026/08/31 15:09:14 tb Exp $	*/
+/*
+ * Copyright (c) 2015 Philip Guenther <guenther@openbsd.org>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef _LIBC_SHA2_H
+#define _LIBC_SHA2_H
+
+#include_next <sha2.h>
+
+__BEGIN_HIDDEN_DECLS
+void __sha256_block(uint32_t state[8], const uint8_t *in, size_t num);
+void __sha256_block_generic(uint32_t state[8], const uint8_t *in, size_t num);
+void __sha512_block(uint64_t state[8], const uint8_t *in, size_t num);
+void __sha512_block_generic(uint64_t state[8], const uint8_t *in, size_t num);
+
+#ifdef __aarch64__
+void __sha256_block_ce(uint32_t state[8], const uint8_t *in, size_t num);
+void __sha512_block_ce(uint64_t state[8], const uint8_t *in, size_t num);
+#endif
+
+#ifdef __amd64__
+void __sha256_block_shani(uint32_t state[8], const uint8_t *in, size_t num);
+#endif
+__END_HIDDEN_DECLS
+
+PROTO_NORMAL(SHA224Data);
+PROTO_NORMAL(SHA224End);
+PROTO_NORMAL(SHA224File);
+PROTO_NORMAL(SHA224Final);
+PROTO_NORMAL(SHA224Init);
+PROTO_NORMAL(SHA224Update);
+PROTO_NORMAL(SHA256Data);
+PROTO_NORMAL(SHA256End);
+PROTO_NORMAL(SHA256File);
+PROTO_NORMAL(SHA256Final);
+PROTO_NORMAL(SHA256Init);
+PROTO_NORMAL(SHA256Update);
+PROTO_NORMAL(SHA384Data);
+PROTO_NORMAL(SHA384End);
+PROTO_NORMAL(SHA384File);
+PROTO_NORMAL(SHA384Final);
+PROTO_NORMAL(SHA384Init);
+PROTO_NORMAL(SHA384Update);
+PROTO_NORMAL(SHA512Data);
+PROTO_NORMAL(SHA512End);
+PROTO_NORMAL(SHA512File);
+PROTO_NORMAL(SHA512Final);
+PROTO_NORMAL(SHA512Init);
+PROTO_NORMAL(SHA512Update);
+PROTO_NORMAL(SHA512_256Data);
+PROTO_NORMAL(SHA512_256End);
+PROTO_NORMAL(SHA512_256File);
+PROTO_NORMAL(SHA512_256Final);
+PROTO_NORMAL(SHA512_256Init);
+PROTO_NORMAL(SHA512_256Update);
+
+#endif /* _LIBC_SHA2_H */

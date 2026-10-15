@@ -77,6 +77,20 @@ FVWM copy lives in `fvwm/compat/` so FVWM builds on an unmodified OpenBSD
 installation that does not have the new libc header.  See
 [stdckdint/README.md](stdckdint/README.md).
 
+### libc
+
+Import of the OpenBSD `-current` C library (`lib/libc`, `include`,
+`libpthread`, with the `sys` headers they need), plus original
+implementations of the six ISO C standard headers the base system does
+not install: `stdalign.h`, `stdnoreturn.h`, `stdatomic.h` and
+`threads.h` from C11, and `stdbit.h` and `stdckdint.h` from C23.  It is a
+patch-style contribution, not a standalone build component: the headers,
+the libc sources, the regress tests and the manual pages are stored at
+OpenBSD-source-relative paths inside `libc/`.  See
+[libc/README.md](libc/README.md) for the implementation and
+[libc/REPORT.md](libc/REPORT.md) for the conformance audit, the
+architecture matrix and the test results.
+
 ## Build
 
 ### Requirements
@@ -208,6 +222,14 @@ $ make -C tests CC=clang run
 
 Set `X11INCS` to the directory holding the X11 headers when they
 are not in the default locations (e.g. `X11INCS=-I/usr/local/include`).
+
+The `libc` component has its own host-side harness, which compiles and
+runs the ISO C headers and the C11 threads wrapper against the host C
+library:
+
+```
+$ make -C libc/tests CC=clang run
+```
 
 ## Security
 

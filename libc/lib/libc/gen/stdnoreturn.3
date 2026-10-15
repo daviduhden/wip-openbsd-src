@@ -1,0 +1,59 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt STDNORETURN 3
+.Os
+.Sh NAME
+.Nm stdnoreturn
+.Nd non-returning function specifier
+.Sh SYNOPSIS
+.In stdnoreturn.h
+.Fn noreturn "function declaration"
+.Sh DESCRIPTION
+The
+.In stdnoreturn.h
+header defines the
+.Fn noreturn
+macro, which expands to the
+.Va _Noreturn
+function specifier.
+A function declared with it does not return to its caller and must not be
+called in a context that expects it to.
+.Pp
+The macro is intended for C only.
+In C++ the equivalent facility is the
+.Va [[noreturn]]
+attribute, and the header defines nothing.
+.Pp
+In ISO C23
+.Va _Noreturn
+is deprecated in favour of the
+.Va [[noreturn]]
+attribute, but the
+.Fn noreturn
+macro and its expansion are unchanged.
+.Sh STANDARDS
+The
+.In stdnoreturn.h
+header conforms to
+.St -isoC-2011
+and ISO/IEC 9899:2024 (C23).
+.Sh HISTORY
+The
+.In stdnoreturn.h
+header appeared in
+.Ox 8.0 .

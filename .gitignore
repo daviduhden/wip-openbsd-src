@@ -11,6 +11,11 @@ pax/pax
 tests/*-tests
 tests/*_debug
 
+# Host-side libc tests (see libc/tests/Makefile)
+libc/tests/*-tests
+libc/tests/*_debug
+libc/tests/.shim
+
 fvwm/libs/libfvwm.a
 fvwm/fvwm/fvwm
 fvwm/fvwm/fvwm_exec

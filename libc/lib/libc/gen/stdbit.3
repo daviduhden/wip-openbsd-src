@@ -1,0 +1,152 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt STDBIT 3
+.Os
+.Sh NAME
+.Nm stdc_leading_zeros ,
+.Nm stdc_leading_ones ,
+.Nm stdc_trailing_zeros ,
+.Nm stdc_trailing_ones ,
+.Nm stdc_first_leading_zero ,
+.Nm stdc_first_leading_one ,
+.Nm stdc_first_trailing_zero ,
+.Nm stdc_first_trailing_one ,
+.Nm stdc_count_zeros ,
+.Nm stdc_count_ones ,
+.Nm stdc_has_single_bit ,
+.Nm stdc_bit_width ,
+.Nm stdc_bit_floor ,
+.Nm stdc_bit_ceil
+.Nd bit and byte utilities
+.Sh SYNOPSIS
+.In stdbit.h
+.Ft unsigned int
+.Fn stdc_leading_zeros "unsigned int value"
+.Ft unsigned int
+.Fn stdc_leading_ones "unsigned int value"
+.Ft unsigned int
+.Fn stdc_trailing_zeros "unsigned int value"
+.Ft unsigned int
+.Fn stdc_trailing_ones "unsigned int value"
+.Ft unsigned int
+.Fn stdc_first_leading_zero "unsigned int value"
+.Ft unsigned int
+.Fn stdc_first_leading_one "unsigned int value"
+.Ft unsigned int
+.Fn stdc_first_trailing_zero "unsigned int value"
+.Ft unsigned int
+.Fn stdc_first_trailing_one "unsigned int value"
+.Ft unsigned int
+.Fn stdc_count_zeros "unsigned int value"
+.Ft unsigned int
+.Fn stdc_count_ones "unsigned int value"
+.Ft bool
+.Fn stdc_has_single_bit "unsigned int value"
+.Ft unsigned int
+.Fn stdc_bit_width "unsigned int value"
+.Ft unsigned int
+.Fn stdc_bit_floor "unsigned int value"
+.Ft unsigned int
+.Fn stdc_bit_ceil "unsigned int value"
+.Sh DESCRIPTION
+The
+.In stdbit.h
+header provides the ISO C23 bit and byte utilities.
+The functions above are type-generic macros that accept any unsigned
+integer type; for each there are also typed functions with the suffixes
+.Sy _uc ,
+.Sy _us ,
+.Sy _ui ,
+.Sy _ul
+and
+.Sy _ull
+for
+.Vt unsigned char ,
+.Vt unsigned short ,
+.Vt unsigned int ,
+.Vt unsigned long
+and
+.Vt unsigned long long .
+.Pp
+.Fn stdc_leading_zeros
+and
+.Fn stdc_trailing_zeros
+count the number of consecutive zero bits starting from the most or least
+significant bit; the corresponding
+.Fn _ones
+macros count one bits.
+.Fn stdc_first_leading_zero ,
+.Fn stdc_first_leading_one ,
+.Fn stdc_first_trailing_zero
+and
+.Fn stdc_first_trailing_one
+return the one-based position of the first matching bit, or zero if no
+such bit exists.
+.Fn stdc_count_zeros
+and
+.Fn stdc_count_ones
+count all zero or one bits.
+.Pp
+.Fn stdc_bit_width
+returns the number of bits needed to represent the value, ignoring
+leading zeros;
+.Fn stdc_bit_floor
+returns the largest power of two not greater than the value, and
+.Fn stdc_bit_ceil
+the smallest power of two not less than the value.
+Both return a value of the same type as their argument.
+.Fn stdc_has_single_bit
+reports whether the value is a power of two.
+.Pp
+The macros
+.Dv __STDC_ENDIAN_LITTLE__ ,
+.Dv __STDC_ENDIAN_BIG__
+and
+.Dv __STDC_ENDIAN_NATIVE__
+are distinct integer constants;
+.Dv __STDC_ENDIAN_NATIVE__
+equals one of the other two according to the byte order of the machine.
+.Sh RETURN VALUES
+The counting, searching and width functions return a value of type
+.Vt unsigned int .
+The first-bit searches return zero when no matching bit is present.
+.Fn stdc_bit_floor
+and
+.Fn stdc_bit_ceil
+return the type of their argument.
+.Sh NOTES
+The typed functions are libc entry points with external linkage and a
+stable address.
+The type-generic interface accepts the standard unsigned integer types and,
+where the compiler provides a 128-bit integer type, that type as well; in
+C++ it is provided with overloaded functions.
+.Pp
+The C29
+.Fn stdc_rotate_left
+and
+.Fn stdc_rotate_right
+additions are not part of ISO C23 and are not provided.
+.Sh STANDARDS
+The
+.In stdbit.h
+header conforms to ISO/IEC 9899:2024 (C23).
+.Sh HISTORY
+The
+.In stdbit.h
+header appeared in
+.Ox 8.0 .

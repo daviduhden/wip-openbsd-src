@@ -1,0 +1,252 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt THREADS 3
+.Os
+.Sh NAME
+.Nm thrd_create ,
+.Nm thrd_equal ,
+.Nm thrd_current ,
+.Nm thrd_sleep ,
+.Nm thrd_yield ,
+.Nm thrd_exit ,
+.Nm thrd_detach ,
+.Nm thrd_join ,
+.Nm mtx_init ,
+.Nm mtx_lock ,
+.Nm mtx_timedlock ,
+.Nm mtx_trylock ,
+.Nm mtx_unlock ,
+.Nm mtx_destroy ,
+.Nm cnd_init ,
+.Nm cnd_signal ,
+.Nm cnd_broadcast ,
+.Nm cnd_wait ,
+.Nm cnd_timedwait ,
+.Nm cnd_destroy ,
+.Nm tss_create ,
+.Nm tss_get ,
+.Nm tss_set ,
+.Nm tss_delete ,
+.Nm call_once
+.Nd ISO C threads
+.Sh SYNOPSIS
+.In threads.h
+.Ft typedef ... thrd_t ;
+.Ft typedef int (*thrd_start_t )(void * );
+.Ft typedef ... mtx_t ;
+.Ft typedef ... cnd_t ;
+.Ft typedef ... tss_t ;
+.Ft typedef void (*tss_dtor_t )(void * );
+.Ft typedef ... once_flag ;
+.Ft int
+.Fn thrd_create "thrd_t *thr" "thrd_start_t func" "void *arg"
+.Ft int
+.Fn thrd_equal "thrd_t thr0" "thrd_t thr1"
+.Ft thrd_t
+.Fn thrd_current "void"
+.Ft int
+.Fn thrd_sleep "const struct timespec *duration" "struct timespec *remaining"
+.Ft void
+.Fn thrd_yield "void"
+.Ft _Noreturn void
+.Fn thrd_exit "int res"
+.Ft int
+.Fn thrd_detach "thrd_t thr"
+.Ft int
+.Fn thrd_join "thrd_t thr" "int *res"
+.Ft int
+.Fn mtx_init "mtx_t *mtx" "int type"
+.Ft int
+.Fn mtx_lock "mtx_t *mtx"
+.Ft int
+.Fn mtx_timedlock "mtx_t *mtx" "const struct timespec *ts"
+.Ft int
+.Fn mtx_trylock "mtx_t *mtx"
+.Ft int
+.Fn mtx_unlock "mtx_t *mtx"
+.Ft void
+.Fn mtx_destroy "mtx_t *mtx"
+.Ft int
+.Fn cnd_init "cnd_t *cond"
+.Ft int
+.Fn cnd_signal "cnd_t *cond"
+.Ft int
+.Fn cnd_broadcast "cnd_t *cond"
+.Ft int
+.Fn cnd_wait "cnd_t *cond" "mtx_t *mtx"
+.Ft int
+.Fn cnd_timedwait "cnd_t *cond" "mtx_t *mtx" "const struct timespec *ts"
+.Ft void
+.Fn cnd_destroy "cnd_t *cond"
+.Ft int
+.Fn tss_create "tss_t *key" "tss_dtor_t dtor"
+.Ft void *
+.Fn tss_get "tss_t key"
+.Ft int
+.Fn tss_set "tss_t key" "void *val"
+.Ft void
+.Fn tss_delete "tss_t key"
+.Ft void
+.Fn call_once "once_flag *flag" "void (*func)(void)"
+.Sh DESCRIPTION
+The
+.In threads.h
+header provides the ISO C11 threads interface.
+It is a standardised interface over the
+.Xr pthread 3
+implementation that is part of
+.Xr libc 3 ;
+every object is a real pthread object underneath and no separate
+synchronisation primitive is introduced.
+.Pp
+.Fn thrd_create
+creates a thread that runs
+.Fa func
+with argument
+.Fa arg .
+.Fn thrd_join
+waits for a thread to terminate and stores its result;
+.Fn thrd_detach
+releases the resources of a thread whose result is not needed.
+.Fn thrd_exit
+terminates the calling thread.
+.Fn thrd_equal
+compares two thread identifiers and
+.Fn thrd_current
+returns the identifier of the calling thread.
+.Fn thrd_sleep
+suspends the calling thread;
+.Fn thrd_yield
+offers the processor to another thread.
+.Pp
+.Fn mtx_init
+initializes a mutex.
+.Fa type
+is
+.Dv mtx_plain ,
+.Dv mtx_recursive
+or
+.Dv mtx_timed ,
+or the bitwise OR of
+.Dv mtx_recursive
+and
+.Dv mtx_timed .
+.Fn mtx_lock
+blocks until the mutex is locked,
+.Fn mtx_trylock
+returns
+.Dv thrd_busy
+if the mutex is already locked,
+and
+.Fn mtx_timedlock
+blocks until the absolute
+.Fa ts
+time.
+.Pp
+.Fn cnd_init
+initializes a condition variable.
+.Fn cnd_wait
+and
+.Fn cnd_timedwait
+atomically release the mutex and wait for a signal;
+.Fn cnd_timedwait
+returns
+.Dv thrd_timedout
+when the absolute
+.Fa ts
+time passes.
+.Fn cnd_signal
+wakes one waiter and
+.Fn cnd_broadcast
+wakes all of them.
+.Pp
+.Fn tss_create
+creates a thread-specific storage key with destructor
+.Fa dtor ;
+.Fn tss_get
+and
+.Fn tss_set
+access the value associated with the calling thread.
+.Pp
+.Fn call_once
+calls
+.Fa func
+exactly once for a given
+.Fa flag .
+A
+.Vt once_flag
+must be initialized with
+.Dv ONCE_FLAG_INIT .
+.Pp
+The
+.Dv thread_local
+macro, available before ISO C23, is a synonym for
+.Va _Thread_local .
+.Sh RETURN VALUES
+The functions that can fail return
+.Dv thrd_success
+on success and one of
+.Dv thrd_timedout ,
+.Dv thrd_busy ,
+.Dv thrd_nomem
+or
+.Dv thrd_error
+on failure.
+.Fn thrd_join
+stores the result of the thread in
+.Fa res
+when
+.Fa res
+is not
+.Dv NULL .
+.Fn thrd_sleep
+returns 0 when the requested interval elapsed, \-1 when it was interrupted
+and \-2 on error.
+.Pp
+.Fn thrd_yield ,
+.Fn thrd_exit ,
+.Fn mtx_destroy ,
+.Fn cnd_destroy
+and
+.Fn tss_delete
+return no value.
+.Sh NOTES
+The base clang currently predefines
+.Dv __STDC_NO_THREADS__
+when targeting
+.Ox ,
+because the base system has historically lacked
+.In threads.h .
+This interface is provided by libc nonetheless; including
+.In threads.h
+withdraws the stale macro, and the compiler's target description should be
+updated to match.
+.Sh SEE ALSO
+.Xr pthread 3 ,
+.Xr stdatomic 3
+.Sh STANDARDS
+The
+.In threads.h
+header conforms to
+.St -isoC-2011
+and ISO/IEC 9899:2024 (C23).
+.Sh HISTORY
+The
+.In threads.h
+header appeared in
+.Ox 8.0 .

@@ -1,0 +1,68 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt STDALIGN 3
+.Os
+.Sh NAME
+.Nm stdalign
+.Nd alignment macros
+.Sh SYNOPSIS
+.In stdalign.h
+.Fn alignas "type"
+.Fn alignof "type"
+.Sh DESCRIPTION
+The
+.In stdalign.h
+header provides two macros that name the ISO C alignment specifier and
+operator.
+.Bl -tag -width Ds
+.It Fn alignas
+Expands to
+.Va _Alignas .
+It specifies the alignment of an object or a member.
+.It Fn alignof
+Expands to
+.Va _Alignof .
+It yields the alignment requirement of a type as a value of type
+.Vt size_t .
+.El
+.Pp
+The macros
+.Dv __alignas_is_defined
+and
+.Dv __alignof_is_defined
+are defined to
+.Dv 1
+and can be used to detect that the header is available.
+.Pp
+In ISO C23
+.Va alignas
+and
+.Va alignof
+are keywords and the header no longer defines the macros; including it is
+harmless and has no effect.
+.Sh STANDARDS
+The
+.In stdalign.h
+header conforms to
+.St -isoC-2011
+and ISO/IEC 9899:2024 (C23).
+.Sh HISTORY
+The
+.In stdalign.h
+header appeared in
+.Ox 8.0 .

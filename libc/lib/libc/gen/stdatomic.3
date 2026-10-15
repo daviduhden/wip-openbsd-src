@@ -1,0 +1,138 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt STDATOMIC 3
+.Os
+.Sh NAME
+.Nm stdatomic
+.Nd atomic types and operations
+.Sh SYNOPSIS
+.In stdatomic.h
+.Sh DESCRIPTION
+The
+.In stdatomic.h
+header provides the ISO C11 atomic types and the operations on them.
+The types are the atomic-qualified forms of the standard integer and
+pointer types:
+.Vt atomic_bool ,
+.Vt atomic_int ,
+.Vt atomic_uint ,
+.Vt atomic_long ,
+.Vt atomic_ulong ,
+.Vt atomic_llong ,
+.Vt atomic_ullong ,
+the least, fast, pointer-sized and maximum-width variants, and
+.Vt atomic_flag .
+.Pp
+The type-generic operations are function-like macros that accept a pointer
+to an atomic object:
+.Bl -tag -width Ds -offset indent -compact
+.It Fn atomic_init object value
+.It Fn atomic_load object
+.It Fn atomic_store object value
+.It Fn atomic_exchange object value
+.It Fn atomic_compare_exchange_strong object expected desired
+.It Fn atomic_compare_exchange_weak object expected desired
+.It Fn atomic_fetch_add object operand
+.It Fn atomic_fetch_sub object operand
+.It Fn atomic_fetch_or object operand
+.It Fn atomic_fetch_xor object operand
+.It Fn atomic_fetch_and object operand
+.El
+.Pp
+Each has an
+.Dq _explicit
+form that takes a
+.Vt memory_order
+argument, and the compare-and-exchange macros take both a success and a
+failure order.
+.Pp
+.Vt memory_order
+is an enumeration with the standard values
+.Dv memory_order_relaxed ,
+.Dv memory_order_consume ,
+.Dv memory_order_acquire ,
+.Dv memory_order_release ,
+.Dv memory_order_acq_rel
+and
+.Dv memory_order_seq_cst .
+.Pp
+.Vt atomic_flag
+is a one-byte lock-free type initialized with
+.Dv ATOMIC_FLAG_INIT
+and manipulated with
+.Fn atomic_flag_test_and_set
+and
+.Fn atomic_flag_clear
+(and their explicit forms).
+.Pp
+.Fn atomic_thread_fence
+and
+.Fn atomic_signal_fence
+issue memory fences.
+.Fn atomic_is_lock_free
+reports whether an object is lock-free and is a compile-time constant.
+The
+.Dv ATOMIC_*_LOCK_FREE
+macros describe the standard atomic types; the values are 0, 1 or 2 as
+specified by ISO C.
+.Pp
+The implementation is built on the compiler's atomic builtins, which
+lower to the atomic instructions of the machine and never call an
+external support library.
+.Sh RETURN VALUES
+.Fn atomic_load ,
+.Fn atomic_exchange ,
+.Fn atomic_fetch_add
+and the other read-modify-write operations return the value that was
+contained in the object; the compare-and-exchange operations return a
+non-zero value if the exchange happened.
+.Fn atomic_store
+and the flag clear operations return no value.
+.Sh NOTES
+For atomic pointer types,
+.Fn atomic_fetch_add
+and
+.Fn atomic_fetch_sub
+scale the operand by the size of the pointed-to type, as the standard
+requires.
+.Pp
+Atomic objects whose size is not lock-free are handled internally with a
+lock-based fallback, so the interface is self-contained and does not
+depend on an external atomic runtime.
+.Fn atomic_is_lock_free
+still reports such a type as not lock-free.
+.Sh SEE ALSO
+.Xr threads 3
+.Sh STANDARDS
+The
+.In stdatomic.h
+header conforms to
+.St -isoC-2011
+and ISO/IEC 9899:2024 (C23).
+The
+.Dv _Bool
+member of
+.Vt atomic_flag
+and the removal of
+.Dv ATOMIC_VAR_INIT
+follow ISO C23.
+.Sh HISTORY
+The
+.In stdatomic.h
+header appeared in
+.Ox 8.0 .

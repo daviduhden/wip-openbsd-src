@@ -1,0 +1,85 @@
+.\"	$OpenBSD$
+.\"
+.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt STDCKDINT 3
+.Os
+.Sh NAME
+.Nm ckd_add ,
+.Nm ckd_sub ,
+.Nm ckd_mul
+.Nd checked integer arithmetic
+.Sh SYNOPSIS
+.In stdckdint.h
+.Ft bool
+.Fn ckd_add "result" "a" "b"
+.Ft bool
+.Fn ckd_sub "result" "a" "b"
+.Ft bool
+.Fn ckd_mul "result" "a" "b"
+.Sh DESCRIPTION
+The
+.In stdckdint.h
+header provides macros for arithmetic with overflow detection.
+Each macro evaluates its two operands at their mathematical value,
+converts the exact result to the type of the object designated by
+.Fa result ,
+stores that converted value, and yields
+.Dv true
+exactly when the conversion is not value preserving.
+Every argument is evaluated exactly once and no operation has undefined
+behaviour, even when the mathematical result is not representable in any
+integer type.
+.Pp
+The macros accept any integer types; the operands need not have the same
+type, and
+.Fa result
+may be narrower, wider or of a different signedness than the operands.
+When the result type is unsigned and the exact value is out of range, the
+stored value wraps modulo the width of the type and the macro yields
+.Dv true .
+.Sh RETURN VALUES
+.Fn ckd_add ,
+.Fn ckd_sub
+and
+.Fn ckd_mul
+return a value of type
+.Vt bool :
+.Dv true
+if the result could not be represented in the destination type,
+.Dv false
+otherwise.
+.Sh EXAMPLES
+The following stores the sum of two
+.Vt int
+values only when it fits:
+.Bd -literal -offset indent
+int sum;
+
+if (!ckd_add(&sum, a, b))
+	use(sum);
+else
+	overflow();
+.Ed
+.Sh STANDARDS
+The
+.In stdckdint.h
+header conforms to ISO/IEC 9899:2024 (C23).
+.Sh HISTORY
+The
+.In stdckdint.h
+header appeared in
+.Ox 8.0 .
