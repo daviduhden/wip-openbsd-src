@@ -1274,23 +1274,6 @@ ar_start_gzip(int fd, const char *path, int wr)
 		close(fds[0]);
 		close(fds[1]);
 
-		{
-			const char *promises;
-
-			/*
-			 * Keep this in sync with the final pledge in
-			 * main(): pledge(2) can only reduce, and this
-			 * re-pledge also runs on later volume changes.
-			 */
-			if (act == LIST)
-				promises = "stdio rpath getpw tape proc exec";
-			else
-				promises = "stdio rpath wpath cpath fattr "
-					   "dpath getpw tape proc exec";
-
-			if (pledge(promises, nullptr) == -1)
-				err(1, "pledge");
-		}
 	} else {
 		if (wr) {
 			dup2(fds[0], STDIN_FILENO);
@@ -1306,9 +1289,7 @@ ar_start_gzip(int fd, const char *path, int wr)
 
 		closefrom(STDERR_FILENO + 1);
 
-		if (pledge("stdio exec", nullptr) == -1)
-			err(1, "pledge");
-
+		/* The compressor must execute with no inherited syscall ceiling. */
 		if (execlp(path, path, gzip_flags, (char *)nullptr) == -1)
 			err(1, "could not exec %s", path);
 		/* NOTREACHED */

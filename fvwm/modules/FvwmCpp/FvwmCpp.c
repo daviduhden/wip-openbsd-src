@@ -160,8 +160,10 @@ main(int argc, char **argv)
 
 	unveil_tempdir("FvwmCpp");
 	unveil_home_read("FvwmCpp");
-	unveil(nullptr, nullptr);
-	sandbox_cpp_preproc("FvwmCpp");
+	if (unveil("/bin/sh", "rx") == -1 ||
+	    unveil("/usr/libexec/ld.so", "rx") == -1 ||
+	    unveil(nullptr, nullptr) == -1)
+		err(1, "FvwmCpp: unveil");
 
 	if (cpp_process(dpy, display_name, cpp_options, filename, cpp_debug) !=
 	    0)
@@ -263,6 +265,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 		_exit(127);
 	}
 
+	sandbox_cpp_preproc("FvwmCpp");
 	close(to_child[0]);
 	close(from_child[1]);
 

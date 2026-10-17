@@ -257,34 +257,11 @@ commands without access to the X11 connection.
 After initialization, the main process locks its filesystem view
 with
 .Xr unveil 2
-and reduces its privileges with
-.Xr pledge 2 .
+and stays unpledged because it must launch modules and restart.
 .El
 .Pp
-The main
-.Nm
-process runs with the following
-.Xr pledge 2
-promises after startup:
-.Bl -dash -compact
-.It
-.Va stdio
-(memory allocation, logging)
-.It
-.Va rpath wpath cpath
-(read and write configuration, resource files, and saved state)
-.It
-.Va proc exec
-(fork/exec for module launching, multi-screen operation,
-.Ic Restart ,
-and the local
-.Ic Exec
-fallback when the helper is unavailable)
-.It
-.Va dns getpw inet
-(user database lookups and TCP X11 connections; kept so the
-spawned modules can inherit them and reduce to their own sets)
-.El
+Without the execution promise, pledge cannot cover those launches.
+The locked unveil view restricts pathname operations in the controller.
 .Pp
 .Nm
 uses
@@ -332,11 +309,9 @@ policy, and it deliberately applies no
 .Xr pledge 2
 or
 .Xr unveil 2
-of its own: both are inherited across
-.Xr execve 2
-and would cripple the arbitrary programs
-.Nm
-launches.
+of its own.
+It must execute arbitrary programs without a syscall ceiling.
+Without execpromises, execve clears inherited unveil rules.
 This means
 .Ic Exec
 and
@@ -365,8 +340,10 @@ module opens its own X11 connection, communicates with the main
 .Nm
 process via Unix pipes, and applies its own
 .Xr pledge 2
-policy (derived from the inherited baseline via
-.Pa fvwm_sandbox.h ).
+policy via
+.Pa fvwm_sandbox.h .
+FvwmCpp and FvwmM4 install the parent policy after creating their
+preprocessor child. Executed modules do not inherit the unveil view.
 .Sh SEE ALSO
 .Xr fvwm_exec 1 ,
 .Xr FvwmAuto 1 ,

@@ -9,7 +9,7 @@ system-provided versions.
 
 ### pax (tar + cpio)
 
-Archive tool with pledge(2) and unveil(2) sandboxing, following
+Archive tool with unveil(2), and pledge(2) in uncompressed modes, following
 the POSIX.1-2024 pax/tar/cpio semantics: the default extraction
 removes leading '/' from pathnames (POSIX C-1) and the tar
 default block size is 10240 bytes (POSIX M-2).  Includes tar(1),
@@ -22,17 +22,18 @@ FVWM 2.2.5 window manager with privilege separation.  Both Exec
 and PipeRead commands run in the fvwm_exec helper (imsg(3)
 protocol over a socketpair), which is started before the main
 process locks its filesystem view and deliberately applies no
-pledge(2)/unveil(2); both are inherited across execve(2) and
-would cripple the arbitrary programs fvwm launches.  PipeRead
+pledge(2)/unveil(2). Without execpromises, execve clears an inherited
+unveil view; no execution promise is requested by these programs.  PipeRead
 output is streamed back over IMSG_PIPEREAD_DATA messages and
 parsed with the historical line semantics (bounded line lengths,
 backslash-newline continuation, NUL truncation, nesting to
 MAX_NESTING_DEPTH with per-frame bounded buffering), so PipeRead
 commands are no longer restricted by the main process's unveil
-sandbox.  The main process, all 17 modules, and xpmroot apply
-per-process pledge(2) policies; the main process additionally
-restricts its filesystem view with unveil(2) (the modules are
-launched by the main process and inherit that view).  Compiled as
+sandbox.  The main process stays unpledged to launch modules and restart, retaining
+its locked unveil view for parent pathname operations. Modules and xpmroot
+apply their own pledge policies; FvwmCpp/FvwmM4 pledge their parent only
+after creating the preprocessor child. Executed modules receive a fresh
+filesystem view, not the controller's unveil rules.  Compiled as
 ISO C23 with complete function prototypes; numeric configuration
 parsing goes through FvwmParseInteger() (historical atoi(3)
 prefix semantics with defined overflow behaviour) or strtonum(3)
@@ -233,9 +234,11 @@ $ make -C libc/tests CC=clang run
 
 ## Security
 
-Every process uses staged pledge(2) and unveil(2) to restrict
-system calls and filesystem access to the minimum required.
-See source code for per-process policy details.
+Processes that no longer execute programs use staged pledge(2).
+Launchers retain unveil where useful for their own pathname operations,
+but stay unpledged to allow execution without the removed promise.
+Unveil is cleared on execve without execpromises; it is not an inherited
+application sandbox. See source code for per-process policy details.
 
 ## License
 

@@ -17,8 +17,8 @@
  * the whole point of the architecture.
  *
  * NOTE: this process deliberately applies no pledge(2) or unveil(2):
- * both are inherited across execve(2), and fvwm must be able to
- * launch arbitrary programs with full user privileges.  The helper's
+ * it must execute arbitrary programs without a syscall ceiling.
+ * Without execpromises, execve clears inherited unveil rules. The helper's
  * protection comes from its separate address space, strict message
  * parsing, bounded buffering, and closefrom(3) fd hygiene.
  *

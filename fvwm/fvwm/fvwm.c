@@ -82,7 +82,7 @@ int    g_argc;
 
 /*
  * Absolute path of the running fvwm binary, recorded with
- * getexecpath(3) at startup (before pledge(2)).  Restart uses it to
+ * getexecpath(3) at startup (before unveil(2)).  Restart uses it to
  * unveil the binary's directory and to re-exec fvwm when a Restart
  * command fails.  Empty when getexecpath(3) is unavailable.
  */
@@ -491,10 +491,9 @@ main(int argc, char **argv)
 	exec_helper_start();
 
 	/*
-	 * Sandbox baseline shared by fvwm and the modules it spawns.
-	 * Modules inherit this state and tighten it with their own
-	 * pledge/unveil calls (see fvwm_sandbox.h).  The baseline
-	 * therefore has to cover every module's needs:
+	 * Filesystem view of the controller. Executed modules start afresh
+	 * because no execpromises are installed, and sandbox themselves.
+	 * The controller must keep module executables and its own files visible:
 	 *
 	 *   FVWMLIBDIR          module binaries and fvwm_exec
 	 *   /etc/X11/fvwm       system configuration
@@ -544,7 +543,7 @@ main(int argc, char **argv)
 		 * Restart re-execs fvwm, so the directory holding the
 		 * running binary must stay visible.  execpath was
 		 * recorded with getexecpath(3) in main(), before
-		 * pledge(2); copy it before trimming the basename so
+		 * unveil(2); copy it before trimming the basename so
 		 * the full path remains available to Done().
 		 */
 		if (execpath[0] != '\0') {
@@ -561,21 +560,8 @@ main(int argc, char **argv)
 		if (unveil(nullptr, nullptr) == -1)
 			err(1, "unveil");
 
-		/*
-		 * proc/exec remain needed: modules are forked and
-		 * exec'd here (module.c), multi-screen operation
-		 * forks, Restart re-execs fvwm, and Exec keeps a
-		 * local fork fallback for installations without the
-		 * helper.  PipeRead no longer forks in this process;
-		 * its commands run in fvwm_exec.  wpath/cpath and
-		 * dns/getpw/inet are kept so the spawned modules can
-		 * inherit them and reduce to their own sets (pledge(2)
-		 * can only drop promises); the unveil policy above
-		 * bounds where they apply.
-		 */
-		if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
-			nullptr) == -1)
-			err(1, "pledge");
+		/* Modules, fallback commands and Restart execute later. Keep the
+		 * controller unpledged and preserve its locked unveil view. */
 	}
 
 	HandleEvents();

@@ -171,8 +171,10 @@ main(int argc, char **argv)
 
 	unveil_tempdir("FvwmM4");
 	unveil_home_read("FvwmM4");
-	unveil(nullptr, nullptr);
-	sandbox_m4_preproc("FvwmM4");
+	if (unveil("/bin/sh", "rx") == -1 ||
+	    unveil("/usr/libexec/ld.so", "rx") == -1 ||
+	    unveil(nullptr, nullptr) == -1)
+		err(1, "FvwmM4: unveil");
 
 	tmp_file = m4_defs(dpy, display_name, m4_options, filename);
 
@@ -249,6 +251,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 		exit(0377);
 	}
 
+	sandbox_m4_preproc("FvwmM4");
 	gethostname(client, MAXHOSTNAME);
 
 	getostype(ostype, sizeof ostype);

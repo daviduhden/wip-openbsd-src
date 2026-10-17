@@ -7,16 +7,11 @@
  *
  * All pledge/unveil calls check return values and fail with diagnostics.
  *
- * Modules inherit the fvwm baseline sandbox (see fvwm.c): a locked
- * unveil covering FVWMLIBDIR, system config, /tmp, $HOME, the bin
- * directories, and the two device files modules use, plus a pledge
- * superset they reduce from.  A module's own unveil calls below are
- * therefore refinements and ignore EPERM (the inherited policy is
- * already broader than or equal to what they ask for).
- *
- * The execution helper (fvwm_exec) deliberately has no sandbox of
- * its own: pledge(2) and unveil(2) are inherited across execve(2)
- * and would cripple the arbitrary programs fvwm launches.
+ * The controller retains a locked unveil view but stays unpledged so it
+ * can execute modules and restart. Without execpromises, execve clears the
+ * filesystem view; each module installs its own restrictions. Preprocessor
+ * parents pledge only after fork/popen, leaving execution to their children.
+ * The execution broker remains unrestricted to launch arbitrary programs.
  *
  * IMPORTANT: Every policy declared here requires verification on a real
  * OpenBSD system with ktrace(1) and a full X11 session.
@@ -99,25 +94,25 @@ sandbox_save_state(const char *progname)
 }
 
 /*
- * sandbox_cpp_preproc -- X11 + fork/exec cpp + tmp + dns.
+ * sandbox_cpp_preproc -- parent after forking cpp; no further execution.
  * Used by: FvwmCpp
  */
 static inline void
 sandbox_cpp_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
+	if (pledge("stdio rpath wpath cpath proc dns getpw inet",
 		nullptr) == -1)
 		err(1, "%s: pledge", progname);
 }
 
 /*
- * sandbox_m4_preproc -- X11 + popen m4 + tmp + dns.
+ * sandbox_m4_preproc -- parent after popen m4; no further execution.
  * Used by: FvwmM4
  */
 static inline void
 sandbox_m4_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc exec dns getpw inet",
+	if (pledge("stdio rpath wpath cpath proc dns getpw inet",
 		nullptr) == -1)
 		err(1, "%s: pledge", progname);
 }

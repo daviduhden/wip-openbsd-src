@@ -8,8 +8,8 @@
  * this process later locks down with unveil(2).
  *
  * The helper is intentionally NOT sandboxed with pledge(2) or
- * unveil(2): both are inherited across execve(2) and would cripple
- * the arbitrary programs fvwm launches.  See fvwm_exec.c.  The
+ * unveil(2): it must execute arbitrary programs without a syscall
+ * ceiling. Without execpromises, execve clears inherited unveil. The
  * helper is started before fvwm applies its own unveil(2) policy,
  * which is what keeps PipeRead and Exec working for programs that
  * live outside the main process's filesystem sandbox.

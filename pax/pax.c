@@ -377,27 +377,17 @@ main(int argc, char **argv)
 	 * also during mid-stream error recovery (ar_rdsync) and
 	 * append-mode trailer rewriting (ar_rev).
 	 */
-	{
-		int need_proc =
-		    (gzip_program != nullptr && act != COPY && act != APPND);
+	/* Compressed multi-volume operations can execute another compressor
+	 * later. Keep those parents unpledged; their unveil view stays locked. */
+	if (gzip_program == nullptr || act == COPY || act == APPND) {
 		const char *promises;
 
-		if (act == LIST) {
-			if (need_proc)
-				promises = "stdio rpath getpw tape proc exec";
-			else
-				promises = "stdio rpath getpw tape";
-		} else if (act == APPND) {
+		if (act == LIST)
+			promises = "stdio rpath getpw tape";
+		else if (act == APPND)
 			promises = "stdio rpath wpath getpw tape";
-		} else {
-			if (need_proc)
-				promises = "stdio rpath wpath cpath fattr "
-					   "dpath getpw tape proc exec";
-			else
-				promises = "stdio rpath wpath cpath fattr "
-					   "dpath getpw tape";
-		}
-
+		else
+			promises = "stdio rpath wpath cpath fattr dpath getpw tape";
 		if (pledge(promises, nullptr) == -1)
 			err(1, "pledge");
 	}
