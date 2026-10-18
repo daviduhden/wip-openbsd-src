@@ -11,9 +11,9 @@
 
 #include "wctoint.h"
 
-#define	FUNCNAME	wcstoimax
-typedef intmax_t	int_type;
-#define	MIN_VALUE	INTMAX_MIN
-#define	MAX_VALUE	INTMAX_MAX
+#define FUNCNAME wcstoimax
+typedef intmax_t int_type;
+#define MIN_VALUE INTMAX_MIN
+#define MAX_VALUE INTMAX_MAX
 
 #include "_wcstol.h"

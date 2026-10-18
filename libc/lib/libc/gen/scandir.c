@@ -37,6 +37,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -44,9 +45,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "telldir.h"
 
-#define MAXIMUM(a, b)	(((a) > (b)) ? (a) : (b))
+#define MAXIMUM(a, b) (((a) > (b)) ? (a) : (b))
 
 /*
  * The DIRSIZ macro is the minimum record length which will hold the directory
@@ -55,9 +57,9 @@
  * (dp->d_namlen + 1), rounded up to a 4 byte boundary.
  */
 #undef DIRSIZ
-#define DIRSIZ(dp)							\
-	((sizeof(struct dirent) - sizeof(dp)->d_name) +			\
-	    (((dp)->d_namlen + 1 + 3) &~ 3))
+#define DIRSIZ(dp)                                                             \
+	((sizeof(struct dirent) - sizeof(dp)->d_name) +                        \
+	    (((dp)->d_namlen + 1 + 3) & ~3))
 
 static int
 scandir_dirp(DIR *dirp, struct dirent ***namelist,
@@ -65,9 +67,9 @@ scandir_dirp(DIR *dirp, struct dirent ***namelist,
     int (*dcomp)(const struct dirent **, const struct dirent **))
 {
 	struct dirent *d, *p, **names = NULL;
-	size_t nitems = 0;
-	struct stat stb;
-	long arraysz;
+	size_t	       nitems = 0;
+	struct stat    stb;
+	long	       arraysz;
 
 	if (fstat(dirp->dd_fd, &stb) == -1)
 		goto fail;
@@ -87,7 +89,7 @@ scandir_dirp(DIR *dirp, struct dirent ***namelist,
 
 	while ((d = readdir(dirp)) != NULL) {
 		if (select != NULL && !(*select)(d))
-			continue;	/* just selected names */
+			continue; /* just selected names */
 
 		/*
 		 * Check to make sure the array has space left and
@@ -102,8 +104,8 @@ scandir_dirp(DIR *dirp, struct dirent ***namelist,
 			arraysz *= 2;
 			if (SIZE_MAX / sizeof(struct dirent *) < arraysz)
 				goto fail;
-			nnames = reallocarray(names,
-			    arraysz, sizeof(struct dirent *));
+			nnames = reallocarray(
+			    names, arraysz, sizeof(struct dirent *));
 			if (nnames == NULL)
 				goto fail;
 
@@ -127,7 +129,7 @@ scandir_dirp(DIR *dirp, struct dirent ***namelist,
 	closedir(dirp);
 	if (nitems && dcomp != NULL)
 		qsort(names, nitems, sizeof(struct dirent *),
-		    (int(*)(const void *, const void *))dcomp);
+		    (int (*)(const void *, const void *))dcomp);
 	*namelist = names;
 	return (nitems);
 
@@ -158,7 +160,7 @@ scandirat(int dirfd, const char *dirname, struct dirent ***namelist,
     int (*dcomp)(const struct dirent **, const struct dirent **))
 {
 	DIR *dirp;
-	int fd;
+	int  fd;
 
 	fd = HIDDEN(openat)(dirfd, dirname, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 	if (fd == -1)
@@ -177,5 +179,5 @@ scandirat(int dirfd, const char *dirname, struct dirent ***namelist,
 int
 alphasort(const struct dirent **d1, const struct dirent **d2)
 {
-	return(strcmp((*d1)->d_name, (*d2)->d_name));
+	return (strcmp((*d1)->d_name, (*d2)->d_name));
 }

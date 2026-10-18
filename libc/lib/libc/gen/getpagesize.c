@@ -30,14 +30,15 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
+
 #include <unistd.h>
 
 int
 getpagesize(void)
 {
 	if (_pagesize == 0) {
-		const int mib[2] = { CTL_HW, HW_PAGESIZE };
-		size_t size;
+		const int mib[2] = {CTL_HW, HW_PAGESIZE};
+		size_t	  size;
 
 		size = sizeof _pagesize;
 		if (sysctl(mib, 2, &_pagesize, &size, NULL, 0) == -1)

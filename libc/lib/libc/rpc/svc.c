@@ -40,16 +40,15 @@
  */
 
 #include <errno.h>
+#include <rpc/pmap_clnt.h>
+#include <rpc/rpc.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <rpc/rpc.h>
-#include <rpc/pmap_clnt.h>
-
 static SVCXPRT **xports;
-static int xportssize;
+static int	 xportssize;
 
-#define	RQCRED_SIZE	400		/* this size is excessive */
+#define RQCRED_SIZE 400 /* this size is excessive */
 
 #define max(a, b) (a > b ? a : b)
 
@@ -67,15 +66,15 @@ static struct svc_callout {
 } *svc_head;
 
 static struct svc_callout *svc_find(u_long, u_long, struct svc_callout **);
-static int svc_fd_insert(int);
-static int svc_fd_remove(int);
+static int		   svc_fd_insert(int);
+static int		   svc_fd_remove(int);
 
-int __svc_fdsetsize = FD_SETSIZE;
-fd_set *__svc_fdset = &svc_fdset;
-static int svc_pollfd_size;		/* number of slots in svc_pollfd */
-static int svc_used_pollfd;		/* number of used slots in svc_pollfd */
-static int *svc_pollfd_freelist;	/* svc_pollfd free list */
-static int svc_max_free;		/* number of used slots in free list */
+int	    __svc_fdsetsize = FD_SETSIZE;
+fd_set	   *__svc_fdset = &svc_fdset;
+static int  svc_pollfd_size;	 /* number of slots in svc_pollfd */
+static int  svc_used_pollfd;	 /* number of used slots in svc_pollfd */
+static int *svc_pollfd_freelist; /* svc_pollfd free list */
+static int  svc_max_free;	 /* number of used slots in free list */
 
 /* ***************  SVCXPRT related stuff **************** */
 
@@ -86,7 +85,7 @@ void
 xprt_register(SVCXPRT *xprt)
 {
 	/* ignore failure conditions */
-	(void) __xprt_register(xprt);
+	(void)__xprt_register(xprt);
 }
 
 /*
@@ -99,7 +98,7 @@ __xprt_register(SVCXPRT *xprt)
 
 	if (xports == NULL || sock + 1 > xportssize) {
 		SVCXPRT **xp;
-		int size = FD_SETSIZE;
+		int	  size = FD_SETSIZE;
 
 		while (sock + 1 > size)
 			size += FD_SETSIZE;
@@ -141,16 +140,16 @@ svc_fd_insert(int sock)
 	 */
 	if (svc_pollfd == NULL || svc_used_pollfd == svc_pollfd_size) {
 		struct pollfd *pfd;
-		int new_size, *new_freelist;
+		int	       new_size, *new_freelist;
 
 		new_size = svc_pollfd ? svc_pollfd_size + 128 : FD_SETSIZE;
 		pfd = reallocarray(svc_pollfd, new_size, sizeof(*svc_pollfd));
 		if (pfd == NULL)
-			return (0);			/* no changes */
+			return (0); /* no changes */
 		new_freelist = realloc(svc_pollfd_freelist, new_size / 2);
 		if (new_freelist == NULL) {
 			free(pfd);
-			return (0);			/* no changes */
+			return (0); /* no changes */
 		}
 		svc_pollfd = pfd;
 		svc_pollfd_size = new_size;
@@ -169,14 +168,15 @@ svc_fd_insert(int sock)
 	}
 	if (sock + 1 > __svc_fdsetsize) {
 		fd_set *fds;
-		size_t bytes;
+		size_t	bytes;
 
 		bytes = howmany(sock + 128, NFDBITS) * sizeof(fd_mask);
 		/* realloc() would be nicer but it gets tricky... */
 		if ((fds = (fd_set *)mem_alloc(bytes)) != NULL) {
 			memset(fds, 0, bytes);
 			memcpy(fds, __svc_fdset,
-			    howmany(__svc_fdsetsize, NFDBITS) * sizeof(fd_mask));
+			    howmany(__svc_fdsetsize, NFDBITS) *
+				sizeof(fd_mask));
 			if (__svc_fdset != &svc_fdset)
 				free(__svc_fdset);
 			__svc_fdset = fds;
@@ -235,7 +235,8 @@ svc_fd_remove(int sock)
 				 * and svc_pollfd_freelist is empty.
 				 */
 				for (i = svc_used_pollfd, j = 0;
-				    i < svc_max_pollfd && j < svc_max_free; i++) {
+				    i < svc_max_pollfd && j < svc_max_free;
+				    i++) {
 					if (svc_pollfd[i].fd == -1)
 						continue;
 					/* be sure to use a low-numbered slot */
@@ -262,15 +263,15 @@ svc_fd_remove(int sock)
 			return (1);
 		}
 	}
-	return (0);		/* not found, shouldn't happen */
+	return (0); /* not found, shouldn't happen */
 }
 
 /*
- * De-activate a transport handle. 
+ * De-activate a transport handle.
  */
 void
 xprt_unregister(SVCXPRT *xprt)
-{ 
+{
 	int sock = xprt->xp_sock;
 
 	if (xports[sock] == xprt) {
@@ -279,7 +280,6 @@ xprt_unregister(SVCXPRT *xprt)
 	}
 }
 DEF_WEAK(xprt_unregister);
-
 
 /* ********************** CALLOUT list related stuff ************* */
 
@@ -297,7 +297,7 @@ svc_register(SVCXPRT *xprt, u_long prog, u_long vers,
 
 	if ((s = svc_find(prog, vers, &prev)) != NULL) {
 		if (s->sc_dispatch == dispatch)
-			goto pmap_it;  /* he is registering another xptr */
+			goto pmap_it; /* he is registering another xptr */
 		return (FALSE);
 	}
 	s = (struct svc_callout *)mem_alloc(sizeof(struct svc_callout));
@@ -335,7 +335,7 @@ svc_unregister(u_long prog, u_long vers)
 		prev->sc_next = s->sc_next;
 	}
 	s->sc_next = NULL;
-	mem_free((char *) s, (u_int) sizeof(struct svc_callout));
+	mem_free((char *)s, (u_int)sizeof(struct svc_callout));
 	/* now unregister the information with the local binder service */
 	(void)pmap_unset(prog, vers);
 }
@@ -368,15 +368,15 @@ done:
 bool_t
 svc_sendreply(SVCXPRT *xprt, xdrproc_t xdr_results, caddr_t xdr_location)
 {
-	struct rpc_msg rply; 
+	struct rpc_msg rply;
 
 	rply.rm_direction = REPLY;
-	rply.rm_reply.rp_stat = MSG_ACCEPTED; 
-	rply.acpted_rply.ar_verf = xprt->xp_verf; 
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
+	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = SUCCESS;
 	rply.acpted_rply.ar_results.where = xdr_location;
 	rply.acpted_rply.ar_results.proc = xdr_results;
-	return (SVC_REPLY(xprt, &rply)); 
+	return (SVC_REPLY(xprt, &rply));
 }
 DEF_WEAK(svc_sendreply);
 
@@ -401,13 +401,13 @@ svcerr_noproc(SVCXPRT *xprt)
 void
 svcerr_decode(SVCXPRT *xprt)
 {
-	struct rpc_msg rply; 
+	struct rpc_msg rply;
 
-	rply.rm_direction = REPLY; 
-	rply.rm_reply.rp_stat = MSG_ACCEPTED; 
+	rply.rm_direction = REPLY;
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
 	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = GARBAGE_ARGS;
-	SVC_REPLY(xprt, &rply); 
+	SVC_REPLY(xprt, &rply);
 }
 DEF_WEAK(svcerr_decode);
 
@@ -417,13 +417,13 @@ DEF_WEAK(svcerr_decode);
 void
 svcerr_systemerr(SVCXPRT *xprt)
 {
-	struct rpc_msg rply; 
+	struct rpc_msg rply;
 
-	rply.rm_direction = REPLY; 
-	rply.rm_reply.rp_stat = MSG_ACCEPTED; 
+	rply.rm_direction = REPLY;
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
 	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = SYSTEM_ERR;
-	SVC_REPLY(xprt, &rply); 
+	SVC_REPLY(xprt, &rply);
 }
 
 /*
@@ -455,7 +455,7 @@ svcerr_weakauth(SVCXPRT *xprt)
 /*
  * Program unavailable error reply
  */
-void 
+void
 svcerr_noprog(SVCXPRT *xprt)
 {
 	struct rpc_msg rply;
@@ -496,9 +496,9 @@ DEF_WEAK(svcerr_progvers);
  * the "raw" parameters (msg.rm_call.cb_cred and msg.rm_call.cb_verf) and
  * the "cooked" credentials (rqst->rq_clntcred).
  * However, this function does not know the structure of the cooked
- * credentials, so it make the following assumptions: 
+ * credentials, so it make the following assumptions:
  *   a) the structure is contiguous (no pointers), and
- *   b) the cred structure size does not exceed RQCRED_SIZE bytes. 
+ *   b) the cred structure size does not exceed RQCRED_SIZE bytes.
  * In all events, all three parameters are freed upon exit from this routine.
  * The storage is trivially management on the call stack in userland, but
  * is mallocated in kernel land.
@@ -524,7 +524,7 @@ void
 svc_getreqset2(fd_set *readfds, int width)
 {
 	fd_mask mask, *maskp;
-	int bit, sock;
+	int	bit, sock;
 
 	maskp = readfds->fds_bits;
 	for (sock = 0; sock < width; sock += NFDBITS) {
@@ -557,16 +557,16 @@ svc_getreq_common(int fd)
 {
 	enum xprt_stat stat;
 	struct rpc_msg msg;
-	int prog_found;
-	u_long low_vers;
-	u_long high_vers;
+	int	       prog_found;
+	u_long	       low_vers;
+	u_long	       high_vers;
 	struct svc_req r;
-	SVCXPRT *xprt;
-	char cred_area[2*MAX_AUTH_BYTES + RQCRED_SIZE];
+	SVCXPRT	      *xprt;
+	char	       cred_area[2 * MAX_AUTH_BYTES + RQCRED_SIZE];
 
 	msg.rm_call.cb_cred.oa_base = cred_area;
 	msg.rm_call.cb_verf.oa_base = &(cred_area[MAX_AUTH_BYTES]);
-	r.rq_clntcred = &(cred_area[2*MAX_AUTH_BYTES]);
+	r.rq_clntcred = &(cred_area[2 * MAX_AUTH_BYTES]);
 
 	/* sock has input waiting */
 	xprt = xports[fd];
@@ -578,7 +578,7 @@ svc_getreq_common(int fd)
 		if (SVC_RECV(xprt, &msg)) {
 			/* find the exported program and call it */
 			struct svc_callout *s;
-			enum auth_stat why;
+			enum auth_stat	    why;
 
 			r.rq_xprt = xprt;
 			r.rq_prog = msg.rm_call.cb_prog;
@@ -586,26 +586,26 @@ svc_getreq_common(int fd)
 			r.rq_proc = msg.rm_call.cb_proc;
 			r.rq_cred = msg.rm_call.cb_cred;
 			/* first authenticate the message */
-			if ((why= _authenticate(&r, &msg)) != AUTH_OK) {
+			if ((why = _authenticate(&r, &msg)) != AUTH_OK) {
 				svcerr_auth(xprt, why);
 				goto call_done;
 			}
 			/* now match message with a registered service*/
 			prog_found = FALSE;
-			low_vers = (u_long) -1;
+			low_vers = (u_long)-1;
 			high_vers = 0;
 			for (s = svc_head; s != NULL; s = s->sc_next) {
 				if (s->sc_prog == r.rq_prog) {
 					if (s->sc_vers == r.rq_vers) {
 						(*s->sc_dispatch)(&r, xprt);
 						goto call_done;
-					}  /* found correct version */
+					} /* found correct version */
 					prog_found = TRUE;
 					if (s->sc_vers < low_vers)
 						low_vers = s->sc_vers;
 					if (s->sc_vers > high_vers)
 						high_vers = s->sc_vers;
-				}   /* found correct program */
+				} /* found correct program */
 			}
 			/*
 			 * if we got here, the program or version
@@ -614,11 +614,11 @@ svc_getreq_common(int fd)
 			if (prog_found)
 				svcerr_progvers(xprt, low_vers, high_vers);
 			else
-				 svcerr_noprog(xprt);
+				svcerr_noprog(xprt);
 			/* Fall through to ... */
 		}
 	call_done:
-		if ((stat = SVC_STAT(xprt)) == XPRT_DIED){
+		if ((stat = SVC_STAT(xprt)) == XPRT_DIED) {
 			SVC_DESTROY(xprt);
 			break;
 		}

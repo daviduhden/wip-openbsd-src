@@ -31,8 +31,8 @@
  *
  * Original version ID:
  * @(#)strtoul.c	8.1 (Berkeley) 6/4/93
- * Citrus: xpg4dl/FreeBSD/lib/libc/locale/wcstoul.c,v 1.2 2001/09/21 16:11:41 yamt Exp
- * NetBSD: wcstoul.c,v 1.1 2001/09/27 16:30:37 yamt Exp
+ * Citrus: xpg4dl/FreeBSD/lib/libc/locale/wcstoul.c,v 1.2 2001/09/21 16:11:41
+ * yamt Exp NetBSD: wcstoul.c,v 1.1 2001/09/27 16:30:37 yamt Exp
  */
 
 /*
@@ -48,10 +48,10 @@ uint_type
 FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 {
 	const wchar_t *s;
-	uint_type acc, cutoff;
-	wint_t wc;
-	int i;
-	int neg, any, cutlim;
+	uint_type      acc, cutoff;
+	wint_t	       wc;
+	int	       i;
+	int	       neg, any, cutlim;
 
 	if (base && (base < 2 || base > 36)) {
 		errno = EINVAL;
@@ -65,7 +65,7 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 	 */
 	s = nptr;
 	do {
-		wc = (wchar_t) *s++;
+		wc = (wchar_t)*s++;
 	} while (iswspace(wc));
 	if (wc == L'-') {
 		neg = 1;
@@ -75,8 +75,8 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 		if (wc == L'+')
 			wc = *s++;
 	}
-	if ((base == 0 || base == 16) &&
-	    wc == L'0' && (*s == L'x' || *s == L'X')) {
+	if ((base == 0 || base == 16) && wc == L'0' &&
+	    (*s == L'x' || *s == L'X')) {
 		wc = s[1];
 		s += 2;
 		base = 16;
@@ -89,7 +89,7 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 	 */
 	cutoff = MAX_VALUE / (uint_type)base;
 	cutlim = (int)(MAX_VALUE % (uint_type)base);
-	for (acc = 0, any = 0;; wc = (wchar_t) *s++) {
+	for (acc = 0, any = 0;; wc = (wchar_t)*s++) {
 		i = wctoint(wc);
 		if (i == (wint_t)-1)
 			break;

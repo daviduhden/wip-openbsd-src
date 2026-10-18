@@ -32,18 +32,19 @@
  */
 
 #include <limits.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdarg.h>
+
 #include "local.h"
 
 int
 snprintf(char *str, size_t n, const char *fmt, ...)
 {
 	va_list ap;
-	int ret;
-	char dummy;
-	FILE f = FILEINIT(__SWR | __SSTR);
+	int	ret;
+	char	dummy;
+	FILE	f = FILEINIT(__SWR | __SSTR);
 
 	/* While snprintf(3) specifies size_t stdio uses an int internally */
 	if (n > INT_MAX)

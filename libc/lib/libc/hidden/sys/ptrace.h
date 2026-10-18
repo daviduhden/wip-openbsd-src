@@ -15,11 +15,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_LIBC_SYS_PTRACE_H_
-#define	_LIBC_SYS_PTRACE_H_
+#ifndef _LIBC_SYS_PTRACE_H_
+#define _LIBC_SYS_PTRACE_H_
 
 #include_next <sys/ptrace.h>
 
 PROTO_WRAP(ptrace);
 
-#endif	/* _LIBC_SYS_PTRACE_H_ */
+#endif /* _LIBC_SYS_PTRACE_H_ */

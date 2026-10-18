@@ -23,11 +23,10 @@ int
 getpeereid(int s, uid_t *euid, gid_t *egid)
 {
 	struct sockpeercred creds;
-	socklen_t credslen = sizeof(creds);
-	int error;
+	socklen_t	    credslen = sizeof(creds);
+	int		    error;
 
-	error = getsockopt(s, SOL_SOCKET, SO_PEERCRED,
-	    &creds, &credslen);
+	error = getsockopt(s, SOL_SOCKET, SO_PEERCRED, &creds, &credslen);
 	if (error)
 		return (error);
 	*euid = creds.uid;

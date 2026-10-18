@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 #include "ypexclude.h"
 
 int
@@ -37,7 +38,7 @@ __ypexclude_add(struct _ypexclude **headp, const char *name)
 {
 	struct _ypexclude *new;
 
-	if (name[0] == '\0')    /* skip */
+	if (name[0] == '\0') /* skip */
 		return (0);
 
 	new = malloc(sizeof(struct _ypexclude));
@@ -61,7 +62,7 @@ __ypexclude_is(struct _ypexclude **headp, const char *name)
 
 	for (curr = *headp; curr; curr = curr->next) {
 		if (strcmp(curr->name, name) == 0)
-			return (1);     /* excluded */
+			return (1); /* excluded */
 	}
 	return (0);
 }

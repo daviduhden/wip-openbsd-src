@@ -4,7 +4,9 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
+
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +14,7 @@
 int
 main(int argc, char *argv[])
 {
-	char name[IF_NAMESIZE], *ifname;
+	char	     name[IF_NAMESIZE], *ifname;
 	unsigned int lo0index;
 
 	lo0index = if_nametoindex("lo0");

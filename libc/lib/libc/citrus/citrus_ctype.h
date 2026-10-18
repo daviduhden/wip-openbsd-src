@@ -33,25 +33,23 @@
 #define _CITRUS_UTF8_MB_CUR_MAX 4
 
 __BEGIN_HIDDEN_DECLS
-size_t	_citrus_none_ctype_mbrtowc(wchar_t * __restrict,
-		const char * __restrict, size_t);
-size_t  _citrus_none_ctype_mbsnrtowcs(wchar_t * __restrict,
-		const char ** __restrict, size_t, size_t);
-size_t  _citrus_none_ctype_wcrtomb(char * __restrict, wchar_t);
-size_t  _citrus_none_ctype_wcsnrtombs(char * __restrict,
-		const wchar_t ** __restrict, size_t, size_t);
+size_t _citrus_none_ctype_mbrtowc(
+    wchar_t *__restrict, const char *__restrict, size_t);
+size_t _citrus_none_ctype_mbsnrtowcs(
+    wchar_t *__restrict, const char **__restrict, size_t, size_t);
+size_t _citrus_none_ctype_wcrtomb(char *__restrict, wchar_t);
+size_t _citrus_none_ctype_wcsnrtombs(
+    char *__restrict, const wchar_t **__restrict, size_t, size_t);
 
-size_t	_citrus_utf8_ctype_mbrtowc(wchar_t * __restrict,
-		const char * __restrict, size_t, mbstate_t * __restrict);
-int     _citrus_utf8_ctype_mbsinit(const mbstate_t * __restrict);
-size_t  _citrus_utf8_ctype_mbsnrtowcs(wchar_t * __restrict,
-		const char ** __restrict, size_t, size_t,
-		mbstate_t * __restrict);
-size_t  _citrus_utf8_ctype_wcrtomb(char * __restrict, wchar_t,
-		mbstate_t * __restrict);
-size_t  _citrus_utf8_ctype_wcsnrtombs(char * __restrict,
-		const wchar_t ** __restrict, size_t, size_t,
-		mbstate_t * __restrict);
+size_t _citrus_utf8_ctype_mbrtowc(
+    wchar_t *__restrict, const char *__restrict, size_t, mbstate_t *__restrict);
+int    _citrus_utf8_ctype_mbsinit(const mbstate_t *__restrict);
+size_t _citrus_utf8_ctype_mbsnrtowcs(wchar_t *__restrict,
+    const char **__restrict, size_t, size_t, mbstate_t *__restrict);
+size_t _citrus_utf8_ctype_wcrtomb(
+    char *__restrict, wchar_t, mbstate_t *__restrict);
+size_t _citrus_utf8_ctype_wcsnrtombs(char *__restrict,
+    const wchar_t **__restrict, size_t, size_t, mbstate_t *__restrict);
 __END_HIDDEN_DECLS
 
 #endif

@@ -38,43 +38,43 @@
 /*
  * Disk-specific ioctls.
  */
-		/* get and set disklabel; DIOCGPART used internally */
-#define DIOCGDINFO	_IOR('d', 101, struct disklabel)/* get */
-#define DIOCSDINFO	_IOW('d', 102, struct disklabel)/* set */
-#define DIOCWDINFO	_IOW('d', 103, struct disklabel)/* set, update disk */
-#define DIOCGPART	_IOW('d', 104, struct partinfo)	/* get partition */
+/* get and set disklabel; DIOCGPART used internally */
+#define DIOCGDINFO _IOR('d', 101, struct disklabel) /* get */
+#define DIOCSDINFO _IOW('d', 102, struct disklabel) /* set */
+#define DIOCWDINFO _IOW('d', 103, struct disklabel) /* set, update disk */
+#define DIOCGPART _IOW('d', 104, struct partinfo)   /* get partition */
 
-#define DIOCEJECT	_IO('d', 112)		/* eject removable disk */
-#define DIOCLOCK	_IOW('d', 113, int)	/* lock/unlock pack */
+#define DIOCEJECT _IO('d', 112)	     /* eject removable disk */
+#define DIOCLOCK _IOW('d', 113, int) /* lock/unlock pack */
 
-#define DIOCGPDINFO	_IOR('d', 114, struct disklabel)/* get physical */
-#define DIOCRLDINFO	_IO('d', 115)			/* reload disklabel */
+#define DIOCGPDINFO _IOR('d', 114, struct disklabel) /* get physical */
+#define DIOCRLDINFO _IO('d', 115)		     /* reload disklabel */
 
 struct dk_inquiry {
-	char		vendor[64];
-	char		product[128];
-	char		revision[64];
-	char		serial[64];
+	char vendor[64];
+	char product[128];
+	char revision[64];
+	char serial[64];
 };
 
-#define DIOCINQ		_IOR('d', 116, struct dk_inquiry)
+#define DIOCINQ _IOR('d', 116, struct dk_inquiry)
 
 struct dk_cache {
-	unsigned int	wrcache;
-	unsigned int	rdcache;
+	unsigned int wrcache;
+	unsigned int rdcache;
 };
 
-#define DIOCGCACHE	_IOR('d', 117, struct dk_cache)	/* get cache enabled */
-#define DIOCSCACHE	_IOW('d', 118, struct dk_cache)	/* set cache enabled */
+#define DIOCGCACHE _IOR('d', 117, struct dk_cache) /* get cache enabled */
+#define DIOCSCACHE _IOW('d', 118, struct dk_cache) /* set cache enabled */
 
 struct dk_diskmap {
-	char		*device;
-	int		fd;
-	int		flags;
+	char *device;
+	int   fd;
+	int   flags;
 };
 
-#define	DIOCMAP		_IOWR('d', 119, struct dk_diskmap)
+#define DIOCMAP _IOWR('d', 119, struct dk_diskmap)
 
-#define	DIOCCACHESYNC	_IOW('d', 120, int)	/* sync cache (force?) */
+#define DIOCCACHESYNC _IOW('d', 120, int) /* sync cache (force?) */
 
 #endif /* _SYS_DKIO_H_ */

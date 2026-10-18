@@ -34,18 +34,18 @@
  */
 
 #ifndef _TELLDIR_H_
-#define	_TELLDIR_H_
+#define _TELLDIR_H_
 
 /* structure describing an open directory. */
 struct _dirdesc {
-	int	dd_fd;		/* file descriptor associated with directory */
-	long	dd_loc;		/* offset in current buffer */
-	long	dd_size;	/* amount of data returned by getdents() */
-	char	*dd_buf;	/* data buffer */
-	int	dd_len;		/* size of data buffer */
-	off_t	dd_curpos;	/* current cookie */
-	off_t	dd_bufpos;	/* cookie of the first entry in dd_buf */
-	void	*dd_lock;	/* mutex to protect struct */
+	int   dd_fd;	 /* file descriptor associated with directory */
+	long  dd_loc;	 /* offset in current buffer */
+	long  dd_size;	 /* amount of data returned by getdents() */
+	char *dd_buf;	 /* data buffer */
+	int   dd_len;	 /* size of data buffer */
+	off_t dd_curpos; /* current cookie */
+	off_t dd_bufpos; /* cookie of the first entry in dd_buf */
+	void *dd_lock;	 /* mutex to protect struct */
 };
 
 __BEGIN_HIDDEN_DECLS

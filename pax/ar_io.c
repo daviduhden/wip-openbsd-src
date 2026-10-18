@@ -1289,7 +1289,8 @@ ar_start_gzip(int fd, const char *path, int wr)
 
 		closefrom(STDERR_FILENO + 1);
 
-		/* The compressor must execute with no inherited syscall ceiling. */
+		/* The compressor must execute with no inherited syscall
+		 * ceiling. */
 		if (execlp(path, path, gzip_flags, (char *)nullptr) == -1)
 			err(1, "could not exec %s", path);
 		/* NOTREACHED */

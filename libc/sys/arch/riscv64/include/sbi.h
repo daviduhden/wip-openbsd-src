@@ -36,69 +36,69 @@
  */
 
 #ifndef _MACHINE_SBI_H_
-#define	_MACHINE_SBI_H_
+#define _MACHINE_SBI_H_
 
 /* SBI Specification Version */
-#define	SBI_SPEC_VERS_MAJOR_OFFSET	24
-#define	SBI_SPEC_VERS_MAJOR_MASK	(0x7F << SBI_SPEC_VERS_MAJOR_OFFSET)
-#define	SBI_SPEC_VERS_MINOR_OFFSET	0
-#define	SBI_SPEC_VERS_MINOR_MASK	(0xFFFFFF << SBI_SPEC_VERS_MINOR_OFFSET)
+#define SBI_SPEC_VERS_MAJOR_OFFSET 24
+#define SBI_SPEC_VERS_MAJOR_MASK (0x7F << SBI_SPEC_VERS_MAJOR_OFFSET)
+#define SBI_SPEC_VERS_MINOR_OFFSET 0
+#define SBI_SPEC_VERS_MINOR_MASK (0xFFFFFF << SBI_SPEC_VERS_MINOR_OFFSET)
 
 /* SBI Implementation IDs */
-#define	SBI_IMPL_ID_BBL			0
-#define	SBI_IMPL_ID_OPENSBI		1
+#define SBI_IMPL_ID_BBL 0
+#define SBI_IMPL_ID_OPENSBI 1
 
 /* SBI Error Codes */
-#define	SBI_SUCCESS			0
-#define	SBI_ERR_FAILURE			-1
-#define	SBI_ERR_NOT_SUPPORTED		-2
-#define	SBI_ERR_INVALID_PARAM		-3
-#define	SBI_ERR_DENIED			-4
-#define	SBI_ERR_INVALID_ADDRESS		-5
+#define SBI_SUCCESS 0
+#define SBI_ERR_FAILURE -1
+#define SBI_ERR_NOT_SUPPORTED -2
+#define SBI_ERR_INVALID_PARAM -3
+#define SBI_ERR_DENIED -4
+#define SBI_ERR_INVALID_ADDRESS -5
 
 /* SBI Base Extension */
-#define	SBI_EXT_ID_BASE			0x10
-#define	SBI_BASE_GET_SPEC_VERSION	0
-#define	SBI_BASE_GET_IMPL_ID		1
-#define	SBI_BASE_GET_IMPL_VERSION	2
-#define	SBI_BASE_PROBE_EXTENSION	3
-#define	SBI_BASE_GET_MVENDORID		4
-#define	SBI_BASE_GET_MARCHID		5
-#define	SBI_BASE_GET_MIMPID		6
+#define SBI_EXT_ID_BASE 0x10
+#define SBI_BASE_GET_SPEC_VERSION 0
+#define SBI_BASE_GET_IMPL_ID 1
+#define SBI_BASE_GET_IMPL_VERSION 2
+#define SBI_BASE_PROBE_EXTENSION 3
+#define SBI_BASE_GET_MVENDORID 4
+#define SBI_BASE_GET_MARCHID 5
+#define SBI_BASE_GET_MIMPID 6
 
 /* Hart State Management (HSM) Extension */
-#define	SBI_EXT_ID_HSM			0x48534D
-#define	SBI_HSM_HART_START		0
-#define	SBI_HSM_HART_STOP		1
-#define	SBI_HSM_HART_STATUS		2
-#define	 SBI_HSM_STATUS_STARTED		0
-#define	 SBI_HSM_STATUS_STOPPED		1
-#define	 SBI_HSM_STATUS_START_PENDING	2
-#define	 SBI_HSM_STATUS_STOP_PENDING	3
+#define SBI_EXT_ID_HSM 0x48534D
+#define SBI_HSM_HART_START 0
+#define SBI_HSM_HART_STOP 1
+#define SBI_HSM_HART_STATUS 2
+#define SBI_HSM_STATUS_STARTED 0
+#define SBI_HSM_STATUS_STOPPED 1
+#define SBI_HSM_STATUS_START_PENDING 2
+#define SBI_HSM_STATUS_STOP_PENDING 3
 
 /* System Reset Extension */
-#define	SBI_EXT_ID_SRST			0x53525354
-#define	SBI_SRST_RESET			0
-#define	 SBI_SRST_RESET_SHUTDOWN	0
-#define	 SBI_SRST_RESET_COLD_REBOOT	1
-#define	 SBI_SRST_RESET_WARM_REBOOT	2
+#define SBI_EXT_ID_SRST 0x53525354
+#define SBI_SRST_RESET 0
+#define SBI_SRST_RESET_SHUTDOWN 0
+#define SBI_SRST_RESET_COLD_REBOOT 1
+#define SBI_SRST_RESET_WARM_REBOOT 2
 
 /* Legacy Extensions */
-#define	SBI_SET_TIMER			0
-#define	SBI_CONSOLE_PUTCHAR		1
-#define	SBI_CONSOLE_GETCHAR		2
-#define	SBI_CLEAR_IPI			3
-#define	SBI_SEND_IPI			4
-#define	SBI_REMOTE_FENCE_I		5
-#define	SBI_REMOTE_SFENCE_VMA		6
-#define	SBI_REMOTE_SFENCE_VMA_ASID	7
-#define	SBI_SHUTDOWN			8
+#define SBI_SET_TIMER 0
+#define SBI_CONSOLE_PUTCHAR 1
+#define SBI_CONSOLE_GETCHAR 2
+#define SBI_CLEAR_IPI 3
+#define SBI_SEND_IPI 4
+#define SBI_REMOTE_FENCE_I 5
+#define SBI_REMOTE_SFENCE_VMA 6
+#define SBI_REMOTE_SFENCE_VMA_ASID 7
+#define SBI_SHUTDOWN 8
 
-#define	SBI_CALL0(e, f)			SBI_CALL4(e, f, 0, 0, 0, 0)
-#define	SBI_CALL1(e, f, p1)		SBI_CALL4(e, f, p1, 0, 0, 0)
-#define	SBI_CALL2(e, f, p1, p2)		SBI_CALL4(e, f, p1, p2, 0, 0)
-#define	SBI_CALL3(e, f, p1, p2, p3)	SBI_CALL4(e, f, p1, p2, p3, 0)
-#define	SBI_CALL4(e, f, p1, p2, p3, p4)	sbi_call(e, f, p1, p2, p3, p4)
+#define SBI_CALL0(e, f) SBI_CALL4(e, f, 0, 0, 0, 0)
+#define SBI_CALL1(e, f, p1) SBI_CALL4(e, f, p1, 0, 0, 0)
+#define SBI_CALL2(e, f, p1, p2) SBI_CALL4(e, f, p1, p2, 0, 0)
+#define SBI_CALL3(e, f, p1, p2, p3) SBI_CALL4(e, f, p1, p2, p3, 0)
+#define SBI_CALL4(e, f, p1, p2, p3, p4) sbi_call(e, f, p1, p2, p3, p4)
 
 /*
  * Documentation available at
@@ -116,18 +116,17 @@ sbi_call(uint64_t arg7, uint64_t arg6, uint64_t arg0, uint64_t arg1,
 {
 	struct sbi_ret ret;
 
-	register uintptr_t a0 __asm ("a0") = (uintptr_t)(arg0);
-	register uintptr_t a1 __asm ("a1") = (uintptr_t)(arg1);
-	register uintptr_t a2 __asm ("a2") = (uintptr_t)(arg2);
-	register uintptr_t a3 __asm ("a3") = (uintptr_t)(arg3);
-	register uintptr_t a6 __asm ("a6") = (uintptr_t)(arg6);
-	register uintptr_t a7 __asm ("a7") = (uintptr_t)(arg7);
+	register uintptr_t a0 __asm("a0") = (uintptr_t)(arg0);
+	register uintptr_t a1 __asm("a1") = (uintptr_t)(arg1);
+	register uintptr_t a2 __asm("a2") = (uintptr_t)(arg2);
+	register uintptr_t a3 __asm("a3") = (uintptr_t)(arg3);
+	register uintptr_t a6 __asm("a6") = (uintptr_t)(arg6);
+	register uintptr_t a7 __asm("a7") = (uintptr_t)(arg7);
 
-	__asm volatile(			\
-		"ecall"				\
-		:"+r"(a0), "+r"(a1)		\
-		:"r"(a2), "r"(a3), "r"(a6), "r"(a7)	\
-		:"memory");
+	__asm volatile("ecall"
+	    : "+r"(a0), "+r"(a1)
+	    : "r"(a2), "r"(a3), "r"(a6), "r"(a7)
+	    : "memory");
 
 	ret.error = a0;
 	ret.value = a1;
@@ -144,7 +143,6 @@ sbi_get_mvendorid(void)
 {
 	return (SBI_CALL0(SBI_EXT_ID_BASE, SBI_BASE_GET_MVENDORID).value);
 }
-
 
 static __inline u_long
 sbi_get_marchid(void)
@@ -243,18 +241,17 @@ sbi_remote_fence_i(const unsigned long *hart_mask)
 }
 
 static __inline void
-sbi_remote_sfence_vma(const unsigned long *hart_mask,
-    unsigned long start, unsigned long size)
+sbi_remote_sfence_vma(
+    const unsigned long *hart_mask, unsigned long start, unsigned long size)
 {
 
-	(void)SBI_CALL3(SBI_REMOTE_SFENCE_VMA, 0, (uint64_t)hart_mask, start,
-	    size);
+	(void)SBI_CALL3(
+	    SBI_REMOTE_SFENCE_VMA, 0, (uint64_t)hart_mask, start, size);
 }
 
 static __inline void
-sbi_remote_sfence_vma_asid(const unsigned long *hart_mask,
-    unsigned long start, unsigned long size,
-    unsigned long asid)
+sbi_remote_sfence_vma_asid(const unsigned long *hart_mask, unsigned long start,
+    unsigned long size, unsigned long asid)
 {
 
 	(void)SBI_CALL4(SBI_REMOTE_SFENCE_VMA_ASID, 0, (uint64_t)hart_mask,

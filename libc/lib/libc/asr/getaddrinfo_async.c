@@ -1,4 +1,5 @@
-/*	$OpenBSD: getaddrinfo_async.c,v 1.70 2026/06/27 16:07:42 jca Exp $	*/
+/*	$OpenBSD: getaddrinfo_async.c,v 1.70 2026/06/27 16:07:42 jca Exp $
+ */
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -18,20 +19,21 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
-#include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <net/if.h>
-#include <netdb.h>
 
+#include <net/if.h>
+#include <netinet/in.h>
+
+#include <arpa/nameser.h>
 #include <asr.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <ifaddrs.h>
+#include <limits.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <limits.h>
 
 #include "asr_private.h"
 
@@ -43,39 +45,42 @@ struct match {
 
 static int getaddrinfo_async_run(struct asr_query *, struct asr_result *);
 static int get_port(const char *, const char *, int);
-static int addrinfo_add(struct asr_query *, const struct sockaddr *, const char *);
-static int addrinfo_from_file(struct asr_query *, int,  FILE *);
+static int addrinfo_add(
+    struct asr_query *, const struct sockaddr *, const char *);
+static int addrinfo_from_file(struct asr_query *, int, FILE *);
 static int addrinfo_from_pkt(struct asr_query *, char *, size_t);
 static int addrconfig_setup(struct asr_query *);
 
 static const struct match matches[] = {
-	{ PF_INET,	SOCK_DGRAM,	IPPROTO_UDP	},
-	{ PF_INET,	SOCK_STREAM,	IPPROTO_TCP	},
-	{ PF_INET,	SOCK_RAW,	0		},
-	{ PF_INET6,	SOCK_DGRAM,	IPPROTO_UDP	},
-	{ PF_INET6,	SOCK_STREAM,	IPPROTO_TCP	},
-	{ PF_INET6,	SOCK_RAW,	0		},
-	{ -1,		0,		0,		},
+    {PF_INET, SOCK_DGRAM, IPPROTO_UDP},
+    {PF_INET, SOCK_STREAM, IPPROTO_TCP},
+    {PF_INET, SOCK_RAW, 0},
+    {PF_INET6, SOCK_DGRAM, IPPROTO_UDP},
+    {PF_INET6, SOCK_STREAM, IPPROTO_TCP},
+    {PF_INET6, SOCK_RAW, 0},
+    {
+	-1,
+	0,
+	0,
+    },
 };
 
 #define MATCH_FAMILY(a, b) ((a) == matches[(b)].family || (a) == PF_UNSPEC)
-#define MATCH_PROTO(a, b) ((a) == matches[(b)].protocol || (a) == 0 || matches[(b)].protocol == 0)
+#define MATCH_PROTO(a, b)                                                      \
+	((a) == matches[(b)].protocol || (a) == 0 || matches[(b)].protocol == 0)
 /* Do not match SOCK_RAW unless explicitly specified */
-#define MATCH_SOCKTYPE(a, b) ((a) == matches[(b)].socktype || ((a) == 0 && \
-				matches[(b)].socktype != SOCK_RAW))
+#define MATCH_SOCKTYPE(a, b)                                                   \
+	((a) == matches[(b)].socktype ||                                       \
+	    ((a) == 0 && matches[(b)].socktype != SOCK_RAW))
 
-enum {
-	DOM_INIT,
-	DOM_DOMAIN,
-	DOM_DONE
-};
+enum { DOM_INIT, DOM_DOMAIN, DOM_DONE };
 
 struct asr_query *
 getaddrinfo_async(const char *hostname, const char *servname,
-	const struct addrinfo *hints, void *asr)
+    const struct addrinfo *hints, void *asr)
 {
-	struct asr_ctx		*ac;
-	struct asr_query	*as;
+	struct asr_ctx	 *ac;
+	struct asr_query *as;
 
 	if (hints == NULL || (hints->ai_flags & AI_NUMERICHOST) == 0)
 		ac = _asr_use_resolver(asr);
@@ -101,7 +106,7 @@ getaddrinfo_async(const char *hostname, const char *servname,
 
 	_asr_ctx_unref(ac);
 	return (as);
-    abort:
+abort:
 	if (as)
 		_asr_async_free(as);
 	_asr_ctx_unref(ac);
@@ -114,36 +119,28 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 {
 	char		 fqdn[MAXDNAME];
 	const char	*str;
-	struct addrinfo	*ai;
+	struct addrinfo *ai;
 	int		 i, family, r, is_localhost = 0, fd;
 	FILE		*f = NULL;
 	union {
-		struct sockaddr		sa;
-		struct sockaddr_in	sain;
-		struct sockaddr_in6	sain6;
+		struct sockaddr	    sa;
+		struct sockaddr_in  sain;
+		struct sockaddr_in6 sain6;
 	} sa;
-	const struct sockaddr_in	sockaddr_in_any = {
-		.sin_family = AF_INET,
-		.sin_len = sizeof(struct sockaddr_in),
-		.sin_addr = htonl(INADDR_ANY)
-	};
-	const struct sockaddr_in	sockaddr_in_lo = {
-		.sin_family = AF_INET,
-		.sin_len = sizeof(struct sockaddr_in),
-		.sin_addr = htonl(INADDR_LOOPBACK)
-	};
-	const struct sockaddr_in6	sockaddr_in6_any = {
-		.sin6_family = AF_INET6,
-		.sin6_len = sizeof(struct sockaddr_in6),
-		.sin6_addr = IN6ADDR_ANY_INIT
-	};
-	const struct sockaddr_in6	sockaddr_in6_lo = {
-		.sin6_family = AF_INET6,
-		.sin6_len = sizeof(struct sockaddr_in6),
-		.sin6_addr = IN6ADDR_LOOPBACK_INIT
-	};
+	const struct sockaddr_in  sockaddr_in_any = {.sin_family = AF_INET,
+	    .sin_len = sizeof(struct sockaddr_in),
+	    .sin_addr = htonl(INADDR_ANY)};
+	const struct sockaddr_in  sockaddr_in_lo = {.sin_family = AF_INET,
+	    .sin_len = sizeof(struct sockaddr_in),
+	    .sin_addr = htonl(INADDR_LOOPBACK)};
+	const struct sockaddr_in6 sockaddr_in6_any = {.sin6_family = AF_INET6,
+	    .sin6_len = sizeof(struct sockaddr_in6),
+	    .sin6_addr = IN6ADDR_ANY_INIT};
+	const struct sockaddr_in6 sockaddr_in6_lo = {.sin6_family = AF_INET6,
+	    .sin6_len = sizeof(struct sockaddr_in6),
+	    .sin6_addr = IN6ADDR_LOOPBACK_INIT};
 
-    next:
+next:
 	switch (as->as_state) {
 
 	case ASR_STATE_INIT:
@@ -154,8 +151,7 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 
 		as->as_count = 0;
 
-		if (as->as.ai.hostname == NULL &&
-		    as->as.ai.servname == NULL) {
+		if (as->as.ai.hostname == NULL && as->as.ai.servname == NULL) {
 			ar->ar_gai_errno = EAI_NONAME;
 			async_set_state(as, ASR_STATE_HALT);
 			break;
@@ -169,9 +165,7 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 
 		ai = &as->as.ai.hints;
 
-		if (ai->ai_addrlen ||
-		    ai->ai_canonname ||
-		    ai->ai_addr ||
+		if (ai->ai_addrlen || ai->ai_canonname || ai->ai_addr ||
 		    ai->ai_next) {
 			ar->ar_gai_errno = EAI_BADHINTS;
 			async_set_state(as, ASR_STATE_HALT);
@@ -185,16 +179,14 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			break;
 		}
 
-		if (ai->ai_family != PF_UNSPEC &&
-		    ai->ai_family != PF_INET &&
+		if (ai->ai_family != PF_UNSPEC && ai->ai_family != PF_INET &&
 		    ai->ai_family != PF_INET6) {
 			ar->ar_gai_errno = EAI_FAMILY;
 			async_set_state(as, ASR_STATE_HALT);
 			break;
 		}
 
-		if (ai->ai_socktype &&
-		    ai->ai_socktype != SOCK_DGRAM  &&
+		if (ai->ai_socktype && ai->ai_socktype != SOCK_DGRAM &&
 		    ai->ai_socktype != SOCK_STREAM &&
 		    ai->ai_socktype != SOCK_RAW) {
 			ar->ar_gai_errno = EAI_SOCKTYPE;
@@ -239,8 +231,9 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			    as->as.ai.hints.ai_flags & AI_NUMERICSERV);
 		if (as->as.ai.port_tcp == -2 || as->as.ai.port_udp == -2 ||
 		    (as->as.ai.port_tcp == -1 && as->as.ai.port_udp == -1) ||
-		    (ai->ai_protocol && (as->as.ai.port_udp == -1 ||
-					 as->as.ai.port_tcp == -1))) {
+		    (ai->ai_protocol &&
+			(as->as.ai.port_udp == -1 ||
+			    as->as.ai.port_tcp == -1))) {
 			ar->ar_gai_errno = EAI_SERVICE;
 			async_set_state(as, ASR_STATE_HALT);
 			break;
@@ -252,7 +245,7 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			is_localhost = _asr_is_localhost(as->as.ai.hostname);
 
 		if (as->as.ai.hostname == NULL)
-			is_localhost = (ai->ai_flags & AI_PASSIVE)? 0 : 1;
+			is_localhost = (ai->ai_flags & AI_PASSIVE) ? 0 : 1;
 
 		/*
 		 * If hostname is NULL, "localhost" or falls within the
@@ -269,18 +262,22 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			if (ai->ai_family == AF_UNSPEC ||
 			    ai->ai_family == AF_INET) {
 				if ((r = addrinfo_add(as,
-				    (const struct sockaddr *)((is_localhost)?
-				    &sockaddr_in_lo : &sockaddr_in_any),
-				    "localhost.")))
+					 (const struct sockaddr
+						 *)((is_localhost) ?
+						 &sockaddr_in_lo :
+						 &sockaddr_in_any),
+					 "localhost.")))
 					ar->ar_gai_errno = r;
 			}
 			if (ar->ar_gai_errno == 0 &&
 			    (ai->ai_family == AF_UNSPEC ||
-			    ai->ai_family == AF_INET6)) {
+				ai->ai_family == AF_INET6)) {
 				if ((r = addrinfo_add(as,
-				    (const struct sockaddr *)((is_localhost)?
-				    &sockaddr_in6_lo : &sockaddr_in6_any),
-				    "localhost.")))
+					 (const struct sockaddr
+						 *)((is_localhost) ?
+						 &sockaddr_in6_lo :
+						 &sockaddr_in6_any),
+					 "localhost.")))
 					ar->ar_gai_errno = r;
 			}
 			if (ar->ar_gai_errno == 0 && as->as_count == 0) {
@@ -291,8 +288,8 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 		}
 
 		/* Try numeric addresses first */
-		if (_asr_sockaddr_from_str(&sa.sa, ai->ai_family,
-		    as->as.ai.hostname) != -1) {
+		if (_asr_sockaddr_from_str(
+			&sa.sa, ai->ai_family, as->as.ai.hostname) != -1) {
 			if ((r = addrinfo_add(as, &sa.sa, as->as.ai.hostname)))
 				ar->ar_gai_errno = r;
 		}
@@ -310,9 +307,9 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 		/* make sure there are no funny characters in hostname */
 		if (!hnok_lenient(as->as.ai.hostname)) {
 			ar->ar_gai_errno = EAI_FAIL;
- 			async_set_state(as, ASR_STATE_HALT);
- 			break;
- 		}
+			async_set_state(as, ASR_STATE_HALT);
+			break;
+		}
 
 		async_set_state(as, ASR_STATE_NEXT_DB);
 		break;
@@ -353,7 +350,8 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 
 		free(as->as.ai.fqdn);
 		as->as.ai.fqdn = NULL;
-		r = _asr_iter_domain(as, as->as.ai.hostname, fqdn, sizeof(fqdn));
+		r = _asr_iter_domain(
+		    as, as->as.ai.hostname, fqdn, sizeof(fqdn));
 		if (r == -1) {
 			async_set_state(as, ASR_STATE_NEXT_DB);
 			break;
@@ -386,10 +384,10 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			}
 
 			family = (as->as.ai.hints.ai_family == AF_UNSPEC) ?
-			    AS_FAMILY(as) : as->as.ai.hints.ai_family;
+			    AS_FAMILY(as) :
+			    as->as.ai.hints.ai_family;
 
-			if (family == AF_INET &&
-			    as->as_flags & ASYNC_NO_INET) {
+			if (family == AF_INET && as->as_flags & ASYNC_NO_INET) {
 				async_set_state(as, ASR_STATE_NEXT_FAMILY);
 				break;
 			} else if (family == AF_INET6 &&
@@ -398,9 +396,8 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 				break;
 			}
 
-			as->as_subq = _res_query_async_ctx(as->as.ai.fqdn,
-			    C_IN, (family == AF_INET6) ? T_AAAA : T_A,
-			    as->as_ctx);
+			as->as_subq = _res_query_async_ctx(as->as.ai.fqdn, C_IN,
+			    (family == AF_INET6) ? T_AAAA : T_A, as->as_ctx);
 
 			if (as->as_subq == NULL) {
 				if (errno == ENOMEM)
@@ -414,7 +411,7 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			break;
 
 		case ASR_DB_FILE:
-			fd = __pledge_open(_PATH_HOSTS, O_RDONLY|O_CLOEXEC);
+			fd = __pledge_open(_PATH_HOSTS, O_RDONLY | O_CLOEXEC);
 			if (fd != -1)
 				f = fdopen(fd, "r");
 			if (f == NULL) {
@@ -423,7 +420,8 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 				break;
 			}
 			family = (as->as.ai.hints.ai_family == AF_UNSPEC) ?
-			    AS_FAMILY(as) : as->as.ai.hints.ai_family;
+			    AS_FAMILY(as) :
+			    as->as.ai.hints.ai_family;
 
 			r = addrinfo_from_file(as, family, f);
 			if (r == -1) {
@@ -501,10 +499,10 @@ getaddrinfo_async_run(struct asr_query *as, struct asr_result *ar)
 static int
 get_port(const char *servname, const char *proto, int numonly)
 {
-	struct servent		se;
-	struct servent_data	sed;
-	int			port;
-	const char		*e;
+	struct servent	    se;
+	struct servent_data sed;
+	int		    port;
+	const char	   *e;
 
 	if (servname == NULL)
 		return (0);
@@ -535,8 +533,8 @@ get_port(const char *servname, const char *proto, int numonly)
 static int
 addrinfo_add(struct asr_query *as, const struct sockaddr *sa, const char *cname)
 {
-	struct addrinfo		*ai;
-	int			 i, port, proto;
+	struct addrinfo *ai;
+	int		 i, port, proto;
 
 	for (i = 0; matches[i].family != -1; i++) {
 		if (matches[i].family != sa->sa_family ||
@@ -597,23 +595,25 @@ addrinfo_add(struct asr_query *as, const struct sockaddr *sa, const char *cname)
 static int
 addrinfo_from_file(struct asr_query *as, int family, FILE *f)
 {
-	char		*tokens[MAXTOKEN], *c, buf[BUFSIZ + 1];
-	int		 n, i;
+	char *tokens[MAXTOKEN], *c, buf[BUFSIZ + 1];
+	int   n, i;
 	union {
-		struct sockaddr		sa;
-		struct sockaddr_in	sain;
-		struct sockaddr_in6	sain6;
+		struct sockaddr	    sa;
+		struct sockaddr_in  sain;
+		struct sockaddr_in6 sain6;
 	} u;
 
 	for (;;) {
-		n = _asr_parse_namedb_line(f, tokens, MAXTOKEN, buf, sizeof(buf));
+		n = _asr_parse_namedb_line(
+		    f, tokens, MAXTOKEN, buf, sizeof(buf));
 		if (n == -1)
 			break; /* ignore errors reading the file */
 
 		for (i = 1; i < n; i++) {
 			if (strcasecmp(as->as.ai.hostname, tokens[i]))
 				continue;
-			if (_asr_sockaddr_from_str(&u.sa, family, tokens[0]) == -1)
+			if (_asr_sockaddr_from_str(&u.sa, family, tokens[0]) ==
+			    -1)
 				continue;
 			break;
 		}
@@ -634,17 +634,17 @@ addrinfo_from_file(struct asr_query *as, int family, FILE *f)
 static int
 addrinfo_from_pkt(struct asr_query *as, char *pkt, size_t pktlen)
 {
-	struct asr_unpack	 p;
-	struct asr_dns_header	 h;
-	struct asr_dns_query	 q;
-	struct asr_dns_rr	 rr;
-	int			 i;
+	struct asr_unpack     p;
+	struct asr_dns_header h;
+	struct asr_dns_query  q;
+	struct asr_dns_rr     rr;
+	int		      i;
 	union {
-		struct sockaddr		sa;
-		struct sockaddr_in	sain;
-		struct sockaddr_in6	sain6;
+		struct sockaddr	    sa;
+		struct sockaddr_in  sain;
+		struct sockaddr_in6 sain6;
 	} u;
-	char		 buf[MAXDNAME], *c;
+	char buf[MAXDNAME], *c;
 
 	_asr_unpack_init(&p, pkt, pktlen);
 	if (_asr_unpack_header(&p, &h) == -1)
@@ -659,8 +659,7 @@ addrinfo_from_pkt(struct asr_query *as, char *pkt, size_t pktlen)
 		if (_asr_unpack_rr(&p, &rr) == -1)
 			return (-1);
 
-		if (rr.rr_type != q.q_type ||
-		    rr.rr_class != q.q_class)
+		if (rr.rr_type != q.q_type || rr.rr_class != q.q_class)
 			continue;
 
 		memset(&u, 0, sizeof u);
@@ -698,11 +697,11 @@ addrinfo_from_pkt(struct asr_query *as, char *pkt, size_t pktlen)
 static int
 addrconfig_setup(struct asr_query *as)
 {
-	struct ifaddrs		*ifa, *ifa0;
-	struct if_data		*ifa_data;
-	struct sockaddr_in	*sinp;
-	struct sockaddr_in6	*sin6p;
-	int			 rtable, ifa_rtable = -1;
+	struct ifaddrs	    *ifa, *ifa0;
+	struct if_data	    *ifa_data;
+	struct sockaddr_in  *sinp;
+	struct sockaddr_in6 *sin6p;
+	int		     rtable, ifa_rtable = -1;
 
 	if (getifaddrs(&ifa0) == -1)
 		return (-1);

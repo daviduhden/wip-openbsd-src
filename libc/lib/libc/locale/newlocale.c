@@ -24,7 +24,7 @@
 locale_t
 newlocale(int mask, const char *locname, locale_t oldloc)
 {
-	int	 ic, flag;
+	int ic, flag;
 
 	/* Invalid input. */
 	if (locname == NULL || mask & ~LC_ALL_MASK) {

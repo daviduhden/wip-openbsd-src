@@ -23,8 +23,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "rthread.h"
 #include "cancel.h"
+#include "rthread.h"
 #include "synch.h"
 
 int
@@ -68,19 +68,19 @@ pthread_cond_destroy(pthread_cond_t *condp)
 }
 
 int
-_rthread_cond_timedwait(pthread_cond_t cond, pthread_mutex_t *mutexp,
-    const struct timespec *abs)
+_rthread_cond_timedwait(
+    pthread_cond_t cond, pthread_mutex_t *mutexp, const struct timespec *abs)
 {
 	struct pthread_mutex *mutex = (struct pthread_mutex *)*mutexp;
-	struct tib *tib = TIB_GET();
-	pthread_t self = tib->tib_thread;
-	int error, rv = 0, canceled = 0, mutex_count = 0;
-	clockid_t clock = cond->clock;
-	int seq = cond->seq;
+	struct tib	     *tib = TIB_GET();
+	pthread_t	      self = tib->tib_thread;
+	int		      error, rv = 0, canceled = 0, mutex_count = 0;
+	clockid_t	      clock = cond->clock;
+	int		      seq = cond->seq;
 	PREP_CANCEL_POINT(tib);
 
-	_rthread_debug(5, "%p: cond_timed %p,%p (%p)\n", self,
-	    (void *)cond, (void *)mutex, (void *)mutex->owner);
+	_rthread_debug(5, "%p: cond_timed %p,%p (%p)\n", self, (void *)cond,
+	    (void *)mutex, (void *)mutex->owner);
 
 	ENTER_DELAYED_CANCEL_POINT(tib, self);
 
@@ -105,12 +105,13 @@ _rthread_cond_timedwait(pthread_cond_t cond, pthread_mutex_t *mutexp,
 		/* If ``seq'' wraps you deserve to lose a signal. */
 		error = _twait(&cond->seq, seq, clock, abs);
 		/*
-		* If we took a normal signal (not from cancellation) then
-		* we should just go back to sleep without changing state
-		* (timeouts, etc).
-		*/
+		 * If we took a normal signal (not from cancellation) then
+		 * we should just go back to sleep without changing state
+		 * (timeouts, etc).
+		 */
 	} while ((error == EINTR) &&
-	   (tib->tib_canceled == 0 || (tib->tib_cantcancel & CANCEL_DISABLED)));
+	    (tib->tib_canceled == 0 ||
+		(tib->tib_cantcancel & CANCEL_DISABLED)));
 
 	/* if timeout or canceled, make note of that */
 	if (error == ETIMEDOUT)
@@ -130,11 +131,11 @@ _rthread_cond_timedwait(pthread_cond_t cond, pthread_mutex_t *mutexp,
 }
 
 int
-pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
-    const struct timespec *abs)
+pthread_cond_timedwait(
+    pthread_cond_t *condp, pthread_mutex_t *mutexp, const struct timespec *abs)
 {
 	pthread_cond_t cond;
-	int error;
+	int	       error;
 
 	if (*condp == NULL) {
 		if ((error = pthread_cond_init(condp, NULL)))
@@ -152,7 +153,7 @@ int
 pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 {
 	pthread_cond_t cond;
-	int error;
+	int	       error;
 
 	if (*condp == NULL) {
 		if ((error = pthread_cond_init(condp, NULL)))
@@ -167,7 +168,7 @@ int
 pthread_cond_signal(pthread_cond_t *condp)
 {
 	pthread_cond_t cond;
-	int count;
+	int	       count;
 
 	if (*condp == NULL)
 		return (0);
@@ -187,7 +188,7 @@ int
 pthread_cond_broadcast(pthread_cond_t *condp)
 {
 	pthread_cond_t cond;
-	int count;
+	int	       count;
 
 	if (*condp == NULL)
 		return (0);

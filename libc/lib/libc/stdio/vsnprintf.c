@@ -34,12 +34,13 @@
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "local.h"
 
 int
 vsnprintf(char *str, size_t n, const char *fmt, __va_list ap)
 {
-	int ret;
+	int  ret;
 	char dummy;
 	FILE f = FILEINIT(__SWR | __SSTR);
 

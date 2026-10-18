@@ -35,110 +35,110 @@
 #ifndef _MACHINE_MPBIOSREG_H_
 #define _MACHINE_MPBIOSREG_H_
 
-#define BIOS_BASE		(0xf0000)
-#define BIOS_SIZE		(0x10000)
-#define BIOS_COUNT		(BIOS_SIZE)
+#define BIOS_BASE (0xf0000)
+#define BIOS_SIZE (0x10000)
+#define BIOS_COUNT (BIOS_SIZE)
 
 /*
  * Multiprocessor config table entry types.
  */
 
-#define MPS_MCT_CPU	0
-#define MPS_MCT_BUS	1
-#define MPS_MCT_IOAPIC	2
-#define MPS_MCT_IOINT	3
-#define MPS_MCT_LINT	4
+#define MPS_MCT_CPU 0
+#define MPS_MCT_BUS 1
+#define MPS_MCT_IOAPIC 2
+#define MPS_MCT_IOINT 3
+#define MPS_MCT_LINT 4
 
-#define MPS_MCT_NTYPES	5
+#define MPS_MCT_NTYPES 5
 
 /*
  * Interrupt types
  */
 
-#define MPS_INTTYPE_INT		0
-#define MPS_INTTYPE_NMI		1
-#define MPS_INTTYPE_SMI		2
-#define MPS_INTTYPE_ExtINT	3
+#define MPS_INTTYPE_INT 0
+#define MPS_INTTYPE_NMI 1
+#define MPS_INTTYPE_SMI 2
+#define MPS_INTTYPE_ExtINT 3
 
-#define MPS_INTPO_DEF		0
-#define MPS_INTPO_ACTHI		1
-#define MPS_INTPO_ACTLO		3
-#define MPS_INTPO_SHIFT		0
-#define MPS_INTPO_MASK		3
+#define MPS_INTPO_DEF 0
+#define MPS_INTPO_ACTHI 1
+#define MPS_INTPO_ACTLO 3
+#define MPS_INTPO_SHIFT 0
+#define MPS_INTPO_MASK 3
 
-#define MPS_INTTR_DEF		0
-#define MPS_INTTR_EDGE		1
-#define MPS_INTTR_LEVEL		3
-#define MPS_INTTR_SHIFT		2
-#define MPS_INTTR_MASK		3
+#define MPS_INTTR_DEF 0
+#define MPS_INTTR_EDGE 1
+#define MPS_INTTR_LEVEL 3
+#define MPS_INTTR_SHIFT 2
+#define MPS_INTTR_MASK 3
 
-#define MPS_INT(p,t) \
-    ((((p) & MPS_INTPO_MASK) << MPS_INTPO_SHIFT) | \
-     (((t) & MPS_INTTR_MASK) << MPS_INTTR_SHIFT))
+#define MPS_INT(p, t)                                                          \
+	((((p) & MPS_INTPO_MASK) << MPS_INTPO_SHIFT) |                         \
+	    (((t) & MPS_INTTR_MASK) << MPS_INTTR_SHIFT))
 
 /* MP Floating Pointer Structure */
 struct mpbios_fps {
-	u_int32_t	signature;
+	u_int32_t signature;
 /* string defined by the Intel MP Spec as identifying the MP table */
-#define MP_FP_SIG		0x5f504d5f	/* _MP_ */
-	
-	u_int32_t 	pap;
-	u_int8_t  	length;
-	u_int8_t  	spec_rev;
-	u_int8_t  	checksum;
-	u_int8_t  	mpfb1;	/* system configuration */
-	u_int8_t  	mpfb2;	/* flags */
-#define MPFPS_FLAG_IMCR		0x80	/* IMCR present */
-	u_int8_t  	mpfb3;	/* unused */
-	u_int8_t  	mpfb4;	/* unused */
-	u_int8_t  	mpfb5;	/* unused */
+#define MP_FP_SIG 0x5f504d5f /* _MP_ */
+
+	u_int32_t pap;
+	u_int8_t  length;
+	u_int8_t  spec_rev;
+	u_int8_t  checksum;
+	u_int8_t  mpfb1;     /* system configuration */
+	u_int8_t  mpfb2;     /* flags */
+#define MPFPS_FLAG_IMCR 0x80 /* IMCR present */
+	u_int8_t mpfb3;	     /* unused */
+	u_int8_t mpfb4;	     /* unused */
+	u_int8_t mpfb5;	     /* unused */
 };
 
 /* MP Configuration Table Header */
 struct mpbios_cth {
-	u_int32_t	signature;
-#define MP_CT_SIG		0x504d4350 	/* PCMP */
-	
-	u_int16_t 	base_len;
-	u_int8_t  	spec_rev;
-	u_int8_t  	checksum;
-	u_int8_t  	oem_id[8];
-	u_int8_t  	product_id[12];
-	u_int32_t	oem_table_pointer;
-	u_int16_t 	oem_table_size;
-	u_int16_t 	entry_count;
-	u_int32_t	apic_address;
-	u_int16_t	ext_len;
-	u_int8_t  	ext_cksum;
-	u_int8_t  	reserved;
+	u_int32_t signature;
+#define MP_CT_SIG 0x504d4350 /* PCMP */
+
+	u_int16_t base_len;
+	u_int8_t  spec_rev;
+	u_int8_t  checksum;
+	u_int8_t  oem_id[8];
+	u_int8_t  product_id[12];
+	u_int32_t oem_table_pointer;
+	u_int16_t oem_table_size;
+	u_int16_t entry_count;
+	u_int32_t apic_address;
+	u_int16_t ext_len;
+	u_int8_t  ext_cksum;
+	u_int8_t  reserved;
 };
 
 struct mpbios_proc {
-	u_int8_t  type;
-	u_int8_t  apic_id;
-	u_int8_t  apic_version;
-	u_int8_t  cpu_flags;
-#define PROCENTRY_FLAG_EN	0x01
-#define PROCENTRY_FLAG_BP	0x02
-	u_long  cpu_signature;
-	u_long  feature_flags;
-	u_long  reserved1;
-	u_long  reserved2;
+	u_int8_t type;
+	u_int8_t apic_id;
+	u_int8_t apic_version;
+	u_int8_t cpu_flags;
+#define PROCENTRY_FLAG_EN 0x01
+#define PROCENTRY_FLAG_BP 0x02
+	u_long cpu_signature;
+	u_long feature_flags;
+	u_long reserved1;
+	u_long reserved2;
 };
 
 struct mpbios_bus {
-	u_int8_t  type;
-	u_int8_t  bus_id;
-	char    bus_type[6];
+	u_int8_t type;
+	u_int8_t bus_id;
+	char	 bus_type[6];
 };
 
 struct mpbios_ioapic {
-	u_int8_t  type;
-	u_int8_t  apic_id;
-	u_int8_t  apic_version;
-	u_int8_t  apic_flags;
-#define IOAPICENTRY_FLAG_EN	0x01
-	void   *apic_address;
+	u_int8_t type;
+	u_int8_t apic_id;
+	u_int8_t apic_version;
+	u_int8_t apic_flags;
+#define IOAPICENTRY_FLAG_EN 0x01
+	void *apic_address;
 };
 
 struct mpbios_int {
@@ -148,8 +148,8 @@ struct mpbios_int {
 	u_int8_t  src_bus_id;
 	u_int8_t  src_bus_irq;
 	u_int8_t  dst_apic_id;
-#define MPS_ALL_APICS	0xff
-	u_int8_t  dst_apic_int;
+#define MPS_ALL_APICS 0xff
+	u_int8_t dst_apic_int;
 };
 
 #endif /* !_MACHINE_MPBIOSREG_H_ */

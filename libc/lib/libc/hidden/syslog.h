@@ -16,13 +16,12 @@
  */
 
 #ifndef _LIBC_SYSLOG_H_
-#define	_LIBC_SYSLOG_H_
+#define _LIBC_SYSLOG_H_
 
 #include_next <syslog.h>
 
 __BEGIN_HIDDEN_DECLS
-void	__vsyslog_r(int, struct syslog_data *, int,
-	    const char *, __va_list);
+void __vsyslog_r(int, struct syslog_data *, int, const char *, __va_list);
 __END_HIDDEN_DECLS
 
 PROTO_DEPRECATED(closelog);

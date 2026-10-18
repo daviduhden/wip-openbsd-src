@@ -37,7 +37,7 @@ size_t
 strspn(const char *s1, const char *s2)
 {
 	const char *p = s1, *spanp;
-	char c, sc;
+	char	    c, sc;
 
 	/*
 	 * Skip any characters in s2, excluding the terminating \0.

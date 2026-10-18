@@ -14,7 +14,7 @@
 
 #include "rand48.h"
 
-int     __rand48_deterministic;
+int __rand48_deterministic;
 
 void
 srand48(long seed)
@@ -28,8 +28,8 @@ srand48_deterministic(long seed)
 {
 	__rand48_deterministic = 1;
 	__rand48_seed[0] = RAND48_SEED_0;
-	__rand48_seed[1] = (unsigned short) seed;
-	__rand48_seed[2] = (unsigned short) (seed >> 16);
+	__rand48_seed[1] = (unsigned short)seed;
+	__rand48_seed[2] = (unsigned short)(seed >> 16);
 	__rand48_mult[0] = RAND48_MULT_0;
 	__rand48_mult[1] = RAND48_MULT_1;
 	__rand48_mult[2] = RAND48_MULT_2;

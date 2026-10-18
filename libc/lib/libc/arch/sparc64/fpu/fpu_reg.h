@@ -31,7 +31,7 @@
 
 u_int32_t __fpu_getreg32(int);
 u_int64_t __fpu_getreg64(int);
-void __fpu_setreg32(int, u_int32_t);
-void __fpu_setreg64(int, u_int64_t);
+void	  __fpu_setreg32(int, u_int32_t);
+void	  __fpu_setreg64(int, u_int64_t);
 
 #endif /* _LIBC_ARCH_SPARC64_FPU_FPU_REG_H_ */

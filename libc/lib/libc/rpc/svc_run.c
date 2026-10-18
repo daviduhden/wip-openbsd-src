@@ -35,25 +35,25 @@
  * This is the rpc server side idle loop
  * Wait for input, call server program.
  */
-#include <rpc/rpc.h>
 #include <errno.h>
-#include <unistd.h>
+#include <rpc/rpc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 void
 svc_run(void)
 {
 	struct pollfd *pfd = NULL, *newp;
-	int nready, saved_max_pollfd = 0;
+	int	       nready, saved_max_pollfd = 0;
 
 	for (;;) {
 		if (svc_max_pollfd > saved_max_pollfd) {
 			newp = reallocarray(pfd, svc_max_pollfd, sizeof(*pfd));
 			if (newp == NULL) {
 				free(pfd);
-				return;			/* XXX */
+				return; /* XXX */
 			}
 			saved_max_pollfd = svc_max_pollfd;
 			pfd = newp;
@@ -66,7 +66,7 @@ svc_run(void)
 			if (errno == EINTR)
 				continue;
 			free(pfd);
-			return;					/* XXX */
+			return; /* XXX */
 		case 0:
 			/* should not happen */
 			continue;

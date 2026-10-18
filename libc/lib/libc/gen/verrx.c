@@ -29,9 +29,9 @@
  */
 
 #include <err.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 
 __dead void
 verrx(int eval, const char *fmt, va_list ap)

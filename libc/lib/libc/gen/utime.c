@@ -37,7 +37,7 @@ utime(const char *path, const struct utimbuf *times)
 {
 	struct timeval tv[2], *tvp;
 
-	if (times == (struct utimbuf *) NULL)
+	if (times == (struct utimbuf *)NULL)
 		tvp = NULL;
 	else {
 		tv[0].tv_sec = times->actime;

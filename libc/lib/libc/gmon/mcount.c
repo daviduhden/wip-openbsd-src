@@ -51,10 +51,10 @@ _MCOUNT_DECL(u_long frompc, u_long selfpc) __used;
 /* _mcount; may be static, inline, etc */
 _MCOUNT_DECL(u_long frompc, u_long selfpc)
 {
-	u_short *frompcindex;
-	struct tostruct *top, *prevtop;
+	u_short		 *frompcindex;
+	struct tostruct	 *top, *prevtop;
 	struct gmonparam *p;
-	long toindex;
+	long		  toindex;
 #ifdef _KERNEL
 	int s;
 
@@ -70,8 +70,8 @@ _MCOUNT_DECL(u_long frompc, u_long selfpc)
 	if ((p = curcpu()->ci_gmon) == NULL)
 		return;
 #else
-	p = (__isthreaded) ?
-		((pthread_t)TIB_GET()->tib_thread)->gmonparam : &_gmonparam;
+	p = (__isthreaded) ? ((pthread_t)TIB_GET()->tib_thread)->gmonparam :
+			     &_gmonparam;
 #endif
 	/*
 	 * check that we are profiling
@@ -132,7 +132,7 @@ _MCOUNT_DECL(u_long frompc, u_long selfpc)
 	 * prevtop points to previous top.
 	 * we know it is not at the head of the chain.
 	 */
-	for (; /* goto done */; ) {
+	for (; /* goto done */;) {
 		if (top->link == 0) {
 			/*
 			 * top is end of the chain and none of the chain

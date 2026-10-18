@@ -32,14 +32,14 @@
  * SUCH DAMAGE.
  */
 
+#include <db.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <db.h>
 #include "btree.h"
 
-#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 /*
  * __bt_ret --
@@ -61,7 +61,7 @@ int
 __bt_ret(BTREE *t, EPG *e, DBT *key, DBT *rkey, DBT *data, DBT *rdata, int copy)
 {
 	BLEAF *bl;
-	void *p;
+	void  *p;
 
 	bl = GETBLEAF(e->page, e->index);
 
@@ -74,8 +74,8 @@ __bt_ret(BTREE *t, EPG *e, DBT *key, DBT *rkey, DBT *data, DBT *rdata, int copy)
 		goto dataonly;
 
 	if (bl->flags & P_BIGKEY) {
-		if (__ovfl_get(t, bl->bytes,
-		    &key->size, &rkey->data, &rkey->size))
+		if (__ovfl_get(
+			t, bl->bytes, &key->size, &rkey->data, &rkey->size))
 			return (RET_ERROR);
 		key->data = rkey->data;
 	} else if (copy || F_ISSET(t, B_DB_LOCK)) {
@@ -99,8 +99,8 @@ dataonly:
 		return (RET_SUCCESS);
 
 	if (bl->flags & P_BIGDATA) {
-		if (__ovfl_get(t, bl->bytes + bl->ksize,
-		    &data->size, &rdata->data, &rdata->size))
+		if (__ovfl_get(t, bl->bytes + bl->ksize, &data->size,
+			&rdata->data, &rdata->size))
 			return (RET_ERROR);
 		data->data = rdata->data;
 	} else if (copy || F_ISSET(t, B_DB_LOCK)) {
@@ -140,10 +140,10 @@ int
 __bt_cmp(BTREE *t, const DBT *k1, EPG *e)
 {
 	BINTERNAL *bi;
-	BLEAF *bl;
-	DBT k2;
-	PAGE *h;
-	void *bigkey;
+	BLEAF	  *bl;
+	DBT	   k2;
+	PAGE	  *h;
+	void	  *bigkey;
 
 	/*
 	 * The left-most key on internal pages, at any level of the tree, is
@@ -176,8 +176,8 @@ __bt_cmp(BTREE *t, const DBT *k1, EPG *e)
 	}
 
 	if (bigkey) {
-		if (__ovfl_get(t, bigkey,
-		    &k2.size, &t->bt_rdata.data, &t->bt_rdata.size))
+		if (__ovfl_get(t, bigkey, &k2.size, &t->bt_rdata.data,
+			&t->bt_rdata.size))
 			return (RET_ERROR);
 		k2.data = t->bt_rdata.data;
 	}
@@ -199,7 +199,7 @@ __bt_cmp(BTREE *t, const DBT *k1, EPG *e)
 int
 __bt_defcmp(const DBT *a, const DBT *b)
 {
-	size_t len;
+	size_t	len;
 	u_char *p1, *p2;
 
 	/*
@@ -229,7 +229,7 @@ size_t
 __bt_defpfx(const DBT *a, const DBT *b)
 {
 	u_char *p1, *p2;
-	size_t cnt, len;
+	size_t	cnt, len;
 
 	cnt = 1;
 	len = MINIMUM(a->size, b->size);

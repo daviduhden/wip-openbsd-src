@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_LIBC_INTTYPES_H_
-#define	_LIBC_INTTYPES_H_
+#ifndef _LIBC_INTTYPES_H_
+#define _LIBC_INTTYPES_H_
 
 #include_next <inttypes.h>
 

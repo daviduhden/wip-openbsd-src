@@ -31,21 +31,23 @@
  * SUCH DAMAGE.
  */
 
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
+
 #include "local.h"
 
 #if defined(APIWARN)
-__warn_references(vsprintf,
-    "vsprintf() is often misused, please use vsnprintf()");
+__warn_references(
+    vsprintf, "vsprintf() is often misused, please use vsnprintf()");
 #endif
 
 int
 vsprintf(char *str, const char *fmt, __va_list ap)
 {
-	int ret;
-	FILE f = FILEINIT(__SWR | __SSTR);;
+	int  ret;
+	FILE f = FILEINIT(__SWR | __SSTR);
+	;
 
 	f._bf._base = f._p = (unsigned char *)str;
 	f._bf._size = f._w = INT_MAX;

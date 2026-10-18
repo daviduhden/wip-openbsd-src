@@ -1,5 +1,7 @@
-/*	$OpenBSD: uuid_to_string.c,v 1.2 2015/09/10 18:13:46 guenther Exp $	*/
-/*	$NetBSD: uuid_to_string.c,v 1.2 2008/04/23 07:52:32 plunky Exp $	*/
+/*	$OpenBSD: uuid_to_string.c,v 1.2 2015/09/10 18:13:46 guenther Exp $
+ */
+/*	$NetBSD: uuid_to_string.c,v 1.2 2008/04/23 07:52:32 plunky Exp $
+ */
 
 /*
  * Copyright (c) 2002 Marcel Moolenaar
@@ -27,7 +29,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libc/uuid/uuid_to_string.c,v 1.2 2003/08/08 19:18:43 marcel Exp $
+ * $FreeBSD: src/lib/libc/uuid/uuid_to_string.c,v 1.2 2003/08/08 19:18:43 marcel
+ * Exp $
  */
 
 #include <stdio.h>
@@ -46,8 +49,8 @@
 void
 uuid_to_string(const uuid_t *u, char **s, uint32_t *status)
 {
-	int c;
-	static const uuid_t nil = { .time_low = 0 };
+	int		    c;
+	static const uuid_t nil = {.time_low = 0};
 
 	if (status != NULL)
 		*status = uuid_s_ok;

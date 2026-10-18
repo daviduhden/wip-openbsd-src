@@ -11,6 +11,6 @@
 
 register_t smc_call(register_t, register_t, register_t, register_t);
 
-#endif	/* _KERNEL */
+#endif /* _KERNEL */
 
-#endif	/* _MACHINE_CPUFUNC_H_ */
+#endif /* _MACHINE_CPUFUNC_H_ */

@@ -16,6 +16,7 @@
  */
 
 #include <sys/wait.h>
+
 #include "cancel.h"
 
 int

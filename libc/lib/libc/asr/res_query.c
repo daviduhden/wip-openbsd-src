@@ -17,21 +17,22 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
-#include <netdb.h>
 
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 int
 res_query(const char *name, int class, int type, u_char *ans, int anslen)
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	size_t		 len;
+	size_t		  len;
 
 	res_init();
 
@@ -74,7 +75,7 @@ res_search(const char *name, int class, int type, u_char *ans, int anslen)
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	size_t		 len;
+	size_t		  len;
 
 	res_init();
 

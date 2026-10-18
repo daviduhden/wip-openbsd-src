@@ -25,4 +25,3 @@ _rthread_debug(int level, const char *fmt, ...)
 	}
 }
 DEF_STRONG(_rthread_debug);
-

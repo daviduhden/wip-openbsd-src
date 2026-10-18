@@ -19,18 +19,18 @@
 #ifndef _MACHINE_EXEC_H_
 #define _MACHINE_EXEC_H_
 
-#define __LDPGSZ		4096
+#define __LDPGSZ 4096
 
-#define ARCH_ELFSIZE		64
+#define ARCH_ELFSIZE 64
 
-#define ELF_TARG_CLASS		ELFCLASS64
-#define ELF_TARG_DATA		ELFDATA2MSB
-#define ELF_TARG_MACH		EM_PPC64
+#define ELF_TARG_CLASS ELFCLASS64
+#define ELF_TARG_DATA ELFDATA2MSB
+#define ELF_TARG_MACH EM_PPC64
 
 /* Processor specific dynamic tag values.  */
-#define DT_PPC64_GLINK		0x70000000
-#define DT_PPC64_OPT		0x70000003
+#define DT_PPC64_GLINK 0x70000000
+#define DT_PPC64_OPT 0x70000003
 
-#define DT_PROCNUM		(DT_PPC64_OPT - DT_LOPROC + 1)
+#define DT_PROCNUM (DT_PPC64_OPT - DT_LOPROC + 1)
 
 #endif

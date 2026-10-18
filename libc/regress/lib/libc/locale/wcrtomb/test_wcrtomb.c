@@ -1,4 +1,5 @@
-/*	$OpenBSD: test_wcrtomb.c,v 1.3 2021/07/03 12:04:53 schwarze Exp $	*/
+/*	$OpenBSD: test_wcrtomb.c,v 1.3 2021/07/03 12:04:53 schwarze Exp $
+ */
 /*
  * Copyright (c) 2016 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -16,6 +17,7 @@
  */
 
 #include <sys/types.h>
+
 #include <err.h>
 #include <errno.h>
 #include <limits.h>
@@ -24,13 +26,13 @@
 #include <string.h>
 #include <wchar.h>
 
-static mbstate_t	 mbs;
+static mbstate_t mbs;
 
 void
 onetest(const char *name, const wchar_t wcin, int outerr, const char *out)
 {
-	char		 buf[MB_LEN_MAX];
-	size_t		 sz, outsz;
+	char   buf[MB_LEN_MAX];
+	size_t sz, outsz;
 
 	memset(buf, 0, MB_LEN_MAX);
 	outsz = out == NULL ? (size_t)-1 : *out == '\0' ? 1 : strlen(out);
@@ -38,9 +40,8 @@ onetest(const char *name, const wchar_t wcin, int outerr, const char *out)
 	if (errno != outerr)
 		err(1, "%zu %s U+%04X", MB_CUR_MAX, name, wcin);
 	if (sz != outsz || (out != NULL && strncmp(buf, out, sz)))
-		errx(1, "%zu %s U+%04X: %4.4s(%zd) != %4.4s(%zd)",
-		    MB_CUR_MAX, name, wcin, buf, sz,
-		    out == NULL ? "(NULL)" : out, outsz);
+		errx(1, "%zu %s U+%04X: %4.4s(%zd) != %4.4s(%zd)", MB_CUR_MAX,
+		    name, wcin, buf, sz, out == NULL ? "(NULL)" : out, outsz);
 	if (mbsinit(&mbs) == 0)
 		errx(1, "%zu %s U+%04X mbsinit", MB_CUR_MAX, name, wcin);
 	if (errno == 0 && outerr == 0)

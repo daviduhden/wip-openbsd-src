@@ -32,46 +32,46 @@
  *	@(#)profile.h	8.1 (Berkeley) 6/11/93
  */
 
-#define	_MCOUNT_DECL void _mcount
+#define _MCOUNT_DECL void _mcount
 
 #ifdef __PIC__
-#define __MCPLT	"@PLT"
+#define __MCPLT "@PLT"
 #else
 #define __MCPLT
 #endif
 
-#define	MCOUNT						\
-__asm(" .globl __mcount		\n"			\
-"	.type __mcount,@function\n"			\
-"__mcount:			\n"			\
-"	pushq	%rbp		\n"			\
-"	movq	%rsp,%rbp	\n"			\
-"	subq	$56,%rsp	\n"			\
-"	movq	%rdi,0(%rsp)	\n"			\
-"	movq	%rsi,8(%rsp)	\n"			\
-"	movq	%rdx,16(%rsp)	\n"			\
-"	movq	%rcx,24(%rsp)	\n"			\
-"	movq	%r8,32(%rsp)	\n"			\
-"	movq	%r9,40(%rsp)	\n"			\
-"	movq	%rax,48(%rsp)	\n"			\
-"	movq	0(%rbp),%r11	\n"			\
-"	movq	8(%r11),%rdi	\n"			\
-"	movq	8(%rbp),%rsi	\n"			\
-"	call	_mcount"__MCPLT"\n"			\
-"	movq	0(%rsp),%rdi	\n"			\
-"	movq	8(%rsp),%rsi	\n"			\
-"	movq	16(%rsp),%rdx	\n"			\
-"	movq	24(%rsp),%rcx	\n"			\
-"	movq	32(%rsp),%r8	\n"			\
-"	movq	40(%rsp),%r9	\n"			\
-"	movq	48(%rsp),%rax	\n"			\
-"	leave			\n"			\
-"	ret			\n"			\
-"	lfence			\n"			\
-"	.size __mcount,.-__mcount");
-
+#define MCOUNT                                                                 \
+	__asm(" .globl __mcount		\n"                                           \
+	      "	.type __mcount,@function\n"                                    \
+	      "__mcount:			\n"                                                 \
+	      "	pushq	%rbp		\n"                                                \
+	      "	movq	%rsp,%rbp	\n"                                             \
+	      "	subq	$56,%rsp	\n"                                              \
+	      "	movq	%rdi,0(%rsp)	\n"                                          \
+	      "	movq	%rsi,8(%rsp)	\n"                                          \
+	      "	movq	%rdx,16(%rsp)	\n"                                         \
+	      "	movq	%rcx,24(%rsp)	\n"                                         \
+	      "	movq	%r8,32(%rsp)	\n"                                          \
+	      "	movq	%r9,40(%rsp)	\n"                                          \
+	      "	movq	%rax,48(%rsp)	\n"                                         \
+	      "	movq	0(%rbp),%r11	\n"                                          \
+	      "	movq	8(%r11),%rdi	\n"                                          \
+	      "	movq	8(%rbp),%rsi	\n"                                          \
+	      "	call	_mcount"__MCPLT                                           \
+	      "\n"                                                             \
+	      "	movq	0(%rsp),%rdi	\n"                                          \
+	      "	movq	8(%rsp),%rsi	\n"                                          \
+	      "	movq	16(%rsp),%rdx	\n"                                         \
+	      "	movq	24(%rsp),%rcx	\n"                                         \
+	      "	movq	32(%rsp),%r8	\n"                                          \
+	      "	movq	40(%rsp),%r9	\n"                                          \
+	      "	movq	48(%rsp),%rax	\n"                                         \
+	      "	leave			\n"                                                    \
+	      "	ret			\n"                                                      \
+	      "	lfence			\n"                                                   \
+	      "	.size __mcount,.-__mcount");
 
 #ifdef _KERNEL
-#define MCOUNT_ENTER	s = intr_disable()
-#define MCOUNT_EXIT	intr_restore(s)
+#define MCOUNT_ENTER s = intr_disable()
+#define MCOUNT_EXIT intr_restore(s)
 #endif /* _KERNEL */

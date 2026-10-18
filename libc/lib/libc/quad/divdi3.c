@@ -42,7 +42,7 @@ quad_t
 __divdi3(quad_t a, quad_t b)
 {
 	u_quad_t ua, ub, uq;
-	int neg = 0;
+	int	 neg = 0;
 
 	ua = a;
 	ub = b;
@@ -54,6 +54,6 @@ __divdi3(quad_t a, quad_t b)
 
 	uq = __qdivrem(ua, ub, (u_quad_t *)0);
 	if (neg)
-		uq = - uq;
+		uq = -uq;
 	return uq;
 }

@@ -14,14 +14,14 @@
  * tag is used to decouple libc from the thread library.
  */
 struct _thread_tag {
-	pthread_mutex_t	m;	/* the tag's mutex */
-	pthread_key_t	k;	/* a key for private data */
+	pthread_mutex_t m; /* the tag's mutex */
+	pthread_key_t	k; /* a key for private data */
 };
 
 /*
  * local mutex to protect against tag creation races.
  */
-static pthread_mutex_t	_thread_tag_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t _thread_tag_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /*
  * Initialize a thread tag structure once.   This function is called
@@ -34,7 +34,7 @@ static void
 _thread_tag_init(void **tag, void (*dt)(void *))
 {
 	struct _thread_tag *tt;
-	int result;
+	int		    result;
 
 	result = pthread_mutex_lock(&_thread_tag_mutex);
 	if (result == 0) {
@@ -42,8 +42,8 @@ _thread_tag_init(void **tag, void (*dt)(void *))
 			tt = malloc(sizeof *tt);
 			if (tt != NULL) {
 				result = pthread_mutex_init(&tt->m, NULL);
-				result |= pthread_key_create(&tt->k, dt ? dt :
-				    free);
+				result |=
+				    pthread_key_create(&tt->k, dt ? dt : free);
 				*tag = tt;
 			}
 		}
@@ -94,11 +94,11 @@ _thread_tag_unlock(void **tag)
  * On any error return 'err'.
  */
 void *
-_thread_tag_storage(void **tag, void *storage, size_t sz, void (*dt)(void *),
-    void *err)
+_thread_tag_storage(
+    void **tag, void *storage, size_t sz, void (*dt)(void *), void *err)
 {
 	struct _thread_tag *tt;
-	void *ret;
+	void		   *ret;
 
 	if (*tag == NULL)
 		_thread_tag_init(tag, dt);
@@ -125,7 +125,7 @@ _thread_tag_storage(void **tag, void *storage, size_t sz, void (*dt)(void *),
 void
 _thread_mutex_lock(void **mutex)
 {
-	pthread_mutex_t	*pmutex = (pthread_mutex_t *)mutex;
+	pthread_mutex_t *pmutex = (pthread_mutex_t *)mutex;
 
 	if (pthread_mutex_lock(pmutex) != 0)
 		_rthread_debug(1, "mutex lock failure");
@@ -134,7 +134,7 @@ _thread_mutex_lock(void **mutex)
 void
 _thread_mutex_unlock(void **mutex)
 {
-	pthread_mutex_t	*pmutex = (pthread_mutex_t *)mutex;
+	pthread_mutex_t *pmutex = (pthread_mutex_t *)mutex;
 
 	if (pthread_mutex_unlock(pmutex) != 0)
 		_rthread_debug(1, "mutex unlock failure");
@@ -143,7 +143,7 @@ _thread_mutex_unlock(void **mutex)
 void
 _thread_mutex_destroy(void **mutex)
 {
-	pthread_mutex_t	*pmutex = (pthread_mutex_t *)mutex;
+	pthread_mutex_t *pmutex = (pthread_mutex_t *)mutex;
 
 	if (pthread_mutex_destroy(pmutex) != 0)
 		_rthread_debug(1, "mutex destroy failure");
@@ -153,91 +153,41 @@ _thread_mutex_destroy(void **mutex)
  * the malloc lock
  */
 #ifndef FUTEX
-#define MALLOC_LOCK_INITIALIZER(n) { \
-	_SPINLOCK_UNLOCKED,	\
-	TAILQ_HEAD_INITIALIZER(malloc_lock[n].lockers), \
-	PTHREAD_MUTEX_DEFAULT,	\
-	NULL,			\
-	0,			\
-	-1 }
+#define MALLOC_LOCK_INITIALIZER(n)                                             \
+	{_SPINLOCK_UNLOCKED, TAILQ_HEAD_INITIALIZER(malloc_lock[n].lockers),   \
+	    PTHREAD_MUTEX_DEFAULT, NULL, 0, -1}
 #else
-#define MALLOC_LOCK_INITIALIZER(n) { \
-	_SPINLOCK_UNLOCKED,	\
-	PTHREAD_MUTEX_DEFAULT,	\
-	NULL,			\
-	0,			\
-	-1 }
+#define MALLOC_LOCK_INITIALIZER(n)                                             \
+	{_SPINLOCK_UNLOCKED, PTHREAD_MUTEX_DEFAULT, NULL, 0, -1}
 #endif
 
 static struct pthread_mutex malloc_lock[_MALLOC_MUTEXES] = {
-	MALLOC_LOCK_INITIALIZER(0),
-	MALLOC_LOCK_INITIALIZER(1),
-	MALLOC_LOCK_INITIALIZER(2),
-	MALLOC_LOCK_INITIALIZER(3),
-	MALLOC_LOCK_INITIALIZER(4),
-	MALLOC_LOCK_INITIALIZER(5),
-	MALLOC_LOCK_INITIALIZER(6),
-	MALLOC_LOCK_INITIALIZER(7),
-	MALLOC_LOCK_INITIALIZER(8),
-	MALLOC_LOCK_INITIALIZER(9),
-	MALLOC_LOCK_INITIALIZER(10),
-	MALLOC_LOCK_INITIALIZER(11),
-	MALLOC_LOCK_INITIALIZER(12),
-	MALLOC_LOCK_INITIALIZER(13),
-	MALLOC_LOCK_INITIALIZER(14),
-	MALLOC_LOCK_INITIALIZER(15),
-	MALLOC_LOCK_INITIALIZER(16),
-	MALLOC_LOCK_INITIALIZER(17),
-	MALLOC_LOCK_INITIALIZER(18),
-	MALLOC_LOCK_INITIALIZER(19),
-	MALLOC_LOCK_INITIALIZER(20),
-	MALLOC_LOCK_INITIALIZER(21),
-	MALLOC_LOCK_INITIALIZER(22),
-	MALLOC_LOCK_INITIALIZER(23),
-	MALLOC_LOCK_INITIALIZER(24),
-	MALLOC_LOCK_INITIALIZER(25),
-	MALLOC_LOCK_INITIALIZER(26),
-	MALLOC_LOCK_INITIALIZER(27),
-	MALLOC_LOCK_INITIALIZER(28),
-	MALLOC_LOCK_INITIALIZER(29),
-	MALLOC_LOCK_INITIALIZER(30),
-	MALLOC_LOCK_INITIALIZER(31)
-};
+    MALLOC_LOCK_INITIALIZER(0), MALLOC_LOCK_INITIALIZER(1),
+    MALLOC_LOCK_INITIALIZER(2), MALLOC_LOCK_INITIALIZER(3),
+    MALLOC_LOCK_INITIALIZER(4), MALLOC_LOCK_INITIALIZER(5),
+    MALLOC_LOCK_INITIALIZER(6), MALLOC_LOCK_INITIALIZER(7),
+    MALLOC_LOCK_INITIALIZER(8), MALLOC_LOCK_INITIALIZER(9),
+    MALLOC_LOCK_INITIALIZER(10), MALLOC_LOCK_INITIALIZER(11),
+    MALLOC_LOCK_INITIALIZER(12), MALLOC_LOCK_INITIALIZER(13),
+    MALLOC_LOCK_INITIALIZER(14), MALLOC_LOCK_INITIALIZER(15),
+    MALLOC_LOCK_INITIALIZER(16), MALLOC_LOCK_INITIALIZER(17),
+    MALLOC_LOCK_INITIALIZER(18), MALLOC_LOCK_INITIALIZER(19),
+    MALLOC_LOCK_INITIALIZER(20), MALLOC_LOCK_INITIALIZER(21),
+    MALLOC_LOCK_INITIALIZER(22), MALLOC_LOCK_INITIALIZER(23),
+    MALLOC_LOCK_INITIALIZER(24), MALLOC_LOCK_INITIALIZER(25),
+    MALLOC_LOCK_INITIALIZER(26), MALLOC_LOCK_INITIALIZER(27),
+    MALLOC_LOCK_INITIALIZER(28), MALLOC_LOCK_INITIALIZER(29),
+    MALLOC_LOCK_INITIALIZER(30), MALLOC_LOCK_INITIALIZER(31)};
 
-static pthread_mutex_t malloc_mutex[_MALLOC_MUTEXES] = {
-	&malloc_lock[0],
-	&malloc_lock[1],
-	&malloc_lock[2],
-	&malloc_lock[3],
-	&malloc_lock[4],
-	&malloc_lock[5],
-	&malloc_lock[6],
-	&malloc_lock[7],
-	&malloc_lock[8],
-	&malloc_lock[9],
-	&malloc_lock[10],
-	&malloc_lock[11],
-	&malloc_lock[12],
-	&malloc_lock[13],
-	&malloc_lock[14],
-	&malloc_lock[15],
-	&malloc_lock[16],
-	&malloc_lock[17],
-	&malloc_lock[18],
-	&malloc_lock[19],
-	&malloc_lock[20],
-	&malloc_lock[21],
-	&malloc_lock[22],
-	&malloc_lock[23],
-	&malloc_lock[24],
-	&malloc_lock[25],
-	&malloc_lock[26],
-	&malloc_lock[27],
-	&malloc_lock[28],
-	&malloc_lock[29],
-	&malloc_lock[30],
-	&malloc_lock[31]
-};
+static pthread_mutex_t malloc_mutex[_MALLOC_MUTEXES] = {&malloc_lock[0],
+    &malloc_lock[1], &malloc_lock[2], &malloc_lock[3], &malloc_lock[4],
+    &malloc_lock[5], &malloc_lock[6], &malloc_lock[7], &malloc_lock[8],
+    &malloc_lock[9], &malloc_lock[10], &malloc_lock[11], &malloc_lock[12],
+    &malloc_lock[13], &malloc_lock[14], &malloc_lock[15], &malloc_lock[16],
+    &malloc_lock[17], &malloc_lock[18], &malloc_lock[19], &malloc_lock[20],
+    &malloc_lock[21], &malloc_lock[22], &malloc_lock[23], &malloc_lock[24],
+    &malloc_lock[25], &malloc_lock[26], &malloc_lock[27], &malloc_lock[28],
+    &malloc_lock[29], &malloc_lock[30], &malloc_lock[31]};
 
 void
 _thread_malloc_lock(int i)
@@ -320,7 +270,7 @@ _thread_arc4_unlock(void)
 pid_t
 _thread_dofork(pid_t (*sys_fork)(void))
 {
-	int i;
+	int   i;
 	pid_t newid;
 
 	_thread_atexit_lock();
@@ -340,4 +290,3 @@ _thread_dofork(pid_t (*sys_fork)(void))
 
 	return newid;
 }
-

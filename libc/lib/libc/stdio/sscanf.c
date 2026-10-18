@@ -31,9 +31,10 @@
  * SUCH DAMAGE.
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdarg.h>
+
 #include "local.h"
 
 static int
@@ -46,9 +47,9 @@ eofread(void *cookie, char *buf, int len)
 int
 sscanf(const char *str, const char *fmt, ...)
 {
-	int ret;
+	int	ret;
 	va_list ap;
-	FILE f = FILEINIT(__SRD);
+	FILE	f = FILEINIT(__SRD);
 
 	f._bf._base = f._p = (unsigned char *)str;
 	f._bf._size = f._r = strlen(str);

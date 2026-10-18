@@ -30,19 +30,19 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <netdb.h>
 
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <netdb.h>
 #include <paths.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
-#include <limits.h>
-#include <stdarg.h>
 
 /* Reentrant version of syslog, i.e. syslog_r() */
 void
@@ -67,24 +67,24 @@ DEF_WEAK(vsyslog_r);
  * This is used by both syslog_r and syslog.
  */
 void
-__vsyslog_r(int pri, struct syslog_data *data,
-    int reentrant, const char *fmt, va_list ap)
+__vsyslog_r(int pri, struct syslog_data *data, int reentrant, const char *fmt,
+    va_list ap)
 {
-	int cnt;
+	int  cnt;
 	char ch, *p, *t;
-	int saved_errno = errno;	/* use original errno */
-#define	TBUF_SIZE	(LOG_MAXLINE+1)
-#define	FMT_SIZE	(1024+1)
+	int  saved_errno = errno; /* use original errno */
+#define TBUF_SIZE (LOG_MAXLINE + 1)
+#define FMT_SIZE (1024 + 1)
 	char *stdp = NULL, tbuf[TBUF_SIZE], fmt_cpy[FMT_SIZE];
-	int tbuf_left, fmt_left, prlen;
+	int   tbuf_left, fmt_left, prlen;
 
-#define	INTERNALLOG	LOG_ERR|LOG_CONS|LOG_PERROR|LOG_PID
+#define INTERNALLOG LOG_ERR | LOG_CONS | LOG_PERROR | LOG_PID
 	/* Check for invalid bits. */
-	if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
+	if (pri & ~(LOG_PRIMASK | LOG_FACMASK)) {
 		syslog_r(INTERNALLOG, data,
 		    "syslog%s: unknown facility/priority: %x",
 		    reentrant ? "_r" : "", pri);
-		pri &= LOG_PRIMASK|LOG_FACMASK;
+		pri &= LOG_PRIMASK | LOG_FACMASK;
 	}
 
 	/* Check priority against setlogmask values. */
@@ -98,14 +98,14 @@ __vsyslog_r(int pri, struct syslog_data *data,
 	p = tbuf;
 	tbuf_left = TBUF_SIZE;
 
-#define	DEC()	\
-	do {					\
-		if (prlen < 0)			\
-			prlen = 0;		\
-		if (prlen >= tbuf_left)		\
-			prlen = tbuf_left - 1;	\
-		p += prlen;			\
-		tbuf_left -= prlen;		\
+#define DEC()                                                                  \
+	do {                                                                   \
+		if (prlen < 0)                                                 \
+			prlen = 0;                                             \
+		if (prlen >= tbuf_left)                                        \
+			prlen = tbuf_left - 1;                                 \
+		p += prlen;                                                    \
+		tbuf_left -= prlen;                                            \
 	} while (0)
 
 	prlen = snprintf(p, tbuf_left, "<%d>", pri);
@@ -135,8 +135,7 @@ __vsyslog_r(int pri, struct syslog_data *data,
 	}
 
 	for (t = fmt_cpy, fmt_left = FMT_SIZE;
-	    (ch = *fmt) != '\0' && fmt_left > 1;
-	    ++fmt) {
+	    (ch = *fmt) != '\0' && fmt_left > 1; ++fmt) {
 		if (ch == '%' && fmt[1] == 'm') {
 			char ebuf[NL_TEXTMAX];
 
@@ -195,7 +194,7 @@ openlog_r(const char *ident, int logstat, int logfac, struct syslog_data *data)
 	if (ident != NULL)
 		data->log_tag = ident;
 	data->log_stat = logstat;
-	if (logfac != 0 && (logfac &~ LOG_FACMASK) == 0)
+	if (logfac != 0 && (logfac & ~LOG_FACMASK) == 0)
 		data->log_fac = logfac;
 }
 DEF_WEAK(openlog_r);

@@ -45,73 +45,66 @@ extern struct bus_dma_tag pci_bus_dma_tag;
 /*
  * Types provided to machine-independent PCI code
  */
-typedef void *pci_chipset_tag_t;
+typedef void	 *pci_chipset_tag_t;
 typedef u_int32_t pcitag_t;
 
 typedef struct {
 	pcitag_t tag;
-	int line, pin;
+	int	 line, pin;
 } pci_intr_handle_t;
 
-#define	pci_intr_line(pc,ih)	((ih.line) & 0xff)
+#define pci_intr_line(pc, ih) ((ih.line) & 0xff)
 
 /*
  * amd64-specific PCI variables and functions.
  * NOT TO BE USED DIRECTLY BY MACHINE INDEPENDENT CODE.
  */
-struct		pci_attach_args;
+struct pci_attach_args;
 
 extern struct extent *pciio_ex;
 extern struct extent *pcimem_ex;
 extern struct extent *pcibus_ex;
-void		pci_init_extents(void);
+void		      pci_init_extents(void);
 
 /*
  * Functions provided to machine-independent PCI code.
  */
-void		pci_attach_hook(struct device *, struct device *,
-		    struct pcibus_attach_args *);
-int		pci_bus_maxdevs(pci_chipset_tag_t, int);
-pcitag_t	pci_make_tag(pci_chipset_tag_t, int, int, int);
-void		pci_decompose_tag(pci_chipset_tag_t, pcitag_t,
-		    int *, int *, int *);
-int		pci_conf_size(pci_chipset_tag_t, pcitag_t);
-pcireg_t	pci_conf_read(pci_chipset_tag_t, pcitag_t, int);
-void		pci_conf_write(pci_chipset_tag_t, pcitag_t, int,
-		    pcireg_t);
-int		pci_intr_enable_msivec(struct pci_attach_args *, int);
-int		pci_intr_map_msi(struct pci_attach_args *,
-		    pci_intr_handle_t *);
-int		pci_intr_map_msivec(struct pci_attach_args *,
-		    int, pci_intr_handle_t *);
-int		pci_intr_map_msix(struct pci_attach_args *,
-		    int, pci_intr_handle_t *);
-int		pci_intr_map(struct pci_attach_args *, pci_intr_handle_t *);
-const char	*pci_intr_string(pci_chipset_tag_t, pci_intr_handle_t);
-void		*pci_intr_establish(pci_chipset_tag_t, pci_intr_handle_t,
-		    int, int (*)(void *), void *, const char *);
-void		*pci_intr_establish_cpu(pci_chipset_tag_t, pci_intr_handle_t,
-		    int, struct cpu_info *,
-		    int (*)(void *), void *, const char *);
-void		pci_intr_disestablish(pci_chipset_tag_t, void *);
-int		pci_probe_device_hook(pci_chipset_tag_t,
-		    struct pci_attach_args *);
+void pci_attach_hook(
+    struct device *, struct device *, struct pcibus_attach_args *);
+int	 pci_bus_maxdevs(pci_chipset_tag_t, int);
+pcitag_t pci_make_tag(pci_chipset_tag_t, int, int, int);
+void	 pci_decompose_tag(pci_chipset_tag_t, pcitag_t, int *, int *, int *);
+int	 pci_conf_size(pci_chipset_tag_t, pcitag_t);
+pcireg_t pci_conf_read(pci_chipset_tag_t, pcitag_t, int);
+void	 pci_conf_write(pci_chipset_tag_t, pcitag_t, int, pcireg_t);
+int	 pci_intr_enable_msivec(struct pci_attach_args *, int);
+int	 pci_intr_map_msi(struct pci_attach_args *, pci_intr_handle_t *);
+int pci_intr_map_msivec(struct pci_attach_args *, int, pci_intr_handle_t *);
+int pci_intr_map_msix(struct pci_attach_args *, int, pci_intr_handle_t *);
+int pci_intr_map(struct pci_attach_args *, pci_intr_handle_t *);
+const char *pci_intr_string(pci_chipset_tag_t, pci_intr_handle_t);
+void	   *pci_intr_establish(pci_chipset_tag_t, pci_intr_handle_t, int,
+    int (*)(void *), void *, const char *);
+void	   *pci_intr_establish_cpu(pci_chipset_tag_t, pci_intr_handle_t, int,
+    struct cpu_info *, int (*)(void *), void *, const char *);
+void	    pci_intr_disestablish(pci_chipset_tag_t, void *);
+int	    pci_probe_device_hook(pci_chipset_tag_t, struct pci_attach_args *);
 
-void 		pci_dev_postattach(struct device *, struct pci_attach_args *);
+void pci_dev_postattach(struct device *, struct pci_attach_args *);
 
-pcireg_t	pci_min_powerstate(pci_chipset_tag_t, pcitag_t);
-void		pci_set_powerstate_md(pci_chipset_tag_t, pcitag_t, int, int);
+pcireg_t pci_min_powerstate(pci_chipset_tag_t, pcitag_t);
+void	 pci_set_powerstate_md(pci_chipset_tag_t, pcitag_t, int, int);
 
-void		pci_mcfg_init(bus_space_tag_t, bus_addr_t, int, int, int);
+void		  pci_mcfg_init(bus_space_tag_t, bus_addr_t, int, int, int);
 pci_chipset_tag_t pci_lookup_segment(int, int);
-int		acpipci_domain_to_seg(int);
+int		  acpipci_domain_to_seg(int);
 
 #define __HAVE_PCI_MSIX
 
-int	pci_msix_table_map(pci_chipset_tag_t, pcitag_t,
-	    bus_space_tag_t, bus_space_handle_t *);
-void	pci_msix_table_unmap(pci_chipset_tag_t, pcitag_t,
-	    bus_space_tag_t, bus_space_handle_t);
+int pci_msix_table_map(
+    pci_chipset_tag_t, pcitag_t, bus_space_tag_t, bus_space_handle_t *);
+void pci_msix_table_unmap(
+    pci_chipset_tag_t, pcitag_t, bus_space_tag_t, bus_space_handle_t);
 
 /*
  * ALL OF THE FOLLOWING ARE MACHINE-DEPENDENT, AND SHOULD NOT BE USED
@@ -123,16 +116,16 @@ void	pci_msix_table_unmap(pci_chipset_tag_t, pcitag_t,
  * says that 255 means `unknown' or `no connection' to the interrupt
  * controller on a PC.
  */
-#define	X86_PCI_INTERRUPT_LINE_NO_CONNECTION	0xff
+#define X86_PCI_INTERRUPT_LINE_NO_CONNECTION 0xff
 
 /*
  * PCI address space is shared with ISA, so avoid legacy ISA I/O
  * registers.
  */
-#define PCI_IO_START	0x400
-#define PCI_IO_END	0xffff
+#define PCI_IO_START 0x400
+#define PCI_IO_END 0xffff
 
 /*
  * Avoid the DOS Compatibility Memory area.
  */
-#define PCI_MEM_START	0x100000
+#define PCI_MEM_START 0x100000

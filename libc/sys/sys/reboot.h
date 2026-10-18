@@ -33,33 +33,33 @@
  */
 
 #ifndef _SYS_REBOOT_H_
-#define	_SYS_REBOOT_H_
+#define _SYS_REBOOT_H_
 
 /*
  * Arguments to reboot system call.  These are passed to the boot program,
  * and then on to init.
  */
-#define	RB_AUTOBOOT	0	/* flags for system auto-booting itself */
+#define RB_AUTOBOOT 0 /* flags for system auto-booting itself */
 
-#define	RB_ASKNAME	0x00001	/* ask for file name to reboot from */
-#define	RB_SINGLE	0x00002	/* reboot to single user only */
-#define	RB_NOSYNC	0x00004	/* dont sync before reboot */
-#define	RB_HALT		0x00008	/* don't reboot, just halt */
-#define	RB_INITNAME	0x00010	/* name given for /etc/init (unused) */
-#define	RB_DFLTROOT	0x00020	/* use compiled-in rootdev */
-#define	RB_KDB		0x00040	/* give control to kernel debugger */
-#define	RB_RDONLY	0x00080	/* mount root fs read-only */
-#define	RB_DUMP		0x00100	/* dump kernel memory before reboot */
-#define	RB_MINIROOT	0x00200	/* mini-root present in memory at boot time */
-#define	RB_CONFIG	0x00400	/* change configured devices */
-#define	RB_TIMEBAD	0x00800	/* don't call resettodr() in boot() */
-#define	RB_POWERDOWN	0x01000	/* attempt to power down machine */
-#define	RB_SERCONS	0x02000	/* use serial console if available */
-#define	RB_USERREQ	0x04000	/* boot() called at user request (e.g. ddb) */
-#define	RB_RESET	0x08000	/* just reset, no cleanup  */
-#define	RB_GOODRANDOM	0x10000	/* excellent random seed loaded */
-#define	RB_UNHIBERNATE	0x20000	/* unhibernate */
-#define RB_COCOVM	0x40000	/* booting confidential VM (e.g. SEV enabled) */
+#define RB_ASKNAME 0x00001     /* ask for file name to reboot from */
+#define RB_SINGLE 0x00002      /* reboot to single user only */
+#define RB_NOSYNC 0x00004      /* dont sync before reboot */
+#define RB_HALT 0x00008	       /* don't reboot, just halt */
+#define RB_INITNAME 0x00010    /* name given for /etc/init (unused) */
+#define RB_DFLTROOT 0x00020    /* use compiled-in rootdev */
+#define RB_KDB 0x00040	       /* give control to kernel debugger */
+#define RB_RDONLY 0x00080      /* mount root fs read-only */
+#define RB_DUMP 0x00100	       /* dump kernel memory before reboot */
+#define RB_MINIROOT 0x00200    /* mini-root present in memory at boot time */
+#define RB_CONFIG 0x00400      /* change configured devices */
+#define RB_TIMEBAD 0x00800     /* don't call resettodr() in boot() */
+#define RB_POWERDOWN 0x01000   /* attempt to power down machine */
+#define RB_SERCONS 0x02000     /* use serial console if available */
+#define RB_USERREQ 0x04000     /* boot() called at user request (e.g. ddb) */
+#define RB_RESET 0x08000       /* just reset, no cleanup  */
+#define RB_GOODRANDOM 0x10000  /* excellent random seed loaded */
+#define RB_UNHIBERNATE 0x20000 /* unhibernate */
+#define RB_COCOVM 0x40000      /* booting confidential VM (e.g. SEV enabled) */
 
 /*
  * Constants for converting boot-style device number to type,
@@ -73,35 +73,35 @@
  *	|MA | AD| CT| UN| PART  | TYPE |
  *	--------------------------------
  */
-#define	B_ADAPTORSHIFT		24
-#define	B_ADAPTORMASK		0x0f
-#define	B_ADAPTOR(val)		(((val) >> B_ADAPTORSHIFT) & B_ADAPTORMASK)
-#define B_CONTROLLERSHIFT	20
-#define B_CONTROLLERMASK	0xf
-#define	B_CONTROLLER(val)	(((val)>>B_CONTROLLERSHIFT) & B_CONTROLLERMASK)
-#define B_UNITSHIFT		16
-#define B_UNITMASK		0xf
-#define	B_UNIT(val)		(((val) >> B_UNITSHIFT) & B_UNITMASK)
-#define B_PARTITIONSHIFT	8
-#define B_PARTITIONMASK		0xff
-#define	B_PARTITION(val)	(((val) >> B_PARTITIONSHIFT) & B_PARTITIONMASK)
-#define	B_TYPESHIFT		0
-#define	B_TYPEMASK		0xff
-#define	B_TYPE(val)		(((val) >> B_TYPESHIFT) & B_TYPEMASK)
+#define B_ADAPTORSHIFT 24
+#define B_ADAPTORMASK 0x0f
+#define B_ADAPTOR(val) (((val) >> B_ADAPTORSHIFT) & B_ADAPTORMASK)
+#define B_CONTROLLERSHIFT 20
+#define B_CONTROLLERMASK 0xf
+#define B_CONTROLLER(val) (((val) >> B_CONTROLLERSHIFT) & B_CONTROLLERMASK)
+#define B_UNITSHIFT 16
+#define B_UNITMASK 0xf
+#define B_UNIT(val) (((val) >> B_UNITSHIFT) & B_UNITMASK)
+#define B_PARTITIONSHIFT 8
+#define B_PARTITIONMASK 0xff
+#define B_PARTITION(val) (((val) >> B_PARTITIONSHIFT) & B_PARTITIONMASK)
+#define B_TYPESHIFT 0
+#define B_TYPEMASK 0xff
+#define B_TYPE(val) (((val) >> B_TYPESHIFT) & B_TYPEMASK)
 
-#define	B_MAGICMASK	0xf0000000
-#define	B_DEVMAGIC	0xa0000000
+#define B_MAGICMASK 0xf0000000
+#define B_DEVMAGIC 0xa0000000
 
-#define MAKEBOOTDEV(type, adaptor, controller, unit, partition) \
-	(((type) << B_TYPESHIFT) | ((adaptor) << B_ADAPTORSHIFT) | \
-	((controller) << B_CONTROLLERSHIFT) | ((unit) << B_UNITSHIFT) | \
-	((partition) << B_PARTITIONSHIFT) | B_DEVMAGIC)
+#define MAKEBOOTDEV(type, adaptor, controller, unit, partition)                \
+	(((type) << B_TYPESHIFT) | ((adaptor) << B_ADAPTORSHIFT) |             \
+	    ((controller) << B_CONTROLLERSHIFT) | ((unit) << B_UNITSHIFT) |    \
+	    ((partition) << B_PARTITIONSHIFT) | B_DEVMAGIC)
 
-#if	defined(_KERNEL) && !defined(_STANDALONE) && !defined(_LOCORE)
+#if defined(_KERNEL) && !defined(_STANDALONE) && !defined(_LOCORE)
 
 __BEGIN_DECLS
-__dead void	reboot(int);
-__dead void	boot(int);
+__dead void reboot(int);
+__dead void boot(int);
 __END_DECLS
 
 #endif /* _KERNEL */

@@ -19,21 +19,21 @@
 struct __sFILE;
 
 __BEGIN_HIDDEN_DECLS
-void	_thread_flockfile(struct __sFILE *);
-int	_thread_ftrylockfile(struct __sFILE *);
-void	_thread_funlockfile(struct __sFILE *);
-void	_thread_malloc_lock(int);
-void	_thread_malloc_unlock(int);
-void	_thread_atexit_lock(void);
-void	_thread_atexit_unlock(void);
-void	_thread_atfork_lock(void);
-void	_thread_atfork_unlock(void);
-void	_thread_arc4_lock(void);
-void	_thread_arc4_unlock(void);
-void	_thread_mutex_lock(void **);
-void	_thread_mutex_unlock(void **);
-void	_thread_mutex_destroy(void **);
-void	_thread_tag_lock(void **);
-void	_thread_tag_unlock(void **);
-void	*_thread_tag_storage(void **, void *, size_t, void (*)(void*), void *);
+void  _thread_flockfile(struct __sFILE *);
+int   _thread_ftrylockfile(struct __sFILE *);
+void  _thread_funlockfile(struct __sFILE *);
+void  _thread_malloc_lock(int);
+void  _thread_malloc_unlock(int);
+void  _thread_atexit_lock(void);
+void  _thread_atexit_unlock(void);
+void  _thread_atfork_lock(void);
+void  _thread_atfork_unlock(void);
+void  _thread_arc4_lock(void);
+void  _thread_arc4_unlock(void);
+void  _thread_mutex_lock(void **);
+void  _thread_mutex_unlock(void **);
+void  _thread_mutex_destroy(void **);
+void  _thread_tag_lock(void **);
+void  _thread_tag_unlock(void **);
+void *_thread_tag_storage(void **, void *, size_t, void (*)(void *), void *);
 __END_HIDDEN_DECLS

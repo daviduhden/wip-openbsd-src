@@ -23,10 +23,11 @@
 #include <string.h>
 #include <unistd.h>
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
-	char *buf;
-	int failures = 0;
+	char  *buf;
+	int    failures = 0;
 	size_t len, bufsize;
 
 	bufsize = getpagesize(); /* trigger guard pages easily */
@@ -52,13 +53,15 @@ int main(int argc, char *argv[])
 	buf[bufsize - 1] = '\0';
 	len = strnlen(buf, bufsize);
 	if (len != bufsize - 1) {
-		fprintf(stderr, "strnlen: failed NUL-terminated buffer test (1)");
+		fprintf(
+		    stderr, "strnlen: failed NUL-terminated buffer test (1)");
 		failures++;
 	}
 
 	len = strnlen(buf, (size_t)-1);
 	if (len != bufsize - 1) {
-		fprintf(stderr, "strnlen: failed NUL-terminated buffer test (2)");
+		fprintf(
+		    stderr, "strnlen: failed NUL-terminated buffer test (2)");
 		failures++;
 	}
 

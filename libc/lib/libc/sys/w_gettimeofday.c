@@ -20,9 +20,9 @@
 int
 WRAP(gettimeofday)(struct timeval *tp, struct timezone *tzp)
 {
-	int rc = 0;
-	struct timekeep *timekeep = _timekeep;
-	static struct timezone zerotz = { 0, 0 };
+	int		       rc = 0;
+	struct timekeep	      *timekeep = _timekeep;
+	static struct timezone zerotz = {0, 0};
 
 	if (timekeep == NULL || timekeep->tk_user == 0)
 		return gettimeofday(tp, tzp);

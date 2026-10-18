@@ -5,7 +5,7 @@
  * -
  * Copyright (c) 1985, 1993
  *    The Regents of the University of California.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -17,7 +17,7 @@
  * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,14 +31,14 @@
  * SUCH DAMAGE.
  * -
  * Portions Copyright (c) 1993 by Digital Equipment Corporation.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies, and that
  * the name of Digital Equipment Corporation not be used in advertising or
  * publicity pertaining to distribution of the document or software without
  * specific, written prior permission.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND DIGITAL EQUIPMENT CORP. DISCLAIMS ALL
  * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL DIGITAL EQUIPMENT
@@ -52,16 +52,16 @@
  */
 
 #include <sys/types.h>
+
 #include <netinet/in.h>
+
 #include <arpa/nameser.h>
-
-#include <stdio.h>
-#include <resolv.h>
 #include <ctype.h>
-
-#include <unistd.h>
 #include <limits.h>
+#include <resolv.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 static int dn_find(u_char *, u_char *, u_char **, u_char **);
 
@@ -77,10 +77,10 @@ dn_expand(const u_char *msg, const u_char *eomorig, const u_char *comp_dn,
     char *exp_dn, int length)
 {
 	const u_char *cp;
-	char *dn;
-	int n, c;
-	char *eom;
-	int len = -1, checked = 0;
+	char	     *dn;
+	int	      n, c;
+	char	     *eom;
+	int	      len = -1, checked = 0;
 
 	if (comp_dn < msg || comp_dn >= eomorig)
 		return (-1);
@@ -94,7 +94,7 @@ dn_expand(const u_char *msg, const u_char *eomorig, const u_char *comp_dn,
 	 * fetch next label in domain name
 	 */
 	while ((n = *cp++)) {
-		if (cp >= eomorig)	/* out of range */
+		if (cp >= eomorig) /* out of range */
 			return (-1);
 
 		/*
@@ -107,7 +107,7 @@ dn_expand(const u_char *msg, const u_char *eomorig, const u_char *comp_dn,
 					return (-1);
 				*dn++ = '.';
 			}
-			if (dn+n >= eom)
+			if (dn + n >= eom)
 				return (-1);
 			checked += n + 1;
 			while (--n >= 0) {
@@ -117,7 +117,7 @@ dn_expand(const u_char *msg, const u_char *eomorig, const u_char *comp_dn,
 					*dn++ = '\\';
 				}
 				*dn++ = c;
-				if (cp >= eomorig)	/* out of range */
+				if (cp >= eomorig) /* out of range */
 					return (-1);
 			}
 			break;
@@ -126,7 +126,7 @@ dn_expand(const u_char *msg, const u_char *eomorig, const u_char *comp_dn,
 			if (len < 0)
 				len = cp - comp_dn + 1;
 			cp = msg + (((n & 0x3f) << 8) | (*cp & 0xff));
-			if (cp < msg || cp >= eomorig)	/* out of range */
+			if (cp < msg || cp >= eomorig) /* out of range */
 				return (-1);
 			checked += 2;
 			/*
@@ -139,7 +139,7 @@ dn_expand(const u_char *msg, const u_char *eomorig, const u_char *comp_dn,
 			break;
 
 		default:
-			return (-1);			/* flag error */
+			return (-1); /* flag error */
 		}
 	}
 	*dn = '\0';
@@ -165,10 +165,10 @@ int
 dn_comp(const char *exp_dn, u_char *comp_dn, int length, u_char **dnptrs,
     u_char **lastdnptr)
 {
-	u_char *cp, *dn;
-	int c, l;
+	u_char	*cp, *dn;
+	int	 c, l;
 	u_char **cpp, **lpp, *sp, *eob;
-	u_char *msg;
+	u_char	*msg;
 
 	dn = (u_char *)exp_dn;
 	cp = comp_dn;
@@ -178,27 +178,27 @@ dn_comp(const char *exp_dn, u_char *comp_dn, int length, u_char **dnptrs,
 		if ((msg = *dnptrs++) != NULL) {
 			for (cpp = dnptrs; *cpp != NULL; cpp++)
 				;
-			lpp = cpp;	/* end of list to search */
+			lpp = cpp; /* end of list to search */
 		}
 	} else
 		msg = NULL;
-	for (c = *dn++; c != '\0'; ) {
+	for (c = *dn++; c != '\0';) {
 		/* look to see if we can use pointers */
 		if (msg != NULL) {
-			if ((l = dn_find(dn-1, msg, dnptrs, lpp)) >= 0) {
-				if (cp+1 >= eob)
+			if ((l = dn_find(dn - 1, msg, dnptrs, lpp)) >= 0) {
+				if (cp + 1 >= eob)
 					return (-1);
 				*cp++ = (l >> 8) | INDIR_MASK;
 				*cp++ = l % 256;
 				return (cp - comp_dn);
 			}
 			/* not found, save it */
-			if (lastdnptr != NULL && cpp < lastdnptr-1) {
+			if (lastdnptr != NULL && cpp < lastdnptr - 1) {
 				*cpp++ = cp;
 				*cpp = NULL;
 			}
 		}
-		sp = cp++;	/* save ptr to length byte */
+		sp = cp++; /* save ptr to length byte */
 		do {
 			if (c == '.') {
 				c = *dn++;
@@ -243,7 +243,7 @@ int
 __dn_skipname(const u_char *comp_dn, const u_char *eom)
 {
 	const u_char *cp;
-	int n;
+	int	      n;
 
 	cp = comp_dn;
 	while (cp < eom && (n = *cp++)) {
@@ -251,13 +251,13 @@ __dn_skipname(const u_char *comp_dn, const u_char *eom)
 		 * check for indirection
 		 */
 		switch (n & INDIR_MASK) {
-		case 0:			/* normal case, n == len */
+		case 0: /* normal case, n == len */
 			cp += n;
 			continue;
-		case INDIR_MASK:	/* indirection */
+		case INDIR_MASK: /* indirection */
 			cp++;
 			break;
-		default:		/* illegal type */
+		default: /* illegal type */
 			return (-1);
 		}
 		break;
@@ -277,7 +277,7 @@ static int
 dn_find(u_char *exp_dn, u_char *msg, u_char **dnptrs, u_char **lastdnptr)
 {
 	u_char *dn, *cp, **cpp;
-	int n;
+	int	n;
 	u_char *sp;
 
 	for (cpp = dnptrs; cpp < lastdnptr; cpp++) {
@@ -288,7 +288,7 @@ dn_find(u_char *exp_dn, u_char *msg, u_char **dnptrs, u_char **lastdnptr)
 			 * check for indirection
 			 */
 			switch (n & INDIR_MASK) {
-			case 0:		/* normal case, n == len */
+			case 0: /* normal case, n == len */
 				while (--n >= 0) {
 					if (*dn == '.')
 						goto next;
@@ -304,17 +304,17 @@ dn_find(u_char *exp_dn, u_char *msg, u_char **dnptrs, u_char **lastdnptr)
 					continue;
 				goto next;
 
-			case INDIR_MASK:	/* indirection */
+			case INDIR_MASK: /* indirection */
 				cp = msg + (((n & 0x3f) << 8) | *cp);
 				break;
 
-			default:	/* illegal type */
+			default: /* illegal type */
 				return (-1);
 			}
 		}
 		if (*dn == '\0')
 			return (sp - msg);
-	next:	;
+	next:;
 	}
 	return (-1);
 }
@@ -330,18 +330,18 @@ dn_find(u_char *exp_dn, u_char *msg, u_char **dnptrs, u_char **lastdnptr)
  * is not careful about this, but for some reason, we're doing it right here.
  */
 #define PERIOD 0x2e
-#define	hyphenchar(c) ((c) == 0x2d)
+#define hyphenchar(c) ((c) == 0x2d)
 #define bslashchar(c) ((c) == 0x5c)
 #define underscorechar(c) ((c) == 0x5f)
 #define periodchar(c) ((c) == PERIOD)
 #define asterchar(c) ((c) == 0x2a)
-#define alphachar(c) (((c) >= 0x41 && (c) <= 0x5a) \
-		   || ((c) >= 0x61 && (c) <= 0x7a))
+#define alphachar(c)                                                           \
+	(((c) >= 0x41 && (c) <= 0x5a) || ((c) >= 0x61 && (c) <= 0x7a))
 #define digitchar(c) ((c) >= 0x30 && (c) <= 0x39)
 
 #define borderchar(c) (alphachar(c) || digitchar(c))
 #define middlechar(c) (borderchar(c) || hyphenchar(c) || underscorechar(c))
-#define	domainchar(c) ((c) > 0x20 && (c) < 0x7f)
+#define domainchar(c) ((c) > 0x20 && (c) < 0x7f)
 
 int
 __res_hnok(const char *dn)
@@ -378,7 +378,7 @@ res_ownok(const char *dn)
 {
 	if (asterchar(dn[0])) {
 		if (periodchar(dn[1]))
-			return (res_hnok(dn+2));
+			return (res_hnok(dn + 2));
 		if (dn[1] == '\0')
 			return (1);
 	}
@@ -396,7 +396,7 @@ res_mailok(const char *dn)
 
 	/* "." is a valid missing representation */
 	if (*dn == '\0')
-		return(1);
+		return (1);
 
 	/* otherwise <label>.<hostname> */
 	while ((ch = *dn++) != '\0') {
@@ -411,7 +411,7 @@ res_mailok(const char *dn)
 	}
 	if (periodchar(ch))
 		return (res_hnok(dn));
-	return(0);
+	return (0);
 }
 
 /*

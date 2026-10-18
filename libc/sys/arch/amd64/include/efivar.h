@@ -21,22 +21,22 @@
 #include <dev/clock_subr.h>
 
 struct efi_softc {
-	struct device	sc_dev;
-	struct pmap	*sc_pm;
-	EFI_RUNTIME_SERVICES *sc_rs;
+	struct device		   sc_dev;
+	struct pmap		  *sc_pm;
+	EFI_RUNTIME_SERVICES	  *sc_rs;
 	EFI_SYSTEM_RESOURCE_TABLE *sc_esrt;
-	u_long		sc_psw;
-	uint64_t	sc_cr3;
+	u_long			   sc_psw;
+	uint64_t		   sc_cr3;
 
 	struct todr_chip_handle sc_todr;
 };
 
-void	efi_enter(struct efi_softc *);
-void	efi_leave(struct efi_softc *);
+void efi_enter(struct efi_softc *);
+void efi_leave(struct efi_softc *);
 
 extern label_t efi_jmpbuf;
 
-#define efi_enter_check(sc) (setjmp(&efi_jmpbuf) ? \
-    (efi_leave(sc), EFAULT) : (efi_enter(sc), 0))
+#define efi_enter_check(sc)                                                    \
+	(setjmp(&efi_jmpbuf) ? (efi_leave(sc), EFAULT) : (efi_enter(sc), 0))
 
 #endif /* _MACHINE_EFIVAR_H_ */

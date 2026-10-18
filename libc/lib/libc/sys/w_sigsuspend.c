@@ -15,15 +15,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <signal.h>
 #include <errno.h>
+#include <signal.h>
+
 #include "cancel.h"
 
 int
 sigsuspend(const sigset_t *set)
 {
 	sigset_t s;
-	int ret;
+	int	 ret;
 
 	if (sigismember(set, SIGTHR)) {
 		s = *set;

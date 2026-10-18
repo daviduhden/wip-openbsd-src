@@ -31,12 +31,12 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <db.h>
 #include "recno.h"
 
 /*
@@ -54,10 +54,10 @@
 int
 __rec_seq(const DB *dbp, DBT *key, DBT *data, u_int flags)
 {
-	BTREE *t;
-	EPG *e;
+	BTREE  *t;
+	EPG    *e;
 	recno_t nrec;
-	int status;
+	int	status;
 
 	t = dbp->internal;
 
@@ -67,7 +67,7 @@ __rec_seq(const DB *dbp, DBT *key, DBT *data, u_int flags)
 		t->bt_pinned = NULL;
 	}
 
-	switch(flags) {
+	switch (flags) {
 	case R_CURSOR:
 		if ((nrec = *(recno_t *)key->data) == 0)
 			goto einval;
@@ -95,10 +95,11 @@ __rec_seq(const DB *dbp, DBT *key, DBT *data, u_int flags)
 		nrec = t->bt_nrecs;
 		break;
 	default:
-einval:		errno = EINVAL;
+	einval:
+		errno = EINVAL;
 		return (RET_ERROR);
 	}
-	
+
 	if (t->bt_nrecs == 0 || nrec > t->bt_nrecs) {
 		if (!F_ISSET(t, R_EOF | R_INMEM) &&
 		    (status = t->bt_irec(t, nrec)) != RET_SUCCESS)

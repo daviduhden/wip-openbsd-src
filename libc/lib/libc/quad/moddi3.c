@@ -43,7 +43,7 @@ quad_t
 __moddi3(quad_t a, quad_t b)
 {
 	u_quad_t ua, ub, ur;
-	int neg = 0;
+	int	 neg = 0;
 
 	ua = a;
 	ub = b;

@@ -41,43 +41,43 @@
  * Machine dependent constants for riscv64.
  */
 
-#define	USRSTACK	VM_MAXUSER_ADDRESS
+#define USRSTACK VM_MAXUSER_ADDRESS
 
 /*
  * Virtual memory related constants, all in bytes
  */
 #ifndef MAXTSIZ
-#define	MAXTSIZ		((paddr_t)1*1024*1024*1024)	/* max text size */
+#define MAXTSIZ ((paddr_t)1 * 1024 * 1024 * 1024) /* max text size */
 #endif
 #ifndef DFLDSIZ
-#define	DFLDSIZ		((paddr_t)128*1024*1024)	/* initial data size limit */
+#define DFLDSIZ ((paddr_t)128 * 1024 * 1024) /* initial data size limit */
 #endif
 #ifndef MAXDSIZ
-#define	MAXDSIZ		((paddr_t)16*1024*1024*1024)	/* max data size */
+#define MAXDSIZ ((paddr_t)16 * 1024 * 1024 * 1024) /* max data size */
 #endif
 #ifndef BRKSIZ
-#define	BRKSIZ		((paddr_t)1*1024*1024*1024)	/* heap gap size */
+#define BRKSIZ ((paddr_t)1 * 1024 * 1024 * 1024) /* heap gap size */
 #endif
-#ifndef	DFLSSIZ
-#define	DFLSSIZ		((paddr_t)128*1024*1024)	/* initial stack size limit */
+#ifndef DFLSSIZ
+#define DFLSSIZ ((paddr_t)128 * 1024 * 1024) /* initial stack size limit */
 #endif
-#ifndef	MAXSSIZ
-#define	MAXSSIZ		((paddr_t)1*1024*1024*1024)	/* max stack size */
+#ifndef MAXSSIZ
+#define MAXSSIZ ((paddr_t)1 * 1024 * 1024 * 1024) /* max stack size */
 #endif
 
-#define	STACKGAP_RANDOM	256*1024
+#define STACKGAP_RANDOM 256 * 1024
 
 /*
  * Size of shared memory map
  */
-#ifndef	SHMMAXPGS
-#define	SHMMAXPGS	1024
+#ifndef SHMMAXPGS
+#define SHMMAXPGS 1024
 #endif
 
 /*
  * Size of User Raw I/O map
  */
-#define	USRIOSIZE	300
+#define USRIOSIZE 300
 
 /**
  * Address space layout.
@@ -111,40 +111,40 @@
  * VM_MIN_ADDRESS and VM_MAXUSER_ADDRESS define the start and end of the
  * user address space.
  */
-#define	VM_MIN_ADDRESS		((vaddr_t)PAGE_SIZE)
-#define	VM_MAX_ADDRESS		(0xffffffffffffffffUL)
+#define VM_MIN_ADDRESS ((vaddr_t)PAGE_SIZE)
+#define VM_MAX_ADDRESS (0xffffffffffffffffUL)
 
-#define	VM_MIN_KERNEL_ADDRESS	(0xffffffc000000000UL)
-#define	VM_MAX_KERNEL_ADDRESS	(0xffffffc800000000UL)
+#define VM_MIN_KERNEL_ADDRESS (0xffffffc000000000UL)
+#define VM_MAX_KERNEL_ADDRESS (0xffffffc800000000UL)
 
 /* Kernel L1 Page Table Range */
-#define	L1_KERN_BASE		(256)
-#define	L1_KERN_ENTRIES		(288 - L1_KERN_BASE)
+#define L1_KERN_BASE (256)
+#define L1_KERN_ENTRIES (288 - L1_KERN_BASE)
 
-#define	DMAP_MIN_ADDRESS	(0xffffffd000000000UL)
-#define	DMAP_MAX_ADDRESS	(0xfffffff000000000UL)
+#define DMAP_MIN_ADDRESS (0xffffffd000000000UL)
+#define DMAP_MAX_ADDRESS (0xfffffff000000000UL)
 
 /* DMAP L1 Page Table Range */
-#define	L1_DMAP_BASE		(320)
-#define	L1_DMAP_ENTRIES		(448 - L1_DMAP_BASE)
+#define L1_DMAP_BASE (320)
+#define L1_DMAP_ENTRIES (448 - L1_DMAP_BASE)
 
-#define	VM_MAXUSER_ADDRESS	(0x0000004000000000UL)  /* 39 bits */
+#define VM_MAXUSER_ADDRESS (0x0000004000000000UL) /* 39 bits */
 
 #ifdef _KERNEL
-#define	VM_MIN_STACK_ADDRESS	(VM_MAXUSER_ADDRESS * 3 / 4)
+#define VM_MIN_STACK_ADDRESS (VM_MAXUSER_ADDRESS * 3 / 4)
 #endif
 
-#define	KERNBASE		(VM_MIN_KERNEL_ADDRESS)
+#define KERNBASE (VM_MIN_KERNEL_ADDRESS)
 
 #ifndef _LOCORE
 extern paddr_t dmap_phys_base;
 #endif
 
 /* virtual sizes (bytes) for various kernel submaps */
-#define	VM_PHYS_SIZE		(USRIOSIZE*PAGE_SIZE)
+#define VM_PHYS_SIZE (USRIOSIZE * PAGE_SIZE)
 
-#define	VM_PHYSSEG_MAX		32
-#define	VM_PHYSSEG_STRAT	VM_PSTRAT_BSEARCH
-#define	VM_PHYSSEG_NOADD	/* can't add RAM after vm_mem_init */
+#define VM_PHYSSEG_MAX 32
+#define VM_PHYSSEG_STRAT VM_PSTRAT_BSEARCH
+#define VM_PHYSSEG_NOADD /* can't add RAM after vm_mem_init */
 
 #endif /* _MACHINE_VMPARAM_H_ */

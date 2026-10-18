@@ -27,8 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "cancel.h" /* in libc/include */
 #include "rthread.h"
-#include "cancel.h"		/* in libc/include */
 
 static _atomic_lock_t static_init_lock = _SPINLOCK_UNLOCKED;
 
@@ -50,8 +50,10 @@ pthread_mutex_init(pthread_mutex_t *mutexp, const pthread_mutexattr_t *attr)
 		mutex->prioceiling = -1;
 	} else {
 		mutex->type = (*attr)->ma_type;
-		mutex->prioceiling = (*attr)->ma_protocol ==
-		    PTHREAD_PRIO_PROTECT ? (*attr)->ma_prioceiling : -1;
+		mutex->prioceiling =
+		    (*attr)->ma_protocol == PTHREAD_PRIO_PROTECT ?
+		    (*attr)->ma_prioceiling :
+		    -1;
 	}
 	*mutexp = mutex;
 
@@ -84,12 +86,12 @@ pthread_mutex_destroy(pthread_mutex_t *mutexp)
 DEF_STRONG(pthread_mutex_destroy);
 
 static int
-_rthread_mutex_lock(pthread_mutex_t *mutexp, int trywait,
-    const struct timespec *abstime)
+_rthread_mutex_lock(
+    pthread_mutex_t *mutexp, int trywait, const struct timespec *abstime)
 {
 	struct pthread_mutex *mutex;
-	pthread_t self = pthread_self();
-	int ret = 0;
+	pthread_t	      self = pthread_self();
+	int		      ret = 0;
 
 	/*
 	 * If the mutex is statically initialized, perform the dynamic
@@ -116,8 +118,7 @@ _rthread_mutex_lock(pthread_mutex_t *mutexp, int trywait,
 		assert(mutex->count > 0);
 
 		/* already owner?  handle recursive behavior */
-		if (mutex->type != PTHREAD_MUTEX_RECURSIVE)
-		{
+		if (mutex->type != PTHREAD_MUTEX_RECURSIVE) {
 			if (trywait ||
 			    mutex->type == PTHREAD_MUTEX_ERRORCHECK) {
 				_spinunlock(&mutex->lock);
@@ -131,7 +132,7 @@ _rthread_mutex_lock(pthread_mutex_t *mutexp, int trywait,
 
 			/* self-deadlock, possibly until timeout */
 			while (__thrsleep(self, CLOCK_REALTIME, abstime,
-			    &mutex->lock, NULL) != EWOULDBLOCK)
+				   &mutex->lock, NULL) != EWOULDBLOCK)
 				_spinlock(&mutex->lock);
 			return (ETIMEDOUT);
 		}
@@ -147,8 +148,8 @@ _rthread_mutex_lock(pthread_mutex_t *mutexp, int trywait,
 		/* add to the wait queue and block until at the head */
 		TAILQ_INSERT_TAIL(&mutex->lockers, self, waiting);
 		while (mutex->owner != self) {
-			ret = __thrsleep(self, CLOCK_REALTIME, abstime,
-			    &mutex->lock, NULL);
+			ret = __thrsleep(
+			    self, CLOCK_REALTIME, abstime, &mutex->lock, NULL);
 			_spinlock(&mutex->lock);
 			assert(mutex->owner != NULL);
 			if (ret == EWOULDBLOCK) {
@@ -189,17 +190,16 @@ pthread_mutex_timedlock(pthread_mutex_t *p, const struct timespec *abstime)
 int
 pthread_mutex_unlock(pthread_mutex_t *mutexp)
 {
-	pthread_t self = pthread_self();
+	pthread_t	      self = pthread_self();
 	struct pthread_mutex *mutex = (struct pthread_mutex *)*mutexp;
 
-	_rthread_debug(5, "%p: mutex_unlock %p\n", (void *)self,
-	    (void *)mutex);
+	_rthread_debug(5, "%p: mutex_unlock %p\n", (void *)self, (void *)mutex);
 
 	if (mutex == NULL)
 #if PTHREAD_MUTEX_DEFAULT == PTHREAD_MUTEX_ERRORCHECK
 		return (EPERM);
 #elif PTHREAD_MUTEX_DEFAULT == PTHREAD_MUTEX_NORMAL
-		return(0);
+		return (0);
 #else
 		abort();
 #endif
@@ -287,23 +287,23 @@ int
 pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
     const struct timespec *abstime)
 {
-	pthread_cond_t cond;
+	pthread_cond_t	      cond;
 	struct pthread_mutex *mutex = (struct pthread_mutex *)*mutexp;
-	struct tib *tib = TIB_GET();
-	pthread_t self = tib->tib_thread;
-	pthread_t next;
-	int mutex_count;
-	int canceled = 0;
-	int rv = 0;
-	int error;
+	struct tib	     *tib = TIB_GET();
+	pthread_t	      self = tib->tib_thread;
+	pthread_t	      next;
+	int		      mutex_count;
+	int		      canceled = 0;
+	int		      rv = 0;
+	int		      error;
 	PREP_CANCEL_POINT(tib);
 
 	if (!*condp)
 		if ((error = pthread_cond_init(condp, NULL)))
 			return (error);
 	cond = *condp;
-	_rthread_debug(5, "%p: cond_timed %p,%p\n", (void *)self,
-	    (void *)cond, (void *)mutex);
+	_rthread_debug(5, "%p: cond_timed %p,%p\n", (void *)self, (void *)cond,
+	    (void *)mutex);
 
 	if (mutex == NULL)
 #if PTHREAD_MUTEX_DEFAULT == PTHREAD_MUTEX_ERRORCHECK
@@ -337,7 +337,7 @@ pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
 		LEAVE_CANCEL_POINT_INNER(tib, 1);
 		return (EINVAL);
 	} else
-		assert(! TAILQ_EMPTY(&cond->waiters));
+		assert(!TAILQ_EMPTY(&cond->waiters));
 
 	/* snag the count in case this is a recursive mutex */
 	mutex_count = mutex->count;
@@ -358,8 +358,8 @@ pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
 
 	/* wait until we're the owner of the mutex again */
 	while (mutex->owner != self) {
-		error = __thrsleep(self, cond->clock, abstime,
-		    &mutex->lock, &self->delayed_cancel);
+		error = __thrsleep(self, cond->clock, abstime, &mutex->lock,
+		    &self->delayed_cancel);
 
 		/*
 		 * If abstime == NULL, then we're definitely waiting
@@ -379,7 +379,7 @@ pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
 		 */
 		if ((error == EINTR || error == ECANCELED) &&
 		    (tib->tib_canceled == 0 ||
-		    (tib->tib_cantcancel & CANCEL_DISABLED))) {
+			(tib->tib_cantcancel & CANCEL_DISABLED))) {
 			_spinlock(&mutex->lock);
 			continue;
 		}
@@ -422,8 +422,7 @@ pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
 		_spinlock(&mutex->lock);
 
 		/* mutex unlocked right now? */
-		if (mutex->owner == NULL &&
-		    TAILQ_EMPTY(&mutex->lockers)) {
+		if (mutex->owner == NULL && TAILQ_EMPTY(&mutex->lockers)) {
 			assert(mutex->count == 0);
 			mutex->owner = self;
 			break;
@@ -443,22 +442,22 @@ pthread_cond_timedwait(pthread_cond_t *condp, pthread_mutex_t *mutexp,
 int
 pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 {
-	pthread_cond_t cond;
+	pthread_cond_t	      cond;
 	struct pthread_mutex *mutex = (struct pthread_mutex *)*mutexp;
-	struct tib *tib = TIB_GET();
-	pthread_t self = tib->tib_thread;
-	pthread_t next;
-	int mutex_count;
-	int canceled = 0;
-	int error;
+	struct tib	     *tib = TIB_GET();
+	pthread_t	      self = tib->tib_thread;
+	pthread_t	      next;
+	int		      mutex_count;
+	int		      canceled = 0;
+	int		      error;
 	PREP_CANCEL_POINT(tib);
 
 	if (!*condp)
 		if ((error = pthread_cond_init(condp, NULL)))
 			return (error);
 	cond = *condp;
-	_rthread_debug(5, "%p: cond_wait %p,%p\n", (void *)self,
-	    (void *)cond, (void *)mutex);
+	_rthread_debug(5, "%p: cond_wait %p,%p\n", (void *)self, (void *)cond,
+	    (void *)mutex);
 
 	if (mutex == NULL)
 #if PTHREAD_MUTEX_DEFAULT == PTHREAD_MUTEX_ERRORCHECK
@@ -488,7 +487,7 @@ pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 		LEAVE_CANCEL_POINT_INNER(tib, 1);
 		return (EINVAL);
 	} else
-		assert(! TAILQ_EMPTY(&cond->waiters));
+		assert(!TAILQ_EMPTY(&cond->waiters));
 
 	/* snag the count in case this is a recursive mutex */
 	mutex_count = mutex->count;
@@ -509,8 +508,8 @@ pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 
 	/* wait until we're the owner of the mutex again */
 	while (mutex->owner != self) {
-		error = __thrsleep(self, 0, NULL, &mutex->lock,
-		    &self->delayed_cancel);
+		error = __thrsleep(
+		    self, 0, NULL, &mutex->lock, &self->delayed_cancel);
 
 		/*
 		 * If we took a normal signal (not from
@@ -519,7 +518,7 @@ pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 		 */
 		if ((error == EINTR || error == ECANCELED) &&
 		    (tib->tib_canceled == 0 ||
-		    (tib->tib_cantcancel & CANCEL_DISABLED))) {
+			(tib->tib_cantcancel & CANCEL_DISABLED))) {
 			_spinlock(&mutex->lock);
 			continue;
 		}
@@ -559,8 +558,7 @@ pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 		_spinlock(&mutex->lock);
 
 		/* mutex unlocked right now? */
-		if (mutex->owner == NULL &&
-		    TAILQ_EMPTY(&mutex->lockers)) {
+		if (mutex->owner == NULL && TAILQ_EMPTY(&mutex->lockers)) {
 			assert(mutex->count == 0);
 			mutex->owner = self;
 			break;
@@ -577,14 +575,13 @@ pthread_cond_wait(pthread_cond_t *condp, pthread_mutex_t *mutexp)
 	return (0);
 }
 
-
 int
 pthread_cond_signal(pthread_cond_t *condp)
 {
-	pthread_cond_t cond;
+	pthread_cond_t	      cond;
 	struct pthread_mutex *mutex;
-	pthread_t thread;
-	int wakeup;
+	pthread_t	      thread;
+	int		      wakeup;
 
 	/* uninitialized?  Then there's obviously no one waiting! */
 	if (!*condp)
@@ -629,11 +626,11 @@ pthread_cond_signal(pthread_cond_t *condp)
 int
 pthread_cond_broadcast(pthread_cond_t *condp)
 {
-	pthread_cond_t cond;
+	pthread_cond_t	      cond;
 	struct pthread_mutex *mutex;
-	pthread_t thread;
-	pthread_t p;
-	int wakeup;
+	pthread_t	      thread;
+	pthread_t	      p;
+	int		      wakeup;
 
 	/* uninitialized?  Then there's obviously no one waiting! */
 	if (!*condp)

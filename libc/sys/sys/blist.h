@@ -2,14 +2,14 @@
 /* DragonFlyBSD:7b80531f545c7d3c51c1660130c71d01f6bccbe0:/sys/sys/blist.h */
 /*
  * Copyright (c) 2003,2004 The DragonFly Project.  All rights reserved.
- * 
+ *
  * This code is derived from software contributed to The DragonFly Project
  * by Matthew Dillon <dillon@backplane.com>
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -19,7 +19,7 @@
  * 3. Neither the name of The DragonFly Project nor the names of its
  *    contributors may be used to endorse or promote products derived
  *    from this software without specific, prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -32,7 +32,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
+ *
  * Implements bitmap resource lists.
  *
  *	Usage:
@@ -66,14 +66,14 @@
 #include <sys/types.h>
 #endif
 
-typedef u_long		swblk_t;
-typedef u_int64_t	u_swblk_t;
+typedef u_long	  swblk_t;
+typedef u_int64_t u_swblk_t;
 
 /*
  * note: currently use SWAPBLK_NONE as an absolute value rather then
  * a flag bit.
  */
-#define SWAPBLK_NONE	((swblk_t)-1)
+#define SWAPBLK_NONE ((swblk_t) - 1)
 
 /*
  * blmeta and bl_bitmap_t MUST be a power of 2 in size.
@@ -81,24 +81,24 @@ typedef u_int64_t	u_swblk_t;
 
 typedef struct blmeta {
 	union {
-	    swblk_t	bmu_avail;	/* space available under us	*/
-	    u_swblk_t	bmu_bitmap;	/* bitmap if we are a leaf	*/
+		swblk_t	  bmu_avail;  /* space available under us	*/
+		u_swblk_t bmu_bitmap; /* bitmap if we are a leaf	*/
 	} u;
-	swblk_t		bm_bighint;	/* biggest contiguous block hint*/
+	swblk_t bm_bighint; /* biggest contiguous block hint*/
 } blmeta_t;
 
 typedef struct blist {
-	swblk_t		bl_blocks;	/* area of coverage		*/
+	swblk_t bl_blocks; /* area of coverage		*/
 	/* XXX int64_t bl_radix */
-	swblk_t		bl_radix;	/* coverage radix		*/
-	swblk_t		bl_skip;	/* starting skip		*/
-	swblk_t		bl_free;	/* number of free blocks	*/
-	blmeta_t	*bl_root;	/* root of radix tree		*/
-	swblk_t		bl_rootblks;	/* swblk_t blks allocated for tree */
+	swblk_t	  bl_radix;    /* coverage radix		*/
+	swblk_t	  bl_skip;     /* starting skip		*/
+	swblk_t	  bl_free;     /* number of free blocks	*/
+	blmeta_t *bl_root;     /* root of radix tree		*/
+	swblk_t	  bl_rootblks; /* swblk_t blks allocated for tree */
 } *blist_t;
 
-#define BLIST_META_RADIX	(sizeof(u_swblk_t)*8/2)	/* 2 bits per */
-#define BLIST_BMAP_RADIX	(sizeof(u_swblk_t)*8)	/* 1 bit per */
+#define BLIST_META_RADIX (sizeof(u_swblk_t) * 8 / 2) /* 2 bits per */
+#define BLIST_BMAP_RADIX (sizeof(u_swblk_t) * 8)     /* 1 bit per */
 
 /*
  * The radix may exceed the size of a 64 bit signed (or unsigned) int
@@ -115,23 +115,22 @@ typedef struct blist {
 
 #if defined(_LP64)
 /* swblk_t 64bits */
-#define BLIST_MAXBLKS		(0x4000000000000000LL /		\
-				 (BLIST_BMAP_RADIX / BLIST_META_RADIX))
+#define BLIST_MAXBLKS                                                          \
+	(0x4000000000000000LL / (BLIST_BMAP_RADIX / BLIST_META_RADIX))
 #else
-#define BLIST_MAXBLKS		(0x40000000 /		\
-				 (BLIST_BMAP_RADIX / BLIST_META_RADIX))
+#define BLIST_MAXBLKS (0x40000000 / (BLIST_BMAP_RADIX / BLIST_META_RADIX))
 #endif
 
-#define BLIST_MAX_ALLOC		BLIST_BMAP_RADIX
+#define BLIST_MAX_ALLOC BLIST_BMAP_RADIX
 
 blist_t blist_create(swblk_t);
-void blist_destroy(blist_t);
+void	blist_destroy(blist_t);
 swblk_t blist_alloc(blist_t, swblk_t);
 swblk_t blist_allocat(blist_t, swblk_t, swblk_t);
-void blist_free(blist_t, swblk_t, swblk_t);
+void	blist_free(blist_t, swblk_t, swblk_t);
 swblk_t blist_fill(blist_t, swblk_t, swblk_t);
-void blist_print(blist_t);
-void blist_resize(blist_t *, swblk_t, int);
-void blist_gapfind(blist_t, swblk_t *, swblk_t *);
+void	blist_print(blist_t);
+void	blist_resize(blist_t *, swblk_t, int);
+void	blist_gapfind(blist_t, swblk_t *, swblk_t *);
 
-#endif	/* _SYS_BLIST_H_ */
+#endif /* _SYS_BLIST_H_ */

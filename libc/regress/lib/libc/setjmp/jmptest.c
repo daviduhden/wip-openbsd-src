@@ -33,6 +33,7 @@
  */
 
 #include <sys/types.h>
+
 #include <err.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -46,21 +47,21 @@
 #endif
 
 #ifdef TEST_SETJMP
-#define BUF		jmp_buf
-#define	SET(b, m)	setjmp(b)
-#define	JMP(b, v)	longjmp(b, v)
+#define BUF jmp_buf
+#define SET(b, m) setjmp(b)
+#define JMP(b, v) longjmp(b, v)
 #endif
 
 #ifdef TEST_U_SETJMP
-#define BUF		jmp_buf
-#define	SET(b, m)	_setjmp(b)
-#define	JMP(b, v)	_longjmp(b, v)
+#define BUF jmp_buf
+#define SET(b, m) _setjmp(b)
+#define JMP(b, v) _longjmp(b, v)
 #endif
 
 #ifdef TEST_SIGSETJMP
-#define BUF		sigjmp_buf
-#define	SET(b, m)	sigsetjmp(b, m)
-#define	JMP(b, v)	siglongjmp(b, v)
+#define BUF sigjmp_buf
+#define SET(b, m) sigsetjmp(b, m)
+#define JMP(b, v) siglongjmp(b, v)
 #endif
 
 int expectsignal;
@@ -81,9 +82,9 @@ int
 main(int argc, char *argv[])
 {
 	struct sigaction sa;
-	BUF jb;
-	sigset_t ss;
-	int i, x;
+	BUF		 jb;
+	sigset_t	 ss;
+	int		 i, x;
 
 	i = getpid();
 

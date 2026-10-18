@@ -33,12 +33,13 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 #include <machine/sysarch.h>
 
 fp_except
 fpsetmask(mask)
-	fp_except mask;
+fp_except mask;
 {
 	struct alpha_fp_except_args a;
 

@@ -4,5 +4,5 @@
  * machine/setjmp.h: machine dependent setjmp-related information.
  */
 
-#define	_JBLEN		32 /* sp, ra, [f]s0-11, fscr, magic val, sigmask */
-#define	_JB_SIGMASK	28
+#define _JBLEN 32 /* sp, ra, [f]s0-11, fscr, magic val, sigmask */
+#define _JB_SIGMASK 28

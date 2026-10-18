@@ -34,7 +34,7 @@
 #include <signal.h>
 #include <string.h>
 
-sigset_t __sigintr;		/* shared with siginterrupt */
+sigset_t __sigintr; /* shared with siginterrupt */
 
 sig_t
 signal(int s, sig_t a)

@@ -25,7 +25,7 @@
 char *
 strndup(const char *str, size_t maxlen)
 {
-	char *copy;
+	char  *copy;
 	size_t len;
 
 	len = strnlen(str, maxlen);

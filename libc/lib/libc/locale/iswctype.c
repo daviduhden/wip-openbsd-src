@@ -35,28 +35,28 @@
  * SUCH DAMAGE.
  */
 
-#include <wchar.h>
-#include <wctype.h>
 #include <ctype.h>
 #include <errno.h>
 #include <string.h>
-#include "rune.h"
-#include "runetype.h"
-#include "rune_local.h"
+#include <wchar.h>
+#include <wctype.h>
+
 #include "_wctrans_local.h"
+#include "rune.h"
+#include "rune_local.h"
+#include "runetype.h"
 
 static inline _RuneType __runetype_w(wint_t);
-static inline int __isctype_w(wint_t, _RuneType);
-static inline wint_t __toupper_w(wint_t);
-static inline wint_t __tolower_w(wint_t);
+static inline int	__isctype_w(wint_t, _RuneType);
+static inline wint_t	__toupper_w(wint_t);
+static inline wint_t	__tolower_w(wint_t);
 
 static inline _RuneType
 __runetype_w(wint_t c)
 {
 	_RuneLocale *rl = _CurrentRuneLocale();
 
-	return (_RUNE_ISCACHED(c) ?
-		rl->rl_runetype[c] : ___runetype_mb(c, rl));
+	return (_RUNE_ISCACHED(c) ? rl->rl_runetype[c] : ___runetype_mb(c, rl));
 }
 
 static inline int
@@ -80,7 +80,7 @@ __tolower_w(wint_t c)
 int
 iswalnum(wint_t c)
 {
-	return (__isctype_w((c), _RUNETYPE_A|_RUNETYPE_D));
+	return (__isctype_w((c), _RUNETYPE_A | _RUNETYPE_D));
 }
 
 int
@@ -179,13 +179,13 @@ DEF_WEAK(wcwidth);
 wctrans_t
 wctrans(const char *charclass)
 {
-	int i;
+	int	     i;
 	_RuneLocale *rl = _CurrentRuneLocale();
 
-	if (rl->rl_wctrans[_WCTRANS_INDEX_LOWER].te_name==NULL)
+	if (rl->rl_wctrans[_WCTRANS_INDEX_LOWER].te_name == NULL)
 		_wctrans_init(rl);
 
-	for (i=0; i<_WCTRANS_NINDEXES; i++)
+	for (i = 0; i < _WCTRANS_NINDEXES; i++)
 		if (!strcmp(rl->rl_wctrans[i].te_name, charclass))
 			return ((wctrans_t)&rl->rl_wctrans[i]);
 
@@ -195,7 +195,7 @@ wctrans(const char *charclass)
 wint_t
 towctrans(wint_t c, wctrans_t desc)
 {
-	if (desc==NULL) {
+	if (desc == NULL) {
 		errno = EINVAL;
 		return (c);
 	}

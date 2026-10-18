@@ -18,19 +18,21 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <string.h>
 #include <errno.h>
+#include <string.h>
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static int	inet_pton4(const char *src, u_char *dst);
-static int	inet_pton6(const char *src, u_char *dst);
+static int inet_pton4(const char *src, u_char *dst);
+static int inet_pton6(const char *src, u_char *dst);
 
 /* int
  * inet_pton(af, src, dst)
@@ -73,8 +75,8 @@ static int
 inet_pton4(const char *src, u_char *dst)
 {
 	static const char digits[] = "0123456789";
-	int saw_digit, octets, ch;
-	u_char tmp[INADDRSZ], *tp;
+	int		  saw_digit, octets, ch;
+	u_char		  tmp[INADDRSZ], *tp;
 
 	saw_digit = 0;
 	octets = 0;
@@ -125,10 +127,10 @@ inet_pton6(const char *src, u_char *dst)
 {
 	static const char xdigits_l[] = "0123456789abcdef",
 			  xdigits_u[] = "0123456789ABCDEF";
-	u_char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
-	const char *xdigits, *curtok;
-	int ch, saw_xdigit, count_xdigit;
-	u_int val;
+	u_char		  tmp[IN6ADDRSZ], *tp, *endp, *colonp;
+	const char	 *xdigits, *curtok;
+	int		  ch, saw_xdigit, count_xdigit;
+	u_int		  val;
 
 	memset((tp = tmp), '\0', IN6ADDRSZ);
 	endp = tp + IN6ADDRSZ;
@@ -168,8 +170,8 @@ inet_pton6(const char *src, u_char *dst)
 			}
 			if (tp + INT16SZ > endp)
 				return (0);
-			*tp++ = (u_char) (val >> 8) & 0xff;
-			*tp++ = (u_char) val & 0xff;
+			*tp++ = (u_char)(val >> 8) & 0xff;
+			*tp++ = (u_char)val & 0xff;
 			saw_xdigit = 0;
 			count_xdigit = 0;
 			val = 0;
@@ -180,15 +182,15 @@ inet_pton6(const char *src, u_char *dst)
 			tp += INADDRSZ;
 			saw_xdigit = 0;
 			count_xdigit = 0;
-			break;	/* '\0' was seen by inet_pton4(). */
+			break; /* '\0' was seen by inet_pton4(). */
 		}
 		return (0);
 	}
 	if (saw_xdigit) {
 		if (tp + INT16SZ > endp)
 			return (0);
-		*tp++ = (u_char) (val >> 8) & 0xff;
-		*tp++ = (u_char) val & 0xff;
+		*tp++ = (u_char)(val >> 8) & 0xff;
+		*tp++ = (u_char)val & 0xff;
 	}
 	if (colonp != NULL) {
 		/*
@@ -196,12 +198,12 @@ inet_pton6(const char *src, u_char *dst)
 		 * overlapping regions, we'll do the shift by hand.
 		 */
 		const int n = tp - colonp;
-		int i;
+		int	  i;
 
 		if (tp == endp)
 			return (0);
 		for (i = 1; i <= n; i++) {
-			endp[- i] = colonp[n - i];
+			endp[-i] = colonp[n - i];
 			colonp[n - i] = 0;
 		}
 		tp = endp;

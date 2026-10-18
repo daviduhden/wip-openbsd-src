@@ -16,11 +16,11 @@
  */
 
 #ifndef INIT_H
-#define	INIT_H
+#define INIT_H
 
 __BEGIN_HIDDEN_DECLS
 /* shared between dl_iterate_phdr() and _csu_finish() in static builds */
-extern struct dl_phdr_info	_static_phdr_info;
+extern struct dl_phdr_info _static_phdr_info;
 __END_HIDDEN_DECLS
 
 #endif /* !INIT_H */

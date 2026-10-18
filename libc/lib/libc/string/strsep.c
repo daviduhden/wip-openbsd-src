@@ -33,7 +33,7 @@
 
 /*
  * Get next token from string *stringp, where tokens are possibly-empty
- * strings separated by characters from delim.  
+ * strings separated by characters from delim.
  *
  * Writes NULs into the string at *stringp to end tokens.
  * delim need not remain constant from call to call.
@@ -45,10 +45,10 @@
 char *
 strsep(char **stringp, const char *delim)
 {
-	char *s;
+	char	   *s;
 	const char *spanp;
-	int c, sc;
-	char *tok;
+	int	    c, sc;
+	char	   *tok;
 
 	if ((s = *stringp) == NULL)
 		return (NULL);

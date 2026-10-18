@@ -16,6 +16,7 @@
  */
 
 #include <stdio_ext.h>
+
 #include "local.h"
 
 void

@@ -35,27 +35,27 @@
 
 #include <sys/conf.h>
 
-#define	mmread	mmrw
-#define	mmwrite	mmrw
+#define mmread mmrw
+#define mmwrite mmrw
 cdev_decl(mm);
 
 /* open, close, ioctl */
-#define cdev_openprom_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) nullop, 0, \
-	(dev_type_mmap((*))) enodev }
+#define cdev_openprom_init(c, n)                                               \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, (dev_type_write((*)))enodev,           \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))nullop, 0,              \
+	    (dev_type_mmap((*)))enodev}
 
 cdev_decl(openprom);
 
 /* open, close, write, ioctl, kqueue */
-#define cdev_acpiapm_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) enodev, 0, \
-	(dev_type_mmap((*))) enodev, 0, 0, dev_init(c,n,kqfilter) }
+#define cdev_acpiapm_init(c, n)                                                \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, (dev_type_write((*)))enodev,           \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))enodev, 0,              \
+	    (dev_type_mmap((*)))enodev, 0, 0, dev_init(c, n, kqfilter)}
 
 cdev_decl(apm);
 cdev_decl(acpiapm);
 
-#endif	/* _MACHINE_CONF_H_ */
+#endif /* _MACHINE_CONF_H_ */

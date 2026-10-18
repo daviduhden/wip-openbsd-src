@@ -17,14 +17,15 @@
 
 #include <fcntl.h>
 #include <stdarg.h>
+
 #include "cancel.h"
 
 int
 open(const char *path, int flags, ...)
 {
 	va_list ap;
-	mode_t mode = 0;
-	int ret;
+	mode_t	mode = 0;
+	int	ret;
 
 	if (flags & O_CREAT) {
 		va_start(ap, flags);

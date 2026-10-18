@@ -23,8 +23,8 @@
 char *
 nl_langinfo_l(nl_item item, locale_t locale)
 {
-	_RuneLocale	*rl;
-	const char	*s;
+	_RuneLocale *rl;
+	const char  *s;
 
 	if (item != CODESET)
 		return nl_langinfo(item);

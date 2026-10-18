@@ -34,10 +34,11 @@
 #ifdef SOFTFLOAT_FOR_GCC
 #include "softfloat-for-gcc.h"
 #endif
-#include "milieu.h"
 #include <softfloat.h>
 
-__weak_alias(_fpsetmask,fpsetmask);
+#include "milieu.h"
+
+__weak_alias(_fpsetmask, fpsetmask);
 
 fp_except
 fpsetmask(fp_except mask)

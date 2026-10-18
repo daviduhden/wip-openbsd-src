@@ -17,21 +17,23 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
 
+#include <net/if.h>
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <string.h>
 
 static size_t asr_print_addr(const struct sockaddr *, char *, size_t);
-static size_t asr_print_port(const struct sockaddr *, const char *, char *, size_t);
+static size_t asr_print_port(
+    const struct sockaddr *, const char *, char *, size_t);
 
-#define SA_IN(sa) ((struct sockaddr_in*)(sa))
-#define SA_IN6(sa) ((struct sockaddr_in6*)(sa))
+#define SA_IN(sa) ((struct sockaddr_in *)(sa))
+#define SA_IN6(sa) ((struct sockaddr_in6 *)(sa))
 
 /*
  * Print the textual representation (as given by inet_ntop(3)) of the address
@@ -50,9 +52,9 @@ asr_print_addr(const struct sockaddr *sa, char *buf, size_t buflen)
 	char tmp[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
 	char scope[IF_NAMESIZE + 1], *ifname;
 	const void *addr;
-	size_t s;
+	size_t	    s;
 
-	switch(sa->sa_family) {
+	switch (sa->sa_family) {
 	case AF_INET:
 		addr = &SA_IN(sa)->sin_addr;
 		break;
@@ -83,7 +85,8 @@ asr_print_addr(const struct sockaddr *sa, char *buf, size_t buflen)
 			ifname = if_indextoname(ifidx, scope + 1);
 
 		if (ifname == NULL)
-			(void)snprintf(scope + 1, sizeof(scope) - 1, "%u", ifidx);
+			(void)snprintf(
+			    scope + 1, sizeof(scope) - 1, "%u", ifidx);
 
 		if (s < buflen)
 			(void)strlcat(buf, scope, buflen);
@@ -94,7 +97,7 @@ asr_print_addr(const struct sockaddr *sa, char *buf, size_t buflen)
 	return (s);
 }
 
-/* 
+/*
  * Print the textual representation of the port set on "sa".
  *
  * If proto is not NULL, it is used as parameter to "getservbyport_r(3)" to
@@ -107,14 +110,15 @@ asr_print_addr(const struct sockaddr *sa, char *buf, size_t buflen)
  * the returned size against buflen.
  */
 static size_t
-asr_print_port(const struct sockaddr *sa, const char *proto, char *buf, size_t buflen)
+asr_print_port(
+    const struct sockaddr *sa, const char *proto, char *buf, size_t buflen)
 {
-	struct servent s;
+	struct servent	    s;
 	struct servent_data sd;
-	int port, r, saved_errno;
-	size_t n;
+	int		    port, r, saved_errno;
+	size_t		    n;
 
-	switch(sa->sa_family) {
+	switch (sa->sa_family) {
 	case AF_INET:
 		port = SA_IN(sa)->sin_port;
 		break;
@@ -127,7 +131,7 @@ asr_print_port(const struct sockaddr *sa, const char *proto, char *buf, size_t b
 	}
 
 	if (proto) {
-		memset(&sd, 0, sizeof (sd));
+		memset(&sd, 0, sizeof(sd));
 		saved_errno = errno;
 		r = getservbyport_r(port, proto, &s, &sd);
 		if (r == 0)
@@ -139,7 +143,7 @@ asr_print_port(const struct sockaddr *sa, const char *proto, char *buf, size_t b
 	}
 
 	r = snprintf(buf, buflen, "%u", ntohs(port));
-	if (r < 0 || r >= buflen) 	/* Actually, this can not happen */
+	if (r < 0 || r >= buflen) /* Actually, this can not happen */
 		return (0);
 
 	return (r);
@@ -151,9 +155,9 @@ getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host,
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	int saved_errno = errno;
-	const char *proto;
-	size_t r;
+	int		  saved_errno = errno;
+	const char	 *proto;
+	size_t		  r;
 
 	/*
 	 * Take a shortcut if we don't care about hostname,
@@ -187,8 +191,8 @@ getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host,
 
 	res_init();
 
-	as = getnameinfo_async(sa, salen, host, hostlen, serv, servlen, flags,
-	    NULL);
+	as = getnameinfo_async(
+	    sa, salen, host, hostlen, serv, servlen, flags, NULL);
 	if (as == NULL) {
 		if (errno == ENOMEM) {
 			errno = saved_errno;

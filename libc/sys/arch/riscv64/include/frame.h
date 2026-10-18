@@ -71,9 +71,9 @@ typedef struct trapframe {
  * pushed on stack for signal delivery
  */
 struct sigframe {
-	int sf_signum;
+	int		  sf_signum;
 	struct sigcontext sf_sc;
-	siginfo_t sf_si;
+	siginfo_t	  sf_si;
 };
 
 /*
@@ -91,7 +91,7 @@ struct switchframe {
 
 struct callframe {
 	struct callframe *f_frame;
-	register_t f_ra;
+	register_t	  f_ra;
 };
 
 #endif /* !_LOCORE */

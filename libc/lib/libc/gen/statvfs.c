@@ -47,7 +47,7 @@ int
 fstatvfs(int fd, struct statvfs *p)
 {
 	struct statfs sb;
-	int ret;
+	int	      ret;
 
 	ret = fstatfs(fd, &sb);
 	if (ret == 0)
@@ -59,11 +59,10 @@ int
 statvfs(const char *path, struct statvfs *p)
 {
 	struct statfs sb;
-	int ret;
+	int	      ret;
 
 	ret = statfs(path, &sb);
 	if (ret == 0)
 		cvt_statfs_to_statvfs(&sb, p);
 	return (ret);
 }
-

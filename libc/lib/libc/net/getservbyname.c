@@ -37,7 +37,7 @@ getservbyname_r(const char *name, const char *proto, struct servent *se,
     struct servent_data *sd)
 {
 	char **cp;
-	int error;
+	int    error;
 
 	setservent_r(sd->stayopen, sd);
 	while ((error = getservent_r(se, sd)) == 0) {
@@ -47,7 +47,7 @@ getservbyname_r(const char *name, const char *proto, struct servent *se,
 			if (strcmp(name, *cp) == 0)
 				goto gotname;
 		continue;
-gotname:
+	gotname:
 		if (proto == 0 || strcmp(se->s_proto, proto) == 0)
 			break;
 	}
@@ -63,7 +63,7 @@ struct servent *
 getservbyname(const char *name, const char *proto)
 {
 	extern struct servent_data _servent_data;
-	static struct servent serv;
+	static struct servent	   serv;
 
 	if (getservbyname_r(name, proto, &serv, &_servent_data) != 0)
 		return (NULL);

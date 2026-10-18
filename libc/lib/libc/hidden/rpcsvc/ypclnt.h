@@ -22,7 +22,7 @@
 
 __BEGIN_HIDDEN_DECLS
 struct dom_binding;
-int	_yp_dobind(const char *, struct dom_binding **);
+int _yp_dobind(const char *, struct dom_binding **);
 __END_HIDDEN_DECLS
 
 PROTO_DEPRECATED(yp_all);

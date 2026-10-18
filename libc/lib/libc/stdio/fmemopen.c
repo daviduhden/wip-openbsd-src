@@ -22,22 +22,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "local.h"
 
 struct state {
-	char		*string;	/* actual stream */
-	size_t		 pos;		/* current position */
-	size_t		 size;		/* allocated size */
-	size_t		 len;		/* length of the data */
-	int		 update;	/* open for update */
-	int		 append;	/* open for append */
+	char  *string; /* actual stream */
+	size_t pos;    /* current position */
+	size_t size;   /* allocated size */
+	size_t len;    /* length of the data */
+	int    update; /* open for update */
+	int    append; /* open for append */
 };
 
 static int
 fmemopen_read(void *v, char *b, int l)
 {
-	struct state	*st = v;
-	int		 i;
+	struct state *st = v;
+	int	      i;
 
 	for (i = 0; i < l && i + st->pos < st->len; i++)
 		b[i] = st->string[st->pos + i];
@@ -49,8 +50,8 @@ fmemopen_read(void *v, char *b, int l)
 static int
 fmemopen_write(void *v, const char *b, int l)
 {
-	struct state	*st = v;
-	int		i;
+	struct state *st = v;
+	int	      i;
 
 	if (st->append)
 		st->pos = st->len;
@@ -74,8 +75,8 @@ fmemopen_write(void *v, const char *b, int l)
 static fpos_t
 fmemopen_seek(void *v, fpos_t off, int whence)
 {
-	struct state	*st = v;
-	ssize_t		 base = 0;
+	struct state *st = v;
+	ssize_t	      base = 0;
 
 	switch (whence) {
 	case SEEK_SET:
@@ -109,7 +110,7 @@ fmemopen_close(void *v)
 static int
 fmemopen_close_free(void *v)
 {
-	struct state	*st = v;
+	struct state *st = v;
 
 	free(st->string);
 	free(st);
@@ -120,9 +121,9 @@ fmemopen_close_free(void *v)
 FILE *
 fmemopen(void *buf, size_t size, const char *mode)
 {
-	struct state	*st;
-	FILE		*fp;
-	int		 flags, oflags;
+	struct state *st;
+	FILE	     *fp;
+	int	      flags, oflags;
 
 	if (size == 0) {
 		errno = EINVAL;
@@ -167,7 +168,7 @@ fmemopen(void *buf, size_t size, const char *mode)
 			*st->string = '\0';
 
 		if (oflags & O_APPEND) {
-			char	*p;
+			char *p;
 
 			if ((p = memchr(st->string, '\0', size)) != NULL)
 				st->pos = st->len = (p - st->string);

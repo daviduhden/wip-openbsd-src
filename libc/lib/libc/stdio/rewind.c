@@ -39,6 +39,6 @@ rewind(FILE *fp)
 {
 	fseeko(fp, 0, SEEK_SET);
 	clearerr(fp);
-	errno = 0;      /* not required, but seems reasonable */
+	errno = 0; /* not required, but seems reasonable */
 }
 DEF_STRONG(rewind);

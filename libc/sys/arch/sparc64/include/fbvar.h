@@ -46,23 +46,23 @@
  * All framebuffer softc structures must start with such a structure.
  */
 struct sunfb {
-	struct	device sf_dev;		/* base device */
+	struct device sf_dev; /* base device */
 
-	int	sf_width;
-	int	sf_height;
-	int	sf_depth;
-	int	sf_linebytes;
+	int sf_width;
+	int sf_height;
+	int sf_depth;
+	int sf_linebytes;
 
-	int	sf_fbsize;		/* sf_height * sf_linebytes */
+	int sf_fbsize; /* sf_height * sf_linebytes */
 
-	int	*sf_crowp, *sf_ccolp;	/* PROM cursor position */
+	int *sf_crowp, *sf_ccolp; /* PROM cursor position */
 
-	struct	rasops_info sf_ro;
+	struct rasops_info sf_ro;
 
-	struct	wsscreen_descr sf_wsd;
-	struct	wsscreen_list sf_wsl;
-	struct	wsscreen_descr *sf_scrlist[1];
-	int	sf_nscreens;
+	struct wsscreen_descr  sf_wsd;
+	struct wsscreen_list   sf_wsl;
+	struct wsscreen_descr *sf_scrlist[1];
+	int		       sf_nscreens;
 };
 
 /*
@@ -70,11 +70,11 @@ struct sunfb {
  */
 extern int fbnode;
 
-void	fb_setsize(struct sunfb*, int, int, int, int, int);
-void	fbwscons_init(struct sunfb *, int, int);
-void	fbwscons_console_init(struct sunfb *, int);
-void	fbwscons_setcolormap(struct sunfb *,
-    void (*)(void *, u_int, u_int8_t, u_int8_t, u_int8_t));
-void	fbwscons_attach(struct sunfb *,	struct wsdisplay_accessops *, int);
+void fb_setsize(struct sunfb *, int, int, int, int, int);
+void fbwscons_init(struct sunfb *, int, int);
+void fbwscons_console_init(struct sunfb *, int);
+void fbwscons_setcolormap(
+    struct sunfb *, void (*)(void *, u_int, u_int8_t, u_int8_t, u_int8_t));
+void fbwscons_attach(struct sunfb *, struct wsdisplay_accessops *, int);
 
-int	ifb_ident(void *);
+int ifb_ident(void *);

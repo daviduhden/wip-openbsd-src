@@ -4,24 +4,24 @@
  * Public domain.
  */
 
+#include <errno.h>
 #include <libgen.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
-#include <errno.h>
 
 int
 main(void)
 {
-	char path[2 * PATH_MAX];
+	char	    path[2 * PATH_MAX];
 	const char *dir = "junk/";
 	const char *fname = "file.name.ext";
-	char *str;
-	int i;
+	char	   *str;
+	int	    i;
 
 	/* Test normal functioning */
 	strlcpy(path, "/", sizeof(path));
-	strlcat(path, dir, sizeof(path)); 
+	strlcat(path, dir, sizeof(path));
 	strlcat(path, fname, sizeof(path));
 	str = basename(path);
 	if (strcmp(str, fname) != 0)
@@ -57,7 +57,7 @@ main(void)
 
 	/* Case 3 */
 	for (i = 0; i < PATH_MAX - 1; i++)
-		strlcat(path, "/", sizeof(path));	/* path cleared above */
+		strlcat(path, "/", sizeof(path)); /* path cleared above */
 	str = basename(path);
 	if (strcmp(str, "/") != 0)
 		goto fail;

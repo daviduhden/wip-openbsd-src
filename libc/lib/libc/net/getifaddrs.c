@@ -28,49 +28,50 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <sys/syslog.h>
-#include <net/if.h>
-#include <net/route.h>
 #include <sys/sysctl.h>
+#include <sys/syslog.h>
+
+#include <net/if.h>
 #include <net/if_dl.h>
+#include <net/route.h>
 
 #include <errno.h>
 #include <ifaddrs.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
 
-#define roundup(x, y)	((((uintptr_t)(x)+((y)-1))/(y))*(y))
-#define proundup(x, y)  (void *)roundup(x,y)
+#define roundup(x, y) ((((uintptr_t)(x) + ((y) - 1)) / (y)) * (y))
+#define proundup(x, y) (void *)roundup(x, y)
 
-#define SA_RLEN(sa)	((sa)->sa_len ? \
-			    roundup((sa)->sa_len, sizeof(long)) : \
-			    roundup(1, sizeof(long)))
+#define SA_RLEN(sa)                                                            \
+	((sa)->sa_len ? roundup((sa)->sa_len, sizeof(long)) :                  \
+			roundup(1, sizeof(long)))
 
 int
 getifaddrs(struct ifaddrs **pif)
 {
-	int icnt = 1, dcnt = 0, ncnt = 0, mib[6], i;
-	size_t needed;
-	char *buf = NULL, *bufp, *data, *names, *next, *p, *p0;
-	struct ifaddrs *cif = 0, *ifa, *ift;
-	struct rt_msghdr *rtm;
-	struct if_msghdr *ifm;
-	struct ifa_msghdr *ifam;
+	int		    icnt = 1, dcnt = 0, ncnt = 0, mib[6], i;
+	size_t		    needed;
+	char		   *buf = NULL, *bufp, *data, *names, *next, *p, *p0;
+	struct ifaddrs	   *cif = 0, *ifa, *ift;
+	struct rt_msghdr   *rtm;
+	struct if_msghdr   *ifm;
+	struct ifa_msghdr  *ifam;
 	struct sockaddr_dl *dl;
-	struct sockaddr *sa;
-	u_short index = 0;
-	size_t len, alen, dlen, dsize;
+	struct sockaddr	   *sa;
+	u_short		    index = 0;
+	size_t		    len, alen, dlen, dsize;
 
 	mib[0] = CTL_NET;
 	mib[1] = PF_ROUTE;
-	mib[2] = 0;             /* protocol */
-	mib[3] = 0;             /* wildcard address family */
+	mib[2] = 0; /* protocol */
+	mib[3] = 0; /* wildcard address family */
 	mib[4] = NET_RT_IFLIST;
-	mib[5] = 0;             /* no flags */
+	mib[5] = 0; /* no flags */
 	while (1) {
 		if (sysctl(mib, 6, NULL, &needed, NULL, 0) == -1) {
 			free(buf);
@@ -121,9 +122,9 @@ getifaddrs(struct ifaddrs **pif)
 		case RTM_NEWADDR:
 			ifam = (struct ifa_msghdr *)rtm;
 			if (index && ifam->ifam_index != index)
-				abort();	/* XXX abort illegal in library */
+				abort(); /* XXX abort illegal in library */
 
-#define	RTA_MASKS	(RTA_NETMASK | RTA_IFA | RTA_BRD)
+#define RTA_MASKS (RTA_NETMASK | RTA_IFA | RTA_BRD)
 			if (index == 0 || (ifam->ifam_addrs & RTA_MASKS) == 0)
 				break;
 			p = next + rtm->rtm_hdrlen;
@@ -131,8 +132,8 @@ getifaddrs(struct ifaddrs **pif)
 			/* Scan to look for length of address */
 			alen = 0;
 			for (p0 = p, i = 0; i < RTAX_MAX; i++) {
-				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i))
-				    == 0)
+				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i)) ==
+				    0)
 					continue;
 				sa = (struct sockaddr *)p;
 				len = SA_RLEN(sa);
@@ -143,8 +144,8 @@ getifaddrs(struct ifaddrs **pif)
 				p += len;
 			}
 			for (p = p0, i = 0; i < RTAX_MAX; i++) {
-				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i))
-				    == 0)
+				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i)) ==
+				    0)
 					continue;
 				sa = (struct sockaddr *)p;
 				len = SA_RLEN(sa);
@@ -174,7 +175,7 @@ getifaddrs(struct ifaddrs **pif)
 	data = calloc(dsize, 1);
 	if (data == NULL) {
 		free(buf);
-		return(-1);
+		return (-1);
 	}
 
 	/* ifaddrs[], names, then if_data[] */
@@ -206,8 +207,8 @@ getifaddrs(struct ifaddrs **pif)
 
 				data = proundup(data, sizeof(long));
 				ift->ifa_addr = (struct sockaddr *)data;
-				memcpy(data, dl,
-				    ((struct sockaddr *)dl)->sa_len);
+				memcpy(
+				    data, dl, ((struct sockaddr *)dl)->sa_len);
 				data += SA_RLEN((struct sockaddr *)dl);
 
 				/* if_data needs long long alignment */
@@ -228,7 +229,7 @@ getifaddrs(struct ifaddrs **pif)
 		case RTM_NEWADDR:
 			ifam = (struct ifa_msghdr *)rtm;
 			if (index && ifam->ifam_index != index)
-				abort();	/* XXX abort illegal in library */
+				abort(); /* XXX abort illegal in library */
 
 			if (index == 0 || (ifam->ifam_addrs & RTA_MASKS) == 0)
 				break;
@@ -239,8 +240,8 @@ getifaddrs(struct ifaddrs **pif)
 			/* Scan to look for length of address */
 			alen = 0;
 			for (p0 = p, i = 0; i < RTAX_MAX; i++) {
-				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i))
-				    == 0)
+				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i)) ==
+				    0)
 					continue;
 				sa = (struct sockaddr *)p;
 				len = SA_RLEN(sa);
@@ -251,8 +252,8 @@ getifaddrs(struct ifaddrs **pif)
 				p += len;
 			}
 			for (p = p0, i = 0; i < RTAX_MAX; i++) {
-				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i))
-				    == 0)
+				if ((RTA_MASKS & ifam->ifam_addrs & (1 << i)) ==
+				    0)
 					continue;
 				sa = (struct sockaddr *)p;
 				len = SA_RLEN(sa);
@@ -288,7 +289,6 @@ getifaddrs(struct ifaddrs **pif)
 				p += len;
 			}
 
-
 			ift = (ift->ifa_next = ift + 1);
 			break;
 		}
@@ -298,10 +298,10 @@ getifaddrs(struct ifaddrs **pif)
 	if (dsize != (char *)data - (char *)ifa) {
 		char buf[1024];
 
-                /* <10> is LOG_CRIT */
+		/* <10> is LOG_CRIT */
 		snprintf(buf, sizeof buf,
-		    "<10>%s: getifaddrs: allocated %lu used %lu\n",
-		    __progname, dsize, (char *)data - (char *)ifa);
+		    "<10>%s: getifaddrs: allocated %lu used %lu\n", __progname,
+		    dsize, (char *)data - (char *)ifa);
 		sendsyslog(buf, strlen(buf), LOG_CONS);
 	}
 

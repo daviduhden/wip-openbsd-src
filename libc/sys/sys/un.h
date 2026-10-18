@@ -33,30 +33,30 @@
  */
 
 #ifndef _SYS_UN_H_
-#define	_SYS_UN_H_
+#define _SYS_UN_H_
 
-#include <sys/cdefs.h>
 #include <sys/_types.h>
+#include <sys/cdefs.h>
 
-#ifndef	_SA_FAMILY_T_DEFINED_
-#define	_SA_FAMILY_T_DEFINED_
-typedef	__sa_family_t	sa_family_t;	/* sockaddr address family type */
+#ifndef _SA_FAMILY_T_DEFINED_
+#define _SA_FAMILY_T_DEFINED_
+typedef __sa_family_t sa_family_t; /* sockaddr address family type */
 #endif
 
 /*
  * Definitions for UNIX IPC domain.
  */
-struct	sockaddr_un {
-	unsigned char	sun_len;	/* sockaddr len excluding NUL */
-	sa_family_t	sun_family;	/* AF_UNIX */
-	char	sun_path[104];		/* path name (gag) */
+struct sockaddr_un {
+	unsigned char sun_len;	     /* sockaddr len excluding NUL */
+	sa_family_t   sun_family;    /* AF_UNIX */
+	char	      sun_path[104]; /* path name (gag) */
 };
 
 #ifndef _KERNEL
 #if __BSD_VISIBLE
 
 /* actual length of an initialized sockaddr_un */
-#define SUN_LEN(su) \
+#define SUN_LEN(su)                                                            \
 	(sizeof(*(su)) - sizeof((su)->sun_path) + strlen((su)->sun_path))
 
 #endif /* __BSD_VISIBLE */

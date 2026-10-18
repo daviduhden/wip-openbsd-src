@@ -26,13 +26,15 @@
  */
 
 #include <sys/types.h>
-#include <stdlib.h>
-#include <string.h>
+
 #include <limits.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "ypinternal.h"
 
 #ifdef YPMATCHCACHE
@@ -40,22 +42,22 @@ static bool_t ypmatch_add(const char *, const char *, u_int, char *, u_int);
 static bool_t ypmatch_find(const char *, const char *, u_int, char **, u_int *);
 
 static struct ypmatch_ent {
-	struct ypmatch_ent	*next;
-	char			*map, *key;
-	char			*val;
-	int			 keylen, vallen;
-	time_t			 expire_t;
+	struct ypmatch_ent *next;
+	char		   *map, *key;
+	char		   *val;
+	int		    keylen, vallen;
+	time_t		    expire_t;
 } *ypmc;
 
 int _yplib_cache = 5;
 
 static bool_t
-ypmatch_add(const char *map, const char *key, u_int keylen, char *val,
-    u_int vallen)
+ypmatch_add(
+    const char *map, const char *key, u_int keylen, char *val, u_int vallen)
 {
 	struct ypmatch_ent *ep;
-	char *newmap = NULL, *newkey = NULL, *newval = NULL;
-	time_t t;
+	char		   *newmap = NULL, *newkey = NULL, *newval = NULL;
+	time_t		    t;
 
 	if (keylen == 0 || vallen == 0)
 		return (0);
@@ -105,16 +107,16 @@ ypmatch_add(const char *map, const char *key, u_int keylen, char *val,
 }
 
 static bool_t
-ypmatch_find(const char *map, const char *key, u_int keylen, char **val,
-    u_int *vallen)
+ypmatch_find(
+    const char *map, const char *key, u_int keylen, char **val, u_int *vallen)
 {
 	struct ypmatch_ent *ep;
-	time_t          t;
+	time_t		    t;
 
 	if (ypmc == NULL)
 		return 0;
 
-	(void) time(&t);
+	(void)time(&t);
 
 	for (ep = ypmc; ep; ep = ep->next) {
 		if (ep->keylen != keylen)
@@ -139,15 +141,15 @@ yp_match(const char *indomain, const char *inmap, const char *inkey,
     int inkeylen, char **outval, int *outvallen)
 {
 	struct dom_binding *ysd;
-	struct ypresp_val yprv;
-	struct timeval  tv;
-	struct ypreq_key yprk;
-	int tries = 0, r;
+	struct ypresp_val   yprv;
+	struct timeval	    tv;
+	struct ypreq_key    yprk;
+	int		    tries = 0, r;
 
 	if (indomain == NULL || *indomain == '\0' ||
-	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL ||
-	    *inmap == '\0' || strlen(inmap) > YPMAXMAP ||
-	    inkey == NULL || inkeylen == 0 || inkeylen >= YPMAXRECORD)
+	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL || *inmap == '\0' ||
+	    strlen(inmap) > YPMAXMAP || inkey == NULL || inkeylen == 0 ||
+	    inkeylen >= YPMAXRECORD)
 		return YPERR_BADARGS;
 
 	*outval = NULL;
@@ -158,8 +160,9 @@ again:
 		return YPERR_DOMAIN;
 
 #ifdef YPMATCHCACHE
-	if (!strcmp(_yp_domain, indomain) && ypmatch_find(inmap, inkey,
-	    inkeylen, &yprv.val.valdat_val, &yprv.val.valdat_len)) {
+	if (!strcmp(_yp_domain, indomain) &&
+	    ypmatch_find(inmap, inkey, inkeylen, &yprv.val.valdat_val,
+		&yprv.val.valdat_len)) {
 		*outvallen = yprv.val.valdat_len;
 		if ((*outval = malloc(*outvallen + 1)) == NULL) {
 			_yp_unbind(ysd);
@@ -177,13 +180,13 @@ again:
 
 	yprk.domain = (char *)indomain;
 	yprk.map = (char *)inmap;
-	yprk.key.keydat_val = (char *) inkey;
+	yprk.key.keydat_val = (char *)inkey;
 	yprk.key.keydat_len = inkeylen;
 
 	memset(&yprv, 0, sizeof yprv);
 
-	r = clnt_call(ysd->dom_client, YPPROC_MATCH,
-	    xdr_ypreq_key, &yprk, xdr_ypresp_val, &yprv, tv);
+	r = clnt_call(ysd->dom_client, YPPROC_MATCH, xdr_ypreq_key, &yprk,
+	    xdr_ypresp_val, &yprv, tv);
 	if (r != RPC_SUCCESS) {
 		if (tries++)
 			clnt_perror(ysd->dom_client, "yp_match: clnt_call");
@@ -200,12 +203,12 @@ again:
 		(*outval)[*outvallen] = '\0';
 #ifdef YPMATCHCACHE
 		if (strcmp(_yp_domain, indomain) == 0)
-			(void)ypmatch_add(inmap, inkey, inkeylen,
-			    *outval, *outvallen);
+			(void)ypmatch_add(
+			    inmap, inkey, inkeylen, *outval, *outvallen);
 #endif
 	}
 out:
-	xdr_free(xdr_ypresp_val, (char *) &yprv);
+	xdr_free(xdr_ypresp_val, (char *)&yprv);
 	_yp_unbind(ysd);
 	return r;
 }
@@ -216,15 +219,15 @@ yp_next(const char *indomain, const char *inmap, const char *inkey,
     int inkeylen, char **outkey, int *outkeylen, char **outval, int *outvallen)
 {
 	struct ypresp_key_val yprkv;
-	struct ypreq_key yprk;
-	struct dom_binding *ysd;
-	struct timeval  tv;
-	int tries = 0, r;
+	struct ypreq_key      yprk;
+	struct dom_binding   *ysd;
+	struct timeval	      tv;
+	int		      tries = 0, r;
 
 	if (indomain == NULL || *indomain == '\0' ||
-	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL ||
-	    *inmap == '\0' || strlen(inmap) > YPMAXMAP ||
-	    inkeylen == 0 || inkeylen >= YPMAXRECORD)
+	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL || *inmap == '\0' ||
+	    strlen(inmap) > YPMAXMAP || inkeylen == 0 ||
+	    inkeylen >= YPMAXRECORD)
 		return YPERR_BADARGS;
 
 	*outkey = *outval = NULL;
@@ -243,8 +246,8 @@ again:
 	yprk.key.keydat_len = inkeylen;
 	(void)memset(&yprkv, 0, sizeof yprkv);
 
-	r = clnt_call(ysd->dom_client, YPPROC_NEXT,
-	    xdr_ypreq_key, &yprk, xdr_ypresp_key_val, &yprkv, tv);
+	r = clnt_call(ysd->dom_client, YPPROC_NEXT, xdr_ypreq_key, &yprk,
+	    xdr_ypresp_key_val, &yprkv, tv);
 	if (r != RPC_SUCCESS) {
 		if (tries++)
 			clnt_perror(ysd->dom_client, "yp_next: clnt_call");
@@ -265,7 +268,7 @@ again:
 			(*outval)[*outvallen] = '\0';
 		}
 	}
-	xdr_free(xdr_ypresp_key_val, (char *) &yprkv);
+	xdr_free(xdr_ypresp_key_val, (char *)&yprkv);
 	_yp_unbind(ysd);
 	return r;
 }

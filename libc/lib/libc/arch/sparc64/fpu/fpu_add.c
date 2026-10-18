@@ -64,8 +64,8 @@ struct fpn *
 __fpu_add(struct fpemu *fe)
 {
 	struct fpn *x = &fe->fe_f1, *y = &fe->fe_f2, *r;
-	u_int r0, r1, r2, r3;
-	int rd;
+	u_int	    r0, r1, r2, r3;
+	int	    rd;
 
 	/*
 	 * Put the `heavier' operand on the right (see fpu_emu.h).
@@ -97,9 +97,9 @@ __fpu_add(struct fpemu *fe)
 	}
 	rd = FSR_GET_RD(fe->fe_fsr);
 	if (ISZERO(y)) {
-		if (rd != FSR_RD_RM)	/* only -0 + -0 gives -0 */
+		if (rd != FSR_RD_RM) /* only -0 + -0 gives -0 */
 			y->fp_sign &= x->fp_sign;
-		else			/* any -0 operand gives -0 */
+		else /* any -0 operand gives -0 */
 			y->fp_sign |= x->fp_sign;
 		return (y);
 	}
@@ -145,7 +145,7 @@ __fpu_add(struct fpemu *fe)
 		FPU_ADDCS(r->fp_mant[1], x->fp_mant[1], y->fp_mant[1]);
 		FPU_ADDC(r0, x->fp_mant[0], y->fp_mant[0]);
 		if ((r->fp_mant[0] = r0) >= FP_2) {
-			(void) __fpu_shr(r, 1);
+			(void)__fpu_shr(r, 1);
 			r->fp_exp++;
 		}
 	} else {

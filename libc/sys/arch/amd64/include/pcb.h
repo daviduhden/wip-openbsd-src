@@ -76,18 +76,18 @@
  * on a 64-byte boundary.
  */
 struct pcb {
-	struct	savefpu pcb_savefpu;	/* floating point state */
-	u_int64_t	pcb_cr3;
-	u_int64_t	pcb_rsp;
-	u_int64_t	pcb_rbp;
-	u_int64_t	pcb_kstack;	/* kernel stack address */
-	u_int64_t	pcb_fsbase;	/* per-thread offset: %fs */
-	caddr_t	pcb_onfault;		/* copyin/out fault recovery */
-	struct	pmap *pcb_pmap;		/* back pointer to our pmap */
+	struct savefpu pcb_savefpu; /* floating point state */
+	u_int64_t      pcb_cr3;
+	u_int64_t      pcb_rsp;
+	u_int64_t      pcb_rbp;
+	u_int64_t      pcb_kstack;  /* kernel stack address */
+	u_int64_t      pcb_fsbase;  /* per-thread offset: %fs */
+	caddr_t	       pcb_onfault; /* copyin/out fault recovery */
+	struct pmap   *pcb_pmap;    /* back pointer to our pmap */
 };
 
 #ifdef _KERNEL
-void	reset_segs(void);
+void reset_segs(void);
 #endif
 
 #endif /* _MACHINE_PCB_H_ */

@@ -36,17 +36,17 @@
 #include <sys/fcntl.h>
 
 #else /* _KERNEL */
-#include <sys/queue.h>
 #include <sys/mutex.h>
+#include <sys/queue.h>
 #endif /* _KERNEL */
 
-#define	DTYPE_VNODE	1	/* file */
-#define	DTYPE_SOCKET	2	/* communications endpoint */
-#define	DTYPE_PIPE	3	/* pipe */
-#define	DTYPE_KQUEUE	4	/* event queue */
-#define	DTYPE_DMABUF	5	/* DMA buffer (for DRM) */
-#define	DTYPE_SYNC	6	/* sync file (for DRM) */
-#define	DTYPE_VMM	7	/* vmm(4) virtual machine */
+#define DTYPE_VNODE 1  /* file */
+#define DTYPE_SOCKET 2 /* communications endpoint */
+#define DTYPE_PIPE 3   /* pipe */
+#define DTYPE_KQUEUE 4 /* event queue */
+#define DTYPE_DMABUF 5 /* DMA buffer (for DRM) */
+#define DTYPE_SYNC 6   /* sync file (for DRM) */
+#define DTYPE_VMM 7    /* vmm(4) virtual machine */
 
 #ifdef _KERNEL
 struct proc;
@@ -63,16 +63,16 @@ struct ucred;
  * - fo_write
  * - fo_close
  */
-struct	fileops {
-	int	(*fo_read)(struct file *, struct uio *, int);
-	int	(*fo_write)(struct file *, struct uio *, int);
-	int	(*fo_ioctl)(struct file *, u_long, caddr_t, struct proc *);
-	int	(*fo_kqfilter)(struct file *, struct knote *);
-	int	(*fo_stat)(struct file *, struct stat *, struct proc *);
-	int	(*fo_close)(struct file *, struct proc *);
-	int	(*fo_seek)(struct file *, off_t *, int, struct proc *);
+struct fileops {
+	int (*fo_read)(struct file *, struct uio *, int);
+	int (*fo_write)(struct file *, struct uio *, int);
+	int (*fo_ioctl)(struct file *, u_long, caddr_t, struct proc *);
+	int (*fo_kqfilter)(struct file *, struct knote *);
+	int (*fo_stat)(struct file *, struct stat *, struct proc *);
+	int (*fo_close)(struct file *, struct proc *);
+	int (*fo_seek)(struct file *, off_t *, int, struct proc *);
 };
-#define FO_POSITION	0x00000001	/* positioned read/write */
+#define FO_POSITION 0x00000001 /* positioned read/write */
 
 /*
  * Kernel descriptor table.
@@ -86,39 +86,38 @@ struct	fileops {
  *	v	vnode lock
  */
 struct file {
-	LIST_ENTRY(file) f_list;/* [F] list of active files */
-	struct mutex f_mtx;
-	u_int	f_flag;		/* [a] see fcntl.h */
-	u_int	f_iflags;	/* [a] internal flags */
-	int	f_type;		/* [I] descriptor type */
-	u_int	f_count;	/* [a] reference count */
-	struct	ucred *f_cred;	/* [I] credentials associated with descriptor */
-	const struct fileops *f_ops; /* [I] file operation pointers */
-	off_t	f_offset;	/* [f,v] offset */
-	void 	*f_data;	/* [I] private data */
-	uint64_t f_rxfer;	/* [f] total number of read transfers */
-	uint64_t f_wxfer;	/* [f] total number of write transfers */
-	uint64_t f_seek;	/* [f] total independent seek operations */
-	uint64_t f_rbytes;	/* [f] total bytes read */
-	uint64_t f_wbytes;	/* [f] total bytes written */
+	LIST_ENTRY(file) f_list; /* [F] list of active files */
+	struct mutex  f_mtx;
+	u_int	      f_flag;	/* [a] see fcntl.h */
+	u_int	      f_iflags; /* [a] internal flags */
+	int	      f_type;	/* [I] descriptor type */
+	u_int	      f_count;	/* [a] reference count */
+	struct ucred *f_cred;	/* [I] credentials associated with descriptor */
+	const struct fileops *f_ops;	/* [I] file operation pointers */
+	off_t		      f_offset; /* [f,v] offset */
+	void		     *f_data;	/* [I] private data */
+	uint64_t	      f_rxfer;	/* [f] total number of read transfers */
+	uint64_t	      f_wxfer; /* [f] total number of write transfers */
+	uint64_t f_seek;   /* [f] total independent seek operations */
+	uint64_t f_rbytes; /* [f] total bytes read */
+	uint64_t f_wbytes; /* [f] total bytes written */
 };
 
-#define FIF_HASLOCK		0x01	/* descriptor holds advisory lock */
-#define FIF_INSERTED		0x80	/* present in `filehead' */
+#define FIF_HASLOCK 0x01  /* descriptor holds advisory lock */
+#define FIF_INSERTED 0x80 /* present in `filehead' */
 
-#define FREF(fp) \
-	do { \
-		extern void vfs_stall_barrier(void); \
-		vfs_stall_barrier(); \
-		atomic_inc_int(&(fp)->f_count); \
+#define FREF(fp)                                                               \
+	do {                                                                   \
+		extern void vfs_stall_barrier(void);                           \
+		vfs_stall_barrier();                                           \
+		atomic_inc_int(&(fp)->f_count);                                \
 	} while (0)
 
-#define FRELE(fp,p) \
-	(atomic_dec_int_nv(&fp->f_count) == 0 ? fdrop(fp, p) : 0)
+#define FRELE(fp, p) (atomic_dec_int_nv(&fp->f_count) == 0 ? fdrop(fp, p) : 0)
 
-#define FDUP_MAX_COUNT		(UINT_MAX - 2 * MAXCPUS)
+#define FDUP_MAX_COUNT (UINT_MAX - 2 * MAXCPUS)
 
-int	fdrop(struct file *, struct proc *);
+int fdrop(struct file *, struct proc *);
 
 static inline off_t
 foffset(struct file *fp)
@@ -132,9 +131,9 @@ foffset(struct file *fp)
 }
 
 LIST_HEAD(filelist, file);
-extern int maxfiles;			/* kernel limit on number of open files */
-extern int numfiles;			/* actual number of open files */
-extern const struct fileops socketops;	/* socket operations for files */
-extern const struct fileops vnops;	/* vnode operations for files */
+extern int		    maxfiles; /* kernel limit on number of open files */
+extern int		    numfiles; /* actual number of open files */
+extern const struct fileops socketops; /* socket operations for files */
+extern const struct fileops vnops;     /* vnode operations for files */
 
 #endif /* _KERNEL */

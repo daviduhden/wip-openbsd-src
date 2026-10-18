@@ -24,11 +24,11 @@
 /* sigh: predeclare and rename the functions which we'll declare inline */
 #include <sys/signal.h>
 
-__only_inline int	sigaddset(sigset_t *__set, int __signo);
-__only_inline int	sigdelset(sigset_t *__set, int __signo);
-__only_inline int	sigemptyset(sigset_t *__set);
-__only_inline int	sigfillset(sigset_t *__set);
-__only_inline int	sigismember(const sigset_t *__set, int __signo);
+__only_inline int sigaddset(sigset_t *__set, int __signo);
+__only_inline int sigdelset(sigset_t *__set, int __signo);
+__only_inline int sigemptyset(sigset_t *__set);
+__only_inline int sigfillset(sigset_t *__set);
+__only_inline int sigismember(const sigset_t *__set, int __signo);
 PROTO_NORMAL(sigaddset);
 PROTO_NORMAL(sigdelset);
 PROTO_NORMAL(sigemptyset);
@@ -50,7 +50,7 @@ extern PROTO_NORMAL(sys_signame);
 PROTO_NORMAL(__errno);
 
 PROTO_DEPRECATED(bsd_signal);
-PROTO_NORMAL(kill);             /* wrap to ban SIGTHR? */
+PROTO_NORMAL(kill); /* wrap to ban SIGTHR? */
 PROTO_DEPRECATED(killpg);
 PROTO_DEPRECATED(psignal);
 PROTO_DEPRECATED(pthread_sigmask);
@@ -69,4 +69,4 @@ PROTO_DEPRECATED(sigvec);
 PROTO_DEPRECATED(sigwait);
 PROTO_NORMAL(thrkill);
 
-#endif	/* !_LIBC_SIGNAL_H */
+#endif /* !_LIBC_SIGNAL_H */

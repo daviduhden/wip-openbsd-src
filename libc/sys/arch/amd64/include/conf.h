@@ -32,8 +32,8 @@
 
 #include <sys/conf.h>
 
-#define	mmread	mmrw
-#define	mmwrite	mmrw
+#define mmread mmrw
+#define mmwrite mmrw
 cdev_decl(mm);
 
 bdev_decl(fd);
@@ -43,11 +43,11 @@ cdev_decl(spkr);
 
 cdev_decl(bios);
 
-#define	cdev_acpi_init(c,n) {\
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) enodev, 0, \
-	(dev_type_mmap((*))) enodev, 0, 0, dev_init(c,n,kqfilter) }
+#define cdev_acpi_init(c, n)                                                   \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, (dev_type_write((*)))enodev,           \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))enodev, 0,              \
+	    (dev_type_mmap((*)))enodev, 0, 0, dev_init(c, n, kqfilter)}
 cdev_decl(acpi);
 
 cdev_decl(pctr);
@@ -59,10 +59,10 @@ cdev_decl(vmm);
 cdev_decl(psp);
 
 #include "kexec.h"
-#define cdev_kexec_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) nullop, 0, \
-	(dev_type_mmap((*))) enodev }
+#define cdev_kexec_init(c, n)                                                  \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, (dev_type_write((*)))enodev,           \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))nullop, 0,              \
+	    (dev_type_mmap((*)))enodev}
 
 cdev_decl(kexec);

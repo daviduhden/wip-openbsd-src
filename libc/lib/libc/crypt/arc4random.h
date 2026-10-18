@@ -38,12 +38,12 @@ static inline int
 _rs_allocate(struct _rs **rsp, struct _rsx **rsxp)
 {
 	struct {
-		struct _rs rs;
+		struct _rs  rs;
 		struct _rsx rsx;
 	} *p;
 
-	if ((p = mmap(NULL, sizeof(*p), PROT_READ|PROT_WRITE,
-	    MAP_ANON|MAP_PRIVATE, -1, 0)) == MAP_FAILED)
+	if ((p = mmap(NULL, sizeof(*p), PROT_READ | PROT_WRITE,
+		 MAP_ANON | MAP_PRIVATE, -1, 0)) == MAP_FAILED)
 		return (-1);
 	if (minherit(p, sizeof(*p), MAP_INHERIT_ZERO) == -1) {
 		munmap(p, sizeof(*p));

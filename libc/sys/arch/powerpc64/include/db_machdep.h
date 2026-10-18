@@ -34,49 +34,49 @@
 #define _MACHINE_DB_MACHDEP_H_
 
 #include <sys/types.h>
-#include <uvm/uvm_param.h>
+
 #include <machine/psl.h>
 #include <machine/trap.h>
+#include <uvm/uvm_param.h>
 
-typedef long		db_expr_t;	/* expression - signed */
+typedef long		 db_expr_t; /* expression - signed */
 typedef struct trapframe db_regs_t;
-extern db_regs_t ddb_regs;		/* register state */
+extern db_regs_t	 ddb_regs; /* register state */
 
-#define PC_REGS(regs)	((regs)->srr0)
-#define SET_PC_REGS(regs, value)	PC_REGS(regs) = (value)
+#define PC_REGS(regs) ((regs)->srr0)
+#define SET_PC_REGS(regs, value) PC_REGS(regs) = (value)
 
-#define BKPT_INST	0x7C810808	/* breakpoint instruction */
+#define BKPT_INST 0x7C810808 /* breakpoint instruction */
 
-#define BKPT_SIZE	(4)		/* size of breakpoint inst */
-#define BKPT_SET(inst)	(BKPT_INST)
+#define BKPT_SIZE (4) /* size of breakpoint inst */
+#define BKPT_SET(inst) (BKPT_INST)
 
-#define db_clear_single_step(regs)	((regs)->srr1 &= ~PSL_SE)
-#define db_set_single_step(regs)	((regs)->srr1 |=  PSL_SE)
+#define db_clear_single_step(regs) ((regs)->srr1 &= ~PSL_SE)
+#define db_set_single_step(regs) ((regs)->srr1 |= PSL_SE)
 
-#define T_BREAKPOINT	0xffff
-#define IS_BREAKPOINT_TRAP(type, code)	((type) == T_BREAKPOINT)
-#define IS_WATCHPOINT_TRAP(type, code)	0
+#define T_BREAKPOINT 0xffff
+#define IS_BREAKPOINT_TRAP(type, code) ((type) == T_BREAKPOINT)
+#define IS_WATCHPOINT_TRAP(type, code) 0
 
-#define M_RTS		0xfc0007fe
-#define I_RTS		0x4c000020
-#define M_BC		0xfc000000
-#define I_BC		0x40000000
-#define M_B		0xfc000000
-#define I_B		0x50000000
-#define M_RFI		0xfc0007fe
-#define I_RFI		0x4c000064
+#define M_RTS 0xfc0007fe
+#define I_RTS 0x4c000020
+#define M_BC 0xfc000000
+#define I_BC 0x40000000
+#define M_B 0xfc000000
+#define I_B 0x50000000
+#define M_RFI 0xfc0007fe
+#define I_RFI 0x4c000064
 
-#define inst_trap_return(ins)	(((ins)&M_RFI) == I_RFI)
-#define inst_return(ins)	(((ins)&M_RTS) == I_RTS)
-#define inst_call(ins)		(((ins)&M_BC ) == I_BC  || \
-				 ((ins)&M_B  ) == I_B )
+#define inst_trap_return(ins) (((ins) & M_RFI) == I_RFI)
+#define inst_return(ins) (((ins) & M_RTS) == I_RTS)
+#define inst_call(ins) (((ins) & M_BC) == I_BC || ((ins) & M_B) == I_B)
 
 struct trapframe;
 void db_ktrap(int, db_regs_t *);
 
-#define DDB_STATE_NOT_RUNNING	0  
-#define DDB_STATE_RUNNING	1
-#define DDB_STATE_EXITING	2
+#define DDB_STATE_NOT_RUNNING 0
+#define DDB_STATE_RUNNING 1
+#define DDB_STATE_EXITING 2
 
 /*
  * We define some of our own commands

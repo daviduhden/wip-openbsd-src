@@ -32,19 +32,19 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <signal.h>
 
-void	testfile();
-void	usage();
+void testfile();
+void usage();
 
 int generate;
 
 int
 main(argc, argv)
-	int argc;
-	char **argv;
+int    argc;
+char **argv;
 {
 	int c;
 
@@ -59,7 +59,7 @@ main(argc, argv)
 		default:
 			usage();
 			break;
-	}
+		}
 
 	argc -= optind;
 	argv += optind;
@@ -70,8 +70,7 @@ main(argc, argv)
 		for (; argc != 0; argc--, argv++) {
 			if (freopen(argv[0], "r", stdin) == NULL) {
 				fprintf(stderr,
-				    "divremtest: couldn't open %s\n",
-				    argv[0]);
+				    "divremtest: couldn't open %s\n", argv[0]);
 				exit(1);
 			}
 
@@ -85,17 +84,17 @@ void
 testfile()
 {
 	union operand {
-		unsigned long	input;
-		int		op_int;
-		unsigned int	op_u_int;
-		long		op_long;
-		unsigned long	op_u_long;
+		unsigned long input;
+		int	      op_int;
+		unsigned int  op_u_int;
+		long	      op_long;
+		unsigned long op_u_long;
 	} op1, op2, divres, modres, divwant, modwant;
 	char opspec[6];
-	int encoded, i;
+	int  encoded, i;
 
-	while (scanf("%6c %lx %lx %lx %lx\n", opspec, &op1.input,
-	    &op2.input, &divwant.input, &modwant.input) != EOF) {
+	while (scanf("%6c %lx %lx %lx %lx\n", opspec, &op1.input, &op2.input,
+		   &divwant.input, &modwant.input) != EOF) {
 
 		encoded = 0;
 
@@ -110,14 +109,13 @@ testfile()
 				posval = 1;
 				break;
 			default:
-				fprintf(stderr,
-				    "unknown signedness spec %c\n",
+				fprintf(stderr, "unknown signedness spec %c\n",
 				    opspec[i]);
 				exit(1);
 			}
 			encoded |= posval << ((5 - i) * 4);
 		}
-			
+
 		for (i = 1; i < 6; i += 2) {
 			int posval;
 
@@ -139,28 +137,24 @@ testfile()
 		/* KILL ME!!! */
 		switch (encoded) {
 
-#define TRY_IT(a, b, c)							\
-	divres.a = op1.b / op2.c;					\
-	modres.a = op1.b % op2.c;					\
-	if (generate) {							\
-		printf("%6s 0x%016lx 0x%016lx 0x%016lx 0x%016lx\n",	\
-		    opspec, op1.input, op2.input,			\
-		    divres.a, modres.a);				\
-	} else {							\
-		if ((divres.a != divwant.a) ||				\
-		    (modres.a != modwant.a)) {				\
-			fprintf(stderr, "%6s 0x%016lx 0x%016lx\n",	\
-		    	    opspec, op1.input, op2.input);		\
-			fprintf(stderr, "FAILED:\n");			\
-			fprintf(stderr,					\
-			    "div:\twanted 0x%16lx, got 0x%16lx\n",	\
-			    divwant.a, divres.a);			\
-			fprintf(stderr,					\
-			    "mod:\twanted 0x%16lx, got 0x%16lx\n",	\
-			    modwant.a, modres.a);			\
-									\
-			exit(1);					\
-		}							\
+#define TRY_IT(a, b, c)                                                        \
+	divres.a = op1.b / op2.c;                                              \
+	modres.a = op1.b % op2.c;                                              \
+	if (generate) {                                                        \
+		printf("%6s 0x%016lx 0x%016lx 0x%016lx 0x%016lx\n", opspec,    \
+		    op1.input, op2.input, divres.a, modres.a);                 \
+	} else {                                                               \
+		if ((divres.a != divwant.a) || (modres.a != modwant.a)) {      \
+			fprintf(stderr, "%6s 0x%016lx 0x%016lx\n", opspec,     \
+			    op1.input, op2.input);                             \
+			fprintf(stderr, "FAILED:\n");                          \
+			fprintf(stderr, "div:\twanted 0x%16lx, got 0x%16lx\n", \
+			    divwant.a, divres.a);                              \
+			fprintf(stderr, "mod:\twanted 0x%16lx, got 0x%16lx\n", \
+			    modwant.a, modres.a);                              \
+                                                                               \
+			exit(1);                                               \
+		}                                                              \
 	}
 
 #include "cases.c"
@@ -168,8 +162,8 @@ testfile()
 #undef TRY_IT
 
 		default:
-			fprintf(stderr,
-			    "INTERNAL ERROR: unknown encoding %x\n", encoded);
+			fprintf(stderr, "INTERNAL ERROR: unknown encoding %x\n",
+			    encoded);
 			exit(1);
 		}
 	}

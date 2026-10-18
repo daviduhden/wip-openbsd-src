@@ -20,6 +20,7 @@
  */
 
 #include <sys/types.h>
+
 #include <machine/spinlock.h>
 
 /*
@@ -36,8 +37,9 @@ _atomic_lock(volatile _atomic_lock_t *lock)
 	 * a local variable containing the locked state.
 	 */
 	__asm__("amoswap.w %0, %1, (%2)"
-		: "=r" (old)
-		: "r" (_ATOMIC_LOCK_LOCKED), "r"  (lock) : "memory");
+	    : "=r"(old)
+	    : "r"(_ATOMIC_LOCK_LOCKED), "r"(lock)
+	    : "memory");
 
 	return (old != _ATOMIC_LOCK_UNLOCKED);
 }

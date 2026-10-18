@@ -32,23 +32,23 @@
  */
 
 #ifndef _SYS_SELECT_H_
-#define	_SYS_SELECT_H_
+#define _SYS_SELECT_H_
 
 #include <sys/types.h>
 
 #ifndef _TIMEVAL_DECLARED
 #define _TIMEVAL_DECLARED
 struct timeval {
-	time_t		tv_sec;		/* seconds */
-	suseconds_t	tv_usec;	/* and microseconds */
+	time_t	    tv_sec;  /* seconds */
+	suseconds_t tv_usec; /* and microseconds */
 };
 #endif
 
 #ifndef _TIMESPEC_DECLARED
 #define _TIMESPEC_DECLARED
 struct timespec {
-	time_t	tv_sec;		/* seconds */
-	long	tv_nsec;	/* and nanoseconds */
+	time_t tv_sec;	/* seconds */
+	long   tv_nsec; /* and nanoseconds */
 };
 #endif
 
@@ -58,20 +58,20 @@ struct timespec {
  * FD_SETSIZE may be defined by the user, but the default here should
  * be enough for most uses.
  */
-#ifndef	FD_SETSIZE
-#define	FD_SETSIZE	1024
+#ifndef FD_SETSIZE
+#define FD_SETSIZE 1024
 #endif
 
 /*
  * We don't want to pollute the namespace with select(2) internals.
  * Non-underscore versions are exposed later #if __BSD_VISIBLE
  */
-#define	__NBBY	8				/* number of bits in a byte */
+#define __NBBY 8 /* number of bits in a byte */
 typedef uint32_t __fd_mask;
 #define __NFDBITS ((unsigned)(sizeof(__fd_mask) * __NBBY)) /* bits per mask */
-#define	__howmany(x, y)	(((x) + ((y) - 1)) / (y))
+#define __howmany(x, y) (((x) + ((y) - 1)) / (y))
 
-typedef	struct fd_set {
+typedef struct fd_set {
 	__fd_mask fds_bits[__howmany(FD_SETSIZE, __NFDBITS)];
 } fd_set;
 
@@ -80,39 +80,40 @@ __fd_set(int fd, fd_set *p)
 {
 	p->fds_bits[fd / __NFDBITS] |= (1U << (fd % __NFDBITS));
 }
-#define FD_SET(n, p)	__fd_set((n), (p))
+#define FD_SET(n, p) __fd_set((n), (p))
 
 static __inline void
 __fd_clr(int fd, fd_set *p)
 {
 	p->fds_bits[fd / __NFDBITS] &= ~(1U << (fd % __NFDBITS));
 }
-#define FD_CLR(n, p)	__fd_clr((n), (p))
+#define FD_CLR(n, p) __fd_clr((n), (p))
 
 static __inline int
 __fd_isset(int fd, const fd_set *p)
 {
 	return (p->fds_bits[fd / __NFDBITS] & (1U << (fd % __NFDBITS)));
 }
-#define FD_ISSET(n, p)	__fd_isset((n), (p))
+#define FD_ISSET(n, p) __fd_isset((n), (p))
 
 #if __BSD_VISIBLE
-#define	FD_COPY(f, t)	(void)(*(t) = *(f))
+#define FD_COPY(f, t) (void)(*(t) = *(f))
 #endif
-#define	FD_ZERO(p) do {					\
-	fd_set *_p = (p);				\
-	__size_t _n = __howmany(FD_SETSIZE, __NFDBITS);	\
-							\
-	while (_n > 0)					\
-		_p->fds_bits[--_n] = 0;			\
-} while (0)
+#define FD_ZERO(p)                                                             \
+	do {                                                                   \
+		fd_set	*_p = (p);                                             \
+		__size_t _n = __howmany(FD_SETSIZE, __NFDBITS);                \
+                                                                               \
+		while (_n > 0)                                                 \
+			_p->fds_bits[--_n] = 0;                                \
+	} while (0)
 
 #if __BSD_VISIBLE
-#define	NBBY	__NBBY
-#define fd_mask	__fd_mask
-#define NFDBITS	__NFDBITS
+#define NBBY __NBBY
+#define fd_mask __fd_mask
+#define NFDBITS __NFDBITS
 #ifndef howmany
-#define howmany(x, y)	__howmany(x, y)
+#define howmany(x, y) __howmany(x, y)
 #endif
 #endif /* __BSD_VISIBLE */
 
@@ -125,11 +126,10 @@ typedef unsigned int sigset_t;
 #ifndef _SELECT_DEFINED_
 #define _SELECT_DEFINED_
 __BEGIN_DECLS
-int	select(int, fd_set * __restrict, fd_set * __restrict,
-	    fd_set * __restrict, struct timeval * __restrict);
-int	pselect(int, fd_set * __restrict, fd_set * __restrict,
-	    fd_set * __restrict, const struct timespec * __restrict,
-	    const sigset_t * __restrict);
+int select(int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict,
+    struct timeval *__restrict);
+int pselect(int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict,
+    const struct timespec *__restrict, const sigset_t *__restrict);
 __END_DECLS
 #endif
 #endif /* !_KERNEL */

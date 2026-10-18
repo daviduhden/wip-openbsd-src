@@ -1,4 +1,5 @@
-/*	$OpenBSD: test___freadahead.c,v 1.2 2025/06/03 14:35:27 yasuoka Exp $	*/
+/*	$OpenBSD: test___freadahead.c,v 1.2 2025/06/03 14:35:27 yasuoka Exp $
+ */
 
 /*
  * Copyright (c) 2025 YASUOKA Masahiko <yasuoka@yasuoka.net>
@@ -23,18 +24,18 @@
 #include <stdlib.h>
 
 /* we use assert() */
-#undef	NDEBUG
+#undef NDEBUG
 
-#define	TMPFILENAME	"test___freadahead.tmp"
+#define TMPFILENAME "test___freadahead.tmp"
 
 void test___freadahead0(void);
 
 void
 test___freadahead0(void)
 {
-	FILE	*fp;
-	int	 r;
-	size_t	 s;
+	FILE  *fp;
+	int    r;
+	size_t s;
 
 	fp = fopen(TMPFILENAME, "w");
 	assert(fp != NULL);

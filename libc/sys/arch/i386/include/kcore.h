@@ -18,8 +18,8 @@
 #define _MACHINE_KCORE_H_
 
 struct dumpmem {
-        paddr_t start;
-        paddr_t end;
+	paddr_t start;
+	paddr_t end;
 };
 
 #endif /* _MACHINE_KCORE_H_ */

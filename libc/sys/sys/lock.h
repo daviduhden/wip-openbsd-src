@@ -1,6 +1,6 @@
 /*	$OpenBSD: lock.h,v 1.27 2016/06/19 11:54:33 natano Exp $	*/
 
-/* 
+/*
  * Copyright (c) 1995
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -35,21 +35,23 @@
  *	@(#)lock.h	8.12 (Berkeley) 5/19/95
  */
 
-#ifndef	_LOCK_H_
-#define	_LOCK_H_
+#ifndef _LOCK_H_
+#define _LOCK_H_
 
 #include <sys/rwlock.h>
 
-#define LK_EXCLUSIVE	RW_WRITE	/* exclusive lock */
-#define LK_SHARED	RW_READ		/* shared lock */
-#define LK_TYPE_MASK	(RW_WRITE|RW_READ) /* type of lock sought */
-#define LK_NOWAIT	RW_NOSLEEP	/* do not sleep to await lock */
-#define LK_RECURSEFAIL	RW_RECURSEFAIL	/* fail if recursive exclusive lock */
-#define LK_EXCLOTHER	RW_WRITE_OTHER	/* exclusive lock held by some other thread */
-#define LK_RWFLAGS	(RW_WRITE|RW_READ|RW_NOSLEEP|RW_RECURSEFAIL|RW_WRITE_OTHER)
+#define LK_EXCLUSIVE RW_WRITE		  /* exclusive lock */
+#define LK_SHARED RW_READ		  /* shared lock */
+#define LK_TYPE_MASK (RW_WRITE | RW_READ) /* type of lock sought */
+#define LK_NOWAIT RW_NOSLEEP		  /* do not sleep to await lock */
+#define LK_RECURSEFAIL RW_RECURSEFAIL	  /* fail if recursive exclusive lock */
+#define LK_EXCLOTHER                                                           \
+	RW_WRITE_OTHER /* exclusive lock held by some other thread */
+#define LK_RWFLAGS                                                             \
+	(RW_WRITE | RW_READ | RW_NOSLEEP | RW_RECURSEFAIL | RW_WRITE_OTHER)
 
 /* LK_ specific */
-#define LK_DRAIN	0x1000UL	/* wait for all lock activity to end */
-#define LK_RETRY	0x2000UL	/* vn_lock: retry until locked */
+#define LK_DRAIN 0x1000UL /* wait for all lock activity to end */
+#define LK_RETRY 0x2000UL /* vn_lock: retry until locked */
 
 #endif /* !_LOCK_H_ */

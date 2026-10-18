@@ -34,11 +34,11 @@
 #include <rpc/rpc.h>
 /*
  * This file should only contain common data (global data) that is exported
- * by public interfaces 
+ * by public interfaces
  */
-struct opaque_auth _null_auth;
-fd_set svc_fdset;
-int svc_maxfd = -1;
-int svc_max_pollfd;
-struct pollfd *svc_pollfd;
+struct opaque_auth   _null_auth;
+fd_set		     svc_fdset;
+int		     svc_maxfd = -1;
+int		     svc_max_pollfd;
+struct pollfd	    *svc_pollfd;
 struct rpc_createerr rpc_createerr;

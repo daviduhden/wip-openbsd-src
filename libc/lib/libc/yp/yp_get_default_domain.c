@@ -1,4 +1,5 @@
-/*	$OpenBSD: yp_get_default_domain.c,v 1.10 2022/08/02 16:59:30 deraadt Exp $ */
+/*	$OpenBSD: yp_get_default_domain.c,v 1.10 2022/08/02 16:59:30 deraadt Exp
+ * $ */
 /*
  * Copyright (c) 1992, 1993 Theo de Raadt <deraadt@theos.com>
  * All rights reserved.
@@ -26,14 +27,16 @@
  */
 
 #include <sys/types.h>
-#include <unistd.h>
+
 #include <limits.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
-#include "ypinternal.h"
+#include <unistd.h>
+
 #include "thread_private.h"
+#include "ypinternal.h"
 
 _THREAD_PRIVATE_KEY(yp_get_default_domain);
 

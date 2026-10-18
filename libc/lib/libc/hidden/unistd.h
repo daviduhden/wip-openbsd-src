@@ -16,13 +16,13 @@
  */
 
 #ifndef _LIBC_UNISTD_H_
-#define	_LIBC_UNISTD_H_
+#define _LIBC_UNISTD_H_
 
 #include_next <unistd.h>
 
 __BEGIN_HIDDEN_DECLS
 /* shared between getpagesize(), sysconf(), and _csu_finish() */
-extern int	_pagesize;
+extern int _pagesize;
 __END_HIDDEN_DECLS
 
 /* the real syscall behind getcwd(3) and getwd(3) */

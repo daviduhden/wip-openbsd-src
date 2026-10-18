@@ -29,10 +29,10 @@
  */
 
 #include <err.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 __dead void
 verrc(int eval, int code, const char *fmt, va_list ap)

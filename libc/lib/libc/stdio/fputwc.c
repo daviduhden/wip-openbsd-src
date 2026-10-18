@@ -33,14 +33,15 @@
 #include <limits.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "local.h"
+
 #include "fvwrite.h"
+#include "local.h"
 
 wint_t
 __fputwc_unlock(wchar_t wc, FILE *fp)
 {
-	size_t size;
-	char buf[MB_LEN_MAX];
+	size_t	      size;
+	char	      buf[MB_LEN_MAX];
 	struct __suio uio;
 	struct __siov iov;
 

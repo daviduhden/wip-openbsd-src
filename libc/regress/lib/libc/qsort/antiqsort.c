@@ -13,13 +13,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int *val;				/* item values */
-static int ncmp;				/* number of comparisons */
-static int nsolid;				/* number of solid items */
-static int candidate;				/* pivot candidate */
-static int gas;					/* gas value */
+static int *val;       /* item values */
+static int  ncmp;      /* number of comparisons */
+static int  nsolid;    /* number of solid items */
+static int  candidate; /* pivot candidate */
+static int  gas;       /* gas value */
 
-#define freeze(x)	(val[(x)] = nsolid++)
+#define freeze(x) (val[(x)] = nsolid++)
 
 static int
 cmp(const void *px, const void *py)

@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include <stdlib.h>		/* div_t */
+#include <stdlib.h> /* div_t */
 
 div_t
 div(int num, int denom)

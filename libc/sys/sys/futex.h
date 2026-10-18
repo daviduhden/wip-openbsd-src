@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_SYS_FUTEX_H_
-#define	_SYS_FUTEX_H_
+#ifndef _SYS_FUTEX_H_
+#define _SYS_FUTEX_H_
 
 #ifndef _KERNEL
 #include <sys/cdefs.h>
@@ -28,18 +28,18 @@ int futex(volatile uint32_t *, int, int, const struct timespec *,
 __END_DECLS
 #endif /* ! _KERNEL */
 
-#define	FUTEX_OP_MASK		0x007f
+#define FUTEX_OP_MASK 0x007f
 
-#define	FUTEX_WAIT		1
-#define	FUTEX_WAKE		2
-#define	FUTEX_REQUEUE		3
+#define FUTEX_WAIT 1
+#define FUTEX_WAKE 2
+#define FUTEX_REQUEUE 3
 
-#define	FUTEX_FLAG_MASK		0xff80
+#define FUTEX_FLAG_MASK 0xff80
 
-#define	FUTEX_PRIVATE_FLAG	0x0080
+#define FUTEX_PRIVATE_FLAG 0x0080
 
-#define	FUTEX_WAIT_PRIVATE	(FUTEX_WAIT | FUTEX_PRIVATE_FLAG)
-#define	FUTEX_WAKE_PRIVATE	(FUTEX_WAKE | FUTEX_PRIVATE_FLAG)
-#define	FUTEX_REQUEUE_PRIVATE	(FUTEX_REQUEUE | FUTEX_PRIVATE_FLAG)
+#define FUTEX_WAIT_PRIVATE (FUTEX_WAIT | FUTEX_PRIVATE_FLAG)
+#define FUTEX_WAKE_PRIVATE (FUTEX_WAKE | FUTEX_PRIVATE_FLAG)
+#define FUTEX_REQUEUE_PRIVATE (FUTEX_REQUEUE | FUTEX_PRIVATE_FLAG)
 
-#endif	/* _SYS_FUTEX_H_ */
+#endif /* _SYS_FUTEX_H_ */

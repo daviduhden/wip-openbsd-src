@@ -32,8 +32,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_MACHINE_PARAM_H_
-#define	_MACHINE_PARAM_H_
+#ifndef _MACHINE_PARAM_H_
+#define _MACHINE_PARAM_H_
 
 #ifdef _KERNEL
 #ifndef _LOCORE
@@ -41,35 +41,35 @@
 #endif
 #endif
 
-#define	_MACHINE	riscv64
-#define	MACHINE		"riscv64"
-#define	_MACHINE_ARCH	riscv64
-#define	MACHINE_ARCH	"riscv64"
-#define	MID_MACHINE	MID_RISCV64
+#define _MACHINE riscv64
+#define MACHINE "riscv64"
+#define _MACHINE_ARCH riscv64
+#define MACHINE_ARCH "riscv64"
+#define MID_MACHINE MID_RISCV64
 
-#define	PAGE_SHIFT	12
-#define	PAGE_SIZE	(1 << PAGE_SHIFT)
-#define	PAGE_MASK	(PAGE_SIZE - 1)
+#define PAGE_SHIFT 12
+#define PAGE_SIZE (1 << PAGE_SHIFT)
+#define PAGE_MASK (PAGE_SIZE - 1)
 
 #ifdef _KERNEL
 
-#define	NBPG		PAGE_SIZE		/* bytes/page */
-#define	PGSHIFT		PAGE_SHIFT		/* LOG2(PAGE_SIZE) */
-#define	PGOFSET		PAGE_MASK		/* byte offset into page */
+#define NBPG PAGE_SIZE	   /* bytes/page */
+#define PGSHIFT PAGE_SHIFT /* LOG2(PAGE_SIZE) */
+#define PGOFSET PAGE_MASK  /* byte offset into page */
 
-#define	UPAGES		6			/* pages of u-area */
-#define	USPACE		(UPAGES * PAGE_SIZE)	/* total size of u-area */
-#define	USPACE_ALIGN	0			/* u-area alignment 0-none */
+#define UPAGES 6		    /* pages of u-area */
+#define USPACE (UPAGES * PAGE_SIZE) /* total size of u-area */
+#define USPACE_ALIGN 0		    /* u-area alignment 0-none */
 #define __HAVE_USPACE_GUARD
 
-#define	NMBCLUSTERS	(64 * 1024)		/* max cluster allocation */
+#define NMBCLUSTERS (64 * 1024) /* max cluster allocation */
 
-#ifndef	MSGBUFSIZE
-#define	MSGBUFSIZE	(16 * PAGE_SIZE)	/* default message buffer size */
+#ifndef MSGBUFSIZE
+#define MSGBUFSIZE (16 * PAGE_SIZE) /* default message buffer size */
 #endif
 
-#define	STACKALIGNBYTES		(16 - 1)
-#define	STACKALIGN(p)		((u_long)(p) &~ STACKALIGNBYTES)
+#define STACKALIGNBYTES (16 - 1)
+#define STACKALIGN(p) ((u_long)(p) & ~STACKALIGNBYTES)
 
 #define __HAVE_FDT
 

@@ -24,7 +24,7 @@ int fail;
 void
 test(const char *p, long long lb, long long ub, int ok)
 {
-	long long val;
+	long long   val;
 	const char *q;
 
 	val = strtonum(p, lb, ub, &q);
@@ -39,7 +39,8 @@ test(const char *p, long long lb, long long ub, int ok)
 	}
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
 	test("1", 0, 10, 1);
 	test("0", -2, 5, 1);
@@ -61,4 +62,3 @@ int main(int argc, char *argv[])
 
 	return (fail);
 }
-

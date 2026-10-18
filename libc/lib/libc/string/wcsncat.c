@@ -34,8 +34,8 @@
 wchar_t *
 wcsncat(wchar_t *s1, const wchar_t *s2, size_t n)
 {
-	wchar_t *p;
-	wchar_t *q;
+	wchar_t	      *p;
+	wchar_t	      *q;
 	const wchar_t *r;
 
 	p = s1;

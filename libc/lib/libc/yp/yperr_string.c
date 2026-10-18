@@ -26,16 +26,17 @@
  */
 
 #include <sys/types.h>
-#include <stdio.h>
+
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <stdio.h>
 
 char *
 yperr_string(int incode)
 {
-	static char     err[80];
+	static char err[80];
 
 	switch (incode) {
 	case 0:
@@ -67,12 +68,13 @@ yperr_string(int incode)
 	case YPERR_BADDB:
 		return "Server data base is bad";
 	case YPERR_VERS:
-		return "YP server version mismatch - server can't supply service.";
+		return "YP server version mismatch - server can't supply "
+		       "service.";
 	case YPERR_ACCESS:
 		return "Access violation";
 	case YPERR_BUSY:
 		return "Database is busy";
 	}
-	(void) snprintf(err, sizeof(err), "YP unknown error %d\n", incode);
+	(void)snprintf(err, sizeof(err), "YP unknown error %d\n", incode);
 	return err;
 }

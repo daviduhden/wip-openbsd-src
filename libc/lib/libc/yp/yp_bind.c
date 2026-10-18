@@ -28,40 +28,41 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <limits.h>
 #include <paths.h>
-
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "ypinternal.h"
 
-char _yp_domain[HOST_NAME_MAX+1];
-int _yplib_timeout = 10;
+char _yp_domain[HOST_NAME_MAX + 1];
+int  _yplib_timeout = 10;
 
-extern CLIENT *
-clntudp_bufcreate_simple(struct sockaddr_in *raddr, u_long program, u_long version,
-    struct timeval wait, int *sockp, u_int sendsz, u_int recvsz);
+extern CLIENT *clntudp_bufcreate_simple(struct sockaddr_in *raddr,
+    u_long program, u_long version, struct timeval wait, int *sockp,
+    u_int sendsz, u_int recvsz);
 
 int
 _yp_dobind(const char *dom, struct dom_binding **ypdb)
 {
 	struct dom_binding *ypbinding;
-	struct timeval tv;
-	int connected = 1;
-	int s;
+	struct timeval	    tv;
+	int		    connected = 1;
+	int		    s;
 
 	if (dom == NULL || strlen(dom) == 0)
 		return YPERR_BADARGS;
 
-	ypbinding = calloc(1, sizeof (*ypbinding));
+	ypbinding = calloc(1, sizeof(*ypbinding));
 	if (ypbinding == NULL)
 		return YPERR_RESRC;
 
@@ -69,15 +70,16 @@ again:
 	s = ypconnect(SOCK_DGRAM);
 	if (s == -1) {
 		free(ypbinding);
-		return YPERR_YPBIND;	/* YP not running */
+		return YPERR_YPBIND; /* YP not running */
 	}
 	ypbinding->dom_socket = s;
 	ypbinding->dom_server_addr.sin_port = -1; /* don't consult portmap */
 
 	tv.tv_sec = _yplib_timeout / 2;
 	tv.tv_usec = 0;
-	ypbinding->dom_client = clntudp_bufcreate_simple(&ypbinding->dom_server_addr,
-	    YPPROG, YPVERS, tv, &ypbinding->dom_socket, UDPMSGSIZE, UDPMSGSIZE);
+	ypbinding->dom_client =
+	    clntudp_bufcreate_simple(&ypbinding->dom_server_addr, YPPROG,
+		YPVERS, tv, &ypbinding->dom_socket, UDPMSGSIZE, UDPMSGSIZE);
 	if (ypbinding->dom_client == NULL) {
 		close(ypbinding->dom_socket);
 		ypbinding->dom_socket = -1;
@@ -106,7 +108,7 @@ int
 yp_bind(const char *dom)
 {
 	struct dom_binding *ysd;
-	int r;
+	int		    r;
 
 	r = _yp_dobind(dom, &ysd);
 	if (r == 0)

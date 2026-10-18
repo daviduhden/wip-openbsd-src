@@ -1,4 +1,5 @@
-/*	$OpenBSD: _atomic_lock.c,v 1.2 2018/05/17 20:28:32 kettenis Exp $	*/
+/*	$OpenBSD: _atomic_lock.c,v 1.2 2018/05/17 20:28:32 kettenis Exp $
+ */
 
 /*
  * Copyright (c) 2004 Dale Rahn. All rights reserved.
@@ -22,27 +23,28 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ 
+ */
 
 /*
  * Atomic lock for arm
  */
 
 #include <sys/types.h>
+
 #include <machine/spinlock.h>
 
 int
 _atomic_lock(volatile _atomic_lock_t *lock)
 {
 	_atomic_lock_t old = 0;
-	uint32_t scratch = 0;
+	uint32_t       scratch = 0;
 
 	__asm__("1: ldrex %0, [%1]      \n"
 		"   strex %2, %3, [%1]  \n"
 		"   cmp %2, #0          \n"
 		"   bne 1b              \n"
-		: "+r" (old), "+r" (lock), "+r" (scratch)
-		: "r" (_ATOMIC_LOCK_LOCKED));
+	    : "+r"(old), "+r"(lock), "+r"(scratch)
+	    : "r"(_ATOMIC_LOCK_LOCKED));
 
 	return (old != _ATOMIC_LOCK_UNLOCKED);
 }

@@ -25,15 +25,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "gdtoa.h"
 
-#define DEFPREC	6
+#define DEFPREC 6
 
 char *
 gcvt(double value, int ndigit, char *buf)
 {
-	char *digits, *dst, *src;
-	int i, decpt, sign;
+	char	     *digits, *dst, *src;
+	int	      i, decpt, sign;
 	struct lconv *lconv;
 
 	lconv = localeconv();
@@ -106,7 +107,7 @@ gcvt(double value, int ndigit, char *buf)
 		}
 		if (*src != '\0') {
 			if (src == digits)
-				*dst++ = '0';	/* zero before decimal point */
+				*dst++ = '0'; /* zero before decimal point */
 			*dst++ = *lconv->decimal_point;
 			while (decpt < 0) {
 				*dst++ = '0';

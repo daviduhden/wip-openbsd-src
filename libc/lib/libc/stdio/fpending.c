@@ -16,12 +16,13 @@
  */
 
 #include <stdio_ext.h>
+
 #include "local.h"
 
 size_t
 __fpending(FILE *fp)
 {
-	size_t	r = 0;
+	size_t r = 0;
 
 	if ((fp->_flags & __SWR) && fp->_bf._base != NULL)
 		r = fp->_p - fp->_bf._base;

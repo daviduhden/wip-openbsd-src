@@ -11,7 +11,7 @@ fpgetround(void)
 {
 	int x;
 
-	__asm__("cfc1 %0,$31" : "=r" (x));
+	__asm__("cfc1 %0,$31" : "=r"(x));
 	return x & 0x03;
 }
 DEF_WEAK(fpgetround);

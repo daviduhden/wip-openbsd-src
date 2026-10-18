@@ -51,36 +51,36 @@
 #include <sys/types.h>
 
 struct ipc_perm {
-	uid_t		cuid;	/* creator user id */
-	gid_t		cgid;	/* creator group id */
-	uid_t		uid;	/* user id */
-	gid_t		gid;	/* group id */
-	mode_t		mode;	/* r/w permission */
-	unsigned short	seq;	/* sequence # (to generate unique msg/sem/shm id) */
-	key_t		key;	/* user specified msg/sem/shm key */
+	uid_t	       cuid; /* creator user id */
+	gid_t	       cgid; /* creator group id */
+	uid_t	       uid;  /* user id */
+	gid_t	       gid;  /* group id */
+	mode_t	       mode; /* r/w permission */
+	unsigned short seq; /* sequence # (to generate unique msg/sem/shm id) */
+	key_t	       key; /* user specified msg/sem/shm key */
 };
 
 /* common mode bits */
-#define	IPC_R		000400	/* read permission */
-#define	IPC_W		000200	/* write/alter permission */
-#define	IPC_M		010000	/* permission to change control info */
+#define IPC_R 000400 /* read permission */
+#define IPC_W 000200 /* write/alter permission */
+#define IPC_M 010000 /* permission to change control info */
 
 /* SVID required constants (same values as system 5) */
-#define	IPC_CREAT	001000	/* create entry if key does not exist */
-#define	IPC_EXCL	002000	/* fail if key exists */
-#define	IPC_NOWAIT	004000	/* error if request must wait */
+#define IPC_CREAT 001000  /* create entry if key does not exist */
+#define IPC_EXCL 002000	  /* fail if key exists */
+#define IPC_NOWAIT 004000 /* error if request must wait */
 
-#define	IPC_PRIVATE	(key_t)0 /* private key */
+#define IPC_PRIVATE (key_t)0 /* private key */
 
-#define	IPC_RMID	0	/* remove identifier */
-#define	IPC_SET		1	/* set options */
-#define	IPC_STAT	2	/* get options */
+#define IPC_RMID 0 /* remove identifier */
+#define IPC_SET 1  /* set options */
+#define IPC_STAT 2 /* get options */
 
 #ifdef _KERNEL
 /* Macros to convert between ipc ids and array indices or sequence ids */
-#define	IPCID_TO_IX(id)		((id) & 0xffff)
-#define	IPCID_TO_SEQ(id)	(((id) >> 16) & 0xffff)
-#define	IXSEQ_TO_IPCID(ix,perm)	(((perm.seq) << 16) | (ix & 0xffff))
+#define IPCID_TO_IX(id) ((id) & 0xffff)
+#define IPCID_TO_SEQ(id) (((id) >> 16) & 0xffff)
+#define IXSEQ_TO_IPCID(ix, perm) (((perm.seq) << 16) | (ix & 0xffff))
 
 struct ucred;
 
@@ -89,7 +89,7 @@ int ipcperm(struct ucred *, struct ipc_perm *, int);
 #else /* !_KERNEL */
 
 __BEGIN_DECLS
-key_t	ftok(const char *, int);
+key_t ftok(const char *, int);
 __END_DECLS
 #endif
 #endif /* !_SYS_IPC_H_ */

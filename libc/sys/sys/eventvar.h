@@ -35,8 +35,8 @@
 #include <sys/refcnt.h>
 #include <sys/task.h>
 
-#define KQ_NEVENTS	8		/* minimize copy{in,out} calls */
-#define KQEXTENT	256		/* linear growth by this amount */
+#define KQ_NEVENTS 8 /* minimize copy{in,out} calls */
+#define KQEXTENT 256 /* linear growth by this amount */
 
 /*
  * Locking:
@@ -46,29 +46,29 @@
  *	q	kq_lock
  */
 struct kqueue {
-	struct		mutex kq_lock;		/* lock for queue access */
-	TAILQ_HEAD(, knote) kq_head;		/* [q] list of pending event */
-	int		kq_count;		/* [q] # of pending events */
-	struct		refcnt kq_refcnt;	/* [a] # of references */
-	struct		klist kq_klist;		/* [L] knotes of other kqs */
-	struct		filedesc *kq_fdp;	/* [I] fd table of this kq */
+	struct mutex kq_lock;	     /* lock for queue access */
+	TAILQ_HEAD(, knote) kq_head; /* [q] list of pending event */
+	int		 kq_count;   /* [q] # of pending events */
+	struct refcnt	 kq_refcnt;  /* [a] # of references */
+	struct klist	 kq_klist;   /* [L] knotes of other kqs */
+	struct filedesc *kq_fdp;     /* [I] fd table of this kq */
 
 	LIST_ENTRY(kqueue) kq_next;
 
-	u_int		kq_nknotes;		/* [q] # of registered knotes */
+	u_int kq_nknotes; /* [q] # of registered knotes */
 
-	int		kq_knlistsize;		/* [q] size of kq_knlist */
-	struct		knlist *kq_knlist;	/* [q] list of
-						 *     attached knotes */
-	u_long		kq_knhashmask;		/* [q] size of kq_knhash */
-	struct		knlist *kq_knhash;	/* [q] hash table for
-						 *     attached knotes */
-	struct		task kq_task;		/* deferring of activation */
+	int	       kq_knlistsize; /* [q] size of kq_knlist */
+	struct knlist *kq_knlist;     /* [q] list of
+				       *     attached knotes */
+	u_long	       kq_knhashmask; /* [q] size of kq_knhash */
+	struct knlist *kq_knhash;     /* [q] hash table for
+				       *     attached knotes */
+	struct task kq_task;	      /* deferring of activation */
 
-	int		kq_state;		/* [q] */
-#define KQ_SLEEP	0x02
-#define KQ_DYING	0x04
-#define KQ_TASK		0x08
+	int kq_state; /* [q] */
+#define KQ_SLEEP 0x02
+#define KQ_DYING 0x04
+#define KQ_TASK 0x08
 };
 
 #endif /* !_SYS_EVENTVAR_H_ */

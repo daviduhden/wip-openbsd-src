@@ -493,7 +493,8 @@ main(int argc, char **argv)
 	/*
 	 * Filesystem view of the controller. Executed modules start afresh
 	 * because no execpromises are installed, and sandbox themselves.
-	 * The controller must keep module executables and its own files visible:
+	 * The controller must keep module executables and its own files
+	 * visible:
 	 *
 	 *   FVWMLIBDIR          module binaries and fvwm_exec
 	 *   /etc/X11/fvwm       system configuration
@@ -560,8 +561,9 @@ main(int argc, char **argv)
 		if (unveil(nullptr, nullptr) == -1)
 			err(1, "unveil");
 
-		/* Modules, fallback commands and Restart execute later. Keep the
-		 * controller unpledged and preserve its locked unveil view. */
+		/* Modules, fallback commands and Restart execute later. Keep
+		 * the controller unpledged and preserve its locked unveil view.
+		 */
 	}
 
 	HandleEvents();

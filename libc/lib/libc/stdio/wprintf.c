@@ -31,14 +31,14 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <wchar.h>
 
 int
-wprintf(const wchar_t * __restrict fmt, ...)
+wprintf(const wchar_t *__restrict fmt, ...)
 {
-	int ret;
+	int	ret;
 	va_list ap;
 
 	va_start(ap, fmt);

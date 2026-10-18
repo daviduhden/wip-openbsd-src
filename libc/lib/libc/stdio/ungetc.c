@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "local.h"
 
 static int __submore(FILE *);
@@ -46,7 +47,7 @@ static int __submore(FILE *);
 static int
 __submore(FILE *fp)
 {
-	int i;
+	int	       i;
 	unsigned char *p;
 
 	if (_UB(fp)._base == fp->_ubuf) {
@@ -90,7 +91,8 @@ ungetc(int c, FILE *fp)
 		 * Otherwise, flush any current write stuff.
 		 */
 		if ((fp->_flags & __SRW) == 0) {
-error:			FUNLOCKFILE(fp);
+		error:
+			FUNLOCKFILE(fp);
 			return (EOF);
 		}
 		if (fp->_flags & __SWR) {
@@ -112,7 +114,8 @@ error:			FUNLOCKFILE(fp);
 		if (fp->_r >= _UB(fp)._size && __submore(fp))
 			goto error;
 		*--fp->_p = c;
-inc_ret:	fp->_r++;
+	inc_ret:
+		fp->_r++;
 		FUNLOCKFILE(fp);
 		return (c);
 	}

@@ -34,9 +34,9 @@
 void *
 valloc(size_t i)
 {
-	long valsiz = getpagesize(), j;
-	void *cp = malloc(i + (valsiz-1));
+	long  valsiz = getpagesize(), j;
+	void *cp = malloc(i + (valsiz - 1));
 
-	j = ((long)cp + (valsiz-1)) &~ (valsiz-1);
+	j = ((long)cp + (valsiz - 1)) & ~(valsiz - 1);
 	return ((void *)j);
 }

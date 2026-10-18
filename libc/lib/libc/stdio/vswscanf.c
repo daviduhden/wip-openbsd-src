@@ -38,9 +38,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+
 #include "local.h"
 
-static int	eofread(void *, char *, int);
+static int eofread(void *, char *, int);
 
 static int
 eofread(void *cookie, char *buf, int len)
@@ -49,14 +50,14 @@ eofread(void *cookie, char *buf, int len)
 }
 
 int
-vswscanf(const wchar_t * __restrict str, const wchar_t * __restrict fmt,
-    __va_list ap)
+vswscanf(
+    const wchar_t *__restrict str, const wchar_t *__restrict fmt, __va_list ap)
 {
-	mbstate_t mbs;
-	FILE f = FILEINIT(__SRD);
-	char *mbstr;
-	size_t len, mlen;
-	int r;
+	mbstate_t      mbs;
+	FILE	       f = FILEINIT(__SRD);
+	char	      *mbstr;
+	size_t	       len, mlen;
+	int	       r;
 	const wchar_t *strp;
 
 	/*

@@ -5,14 +5,9 @@
  */
 
 #include <locale.h>
+
 #include "localedef.h"
 
-const _MessagesLocale _DefaultMessagesLocale =
-{
-	"^[Yy]",
-	"^[Nn]",
-	"yes",
-	"no"
-} ;
+const _MessagesLocale _DefaultMessagesLocale = {"^[Yy]", "^[Nn]", "yes", "no"};
 
 const _MessagesLocale *_CurrentMessagesLocale = &_DefaultMessagesLocale;

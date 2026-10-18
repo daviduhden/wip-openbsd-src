@@ -32,13 +32,13 @@
  * SUCH DAMAGE.
  */
 
+#include <db.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include <db.h>
 #include "btree.h"
 
 static int bt_meta(BTREE *);
@@ -56,7 +56,7 @@ int
 __bt_close(DB *dbp)
 {
 	BTREE *t;
-	int fd;
+	int    fd;
 
 	t = dbp->internal;
 
@@ -110,7 +110,7 @@ int
 __bt_sync(const DB *dbp, u_int flags)
 {
 	BTREE *t;
-	int status;
+	int    status;
 
 	t = dbp->internal;
 
@@ -151,7 +151,7 @@ static int
 bt_meta(BTREE *t)
 {
 	BTMETA m;
-	void *p;
+	void  *p;
 
 	if ((p = mpool_get(t->bt_mp, P_META, 0)) == NULL)
 		return (RET_ERROR);

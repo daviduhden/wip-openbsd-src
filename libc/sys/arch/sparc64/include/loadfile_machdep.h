@@ -1,4 +1,5 @@
-/*	$OpenBSD: loadfile_machdep.h,v 1.3 2013/10/17 11:54:02 miod Exp $	*/
+/*	$OpenBSD: loadfile_machdep.h,v 1.3 2013/10/17 11:54:02 miod Exp $
+ */
 /*	$NetBSD: loadfile_machdep.h,v 1.3 2000/08/16 08:16:58 mrg Exp $	 */
 
 /*-
@@ -37,29 +38,28 @@
 #define ELFSIZE 32
 #endif
 
-#define LOAD_KERNEL	LOAD_ALL
-#define COUNT_KERNEL	COUNT_ALL
+#define LOAD_KERNEL LOAD_ALL
+#define COUNT_KERNEL COUNT_ALL
 
 #ifdef _STANDALONE
-#define LOADADDR(a)		(((u_long)(a) & 0x0fffffff) + offset)
-#define ALIGNENTRY(a)		((u_long)(a))
-#define READ(f, b, c)		read((f), (void *)LOADADDR(b), (c))
-#define BCOPY(s, d, c)		memcpy((void *)LOADADDR(d), (void *)(s), (c))
-#define BZERO(d, c)		memset((void *)LOADADDR(d), 0, (c))
-#define	WARN(a)			(void)(printf a, \
-				    printf((errno ? ": %s\n" : "\n"), \
-				    strerror(errno)))
-#define PROGRESS(a)		(void) printf a
-#define ALLOC(a)		alloc(a)
-#define FREE(a, b)		free(a, b)
+#define LOADADDR(a) (((u_long)(a) & 0x0fffffff) + offset)
+#define ALIGNENTRY(a) ((u_long)(a))
+#define READ(f, b, c) read((f), (void *)LOADADDR(b), (c))
+#define BCOPY(s, d, c) memcpy((void *)LOADADDR(d), (void *)(s), (c))
+#define BZERO(d, c) memset((void *)LOADADDR(d), 0, (c))
+#define WARN(a)                                                                \
+	(void)(printf a, printf((errno ? ": %s\n" : "\n"), strerror(errno)))
+#define PROGRESS(a) (void)printf a
+#define ALLOC(a) alloc(a)
+#define FREE(a, b) free(a, b)
 #else
-#define LOADADDR(a)		(((u_long)(a)) + offset)
-#define ALIGNENTRY(a)		((u_long)(a))
-#define READ(f, b, c)		read((f), (void *)LOADADDR(b), (c))
-#define BCOPY(s, d, c)		memcpy((void *)LOADADDR(d), (void *)(s), (c))
-#define BZERO(d, c)		memset((void *)LOADADDR(d), 0, (c))
-#define WARN(a)			warn a
-#define PROGRESS(a)		/* nothing */
-#define ALLOC(a)		malloc(a)
-#define FREE(a, b)		free(a)
+#define LOADADDR(a) (((u_long)(a)) + offset)
+#define ALIGNENTRY(a) ((u_long)(a))
+#define READ(f, b, c) read((f), (void *)LOADADDR(b), (c))
+#define BCOPY(s, d, c) memcpy((void *)LOADADDR(d), (void *)(s), (c))
+#define BZERO(d, c) memset((void *)LOADADDR(d), 0, (c))
+#define WARN(a) warn a
+#define PROGRESS(a) /* nothing */
+#define ALLOC(a) malloc(a)
+#define FREE(a, b) free(a)
 #endif

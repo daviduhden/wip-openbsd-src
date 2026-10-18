@@ -34,25 +34,25 @@
  */
 #include <sys/types.h>
 #include <sys/limits.h>
-#include <string.h>
-#include <unistd.h>
+
+#include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <grp.h>
 #include <pwd.h>
-#include <errno.h>
-
 #include <rpc/rpc.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #ifdef YP
-#define _PATH_NETID	"/etc/netid"
-#define MAXLINELENGTH	1024
+#define _PATH_NETID "/etc/netid"
+#define MAXLINELENGTH 1024
 
-static int _parse_netid(char*, uid_t, gid_t*, int*, int);
-static int _read_netid(const char *, uid_t, gid_t*, int*, int);
+static int _parse_netid(char *, uid_t, gid_t *, int *, int);
+static int _read_netid(const char *, uid_t, gid_t *, int *, int);
 
 /*
  * Parse one string of the form "uid:gid[,gid[,...]]".
@@ -60,14 +60,13 @@ static int _read_netid(const char *, uid_t, gid_t*, int*, int);
  * If the uid does not match, return 0.
  */
 static int
-_parse_netid(char *netid, uid_t uid, gid_t *groups, int *ngroups,
-	     int maxgroups)
+_parse_netid(char *netid, uid_t uid, gid_t *groups, int *ngroups, int maxgroups)
 {
 	const char *errstr = NULL;
-	char *start, *p;
-	uid_t tuid;
-	gid_t gid;
-	int i;
+	char	   *start, *p;
+	uid_t	    tuid;
+	gid_t	    gid;
+	int	    i;
 
 	/* Check the uid. */
 	p = strchr(netid, ':');
@@ -78,7 +77,7 @@ _parse_netid(char *netid, uid_t uid, gid_t *groups, int *ngroups,
 	if (errstr || tuid != uid)
 		return (0);
 
-        /* Loop over the gids. */
+	/* Loop over the gids. */
 	while (p && *p) {
 		start = p;
 		p = strchr(start, ',');
@@ -109,14 +108,14 @@ _parse_netid(char *netid, uid_t uid, gid_t *groups, int *ngroups,
  * See _parse_netid for details, including return values.
  */
 static int
-_read_netid(const char *key, uid_t uid, gid_t *groups, int *ngroups,
-	    int maxgroups)
+_read_netid(
+    const char *key, uid_t uid, gid_t *groups, int *ngroups, int maxgroups)
 {
 	FILE *fp;
-	char line[MAXLINELENGTH], *p;
-	int found = 0, fd;
+	char  line[MAXLINELENGTH], *p;
+	int   found = 0, fd;
 
-	fd = __pledge_open(_PATH_NETID, O_RDONLY|O_CLOEXEC);
+	fd = __pledge_open(_PATH_NETID, O_RDONLY | O_CLOEXEC);
 	if (fd == -1)
 		return (0);
 	fp = fdopen(fd, "r");
@@ -150,11 +149,11 @@ _read_netid(const char *key, uid_t uid, gid_t *groups, int *ngroups,
 int
 getgrouplist(const char *uname, gid_t agroup, gid_t *groups, int *grpcnt)
 {
-	int i, ngroups = 0, maxgroups = *grpcnt, bail;
-	int needyp = 0, foundyp = 0;
-	int *skipyp = &foundyp;
+	int		     i, ngroups = 0, maxgroups = *grpcnt, bail;
+	int		     needyp = 0, foundyp = 0;
+	int		    *skipyp = &foundyp;
 	extern struct group *_getgrent_yp(int *);
-	struct group *grp;
+	struct group	    *grp;
 
 	/*
 	 * install primary group
@@ -179,8 +178,8 @@ getgrouplist(const char *uname, gid_t agroup, gid_t *groups, int *grpcnt)
 		}
 		if (grp->gr_gid == agroup)
 			continue;
-		for (bail = 0, i = 0; bail == 0 && i < maxgroups &&
-		    i < ngroups; i++) {
+		for (bail = 0, i = 0; bail == 0 && i < maxgroups && i < ngroups;
+		    i++) {
 			if (groups[i] == grp->gr_gid)
 				bail = 1;
 		}
@@ -202,10 +201,10 @@ getgrouplist(const char *uname, gid_t agroup, gid_t *groups, int *grpcnt)
 	 * If we were told that there is a YP marker, look at netid data.
 	 */
 	if (skipyp && needyp) {
-		char buf[MAXLINELENGTH], *ypdata = NULL, *key;
-		static char *__ypdomain;
+		char	      buf[MAXLINELENGTH], *ypdata = NULL, *key;
+		static char  *__ypdomain;
 		struct passwd pwstore;
-		int ypdatalen;
+		int	      ypdatalen;
 
 		/* Construct the netid key to look up. */
 		if (getpwnam_r(uname, &pwstore, buf, sizeof buf, NULL) ||
@@ -216,15 +215,15 @@ getgrouplist(const char *uname, gid_t agroup, gid_t *groups, int *grpcnt)
 			goto out;
 
 		/* First scan the static netid file. */
-		if (_read_netid(key, pwstore.pw_uid, groups, &ngroups,
-		    maxgroups)) {
+		if (_read_netid(
+			key, pwstore.pw_uid, groups, &ngroups, maxgroups)) {
 			free(key);
 			goto out;
 		}
 
 		/* Only access YP when there is no static entry. */
-		if (!yp_match(__ypdomain, "netid.byname", key,
-		    (int)strlen(key), &ypdata, &ypdatalen))
+		if (!yp_match(__ypdomain, "netid.byname", key, (int)strlen(key),
+			&ypdata, &ypdatalen))
 			_parse_netid(ypdata, pwstore.pw_uid, groups, &ngroups,
 			    maxgroups);
 

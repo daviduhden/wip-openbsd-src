@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_TIME_H_
-#define	_LIBC_TIME_H_
+#define _LIBC_TIME_H_
 
 #include_next <time.h>
 

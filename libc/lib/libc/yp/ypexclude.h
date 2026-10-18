@@ -32,12 +32,12 @@
  */
 
 struct _ypexclude {
-	const char *name;
+	const char	  *name;
 	struct _ypexclude *next;
 };
 
 __BEGIN_HIDDEN_DECLS
-int __ypexclude_add(struct _ypexclude **, const char *);
-int __ypexclude_is(struct _ypexclude **, const char *);
+int  __ypexclude_add(struct _ypexclude **, const char *);
+int  __ypexclude_is(struct _ypexclude **, const char *);
 void __ypexclude_free(struct _ypexclude **);
 __END_HIDDEN_DECLS

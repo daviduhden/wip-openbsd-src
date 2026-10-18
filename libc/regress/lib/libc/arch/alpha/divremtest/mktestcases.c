@@ -37,30 +37,27 @@
 int
 main()
 {
-	int i, j;
+	int	      i, j;
 	unsigned long n1, n2;
 
 	srandom(time(NULL));
 
 	for (i = 1; /* i < 10240 */ 1; i++) {
-		n1 = (unsigned)
-		    (random() & ((random() & random()) | 0x80000000));
+		n1 =
+		    (unsigned)(random() & ((random() & random()) | 0x80000000));
 		n1 <<= 32;
 		n1 |= (unsigned)(random() & random() & random());
 
-		n2 = (unsigned)
-		    (random() & ((random() & random()) | 0x80000000));
+		n2 =
+		    (unsigned)(random() & ((random() & random()) | 0x80000000));
 		n2 <<= 32;
 		n2 |= (unsigned)(random() & random() & random());
 
 		for (j = 0; j < 64; j++) {
-			char *tab[] = { ".i", ".l", "-i", "-l" };
+			char *tab[] = {".i", ".l", "-i", "-l"};
 
-			printf("%s%s%s 0x%lx 0x%lx 0 0\n",
-			    tab[(j >> 4) & 0x3],
-			    tab[(j >> 2) & 0x3],
-			    tab[(j >> 0) & 0x3],
-			    n1, n2);
+			printf("%s%s%s 0x%lx 0x%lx 0 0\n", tab[(j >> 4) & 0x3],
+			    tab[(j >> 2) & 0x3], tab[(j >> 0) & 0x3], n1, n2);
 		}
 	}
 

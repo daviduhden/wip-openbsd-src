@@ -31,14 +31,14 @@
 #ifndef _ARM_EXEC_H_
 #define _ARM_EXEC_H_
 
-#define __LDPGSZ	4096
+#define __LDPGSZ 4096
 
-#define ARCH_ELFSIZE		32
+#define ARCH_ELFSIZE 32
 
-#define ELF_TARG_CLASS		ELFCLASS32
-#define ELF_TARG_DATA		ELFDATA2LSB
-#define ELF_TARG_MACH		EM_ARM 
+#define ELF_TARG_CLASS ELFCLASS32
+#define ELF_TARG_DATA ELFDATA2LSB
+#define ELF_TARG_MACH EM_ARM
 
-#define PT_ARM_EXIDX	0x70000001
+#define PT_ARM_EXIDX 0x70000001
 
-#endif  /* _ARM_EXEC_H_ */
+#endif /* _ARM_EXEC_H_ */

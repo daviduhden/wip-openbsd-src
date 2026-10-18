@@ -25,9 +25,9 @@
 #include <wchar.h>
 
 /* we use assert() */
-#undef	NDEBUG
+#undef NDEBUG
 
-#define	TMPFILENAME	"test_fflush.tmp"
+#define TMPFILENAME "test_fflush.tmp"
 
 void setup(void);
 
@@ -43,7 +43,7 @@ void test_fflush_read6(void);
 void
 setup(void)
 {
-	FILE	*fp;
+	FILE *fp;
 
 	/* common setup */
 	unlink(TMPFILENAME);
@@ -57,9 +57,9 @@ setup(void)
 void
 test_fflush_read0(void)
 {
-	int	 r;
-	char	 buf[80];
-	FILE	*fp;
+	int   r;
+	char  buf[80];
+	FILE *fp;
 
 	setup();
 
@@ -84,9 +84,9 @@ test_fflush_read0(void)
 void
 test_fflush_read1(void)
 {
-	int	 r;
-	char	 buf[80];
-	FILE	*fp;
+	int   r;
+	char  buf[80];
+	FILE *fp;
 
 	setup();
 
@@ -143,9 +143,9 @@ test_fflush_read1(void)
 void
 test_fflush_read2(void)
 {
-	int	 r;
-	FILE	*fp;
-	char	 buf[80];
+	int   r;
+	FILE *fp;
+	char  buf[80];
 
 	/* In POSIX-2008, fflush() must work with the file object for reading */
 	fp = popen("echo Hello world", "r");
@@ -170,8 +170,8 @@ test_fflush_read2(void)
 void
 test_fflush_read3(void)
 {
-	int	 r;
-	FILE	*fp;
+	int   r;
+	FILE *fp;
 
 	setup();
 
@@ -188,10 +188,10 @@ test_fflush_read3(void)
 void
 test_fflush_read4(void)
 {
-	int	 r;
-	FILE	*fp;
-	off_t	 pos;
-	char	 buf[80];
+	int   r;
+	FILE *fp;
+	off_t pos;
+	char  buf[80];
 
 	setup();
 
@@ -199,11 +199,11 @@ test_fflush_read4(void)
 	fp = fopen(TMPFILENAME, "r");
 	assert(fp != NULL);
 
-	assert(fgetc(fp) == 'H');	/* read 1 */
+	assert(fgetc(fp) == 'H'); /* read 1 */
 
 	pos = lseek(fileno(fp), 0, SEEK_CUR);
 	assert(pos >= 1);
-	assert(pos > 1);	/* this test assume the buffer is used */
+	assert(pos > 1); /* this test assume the buffer is used */
 
 	/* freopen() should call fflush() internal */
 	fp = freopen(TMPFILENAME, "r", fp);
@@ -220,7 +220,7 @@ test_fflush_read4(void)
 void
 setupw(void)
 {
-	FILE	*fp;
+	FILE *fp;
 
 	/* common setup */
 	unlink(TMPFILENAME);
@@ -235,20 +235,20 @@ setupw(void)
 void
 test_fflush_read5(void)
 {
-	int	 r;
-	wchar_t	 buf[80];
-	FILE	*fp;
+	int	r;
+	wchar_t buf[80];
+	FILE   *fp;
 
 	setupw();
 
 	fp = fopen(TMPFILENAME, "r");
 
 	assert(fp != NULL);
-	assert(fgetwc(fp) == L'\u3053');	/* Ko */
-	assert(fgetwc(fp) == L'\u3093');	/* N  */
-	assert(fgetwc(fp) == L'\u306b');	/* Ni */
-	assert(fgetwc(fp) == L'\u3061');	/* Ti */
-	assert(fgetwc(fp) == L'\u308f');	/* Wa */
+	assert(fgetwc(fp) == L'\u3053'); /* Ko */
+	assert(fgetwc(fp) == L'\u3093'); /* N  */
+	assert(fgetwc(fp) == L'\u306b'); /* Ni */
+	assert(fgetwc(fp) == L'\u3061'); /* Ti */
+	assert(fgetwc(fp) == L'\u308f'); /* Wa */
 
 	/* push 263A(smile) back */
 	assert(ungetwc(L'\u263a', fp));
@@ -267,11 +267,11 @@ test_fflush_read5(void)
 	fp = fopen(TMPFILENAME, "r");
 
 	assert(fp != NULL);
-	assert(fgetwc(fp) == L'\u3053');	/* Ko */
-	assert(fgetwc(fp) == L'\u3093');	/* N  */
-	assert(fgetwc(fp) == L'\u306b');	/* Ni */
-	assert(fgetwc(fp) == L'\u3061');	/* Ti */
-	assert(fgetwc(fp) == L'\u308f');	/* Wa */
+	assert(fgetwc(fp) == L'\u3053'); /* Ko */
+	assert(fgetwc(fp) == L'\u3093'); /* N  */
+	assert(fgetwc(fp) == L'\u306b'); /* Ni */
+	assert(fgetwc(fp) == L'\u3061'); /* Ti */
+	assert(fgetwc(fp) == L'\u308f'); /* Wa */
 
 	/* push 263A(smile) back */
 	assert(ungetwc(L'\u263a', fp));
@@ -295,8 +295,8 @@ test_fflush_read5(void)
 void
 test_fflush_read6(void)
 {
-	int	 r, c;
-	FILE	*fp;
+	int   r, c;
+	FILE *fp;
 
 	setup();
 	fp = fopen(TMPFILENAME, "r");
@@ -304,14 +304,14 @@ test_fflush_read6(void)
 
 	/*
 	 * https://pubs.opengroup.org/onlinepubs/9699919799/functions/fflush.html
-	 * .. any characters pushed back onto the stream by ungetc() or ungetwc()
-	 * that have not subsequently been read from the stream shall be discarded
-	 * (without further changing the file offset).
+	 * .. any characters pushed back onto the stream by ungetc() or
+	 * ungetwc() that have not subsequently been read from the stream shall
+	 * be discarded (without further changing the file offset).
 	 */
 
 	assert(fgetc(fp) == 'H');
 	c = getc(fp);
-	ungetc(c, fp);	/* push back the character has been read */
+	ungetc(c, fp); /* push back the character has been read */
 	r = fflush(fp);
 	assert(r == 0);
 	assert(getc(fp) == c);

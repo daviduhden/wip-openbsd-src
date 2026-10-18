@@ -45,7 +45,7 @@ LIST_HEAD(sigiolst, sigio);
  *	S	sigio_lock
  */
 struct sigio_ref {
-	struct sigio	*sir_sigio;	/* [S] associated sigio struct */
+	struct sigio *sir_sigio; /* [S] associated sigio struct */
 };
 
 #ifdef _KERNEL
@@ -63,20 +63,20 @@ struct sigio_ref {
  */
 struct sigio {
 	union {
-		struct	process *siu_proc;
-					/* [I] process to receive
-					 *     SIGIO/SIGURG */
-		struct	pgrp *siu_pgrp; /* [I] process group to receive ... */
+		struct process *siu_proc;
+		/* [I] process to receive
+		 *     SIGIO/SIGURG */
+		struct pgrp *siu_pgrp; /* [I] process group to receive ... */
 	} sio_u;
-	LIST_ENTRY(sigio) sio_pgsigio;	/* [S] sigio's for process or group */
-	struct	sigio_ref *sio_myref;	/* [I] location of the pointer that
-					 *     holds the reference to
-					 *     this structure */
-	struct	ucred *sio_ucred;	/* [I] current credentials */
-	pid_t	sio_pgid;		/* [I] pgid for signals */
+	LIST_ENTRY(sigio) sio_pgsigio; /* [S] sigio's for process or group */
+	struct sigio_ref *sio_myref;   /* [I] location of the pointer that
+					*     holds the reference to
+					*     this structure */
+	struct ucred *sio_ucred;       /* [I] current credentials */
+	pid_t	      sio_pgid;	       /* [I] pgid for signals */
 };
-#define	sio_proc	sio_u.siu_proc
-#define	sio_pgrp	sio_u.siu_pgrp
+#define sio_proc sio_u.siu_proc
+#define sio_pgrp sio_u.siu_pgrp
 
 static inline void
 sigio_init(struct sigio_ref *sir)
@@ -84,11 +84,11 @@ sigio_init(struct sigio_ref *sir)
 	sir->sir_sigio = NULL;
 }
 
-void	sigio_copy(struct sigio_ref *, struct sigio_ref *);
-void	sigio_free(struct sigio_ref *);
-void	sigio_freelist(struct sigiolst *);
-void	sigio_getown(struct sigio_ref *, u_long, caddr_t);
-int	sigio_setown(struct sigio_ref *, u_long, caddr_t);
+void sigio_copy(struct sigio_ref *, struct sigio_ref *);
+void sigio_free(struct sigio_ref *);
+void sigio_freelist(struct sigiolst *);
+void sigio_getown(struct sigio_ref *, u_long, caddr_t);
+int  sigio_setown(struct sigio_ref *, u_long, caddr_t);
 
 #endif /* _KERNEL */
 

@@ -29,8 +29,8 @@
  */
 
 #include <sys/types.h>
-#include <sys/uio.h>
 #include <sys/mman.h>
+#include <sys/uio.h>
 
 #include <errno.h>
 #include <limits.h>
@@ -45,9 +45,9 @@ int
 execl(const char *name, const char *arg, ...)
 {
 	va_list ap;
-	char **argv;
-	size_t maplen;
-	int save_errno, n, error;
+	char  **argv;
+	size_t	maplen;
+	int	save_errno, n, error;
 
 	va_start(ap, arg);
 	n = 1;
@@ -56,8 +56,8 @@ execl(const char *name, const char *arg, ...)
 	va_end(ap);
 
 	maplen = (n + 1) * sizeof(*argv);
-	argv = mmap(NULL, maplen, PROT_WRITE|PROT_READ,
-	    MAP_ANON|MAP_PRIVATE, -1, 0);
+	argv = mmap(NULL, maplen, PROT_WRITE | PROT_READ,
+	    MAP_ANON | MAP_PRIVATE, -1, 0);
 	if (argv == MAP_FAILED)
 		return (-1);
 
@@ -80,9 +80,9 @@ int
 execle(const char *name, const char *arg, ...)
 {
 	va_list ap;
-	char **argv, **envp;
-	size_t maplen;
-	int save_errno, n, error;
+	char  **argv, **envp;
+	size_t	maplen;
+	int	save_errno, n, error;
 
 	va_start(ap, arg);
 	n = 1;
@@ -91,8 +91,8 @@ execle(const char *name, const char *arg, ...)
 	va_end(ap);
 
 	maplen = (n + 1) * sizeof(*argv);
-	argv = mmap(NULL, maplen, PROT_WRITE|PROT_READ,
-	    MAP_ANON|MAP_PRIVATE, -1, 0);
+	argv = mmap(NULL, maplen, PROT_WRITE | PROT_READ,
+	    MAP_ANON | MAP_PRIVATE, -1, 0);
 	if (argv == MAP_FAILED)
 		return (-1);
 
@@ -115,9 +115,9 @@ int
 execlp(const char *name, const char *arg, ...)
 {
 	va_list ap;
-	char **argv;
-	size_t maplen;
-	int save_errno, n, error;
+	char  **argv;
+	size_t	maplen;
+	int	save_errno, n, error;
 
 	va_start(ap, arg);
 	n = 1;
@@ -126,8 +126,8 @@ execlp(const char *name, const char *arg, ...)
 	va_end(ap);
 
 	maplen = (n + 1) * sizeof(*argv);
-	argv = mmap(NULL, maplen, PROT_WRITE|PROT_READ,
-	    MAP_ANON|MAP_PRIVATE, -1, 0);
+	argv = mmap(NULL, maplen, PROT_WRITE | PROT_READ,
+	    MAP_ANON | MAP_PRIVATE, -1, 0);
 	if (argv == MAP_FAILED)
 		return (-1);
 
@@ -155,13 +155,13 @@ int
 execvpe(const char *name, char *const *argv, char *const *envp)
 {
 	char **memp;
-	int cnt;
+	int    cnt;
 	size_t lp, ln, curlen;
-	char *p;
-	int eacces = 0;
-	char *bp, *cur, *path, buf[PATH_MAX];
+	char  *p;
+	int    eacces = 0;
+	char  *bp, *cur, *path, buf[PATH_MAX];
 	size_t maplen;
-	int save_errno;
+	int    save_errno;
 
 	/*
 	 * Do not allow null name
@@ -169,7 +169,7 @@ execvpe(const char *name, char *const *argv, char *const *envp)
 	if (name == NULL || *name == '\0') {
 		errno = ENOENT;
 		return (-1);
- 	}
+	}
 
 	/* If it's an absolute or relative path name, it's easy. */
 	if (strchr(name, '/')) {
@@ -184,8 +184,8 @@ execvpe(const char *name, char *const *argv, char *const *envp)
 		path = _PATH_DEFPATH;
 
 	curlen = strlen(path) + 1;
-	cur = mmap(NULL, curlen, PROT_WRITE|PROT_READ,
-	    MAP_ANON|MAP_PRIVATE, -1, 0);
+	cur = mmap(NULL, curlen, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE,
+	    -1, 0);
 	if (cur == MAP_FAILED)
 		return (-1);
 
@@ -225,8 +225,9 @@ execvpe(const char *name, char *const *argv, char *const *envp)
 		bcopy(name, buf + lp + 1, ln);
 		buf[lp + ln + 1] = '\0';
 
-retry:		(void)execve(bp, argv, envp);
-		switch(errno) {
+	retry:
+		(void)execve(bp, argv, envp);
+		switch (errno) {
 		case E2BIG:
 			goto done;
 		case EISDIR:
@@ -239,8 +240,8 @@ retry:		(void)execve(bp, argv, envp);
 				;
 
 			maplen = (cnt + 2) * sizeof(char *);
-			memp = mmap(NULL, maplen, PROT_WRITE|PROT_READ,
-			    MAP_ANON|MAP_PRIVATE, -1, 0);
+			memp = mmap(NULL, maplen, PROT_WRITE | PROT_READ,
+			    MAP_ANON | MAP_PRIVATE, -1, 0);
 			if (memp == MAP_FAILED)
 				goto done;
 
@@ -285,7 +286,6 @@ DEF_WEAK(execvpe);
 int
 execvp(const char *name, char *const *argv)
 {
-    return execvpe(name, argv, environ);
+	return execvpe(name, argv, environ);
 }
 DEF_WEAK(execvp);
-

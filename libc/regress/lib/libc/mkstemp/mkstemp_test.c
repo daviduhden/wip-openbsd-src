@@ -14,18 +14,18 @@
 
 #include <err.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #include <unistd.h>
 
-#define MAX_TEMPLATE_LEN	10
-#define MAX_TRIES		100
-#define MIN_Xs			6
+#define MAX_TEMPLATE_LEN 10
+#define MAX_TRIES 100
+#define MIN_Xs 6
 
-#define SUFFIX	".suff"
-#define SLEN	(sizeof SUFFIX - 1)
+#define SUFFIX ".suff"
+#define SLEN (sizeof SUFFIX - 1)
 
 long pg;
 
@@ -69,13 +69,12 @@ check(int fd, char const *path, char const *prefix, size_t plen,
 	return 1;
 }
 
-
 void
 try_mkstemp(char *p, char const *prefix, int len)
 {
-	char *q;
+	char  *q;
 	size_t plen = strlen(prefix);
-	int tries, fd;
+	int    tries, fd;
 
 	for (tries = 0; tries < MAX_TRIES; tries++) {
 		memcpy(p, prefix, plen);
@@ -91,10 +90,10 @@ try_mkstemp(char *p, char const *prefix, int len)
 void
 try_mkstemps(char *p, char const *prefix, int len, char const *suffix)
 {
-	char *q;
+	char  *q;
 	size_t plen = strlen(prefix);
 	size_t slen = strlen(suffix);
-	int tries, fd;
+	int    tries, fd;
 
 	for (tries = 0; tries < MAX_TRIES; tries++) {
 		memcpy(p, prefix, plen);
@@ -111,10 +110,10 @@ int
 main(void)
 {
 	struct stat sb, fsb;
-	char cwd[PATH_MAX + 1];
-	char *p;
-	size_t clen;
-	int i;
+	char	    cwd[PATH_MAX + 1];
+	char	   *p;
+	size_t	    clen;
+	int	    i;
 
 	pg = sysconf(_SC_PAGESIZE);
 	if (getcwd(cwd, sizeof cwd - 1) == NULL)
@@ -159,7 +158,6 @@ main(void)
 		try_mkstemps(p, cwd, i, SUFFIX);
 		/* how about at the end of the page, prefixed with cwd? */
 		try_mkstemps(p + pg - clen - i - SLEN - 1, cwd, i, SUFFIX);
-
 	}
 
 	return 0;

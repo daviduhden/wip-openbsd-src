@@ -32,7 +32,7 @@
  */
 
 #ifndef _SYS_KTHREAD_H_
-#define	_SYS_KTHREAD_H_
+#define _SYS_KTHREAD_H_
 
 /*
  * Kernel thread handling.
@@ -40,11 +40,10 @@
 
 #ifdef _KERNEL
 struct proc;
-int	kthread_create(void (*)(void *), void *, struct proc **,
-	    const char *);
-void	kthread_create_deferred(void (*)(void *), void *);
-void	kthread_run_deferred_queue(void);
-void	kthread_exit(int) __attribute__((__noreturn__));
+int  kthread_create(void (*)(void *), void *, struct proc **, const char *);
+void kthread_create_deferred(void (*)(void *), void *);
+void kthread_run_deferred_queue(void);
+void kthread_exit(int) __attribute__((__noreturn__));
 #endif /* _KERNEL */
 
 #endif /* _SYS_KTHREAD_H_ */

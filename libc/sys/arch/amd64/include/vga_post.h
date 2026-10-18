@@ -36,8 +36,8 @@
 #ifdef _KERNEL
 struct vga_post;
 
-struct vga_post	*vga_post_init(int, int, int);
-void		vga_post_free(struct vga_post *);
-void		vga_post_call(struct vga_post *);
+struct vga_post *vga_post_init(int, int, int);
+void		 vga_post_free(struct vga_post *);
+void		 vga_post_call(struct vga_post *);
 #endif
 #endif

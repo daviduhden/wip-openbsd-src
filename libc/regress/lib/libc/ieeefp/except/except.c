@@ -1,19 +1,20 @@
 /*	$OpenBSD: except.c,v 1.12 2010/05/08 19:16:33 naddy Exp $	*/
 
 #include <sys/types.h>
-#include <unistd.h>
+
+#include <assert.h>
+#include <err.h>
+#include <float.h>
+#include <ieeefp.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
-#include <assert.h>
-#include <ieeefp.h>
-#include <float.h>
-#include <err.h>
+#include <unistd.h>
 
 volatile sig_atomic_t signal_status;
 
-volatile const double one  = 1.0;
+volatile const double one = 1.0;
 volatile const double zero = 0.0;
 volatile const double huge = DBL_MAX;
 volatile const double tiny = DBL_MIN;
@@ -31,12 +32,11 @@ sigfpe(int sig, siginfo_t *si, void *v)
 	_exit(signal_status);
 }
 
-
 int
 main(int argc, char *argv[])
 {
 	struct sigaction sa;
-	volatile double x;
+	volatile double	 x;
 
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s condition\n", argv[0]);
@@ -44,9 +44,9 @@ main(int argc, char *argv[])
 	}
 
 	/*
-	 * check to make sure that all exceptions are masked and 
+	 * check to make sure that all exceptions are masked and
 	 * that the accumulated exception status is clear.
- 	 */
+	 */
 	assert(fpgetmask() == 0);
 	assert(fpgetsticky() == 0);
 

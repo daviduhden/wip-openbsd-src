@@ -52,7 +52,7 @@ struct trapframe {
 	__register_t srr0;
 	__register_t srr1;
 	__register_t vrsave;
-	__register_t dar;	/* dar & dsisr are only filled on a DSI trap */
+	__register_t dar; /* dar & dsisr are only filled on a DSI trap */
 	__register_t dsisr;
 	__register_t exc;
 };
@@ -60,45 +60,45 @@ struct trapframe {
 /*
  * This is to ensure alignment of the stackpointer
  */
-#define	FRAMELEN	roundup(sizeof(struct trapframe) + 32, 16)
+#define FRAMELEN roundup(sizeof(struct trapframe) + 32, 16)
 
 struct callframe {
-	register_t	cf_sp;
-	register_t	cf_cr;
-	register_t	cf_lr;
-	register_t	cf_toc;
+	register_t cf_sp;
+	register_t cf_cr;
+	register_t cf_lr;
+	register_t cf_toc;
 };
 
 struct sigframe {
-	int		sf_signum;
-	siginfo_t	*sf_sip;
+	int		  sf_signum;
+	siginfo_t	 *sf_sip;
 	struct sigcontext sf_sc;
-	siginfo_t	sf_si;
+	siginfo_t	  sf_si;
 };
 
 struct switchframe {
-	register_t	sf_sp;
-	register_t	sf_cr;
-	register_t	sf_lr;		/* unused */
-	register_t	sf_toc;		/* unused */
-	register_t	sf_r14;
-	register_t	sf_r15;
-	register_t	sf_r16;
-	register_t	sf_r17;
-	register_t	sf_r18;
-	register_t	sf_r19;
-	register_t	sf_r20;
-	register_t	sf_r21;
-	register_t	sf_r22;
-	register_t	sf_r23;
-	register_t	sf_r24;
-	register_t	sf_r25;
-	register_t	sf_r26;
-	register_t	sf_r27;
-	register_t	sf_r28;
-	register_t	sf_r29;
-	register_t	sf_r30;
-	register_t	sf_r31;
+	register_t sf_sp;
+	register_t sf_cr;
+	register_t sf_lr;  /* unused */
+	register_t sf_toc; /* unused */
+	register_t sf_r14;
+	register_t sf_r15;
+	register_t sf_r16;
+	register_t sf_r17;
+	register_t sf_r18;
+	register_t sf_r19;
+	register_t sf_r20;
+	register_t sf_r21;
+	register_t sf_r22;
+	register_t sf_r23;
+	register_t sf_r24;
+	register_t sf_r25;
+	register_t sf_r26;
+	register_t sf_r27;
+	register_t sf_r28;
+	register_t sf_r29;
+	register_t sf_r30;
+	register_t sf_r31;
 };
 
 #endif /* _MACHDEP_FRAME_H_ */

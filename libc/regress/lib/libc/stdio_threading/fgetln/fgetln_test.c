@@ -19,10 +19,10 @@
 void
 fgetln_thread(void *v)
 {
-	FILE *file = v;
+	FILE  *file = v;
 	size_t len;
-	char *buf;
-	int i;
+	char  *buf;
+	int    i;
 
 	for (i = 0; i < 4096; i++) {
 		if ((buf = fgetln(file, &len)) == NULL) {
@@ -42,13 +42,12 @@ fgetln_thread(void *v)
 int
 main(void)
 {
-	char sfn[24];
+	char  sfn[24];
 	FILE *sfp;
-	int fd, i;
+	int   fd, i;
 
 	strlcpy(sfn, "/tmp/barnacles.XXXXXXXX", sizeof(sfn));
-	if ((fd = mkstemp(sfn)) == -1 ||
-	    (sfp = fdopen(fd, "w+")) == NULL) {
+	if ((fd = mkstemp(sfn)) == -1 || (sfp = fdopen(fd, "w+")) == NULL) {
 		int saved_errno = errno;
 		if (fd != -1) {
 			unlink(sfn);

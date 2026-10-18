@@ -7,9 +7,9 @@
 int
 TEST_SETJMP(void)
 {
-	JMP_BUF env;
+	JMP_BUF	  env;
 	fexcept_t flag;
-	int rv;
+	int	  rv;
 
 	/* Set up the FPU control word register. */
 	rv = fesetround(FE_UPWARD);
@@ -20,7 +20,7 @@ TEST_SETJMP(void)
 
 	rv = SETJMP(env, 0);
 
-	switch(rv) {
+	switch (rv) {
 	case 0: {
 		/* Mess with the FPU control word. */
 		rv = fesetround(FE_DOWNWARD);
@@ -45,8 +45,8 @@ TEST_SETJMP(void)
 #if !defined(__arm__) && !defined(__aarch64__) && !defined(__riscv)
 		rv = fegetexcept();
 		if (rv != FE_DIVBYZERO)
-			errx(1, "fegetexcept returned %d, not FE_DIVBYZERO",
-			    rv);
+			errx(
+			    1, "fegetexcept returned %d, not FE_DIVBYZERO", rv);
 #endif
 
 		/* Verify that the FPU exception flags weren't clobbered. */

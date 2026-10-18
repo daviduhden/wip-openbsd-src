@@ -1,4 +1,5 @@
-/*	$OpenBSD: res_search_async.c,v 1.22 2026/06/25 13:07:21 florian Exp $	*/
+/*	$OpenBSD: res_search_async.c,v 1.22 2026/06/25 13:07:21 florian Exp $
+ */
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -18,11 +19,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
-#include <arpa/nameser.h>
-#include <netdb.h>
 
+#include <arpa/nameser.h>
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +31,7 @@
 
 #include "asr_private.h"
 
-static int res_search_async_run(struct asr_query *, struct asr_result *);
+static int    res_search_async_run(struct asr_query *, struct asr_result *);
 static size_t domcat(const char *, const char *, char *, size_t);
 
 /*
@@ -56,14 +57,14 @@ DEF_WEAK(res_search_async);
 struct asr_query *
 _res_search_async_ctx(const char *name, int class, int type, struct asr_ctx *ac)
 {
-	struct asr_query	*as;
+	struct asr_query *as;
 
-	DPRINT("asr: res_search_async_ctx(\"%s\", %i, %i)\n", name, class,
-	    type);
+	DPRINT(
+	    "asr: res_search_async_ctx(\"%s\", %i, %i)\n", name, class, type);
 
 	if ((as = _asr_async_new(ac, ASR_SEARCH)) == NULL)
 		goto err; /* errno set */
-	as->as_run  = res_search_async_run;
+	as->as_run = res_search_async_run;
 	if ((as->as.search.name = strdup(name)) == NULL)
 		goto err; /* errno set */
 
@@ -71,21 +72,21 @@ _res_search_async_ctx(const char *name, int class, int type, struct asr_ctx *ac)
 	as->as.search.type = type;
 
 	return (as);
-    err:
+err:
 	if (as)
 		_asr_async_free(as);
 	return (NULL);
 }
 
-#define HERRNO_UNSET	-2
+#define HERRNO_UNSET -2
 
 static int
 res_search_async_run(struct asr_query *as, struct asr_result *ar)
 {
-	int	r;
-	char	fqdn[MAXDNAME];
+	int  r;
+	char fqdn[MAXDNAME];
 
-    next:
+next:
 	switch (as->as_state) {
 
 	case ASR_STATE_INIT:
@@ -107,7 +108,8 @@ res_search_async_run(struct asr_query *as, struct asr_result *ar)
 		 */
 		as->as_dom_flags = 0;
 
-		r = _asr_iter_domain(as, as->as.search.name, fqdn, sizeof(fqdn));
+		r = _asr_iter_domain(
+		    as, as->as.search.name, fqdn, sizeof(fqdn));
 		if (r == -1) {
 			async_set_state(as, ASR_STATE_NOT_FOUND);
 			break;
@@ -120,8 +122,8 @@ res_search_async_run(struct asr_query *as, struct asr_result *ar)
 			async_set_state(as, ASR_STATE_HALT);
 			break;
 		}
-		as->as_subq = _res_query_async_ctx(fqdn,
-		    as->as.search.class, as->as.search.type, as->as_ctx);
+		as->as_subq = _res_query_async_ctx(
+		    fqdn, as->as.search.class, as->as.search.type, as->as_ctx);
 		if (as->as_subq == NULL) {
 			ar->ar_errno = errno;
 			if (errno == EINVAL)
@@ -216,7 +218,7 @@ res_search_async_run(struct asr_query *as, struct asr_result *ar)
 static size_t
 domcat(const char *name, const char *domain, char *buf, size_t buflen)
 {
-	size_t	r;
+	size_t r;
 
 	r = _asr_make_fqdn(name, domain, buf, buflen);
 	if (r == 0)
@@ -226,11 +228,7 @@ domcat(const char *name, const char *domain, char *buf, size_t buflen)
 	return (r - 1);
 }
 
-enum {
-	DOM_INIT,
-	DOM_DOMAIN,
-	DOM_DONE
-};
+enum { DOM_INIT, DOM_DOMAIN, DOM_DONE };
 
 /*
  * Implement the search domain strategy.
@@ -245,10 +243,10 @@ enum {
  * error generating the next name, or the resulting name length.
  */
 int
-_asr_iter_domain(struct asr_query *as, const char *name, char * buf, size_t len)
+_asr_iter_domain(struct asr_query *as, const char *name, char *buf, size_t len)
 {
-	const char	*c;
-	int		 dots;
+	const char *c;
+	int	    dots;
 
 	switch (as->as_dom_step) {
 
@@ -259,7 +257,7 @@ _asr_iter_domain(struct asr_query *as, const char *name, char * buf, size_t len)
 		 * If "name" is an FQDN, that's the only result and we
 		 * don't try anything else.
 		 */
-		if (strlen(name) && name[strlen(name) - 1] ==  '.') {
+		if (strlen(name) && name[strlen(name) - 1] == '.') {
 			DPRINT("asr: iter_domain(\"%s\") fqdn\n", name);
 			as->as_dom_flags |= ASYNC_DOM_FQDN;
 			as->as_dom_step = DOM_DONE;
@@ -291,12 +289,12 @@ _asr_iter_domain(struct asr_query *as, const char *name, char * buf, size_t len)
 
 	case DOM_DOMAIN:
 		if (as->as_dom_idx < as->as_ctx->ac_domcount &&
-		    (as->as_ctx->ac_options & RES_DNSRCH || (
-			as->as_ctx->ac_options & RES_DEFNAMES &&
-			as->as_dom_idx == 0 &&
-			strchr(name, '.') == NULL))) {
-			DPRINT("asr: iter_domain(\"%s\") domain \"%s\"\n",
-			    name, as->as_ctx->ac_dom[as->as_dom_idx]);
+		    (as->as_ctx->ac_options & RES_DNSRCH ||
+			(as->as_ctx->ac_options & RES_DEFNAMES &&
+			    as->as_dom_idx == 0 &&
+			    strchr(name, '.') == NULL))) {
+			DPRINT("asr: iter_domain(\"%s\") domain \"%s\"\n", name,
+			    as->as_ctx->ac_dom[as->as_dom_idx]);
 			as->as_dom_flags |= ASYNC_DOM_DOMAIN;
 			return (domcat(name,
 			    as->as_ctx->ac_dom[as->as_dom_idx++], buf, len));

@@ -22,17 +22,17 @@
 #ifdef _KERNEL
 #ifdef __USE_MI_SOFTINTR
 
-#define SOFTINTR_CLOCK		0
-#define SOFTINTR_NET		1
-#define SOFTINTR_TTY		2
-#define NSOFTINTR		3
+#define SOFTINTR_CLOCK 0
+#define SOFTINTR_NET 1
+#define SOFTINTR_TTY 2
+#define NSOFTINTR 3
 
 #ifndef _LOCORE
-void	softintr_init(void);
-void	*softintr_establish(int, void (*)(void *), void *);
-void	softintr_disestablish(void *);
-void	softintr_dispatch(int);
-void	softintr_schedule(void *);
+void  softintr_init(void);
+void *softintr_establish(int, void (*)(void *), void *);
+void  softintr_disestablish(void *);
+void  softintr_dispatch(int);
+void  softintr_schedule(void *);
 #endif /* !_LOCORE */
 
 #endif /* __USE_MI_SOFTINTR */

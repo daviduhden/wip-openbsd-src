@@ -16,28 +16,29 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <stdarg.h>
 #include <unistd.h>
+
 #include "local.h"
 
-#define	INITIAL_SIZE	128
+#define INITIAL_SIZE 128
 
 int
 asprintf(char **str, const char *fmt, ...)
 {
-	int ret;
-	va_list ap;
-	FILE f = FILEINIT(__SWR | __SSTR | __SALC);
+	int	  ret;
+	va_list	  ap;
+	FILE	  f = FILEINIT(__SWR | __SSTR | __SALC);
 	const int pgsz = getpagesize();
 
 	f._bf._base = f._p = malloc(INITIAL_SIZE);
 	if (f._bf._base == NULL)
 		goto err;
-	f._bf._size = f._w = INITIAL_SIZE - 1;	/* leave room for the NUL */
+	f._bf._size = f._w = INITIAL_SIZE - 1; /* leave room for the NUL */
 	va_start(ap, fmt);
 	ret = __vfprintf(&f, fmt, ap);
 	va_end(ap);
@@ -46,8 +47,8 @@ asprintf(char **str, const char *fmt, ...)
 	*f._p = '\0';
 	if (ret + 1 > INITIAL_SIZE && ret + 1 < pgsz / 2) {
 		/* midsize allocations can try to conserve memory */
-		unsigned char *_base = recallocarray(f._bf._base,
-		    f._bf._size + 1, ret + 1, 1);
+		unsigned char *_base =
+		    recallocarray(f._bf._base, f._bf._size + 1, ret + 1, 1);
 
 		if (_base == NULL)
 			goto err;

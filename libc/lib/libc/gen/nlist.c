@@ -32,6 +32,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+#include <a.out.h> /* pulls in nlist.h */
+#include <elf.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -39,15 +41,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <a.out.h>		/* pulls in nlist.h */
-#include <elf.h>
 
-#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
-int	__fdnlist(int, struct nlist *);
+int __fdnlist(int, struct nlist *);
 PROTO_NORMAL(__fdnlist);
 
-#define	ISLAST(p)	(p->n_un.n_name == 0 || p->n_un.n_name[0] == 0)
+#define ISLAST(p) (p->n_un.n_name == 0 || p->n_un.n_name[0] == 0)
 
 /*
  * __elf_is_okay__ - Determine if ehdr really
@@ -66,8 +66,7 @@ __elf_is_okay__(Elf_Ehdr *ehdr)
 	 * Elf_Ehdr structure.  These few elements are
 	 * represented in a machine independent fashion.
 	 */
-	if (IS_ELF(*ehdr) &&
-	    ehdr->e_ident[EI_CLASS] == ELF_TARG_CLASS &&
+	if (IS_ELF(*ehdr) && ehdr->e_ident[EI_CLASS] == ELF_TARG_CLASS &&
 	    ehdr->e_ident[EI_DATA] == ELF_TARG_DATA &&
 	    ehdr->e_ident[EI_VERSION] == ELF_TARG_VER) {
 
@@ -87,18 +86,18 @@ int
 __fdnlist(int fd, struct nlist *list)
 {
 	struct nlist *p;
-	caddr_t strtab;
-	Elf_Off symoff = 0, symstroff = 0;
-	Elf_Word symsize = 0, symstrsize = 0;
-	Elf_Sword nent, cc, i;
-	Elf_Sym sbuf[1024];
-	Elf_Sym *s;
-	Elf_Ehdr ehdr;
-	Elf_Shdr *shdr = NULL;
-	Elf_Word shdr_size;
-	struct stat st;
-	int usemalloc = 0;
-	size_t left, len;
+	caddr_t	      strtab;
+	Elf_Off	      symoff = 0, symstroff = 0;
+	Elf_Word      symsize = 0, symstrsize = 0;
+	Elf_Sword     nent, cc, i;
+	Elf_Sym	      sbuf[1024];
+	Elf_Sym	     *s;
+	Elf_Ehdr      ehdr;
+	Elf_Shdr     *shdr = NULL;
+	Elf_Word      shdr_size;
+	struct stat   st;
+	int	      usemalloc = 0;
+	size_t	      left, len;
 
 	/* Make sure obj is OK */
 	if (pread(fd, &ehdr, sizeof(Elf_Ehdr), 0) != sizeof(Elf_Ehdr) ||
@@ -116,7 +115,7 @@ __fdnlist(int fd, struct nlist *list)
 	}
 
 	/* mmap section header table */
-	shdr = mmap(NULL, shdr_size, PROT_READ, MAP_SHARED|MAP_FILE, fd,
+	shdr = mmap(NULL, shdr_size, PROT_READ, MAP_SHARED | MAP_FILE, fd,
 	    ehdr.e_shoff);
 	if (shdr == MAP_FAILED) {
 		usemalloc = 1;
@@ -198,8 +197,8 @@ __fdnlist(int fd, struct nlist *list)
 			return (-1);
 		}
 	} else {
-		strtab = mmap(NULL, symstrsize, PROT_READ, MAP_SHARED|MAP_FILE,
-		    fd, symstroff);
+		strtab = mmap(NULL, symstrsize, PROT_READ,
+		    MAP_SHARED | MAP_FILE, fd, symstroff);
 		if (strtab == MAP_FAILED)
 			return (-1);
 	}
@@ -234,16 +233,16 @@ __fdnlist(int fd, struct nlist *list)
 				len = strlen(sym);
 
 				if ((len >= left ||
-				    strcmp(&strtab[soff], sym) != 0) &&
+					strcmp(&strtab[soff], sym) != 0) &&
 				    (sym[0] != '_' || len - 1 >= left ||
-				     strcmp(&strtab[soff], sym + 1) != 0))
+					strcmp(&strtab[soff], sym + 1) != 0))
 					continue;
 
 				p->n_value = s->st_value;
 
 				/* XXX - type conversion */
 				/*	 is pretty rude. */
-				switch(ELF_ST_TYPE(s->st_info)) {
+				switch (ELF_ST_TYPE(s->st_info)) {
 				case STT_NOTYPE:
 					switch (s->st_shndx) {
 					case SHN_UNDEF:

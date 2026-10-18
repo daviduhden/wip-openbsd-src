@@ -23,9 +23,9 @@
 int sysctlbyname(char *, void *, size_t *, void *, size_t);
 
 int
-sysctlbyname(char* s, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctlbyname(char *s, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
-        int mib[3], miblen;
+	int mib[3], miblen;
 
 	mib[0] = CTL_KERN;
 	if (strcmp(s, "kern.timecounter.hardware") == 0) {
@@ -44,7 +44,7 @@ sysctlbyname(char* s, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 		return -42;
 	}
 
-        return sysctl(mib, miblen, oldp, oldlenp, newp, newlen);
+	return sysctl(mib, miblen, oldp, oldlenp, newp, newlen);
 }
 
 /* t_connect.c */

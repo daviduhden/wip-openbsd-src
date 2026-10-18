@@ -19,9 +19,10 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +43,7 @@ inet_neta(in_addr_t src, char *dst, size_t size)
 {
 	char *odst = dst;
 	char *ep;
-	int advance;
+	int   advance;
 
 	if (src == 0x00000000) {
 		if (size < sizeof "0.0.0.0")
@@ -74,7 +75,7 @@ inet_neta(in_addr_t src, char *dst, size_t size)
 	}
 	return (odst);
 
- emsgsize:
+emsgsize:
 	errno = EMSGSIZE;
 	return (NULL);
 }

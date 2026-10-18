@@ -25,7 +25,7 @@
 int
 main(void)
 {
-	char *buf;
+	char  *buf;
 	size_t bufsize;
 
 	/* Allocate buffer with guard pages. */

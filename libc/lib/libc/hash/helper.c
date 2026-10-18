@@ -26,20 +26,19 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdlib.h>
+#include <hashinc>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include <hashinc>
-
-#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 char *
 HASHEnd(HASH_CTX *ctx, char *buf)
 {
-	int i;
-	u_int8_t digest[HASH_DIGEST_LENGTH];
+	int		  i;
+	u_int8_t	  digest[HASH_DIGEST_LENGTH];
 	static const char hex[] = "0123456789abcdef";
 
 	if (buf == NULL && (buf = malloc(HASH_DIGEST_STRING_LENGTH)) == NULL)
@@ -60,15 +59,15 @@ char *
 HASHFile(const char *filename, char *buf)
 {
 	struct stat sb;
-	u_char buffer[BUFSIZ];
-	HASH_CTX ctx;
-	int fd, save_errno;
-	ssize_t nr;
-	off_t len;
+	u_char	    buffer[BUFSIZ];
+	HASH_CTX    ctx;
+	int	    fd, save_errno;
+	ssize_t	    nr;
+	off_t	    len;
 
 	HASHInit(&ctx);
 
-	if ((fd = open(filename, O_RDONLY|O_CLOEXEC)) == -1)
+	if ((fd = open(filename, O_RDONLY | O_CLOEXEC)) == -1)
 		return (NULL);
 	if (fstat(fd, &sb) == -1) {
 		save_errno = errno;

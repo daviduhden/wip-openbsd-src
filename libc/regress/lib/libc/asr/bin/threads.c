@@ -14,25 +14,24 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
 
 #include <assert.h>
 #include <err.h>
 #include <getopt.h>
+#include <netdb.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-#include <netdb.h>
+#define MAX_THREADS 50
 
-#define MAX_THREADS	50
-
-int	  ac;
-char	**av;
-int	  loop;
-int	  nthreads;
+int    ac;
+char **av;
+int    loop;
+int    nthreads;
 
 extern int long_err;
 extern int gai_errno;
@@ -40,36 +39,40 @@ extern int rrset_errno;
 
 void async_resolver_done(void *);
 
-void stats(void)
+void
+stats(void)
 {
-	struct rusage	ru;
+	struct rusage ru;
 
 	getrusage(RUSAGE_SELF, &ru);
 	printf("%li\n", ru.ru_maxrss);
 }
 
-void*
+void *
 task(void *arg)
 {
 	int		 id, i, j, c;
 	struct addrinfo *ai, *n;
 
-	id = *((int*) arg);
+	id = *((int *)arg);
 
-	n = NULL; c =0;
+	n = NULL;
+	c = 0;
 
-	for(j = 0; j < loop; j++)
-		for(i = 0; i < ac; i++) {
+	for (j = 0; j < loop; j++)
+		for (i = 0; i < ac; i++) {
 			if (getaddrinfo(av[i], NULL, NULL, &ai) == 0) {
-/*
-				for (c = 0, n = ai; n; c++, n = n->ai_next);
-				printf("%i:%s: ok: %i\n", id, av[i], c);
-*/
+				/*
+								for (c = 0, n =
+				   ai; n; c++, n = n->ai_next); printf("%i:%s:
+				   ok: %i\n", id, av[i], c);
+				*/
 				freeaddrinfo(ai);
 			} else {
-/*
-				printf("%i:%s: fail\n", id, av[i]);
-*/
+				/*
+								printf("%i:%s:
+				   fail\n", id, av[i]);
+				*/
 			}
 		}
 	return (NULL);
@@ -79,16 +82,17 @@ void
 usage(void)
 {
 	extern const char *__progname;
-	fprintf(stderr, "usage: %s [-L loop] [-l loop] [-t threads] <host> ...\n",
-		__progname);
+	fprintf(stderr,
+	    "usage: %s [-L loop] [-l loop] [-t threads] <host> ...\n",
+	    __progname);
 }
 
 int
 main(int argc, char **argv)
 {
-	pthread_t	th[MAX_THREADS];
-	int		th_args[MAX_THREADS], r, i, ch;
-	int		n, LOOP;
+	pthread_t th[MAX_THREADS];
+	int	  th_args[MAX_THREADS], r, i, ch;
+	int	  n, LOOP;
 
 	nthreads = 1;
 	loop = 1;
@@ -120,10 +124,11 @@ main(int argc, char **argv)
 	av = argv;
 
 	printf("%i %i %i\n", LOOP, nthreads, loop);
-	for (n = 0; n < LOOP; n ++) {
+	for (n = 0; n < LOOP; n++) {
 		for (i = 0; i < nthreads; i++) {
 			th_args[i] = i;
-			r = pthread_create(&th[i], NULL, task, (void *) &th_args[i]);
+			r = pthread_create(
+			    &th[i], NULL, task, (void *)&th_args[i]);
 			if (r == -1)
 				errx(1, "pthread_create");
 		}

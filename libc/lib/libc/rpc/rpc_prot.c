@@ -55,8 +55,8 @@ xdr_opaque_auth(XDR *xdrs, struct opaque_auth *ap)
 {
 
 	if (xdr_enum(xdrs, &(ap->oa_flavor)))
-		return (xdr_bytes(xdrs, &ap->oa_base,
-		    &ap->oa_length, MAX_AUTH_BYTES));
+		return (xdr_bytes(
+		    xdrs, &ap->oa_base, &ap->oa_length, MAX_AUTH_BYTES));
 	return (FALSE);
 }
 DEF_WEAK(xdr_opaque_auth);
@@ -80,9 +80,9 @@ xdr_accepted_reply(XDR *xdrs, struct accepted_reply *ar)
 {
 
 	/* personalized union, rather than calling xdr_union */
-	if (! xdr_opaque_auth(xdrs, &(ar->ar_verf)))
+	if (!xdr_opaque_auth(xdrs, &(ar->ar_verf)))
 		return (FALSE);
-	if (! xdr_enum(xdrs, (enum_t *)&(ar->ar_stat)))
+	if (!xdr_enum(xdrs, (enum_t *)&(ar->ar_stat)))
 		return (FALSE);
 
 	switch (ar->ar_stat) {
@@ -93,7 +93,7 @@ xdr_accepted_reply(XDR *xdrs, struct accepted_reply *ar)
 			return (FALSE);
 		return (xdr_u_int32_t(xdrs, &(ar->ar_vers.high)));
 	default:
-		return (TRUE);  /* TRUE => open ended set of problems */
+		return (TRUE); /* TRUE => open ended set of problems */
 	}
 }
 DEF_WEAK(xdr_accepted_reply);
@@ -106,7 +106,7 @@ xdr_rejected_reply(XDR *xdrs, struct rejected_reply *rr)
 {
 
 	/* personalized union, rather than calling xdr_union */
-	if (! xdr_enum(xdrs, (enum_t *)&(rr->rj_stat)))
+	if (!xdr_enum(xdrs, (enum_t *)&(rr->rj_stat)))
 		return (FALSE);
 
 	switch (rr->rj_stat) {
@@ -122,9 +122,8 @@ xdr_rejected_reply(XDR *xdrs, struct rejected_reply *rr)
 DEF_WEAK(xdr_rejected_reply);
 
 static struct xdr_discrim reply_dscrm[3] = {
-	{ (int)MSG_ACCEPTED, xdr_accepted_reply },
-	{ (int)MSG_DENIED, xdr_rejected_reply },
-	{ __dontcare__, NULL } };
+    {(int)MSG_ACCEPTED, xdr_accepted_reply},
+    {(int)MSG_DENIED, xdr_rejected_reply}, {__dontcare__, NULL}};
 
 /*
  * XDR a reply message
@@ -136,7 +135,7 @@ xdr_replymsg(XDR *xdrs, struct rpc_msg *rmsg)
 	    xdr_enum(xdrs, (enum_t *)&(rmsg->rm_direction)) &&
 	    rmsg->rm_direction == REPLY)
 		return (xdr_union(xdrs, (enum_t *)&(rmsg->rm_reply.rp_stat),
-		   (caddr_t)&(rmsg->rm_reply.ru), reply_dscrm, NULL));
+		    (caddr_t) & (rmsg->rm_reply.ru), reply_dscrm, NULL));
 	return (FALSE);
 }
 DEF_WEAK(xdr_replymsg);
@@ -152,8 +151,7 @@ xdr_callhdr(XDR *xdrs, struct rpc_msg *cmsg)
 
 	cmsg->rm_direction = CALL;
 	cmsg->rm_call.cb_rpcvers = RPC_MSG_VERSION;
-	if (xdrs->x_op == XDR_ENCODE &&
-	    xdr_u_int32_t(xdrs, &(cmsg->rm_xid)) &&
+	if (xdrs->x_op == XDR_ENCODE && xdr_u_int32_t(xdrs, &(cmsg->rm_xid)) &&
 	    xdr_enum(xdrs, (enum_t *)&(cmsg->rm_direction)) &&
 	    xdr_u_int32_t(xdrs, &(cmsg->rm_call.cb_rpcvers)) &&
 	    xdr_u_int32_t(xdrs, &(cmsg->rm_call.cb_prog)))

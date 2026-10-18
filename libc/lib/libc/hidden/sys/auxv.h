@@ -22,8 +22,8 @@
 #include_next <sys/auxv.h>
 
 __BEGIN_HIDDEN_DECLS
-extern unsigned long	_hwcap, _hwcap2;
-extern int	_hwcap_avail, _hwcap2_avail;
+extern unsigned long _hwcap, _hwcap2;
+extern int	     _hwcap_avail, _hwcap2_avail;
 __END_HIDDEN_DECLS
 
 PROTO_DEPRECATED(elf_aux_info);

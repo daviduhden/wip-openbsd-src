@@ -40,8 +40,8 @@
  * Note: the shorthand has been gutted for efficiency.
  */
 
-#include <stdio.h>
 #include <rpc/rpc.h>
+#include <stdio.h>
 #include <string.h>
 
 /*
@@ -50,25 +50,26 @@
 enum auth_stat
 _svcauth_unix(struct svc_req *rqst, struct rpc_msg *msg)
 {
-	enum auth_stat stat;
-	XDR xdrs;
+	enum auth_stat	       stat;
+	XDR		       xdrs;
 	struct authunix_parms *aup;
-	int32_t *buf;
+	int32_t		      *buf;
 	struct area {
 		struct authunix_parms area_aup;
-		char area_machname[MAX_MACHINE_NAME+1];
-		int area_gids[NGRPS];
-	} *area;
+		char		      area_machname[MAX_MACHINE_NAME + 1];
+		int		      area_gids[NGRPS];
+	}    *area;
 	u_int auth_len;
 	u_int str_len, gid_len;
 	u_int i;
 
-	area = (struct area *) rqst->rq_clntcred;
+	area = (struct area *)rqst->rq_clntcred;
 	aup = &area->area_aup;
 	aup->aup_machname = area->area_machname;
 	aup->aup_gids = area->area_gids;
 	auth_len = (u_int)msg->rm_call.cb_cred.oa_length;
-	xdrmem_create(&xdrs, msg->rm_call.cb_cred.oa_base, auth_len,XDR_DECODE);
+	xdrmem_create(
+	    &xdrs, msg->rm_call.cb_cred.oa_base, auth_len, XDR_DECODE);
 	buf = XDR_INLINE(&xdrs, auth_len);
 	if (buf != NULL) {
 		aup->aup_time = IXDR_GET_LONG(buf);
@@ -80,7 +81,7 @@ _svcauth_unix(struct svc_req *rqst, struct rpc_msg *msg)
 		memcpy(aup->aup_machname, (caddr_t)buf, (u_int)str_len);
 		aup->aup_machname[str_len] = 0;
 		str_len = RNDUP(str_len);
-		buf += str_len / sizeof (int32_t);
+		buf += str_len / sizeof(int32_t);
 		aup->aup_uid = IXDR_GET_LONG(buf);
 		aup->aup_gid = IXDR_GET_LONG(buf);
 		gid_len = IXDR_GET_U_LONG(buf);
@@ -100,7 +101,7 @@ _svcauth_unix(struct svc_req *rqst, struct rpc_msg *msg)
 			stat = AUTH_BADCRED;
 			goto done;
 		}
-	} else if (! xdr_authunix_parms(&xdrs, aup)) {
+	} else if (!xdr_authunix_parms(&xdrs, aup)) {
 		xdrs.x_op = XDR_FREE;
 		(void)xdr_authunix_parms(&xdrs, aup);
 		stat = AUTH_BADCRED;
@@ -115,12 +116,11 @@ done:
 }
 DEF_STRONG(_svcauth_unix);
 
-
 /*
  * Shorthand unix authenticator
  * Looks up longhand in a cache.
  */
-enum auth_stat 
+enum auth_stat
 _svcauth_short(struct svc_req *rqst, struct rpc_msg *msg)
 {
 	return (AUTH_REJECTEDCRED);

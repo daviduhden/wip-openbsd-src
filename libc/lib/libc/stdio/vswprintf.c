@@ -29,22 +29,23 @@
  */
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
-#include <stdarg.h>
+
 #include "local.h"
 
 int
-vswprintf(wchar_t * __restrict s, size_t n, const wchar_t * __restrict fmt,
+vswprintf(wchar_t *__restrict s, size_t n, const wchar_t *__restrict fmt,
     __va_list ap)
 {
 	mbstate_t mbs;
-	FILE f = FILEINIT(__SWR | __SSTR | __SALC);
-	char *mbp;
-	int ret, sverrno;
-	size_t nwc;
+	FILE	  f = FILEINIT(__SWR | __SSTR | __SALC);
+	char	 *mbp;
+	int	  ret, sverrno;
+	size_t	  nwc;
 
 	if (n == 0) {
 		errno = EINVAL;
@@ -56,7 +57,7 @@ vswprintf(wchar_t * __restrict s, size_t n, const wchar_t * __restrict fmt,
 		errno = ENOMEM;
 		return (-1);
 	}
-	f._bf._size = f._w = 127;		/* Leave room for the NUL */
+	f._bf._size = f._w = 127; /* Leave room for the NUL */
 	ret = __vfwprintf(&f, fmt, ap);
 	if (ret < 0) {
 		sverrno = errno;

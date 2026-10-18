@@ -45,12 +45,12 @@
 #include <wchar.h>
 
 wchar_t *
-wcstok(wchar_t * __restrict s, const wchar_t * __restrict delim, 
-    wchar_t ** __restrict last)
+wcstok(wchar_t *__restrict s, const wchar_t *__restrict delim,
+    wchar_t **__restrict last)
 {
 	const wchar_t *spanp;
-	wchar_t c, sc;
-	wchar_t *tok;
+	wchar_t	       c, sc;
+	wchar_t	      *tok;
 
 	if (s == NULL && (s = *last) == NULL)
 		return (NULL);
@@ -65,7 +65,7 @@ cont:
 			goto cont;
 	}
 
-	if (c == L'\0') {	/* no non-delimiter characters */
+	if (c == L'\0') { /* no non-delimiter characters */
 		*last = NULL;
 		return (NULL);
 	}

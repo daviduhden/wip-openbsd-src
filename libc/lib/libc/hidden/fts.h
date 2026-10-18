@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_FTS_H_
-#define	_LIBC_FTS_H_
+#define _LIBC_FTS_H_
 
 #include_next <fts.h>
 

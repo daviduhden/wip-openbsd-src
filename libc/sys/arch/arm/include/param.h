@@ -32,30 +32,30 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_ARM_PARAM_H_
-#define	_ARM_PARAM_H_
+#ifndef _ARM_PARAM_H_
+#define _ARM_PARAM_H_
 
-#define	MACHINE_ARCH	"arm"
-#define	_MACHINE_ARCH	arm
-#define	MID_MACHINE	MID_ARM6
+#define MACHINE_ARCH "arm"
+#define _MACHINE_ARCH arm
+#define MID_MACHINE MID_ARM6
 
-#define	PAGE_SHIFT	12
-#define	PAGE_SIZE	(1 << PAGE_SHIFT)
-#define	PAGE_MASK	(PAGE_SIZE - 1)
+#define PAGE_SHIFT 12
+#define PAGE_SIZE (1 << PAGE_SHIFT)
+#define PAGE_MASK (PAGE_SIZE - 1)
 
 #ifdef _KERNEL
 
-#define	NPTEPG		(PAGE_SIZE/(sizeof (pt_entry_t)))
+#define NPTEPG (PAGE_SIZE / (sizeof(pt_entry_t)))
 
-#define	NBPG		PAGE_SIZE
-#define	PGSHIFT		PAGE_SHIFT
-#define	PGOFSET		PAGE_MASK
+#define NBPG PAGE_SIZE
+#define PGSHIFT PAGE_SHIFT
+#define PGOFSET PAGE_MASK
 
-#define	UPAGES		2			/* pages of u-area */
-#define	USPACE		(UPAGES * PAGE_SIZE)	/* total size of u-area */
-#define	USPACE_ALIGN	0			/* u-area alignment 0-none */
+#define UPAGES 2		    /* pages of u-area */
+#define USPACE (UPAGES * PAGE_SIZE) /* total size of u-area */
+#define USPACE_ALIGN 0		    /* u-area alignment 0-none */
 
-#define	NMBCLUSTERS	(32 * 1024)		/* max cluster allocation */
+#define NMBCLUSTERS (32 * 1024) /* max cluster allocation */
 
 /* Constants used to divide the USPACE area */
 /*
@@ -82,15 +82,15 @@
  * overflows.
  */
 
-#define	FPCONTEXTSIZE			(0x100)
-#define	USPACE_SVC_STACK_TOP		(USPACE)
-#define	USPACE_SVC_STACK_BOTTOM		(USPACE_SVC_STACK_TOP - 0x1000)
-#define	USPACE_UNDEF_STACK_TOP		(USPACE_SVC_STACK_BOTTOM - 0x10)
-#define	USPACE_UNDEF_STACK_BOTTOM	(sizeof(struct user) + FPCONTEXTSIZE + 10)
+#define FPCONTEXTSIZE (0x100)
+#define USPACE_SVC_STACK_TOP (USPACE)
+#define USPACE_SVC_STACK_BOTTOM (USPACE_SVC_STACK_TOP - 0x1000)
+#define USPACE_UNDEF_STACK_TOP (USPACE_SVC_STACK_BOTTOM - 0x10)
+#define USPACE_UNDEF_STACK_BOTTOM (sizeof(struct user) + FPCONTEXTSIZE + 10)
 
 #ifndef _LOCORE
-void	delay (unsigned);
-#define	DELAY(x)	delay(x)
+void delay(unsigned);
+#define DELAY(x) delay(x)
 #endif
 
 #if !defined(_LOCORE)
@@ -98,8 +98,8 @@ void	delay (unsigned);
 #endif
 
 /* ARM-specific macro to align a stack pointer (downwards). */
-#define	STACKALIGNBYTES		(8 - 1)
-#define	STACKALIGN(p)		((u_long)(p) &~ STACKALIGNBYTES)
+#define STACKALIGNBYTES (8 - 1)
+#define STACKALIGN(p) ((u_long)(p) & ~STACKALIGNBYTES)
 
 #endif /* _KERNEL */
 

@@ -37,7 +37,10 @@ size(void)
 	return arc4random_uniform(1 << p);
 }
 
-struct { void *p; size_t sz; } a[N];
+struct {
+	void  *p;
+	size_t sz;
+} a[N];
 
 void
 fill(u_char *p, size_t sz)
@@ -61,8 +64,8 @@ check(u_char *p, size_t sz)
 int
 main(int argc, char *argv[])
 {
-	int count, p, r, i;
-	void * q;
+	int    count, p, r, i;
+	void  *q;
 	size_t sz;
 
 	for (count = 0; count < COUNT; count++) {

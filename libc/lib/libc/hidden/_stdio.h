@@ -51,7 +51,7 @@
 /* stdio buffers */
 struct __sbuf {
 	unsigned char *_base;
-	int	_size;
+	int	       _size;
 };
 
 /*
@@ -79,71 +79,71 @@ struct __sbuf {
  * _ub._base!=NULL) and _up and _ur save the current values of _p and _r.
  */
 struct __sFILE {
-	int	_flags;		/* flags, below; this FILE is free if 0 */
-	int	_file;		/* fileno, if Unix descriptor, else -1 */
-	unsigned char *_p;	/* current position in (some) buffer */
-	int	_r;		/* read space left for getc() */
-	int	_w;		/* write space left for putc() */
-	struct	__sbuf _bf;	/* the buffer (at least 1 byte, if !NULL) */
-	int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
+	int	       _flags;	 /* flags, below; this FILE is free if 0 */
+	int	       _file;	 /* fileno, if Unix descriptor, else -1 */
+	unsigned char *_p;	 /* current position in (some) buffer */
+	int	       _r;	 /* read space left for getc() */
+	int	       _w;	 /* write space left for putc() */
+	struct __sbuf  _bf;	 /* the buffer (at least 1 byte, if !NULL) */
+	int	       _lbfsize; /* 0 or -_bf._size, for inline putc */
 	struct __rcmtx _lock;
 
 	/* operations */
-	void	*_cookie;	/* cookie passed to io functions */
+	void   *_cookie; /* cookie passed to io functions */
 	int	(*_close)(void *);
 	int	(*_read)(void *, char *, int);
-	__off_t	(*_seek)(void *, __off_t, int);
+	__off_t (*_seek)(void *, __off_t, int);
 	int	(*_write)(void *, const char *, int);
 
-	struct	__sbuf _ub;	/* ungetc buffer */
+	struct __sbuf _ub; /* ungetc buffer */
 
 	/* data for long sequences of ungetc() */
-	unsigned char *_up;	/* saved _p when _p is doing ungetc data */
-	int	_ur;		/* saved _r when _r is counting ungetc data */
+	unsigned char *_up; /* saved _p when _p is doing ungetc data */
+	int	       _ur; /* saved _r when _r is counting ungetc data */
 
 	/* tricks to meet minimum requirements even when malloc() fails */
-	unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
-	unsigned char _nbuf[1];	/* guarantee a getc() buffer */
+	unsigned char _ubuf[3]; /* guarantee an ungetc() buffer */
+	unsigned char _nbuf[1]; /* guarantee a getc() buffer */
 
 	/* separate buffer for fgetln() when line crosses buffer boundary */
-	struct	__sbuf _lb;	/* buffer for fgetln() */
+	struct __sbuf _lb; /* buffer for fgetln() */
 
 	/* Unix stdio files get aligned to block boundaries on fseek() */
-	int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
-	__off_t	_offset;	/* current lseek offset */
+	int	_blksize; /* stat.st_blksize (may be != _bf._size) */
+	__off_t _offset;  /* current lseek offset */
 
 	/* minimal requirement of SUSv2 */
 	/* XXX switch to (re)using _ub */
-#define	FILE_UNGETWC_BUFSIZE	1
-	__wchar_t	_ungetwc_buf[FILE_UNGETWC_BUFSIZE];
-	size_t		_ungetwc_inbuf;
+#define FILE_UNGETWC_BUFSIZE 1
+	__wchar_t _ungetwc_buf[FILE_UNGETWC_BUFSIZE];
+	size_t _ungetwc_inbuf;
 
 	/* conversion state for wide-oriented streams */
 	/* XXX should only need one; clear when switching mode */
-	__mbstate_t	_mbstate_in;
-	__mbstate_t	_mbstate_out;
+	__mbstate_t _mbstate_in;
+	__mbstate_t _mbstate_out;
 };
 
-#define	__SLBF	0x0001		/* line buffered */
-#define	__SNBF	0x0002		/* unbuffered */
-#define	__SRD	0x0004		/* OK to read */
-#define	__SWR	0x0008		/* OK to write */
-	/* RD and WR are never simultaneously asserted */
-#define	__SRW	0x0010		/* open for reading & writing */
-#define	__SEOF	0x0020		/* found EOF */
-#define	__SERR	0x0040		/* found error */
-#define	__SMBF	0x0080		/* _buf is from malloc */
-#define	__SAPP	0x0100		/* fdopen()ed in append mode */
-#define	__SSTR	0x0200		/* this is an sprintf/snprintf string */
-#define	__SOPT	0x0400		/* do fseek() optimisation */
-#define	__SNPT	0x0800		/* do not do fseek() optimisation */
-#define	__SOFF	0x1000		/* set iff _offset is in fact correct */
-#define	__SMOD	0x2000		/* true => fgetln modified _p text */
-#define	__SALC	0x4000		/* allocate string space dynamically */
-#define	__SIGN	0x8000		/* ignore this file in _fwalk */
-#define	__SONW	0x10000		/* orientation set to narrow */
-#define	__SOWD	0x20000		/* orientation set to wide */
-	/* ONW and OWD are never simultaneously asserted */
+#define __SLBF 0x0001  /* line buffered */
+#define __SNBF 0x0002  /* unbuffered */
+#define __SRD 0x0004   /* OK to read */
+#define __SWR 0x0008   /* OK to write */
+		       /* RD and WR are never simultaneously asserted */
+#define __SRW 0x0010   /* open for reading & writing */
+#define __SEOF 0x0020  /* found EOF */
+#define __SERR 0x0040  /* found error */
+#define __SMBF 0x0080  /* _buf is from malloc */
+#define __SAPP 0x0100  /* fdopen()ed in append mode */
+#define __SSTR 0x0200  /* this is an sprintf/snprintf string */
+#define __SOPT 0x0400  /* do fseek() optimisation */
+#define __SNPT 0x0800  /* do not do fseek() optimisation */
+#define __SOFF 0x1000  /* set iff _offset is in fact correct */
+#define __SMOD 0x2000  /* true => fgetln modified _p text */
+#define __SALC 0x4000  /* allocate string space dynamically */
+#define __SIGN 0x8000  /* ignore this file in _fwalk */
+#define __SONW 0x10000 /* orientation set to narrow */
+#define __SOWD 0x20000 /* orientation set to wide */
+		       /* ONW and OWD are never simultaneously asserted */
 
 __BEGIN_DECLS
 extern FILE __stdin[];

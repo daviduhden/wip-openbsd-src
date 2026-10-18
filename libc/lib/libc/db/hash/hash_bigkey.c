@@ -60,11 +60,12 @@
 #endif
 
 #include <db.h>
+
+#include "extern.h"
 #include "hash.h"
 #include "page.h"
-#include "extern.h"
 
-#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 static int collect_key(HTAB *, BUFHEAD *, int, DBT *, int);
 static int collect_data(HTAB *, BUFHEAD *, int, int);
@@ -82,11 +83,11 @@ int
 __big_insert(HTAB *hashp, BUFHEAD *bufp, const DBT *key, const DBT *val)
 {
 	u_int16_t *p;
-	int key_size, n, val_size;
-	u_int16_t space, move_bytes, off;
-	char *cp, *key_data, *val_data;
+	int	   key_size, n, val_size;
+	u_int16_t  space, move_bytes, off;
+	char	  *cp, *key_data, *val_data;
 
-	cp = bufp->page;		/* Character pointer of p. */
+	cp = bufp->page; /* Character pointer of p. */
 	p = (u_int16_t *)cp;
 
 	key_data = (char *)key->data;
@@ -190,9 +191,9 @@ __big_insert(HTAB *hashp, BUFHEAD *bufp, const DBT *key, const DBT *val)
 int
 __big_delete(HTAB *hashp, BUFHEAD *bufp)
 {
-	BUFHEAD *last_bfp, *rbufp;
+	BUFHEAD	  *last_bfp, *rbufp;
 	u_int16_t *bp, pageno;
-	int key_done, n;
+	int	   key_done, n;
 
 	rbufp = bufp;
 	last_bfp = NULL;
@@ -218,7 +219,7 @@ __big_delete(HTAB *hashp, BUFHEAD *bufp)
 			__free_ovflpage(hashp, last_bfp);
 		last_bfp = rbufp;
 		if (!rbufp)
-			return (-1);		/* Error. */
+			return (-1); /* Error. */
 		bp = (u_int16_t *)rbufp->page;
 	}
 
@@ -268,10 +269,10 @@ int
 __find_bigpair(HTAB *hashp, BUFHEAD *bufp, int ndx, char *key, int size)
 {
 	u_int16_t *bp;
-	char *p;
-	int ksize;
-	u_int16_t bytes;
-	char *kkey;
+	char	  *p;
+	int	   ksize;
+	u_int16_t  bytes;
+	char	  *kkey;
 
 	bp = (u_int16_t *)bufp->page;
 	p = bufp->page;
@@ -314,9 +315,9 @@ __find_bigpair(HTAB *hashp, BUFHEAD *bufp, int ndx, char *key, int size)
 u_int16_t
 __find_last_page(HTAB *hashp, BUFHEAD **bpp)
 {
-	BUFHEAD *bufp;
+	BUFHEAD	  *bufp;
 	u_int16_t *bp, pageno;
-	int n;
+	int	   n;
 
 	bufp = *bpp;
 	bp = (u_int16_t *)bufp->page;
@@ -335,7 +336,7 @@ __find_last_page(HTAB *hashp, BUFHEAD **bpp)
 		pageno = bp[n - 1];
 		bufp = __get_buf(hashp, pageno, bufp, 0);
 		if (!bufp)
-			return (0);	/* Need to indicate an error! */
+			return (0); /* Need to indicate an error! */
 		bp = (u_int16_t *)bufp->page;
 	}
 
@@ -353,9 +354,9 @@ __find_last_page(HTAB *hashp, BUFHEAD **bpp)
 int
 __big_return(HTAB *hashp, BUFHEAD *bufp, int ndx, DBT *val, int set_current)
 {
-	BUFHEAD *save_p;
+	BUFHEAD	  *save_p;
 	u_int16_t *bp, len, off, save_addr;
-	char *tp;
+	char	  *tp;
 
 	bp = (u_int16_t *)bufp->page;
 	while (bp[ndx + 1] == PARTIAL_KEY) {
@@ -375,57 +376,55 @@ __big_return(HTAB *hashp, BUFHEAD *bufp, int ndx, DBT *val, int set_current)
 		save_addr = save_p->addr;
 		off = bp[1];
 		len = 0;
-	} else
-		if (!FREESPACE(bp)) {
-			/*
-			 * This is a hack.  We can't distinguish between
-			 * FULL_KEY_DATA that contains complete data or
-			 * incomplete data, so we require that if the data
-			 * is complete, there is at least 1 byte of free
-			 * space left.
-			 */
-			off = bp[bp[0]];
-			len = bp[1] - off;
-			save_p = bufp;
-			save_addr = bufp->addr;
-			bufp = __get_buf(hashp, bp[bp[0] - 1], bufp, 0);
-			if (!bufp)
-				return (-1);
-			bp = (u_int16_t *)bufp->page;
-		} else {
-			/* The data is all on one page. */
-			tp = (char *)bp;
-			off = bp[bp[0]];
-			val->data = (u_char *)tp + off;
-			val->size = bp[1] - off;
-			if (set_current) {
-				if (bp[0] == 2) {	/* No more buckets in
-							 * chain */
-					hashp->cpage = NULL;
+	} else if (!FREESPACE(bp)) {
+		/*
+		 * This is a hack.  We can't distinguish between
+		 * FULL_KEY_DATA that contains complete data or
+		 * incomplete data, so we require that if the data
+		 * is complete, there is at least 1 byte of free
+		 * space left.
+		 */
+		off = bp[bp[0]];
+		len = bp[1] - off;
+		save_p = bufp;
+		save_addr = bufp->addr;
+		bufp = __get_buf(hashp, bp[bp[0] - 1], bufp, 0);
+		if (!bufp)
+			return (-1);
+		bp = (u_int16_t *)bufp->page;
+	} else {
+		/* The data is all on one page. */
+		tp = (char *)bp;
+		off = bp[bp[0]];
+		val->data = (u_char *)tp + off;
+		val->size = bp[1] - off;
+		if (set_current) {
+			if (bp[0] == 2) { /* No more buckets in
+					   * chain */
+				hashp->cpage = NULL;
+				hashp->cbucket++;
+				hashp->cndx = 1;
+			} else {
+				hashp->cpage =
+				    __get_buf(hashp, bp[bp[0] - 1], bufp, 0);
+				if (!hashp->cpage)
+					return (-1);
+				hashp->cndx = 1;
+				if (!((u_int16_t *)hashp->cpage->page)[0]) {
 					hashp->cbucket++;
-					hashp->cndx = 1;
-				} else {
-					hashp->cpage = __get_buf(hashp,
-					    bp[bp[0] - 1], bufp, 0);
-					if (!hashp->cpage)
-						return (-1);
-					hashp->cndx = 1;
-					if (!((u_int16_t *)
-					    hashp->cpage->page)[0]) {
-						hashp->cbucket++;
-						hashp->cpage = NULL;
-					}
+					hashp->cpage = NULL;
 				}
 			}
-			return (0);
 		}
+		return (0);
+	}
 
 	val->size = (size_t)collect_data(hashp, bufp, (int)len, set_current);
 	if (val->size == (size_t)-1)
 		return (-1);
 	if (save_p->addr != save_addr) {
 		/* We are pretty short on buffers. */
-		errno = EINVAL;			/* OUT OF BUFFERS */
+		errno = EINVAL; /* OUT OF BUFFERS */
 		return (-1);
 	}
 	memmove(hashp->tmp_buf, (save_p->page) + off, len);
@@ -440,24 +439,24 @@ static int
 collect_data(HTAB *hashp, BUFHEAD *bufp, int len, int set)
 {
 	u_int16_t *bp;
-	char *p;
-	BUFHEAD *xbp;
-	u_int16_t save_addr;
-	int mylen, totlen;
+	char	  *p;
+	BUFHEAD	  *xbp;
+	u_int16_t  save_addr;
+	int	   mylen, totlen;
 
 	p = bufp->page;
 	bp = (u_int16_t *)p;
 	mylen = hashp->BSIZE - bp[1];
 	save_addr = bufp->addr;
 
-	if (bp[2] == FULL_KEY_DATA) {		/* End of Data */
+	if (bp[2] == FULL_KEY_DATA) { /* End of Data */
 		totlen = len + mylen;
 		free(hashp->tmp_buf);
 		if ((hashp->tmp_buf = (char *)malloc(totlen)) == NULL)
 			return (-1);
 		if (set) {
 			hashp->cndx = 1;
-			if (bp[0] == 2) {	/* No more buckets in chain */
+			if (bp[0] == 2) { /* No more buckets in chain */
 				hashp->cpage = NULL;
 				hashp->cbucket++;
 			} else {
@@ -465,7 +464,8 @@ collect_data(HTAB *hashp, BUFHEAD *bufp, int len, int set)
 				    __get_buf(hashp, bp[bp[0] - 1], bufp, 0);
 				if (!hashp->cpage)
 					return (-1);
-				else if (!((u_int16_t *)hashp->cpage->page)[0]) {
+				else if (!((u_int16_t *)
+						 hashp->cpage->page)[0]) {
 					hashp->cbucket++;
 					hashp->cpage = NULL;
 				}
@@ -473,12 +473,12 @@ collect_data(HTAB *hashp, BUFHEAD *bufp, int len, int set)
 		}
 	} else {
 		xbp = __get_buf(hashp, bp[bp[0] - 1], bufp, 0);
-		if (!xbp || ((totlen =
-		    collect_data(hashp, xbp, len + mylen, set)) < 1))
+		if (!xbp ||
+		    ((totlen = collect_data(hashp, xbp, len + mylen, set)) < 1))
 			return (-1);
 	}
 	if (bufp->addr != save_addr) {
-		errno = EINVAL;			/* Out of buffers. */
+		errno = EINVAL; /* Out of buffers. */
 		return (-1);
 	}
 	memmove(&hashp->tmp_buf[len], (bufp->page) + bp[1], mylen);
@@ -505,9 +505,9 @@ __big_keydata(HTAB *hashp, BUFHEAD *bufp, DBT *key, DBT *val, int set)
 static int
 collect_key(HTAB *hashp, BUFHEAD *bufp, int len, DBT *val, int set)
 {
-	BUFHEAD *xbp;
-	char *p;
-	int mylen, totlen;
+	BUFHEAD	  *xbp;
+	char	  *p;
+	int	   mylen, totlen;
 	u_int16_t *bp, save_addr;
 
 	p = bufp->page;
@@ -516,7 +516,7 @@ collect_key(HTAB *hashp, BUFHEAD *bufp, int len, DBT *val, int set)
 
 	save_addr = bufp->addr;
 	totlen = len + mylen;
-	if (bp[2] == FULL_KEY || bp[2] == FULL_KEY_DATA) {    /* End of Key. */
+	if (bp[2] == FULL_KEY || bp[2] == FULL_KEY_DATA) { /* End of Key. */
 		free(hashp->tmp_key);
 		if ((hashp->tmp_key = (char *)malloc(totlen)) == NULL)
 			return (-1);
@@ -524,12 +524,12 @@ collect_key(HTAB *hashp, BUFHEAD *bufp, int len, DBT *val, int set)
 			return (-1);
 	} else {
 		xbp = __get_buf(hashp, bp[bp[0] - 1], bufp, 0);
-		if (!xbp || ((totlen =
-		    collect_key(hashp, xbp, totlen, val, set)) < 1))
+		if (!xbp ||
+		    ((totlen = collect_key(hashp, xbp, totlen, val, set)) < 1))
 			return (-1);
 	}
 	if (bufp->addr != save_addr) {
-		errno = EINVAL;		/* MIS -- OUT OF BUFFERS */
+		errno = EINVAL; /* MIS -- OUT OF BUFFERS */
 		return (-1);
 	}
 	memmove(&hashp->tmp_key[len], (bufp->page) + bp[1], mylen);
@@ -543,15 +543,15 @@ collect_key(HTAB *hashp, BUFHEAD *bufp, int len, DBT *val, int set)
  */
 int
 __big_split(HTAB *hashp,
-    BUFHEAD *op,	/* Pointer to where to put keys that go in old bucket */
-    BUFHEAD *np,	/* Pointer to new bucket page */
-    BUFHEAD *big_keyp,	/* Pointer to first page containing the big key/data */
-    int addr,		/* Address of big_keyp */
+    BUFHEAD	 *op,	/* Pointer to where to put keys that go in old bucket */
+    BUFHEAD	 *np,	/* Pointer to new bucket page */
+    BUFHEAD  *big_keyp, /* Pointer to first page containing the big key/data */
+    int	      addr,	/* Address of big_keyp */
     u_int32_t obucket,	/* Old Bucket */
     SPLIT_RETURN *ret)
 {
-	BUFHEAD *bp, *tmpp;
-	DBT key, val;
+	BUFHEAD	 *bp, *tmpp;
+	DBT	  key, val;
 	u_int32_t change;
 	u_int16_t free_space, n, off, *tp;
 
@@ -564,7 +564,7 @@ __big_split(HTAB *hashp,
 
 	if ((ret->next_addr = __find_last_page(hashp, &big_keyp))) {
 		if (!(ret->nextp =
-		    __get_buf(hashp, ret->next_addr, big_keyp, 0)))
+			    __get_buf(hashp, ret->next_addr, big_keyp, 0)))
 			return (-1);
 	} else
 		ret->nextp = NULL;
@@ -580,11 +580,11 @@ __big_split(HTAB *hashp,
 
 	tmpp->flags |= BUF_MOD;
 #ifdef DEBUG1
-	(void)fprintf(stderr,
-	    "BIG_SPLIT: %d->ovfl was %d is now %d\n", tmpp->addr,
-	    (tmpp->ovfl ? tmpp->ovfl->addr : 0), (bp ? bp->addr : 0));
+	(void)fprintf(stderr, "BIG_SPLIT: %d->ovfl was %d is now %d\n",
+	    tmpp->addr, (tmpp->ovfl ? tmpp->ovfl->addr : 0),
+	    (bp ? bp->addr : 0));
 #endif
-	tmpp->ovfl = bp;	/* one of op/np point to big_keyp */
+	tmpp->ovfl = bp; /* one of op/np point to big_keyp */
 	tp = (u_int16_t *)tmpp->page;
 #ifdef DEBUG
 	assert(FREESPACE(tp) >= OVFLSIZE);

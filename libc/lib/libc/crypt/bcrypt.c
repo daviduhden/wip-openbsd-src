@@ -32,6 +32,7 @@
  */
 
 #include <sys/types.h>
+
 #include <blf.h>
 #include <ctype.h>
 #include <errno.h>
@@ -47,14 +48,14 @@
  */
 
 #define BCRYPT_VERSION '2'
-#define BCRYPT_MAXSALT 16	/* Precomputation is just so nice */
-#define BCRYPT_WORDS 6		/* Ciphertext words */
-#define BCRYPT_MINLOGROUNDS 4	/* we have log2(rounds) in salt */
+#define BCRYPT_MAXSALT 16     /* Precomputation is just so nice */
+#define BCRYPT_WORDS 6	      /* Ciphertext words */
+#define BCRYPT_MINLOGROUNDS 4 /* we have log2(rounds) in salt */
 
-#define	BCRYPT_SALTSPACE	(7 + (BCRYPT_MAXSALT * 4 + 2) / 3 + 1)
-#define	BCRYPT_HASHSPACE	61
+#define BCRYPT_SALTSPACE (7 + (BCRYPT_MAXSALT * 4 + 2) / 3 + 1)
+#define BCRYPT_HASHSPACE 61
 
-char   *bcrypt_gensalt(u_int8_t);
+char *bcrypt_gensalt(u_int8_t);
 
 static int encode_base64(char *, const u_int8_t *, size_t);
 static int decode_base64(u_int8_t *, size_t, const char *);
@@ -89,16 +90,16 @@ bcrypt_initsalt(int log_rounds, uint8_t *salt, size_t saltbuflen)
  * the core bcrypt function
  */
 static int
-bcrypt_hashpass(const char *key, const char *salt, char *encrypted,
-    size_t encryptedlen)
+bcrypt_hashpass(
+    const char *key, const char *salt, char *encrypted, size_t encryptedlen)
 {
-	blf_ctx state;
+	blf_ctx	  state;
 	u_int32_t rounds, i, k;
 	u_int16_t j;
-	size_t key_len;
-	u_int8_t salt_len, logr, minor;
-	u_int8_t ciphertext[4 * BCRYPT_WORDS] = "OrpheanBeholderScryDoubt";
-	u_int8_t csalt[BCRYPT_MAXSALT];
+	size_t	  key_len;
+	u_int8_t  salt_len, logr, minor;
+	u_int8_t  ciphertext[4 * BCRYPT_WORDS] = "OrpheanBeholderScryDoubt";
+	u_int8_t  csalt[BCRYPT_MAXSALT];
 	u_int32_t cdata[BCRYPT_WORDS];
 
 	if (encryptedlen < BCRYPT_HASHSPACE)
@@ -128,7 +129,7 @@ bcrypt_hashpass(const char *key, const char *salt, char *encrypted,
 		key_len++; /* include the NUL */
 		break;
 	default:
-		 goto inval;
+		goto inval;
 	}
 	if (salt[2] != '$')
 		goto inval;
@@ -158,17 +159,17 @@ bcrypt_hashpass(const char *key, const char *salt, char *encrypted,
 
 	/* Setting up S-Boxes and Subkeys */
 	Blowfish_initstate(&state);
-	Blowfish_expandstate(&state, csalt, salt_len,
-	    (u_int8_t *) key, key_len);
+	Blowfish_expandstate(&state, csalt, salt_len, (u_int8_t *)key, key_len);
 	for (k = 0; k < rounds; k++) {
-		Blowfish_expand0state(&state, (u_int8_t *) key, key_len);
+		Blowfish_expand0state(&state, (u_int8_t *)key, key_len);
 		Blowfish_expand0state(&state, csalt, salt_len);
 	}
 
 	/* This can be precomputed later */
 	j = 0;
 	for (i = 0; i < BCRYPT_WORDS; i++)
-		cdata[i] = Blowfish_stream2word(ciphertext, 4 * BCRYPT_WORDS, &j);
+		cdata[i] =
+		    Blowfish_stream2word(ciphertext, 4 * BCRYPT_WORDS, &j);
 
 	/* Now do the encryption */
 	for (k = 0; k < 64; k++)
@@ -183,7 +184,6 @@ bcrypt_hashpass(const char *key, const char *salt, char *encrypted,
 		cdata[i] = cdata[i] >> 8;
 		ciphertext[4 * i + 0] = cdata[i] & 0xff;
 	}
-
 
 	snprintf(encrypted, 8, "$2%c$%2.2u$", minor, logr);
 	encode_base64(encrypted + 7, csalt, BCRYPT_MAXSALT);
@@ -244,9 +244,9 @@ int
 _bcrypt_autorounds(void)
 {
 	struct timespec before, after;
-	int r = 8;
-	char buf[_PASSWORD_LEN];
-	int duration;
+	int		r = 8;
+	char		buf[_PASSWORD_LEN];
+	int		duration;
 
 	WRAP(clock_gettime)(CLOCK_THREAD_CPUTIME_ID, &before);
 	bcrypt_newhash("testpassword", r, buf, sizeof(buf));
@@ -274,24 +274,18 @@ _bcrypt_autorounds(void)
  * internal utilities
  */
 static const u_int8_t Base64Code[] =
-"./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-static const u_int8_t index_64[128] = {
-	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-	255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-	255, 255, 255, 255, 255, 255, 0, 1, 54, 55,
-	56, 57, 58, 59, 60, 61, 62, 63, 255, 255,
-	255, 255, 255, 255, 255, 2, 3, 4, 5, 6,
-	7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-	17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-	255, 255, 255, 255, 255, 255, 28, 29, 30,
-	31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-	41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-	51, 52, 53, 255, 255, 255, 255, 255
-};
-#define CHAR64(c)  ( (c) > 127 ? 255 : index_64[(c)])
+static const u_int8_t index_64[128] = {255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 54, 55, 56, 57, 58, 59, 60,
+    61, 62, 63, 255, 255, 255, 255, 255, 255, 255, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 255,
+    255, 255, 255, 255, 255, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 255, 255, 255, 255,
+    255};
+#define CHAR64(c) ((c) > 127 ? 255 : index_64[(c)])
 
 /*
  * read buflen (after decoding) bytes of data from b64data
@@ -299,9 +293,9 @@ static const u_int8_t index_64[128] = {
 static int
 decode_base64(u_int8_t *buffer, size_t len, const char *b64data)
 {
-	u_int8_t *bp = buffer;
+	u_int8_t       *bp = buffer;
 	const u_int8_t *p = b64data;
-	u_int8_t c1, c2, c3, c4;
+	u_int8_t	c1, c2, c3, c4;
 
 	while (bp < buffer + len) {
 		c1 = CHAR64(*p);
@@ -342,9 +336,9 @@ decode_base64(u_int8_t *buffer, size_t len, const char *b64data)
 static int
 encode_base64(char *b64buffer, const u_int8_t *data, size_t len)
 {
-	u_int8_t *bp = b64buffer;
+	u_int8_t       *bp = b64buffer;
 	const u_int8_t *p = data;
-	u_int8_t c1, c2;
+	u_int8_t	c1, c2;
 
 	while (p < data + len) {
 		c1 = *p++;
@@ -377,7 +371,7 @@ encode_base64(char *b64buffer, const u_int8_t *data, size_t len)
 char *
 bcrypt_gensalt(u_int8_t log_rounds)
 {
-	static char    gsalt[BCRYPT_SALTSPACE];
+	static char gsalt[BCRYPT_SALTSPACE];
 
 	bcrypt_initsalt(log_rounds, gsalt, sizeof(gsalt));
 
@@ -387,7 +381,7 @@ bcrypt_gensalt(u_int8_t log_rounds)
 char *
 bcrypt(const char *pass, const char *salt)
 {
-	static char    gencrypted[BCRYPT_HASHSPACE];
+	static char gencrypted[BCRYPT_HASHSPACE];
 
 	if (bcrypt_hashpass(pass, salt, gencrypted, sizeof(gencrypted)) != 0)
 		return NULL;

@@ -23,13 +23,13 @@
  * parts of libc prevent overriding by the application and avoid unnecessary
  * relocations.
  */
-#define _HIDDEN(x)		_libc_##x
-#define _HIDDEN_ALIAS(x,y)			\
-	STRONG_ALIAS(_HIDDEN(x),y);		\
+#define _HIDDEN(x) _libc_##x
+#define _HIDDEN_ALIAS(x, y)                                                    \
+	STRONG_ALIAS(_HIDDEN(x), y);                                           \
 	.hidden _HIDDEN(x)
-#define _HIDDEN_FALIAS(x,y)			\
-	_HIDDEN_ALIAS(x,y);			\
-	.type _HIDDEN(x),@function
+#define _HIDDEN_FALIAS(x, y)                                                   \
+	_HIDDEN_ALIAS(x, y);                                                   \
+	.type _HIDDEN(x), @function
 
 /*
  * For functions implemented in ASM that aren't syscalls.
@@ -39,18 +39,25 @@
  *			mark it .protected, else be like END_STRONG();
  *			for clang builtins like memcpy
  */
-#define	END_STRONG(x)	END(x); _HIDDEN_FALIAS(x,x); END(_HIDDEN(x))
-#define	END_WEAK(x)	END_STRONG(x); .weak x
+#define END_STRONG(x)                                                          \
+	END(x);                                                                \
+	_HIDDEN_FALIAS(x, x);                                                  \
+	END(_HIDDEN(x))
+#define END_WEAK(x)                                                            \
+	END_STRONG(x);                                                         \
+	.weak x
 
 #ifdef __clang__
-#define	END_BUILTIN(x)	END(x); .protected x
+#define END_BUILTIN(x)                                                         \
+	END(x);                                                                \
+	.protected x
 #else
-#define	END_BUILTIN(x)	END_STRONG(x)
+#define END_BUILTIN(x) END_STRONG(x)
 #endif
 
-#define PINSYSCALL(sysno, label)					\
-	.pushsection .openbsd.syscalls,"",@progbits;			\
-	.p2align 2;							\
-	.long label;							\
-	.long sysno;							\
+#define PINSYSCALL(sysno, label)                                               \
+	.pushsection.openbsd.syscalls, "", @progbits;                          \
+	.p2align 2;                                                            \
+	.long label;                                                           \
+	.long sysno;                                                           \
 	.popsection;

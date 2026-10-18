@@ -29,20 +29,18 @@
 #ifndef _MACHINE_RBUS_MACHDEP_H_
 #define _MACHINE_RBUS_MACHDEP_H_
 
-struct pci_attach_args;		/* XXX */
+struct pci_attach_args; /* XXX */
 
-#define md_space_map(rbt, physaddr, size, flags, bshp) \
+#define md_space_map(rbt, physaddr, size, flags, bshp)                         \
 	_bus_space_map((rbt)->rb_bt, (physaddr), (size), (flags), (bshp))
 
-#define md_space_unmap(rbt, bsh, size, adrp) \
+#define md_space_unmap(rbt, bsh, size, adrp)                                   \
 	_bus_space_unmap((rbt)->rb_bt, (bsh), (size), (adrp))
 
-rbus_tag_t	rbus_pccbb_parent_io(struct device *,
-		    struct pci_attach_args *);
-rbus_tag_t	rbus_pccbb_parent_mem(struct device *,
-		    struct pci_attach_args *);
+rbus_tag_t rbus_pccbb_parent_io(struct device *, struct pci_attach_args *);
+rbus_tag_t rbus_pccbb_parent_mem(struct device *, struct pci_attach_args *);
 
-void		pccbb_attach_hook(struct device *, struct device *,
-		    struct pci_attach_args *);
+void pccbb_attach_hook(
+    struct device *, struct device *, struct pci_attach_args *);
 
 #endif /* _MACHINE_RBUS_MACHDEP_H_ */

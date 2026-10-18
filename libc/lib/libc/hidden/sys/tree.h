@@ -1,6 +1,6 @@
 /*	$OpenBSD: tree.h,v 1.1 2017/06/19 03:06:26 dlg Exp $ */
 
-/* 
+/*
  * Copyright (c) 2016 David Gwynne <dlg@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any

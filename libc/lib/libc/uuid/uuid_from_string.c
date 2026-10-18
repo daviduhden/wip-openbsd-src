@@ -1,5 +1,7 @@
-/*	$OpenBSD: uuid_from_string.c,v 1.3 2021/08/30 20:41:33 krw Exp $	*/
-/*	$NetBSD: uuid_from_string.c,v 1.1 2004/09/13 21:44:54 thorpej Exp $	*/
+/*	$OpenBSD: uuid_from_string.c,v 1.3 2021/08/30 20:41:33 krw Exp $
+ */
+/*	$NetBSD: uuid_from_string.c,v 1.1 2004/09/13 21:44:54 thorpej Exp $
+ */
 
 /*
  * Copyright (c) 2002 Marcel Moolenaar
@@ -27,7 +29,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libc/uuid/uuid_from_string.c,v 1.2 2003/08/08 19:18:43 marcel Exp $
+ * $FreeBSD: src/lib/libc/uuid/uuid_from_string.c,v 1.2 2003/08/08 19:18:43
+ * marcel Exp $
  */
 
 #include <ctype.h>
@@ -85,8 +88,7 @@ uuid_from_string(const char *s, uuid_t *u, uint32_t *status)
 		}
 	}
 
-	n = sscanf(s,
-	    "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
+	n = sscanf(s, "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
 	    &u->time_low, &u->time_mid, &u->time_hi_and_version,
 	    &u->clock_seq_hi_and_reserved, &u->clock_seq_low, &u->node[0],
 	    &u->node[1], &u->node[2], &u->node[3], &u->node[4], &u->node[5]);
@@ -97,9 +99,9 @@ uuid_from_string(const char *s, uuid_t *u, uint32_t *status)
 
 	/* We have a successful scan. Check semantics... */
 	n = u->clock_seq_hi_and_reserved;
-	if ((n & 0x80) != 0x00 &&			/* variant 0? */
-	    (n & 0xc0) != 0x80 &&			/* variant 1? */
-	    (n & 0xe0) != 0xc0) {			/* variant 2? */
+	if ((n & 0x80) != 0x00 && /* variant 0? */
+	    (n & 0xc0) != 0x80 && /* variant 1? */
+	    (n & 0xe0) != 0xc0) { /* variant 2? */
 		if (status != NULL)
 			*status = uuid_s_bad_version;
 	} else {

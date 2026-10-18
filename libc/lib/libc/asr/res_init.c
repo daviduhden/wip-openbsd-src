@@ -17,19 +17,19 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <arpa/nameser.h>
-#include <netinet/in.h>
-#include <netdb.h>
 
+#include <netinet/in.h>
+
+#include <arpa/nameser.h>
 #include <asr.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <string.h>
 
 #include "asr_private.h"
 #include "thread_private.h"
 
-
-struct __res_state _res;
+struct __res_state     _res;
 struct __res_state_ext _res_ext;
 
 int h_errno;
@@ -37,9 +37,9 @@ int h_errno;
 int
 res_init(void)
 {
-	static void *resinit_mutex;
-	struct asr_ctx	*ac;
-	int i;
+	static void    *resinit_mutex;
+	struct asr_ctx *ac;
+	int		i;
 
 	ac = _asr_use_resolver(NULL);
 

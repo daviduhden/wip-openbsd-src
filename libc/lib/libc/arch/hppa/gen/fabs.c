@@ -5,13 +5,14 @@
  */
 
 #include <sys/types.h>
+
 #include <math.h>
 
 double
 fabs(double val)
 {
 
-	__asm__ volatile("fabs,dbl %0,%0" : "+f" (val));
+	__asm__ volatile("fabs,dbl %0,%0" : "+f"(val));
 	return (val);
 }
 

@@ -10,9 +10,9 @@
 
 #include "wctoint.h"
 
-#define	FUNCNAME	wcstol
+#define FUNCNAME wcstol
 typedef long int_type;
-#define	MIN_VALUE	LONG_MIN
-#define	MAX_VALUE	LONG_MAX
+#define MIN_VALUE LONG_MIN
+#define MAX_VALUE LONG_MAX
 
 #include "_wcstol.h"

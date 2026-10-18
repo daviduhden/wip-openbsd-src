@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+
 #include "telldir.h"
 #include "thread_private.h"
 
@@ -46,8 +47,8 @@ readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 		return errno;
 	}
 	if (dp != NULL)
-		memcpy(entry, dp,
-		    sizeof (struct dirent) - NAME_MAX + dp->d_namlen);
+		memcpy(
+		    entry, dp, sizeof(struct dirent) - NAME_MAX + dp->d_namlen);
 	_MUTEX_UNLOCK(&dirp->dd_lock);
 	if (dp != NULL)
 		*result = entry;

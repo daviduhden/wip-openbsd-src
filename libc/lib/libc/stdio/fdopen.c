@@ -32,18 +32,20 @@
  */
 
 #include <sys/types.h>
+
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <unistd.h>
 #include <stdio.h>
-#include <errno.h>
+#include <unistd.h>
+
 #include "local.h"
 
 FILE *
 fdopen(int fd, const char *mode)
 {
 	FILE *fp;
-	int flags, oflags, fdflags, tmp;
+	int   flags, oflags, fdflags, tmp;
 
 	if ((flags = __sflags(mode, &oflags)) == 0)
 		return (NULL);

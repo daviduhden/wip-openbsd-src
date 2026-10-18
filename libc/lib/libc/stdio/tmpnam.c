@@ -36,14 +36,14 @@
 #include <stdio.h>
 #include <unistd.h>
 
-__warn_references(tmpnam,
-    "tmpnam() possibly used unsafely; consider using mkstemp()");
+__warn_references(
+    tmpnam, "tmpnam() possibly used unsafely; consider using mkstemp()");
 
 char *
 tmpnam(char *s)
 {
 	static u_long tmpcount;
-	static char buf[L_tmpnam];
+	static char   buf[L_tmpnam];
 
 	if (s == NULL)
 		s = buf;

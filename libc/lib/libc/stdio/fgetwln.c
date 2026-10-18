@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wchar.h>
+
 #include "local.h"
 
 /*
@@ -49,7 +50,7 @@ __slbexpand(FILE *fp, size_t newsize)
 }
 
 wchar_t *
-fgetwln(FILE * __restrict fp, size_t *lenp)
+fgetwln(FILE *__restrict fp, size_t *lenp)
 {
 	wint_t wc;
 	size_t len;
@@ -59,7 +60,7 @@ fgetwln(FILE * __restrict fp, size_t *lenp)
 
 	len = 0;
 	while ((wc = __fgetwc_unlock(fp)) != WEOF) {
-#define	GROW	512
+#define GROW 512
 		if (len >= fp->_lb._size / sizeof(wchar_t) &&
 		    __slbexpand(fp, len + GROW)) {
 			fp->_flags |= __SERR;

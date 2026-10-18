@@ -35,54 +35,54 @@
  *	$NetBSD: psl.h,v 1.5 2000/11/19 19:52:37 matt Exp $
  */
 
-#ifndef	_MACHINE_PSL_H_
-#define	_MACHINE_PSL_H_
+#ifndef _MACHINE_PSL_H_
+#define _MACHINE_PSL_H_
 
 /*
  * Machine State Register (MSR) - All cores
  */
-#define	PSL_VEC		0x02000000UL	/* AltiVec/SPE vector unit available */
-#define	PSL_VSX		0x00800000UL	/* Vector-Scalar unit available */
-#define	PSL_EE		0x00008000UL	/* external interrupt enable */
-#define	PSL_PR		0x00004000UL	/* privilege mode (1 == user) */
-#define	PSL_FP		0x00002000UL	/* floating point enable */
-#define	PSL_ME		0x00001000UL	/* machine check enable */
-#define	PSL_FE0		0x00000800UL	/* floating point interrupt mode 0 */
-#define	PSL_FE1		0x00000100UL	/* floating point interrupt mode 1 */
-#define	PSL_PMM		0x00000004UL	/* performance monitor mark */
-#define	PSL_RI		0x00000002UL	/* recoverable interrupt */
+#define PSL_VEC 0x02000000UL /* AltiVec/SPE vector unit available */
+#define PSL_VSX 0x00800000UL /* Vector-Scalar unit available */
+#define PSL_EE 0x00008000UL  /* external interrupt enable */
+#define PSL_PR 0x00004000UL  /* privilege mode (1 == user) */
+#define PSL_FP 0x00002000UL  /* floating point enable */
+#define PSL_ME 0x00001000UL  /* machine check enable */
+#define PSL_FE0 0x00000800UL /* floating point interrupt mode 0 */
+#define PSL_FE1 0x00000100UL /* floating point interrupt mode 1 */
+#define PSL_PMM 0x00000004UL /* performance monitor mark */
+#define PSL_RI 0x00000002UL  /* recoverable interrupt */
 
-#define PSL_GS		0x10000000UL	/* Guest state */
-#define PSL_UCLE	0x04000000UL	/* User mode cache lock enable */
-#define PSL_WE		0x00040000UL	/* Wait state enable */
-#define PSL_CE		0x00020000UL	/* Critical interrupt enable */
-#define PSL_UBLE	0x00000400UL	/* BTB lock enable - e500 only */
-#define PSL_DWE		0x00000400UL	/* Debug Wait Enable - 440 only*/
-#define PSL_DE		0x00000200UL	/* Debug interrupt enable */
-#define PSL_IS		0x00000020UL	/* Instruction address space */
-#define PSL_DS		0x00000010UL	/* Data address space */
+#define PSL_GS 0x10000000UL   /* Guest state */
+#define PSL_UCLE 0x04000000UL /* User mode cache lock enable */
+#define PSL_WE 0x00040000UL   /* Wait state enable */
+#define PSL_CE 0x00020000UL   /* Critical interrupt enable */
+#define PSL_UBLE 0x00000400UL /* BTB lock enable - e500 only */
+#define PSL_DWE 0x00000400UL  /* Debug Wait Enable - 440 only*/
+#define PSL_DE 0x00000200UL   /* Debug interrupt enable */
+#define PSL_IS 0x00000020UL   /* Instruction address space */
+#define PSL_DS 0x00000010UL   /* Data address space */
 
-#define PSL_SF		0x8000000000000000UL	/* 64-bit addressing */
-#define PSL_HV		0x1000000000000000UL	/* hyper-privileged mode */
+#define PSL_SF 0x8000000000000000UL /* 64-bit addressing */
+#define PSL_HV 0x1000000000000000UL /* hyper-privileged mode */
 
-#define	PSL_POW		0x00040000UL	/* power management */
-#define	PSL_ILE		0x00010000UL	/* interrupt endian mode (1 == le) */
-#define	PSL_SE		0x00000400UL	/* single-step trace enable */
-#define	PSL_BE		0x00000200UL	/* branch trace enable */
-#define	PSL_IP		0x00000040UL	/* interrupt prefix - 601 only */
-#define	PSL_IR		0x00000020UL	/* instruction address relocation */
-#define	PSL_DR		0x00000010UL	/* data address relocation */
-#define	PSL_LE		0x00000001UL	/* endian mode (1 == le) */
+#define PSL_POW 0x00040000UL /* power management */
+#define PSL_ILE 0x00010000UL /* interrupt endian mode (1 == le) */
+#define PSL_SE 0x00000400UL  /* single-step trace enable */
+#define PSL_BE 0x00000200UL  /* branch trace enable */
+#define PSL_IP 0x00000040UL  /* interrupt prefix - 601 only */
+#define PSL_IR 0x00000020UL  /* instruction address relocation */
+#define PSL_DR 0x00000010UL  /* data address relocation */
+#define PSL_LE 0x00000001UL  /* endian mode (1 == le) */
 
 /*
  * Floating-point exception modes:
  */
-#define	PSL_FE_DIS	0		/* none */
-#define	PSL_FE_NONREC	PSL_FE1		/* imprecise non-recoverable */
-#define	PSL_FE_REC	PSL_FE0		/* imprecise recoverable */
-#define	PSL_FE_PREC	(PSL_FE0 | PSL_FE1) /* precise */
-#define	PSL_FE_DFLT	PSL_FE_DIS	/* default == none */
+#define PSL_FE_DIS 0			/* none */
+#define PSL_FE_NONREC PSL_FE1		/* imprecise non-recoverable */
+#define PSL_FE_REC PSL_FE0		/* imprecise recoverable */
+#define PSL_FE_PREC (PSL_FE0 | PSL_FE1) /* precise */
+#define PSL_FE_DFLT PSL_FE_DIS		/* default == none */
 
-#define	PSL_FPU		(PSL_FP | PSL_FE_PREC)
+#define PSL_FPU (PSL_FP | PSL_FE_PREC)
 
-#endif	/* _MACHINE_PSL_H_ */
+#endif /* _MACHINE_PSL_H_ */

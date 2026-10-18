@@ -32,8 +32,8 @@
 #include <sys/stat.h>
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
+#include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -48,28 +48,28 @@
 #include <syslog.h>
 #include <unistd.h>
 
-static int __ivaliduser_sa(FILE *, struct sockaddr *, socklen_t,
-	    const char *, const char *);
-static int __icheckhost(struct sockaddr *, socklen_t, const char *);
+static int __ivaliduser_sa(
+    FILE *, struct sockaddr *, socklen_t, const char *, const char *);
+static int   __icheckhost(struct sockaddr *, socklen_t, const char *);
 static char *__gethostloop(struct sockaddr *, socklen_t);
-static int iruserok_sa(const void *, int, int, const char *, const char *);
+static int   iruserok_sa(const void *, int, int, const char *, const char *);
 
 int
 ruserok(const char *rhost, int superuser, const char *ruser, const char *luser)
 {
 	struct addrinfo hints, *res, *r;
-	int error;
+	int		error;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = PF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;	/*dummy*/
+	hints.ai_socktype = SOCK_DGRAM; /*dummy*/
 	error = getaddrinfo(rhost, "0", &hints, &res);
 	if (error)
 		return (-1);
 
 	for (r = res; r; r = r->ai_next) {
 		if (iruserok_sa(r->ai_addr, r->ai_addrlen, superuser, ruser,
-		    luser) == 0) {
+			luser) == 0) {
 			freeaddrinfo(res);
 			return (0);
 		}
@@ -83,13 +83,13 @@ iruserok_sa(const void *raddr, int rlen, int superuser, const char *ruser,
     const char *luser)
 {
 	struct sockaddr *sa;
-	char *cp;
-	struct stat sbuf;
-	struct passwd pwstore, *pwd;
-	FILE *hostf;
-	uid_t uid;
-	int first;
-	char pbuf[PATH_MAX], pwbuf[_PW_BUF_LEN];
+	char		*cp;
+	struct stat	 sbuf;
+	struct passwd	 pwstore, *pwd;
+	FILE		*hostf;
+	uid_t		 uid;
+	int		 first;
+	char		 pbuf[PATH_MAX], pwbuf[_PW_BUF_LEN];
 
 	sa = (struct sockaddr *)raddr;
 	first = 1;
@@ -139,7 +139,7 @@ again:
 			cp = ".rhosts fstat failed";
 		else if (sbuf.st_uid && sbuf.st_uid != pwd->pw_uid)
 			cp = "bad .rhosts owner";
-		else if (sbuf.st_mode & (S_IWGRP|S_IWOTH))
+		else if (sbuf.st_mode & (S_IWGRP | S_IWOTH))
 			cp = ".rhosts writable by other than owner";
 		/* If there were any problems, quit. */
 		if (cp) {
@@ -155,13 +155,13 @@ int
 __ivaliduser_sa(FILE *hostf, struct sockaddr *raddr, socklen_t salen,
     const char *luser, const char *ruser)
 {
-	char *user, *p;
-	char *buf;
+	char	   *user, *p;
+	char	   *buf;
 	const char *auser, *ahost;
-	int hostok, userok;
-	char *rhost = (char *)-1;
-	char domain[HOST_NAME_MAX+1];
-	size_t buflen;
+	int	    hostok, userok;
+	char	   *rhost = (char *)-1;
+	char	    domain[HOST_NAME_MAX + 1];
+	size_t	    buflen;
 
 	getdomainname(domain, sizeof(domain));
 
@@ -169,11 +169,13 @@ __ivaliduser_sa(FILE *hostf, struct sockaddr *raddr, socklen_t salen,
 		p = buf;
 		if (*p == '#')
 			continue;
-		while (p < buf + buflen && *p != '\n' && *p != ' ' && *p != '\t') {
+		while (
+		    p < buf + buflen && *p != '\n' && *p != ' ' && *p != '\t') {
 			if (!isprint((unsigned char)*p))
 				goto bail;
 			*p = isupper((unsigned char)*p) ?
-			    tolower((unsigned char)*p) : *p;
+			    tolower((unsigned char)*p) :
+			    *p;
 			p++;
 		}
 		if (p >= buf + buflen)
@@ -219,8 +221,8 @@ __ivaliduser_sa(FILE *hostf, struct sockaddr *raddr, socklen_t salen,
 					rhost = __gethostloop(raddr, salen);
 				hostok = 0;
 				if (rhost)
-					hostok = innetgr(&ahost[2], rhost,
-					    NULL, domain);
+					hostok = innetgr(
+					    &ahost[2], rhost, NULL, domain);
 				break;
 			default:
 				hostok = __icheckhost(raddr, salen, &ahost[1]);
@@ -236,8 +238,8 @@ __ivaliduser_sa(FILE *hostf, struct sockaddr *raddr, socklen_t salen,
 					rhost = __gethostloop(raddr, salen);
 				hostok = 0;
 				if (rhost)
-					hostok = -innetgr(&ahost[2], rhost,
-					    NULL, domain);
+					hostok = -innetgr(
+					    &ahost[2], rhost, NULL, domain);
 				break;
 			default:
 				hostok = -__icheckhost(raddr, salen, &ahost[1]);
@@ -246,15 +248,14 @@ __ivaliduser_sa(FILE *hostf, struct sockaddr *raddr, socklen_t salen,
 		else
 			hostok = __icheckhost(raddr, salen, ahost);
 
-
 		if (auser[0] == '+')
 			switch (auser[1]) {
 			case '\0':
 				userok = 1;
 				break;
 			case '@':
-				userok = innetgr(&auser[2], NULL, ruser,
-				    domain);
+				userok =
+				    innetgr(&auser[2], NULL, ruser, domain);
 				break;
 			default:
 				userok = strcmp(ruser, &auser[1]) ? 0 : 1;
@@ -266,8 +267,8 @@ __ivaliduser_sa(FILE *hostf, struct sockaddr *raddr, socklen_t salen,
 				userok = -1;
 				break;
 			case '@':
-				userok = -innetgr(&auser[2], NULL, ruser,
-				    domain);
+				userok =
+				    -innetgr(&auser[2], NULL, ruser, domain);
 				break;
 			default:
 				userok = strcmp(ruser, &auser[1]) ? 0 : -1;
@@ -300,19 +301,18 @@ static int
 __icheckhost(struct sockaddr *raddr, socklen_t salen, const char *lhost)
 {
 	struct addrinfo hints, *res, *r;
-	char h1[NI_MAXHOST], h2[NI_MAXHOST];
-	int error;
-	const int niflags = NI_NUMERICHOST;
+	char		h1[NI_MAXHOST], h2[NI_MAXHOST];
+	int		error;
+	const int	niflags = NI_NUMERICHOST;
 
 	h1[0] = '\0';
-	if (getnameinfo(raddr, salen, h1, sizeof(h1), NULL, 0,
-	    niflags) != 0)
+	if (getnameinfo(raddr, salen, h1, sizeof(h1), NULL, 0, niflags) != 0)
 		return (0);
 
 	/* Resolve laddr into sockaddr */
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = raddr->sa_family;
-	hints.ai_socktype = SOCK_DGRAM;	/*dummy*/
+	hints.ai_socktype = SOCK_DGRAM; /*dummy*/
 	res = NULL;
 	error = getaddrinfo(lhost, "0", &hints, &res);
 	if (error)
@@ -323,8 +323,8 @@ __icheckhost(struct sockaddr *raddr, socklen_t salen, const char *lhost)
 	 */
 	for (r = res; r; r = r->ai_next) {
 		h2[0] = '\0';
-		if (getnameinfo(r->ai_addr, r->ai_addrlen, h2, sizeof(h2),
-		    NULL, 0, niflags) != 0)
+		if (getnameinfo(r->ai_addr, r->ai_addrlen, h2, sizeof(h2), NULL,
+			0, niflags) != 0)
 			continue;
 		if (strcmp(h1, h2) == 0) {
 			freeaddrinfo(res);
@@ -345,18 +345,17 @@ __icheckhost(struct sockaddr *raddr, socklen_t salen, const char *lhost)
 static char *
 __gethostloop(struct sockaddr *raddr, socklen_t salen)
 {
-	static char remotehost[NI_MAXHOST];
-	char h1[NI_MAXHOST], h2[NI_MAXHOST];
+	static char	remotehost[NI_MAXHOST];
+	char		h1[NI_MAXHOST], h2[NI_MAXHOST];
 	struct addrinfo hints, *res, *r;
-	int error;
-	const int niflags = NI_NUMERICHOST;
+	int		error;
+	const int	niflags = NI_NUMERICHOST;
 
 	h1[0] = remotehost[0] = '\0';
-	if (getnameinfo(raddr, salen, remotehost, sizeof(remotehost),
-	    NULL, 0, NI_NAMEREQD) != 0)
+	if (getnameinfo(raddr, salen, remotehost, sizeof(remotehost), NULL, 0,
+		NI_NAMEREQD) != 0)
 		return (NULL);
-	if (getnameinfo(raddr, salen, h1, sizeof(h1), NULL, 0,
-	    niflags) != 0)
+	if (getnameinfo(raddr, salen, h1, sizeof(h1), NULL, 0, niflags) != 0)
 		return (NULL);
 
 	/*
@@ -365,7 +364,7 @@ __gethostloop(struct sockaddr *raddr, socklen_t salen)
 	 */
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = raddr->sa_family;
-	hints.ai_socktype = SOCK_DGRAM;	/*dummy*/
+	hints.ai_socktype = SOCK_DGRAM; /*dummy*/
 	hints.ai_flags = AI_CANONNAME;
 	res = NULL;
 	error = getaddrinfo(remotehost, "0", &hints, &res);
@@ -374,8 +373,8 @@ __gethostloop(struct sockaddr *raddr, socklen_t salen)
 
 	for (r = res; r; r = r->ai_next) {
 		h2[0] = '\0';
-		if (getnameinfo(r->ai_addr, r->ai_addrlen, h2, sizeof(h2),
-		    NULL, 0, niflags) != 0)
+		if (getnameinfo(r->ai_addr, r->ai_addrlen, h2, sizeof(h2), NULL,
+			0, niflags) != 0)
 			continue;
 		if (strcmp(h1, h2) == 0) {
 			freeaddrinfo(res);

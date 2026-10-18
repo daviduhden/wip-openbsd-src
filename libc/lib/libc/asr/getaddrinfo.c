@@ -17,11 +17,12 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
-#include <netdb.h>
 
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 
 int
@@ -30,7 +31,7 @@ getaddrinfo(const char *hostname, const char *servname,
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	int		 saved_errno = errno;
+	int		  saved_errno = errno;
 
 	if (hints == NULL || (hints->ai_flags & AI_NUMERICHOST) == 0)
 		res_init();

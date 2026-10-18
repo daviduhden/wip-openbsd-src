@@ -19,19 +19,18 @@
  * signals
  */
 
-#include <signal.h>
 #include <errno.h>
-
 #include <pthread.h>
+#include <signal.h>
 
+#include "cancel.h" /* in libc/include */
 #include "thread/rthread.h"
-#include "cancel.h"		/* in libc/include */
 
 int
 sigwait(const sigset_t *set, int *sig)
 {
 	sigset_t s = *set;
-	int ret;
+	int	 ret;
 
 	sigdelset(&s, SIGTHR);
 	do {
@@ -45,7 +44,7 @@ sigwait(const sigset_t *set, int *sig)
 	return (0);
 }
 
-#if 0		/* need kernel to fill in more siginfo_t bits first */
+#if 0 /* need kernel to fill in more siginfo_t bits first */
 int
 sigwaitinfo(const sigset_t *set, siginfo_t *info)
 {

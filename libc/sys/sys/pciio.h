@@ -31,56 +31,56 @@
  */
 
 #ifndef _SYS_PCIIO_H_
-#define	_SYS_PCIIO_H_
+#define _SYS_PCIIO_H_
 
 #include <sys/ioccom.h>
 
 struct pcisel {
-	u_int8_t	pc_bus;		/* bus number */
-	u_int8_t	pc_dev;		/* device on this bus */
-	u_int8_t	pc_func;	/* function on this device */
+	u_int8_t pc_bus;  /* bus number */
+	u_int8_t pc_dev;  /* device on this bus */
+	u_int8_t pc_func; /* function on this device */
 };
 
 struct pci_io {
-	struct pcisel	pi_sel;		/* device to operate on */
-	int		pi_reg;		/* configuration register to examine */
-	int		pi_width;	/* width (in bytes) of read or write */
-	u_int32_t	pi_data;	/* data to write or result of read */
+	struct pcisel pi_sel;	/* device to operate on */
+	int	      pi_reg;	/* configuration register to examine */
+	int	      pi_width; /* width (in bytes) of read or write */
+	u_int32_t     pi_data;	/* data to write or result of read */
 };
 
 struct pci_rom {
-	struct pcisel	pr_sel;
-	int		pr_romlen;
-	char		*pr_rom;
+	struct pcisel pr_sel;
+	int	      pr_romlen;
+	char	     *pr_rom;
 };
 
 struct pci_vpd_req {
-	struct pcisel	pv_sel;
-	int		pv_offset;
-	int		pv_count;
-	uint32_t	*pv_data;
+	struct pcisel pv_sel;
+	int	      pv_offset;
+	int	      pv_count;
+	uint32_t     *pv_data;
 };
 
 struct pci_vga {
-	struct pcisel	pv_sel;
-	int		pv_lock;
-	int		pv_decode;
+	struct pcisel pv_sel;
+	int	      pv_lock;
+	int	      pv_decode;
 };
 
-#define	PCI_VGA_UNLOCK		0x00
-#define	PCI_VGA_LOCK		0x01
-#define	PCI_VGA_TRYLOCK		0x02
+#define PCI_VGA_UNLOCK 0x00
+#define PCI_VGA_LOCK 0x01
+#define PCI_VGA_TRYLOCK 0x02
 
-#define	PCI_VGA_IO_ENABLE	0x01
-#define	PCI_VGA_MEM_ENABLE	0x02
+#define PCI_VGA_IO_ENABLE 0x01
+#define PCI_VGA_MEM_ENABLE 0x02
 
-#define	PCIOCREAD	_IOWR('p', 2, struct pci_io)
-#define	PCIOCWRITE	_IOWR('p', 3, struct pci_io)
-#define	PCIOCGETROMLEN	_IOWR('p', 4, struct pci_rom)
-#define	PCIOCGETROM	_IOWR('p', 5, struct pci_rom)
-#define	PCIOCGETVGA	_IOWR('p', 6, struct pci_vga)
-#define	PCIOCSETVGA	_IOWR('p', 7, struct pci_vga)
-#define	PCIOCREADMASK	_IOWR('p', 8, struct pci_io)
-#define	PCIOCGETVPD	_IOWR('p', 9, struct pci_vpd_req)
+#define PCIOCREAD _IOWR('p', 2, struct pci_io)
+#define PCIOCWRITE _IOWR('p', 3, struct pci_io)
+#define PCIOCGETROMLEN _IOWR('p', 4, struct pci_rom)
+#define PCIOCGETROM _IOWR('p', 5, struct pci_rom)
+#define PCIOCGETVGA _IOWR('p', 6, struct pci_vga)
+#define PCIOCSETVGA _IOWR('p', 7, struct pci_vga)
+#define PCIOCREADMASK _IOWR('p', 8, struct pci_io)
+#define PCIOCGETVPD _IOWR('p', 9, struct pci_vpd_req)
 
 #endif /* !_SYS_PCIIO_H_ */

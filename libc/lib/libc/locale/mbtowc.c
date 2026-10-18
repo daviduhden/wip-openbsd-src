@@ -26,17 +26,16 @@
  * SUCH DAMAGE.
  */
 
-
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
-#include <errno.h>
 
 int
-mbtowc(wchar_t * __restrict pwc, const char * __restrict s, size_t n)
+mbtowc(wchar_t *__restrict pwc, const char *__restrict s, size_t n)
 {
 	static mbstate_t mbs;
-	size_t rval;
+	size_t		 rval;
 
 	if (s == NULL) {
 		/* No support for state dependent encodings. */

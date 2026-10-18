@@ -32,8 +32,8 @@
  *	@(#)resourcevar.h	8.3 (Berkeley) 2/22/94
  */
 
-#ifndef	_SYS_RESOURCEVAR_H_
-#define	_SYS_RESOURCEVAR_H_
+#ifndef _SYS_RESOURCEVAR_H_
+#define _SYS_RESOURCEVAR_H_
 
 #include <sys/refcnt.h>
 
@@ -43,40 +43,40 @@
  * copy-on-write after forks.
  */
 struct plimit {
-	struct	rlimit pl_rlimit[RLIM_NLIMITS];
-	struct	refcnt pl_refcnt;
+	struct rlimit pl_rlimit[RLIM_NLIMITS];
+	struct refcnt pl_refcnt;
 };
 
 /* add user profiling from AST */
-#define	ADDUPROF(p)							\
-do {									\
-	atomic_clearbits_int(&(p)->p_flag, P_OWEUPC);			\
-	addupc_task((p), (p)->p_prof_addr, (p)->p_prof_ticks);		\
-	(p)->p_prof_ticks = 0;						\
-} while (0)
+#define ADDUPROF(p)                                                            \
+	do {                                                                   \
+		atomic_clearbits_int(&(p)->p_flag, P_OWEUPC);                  \
+		addupc_task((p), (p)->p_prof_addr, (p)->p_prof_ticks);         \
+		(p)->p_prof_ticks = 0;                                         \
+	} while (0)
 
 #ifdef _KERNEL
 
-#include <lib/libkern/libkern.h>	/* for KASSERT() */
+#include <lib/libkern/libkern.h> /* for KASSERT() */
 
 extern uint64_t profclock_period;
 
-void	 addupc_intr(struct proc *, u_long, u_long);
-void	 addupc_task(struct proc *, u_long, u_int);
+void addupc_intr(struct proc *, u_long, u_long);
+void addupc_task(struct proc *, u_long, u_int);
 struct clockrequest;
-void	 profclock(struct clockrequest *, void *, void *);
-void	 tuagg_add_process(struct process *, struct proc *);
-void	 tuagg_add_runtime(void);
+void profclock(struct clockrequest *, void *, void *);
+void tuagg_add_process(struct process *, struct proc *);
+void tuagg_add_runtime(void);
 struct tusage;
-void	 tuagg_get_proc(struct tusage *, struct proc *);
-void	 tuagg_get_process(struct tusage *, struct process *);
-void	 calctsru(struct tusage *, struct timespec *, struct timespec *,
-	    struct timespec *);
-void	 calcru(struct tusage *, struct timeval *, struct timeval *,
-	    struct timeval *);
-void	 lim_startup(struct plimit *);
-void	 lim_free(struct plimit *);
-void	 lim_fork(struct process *, struct process *);
+void tuagg_get_proc(struct tusage *, struct proc *);
+void tuagg_get_process(struct tusage *, struct process *);
+void calctsru(
+    struct tusage *, struct timespec *, struct timespec *, struct timespec *);
+void calcru(
+    struct tusage *, struct timeval *, struct timeval *, struct timeval *);
+void	       lim_startup(struct plimit *);
+void	       lim_free(struct plimit *);
+void	       lim_fork(struct process *, struct process *);
 struct plimit *lim_read_enter(void);
 
 /*
@@ -95,7 +95,7 @@ static inline rlim_t
 lim_cur(int which)
 {
 	struct plimit *limit;
-	rlim_t val;
+	rlim_t	       val;
 
 	KASSERT(which >= 0 && which < RLIM_NLIMITS);
 
@@ -105,10 +105,10 @@ lim_cur(int which)
 	return (val);
 }
 
-rlim_t	 lim_cur_proc(struct proc *, int);
+rlim_t lim_cur_proc(struct proc *, int);
 
-void	 ruadd(struct rusage *, const struct rusage *);
-void	 rucheck(void *);
+void ruadd(struct rusage *, const struct rusage *);
+void rucheck(void *);
 
 #endif
-#endif	/* !_SYS_RESOURCEVAR_H_ */
+#endif /* !_SYS_RESOURCEVAR_H_ */

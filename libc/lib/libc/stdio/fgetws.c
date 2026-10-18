@@ -34,13 +34,14 @@
 #include <errno.h>
 #include <stdio.h>
 #include <wchar.h>
+
 #include "local.h"
 
 wchar_t *
-fgetws(wchar_t * __restrict ws, int n, FILE * __restrict fp)
+fgetws(wchar_t *__restrict ws, int n, FILE *__restrict fp)
 {
 	wchar_t *wsp;
-	wint_t wc;
+	wint_t	 wc;
 
 	FLOCKFILE(fp);
 	_SET_ORIENTATION(fp, 1);
@@ -52,8 +53,8 @@ fgetws(wchar_t * __restrict ws, int n, FILE * __restrict fp)
 
 	wsp = ws;
 	while (n-- > 1) {
-		if ((wc = __fgetwc_unlock(fp)) == WEOF &&
-		    ferror(fp) && errno == EILSEQ)
+		if ((wc = __fgetwc_unlock(fp)) == WEOF && ferror(fp) &&
+		    errno == EILSEQ)
 			goto error;
 		if (wc == WEOF) {
 			if (wsp == ws) {

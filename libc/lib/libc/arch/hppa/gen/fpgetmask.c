@@ -5,6 +5,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_except
@@ -12,6 +13,6 @@ fpgetmask()
 {
 	u_int64_t fpsr;
 
-	__asm__ volatile("fstd %%fr0,0(%1)" : "=m" (fpsr) : "r" (&fpsr));
+	__asm__ volatile("fstd %%fr0,0(%1)" : "=m"(fpsr) : "r"(&fpsr));
 	return ((fpsr >> 32) & 0x1f);
 }

@@ -1,4 +1,5 @@
-/*	$OpenBSD: fpsetsticky.c,v 1.1 2018/02/28 11:16:54 kettenis Exp $	*/
+/*	$OpenBSD: fpsetsticky.c,v 1.1 2018/02/28 11:16:54 kettenis Exp $
+ */
 /*
  * Copyright (c) 2018 Mark Kettenis <kettenis@openbsd.org>
  *
@@ -19,22 +20,23 @@
 #ifdef SOFTFLOAT_FOR_GCC
 #include "softfloat-for-gcc.h"
 #endif
-#include "milieu.h"
 #include <softfloat.h>
 
-#define FP_X_MASK	(FP_X_INV | FP_X_DZ | FP_X_OFL | FP_X_UFL | FP_X_IMP)
+#include "milieu.h"
 
-__weak_alias(_fpsetsticky,fpsetsticky);
+#define FP_X_MASK (FP_X_INV | FP_X_DZ | FP_X_OFL | FP_X_UFL | FP_X_IMP)
+
+__weak_alias(_fpsetsticky, fpsetsticky);
 
 fp_except
 fpsetsticky(fp_except except)
 {
 	fp_except old, new;
 
-	__asm volatile("vmrs %0, fpscr" : "=r" (old));
+	__asm volatile("vmrs %0, fpscr" : "=r"(old));
 	new = old & ~(FP_X_MASK);
 	new |= (except & FP_X_MASK);
-	__asm volatile("vmsr fpscr, %0" :: "r" (new));
+	__asm volatile("vmsr fpscr, %0" ::"r"(new));
 
 	old |= float_exception_flags;
 	float_exception_flags = except;

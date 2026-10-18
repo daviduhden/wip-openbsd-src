@@ -39,6 +39,7 @@
  */
 
 #include <sys/queue.h>
+
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -52,12 +53,12 @@
  * not NULL. If not locked, the file lock structure can be
  * reassigned to a different file by setting fp.
  */
-struct	file_lock {
-	LIST_ENTRY(file_lock)	entry;	/* Entry if file list.       */
-	FILE			*fp;	/* The target file.          */
-	struct pthread_queue	lockers;
-	pthread_t		owner;
-	int			count;
+struct file_lock {
+	LIST_ENTRY(file_lock) entry; /* Entry if file list.       */
+	FILE		    *fp;     /* The target file.          */
+	struct pthread_queue lockers;
+	pthread_t	     owner;
+	int		     count;
 };
 
 /*
@@ -66,7 +67,7 @@ struct	file_lock {
  * but this causes incompatibility, so separate data structures are
  * required.
  */
-#define NUM_HEADS	128
+#define NUM_HEADS 128
 
 /*
  * This macro casts a file pointer to a long integer and right
@@ -76,7 +77,7 @@ struct	file_lock {
  * structures. If there is a collision, a linear search of the
  * dynamic list of locks linked to each static lock is performed.
  */
-#define file_idx(_p)	((int)((((uintptr_t) _p) >> sizeof(void *)) % NUM_HEADS))
+#define file_idx(_p) ((int)((((uintptr_t)_p) >> sizeof(void *)) % NUM_HEADS))
 
 /*
  * Global array of file locks. The first lock for each hash bucket is
@@ -85,18 +86,17 @@ struct	file_lock {
  */
 static struct static_file_lock {
 	LIST_HEAD(file_list_head, file_lock) head;
-	struct	file_lock	fl;
+	struct file_lock fl;
 } flh[NUM_HEADS];
 
 /* Lock for accesses to the hash table: */
-static _atomic_lock_t	hash_lock	= _SPINLOCK_UNLOCKED;
+static _atomic_lock_t hash_lock = _SPINLOCK_UNLOCKED;
 
 /*
  * Find a lock structure for a FILE, return NULL if the file is
  * not locked:
  */
-static
-struct file_lock *
+static struct file_lock *
 find_lock(int idx, FILE *fp)
 {
 	struct file_lock *p;
@@ -117,15 +117,14 @@ find_lock(int idx, FILE *fp)
 			/* Not this file, try the next: */
 			p = LIST_NEXT(p, entry);
 	}
-	return(p);
+	return (p);
 }
 
 /*
  * Lock a file, assuming that there is no lock structure currently
  * assigned to it.
  */
-static
-struct file_lock *
+static struct file_lock *
 do_lock(int idx, FILE *fp)
 {
 	struct file_lock *p;
@@ -134,8 +133,7 @@ do_lock(int idx, FILE *fp)
 	if (flh[idx].fl.owner == NULL) {
 		/* Return a pointer to the static lock: */
 		p = &flh[idx].fl;
-	}
-	else {
+	} else {
 		/* Point to the first dynamic lock: */
 		p = LIST_FIRST(&flh[idx].head);
 
@@ -152,8 +150,9 @@ do_lock(int idx, FILE *fp)
 	 * If an existing lock structure has not been found,
 	 * allocate memory for a new one:
 	 */
-	if (p == NULL && (p = (struct file_lock *)
-	    malloc(sizeof(struct file_lock))) != NULL) {
+	if (p == NULL &&
+	    (p = (struct file_lock *)malloc(sizeof(struct file_lock))) !=
+		NULL) {
 		/* Add the new element to the list: */
 		LIST_INSERT_HEAD(&flh[idx].head, p, entry);
 	}
@@ -161,20 +160,20 @@ do_lock(int idx, FILE *fp)
 	/* Check if there is a lock structure to acquire: */
 	if (p != NULL) {
 		/* Acquire the lock for the running thread: */
-		p->fp		= fp;
-		p->owner	= pthread_self();
-		p->count	= 1;
+		p->fp = fp;
+		p->owner = pthread_self();
+		p->count = 1;
 		TAILQ_INIT(&p->lockers);
 	}
-	return(p);
+	return (p);
 }
 
 void
-_thread_flockfile(FILE * fp)
+_thread_flockfile(FILE *fp)
 {
-	int	idx = file_idx(fp);
-	struct	file_lock	*p;
-	pthread_t	self = pthread_self();
+	int		  idx = file_idx(fp);
+	struct file_lock *p;
+	pthread_t	  self = pthread_self();
 
 	/* Lock the hash table: */
 	_spinlock(&hash_lock);
@@ -187,10 +186,10 @@ _thread_flockfile(FILE * fp)
 		 */
 		do_lock(idx, fp);
 
-	/*
-	 * The file is already locked, so check if the
-	 * running thread is the owner:
-	 */
+		/*
+		 * The file is already locked, so check if the
+		 * running thread is the owner:
+		 */
 	} else if (p->owner == self) {
 		/*
 		 * The running thread is already the
@@ -205,7 +204,7 @@ _thread_flockfile(FILE * fp)
 		 * Append this thread to the queue of
 		 * threads waiting on the lock.
 		 */
-		TAILQ_INSERT_TAIL(&p->lockers,self,waiting);
+		TAILQ_INSERT_TAIL(&p->lockers, self, waiting);
 		while (p->owner != self) {
 			__thrsleep(self, 0, NULL, &hash_lock, NULL);
 			_spinlock(&hash_lock);
@@ -217,11 +216,11 @@ _thread_flockfile(FILE * fp)
 }
 
 int
-_thread_ftrylockfile(FILE * fp)
+_thread_ftrylockfile(FILE *fp)
 {
-	int	ret = -1;
-	int	idx = file_idx(fp);
-	struct	file_lock	*p;
+	int		  ret = -1;
+	int		  idx = file_idx(fp);
+	struct file_lock *p;
 
 	/* Lock the hash table: */
 	_spinlock(&hash_lock);
@@ -234,10 +233,10 @@ _thread_ftrylockfile(FILE * fp)
 		 */
 		p = do_lock(idx, fp);
 
-	/*
-	 * The file is already locked, so check if the
-	 * running thread is the owner:
-	 */
+		/*
+		 * The file is already locked, so check if the
+		 * running thread is the owner:
+		 */
 	} else if (p->owner == pthread_self()) {
 		/*
 		 * The running thread is already the
@@ -265,11 +264,11 @@ _thread_ftrylockfile(FILE * fp)
 	return (ret);
 }
 
-void 
-_thread_funlockfile(FILE * fp)
+void
+_thread_funlockfile(FILE *fp)
 {
-	int	idx = file_idx(fp);
-	struct	file_lock	*p;
+	int		  idx = file_idx(fp);
+	struct file_lock *p;
 
 	/* Lock the hash table: */
 	_spinlock(&hash_lock);
@@ -287,7 +286,7 @@ _thread_funlockfile(FILE * fp)
 			/* Get the new owner of the lock: */
 			if ((p->owner = TAILQ_FIRST(&p->lockers)) != NULL) {
 				/* Pop the thread off the queue: */
-				TAILQ_REMOVE(&p->lockers,p->owner,waiting);
+				TAILQ_REMOVE(&p->lockers, p->owner, waiting);
 
 				/*
 				 * This is the first lock for the new

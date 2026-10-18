@@ -32,7 +32,7 @@
  */
 
 #ifndef _MACHINE_CPUFUNC_H_
-#define	_MACHINE_CPUFUNC_H_
+#define _MACHINE_CPUFUNC_H_
 
 #ifdef _KERNEL
 
@@ -44,62 +44,62 @@
 
 #include <machine/specialreg.h>
 
-static __inline void invlpg(u_int);
-static __inline void lidt(void *);
-static __inline void lldt(u_short);
-static __inline void ltr(u_short);
-static __inline void lcr0(u_int);
-static __inline u_int rcr0(void);
-static __inline u_int rcr2(void);
-static __inline void lcr3(u_int);
-static __inline u_int rcr3(void);
-static __inline void lcr4(u_int);
-static __inline u_int rcr4(void);
-static __inline void tlbflush(void);
-static __inline u_int read_eflags(void);
-static __inline void write_eflags(u_int);
-static __inline void wbinvd(void);
-static __inline void clflush(u_int32_t addr);
-static __inline void mfence(void);
-static __inline void wrmsr(u_int, u_int64_t);
+static __inline void	  invlpg(u_int);
+static __inline void	  lidt(void *);
+static __inline void	  lldt(u_short);
+static __inline void	  ltr(u_short);
+static __inline void	  lcr0(u_int);
+static __inline u_int	  rcr0(void);
+static __inline u_int	  rcr2(void);
+static __inline void	  lcr3(u_int);
+static __inline u_int	  rcr3(void);
+static __inline void	  lcr4(u_int);
+static __inline u_int	  rcr4(void);
+static __inline void	  tlbflush(void);
+static __inline u_int	  read_eflags(void);
+static __inline void	  write_eflags(u_int);
+static __inline void	  wbinvd(void);
+static __inline void	  clflush(u_int32_t addr);
+static __inline void	  mfence(void);
+static __inline void	  wrmsr(u_int, u_int64_t);
 static __inline u_int64_t rdmsr(u_int);
-static __inline void breakpoint(void);
+static __inline void	  breakpoint(void);
 
-static __inline void 
+static __inline void
 invlpg(u_int addr)
-{ 
-        __asm volatile("invlpg (%0)" : : "r" (addr) : "memory");
-}  
+{
+	__asm volatile("invlpg (%0)" : : "r"(addr) : "memory");
+}
 
 static __inline void
 lidt(void *p)
 {
-	__asm volatile("lidt (%0)" : : "r" (p) : "memory");
+	__asm volatile("lidt (%0)" : : "r"(p) : "memory");
 }
 
 static __inline void
 lldt(u_short sel)
 {
-	__asm volatile("lldt %0" : : "r" (sel));
+	__asm volatile("lldt %0" : : "r"(sel));
 }
 
 static __inline void
 ltr(u_short sel)
 {
-	__asm volatile("ltr %0" : : "r" (sel));
+	__asm volatile("ltr %0" : : "r"(sel));
 }
 
 static __inline void
 lcr0(u_int val)
 {
-	__asm volatile("movl %0,%%cr0" : : "r" (val));
+	__asm volatile("movl %0,%%cr0" : : "r"(val));
 }
 
 static __inline u_int
 rcr0(void)
 {
 	u_int val;
-	__asm volatile("movl %%cr0,%0" : "=r" (val));
+	__asm volatile("movl %%cr0,%0" : "=r"(val));
 	return val;
 }
 
@@ -107,35 +107,35 @@ static __inline u_int
 rcr2(void)
 {
 	u_int val;
-	__asm volatile("movl %%cr2,%0" : "=r" (val));
+	__asm volatile("movl %%cr2,%0" : "=r"(val));
 	return val;
 }
 
 static __inline void
 lcr3(u_int val)
 {
-	__asm volatile("movl %0,%%cr3" : : "r" (val));
+	__asm volatile("movl %0,%%cr3" : : "r"(val));
 }
 
 static __inline u_int
 rcr3(void)
 {
 	u_int val;
-	__asm volatile("movl %%cr3,%0" : "=r" (val));
+	__asm volatile("movl %%cr3,%0" : "=r"(val));
 	return val;
 }
 
 static __inline void
 lcr4(u_int val)
 {
-	__asm volatile("movl %0,%%cr4" : : "r" (val));
+	__asm volatile("movl %0,%%cr4" : : "r"(val));
 }
 
 static __inline u_int
 rcr4(void)
 {
 	u_int val;
-	__asm volatile("movl %%cr4,%0" : "=r" (val));
+	__asm volatile("movl %%cr4,%0" : "=r"(val));
 	return val;
 }
 
@@ -143,14 +143,13 @@ static __inline void
 tlbflush(void)
 {
 	u_int val;
-	__asm volatile("movl %%cr3,%0" : "=r" (val));
-	__asm volatile("movl %0,%%cr3" : : "r" (val));
+	__asm volatile("movl %%cr3,%0" : "=r"(val));
+	__asm volatile("movl %0,%%cr3" : : "r"(val));
 }
 
 #ifdef notyet
-void	setidt(int idx, /*XXX*/caddr_t func, int typ, int dpl);
+void setidt(int idx, /*XXX*/ caddr_t func, int typ, int dpl);
 #endif
-
 
 /* XXXX ought to be in psl.h with spl() functions */
 
@@ -159,14 +158,14 @@ read_eflags(void)
 {
 	u_int ef;
 
-	__asm volatile("pushfl; popl %0" : "=r" (ef));
+	__asm volatile("pushfl; popl %0" : "=r"(ef));
 	return (ef);
 }
 
 static __inline void
 write_eflags(u_int ef)
 {
-	__asm volatile("pushl %0; popfl" : : "r" (ef));
+	__asm volatile("pushl %0; popfl" : : "r"(ef));
 }
 
 static inline void
@@ -211,7 +210,7 @@ wbinvd_on_all_cpus(void)
 static __inline void
 clflush(u_int32_t addr)
 {
-	__asm volatile("clflush %0" : "+m" (*(volatile char *)addr));
+	__asm volatile("clflush %0" : "+m"(*(volatile char *)addr));
 }
 
 static __inline void
@@ -225,7 +224,7 @@ rdtsc(void)
 {
 	uint64_t tsc;
 
-	__asm volatile("rdtsc" : "=A" (tsc));
+	__asm volatile("rdtsc" : "=A"(tsc));
 	return (tsc);
 }
 
@@ -234,62 +233,57 @@ rdtsc_lfence(void)
 {
 	uint64_t tsc;
 
-	__asm volatile("lfence; rdtsc" : "=A" (tsc));
+	__asm volatile("lfence; rdtsc" : "=A"(tsc));
 	return tsc;
 }
 
 static __inline void
 wrmsr(u_int msr, u_int64_t newval)
 {
-        __asm volatile("wrmsr" : : "A" (newval), "c" (msr));
+	__asm volatile("wrmsr" : : "A"(newval), "c"(msr));
 }
 
 static __inline u_int64_t
 rdmsr(u_int msr)
 {
-        u_int64_t rv;
+	u_int64_t rv;
 
-        __asm volatile("rdmsr" : "=A" (rv) : "c" (msr));
-        return (rv);
+	__asm volatile("rdmsr" : "=A"(rv) : "c"(msr));
+	return (rv);
 }
 
 static __inline void
 monitor(const volatile void *addr, u_long extensions, u_int hints)
 {
-	__asm volatile("monitor"
-	    : : "a" (addr), "c" (extensions), "d" (hints));
+	__asm volatile("monitor" : : "a"(addr), "c"(extensions), "d"(hints));
 }
 
 static __inline void
 mwait(u_long extensions, u_int hints)
 {
-	__asm volatile("mwait" : : "a" (hints), "c" (extensions));
+	__asm volatile("mwait" : : "a"(hints), "c"(extensions));
 }
 
-/* 
+/*
  * Some of the undocumented AMD64 MSRs need a 'passcode' to access.
  *
  * See LinuxBIOSv2: src/cpu/amd/model_fxx/model_fxx_init.c
  */
 
-#define	OPTERON_MSR_PASSCODE	0x9c5a203a
- 
+#define OPTERON_MSR_PASSCODE 0x9c5a203a
+
 static __inline u_int64_t
 rdmsr_locked(u_int msr, u_int code)
 {
 	uint64_t rv;
-	__asm volatile("rdmsr"
-	    : "=A" (rv)
-	    : "c" (msr), "D" (code));
+	__asm volatile("rdmsr" : "=A"(rv) : "c"(msr), "D"(code));
 	return (rv);
 }
 
 static __inline void
 wrmsr_locked(u_int msr, u_int code, u_int64_t newval)
 {
-	__asm volatile("wrmsr"
-	    :
-	    : "A" (newval), "c" (msr), "D" (code));
+	__asm volatile("wrmsr" : : "A"(newval), "c"(msr), "D"(code));
 }
 
 /* Break into DDB. */

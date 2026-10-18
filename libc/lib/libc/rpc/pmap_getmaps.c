@@ -37,16 +37,18 @@
  * contains pmap_getmaps, which is only tcp service involved
  */
 
-#include <rpc/rpc.h>
-#include <rpc/pmap_prot.h>
-#include <rpc/pmap_clnt.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <errno.h>
-#include <unistd.h>
-#include <net/if.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
+
+#include <net/if.h>
+
+#include <errno.h>
+#include <netdb.h>
+#include <rpc/pmap_clnt.h>
+#include <rpc/pmap_prot.h>
+#include <rpc/rpc.h>
+#include <stdio.h>
+#include <unistd.h>
 #define NAMELEN 255
 #define MAX_BROADCAST_SIZE 1400
 
@@ -58,18 +60,17 @@ struct pmaplist *
 pmap_getmaps(struct sockaddr_in *address)
 {
 	struct pmaplist *head = NULL;
-	int sock = -1;
-	struct timeval minutetimeout;
-	CLIENT *client;
+	int		 sock = -1;
+	struct timeval	 minutetimeout;
+	CLIENT		*client;
 
 	minutetimeout.tv_sec = 60;
 	minutetimeout.tv_usec = 0;
 	address->sin_port = htons(PMAPPORT);
-	client = clnttcp_create(address, PMAPPROG,
-	    PMAPVERS, &sock, 50, 500);
+	client = clnttcp_create(address, PMAPPROG, PMAPVERS, &sock, 50, 500);
 	if (client != NULL) {
-		if (CLNT_CALL(client, PMAPPROC_DUMP, xdr_void, NULL, xdr_pmaplist,
-		    &head, minutetimeout) != RPC_SUCCESS) {
+		if (CLNT_CALL(client, PMAPPROC_DUMP, xdr_void, NULL,
+			xdr_pmaplist, &head, minutetimeout) != RPC_SUCCESS) {
 			CLNT_DESTROY(client);
 			return (NULL);
 		}

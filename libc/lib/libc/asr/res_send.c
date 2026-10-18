@@ -17,21 +17,22 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
-#include <netdb.h>
 
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 int
 res_send(const u_char *buf, int buflen, u_char *ans, int anslen)
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	size_t len;
+	size_t		  len;
 
 	res_init();
 

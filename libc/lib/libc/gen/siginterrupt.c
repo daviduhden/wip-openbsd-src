@@ -38,7 +38,7 @@ int
 siginterrupt(int sig, int flag)
 {
 	struct sigaction sa;
-	int ret;
+	int		 ret;
 
 	if ((ret = WRAP(sigaction)(sig, NULL, &sa)) == -1)
 		return (ret);

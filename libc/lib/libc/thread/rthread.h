@@ -22,9 +22,9 @@
 #include "thread_private.h"
 
 __BEGIN_HIDDEN_DECLS
-void	_rthread_tls_destructors(pthread_t);
+void _rthread_tls_destructors(pthread_t);
 
-extern int _rthread_debug_level;
+extern int	      _rthread_debug_level;
 extern struct pthread _initial_thread;
 __END_HIDDEN_DECLS
 

@@ -26,19 +26,17 @@
 /*
  * In userspace, register %g7 contains the address of the thread's TCB
  */
-#define TCB_GET(p)		\
-	((void *)(p)->p_md.md_tf->tf_global[7])
-#define TCB_SET(p, addr)	\
-	((p)->p_md.md_tf->tf_global[7] = (int64_t)(addr))
+#define TCB_GET(p) ((void *)(p)->p_md.md_tf->tf_global[7])
+#define TCB_SET(p, addr) ((p)->p_md.md_tf->tf_global[7] = (int64_t)(addr))
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for big TCB, with static TLS data at negative offsets */
-#define TLS_VARIANT	2
+#define TLS_VARIANT 2
 
-register void *__tcb __asm__ ("g7");
-#define TCB_GET()		(__tcb)
-#define TCB_SET(tcb)		((__tcb) = (tcb))
+register void *__tcb __asm__("g7");
+#define TCB_GET() (__tcb)
+#define TCB_SET(tcb) ((__tcb) = (tcb))
 
 #endif /* _KERNEL */
 #endif /* _MACHINE_TCB_H_ */

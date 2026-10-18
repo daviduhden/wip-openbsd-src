@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_MACHINE_FENV_H_
-#define	_MACHINE_FENV_H_
+#ifndef _MACHINE_FENV_H_
+#define _MACHINE_FENV_H_
 
 /*
  * Each symbol representing a floating point exception expands to an integer
@@ -26,19 +26,20 @@
  *
  * We use such values that allow direct bitwise operations on FPU registers.
  */
-#define	FE_INVALID		0x01
-#define	FE_DIVBYZERO		0x02
-#define	FE_OVERFLOW		0x04
-#define	FE_UNDERFLOW		0x08
-#define	FE_INEXACT		0x10
-#define	FE_DENORMAL		0x80
+#define FE_INVALID 0x01
+#define FE_DIVBYZERO 0x02
+#define FE_OVERFLOW 0x04
+#define FE_UNDERFLOW 0x08
+#define FE_INEXACT 0x10
+#define FE_DENORMAL 0x80
 
 /*
  * The following symbol is simply the bitwise-inclusive OR of all floating-point
  * exception constants defined above.
  */
-#define	FE_ALL_EXCEPT		(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | \
-				 FE_UNDERFLOW | FE_INEXACT | FE_DENORMAL)
+#define FE_ALL_EXCEPT                                                          \
+	(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT | \
+	    FE_DENORMAL)
 
 /*
  * Each symbol representing the rounding direction, expands to an integer
@@ -46,23 +47,22 @@
  *
  * We use such values that allow direct bitwise operations on FPU registers.
  */
-#define	FE_TONEAREST		0x0
-#define	FE_UPWARD		0x1
-#define	FE_DOWNWARD		0x2
-#define	FE_TOWARDZERO		0x3
+#define FE_TONEAREST 0x0
+#define FE_UPWARD 0x1
+#define FE_DOWNWARD 0x2
+#define FE_TOWARDZERO 0x3
 
 /*
  * The following symbol is simply the bitwise-inclusive OR of all floating-point
  * rounding direction constants defined above.
  */
-#define	_ROUND_MASK		(FE_TONEAREST | FE_UPWARD | FE_DOWNWARD | \
-				 FE_TOWARDZERO)
-#define	_ROUND_SHIFT		22
+#define _ROUND_MASK (FE_TONEAREST | FE_UPWARD | FE_DOWNWARD | FE_TOWARDZERO)
+#define _ROUND_SHIFT 22
 
 /*
  * fenv_t represents the entire floating-point environment.
  */
-typedef	unsigned long long	fenv_t;
+typedef unsigned long long fenv_t;
 
 /*
  * The following constant represents the default floating-point environment
@@ -74,9 +74,9 @@ typedef	unsigned long long	fenv_t;
  * feupdateenv().
  */
 __BEGIN_DECLS
-extern	fenv_t			__fe_dfl_env;
+extern fenv_t __fe_dfl_env;
 __END_DECLS
-#define	FE_DFL_ENV		((const fenv_t *)&__fe_dfl_env)
+#define FE_DFL_ENV ((const fenv_t *)&__fe_dfl_env)
 
 /*
  * fexcept_t represents the floating-point status flags collectively, including
@@ -90,6 +90,6 @@ __END_DECLS
  * A floating-point control mode is a system variable whose value may be set by
  * the user to affect the subsequent behavior of floating-point arithmetic.
  */
-typedef	unsigned long long	fexcept_t;
+typedef unsigned long long fexcept_t;
 
-#endif	/* !_MACHINE_FENV_H_ */
+#endif /* !_MACHINE_FENV_H_ */

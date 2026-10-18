@@ -12,29 +12,28 @@
  */
 #include <search.h>
 
-typedef struct node_t
-{
-    char	  *key;
-    struct node_t *llink, *rlink;
+typedef struct node_t {
+	char	      *key;
+	struct node_t *llink, *rlink;
 } node;
 
 /* find a node, or return 0 */
 void *
-tfind(const void *vkey, void * const *vrootp,
+tfind(const void *vkey, void *const *vrootp,
     int (*compar)(const void *, const void *))
 {
-    char *key = (char *)vkey;
-    node **rootp = (node **)vrootp;
+	char  *key = (char *)vkey;
+	node **rootp = (node **)vrootp;
 
-    if (rootp == (struct node_t **)0)
-	return ((struct node_t *)0);
-    while (*rootp != (struct node_t *)0) {	/* T1: */
-	int r;
-	if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
-	    return (*rootp);		/* key found */
-	rootp = (r < 0) ?
-	    &(*rootp)->llink :		/* T3: follow left branch */
-	    &(*rootp)->rlink;		/* T4: follow right branch */
-    }
-    return (node *)0;
+	if (rootp == (struct node_t **)0)
+		return ((struct node_t *)0);
+	while (*rootp != (struct node_t *)0) { /* T1: */
+		int r;
+		if ((r = (*compar)(key, (*rootp)->key)) == 0) /* T2: */
+			return (*rootp);		      /* key found */
+		rootp = (r < 0) ?
+		    &(*rootp)->llink : /* T3: follow left branch */
+		    &(*rootp)->rlink;  /* T4: follow right branch */
+	}
+	return (node *)0;
 }

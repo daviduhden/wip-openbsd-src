@@ -20,17 +20,17 @@
 
 /* amd64 hibernate support structures and functions */
 
-int	get_hibernate_info_md(union hibernate_info *);
-void	hibernate_flush(void);
-void	hibernate_enter_resume_mapping(vaddr_t, paddr_t, int);
-int	hibernate_inflate_skip(union hibernate_info *, paddr_t);
-int	hibernate_suspend(void);
-void	hibernate_switch_stack_machdep(void);
-void	hibernate_resume_machdep(vaddr_t);
-void	hibernate_activate_resume_pt_machdep(void);
-void	hibernate_enable_intr_machdep(void);
-void	hibernate_disable_intr_machdep(void);
+int  get_hibernate_info_md(union hibernate_info *);
+void hibernate_flush(void);
+void hibernate_enter_resume_mapping(vaddr_t, paddr_t, int);
+int  hibernate_inflate_skip(union hibernate_info *, paddr_t);
+int  hibernate_suspend(void);
+void hibernate_switch_stack_machdep(void);
+void hibernate_resume_machdep(vaddr_t);
+void hibernate_activate_resume_pt_machdep(void);
+void hibernate_enable_intr_machdep(void);
+void hibernate_disable_intr_machdep(void);
 #ifdef MULTIPROCESSOR
-void	hibernate_quiesce_cpus(void);
-void	hibernate_drop_to_real_mode(void);
+void hibernate_quiesce_cpus(void);
+void hibernate_drop_to_real_mode(void);
 #endif /* MULTIPROCESSOR */

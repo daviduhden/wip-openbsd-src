@@ -20,20 +20,20 @@
 #define _MACHINE_REG_H_
 
 struct reg {
-	uint64_t	r_reg[32];
-	uint64_t	r_lr;
-	uint64_t	r_cr;
-	uint64_t	r_xer;
-	uint64_t	r_ctr;
-	uint64_t	r_pc;
-	uint64_t	r_ps;
+	uint64_t r_reg[32];
+	uint64_t r_lr;
+	uint64_t r_cr;
+	uint64_t r_xer;
+	uint64_t r_ctr;
+	uint64_t r_pc;
+	uint64_t r_ps;
 };
 
 struct fpreg {
-	__uint128_t	fp_vsx[64];
-	uint64_t	fp_fpscr;
-	uint64_t	fp_vscr;
-	uint64_t	fp_vrsave;
+	__uint128_t fp_vsx[64];
+	uint64_t    fp_fpscr;
+	uint64_t    fp_vscr;
+	uint64_t    fp_vrsave;
 };
 
 #endif /* !_MACHINE_REG_H_ */

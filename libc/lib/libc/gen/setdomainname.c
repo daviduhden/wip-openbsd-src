@@ -30,12 +30,13 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
+
 #include <unistd.h>
 
 int
 setdomainname(const char *name, size_t namelen)
 {
-	const int mib[2] = { CTL_KERN, KERN_DOMAINNAME };
+	const int mib[2] = {CTL_KERN, KERN_DOMAINNAME};
 
 	if (sysctl(mib, 2, NULL, NULL, (void *)name, namelen) == -1)
 		return (-1);

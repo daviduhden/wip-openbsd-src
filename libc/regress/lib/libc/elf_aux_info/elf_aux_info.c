@@ -6,9 +6,9 @@
 int
 main(void)
 {
-	int ret = 0;
-	int a;
-	unsigned long b;
+	int		   ret = 0;
+	int		   a;
+	unsigned long	   b;
 	unsigned long long c;
 
 	/* Should always succeed */

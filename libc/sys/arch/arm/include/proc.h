@@ -33,8 +33,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_ARM_PROC_H_
-#define	_ARM_PROC_H_
+#ifndef _ARM_PROC_H_
+#define _ARM_PROC_H_
 
 /*
  * Machine-dependent part of the proc structure for arm.
@@ -43,8 +43,8 @@
 struct trapframe;
 
 struct mdproc {
-	int	pmc_enabled;		/* bitfield of enabled counters */
-	void	*pmc_state;		/* port-specific pmc state */
+	int   pmc_enabled; /* bitfield of enabled counters */
+	void *pmc_state;   /* port-specific pmc state */
 };
 
 #endif /* _ARM_PROC_H_ */

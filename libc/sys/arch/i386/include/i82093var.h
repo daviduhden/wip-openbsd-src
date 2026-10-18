@@ -38,28 +38,28 @@
 #include <machine/apicvar.h>
 
 struct ioapic_pin {
-	struct intrhand		*ip_handler; 
-	struct ioapic_pin	*ip_next; /* next pin on this vector */
-	struct mp_intr_map 	*ip_map;
-	int			ip_vector; /* IDT vector */
-	int			ip_type;
-	int			ip_minlevel;
-	int			ip_maxlevel;
+	struct intrhand	   *ip_handler;
+	struct ioapic_pin  *ip_next; /* next pin on this vector */
+	struct mp_intr_map *ip_map;
+	int		    ip_vector; /* IDT vector */
+	int		    ip_type;
+	int		    ip_minlevel;
+	int		    ip_maxlevel;
 };
 
 struct ioapic_softc {
-	struct pic		sc_pic;
-	struct ioapic_softc	*sc_next;
-	int			sc_apicid;
-	int			sc_apic_vers;
-	int			sc_apic_vecbase; /* global int base if ACPI */
-	int			sc_apic_sz;	/* apic size*/
-	int			sc_flags;
-	paddr_t			sc_pa;		/* PA of ioapic */
-	volatile u_int32_t	*sc_reg;	/* KVA of ioapic addr */
-	volatile u_int32_t	*sc_data;	/* KVA of ioapic data */
-	struct ioapic_pin	*sc_pins;	/* sc_apic_sz entries */
-};      
+	struct pic	     sc_pic;
+	struct ioapic_softc *sc_next;
+	int		     sc_apicid;
+	int		     sc_apic_vers;
+	int		     sc_apic_vecbase; /* global int base if ACPI */
+	int		     sc_apic_sz;      /* apic size*/
+	int		     sc_flags;
+	paddr_t		     sc_pa;   /* PA of ioapic */
+	volatile u_int32_t  *sc_reg;  /* KVA of ioapic addr */
+	volatile u_int32_t  *sc_data; /* KVA of ioapic data */
+	struct ioapic_pin   *sc_pins; /* sc_apic_sz entries */
+};
 
 /*
  * MP: intr_handle_t is bitfielded.
@@ -69,31 +69,30 @@ struct ioapic_softc {
  * (ih&0x00ff00)>>8 -> ioapic line.
  */
 
-#define APIC_INT_VIA_APIC	0x10000000
-#define APIC_INT_VIA_MSG	0x20000000
-#define APIC_INT_APIC_MASK	0x00ff0000
-#define APIC_INT_APIC_SHIFT	16
-#define APIC_INT_PIN_MASK	0x0000ff00
-#define APIC_INT_PIN_SHIFT	8
-#define APIC_INT_LINE_MASK	0x000000ff
+#define APIC_INT_VIA_APIC 0x10000000
+#define APIC_INT_VIA_MSG 0x20000000
+#define APIC_INT_APIC_MASK 0x00ff0000
+#define APIC_INT_APIC_SHIFT 16
+#define APIC_INT_PIN_MASK 0x0000ff00
+#define APIC_INT_PIN_SHIFT 8
+#define APIC_INT_LINE_MASK 0x000000ff
 
 #define APIC_IRQ_APIC(x) ((x & APIC_INT_APIC_MASK) >> APIC_INT_APIC_SHIFT)
 #define APIC_IRQ_PIN(x) ((x & APIC_INT_PIN_MASK) >> APIC_INT_PIN_SHIFT)
 
-void   *apic_intr_establish(int, int, int, int (*)(void *), void *,
-    const char *); 
-void	apic_intr_disestablish(void *);
+void *apic_intr_establish(int, int, int, int (*)(void *), void *, const char *);
+void  apic_intr_disestablish(void *);
 
-void	ioapic_print_redir(struct ioapic_softc *, char *, int);
+void		     ioapic_print_redir(struct ioapic_softc *, char *, int);
 struct ioapic_softc *ioapic_find(int);
 struct ioapic_softc *ioapic_find_bybase(int);
 
-void	ioapic_enable(void);
+void ioapic_enable(void);
 
-extern int ioapic_bsp_id;
-extern int nioapics;
+extern int		    ioapic_bsp_id;
+extern int		    nioapics;
 extern struct ioapic_softc *ioapics;
-extern u_int16_t ioapic_id_map;
-extern u_int8_t ioapic_id_remap[];
+extern u_int16_t	    ioapic_id_map;
+extern u_int8_t		    ioapic_id_remap[];
 
 #endif /* !_MACHINE_I82093VAR_H_ */

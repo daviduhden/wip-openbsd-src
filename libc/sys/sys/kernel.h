@@ -40,21 +40,21 @@
 /* Global variables for the kernel. */
 
 /* 1.1 */
-extern int hostid;
+extern int  hostid;
 extern char hostname[MAXHOSTNAMELEN];
-extern int hostnamelen;
+extern int  hostnamelen;
 extern char domainname[MAXHOSTNAMELEN];
-extern int domainnamelen;
+extern int  domainnamelen;
 
 /* 1.2 */
-extern int utc_offset;		/* seconds east of UTC */
+extern int utc_offset; /* seconds east of UTC */
 
-extern int tick;		/* usec per tick (1000000 / hz) */
-extern int tick_nsec;		/* nsec per tick */
-extern int ticks;		/* # of hardclock ticks */
-extern int hz;			/* system clock's frequency */
-extern int stathz;		/* statistics clock's frequency */
-extern int profhz;		/* profiling clock's frequency */
+extern int tick;      /* usec per tick (1000000 / hz) */
+extern int tick_nsec; /* nsec per tick */
+extern int ticks;     /* # of hardclock ticks */
+extern int hz;	      /* system clock's frequency */
+extern int stathz;    /* statistics clock's frequency */
+extern int profhz;    /* profiling clock's frequency */
 
 #ifndef HZ
 #define HZ 100

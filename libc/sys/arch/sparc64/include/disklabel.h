@@ -33,8 +33,8 @@
 #ifndef _MACHINE_DISKLABEL_H_
 #define _MACHINE_DISKLABEL_H_
 
-#define	LABELSECTOR	0	/* sector containing label */
-#define	LABELOFFSET	128	/* offset of label in sector */
-#define	MAXPARTITIONS	16	/* number of partitions */
+#define LABELSECTOR 0	 /* sector containing label */
+#define LABELOFFSET 128	 /* offset of label in sector */
+#define MAXPARTITIONS 16 /* number of partitions */
 
 #endif /* _MACHINE_DISKLABEL_H_ */

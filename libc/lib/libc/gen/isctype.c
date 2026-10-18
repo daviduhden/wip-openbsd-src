@@ -41,8 +41,9 @@
 int
 isalnum(int c)
 {
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] &
-	    (_CTYPE_U|_CTYPE_L|_CTYPE_N)));
+	return (c == EOF ? 0 :
+			   ((_ctype_ + 1)[(unsigned char)c] &
+			       (_CTYPE_U | _CTYPE_L | _CTYPE_N)));
 }
 DEF_STRONG(isalnum);
 
@@ -50,8 +51,9 @@ DEF_STRONG(isalnum);
 int
 isalpha(int c)
 {
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] &
-	    (_CTYPE_U|_CTYPE_L)));
+	return (c == EOF ?
+		0 :
+		((_ctype_ + 1)[(unsigned char)c] & (_CTYPE_U | _CTYPE_L)));
 }
 DEF_STRONG(isalpha);
 
@@ -83,8 +85,9 @@ DEF_STRONG(isdigit);
 int
 isgraph(int c)
 {
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] &
-	    (_CTYPE_P|_CTYPE_U|_CTYPE_L|_CTYPE_N)));
+	return (c == EOF ? 0 :
+			   ((_ctype_ + 1)[(unsigned char)c] &
+			       (_CTYPE_P | _CTYPE_U | _CTYPE_L | _CTYPE_N)));
 }
 DEF_STRONG(isgraph);
 
@@ -100,8 +103,10 @@ DEF_STRONG(islower);
 int
 isprint(int c)
 {
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] &
-	    (_CTYPE_P|_CTYPE_U|_CTYPE_L|_CTYPE_N|_CTYPE_B)));
+	return (c == EOF ?
+		0 :
+		((_ctype_ + 1)[(unsigned char)c] &
+		    (_CTYPE_P | _CTYPE_U | _CTYPE_L | _CTYPE_N | _CTYPE_B)));
 }
 DEF_STRONG(isprint);
 
@@ -133,8 +138,9 @@ DEF_STRONG(isupper);
 int
 isxdigit(int c)
 {
-	return (c == EOF ? 0 : ((_ctype_ + 1)[(unsigned char)c] &
-	    (_CTYPE_N|_CTYPE_X)));
+	return (c == EOF ?
+		0 :
+		((_ctype_ + 1)[(unsigned char)c] & (_CTYPE_N | _CTYPE_X)));
 }
 DEF_STRONG(isxdigit);
 

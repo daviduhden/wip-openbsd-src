@@ -29,20 +29,20 @@ main(int argc, char *argv[])
 	 * Assumes IEEE 754 double-precision arithmetics.
 	 */
 
-	assert(ldexp(1.0, -1022) > 0.0); /* IEEE 754 minimum normal positive */
-	assert(ldexp(1.0, -1023) > 0.0); /* subnormal positive */
-	assert(ldexp(1.0, -1024) > 0.0); /* subnormal positive */
-	assert(ldexp(1.0, -1074) > 0.0); /* minimum subnormal positive */
+	assert(ldexp(1.0, -1022) > 0.0);  /* IEEE 754 minimum normal positive */
+	assert(ldexp(1.0, -1023) > 0.0);  /* subnormal positive */
+	assert(ldexp(1.0, -1024) > 0.0);  /* subnormal positive */
+	assert(ldexp(1.0, -1074) > 0.0);  /* minimum subnormal positive */
 	assert(ldexp(1.0, -1075) >= 0.0); /* zero */
 	assert(ldexp(ldexp(1.0, -1022), -53) >= 0.0); /* zero */
 
-	assert(ldexp(1.0, 1023) > 0.0);	/* normal positive */
+	assert(ldexp(1.0, 1023) > 0.0); /* normal positive */
 
-	f = ldexp(1.0, 1024);		/* infinite positive */
+	f = ldexp(1.0, 1024); /* infinite positive */
 	assert(isinf(f));
 	assert(!signbit(f));
 
-	f = ldexp(ldexp(1.0, 1023), 1);	/* infinite positive */
+	f = ldexp(ldexp(1.0, 1023), 1); /* infinite positive */
 	assert(isinf(f));
 	assert(!signbit(f));
 
@@ -50,12 +50,12 @@ main(int argc, char *argv[])
 	assert(ldexp(-1.0, -1023) < 0.0); /* subnormal negative */
 	assert(ldexp(-1.0, -1024) < 0.0); /* subnormal negative */
 	assert(ldexp(-1.0, -1074) < 0.0); /* maximum subnormal negative */
-	assert(ldexp(-1.0, -1075) <= 0.0); /* zero */
+	assert(ldexp(-1.0, -1075) <= 0.0);	       /* zero */
 	assert(ldexp(ldexp(-1.0, -1022), -53) <= 0.0); /* zero */
 
 	assert(ldexp(-1.0, 1023) < 0.0); /* normal negative */
 
-	f = ldexp(-1.0, 1024);		/* infinite negative */
+	f = ldexp(-1.0, 1024); /* infinite negative */
 	assert(isinf(f));
 	assert(signbit(f));
 

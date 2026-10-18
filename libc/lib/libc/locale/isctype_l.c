@@ -20,7 +20,7 @@
  * characters agree with ASCII, so always use the ASCII tables.
  */
 
-#define	_ANSI_LIBRARY
+#define _ANSI_LIBRARY
 #include <ctype.h>
 
 #undef isalnum_l

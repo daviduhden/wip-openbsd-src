@@ -39,9 +39,9 @@
  * from the stream.
  */
 
-#include <stdio.h>
 #include <rpc/types.h>
 #include <rpc/xdr.h>
+#include <stdio.h>
 
 static bool_t	xdrstdio_getlong(XDR *, long *);
 static bool_t	xdrstdio_putlong(XDR *, long *);
@@ -55,16 +55,16 @@ static void	xdrstdio_destroy(XDR *);
 /*
  * Ops vector for stdio type XDR
  */
-static const struct xdr_ops	xdrstdio_ops = {
-	xdrstdio_getlong,	/* deserialize a long int */
-	xdrstdio_putlong,	/* serialize a long int */
-	xdrstdio_getbytes,	/* deserialize counted bytes */
-	xdrstdio_putbytes,	/* serialize counted bytes */
-	xdrstdio_getpos,	/* get offset in the stream */
-	xdrstdio_setpos,	/* set offset in the stream */
-	xdrstdio_inline,	/* prime stream for inline macros */
-	xdrstdio_destroy,	/* destroy stream */
-	NULL,			/* xdrstdio_control */
+static const struct xdr_ops xdrstdio_ops = {
+    xdrstdio_getlong,  /* deserialize a long int */
+    xdrstdio_putlong,  /* serialize a long int */
+    xdrstdio_getbytes, /* deserialize counted bytes */
+    xdrstdio_putbytes, /* serialize counted bytes */
+    xdrstdio_getpos,   /* get offset in the stream */
+    xdrstdio_setpos,   /* set offset in the stream */
+    xdrstdio_inline,   /* prime stream for inline macros */
+    xdrstdio_destroy,  /* destroy stream */
+    NULL,	       /* xdrstdio_control */
 };
 
 /*
@@ -119,7 +119,8 @@ static bool_t
 xdrstdio_getbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 
-	if ((len != 0) && (fread(addr, (int)len, 1, (FILE *)xdrs->x_private) != 1))
+	if ((len != 0) &&
+	    (fread(addr, (int)len, 1, (FILE *)xdrs->x_private) != 1))
 		return (FALSE);
 	return (TRUE);
 }
@@ -128,7 +129,8 @@ static bool_t
 xdrstdio_putbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 
-	if ((len != 0) && (fwrite(addr, (int)len, 1, (FILE *)xdrs->x_private) != 1))
+	if ((len != 0) &&
+	    (fwrite(addr, (int)len, 1, (FILE *)xdrs->x_private) != 1))
 		return (FALSE);
 	return (TRUE);
 }
@@ -137,15 +139,15 @@ static u_int
 xdrstdio_getpos(XDR *xdrs)
 {
 
-	return ((u_int) ftell((FILE *)xdrs->x_private));
+	return ((u_int)ftell((FILE *)xdrs->x_private));
 }
 
 static bool_t
 xdrstdio_setpos(XDR *xdrs, u_int pos)
-{ 
+{
 
-	return ((fseeko((FILE *)xdrs->x_private, pos, SEEK_SET) == -1) ?
-		FALSE : TRUE);
+	return ((fseeko((FILE *)xdrs->x_private, pos, SEEK_SET) == -1) ? FALSE :
+									 TRUE);
 }
 
 static int32_t *

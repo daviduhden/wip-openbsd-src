@@ -23,7 +23,7 @@ rdtsc_lfence(void)
 {
 	uint32_t hi, lo;
 	__asm volatile("lfence; rdtsc" : "=a"(lo), "=d"(hi));
-	return ((uint64_t)lo)|(((uint64_t)hi)<<32);
+	return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
 static inline u_int
@@ -31,7 +31,7 @@ rdtscp(void)
 {
 	uint32_t hi, lo;
 	__asm volatile("rdtscp" : "=a"(lo), "=d"(hi) : : "ecx");
-	return ((uint64_t)lo)|(((uint64_t)hi)<<32);
+	return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
 static int

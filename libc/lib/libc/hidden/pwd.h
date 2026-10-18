@@ -16,14 +16,13 @@
  */
 
 #ifndef _LIBC_PWD_H_
-#define	_LIBC_PWD_H_
+#define _LIBC_PWD_H_
 
 #include_next <pwd.h>
 
 __BEGIN_HIDDEN_DECLS
-int	_bcrypt_autorounds(void);
+int _bcrypt_autorounds(void);
 __END_HIDDEN_DECLS
-
 
 PROTO_NORMAL(bcrypt);
 PROTO_NORMAL(bcrypt_checkpass);

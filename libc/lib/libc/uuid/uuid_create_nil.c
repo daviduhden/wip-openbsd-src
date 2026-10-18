@@ -1,5 +1,7 @@
-/*	$OpenBSD: uuid_create_nil.c,v 1.3 2015/09/13 11:36:16 guenther Exp $	*/
-/*	$NetBSD: uuid_create_nil.c,v 1.2 2005/02/09 21:35:47 kleink Exp $	*/
+/*	$OpenBSD: uuid_create_nil.c,v 1.3 2015/09/13 11:36:16 guenther Exp $
+ */
+/*	$NetBSD: uuid_create_nil.c,v 1.2 2005/02/09 21:35:47 kleink Exp $
+ */
 
 /*
  * Copyright (c) 2002 Marcel Moolenaar
@@ -27,7 +29,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libc/uuid/uuid_create_nil.c,v 1.2 2003/08/08 19:18:43 marcel Exp $
+ * $FreeBSD: src/lib/libc/uuid/uuid_create_nil.c,v 1.2 2003/08/08 19:18:43
+ * marcel Exp $
  */
 
 #include <string.h>

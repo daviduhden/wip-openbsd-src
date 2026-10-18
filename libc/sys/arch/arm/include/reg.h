@@ -46,8 +46,8 @@ struct reg {
 };
 
 struct fpreg {
-	uint64_t	fp_reg[32];
-	uint32_t	fp_scr;
+	uint64_t fp_reg[32];
+	uint32_t fp_scr;
 };
 
 #endif /* !_ARM_REG_H_ */

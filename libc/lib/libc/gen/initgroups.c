@@ -29,15 +29,15 @@
  */
 
 #include <err.h>
+#include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <limits.h>
 
 int
 initgroups(const char *uname, gid_t agroup)
 {
 	gid_t groups[NGROUPS_MAX];
-	int maxgroups, ngroups;
+	int   maxgroups, ngroups;
 
 	maxgroups = ngroups = NGROUPS_MAX;
 	if (getgrouplist(uname, agroup, groups, &ngroups) == -1) {

@@ -31,25 +31,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/socket.h>
+
+#include <netdb.h>
+#include <rpc/pmap_clnt.h>
+#include <rpc/rpc.h>
 #include <stdio.h>
 #include <string.h>
-#include <rpc/rpc.h>
-#include <rpc/pmap_clnt.h>
-#include <netdb.h>
-#include <sys/socket.h>
 
 int
 getrpcport(char *host, int prognum, int versnum, int proto)
 {
 	struct sockaddr_in addr;
-	struct hostent *hp;
+	struct hostent	  *hp;
 
 	if ((hp = gethostbyname(host)) == NULL)
 		return (0);
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_len = sizeof(struct sockaddr_in);
 	addr.sin_family = AF_INET;
-	addr.sin_port =  0;
+	addr.sin_port = 0;
 	memcpy((char *)&addr.sin_addr, hp->h_addr, hp->h_length);
 	return (pmap_getport(&addr, prognum, versnum, proto));
 }

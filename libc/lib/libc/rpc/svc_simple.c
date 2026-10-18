@@ -31,27 +31,28 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* 
+/*
  * svc_simple.c
  * Simplified front end to rpc.
  */
 
+#include <sys/socket.h>
+
+#include <netdb.h>
+#include <rpc/pmap_clnt.h>
+#include <rpc/rpc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <rpc/rpc.h>
-#include <rpc/pmap_clnt.h>
-#include <sys/socket.h>
-#include <netdb.h>
 
 static struct proglst {
-	char *(*p_progname)();
-	int  p_prognum;
-	int  p_procnum;
-	xdrproc_t p_inproc, p_outproc;
+	char	       *(*p_progname)();
+	int		p_prognum;
+	int		p_procnum;
+	xdrproc_t	p_inproc, p_outproc;
 	struct proglst *p_nxt;
-} *proglst;
-static void universal(struct svc_req *, SVCXPRT *);
+}	       *proglst;
+static void	universal(struct svc_req *, SVCXPRT *);
 static SVCXPRT *transp;
 
 int
@@ -59,7 +60,7 @@ registerrpc(int prognum, int versnum, int procnum, char *(*progname)(),
     xdrproc_t inproc, xdrproc_t outproc)
 {
 	struct proglst *pl;
-	
+
 	if (procnum == NULLPROC)
 		return (-1);
 	if (transp == NULL) {
@@ -67,9 +68,9 @@ registerrpc(int prognum, int versnum, int procnum, char *(*progname)(),
 		if (transp == NULL)
 			return (-1);
 	}
-	(void) pmap_unset((u_long)prognum, (u_long)versnum);
-	if (!svc_register(transp, (u_long)prognum, (u_long)versnum, 
-	    universal, IPPROTO_UDP))
+	(void)pmap_unset((u_long)prognum, (u_long)versnum);
+	if (!svc_register(transp, (u_long)prognum, (u_long)versnum, universal,
+		IPPROTO_UDP))
 		return (-1);
 	pl = malloc(sizeof(struct proglst));
 	if (pl == NULL)
@@ -87,12 +88,12 @@ registerrpc(int prognum, int versnum, int procnum, char *(*progname)(),
 static void
 universal(struct svc_req *rqstp, SVCXPRT *transp)
 {
-	int prog, proc;
-	char *outdata;
-	char xdrbuf[UDPMSGSIZE];
+	int		prog, proc;
+	char	       *outdata;
+	char		xdrbuf[UDPMSGSIZE];
 	struct proglst *pl;
 
-	/* 
+	/*
 	 * enforce "procnum 0 is echo" convention
 	 */
 	if (rqstp->rq_proc == NULLPROC) {
@@ -111,8 +112,7 @@ universal(struct svc_req *rqstp, SVCXPRT *transp)
 				return;
 			}
 			outdata = (*(pl->p_progname))(xdrbuf);
-			if (outdata == NULL &&
-			    pl->p_outproc != xdr_void)
+			if (outdata == NULL && pl->p_outproc != xdr_void)
 				/* there was an error */
 				return;
 			if (!svc_sendreply(transp, pl->p_outproc, outdata))
@@ -123,4 +123,3 @@ universal(struct svc_req *rqstp, SVCXPRT *transp)
 		}
 	exit(1);
 }
-

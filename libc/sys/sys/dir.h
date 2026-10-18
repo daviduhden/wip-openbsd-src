@@ -38,9 +38,9 @@
  */
 
 #ifndef _SYS_DIR_H_
-#define	_SYS_DIR_H_
+#define _SYS_DIR_H_
 
-#ifdef	_KERNEL
+#ifdef _KERNEL
 /* This file should only be used by old user-level code. */
 #error "Please use <sys/dirent.h> instead"
 #endif
@@ -59,7 +59,8 @@
  * null byte (dp->d_namlen+1), rounded up to a 4 byte boundary.
  */
 #undef DIRSIZ
-#define DIRSIZ(dp) \
-    ((sizeof (struct direct) - (MAXNAMLEN+1)) + (((dp)->d_namlen+1 + 3) &~ 3))
+#define DIRSIZ(dp)                                                             \
+	((sizeof(struct direct) - (MAXNAMLEN + 1)) +                           \
+	    (((dp)->d_namlen + 1 + 3) & ~3))
 
 #endif /* !_SYS_DIR_H_ */

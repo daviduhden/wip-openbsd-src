@@ -7,9 +7,9 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
-#include <ieeefp.h>
 #include <float.h>
+#include <ieeefp.h>
+#include <stdlib.h>
 
 int
 main(int argc, char *argv[])

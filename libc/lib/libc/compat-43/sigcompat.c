@@ -32,17 +32,17 @@
 int
 sigvec(int signo, struct sigvec *sv, struct sigvec *osv)
 {
-	int ret;
+	int	      ret;
 	struct sigvec nsv;
 
 	if (sv) {
 		nsv = *sv;
-		nsv.sv_flags ^= SV_INTERRUPT;	/* !SA_INTERRUPT */
+		nsv.sv_flags ^= SV_INTERRUPT; /* !SA_INTERRUPT */
 	}
 	ret = WRAP(sigaction)(signo, sv ? (struct sigaction *)&nsv : NULL,
 	    (struct sigaction *)osv);
 	if (ret == 0 && osv)
-		osv->sv_flags ^= SV_INTERRUPT;	/* !SA_INTERRUPT */
+		osv->sv_flags ^= SV_INTERRUPT; /* !SA_INTERRUPT */
 	return (ret);
 }
 
@@ -51,8 +51,8 @@ sigsetmask(int mask)
 {
 	int omask, n;
 
-	n = WRAP(sigprocmask)(SIG_SETMASK, (sigset_t *) &mask,
-	    (sigset_t *) &omask);
+	n = WRAP(sigprocmask)(
+	    SIG_SETMASK, (sigset_t *)&mask, (sigset_t *)&omask);
 	if (n)
 		return (n);
 	return (omask);
@@ -63,8 +63,7 @@ sigblock(int mask)
 {
 	int omask, n;
 
-	n = WRAP(sigprocmask)(SIG_BLOCK, (sigset_t *) &mask,
-	    (sigset_t *) &omask);
+	n = WRAP(sigprocmask)(SIG_BLOCK, (sigset_t *)&mask, (sigset_t *)&omask);
 	if (n)
 		return (n);
 	return (omask);

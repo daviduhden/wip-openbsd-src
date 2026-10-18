@@ -11,19 +11,19 @@ char *
 l64a(long value)
 {
 	static char buf[8];
-	char *s = buf;
-	int digit;
-	int i;
+	char	   *s = buf;
+	int	    digit;
+	int	    i;
 
 	if (value < 0) {
 		errno = EINVAL;
-		return(NULL);
+		return (NULL);
 	}
 
 	for (i = 0; value != 0 && i < 6; i++) {
 		digit = value & 0x3f;
 
-		if (digit < 2) 
+		if (digit < 2)
 			*s = digit + '.';
 		else if (digit < 12)
 			*s = digit + '0' - 2;
@@ -38,5 +38,5 @@ l64a(long value)
 
 	*s = '\0';
 
-	return(buf);
+	return (buf);
 }

@@ -41,8 +41,8 @@
  * now we define various for playing with virtual addresses
  */
 
-#define	PDSHIFT		22		/* offset of PD index in VA */
-#define	NBPD		(1 << PDSHIFT)	/* # bytes mapped by PD (4MB) */
+#define PDSHIFT 22	    /* offset of PD index in VA */
+#define NBPD (1 << PDSHIFT) /* # bytes mapped by PD (4MB) */
 
 /*
  * here we define the bits of the PDE/PTE, as described above:
@@ -50,43 +50,43 @@
  * XXXCDC: need to rename these (PG_u == ugly).
  */
 
-#define	PG_V		0x00000001	/* valid entry */
-#define	PG_RO		0x00000000	/* read-only page */
-#define	PG_RW		0x00000002	/* read-write page */
-#define	PG_u		0x00000004	/* user accessible page */
-#define	PG_PROT		0x00000806	/* all protection bits */
-#define	PG_WT		0x00000008	/* write through */
-#define	PG_N		0x00000010	/* non-cacheable */
-#define	PG_U		0x00000020	/* has been used */
-#define	PG_M		0x00000040	/* has been modified */
-#define	PG_PAT		0x00000080	/* PAT bit. (on pte) */
-#define PG_PS		0x00000080	/* 4MB page size (on pde) */
-#define PG_G		0x00000100	/* global, don't TLB flush */
-#define PG_AVAIL1	0x00000200	/* ignored by hardware */
-#define PG_AVAIL2	0x00000400	/* ignored by hardware */
-#define PG_AVAIL3	0x00000800	/* ignored by hardware */
-#define	PG_PATLG	0x00001000	/* PAT on large pages */
+#define PG_V 0x00000001	     /* valid entry */
+#define PG_RO 0x00000000     /* read-only page */
+#define PG_RW 0x00000002     /* read-write page */
+#define PG_u 0x00000004	     /* user accessible page */
+#define PG_PROT 0x00000806   /* all protection bits */
+#define PG_WT 0x00000008     /* write through */
+#define PG_N 0x00000010	     /* non-cacheable */
+#define PG_U 0x00000020	     /* has been used */
+#define PG_M 0x00000040	     /* has been modified */
+#define PG_PAT 0x00000080    /* PAT bit. (on pte) */
+#define PG_PS 0x00000080     /* 4MB page size (on pde) */
+#define PG_G 0x00000100	     /* global, don't TLB flush */
+#define PG_AVAIL1 0x00000200 /* ignored by hardware */
+#define PG_AVAIL2 0x00000400 /* ignored by hardware */
+#define PG_AVAIL3 0x00000800 /* ignored by hardware */
+#define PG_PATLG 0x00001000  /* PAT on large pages */
 
 /* Cacheability bits when we are using PAT */
-#define	PG_WB		(0)		/* The default */
-#define	PG_WC		(PG_WT)		/* WT and CD is WC */
-#define	PG_UCMINUS	(PG_N)		/* UC but mtrr can override */
-#define	PG_UC		(PG_WT | PG_N)	/* hard UC */
+#define PG_WB (0)	     /* The default */
+#define PG_WC (PG_WT)	     /* WT and CD is WC */
+#define PG_UCMINUS (PG_N)    /* UC but mtrr can override */
+#define PG_UC (PG_WT | PG_N) /* hard UC */
 
 /*
  * various shorthand protection codes
  */
 
-#define	PG_KR		0x00000000	/* kernel read-only */
-#define	PG_KW		0x00000002	/* kernel read-write */
+#define PG_KR 0x00000000 /* kernel read-only */
+#define PG_KW 0x00000002 /* kernel read-write */
 
 /*
  * page protection exception bits
  */
 
-#define PGEX_P		0x01	/* protection violation (vs. no mapping) */
-#define PGEX_W		0x02	/* exception during a write cycle */
-#define PGEX_U		0x04	/* exception while in user mode (upl) */
-#define PGEX_I		0x10	/* instruction fetch blocked by NX */
+#define PGEX_P 0x01 /* protection violation (vs. no mapping) */
+#define PGEX_W 0x02 /* exception during a write cycle */
+#define PGEX_U 0x04 /* exception while in user mode (upl) */
+#define PGEX_I 0x10 /* instruction fetch blocked by NX */
 
 #endif /* _MACHINE_PTE_H_ */

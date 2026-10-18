@@ -26,21 +26,23 @@
  */
 
 #include <sys/types.h>
-#include <string.h>
+
 #include <limits.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <string.h>
+
 #include "ypinternal.h"
 
 int
 yp_maplist(const char *indomain, struct ypmaplist **outmaplist)
 {
-	struct dom_binding *ysd;
+	struct dom_binding   *ysd;
 	struct ypresp_maplist ypml;
-	struct timeval  tv;
-	int tries = 0, r;
+	struct timeval	      tv;
+	int		      tries = 0, r;
 
 again:
 	if (_yp_dobind(indomain, &ysd) != 0)
@@ -51,8 +53,8 @@ again:
 
 	memset(&ypml, 0, sizeof ypml);
 
-	r = clnt_call(ysd->dom_client, YPPROC_MAPLIST,
-	    xdr_domainname, &indomain, xdr_ypresp_maplist, &ypml, tv);
+	r = clnt_call(ysd->dom_client, YPPROC_MAPLIST, xdr_domainname,
+	    &indomain, xdr_ypresp_maplist, &ypml, tv);
 	if (r != RPC_SUCCESS) {
 		if (tries++)
 			clnt_perror(ysd->dom_client, "yp_maplist: clnt_call");

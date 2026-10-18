@@ -34,17 +34,17 @@
 /*
  * i386-dependent ptrace definitions
  */
-#define	PT_STEP		(PT_FIRSTMACH + 0)
-#define	PT_GETREGS	(PT_FIRSTMACH + 1)
-#define	PT_SETREGS	(PT_FIRSTMACH + 2)
-#define	PT_GETFPREGS	(PT_FIRSTMACH + 3)
-#define	PT_SETFPREGS	(PT_FIRSTMACH + 4)
-#define	PT_GETXMMREGS	(PT_FIRSTMACH + 5)
-#define	PT_SETXMMREGS	(PT_FIRSTMACH + 6)
+#define PT_STEP (PT_FIRSTMACH + 0)
+#define PT_GETREGS (PT_FIRSTMACH + 1)
+#define PT_SETREGS (PT_FIRSTMACH + 2)
+#define PT_GETFPREGS (PT_FIRSTMACH + 3)
+#define PT_SETFPREGS (PT_FIRSTMACH + 4)
+#define PT_GETXMMREGS (PT_FIRSTMACH + 5)
+#define PT_SETXMMREGS (PT_FIRSTMACH + 6)
 
 #ifdef _KERNEL
 struct xmmregs;
 
-int 	process_read_xmmregs(struct proc *, struct xmmregs *);
-int	process_write_xmmregs(struct proc *, const struct xmmregs *);
+int process_read_xmmregs(struct proc *, struct xmmregs *);
+int process_write_xmmregs(struct proc *, const struct xmmregs *);
 #endif

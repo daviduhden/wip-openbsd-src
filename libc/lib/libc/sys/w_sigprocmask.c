@@ -19,8 +19,8 @@
  * signals
  */
 
-#include <signal.h>
 #include <errno.h>
+#include <signal.h>
 
 int
 WRAP(sigprocmask)(int how, const sigset_t *set, sigset_t *oset)

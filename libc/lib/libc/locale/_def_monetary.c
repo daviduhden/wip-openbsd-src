@@ -6,33 +6,33 @@
 
 #include <limits.h>
 #include <locale.h>
+
 #include "localedef.h"
 
-const _MonetaryLocale _DefaultMonetaryLocale =
-{
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	CHAR_MAX,
-	CHAR_MAX,
+const _MonetaryLocale _DefaultMonetaryLocale = {
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    CHAR_MAX,
+    CHAR_MAX,
 
-	CHAR_MAX,	/* local p_cs_precedes */
-	CHAR_MAX,
-	CHAR_MAX,
-	CHAR_MAX,
-	CHAR_MAX,
-	CHAR_MAX,
+    CHAR_MAX, /* local p_cs_precedes */
+    CHAR_MAX,
+    CHAR_MAX,
+    CHAR_MAX,
+    CHAR_MAX,
+    CHAR_MAX,
 
-	CHAR_MAX,	/* intl p_cs_precedes */
-	CHAR_MAX,
-	CHAR_MAX,
-	CHAR_MAX,
-	CHAR_MAX,
-	CHAR_MAX,
+    CHAR_MAX, /* intl p_cs_precedes */
+    CHAR_MAX,
+    CHAR_MAX,
+    CHAR_MAX,
+    CHAR_MAX,
+    CHAR_MAX,
 };
 
 const _MonetaryLocale *_CurrentMonetaryLocale = &_DefaultMonetaryLocale;

@@ -34,21 +34,21 @@
 #include <sys/exec.h>
 #include <sys/sysctl.h>
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
-#define	MAX_PROCTITLE	2048
+#define MAX_PROCTITLE 2048
 
 void
 setproctitle(const char *fmt, ...)
 {
 	static struct ps_strings *ps;
-	va_list ap;
-	
+	va_list			  ap;
+
 	static char buf[MAX_PROCTITLE], *bufp = buf;
-	int used;
+	int	    used;
 
 	va_start(ap, fmt);
 	if (fmt != NULL) {
@@ -64,8 +64,8 @@ setproctitle(const char *fmt, ...)
 
 	if (ps == NULL) {
 		struct _ps_strings _ps;
-		const int mib[2] = { CTL_VM, VM_PSSTRINGS };
-		size_t len;
+		const int	   mib[2] = {CTL_VM, VM_PSSTRINGS};
+		size_t		   len;
 
 		len = sizeof(_ps);
 		if (sysctl(mib, 2, &_ps, &len, NULL, 0) != 0)

@@ -16,6 +16,7 @@
  */
 
 #include <sys/types.h>
+
 #include <err.h>
 #include <errno.h>
 #include <locale.h>
@@ -23,21 +24,21 @@
 #include <string.h>
 #include <wchar.h>
 
-static mbstate_t	 mbs;
+static mbstate_t mbs;
 
 void
-onetest(const char *name, const char *in, size_t insz,
-    int outerr, size_t outsz, wint_t out)
+onetest(const char *name, const char *in, size_t insz, int outerr, size_t outsz,
+    wint_t out)
 {
-	wchar_t		 wc;
-	size_t		 sz;
+	wchar_t wc;
+	size_t	sz;
 
 	sz = mbrtowc(&wc, in, insz, &mbs);
 	if (errno != outerr)
 		err(1, "%zu %s(%zd)", MB_CUR_MAX, name, insz);
 	if (sz != outsz || (out != WEOF && wc != out))
-		errx(1, "%zu %s(%zd) = (%zd, %d) != (%zd, %d)",
-		    MB_CUR_MAX, name, insz, sz, wc, outsz, out);
+		errx(1, "%zu %s(%zd) = (%zd, %d) != (%zd, %d)", MB_CUR_MAX,
+		    name, insz, sz, wc, outsz, out);
 	if (mbsinit(&mbs) == (insz && outsz == (size_t)-2))
 		errx(1, "%zu %s(%zd) mbsinit", MB_CUR_MAX, name, insz);
 	if (errno == 0 && outerr == 0)

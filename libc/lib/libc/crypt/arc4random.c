@@ -23,6 +23,9 @@
  * ChaCha based random number generator for OpenBSD.
  */
 
+#include <sys/types.h>
+#include <sys/time.h>
+
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
@@ -30,8 +33,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/time.h>
 
 #define KEYSTREAM_ONLY
 #include "chacha_private.h"
@@ -40,30 +41,30 @@
 
 #if defined(__GNUC__) || defined(_MSC_VER)
 #define inline __inline
-#else				/* __GNUC__ || _MSC_VER */
+#else /* __GNUC__ || _MSC_VER */
 #define inline
-#endif				/* !__GNUC__ && !_MSC_VER */
+#endif /* !__GNUC__ && !_MSC_VER */
 
-#define KEYSZ	32
-#define IVSZ	8
-#define BLOCKSZ	64
-#define RSBUFSZ	(16*BLOCKSZ)
+#define KEYSZ 32
+#define IVSZ 8
+#define BLOCKSZ 64
+#define RSBUFSZ (16 * BLOCKSZ)
 
-#define REKEY_BASE	(1024*1024) /* NB. should be a power of 2 */
+#define REKEY_BASE (1024 * 1024) /* NB. should be a power of 2 */
 
 /* Marked MAP_INHERIT_ZERO, so zero'd out in fork children. */
 static struct _rs {
-	size_t		rs_have;	/* valid bytes at end of rs_buf */
-	size_t		rs_count;	/* bytes till reseed */
+	size_t rs_have;	 /* valid bytes at end of rs_buf */
+	size_t rs_count; /* bytes till reseed */
 } *rs;
 
 /* Maybe be preserved in fork children, if _rs_allocate() decides. */
 static struct _rsx {
-	chacha_ctx	rs_chacha;	/* chacha context for random keystream */
-	u_char		rs_buf[RSBUFSZ];	/* keystream blocks */
+	chacha_ctx rs_chacha;	    /* chacha context for random keystream */
+	u_char	   rs_buf[RSBUFSZ]; /* keystream blocks */
 } *rsx;
 
-static inline int _rs_allocate(struct _rs **, struct _rsx **);
+static inline int  _rs_allocate(struct _rs **, struct _rsx **);
 static inline void _rs_forkdetect(void);
 #include "arc4random.h"
 
@@ -87,7 +88,7 @@ _rs_init(u_char *buf, size_t n)
 static void
 _rs_stir(void)
 {
-	u_char rnd[KEYSZ + IVSZ];
+	u_char	 rnd[KEYSZ + IVSZ];
 	uint32_t rekey_fuzz = 0;
 
 	if (getentropy(rnd, sizeof rnd) == -1)
@@ -97,7 +98,7 @@ _rs_stir(void)
 		_rs_init(rnd, sizeof(rnd));
 	else
 		_rs_rekey(rnd, sizeof(rnd));
-	explicit_bzero(rnd, sizeof(rnd));	/* discard source seed */
+	explicit_bzero(rnd, sizeof(rnd)); /* discard source seed */
 
 	/* invalidate rs_buf */
 	rs->rs_have = 0;
@@ -128,8 +129,8 @@ _rs_rekey(u_char *dat, size_t datlen)
 	memset(rsx->rs_buf, 0, sizeof(rsx->rs_buf));
 #endif
 	/* fill rs_buf with the keystream */
-	chacha_encrypt_bytes(&rsx->rs_chacha, rsx->rs_buf,
-	    rsx->rs_buf, sizeof(rsx->rs_buf));
+	chacha_encrypt_bytes(
+	    &rsx->rs_chacha, rsx->rs_buf, rsx->rs_buf, sizeof(rsx->rs_buf));
 	/* mix in optional user provided data */
 	if (dat) {
 		size_t i, m;
@@ -149,14 +150,14 @@ _rs_random_buf(void *_buf, size_t n)
 {
 	u_char *buf = (u_char *)_buf;
 	u_char *keystream;
-	size_t m;
+	size_t	m;
 
 	_rs_stir_if_needed(n);
 	while (n > 0) {
 		if (rs->rs_have > 0) {
 			m = minimum(n, rs->rs_have);
-			keystream = rsx->rs_buf + sizeof(rsx->rs_buf)
-			    - rs->rs_have;
+			keystream =
+			    rsx->rs_buf + sizeof(rsx->rs_buf) - rs->rs_have;
 			memcpy(buf, keystream, m);
 			memset(keystream, 0, m);
 			buf += m;

@@ -22,14 +22,15 @@
  */
 
 #ifndef _SYS_TIMETC_H_
-#define	_SYS_TIMETC_H_
+#define _SYS_TIMETC_H_
 
 #if !defined(_KERNEL) && !defined(_LIBC)
 #error "no user-serviceable parts inside"
 #endif
 
-#include <machine/timetc.h>
 #include <sys/queue.h>
+
+#include <machine/timetc.h>
 
 /*-
  * `struct timecounter' is the interface between the hardware which implements
@@ -53,53 +54,53 @@ typedef u_int timecounter_get_t(struct timecounter *);
  */
 
 struct timecounter {
-	timecounter_get_t	*tc_get_timecount;	/* [I] */
-		/*
-		 * This function reads the counter.  It is not required to
-		 * mask any unimplemented bits out, as long as they are
-		 * constant.
-		 */
-	u_int 			tc_counter_mask;	/* [I] */
-		/* This mask should mask off any unimplemented bits. */
-	u_int64_t		tc_frequency;		/* [I] */
-		/* Frequency of the counter in Hz. */
-	char			*tc_name;		/* [I] */
-		/* Name of the timecounter. */
-	int			tc_quality;		/* [I] */
-		/*
-		 * Used to determine if this timecounter is better than
-		 * another timecounter higher means better.  Negative
-		 * means "only use at explicit request".
-		 */
-	void			*tc_priv;		/* [I] */
-		/* Pointer to the timecounter's private parts. */
-	int			tc_user;		/* [I] */
-		/* Expose this timecounter to userland. */
-	SLIST_ENTRY(timecounter) tc_next;		/* [I] */
-		/* Pointer to the next timecounter. */
-	int64_t			tc_freq_adj;		/* [T,W] */
-		/* Current frequency adjustment. */
-	u_int64_t		tc_precision;		/* [I] */
-		/* Precision of the counter.  Computed in tc_init(). */
+	timecounter_get_t *tc_get_timecount; /* [I] */
+					     /*
+					      * This function reads the counter.  It is not required to
+					      * mask any unimplemented bits out, as long as they are
+					      * constant.
+					      */
+	u_int tc_counter_mask;		     /* [I] */
+	/* This mask should mask off any unimplemented bits. */
+	u_int64_t tc_frequency; /* [I] */
+				/* Frequency of the counter in Hz. */
+	char *tc_name;		/* [I] */
+				/* Name of the timecounter. */
+	int tc_quality;		/* [I] */
+				/*
+				 * Used to determine if this timecounter is better than
+				 * another timecounter higher means better.  Negative
+				 * means "only use at explicit request".
+				 */
+	void *tc_priv;		/* [I] */
+	/* Pointer to the timecounter's private parts. */
+	int tc_user; /* [I] */
+		     /* Expose this timecounter to userland. */
+	SLIST_ENTRY(timecounter) tc_next; /* [I] */
+					  /* Pointer to the next timecounter. */
+	int64_t tc_freq_adj;		  /* [T,W] */
+					  /* Current frequency adjustment. */
+	u_int64_t tc_precision;		  /* [I] */
+	/* Precision of the counter.  Computed in tc_init(). */
 };
 
 struct timekeep {
 	/* set at initialization */
-	uint32_t	tk_version;		/* version number */
+	uint32_t tk_version; /* version number */
 
 	/* timehands members */
-	uint64_t	tk_scale;
-	u_int		tk_offset_count;
-	struct bintime	tk_offset;
-	struct bintime	tk_naptime;
-	struct bintime	tk_boottime;
-	volatile u_int	tk_generation;
+	uint64_t       tk_scale;
+	u_int	       tk_offset_count;
+	struct bintime tk_offset;
+	struct bintime tk_naptime;
+	struct bintime tk_boottime;
+	volatile u_int tk_generation;
 
 	/* timecounter members */
-	int		tk_user;
-	u_int		tk_counter_mask;
+	int   tk_user;
+	u_int tk_counter_mask;
 };
-#define TK_VERSION	0
+#define TK_VERSION 0
 
 struct rwlock;
 extern struct rwlock tc_lock;
@@ -107,18 +108,18 @@ extern struct rwlock tc_lock;
 extern struct timecounter *timecounter;
 
 extern struct uvm_object *timekeep_object;
-extern struct timekeep *timekeep;
+extern struct timekeep	 *timekeep;
 
 u_int64_t tc_getfrequency(void);
 u_int64_t tc_getprecision(void);
-void	tc_init(struct timecounter *tc);
-void	tc_reset_quality(struct timecounter *, int);
-void	tc_setclock(const struct timespec *ts);
-void	tc_setrealtimeclock(const struct timespec *ts);
-void	tc_ticktock(void);
-void	inittimecounter(void);
-int	sysctl_tc(int *, u_int, void *, size_t *, void *, size_t);
-void	tc_adjfreq(int64_t *, int64_t *);
-void	tc_adjtime(int64_t *, int64_t *);
+void	  tc_init(struct timecounter *tc);
+void	  tc_reset_quality(struct timecounter *, int);
+void	  tc_setclock(const struct timespec *ts);
+void	  tc_setrealtimeclock(const struct timespec *ts);
+void	  tc_ticktock(void);
+void	  inittimecounter(void);
+int	  sysctl_tc(int *, u_int, void *, size_t *, void *, size_t);
+void	  tc_adjfreq(int64_t *, int64_t *);
+void	  tc_adjtime(int64_t *, int64_t *);
 
 #endif /* !_SYS_TIMETC_H_ */

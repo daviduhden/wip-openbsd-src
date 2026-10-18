@@ -21,9 +21,9 @@
 #include_next <netdb.h>
 
 __BEGIN_HIDDEN_DECLS
-extern int _net_stayopen;
+extern int		    _net_stayopen;
 extern struct protoent_data _protoent_data;
-extern struct servent_data _servent_data;
+extern struct servent_data  _servent_data;
 __END_HIDDEN_DECLS
 
 PROTO_DEPRECATED(endhostent);
@@ -66,4 +66,4 @@ PROTO_NORMAL(setprotoent_r);
 PROTO_DEPRECATED(setservent);
 PROTO_NORMAL(setservent_r);
 
-#endif	/* !_LIBC_NETDB_H */
+#endif /* !_LIBC_NETDB_H */

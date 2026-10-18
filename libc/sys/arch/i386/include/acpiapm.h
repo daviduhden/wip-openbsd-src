@@ -15,9 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 extern int (*acpiapm_open)(dev_t, int, int, struct proc *);
 extern int (*acpiapm_close)(dev_t, int, int, struct proc *);
 extern int (*acpiapm_ioctl)(dev_t, u_long, caddr_t, int, struct proc *);
 extern int (*acpiapm_kqfilter)(dev_t, struct knote *);
-

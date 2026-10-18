@@ -47,9 +47,9 @@
 #include <machine/reg.h>
 
 #ifdef notyet
-#define	PCB_MAXWIN	32	/* architectural limit */
+#define PCB_MAXWIN 32 /* architectural limit */
 #else
-#define	PCB_MAXWIN	8	/* worried about u area sizes ... */
+#define PCB_MAXWIN 8 /* worried about u area sizes ... */
 #endif
 
 /*
@@ -103,7 +103,7 @@
  * The only other register we need to save is %cwp because it cannot
  * be trivially computed from the other registers.  The %cwp is
  * stored in the %tstate register, but if the machine was in a register
- * window spill/fill handler, the value of that %cwp may be off by 
+ * window spill/fill handler, the value of that %cwp may be off by
  * as much as 2 register windows.  We will also store %cwp.  [We will
  * try to steal pcb_uw or pcb_nsaved for this purpose eventually.]
  *
@@ -121,32 +121,33 @@
  * full windows we have.  As soon as a flush traps, we dump all user
  * windows to the pcb, handle the fault, then restore all user windows.
  *
- * XXX we are using pcb_nsaved as the counter.  pcb_uw is still a mask.  
+ * XXX we are using pcb_nsaved as the counter.  pcb_uw is still a mask.
  * change this as soon as the new scheme is debugged.
  */
 struct pcb {
-	u_int64_t	pcb_sp;		/* sp (%o6) when switch() was called */
-	u_int64_t	pcb_pc;		/* pc (%o7) when switch() was called */
-	caddr_t	pcb_onfault;	/* for copyin/out */
-	short	pcb_pstate;	/* %pstate when switch() was called -- may be useful if we support multiple memory models */
-	char	pcb_nsaved;	/* number of windows saved in pcb */
+	u_int64_t pcb_sp;      /* sp (%o6) when switch() was called */
+	u_int64_t pcb_pc;      /* pc (%o7) when switch() was called */
+	caddr_t	  pcb_onfault; /* for copyin/out */
+	short pcb_pstate; /* %pstate when switch() was called -- may be useful
+			     if we support multiple memory models */
+	char pcb_nsaved;  /* number of windows saved in pcb */
 
 	/* The rest is probably not needed except for pcb_rw */
-	char	pcb_cwp;	/* %cwp when switch() was called */
-	char	pcb_pil;	/* %pil when switch() was called -- probably not needed */
+	char pcb_cwp; /* %cwp when switch() was called */
+	char pcb_pil; /* %pil when switch() was called -- probably not needed */
 
-	const char *lastcall;	/* DEBUG -- name of last system call */
-	u_int64_t	pcb_wcookie;
+	const char *lastcall; /* DEBUG -- name of last system call */
+	u_int64_t   pcb_wcookie;
 
 	/* the following MUST be aligned on a 64-bit boundary */
-	struct	rwindow pcb_rw[PCB_MAXWIN];	/* saved windows */
-	u_int64_t	pcb_rwsp[PCB_MAXWIN];
+	struct rwindow pcb_rw[PCB_MAXWIN]; /* saved windows */
+	u_int64_t      pcb_rwsp[PCB_MAXWIN];
 };
 
 #ifndef _KERNEL
 /* Let gdb compile.  We need fancier macros to make these make sense. */
-#define pcb_psr	pcb_pstate
-#define pcb_wim	pcb_cwp
+#define pcb_psr pcb_pstate
+#define pcb_wim pcb_cwp
 #endif /* _KERNEL */
 
 #endif /* _MACHINE_PCB_H_ */

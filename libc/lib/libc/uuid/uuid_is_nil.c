@@ -1,4 +1,5 @@
-/*	$OpenBSD: uuid_is_nil.c,v 1.3 2015/09/13 11:36:16 guenther Exp $	*/
+/*	$OpenBSD: uuid_is_nil.c,v 1.3 2015/09/13 11:36:16 guenther Exp $
+ */
 /*	$NetBSD: uuid_is_nil.c,v 1.4 2008/04/23 07:52:32 plunky Exp $	*/
 
 /*
@@ -27,7 +28,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libc/uuid/uuid_is_nil.c,v 1.2 2003/08/08 19:18:43 marcel Exp $
+ * $FreeBSD: src/lib/libc/uuid/uuid_is_nil.c,v 1.2 2003/08/08 19:18:43 marcel
+ * Exp $
  */
 
 #include <string.h>
@@ -41,7 +43,7 @@
 int32_t
 uuid_is_nil(const uuid_t *u, uint32_t *status)
 {
-	static const uuid_t nil = { .time_low = 0 };
+	static const uuid_t nil = {.time_low = 0};
 
 	if (status)
 		*status = uuid_s_ok;

@@ -8,18 +8,21 @@
 
 #include <err.h>
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 
-void sighandler(int sig) { }
+void
+sighandler(int sig)
+{
+}
 
 int
 main(void)
 {
 	struct sigaction sa;
-	sigset_t set, oset;
+	sigset_t	 set, oset;
 
 	/*
 	 * check sigprocmask

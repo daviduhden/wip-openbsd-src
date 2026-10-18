@@ -32,12 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef _MACHINE_MPBIOSVAR_H_
 #define _MACHINE_MPBIOSVAR_H_
 
-#define MP_TRAMPOLINE  (16 * PAGE_SIZE)
-#define MP_TRAMP_DATA  (17 * PAGE_SIZE)
+#define MP_TRAMPOLINE (16 * PAGE_SIZE)
+#define MP_TRAMP_DATA (17 * PAGE_SIZE)
 
 #if !defined(_LOCORE)
 

@@ -29,52 +29,53 @@
  * the rights to redistribute these changes.
  */
 
-#ifndef	_MACHINE_DB_MACHDEP_H_
-#define	_MACHINE_DB_MACHDEP_H_
+#ifndef _MACHINE_DB_MACHDEP_H_
+#define _MACHINE_DB_MACHDEP_H_
 
 /*
  * Machine-dependent defines for new kernel debugger.
  */
 
 #include <sys/param.h>
-#include <uvm/uvm_extern.h>
+
 #include <machine/armreg.h>
 #include <machine/frame.h>
+#include <uvm/uvm_extern.h>
 
 /* end of mangling */
 
-typedef	long		db_expr_t;	/* expression - signed */
+typedef long db_expr_t; /* expression - signed */
 
 typedef trapframe_t db_regs_t;
 
-extern db_regs_t		ddb_regs;	/* register state */
-#define	DDB_REGS	(&ddb_regs)
+extern db_regs_t ddb_regs; /* register state */
+#define DDB_REGS (&ddb_regs)
 
-#define	PC_REGS(regs)	((vaddr_t)(regs)->tf_elr)
-#define	SET_PC_REGS(regs, value)	(regs)->tf_elr = (register_t)(value)
+#define PC_REGS(regs) ((vaddr_t)(regs)->tf_elr)
+#define SET_PC_REGS(regs, value) (regs)->tf_elr = (register_t)(value)
 
-#define	BKPT_INST	0xd4200000		/* breakpoint instruction */
-#define	BKPT_SIZE	(INSN_SIZE)		/* size of breakpoint inst */
-#define	BKPT_SET(inst)	(BKPT_INST)
+#define BKPT_INST 0xd4200000  /* breakpoint instruction */
+#define BKPT_SIZE (INSN_SIZE) /* size of breakpoint inst */
+#define BKPT_SET(inst) (BKPT_INST)
 
-#define	db_clear_single_step(regs)	((regs)->tf_spsr &= ~PSR_SS)
-#define	db_set_single_step(regs)	((regs)->tf_spsr |= PSR_SS)
+#define db_clear_single_step(regs) ((regs)->tf_spsr &= ~PSR_SS)
+#define db_set_single_step(regs) ((regs)->tf_spsr |= PSR_SS)
 
-#define	IS_BREAKPOINT_TRAP(type, code)	((type) == EXCP_BRK)
-#define	IS_WATCHPOINT_TRAP(type, code)	((type) == EXCP_WATCHPT_EL1)
+#define IS_BREAKPOINT_TRAP(type, code) ((type) == EXCP_BRK)
+#define IS_WATCHPOINT_TRAP(type, code) ((type) == EXCP_WATCHPT_EL1)
 
 // ALL BROKEN!!!
-#define	inst_trap_return(ins)	((ins) == 0 && (ins) == 1)
-#define	inst_return(ins)	((ins) == 0 && (ins) == 1)
-#define	inst_call(ins)		((ins) == 0 && (ins) == 1)
+#define inst_trap_return(ins) ((ins) == 0 && (ins) == 1)
+#define inst_return(ins) ((ins) == 0 && (ins) == 1)
+#define inst_call(ins) ((ins) == 0 && (ins) == 1)
 
 #define DB_MACHINE_COMMANDS
 
-int db_ktrap(int, db_regs_t *);
-void db_machine_init (void);
+int  db_ktrap(int, db_regs_t *);
+void db_machine_init(void);
 
-#define DDB_STATE_NOT_RUNNING	0  
-#define DDB_STATE_RUNNING	1
-#define DDB_STATE_EXITING	2
+#define DDB_STATE_NOT_RUNNING 0
+#define DDB_STATE_RUNNING 1
+#define DDB_STATE_EXITING 2
 
-#endif	/* _MACHINE_DB_MACHDEP_H_ */
+#endif /* _MACHINE_DB_MACHDEP_H_ */

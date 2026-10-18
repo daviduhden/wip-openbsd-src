@@ -11,8 +11,8 @@
 
 #include "wctoint.h"
 
-#define	FUNCNAME	wcstoumax
-typedef uintmax_t	uint_type;
-#define	MAX_VALUE	UINTMAX_MAX
+#define FUNCNAME wcstoumax
+typedef uintmax_t uint_type;
+#define MAX_VALUE UINTMAX_MAX
 
 #include "_wcstoul.h"

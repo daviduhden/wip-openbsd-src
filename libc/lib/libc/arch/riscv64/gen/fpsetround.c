@@ -16,6 +16,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_rnd
@@ -23,7 +24,7 @@ fpsetround(fp_rnd rnd_dir)
 {
 	uint32_t frm;
 
-	__asm volatile ("fsrm %0, %1" : "=r"(frm) : "r"(rnd_dir));
+	__asm volatile("fsrm %0, %1" : "=r"(frm) : "r"(rnd_dir));
 
 	/* Truncating to 2 bits means both RNE and RMM become FP_RN. */
 	return frm & 0x3;

@@ -21,7 +21,7 @@
 #include_next <rpc/svc.h>
 
 __BEGIN_HIDDEN_DECLS
-int	__xprt_register(SVCXPRT *);
+int __xprt_register(SVCXPRT *);
 __END_HIDDEN_DECLS
 
 PROTO_NORMAL(svc_getreq);

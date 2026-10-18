@@ -1,5 +1,6 @@
 /*	$OpenBSD: dprintf.c,v 1.2 2015/08/31 02:53:57 guenther Exp $	*/
-/*	$FreeBSD: src/lib/libc/stdio/dprintf.c,v 1.2 2012/11/17 01:49:39 svnexp Exp $	*/
+/*	$FreeBSD: src/lib/libc/stdio/dprintf.c,v 1.2 2012/11/17 01:49:39 svnexp
+ * Exp $	*/
 
 /*-
  * Copyright (c) 2009 David Schultz <das@FreeBSD.org>
@@ -32,14 +33,14 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 int
-dprintf(int fd, const char * __restrict fmt, ...)
+dprintf(int fd, const char *__restrict fmt, ...)
 {
 	va_list ap;
-	int ret;
+	int	ret;
 
 	va_start(ap, fmt);
 	ret = vdprintf(fd, fmt, ap);

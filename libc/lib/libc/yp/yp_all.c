@@ -27,29 +27,31 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
 #include <limits.h>
-#include <unistd.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "ypinternal.h"
 
-static int (*ypresp_allfn)(u_long, char *, int, char *, int, void *);
+static int   (*ypresp_allfn)(u_long, char *, int, char *, int, void *);
 static void *ypresp_data;
 
 static bool_t
 _xdr_ypresp_all_seq(XDR *xdrs, u_long *objp)
 {
 	struct ypresp_all out;
-	u_long status;
-	char *key, *val;
-	int size;
-	int done = 0;  /* set to 1 when the user does not want more data */
-	bool_t rc = TRUE;  /* FALSE at the end of loop signals failure */
+	u_long		  status;
+	char		 *key, *val;
+	int		  size;
+	int    done = 0;  /* set to 1 when the user does not want more data */
+	bool_t rc = TRUE; /* FALSE at the end of loop signals failure */
 
 	memset(&out, 0, sizeof out);
 	while (rc && !done) {
@@ -67,8 +69,8 @@ _xdr_ypresp_all_seq(XDR *xdrs, u_long *objp)
 				*objp = (u_long)YP_YPERR;
 				goto fail;
 			}
-			(void)memcpy(key, out.ypresp_all_u.val.key.keydat_val,
-			    size);
+			(void)memcpy(
+			    key, out.ypresp_all_u.val.key.keydat_val, size);
 			key[size] = '\0';
 
 			size = out.ypresp_all_u.val.val.valdat_len;
@@ -77,8 +79,8 @@ _xdr_ypresp_all_seq(XDR *xdrs, u_long *objp)
 				*objp = (u_long)YP_YPERR;
 				goto fail;
 			}
-			(void)memcpy(val, out.ypresp_all_u.val.val.valdat_val,
-			    size);
+			(void)memcpy(
+			    val, out.ypresp_all_u.val.val.valdat_val, size);
 			val[size] = '\0';
 
 			done = (*ypresp_allfn)(status, key,
@@ -91,7 +93,7 @@ _xdr_ypresp_all_seq(XDR *xdrs, u_long *objp)
 		if (status != YP_NOMORE)
 			*objp = status;
 		rc = TRUE;
-fail:
+	fail:
 		xdr_free(xdr_ypresp_all, (char *)&out);
 	}
 	return rc;
@@ -102,22 +104,22 @@ yp_all(const char *dom, const char *inmap, struct ypall_callback *incallback)
 {
 	struct ypreq_nokey yprnk;
 	struct dom_binding ypbinding;
-	struct timeval  tv;
-	int connected = 1;
-	u_long		status;
-	int		r = 0, s;
+	struct timeval	   tv;
+	int		   connected = 1;
+	u_long		   status;
+	int		   r = 0, s;
 
 	if (dom == NULL || strlen(dom) == 0)
 		return YPERR_BADARGS;
 
-	if (strlen(dom) > YPMAXDOMAIN || inmap == NULL ||
-	    *inmap == '\0' || strlen(inmap) > YPMAXMAP || incallback == NULL)
+	if (strlen(dom) > YPMAXDOMAIN || inmap == NULL || *inmap == '\0' ||
+	    strlen(inmap) > YPMAXMAP || incallback == NULL)
 		return YPERR_BADARGS;
 
 again:
 	s = ypconnect(SOCK_STREAM);
 	if (s == -1)
-		return YPERR_DOMAIN;	/* YP not running */
+		return YPERR_DOMAIN; /* YP not running */
 	ypbinding.dom_socket = s;
 	ypbinding.dom_server_addr.sin_port = -1; /* don't consult portmap */
 
@@ -136,9 +138,9 @@ again:
 	yprnk.domain = (char *)dom;
 	yprnk.map = (char *)inmap;
 	ypresp_allfn = incallback->foreach;
-	ypresp_data = (void *) incallback->data;
-	(void) clnt_call(ypbinding.dom_client, YPPROC_ALL,
-	    xdr_ypreq_nokey, &yprnk, _xdr_ypresp_all_seq, &status, tv);
+	ypresp_data = (void *)incallback->data;
+	(void)clnt_call(ypbinding.dom_client, YPPROC_ALL, xdr_ypreq_nokey,
+	    &yprnk, _xdr_ypresp_all_seq, &status, tv);
 	close(ypbinding.dom_socket);
 	clnt_destroy(ypbinding.dom_client);
 

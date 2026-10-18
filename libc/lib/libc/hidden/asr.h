@@ -37,4 +37,4 @@ PROTO_NORMAL(res_query_async);
 PROTO_NORMAL(res_search_async);
 PROTO_NORMAL(res_send_async);
 
-#endif	/* _LIBC_ASR_H_ */
+#endif /* _LIBC_ASR_H_ */

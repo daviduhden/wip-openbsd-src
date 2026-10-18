@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_RPCSVC_YP_H_
-#define	_LIBC_RPCSVC_YP_H_
+#define _LIBC_RPCSVC_YP_H_
 
 #include_next <rpcsvc/yp.h>
 

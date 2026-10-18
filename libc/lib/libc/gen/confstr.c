@@ -33,22 +33,21 @@
 #include <string.h>
 #include <unistd.h>
 
-
 static const char v6_width_restricted_envs[] = {
 #ifdef __LP64__
-	"POSIX_V6_LP64_OFF64\n"
-	"POSIX_V6_LPBIG_OFFBIG"
+    "POSIX_V6_LP64_OFF64\n"
+    "POSIX_V6_LPBIG_OFFBIG"
 #else
-	"POSIX_V6_ILP32_OFFBIG"
+    "POSIX_V6_ILP32_OFFBIG"
 #endif
 };
 
 static const char v7_width_restricted_envs[] = {
 #ifdef __LP64__
-	"POSIX_V7_LP64_OFF64\n"
-	"POSIX_V7_LPBIG_OFFBIG"
+    "POSIX_V7_LP64_OFF64\n"
+    "POSIX_V7_LPBIG_OFFBIG"
 #else
-	"POSIX_V7_ILP32_OFFBIG"
+    "POSIX_V7_ILP32_OFFBIG"
 #endif
 };
 
@@ -115,7 +114,7 @@ confstr(int name, char *buf, size_t len)
 
 	case _CS_POSIX_V6_WIDTH_RESTRICTED_ENVS:
 		return (strlcpy(buf, v6_width_restricted_envs, len) + 1);
-	
+
 	case _CS_POSIX_V7_WIDTH_RESTRICTED_ENVS:
 		return (strlcpy(buf, v7_width_restricted_envs, len) + 1);
 

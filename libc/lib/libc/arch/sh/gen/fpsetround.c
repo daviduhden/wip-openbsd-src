@@ -17,6 +17,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_rnd
@@ -27,14 +28,14 @@ fpsetround(fp_rnd rnd_dir)
 	extern register_t __fpscr_values[2];
 #endif
 
-	__asm__ volatile ("sts fpscr, %0" : "=r" (fpscr));
+	__asm__ volatile("sts fpscr, %0" : "=r"(fpscr));
 	if (rnd_dir == FP_RN || rnd_dir == FP_RZ) {
 		nfpscr = (fpscr & ~0x03) | rnd_dir;
 #if defined(__SH4__) && !defined(__SH4_NOFPU__)
 		__fpscr_values[0] = (__fpscr_values[0] & ~0x03) | rnd_dir;
 		__fpscr_values[1] = (__fpscr_values[1] & ~0x03) | rnd_dir;
 #endif
-		__asm__ volatile ("lds %0, fpscr" : : "r" (nfpscr));
+		__asm__ volatile("lds %0, fpscr" : : "r"(nfpscr));
 	}
 	/* else how report an error? */
 

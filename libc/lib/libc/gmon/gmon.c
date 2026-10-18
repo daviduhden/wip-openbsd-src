@@ -63,19 +63,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/time.h>
 #include <sys/gmon.h>
 #include <sys/mman.h>
 #include <sys/sysctl.h>
+#include <sys/time.h>
 
+#include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include <limits.h>
 #include <unistd.h>
 
-struct gmonparam _gmonparam = { GMON_PROF_OFF };
+struct gmonparam _gmonparam = {GMON_PROF_OFF};
 
 #include <pthread.h>
 #include <thread_private.h>
@@ -85,18 +85,18 @@ static SLIST_HEAD(, gmonparam) _gmoninuse = SLIST_HEAD_INITIALIZER(_gmoninuse);
 _THREAD_PRIVATE_MUTEX(_gmonlock);
 static pthread_key_t _gmonkey;
 
-static int	s_scale;
+static int s_scale;
 /* see profil(2) where this is describe (incorrectly) */
-#define		SCALE_1_TO_1	0x10000L
+#define SCALE_1_TO_1 0x10000L
 
 #define ERR(s) write(STDERR_FILENO, s, sizeof(s))
 
 PROTO_NORMAL(_gmon_alloc);
 PROTO_NORMAL(moncontrol);
 
-#define PAGESIZE	(1UL << _MAX_PAGE_SHIFT)
-#define PAGEMASK	(PAGESIZE - 1)
-#define PAGEROUND(x)	(((x) + (PAGEMASK)) & ~PAGEMASK)
+#define PAGESIZE (1UL << _MAX_PAGE_SHIFT)
+#define PAGEMASK (PAGESIZE - 1)
+#define PAGEROUND(x) (((x) + (PAGEMASK)) & ~PAGEMASK)
 
 static void
 _gmon_destructor(void *arg)
@@ -114,10 +114,10 @@ _gmon_destructor(void *arg)
 void
 _monstartup(u_long lowpc, u_long highpc)
 {
-	int o;
+	int		  o;
 	struct gmonparam *p = &_gmonparam;
-	char *profdir = NULL;
-	char *a;
+	char		 *profdir = NULL;
+	char		 *a;
 
 	/*
 	 * round lowpc and highpc to multiples of the density we're using
@@ -142,7 +142,7 @@ _monstartup(u_long lowpc, u_long highpc)
 	/* Create a contig output buffer, with froms/tos tables after */
 	a = mmap(NULL,
 	    PAGEROUND(p->outbuflen) + _ALIGN(p->fromssize) + _ALIGN(p->tossize),
-	    PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0);
+	    PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	if (a == MAP_FAILED) {
 		ERR("_monstartup: out of memory\n");
 		return;
@@ -156,7 +156,7 @@ _monstartup(u_long lowpc, u_long highpc)
 	o = p->highpc - p->lowpc;
 	if (p->kcountsize < o) {
 #ifndef notdef
-		s_scale = ((float)p->kcountsize / o ) * SCALE_1_TO_1;
+		s_scale = ((float)p->kcountsize / o) * SCALE_1_TO_1;
 #else /* avoid floating point */
 		int quot = o / p->kcountsize;
 
@@ -175,7 +175,7 @@ _monstartup(u_long lowpc, u_long highpc)
 	if (issetugid() == 0)
 		profdir = getenv("PROFDIR");
 	if (profdir)
-		p->dirfd = open(profdir, O_DIRECTORY|O_CLOEXEC, 0);
+		p->dirfd = open(profdir, O_DIRECTORY | O_CLOEXEC, 0);
 	else
 		p->dirfd = -1;
 
@@ -191,7 +191,7 @@ struct gmonparam *
 _gmon_alloc(void)
 {
 	struct gmonparam *p;
-	char *a;
+	char		 *a;
 
 	if (_gmonparam.state == GMON_PROF_OFF)
 		return NULL;
@@ -204,9 +204,9 @@ _gmon_alloc(void)
 	} else {
 		_THREAD_PRIVATE_MUTEX_UNLOCK(_gmonlock);
 		a = mmap(NULL,
-			 _ALIGN(sizeof(*p)) + _ALIGN(_gmonparam.fromssize) +
-			 _ALIGN(_gmonparam.tossize),
-			 PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0);
+		    _ALIGN(sizeof(*p)) + _ALIGN(_gmonparam.fromssize) +
+			_ALIGN(_gmonparam.tossize),
+		    PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 		if (a == MAP_FAILED) {
 			pthread_setspecific(_gmonkey, NULL);
 			ERR("_gmon_alloc: out of memory\n");
@@ -232,9 +232,9 @@ DEF_WEAK(_gmon_alloc);
 static void
 _gmon_merge_two(struct gmonparam *p, struct gmonparam *q)
 {
-	u_long fromindex, selfpc, endfrom;
-	u_short *frompcindex, qtoindex, toindex;
-	long count;
+	u_long		 fromindex, selfpc, endfrom;
+	u_short		*frompcindex, qtoindex, toindex;
+	long		 count;
 	struct tostruct *top;
 
 	endfrom = (q->fromssize / sizeof(*q->froms));
@@ -242,7 +242,7 @@ _gmon_merge_two(struct gmonparam *p, struct gmonparam *q)
 		if (q->froms[fromindex] == 0)
 			continue;
 		for (qtoindex = q->froms[fromindex]; qtoindex != 0;
-		     qtoindex = q->tos[qtoindex].link) {
+		    qtoindex = q->tos[qtoindex].link) {
 			selfpc = q->tos[qtoindex].selfpc;
 			count = q->tos[qtoindex].count;
 			/* cribbed from mcount */
@@ -269,7 +269,7 @@ _gmon_merge_two(struct gmonparam *p, struct gmonparam *q)
 				/*
 				 * arc at front of chain; usual case.
 				 */
-				top->count+= count;
+				top->count += count;
 				goto done;
 			}
 			/*
@@ -277,7 +277,7 @@ _gmon_merge_two(struct gmonparam *p, struct gmonparam *q)
 			 * top points to what we are looking at,
 			 * we know it is not at the head of the chain.
 			 */
-			for (; /* goto done */; ) {
+			for (; /* goto done */;) {
 				if (top->link == 0) {
 					/*
 					 * top is end of the chain and
@@ -309,15 +309,12 @@ _gmon_merge_two(struct gmonparam *p, struct gmonparam *q)
 					top->count += count;
 					goto done;
 				}
-
 			}
 
-		done: ;
+		done:;
 		}
-
 	}
-overflow: ;
-
+overflow:;
 }
 
 static void
@@ -328,9 +325,10 @@ _gmon_merge(void)
 	_THREAD_PRIVATE_MUTEX_LOCK(_gmonlock);
 
 	SLIST_FOREACH(q, &_gmonfree, list)
-		_gmon_merge_two(&_gmonparam, q);
+	_gmon_merge_two(&_gmonparam, q);
 
-	SLIST_FOREACH(q, &_gmoninuse, list) {
+	SLIST_FOREACH(q, &_gmoninuse, list)
+	{
 		q->state = GMON_PROF_OFF;
 		_gmon_merge_two(&_gmonparam, q);
 	}
@@ -338,20 +336,19 @@ _gmon_merge(void)
 	_THREAD_PRIVATE_MUTEX_UNLOCK(_gmonlock);
 }
 
-
 void
 _mcleanup(void)
 {
-	int fromindex, endfrom, totarc = 0, toindex;
-	u_long frompc;
-	struct rawarc rawarc;
+	int		  fromindex, endfrom, totarc = 0, toindex;
+	u_long		  frompc;
+	struct rawarc	  rawarc;
 	struct gmonparam *p = &_gmonparam;
-	struct gmonhdr *hdr;
-	struct clockinfo clockinfo;
-	const int mib[2] = { CTL_KERN, KERN_CLOCKRATE };
-	size_t size;
+	struct gmonhdr	 *hdr;
+	struct clockinfo  clockinfo;
+	const int	  mib[2] = {CTL_KERN, KERN_CLOCKRATE};
+	size_t		  size;
 #ifdef DEBUG
-	int log, len;
+	int  log, len;
 	char dbuf[200];
 #endif
 
@@ -366,13 +363,13 @@ _mcleanup(void)
 	if (sysctl(mib, 2, &clockinfo, &size, NULL, 0) == -1) {
 		clockinfo.profhz = 0;
 	} else if (clockinfo.profhz == 0) {
-		clockinfo.profhz = clockinfo.hz;	/* best guess */
+		clockinfo.profhz = clockinfo.hz; /* best guess */
 	}
 
 	moncontrol(0);
 
 #ifdef DEBUG
-	log = open("gmon.log", O_CREAT|O_TRUNC|O_WRONLY|O_CLOEXEC, 0664);
+	log = open("gmon.log", O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0664);
 	if (log == -1) {
 		perror("mcount: gmon.log");
 		close(fd);
@@ -399,12 +396,12 @@ _mcleanup(void)
 		frompc = p->lowpc;
 		frompc += fromindex * p->hashfraction * sizeof(*p->froms);
 		for (toindex = p->froms[fromindex]; toindex != 0;
-		     toindex = p->tos[toindex].link) {
+		    toindex = p->tos[toindex].link) {
 #ifdef DEBUG
-			(void) snprintf(dbuf, sizeof dbuf,
-			"[mcleanup2] frompc 0x%x selfpc 0x%x count %d\n" ,
-				frompc, p->tos[toindex].selfpc,
-				p->tos[toindex].count);
+			(void)snprintf(dbuf, sizeof dbuf,
+			    "[mcleanup2] frompc 0x%x selfpc 0x%x count %d\n",
+			    frompc, p->tos[toindex].selfpc,
+			    p->tos[toindex].count);
 			write(log, dbuf, strlen(dbuf));
 #endif
 			rawarc.raw_frompc = frompc;

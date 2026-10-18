@@ -26,13 +26,15 @@
  */
 
 #include <sys/types.h>
+
 #include <limits.h>
-#include <stdlib.h>
-#include <string.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "ypinternal.h"
 
 int
@@ -40,14 +42,14 @@ yp_first(const char *indomain, const char *inmap, char **outkey, int *outkeylen,
     char **outval, int *outvallen)
 {
 	struct ypresp_key_val yprkv;
-	struct ypreq_nokey yprnk;
-	struct dom_binding *ysd = NULL;
-	struct timeval  tv;
-	int tries = 0, r;
+	struct ypreq_nokey    yprnk;
+	struct dom_binding   *ysd = NULL;
+	struct timeval	      tv;
+	int		      tries = 0, r;
 
 	if (indomain == NULL || *indomain == '\0' ||
-	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL ||
-	    *inmap == '\0' || strlen(inmap) > YPMAXMAP)
+	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL || *inmap == '\0' ||
+	    strlen(inmap) > YPMAXMAP)
 		return YPERR_BADARGS;
 
 	*outkey = *outval = NULL;
@@ -64,8 +66,8 @@ again:
 	yprnk.map = (char *)inmap;
 	(void)memset(&yprkv, 0, sizeof yprkv);
 
-	r = clnt_call(ysd->dom_client, YPPROC_FIRST,
-	    xdr_ypreq_nokey, &yprnk, xdr_ypresp_key_val, &yprkv, tv);
+	r = clnt_call(ysd->dom_client, YPPROC_FIRST, xdr_ypreq_nokey, &yprnk,
+	    xdr_ypresp_key_val, &yprkv, tv);
 	if (r != RPC_SUCCESS) {
 		if (tries++)
 			clnt_perror(ysd->dom_client, "yp_first: clnt_call");
@@ -86,7 +88,7 @@ again:
 			(*outval)[*outvallen] = '\0';
 		}
 	}
-	xdr_free(xdr_ypresp_key_val, (char *) &yprkv);
+	xdr_free(xdr_ypresp_key_val, (char *)&yprkv);
 	_yp_unbind(ysd);
 	return r;
 }

@@ -31,12 +31,12 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <db.h>
 #include "recno.h"
 
 /*
@@ -55,11 +55,11 @@
 int
 __rec_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 {
-	BTREE *t;
-	DBT fdata, tdata;
+	BTREE  *t;
+	DBT	fdata, tdata;
 	recno_t nrec;
-	int status;
-	void *tp;
+	int	status;
+	void   *tp;
 
 	t = dbp->internal;
 
@@ -86,8 +86,8 @@ __rec_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 			t->bt_rdata.size = t->bt_reclen;
 		}
 		memmove(t->bt_rdata.data, data->data, data->size);
-		memset((char *)t->bt_rdata.data + data->size,
-		    t->bt_bval, t->bt_reclen - data->size);
+		memset((char *)t->bt_rdata.data + data->size, t->bt_bval,
+		    t->bt_reclen - data->size);
 		fdata.data = t->bt_rdata.data;
 		fdata.size = t->bt_reclen;
 	} else {
@@ -123,7 +123,8 @@ __rec_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 			return (RET_SPECIAL);
 		break;
 	default:
-einval:		errno = EINVAL;
+	einval:
+		errno = EINVAL;
 		return (RET_ERROR);
 	}
 
@@ -137,8 +138,8 @@ einval:		errno = EINVAL;
 			return (RET_ERROR);
 		if (nrec > t->bt_nrecs + 1) {
 			if (F_ISSET(t, R_FIXLEN)) {
-				if ((tdata.data =
-				    (void *)malloc(t->bt_reclen)) == NULL)
+				if ((tdata.data = (void *)malloc(
+					 t->bt_reclen)) == NULL)
 					return (RET_ERROR);
 				tdata.size = t->bt_reclen;
 				memset(tdata.data, t->bt_bval, tdata.size);
@@ -147,8 +148,8 @@ einval:		errno = EINVAL;
 				tdata.size = 0;
 			}
 			while (nrec > t->bt_nrecs + 1)
-				if (__rec_iput(t,
-				    t->bt_nrecs, &tdata, 0) != RET_SUCCESS)
+				if (__rec_iput(t, t->bt_nrecs, &tdata, 0) !=
+				    RET_SUCCESS)
 					return (RET_ERROR);
 			if (F_ISSET(t, R_FIXLEN))
 				free(tdata.data);
@@ -160,7 +161,7 @@ einval:		errno = EINVAL;
 
 	if (flags == R_SETCURSOR)
 		t->bt_cursor.rcursor = nrec;
-	
+
 	F_SET(t, R_MODIFIED);
 	return (__rec_ret(t, NULL, nrec, key, NULL));
 }
@@ -179,14 +180,14 @@ einval:		errno = EINVAL;
 int
 __rec_iput(BTREE *t, recno_t nrec, const DBT *data, u_int flags)
 {
-	DBT tdata;
-	EPG *e;
-	PAGE *h;
-	indx_t idx, nxtindex;
-	pgno_t pg;
+	DBT	  tdata;
+	EPG	 *e;
+	PAGE	 *h;
+	indx_t	  idx, nxtindex;
+	pgno_t	  pg;
 	u_int32_t nbytes;
-	int dflags, status;
-	char *dest, db[NOVFLSIZE];
+	int	  dflags, status;
+	char	 *dest, db[NOVFLSIZE];
 
 	/*
 	 * If the data won't fit on a page, store it on indirect pages.
@@ -208,8 +209,9 @@ __rec_iput(BTREE *t, recno_t nrec, const DBT *data, u_int flags)
 
 	/* __rec_search pins the returned page. */
 	if ((e = __rec_search(t, nrec,
-	    nrec > t->bt_nrecs || flags == R_IAFTER || flags == R_IBEFORE ?
-	    SINSERT : SEARCH)) == NULL)
+		 nrec > t->bt_nrecs || flags == R_IAFTER || flags == R_IBEFORE ?
+		     SINSERT :
+		     SEARCH)) == NULL)
 		return (RET_ERROR);
 
 	h = e->page;
@@ -228,8 +230,7 @@ __rec_iput(BTREE *t, recno_t nrec, const DBT *data, u_int flags)
 	case R_IBEFORE:
 		break;
 	default:
-		if (nrec < t->bt_nrecs &&
-		    __rec_dleaf(t, h, idx) == RET_ERROR) {
+		if (nrec < t->bt_nrecs && __rec_dleaf(t, h, idx) == RET_ERROR) {
 			mpool_put(t->bt_mp, h, 0);
 			return (RET_ERROR);
 		}

@@ -17,22 +17,22 @@
  */
 
 struct simplebus_softc {
-	struct device		 sc_dev;
-	int			 sc_node;
-	bus_space_tag_t		 sc_iot;
-	bus_dma_tag_t		 sc_dmat;
-	int			 sc_acells;
-	int			 sc_scells;
-	int			 sc_pacells;
-	int			 sc_pscells;
-	struct bus_space	 sc_bus;
+	struct device		   sc_dev;
+	int			   sc_node;
+	bus_space_tag_t		   sc_iot;
+	bus_dma_tag_t		   sc_dmat;
+	int			   sc_acells;
+	int			   sc_scells;
+	int			   sc_pacells;
+	int			   sc_pscells;
+	struct bus_space	   sc_bus;
 	struct machine_bus_dma_tag sc_dma;
-	int			*sc_ranges;
-	int			 sc_rangeslen;
-	int			*sc_dmaranges;
-	int			 sc_dmarangeslen;
-	int			 sc_early;
-	int			 sc_early_nodes[64];
+	int			  *sc_ranges;
+	int			   sc_rangeslen;
+	int			  *sc_dmaranges;
+	int			   sc_dmarangeslen;
+	int			   sc_early;
+	int			   sc_early_nodes[64];
 };
 
 extern void simplebus_attach(struct device *, struct device *, void *);

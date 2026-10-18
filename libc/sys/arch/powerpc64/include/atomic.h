@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #ifndef _MACHINE_ATOMIC_H_
 #define _MACHINE_ATOMIC_H_
 
@@ -27,12 +26,14 @@ atomic_setbits_int(volatile unsigned int *uip, unsigned int v)
 {
 	unsigned int tmp;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	or	%0, %1, %0	\n"
-	    "	stwcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    "	sync" : "=&r" (tmp) : "r" (v), "r" (uip) : "cc", "memory");
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	or	%0, %1, %0	\n"
+		       "	stwcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+		       "	sync"
+	    : "=&r"(tmp)
+	    : "r"(v), "r"(uip)
+	    : "cc", "memory");
 }
 
 static __inline void
@@ -40,12 +41,14 @@ atomic_clearbits_int(volatile unsigned int *uip, unsigned int v)
 {
 	unsigned int tmp;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	andc	%0, %0, %1	\n"
-	    "	stwcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    "	sync" : "=&r" (tmp) : "r" (v), "r" (uip) : "cc", "memory");
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	andc	%0, %0, %1	\n"
+		       "	stwcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+		       "	sync"
+	    : "=&r"(tmp)
+	    : "r"(v), "r"(uip)
+	    : "cc", "memory");
 }
 
 #endif /* defined(_KERNEL) */
@@ -55,15 +58,14 @@ _atomic_cas_uint(volatile unsigned int *p, unsigned int o, unsigned int n)
 {
 	unsigned int rv;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	cmpw	0, %0, %4	\n"
-	    "	bne-	2f		\n"
-	    "	stwcx.	%3, 0, %2	\n" 
-	    "	bne-	1b		\n"
-	    "2:				\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (n), "r" (o)
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	cmpw	0, %0, %4	\n"
+		       "	bne-	2f		\n"
+		       "	stwcx.	%3, 0, %2	\n"
+		       "	bne-	1b		\n"
+		       "2:				\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(n), "r"(o)
 	    : "cc");
 
 	return (rv);
@@ -75,15 +77,14 @@ _atomic_cas_ulong(volatile unsigned long *p, unsigned long o, unsigned long n)
 {
 	unsigned long rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	cmpd	0, %0, %4	\n"
-	    "	bne-	2f		\n"
-	    "	stdcx.	%3, 0, %2	\n" 
-	    "	bne-	1b		\n"
-	    "2:				\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (n), "r" (o)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	cmpd	0, %0, %4	\n"
+		       "	bne-	2f		\n"
+		       "	stdcx.	%3, 0, %2	\n"
+		       "	bne-	1b		\n"
+		       "2:				\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(n), "r"(o)
 	    : "cc");
 
 	return (rv);
@@ -93,18 +94,17 @@ _atomic_cas_ulong(volatile unsigned long *p, unsigned long o, unsigned long n)
 static inline void *
 _atomic_cas_ptr(volatile void *pp, void *o, void *n)
 {
-	void * volatile *p = pp;
-	void *rv;
+	void *volatile *p = pp;
+	void	       *rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	cmpd	0, %0, %4	\n"
-	    "	bne-	2f		\n"
-	    "	stdcx.	%3, 0, %2	\n" 
-	    "	bne-	1b		\n"
-	    "2:				\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (n), "r" (o)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	cmpd	0, %0, %4	\n"
+		       "	bne-	2f		\n"
+		       "	stdcx.	%3, 0, %2	\n"
+		       "	bne-	1b		\n"
+		       "2:				\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(n), "r"(o)
 	    : "cc");
 
 	return (rv);
@@ -116,12 +116,11 @@ _atomic_swap_uint(volatile unsigned int *p, unsigned int v)
 {
 	unsigned int rv;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	stwcx.	%3, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	stwcx.	%3, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc");
 
 	return (rv);
@@ -133,12 +132,11 @@ _atomic_swap_ulong(volatile unsigned long *p, unsigned long v)
 {
 	unsigned long rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	stdcx.	%3, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	stdcx.	%3, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc");
 
 	return (rv);
@@ -148,15 +146,14 @@ _atomic_swap_ulong(volatile unsigned long *p, unsigned long v)
 static inline void *
 _atomic_swap_ptr(volatile void *pp, void *v)
 {
-	void * volatile *p = pp;
-	void *rv;
+	void *volatile *p = pp;
+	void	       *rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	stdcx.	%3, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	stdcx.	%3, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc");
 
 	return (rv);
@@ -168,13 +165,12 @@ _atomic_add_int_nv(volatile unsigned int *p, unsigned int v)
 {
 	unsigned int rv;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	add	%0, %3,	%0	\n"
-	    "	stwcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	add	%0, %3,	%0	\n"
+		       "	stwcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc", "xer");
 
 	return (rv);
@@ -186,13 +182,12 @@ _atomic_add_long_nv(volatile unsigned long *p, unsigned long v)
 {
 	unsigned long rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	add	%0, %3,	%0	\n"
-	    "	stdcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	add	%0, %3,	%0	\n"
+		       "	stdcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc", "xer");
 
 	return (rv);
@@ -204,13 +199,12 @@ _atomic_sub_int_nv(volatile unsigned int *p, unsigned int v)
 {
 	unsigned int rv;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	subf	%0, %3,	%0	\n"
-	    "	stwcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	subf	%0, %3,	%0	\n"
+		       "	stwcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc", "xer");
 
 	return (rv);
@@ -222,13 +216,12 @@ _atomic_sub_long_nv(volatile unsigned long *p, unsigned long v)
 {
 	unsigned long rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	subf	%0, %3,	%0	\n"
-	    "	stdcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "r" (v)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	subf	%0, %3,	%0	\n"
+		       "	stdcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "r"(v)
 	    : "cc", "xer");
 
 	return (rv);
@@ -240,13 +233,12 @@ _atomic_addic_int_nv(volatile unsigned int *p, unsigned int v)
 {
 	unsigned int rv;
 
-	__asm volatile (
-	    "1:	lwarx	%0, 0, %2	\n"
-	    "	addic	%0, %0,	%3	\n"
-	    "	stwcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "i" (v)
+	__asm volatile("1:	lwarx	%0, 0, %2	\n"
+		       "	addic	%0, %0,	%3	\n"
+		       "	stwcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "i"(v)
 	    : "cc", "xer");
 
 	return (rv);
@@ -259,13 +251,12 @@ _atomic_addic_long_nv(volatile unsigned long *p, unsigned long v)
 {
 	unsigned long rv;
 
-	__asm volatile (
-	    "1:	ldarx	%0, 0, %2	\n"
-	    "	addic	%0, %0,	%3	\n"
-	    "	stdcx.	%0, 0, %2	\n"
-	    "	bne-	1b		\n"
-	    : "=&r" (rv), "+m" (*p)
-	    : "r" (p), "i" (v)
+	__asm volatile("1:	ldarx	%0, 0, %2	\n"
+		       "	addic	%0, %0,	%3	\n"
+		       "	stdcx.	%0, 0, %2	\n"
+		       "	bne-	1b		\n"
+	    : "=&r"(rv), "+m"(*p)
+	    : "r"(p), "i"(v)
 	    : "cc", "xer");
 
 	return (rv);
@@ -273,20 +264,23 @@ _atomic_addic_long_nv(volatile unsigned long *p, unsigned long v)
 #define atomic_inc_long_nv(_p) _atomic_addic_long_nv((_p), 1)
 #define atomic_dec_long_nv(_p) _atomic_addic_long_nv((_p), -1)
 
-#define __membar(_f) do { __asm volatile(_f ::: "memory"); } while (0)
+#define __membar(_f)                                                           \
+	do {                                                                   \
+		__asm volatile(_f::: "memory");                                \
+	} while (0)
 
 #if defined(MULTIPROCESSOR) || !defined(_KERNEL)
-#define membar_enter()		__membar("sync")
-#define membar_exit()		__membar("sync")
-#define membar_producer()	__membar("sync")
-#define membar_consumer()	__membar("sync")
-#define membar_sync()		__membar("sync")
+#define membar_enter() __membar("sync")
+#define membar_exit() __membar("sync")
+#define membar_producer() __membar("sync")
+#define membar_consumer() __membar("sync")
+#define membar_sync() __membar("sync")
 #else
-#define membar_enter()		__membar("")
-#define membar_exit()		__membar("")
-#define membar_producer()	__membar("")
-#define membar_consumer()	__membar("")
-#define membar_sync()		__membar("")
+#define membar_enter() __membar("")
+#define membar_exit() __membar("")
+#define membar_producer() __membar("")
+#define membar_consumer() __membar("")
+#define membar_sync() __membar("")
 #endif
 
 #endif /* _MACHINE_ATOMIC_H_ */

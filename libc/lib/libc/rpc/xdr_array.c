@@ -38,14 +38,12 @@
  * arrays.  See xdr.h for more info on the interface to xdr.
  */
 
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <limits.h>
 #include <rpc/types.h>
 #include <rpc/xdr.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
  * XDR an array of arbitrary elements
@@ -55,24 +53,22 @@
  * xdr procedure to call to handle each element of the array.
  */
 bool_t
-xdr_array(XDR *xdrs,
-    caddr_t *addrp,	/* array pointer */
-    u_int *sizep,	/* number of elements */
-    u_int maxsize,	/* max numberof elements */
-    u_int elsize,	/* size in bytes of each element */
-    xdrproc_t elproc)	/* xdr routine to handle each element */
+xdr_array(XDR *xdrs, caddr_t *addrp, /* array pointer */
+    u_int    *sizep,		     /* number of elements */
+    u_int     maxsize,		     /* max numberof elements */
+    u_int     elsize,		     /* size in bytes of each element */
+    xdrproc_t elproc)		     /* xdr routine to handle each element */
 {
 	caddr_t target = *addrp;
-	u_int nodesize, c, i;
-	bool_t stat = TRUE;
+	u_int	nodesize, c, i;
+	bool_t	stat = TRUE;
 
 	/* like strings, arrays are really counted arrays */
 	if (!xdr_u_int(xdrs, sizep))
 		return (FALSE);
 
 	c = *sizep;
-	if ((c > maxsize || c > UINT_MAX/elsize) &&
-	    xdrs->x_op != XDR_FREE)
+	if ((c > maxsize || c > UINT_MAX / elsize) && xdrs->x_op != XDR_FREE)
 		return (FALSE);
 	nodesize = c * elsize;
 
@@ -127,8 +123,8 @@ DEF_WEAK(xdr_array);
  * > xdr_elem: routine to XDR each element
  */
 bool_t
-xdr_vector(XDR *xdrs, char *basep, u_int nelem, u_int elemsize,
-    xdrproc_t xdr_elem)
+xdr_vector(
+    XDR *xdrs, char *basep, u_int nelem, u_int elemsize, xdrproc_t xdr_elem)
 {
 	char *elptr;
 	u_int i;
@@ -136,8 +132,8 @@ xdr_vector(XDR *xdrs, char *basep, u_int nelem, u_int elemsize,
 	elptr = basep;
 	for (i = 0; i < nelem; i++) {
 		if (!(*xdr_elem)(xdrs, elptr))
-			return(FALSE);
+			return (FALSE);
 		elptr += elemsize;
 	}
-	return(TRUE);
+	return (TRUE);
 }

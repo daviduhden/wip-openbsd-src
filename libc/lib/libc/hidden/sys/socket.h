@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_SYS_SOCKET_H_
-#define	_LIBC_SYS_SOCKET_H_
+#define _LIBC_SYS_SOCKET_H_
 
 #include_next <sys/socket.h>
 

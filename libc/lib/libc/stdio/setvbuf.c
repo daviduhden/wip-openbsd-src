@@ -34,6 +34,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "local.h"
 
 /*
@@ -43,9 +44,9 @@
 int
 setvbuf(FILE *fp, char *buf, int mode, size_t size)
 {
-	int ret, flags;
+	int    ret, flags;
 	size_t iosize;
-	int ttyflag;
+	int    ttyflag;
 
 	/*
 	 * Verify arguments.  The `int' limit on `size' is due to this
@@ -85,7 +86,7 @@ setvbuf(FILE *fp, char *buf, int mode, size_t size)
 	 */
 	flags |= __swhatbuf(fp, &iosize, &ttyflag);
 	if (size == 0) {
-		buf = NULL;	/* force local allocation */
+		buf = NULL; /* force local allocation */
 		size = iosize;
 	}
 
@@ -104,7 +105,7 @@ setvbuf(FILE *fp, char *buf, int mode, size_t size)
 		}
 		if (buf == NULL) {
 			/* No luck; switch to unbuffered I/O. */
-nbf:
+		nbf:
 			fp->_flags = flags | __SNBF;
 			fp->_w = 0;
 			fp->_bf._base = fp->_p = fp->_nbuf;

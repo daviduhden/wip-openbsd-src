@@ -16,8 +16,9 @@
  */
 
 #include <sys/types.h>
-#include <machine/ieee.h>
+
 #include <float.h>
+#include <machine/ieee.h>
 #include <math.h>
 
 int
@@ -66,7 +67,7 @@ __fpclassifyf(float f)
 }
 DEF_STRONG(__fpclassifyf);
 
-#if	LDBL_MANT_DIG == DBL_MANT_DIG
+#if LDBL_MANT_DIG == DBL_MANT_DIG
 MAKE_CLONE(__fpclassifyl, __fpclassify);
 DEF_STRONG(__fpclassifyl);
-#endif	/* LDBL_MANT_DIG == DBL_MANT_DIG */
+#endif /* LDBL_MANT_DIG == DBL_MANT_DIG */

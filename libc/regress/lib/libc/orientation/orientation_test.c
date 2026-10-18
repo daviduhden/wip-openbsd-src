@@ -35,6 +35,7 @@
  */
 
 #include <sys/types.h>
+
 #include <err.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -46,22 +47,22 @@
 char filename[] = "/tmp/fwide.XXXXXXXXXX";
 
 FILE *dup_stdout = NULL;
-int failures = 0;
+int   failures = 0;
 
 void
 fail(int line, int r, char const *expect, char const *test)
 {
 	failures++;
 	fprintf(dup_stdout,
-		"FAIL: %d: fwide returned %d, expected %s 0 after %s\n",
-		line, r, expect, test);
+	    "FAIL: %d: fwide returned %d, expected %s 0 after %s\n", line, r,
+	    expect, test);
 }
 
 FILE *
 setup(int line)
 {
-	FILE	*f;
-	int	r;
+	FILE *f;
+	int   r;
 
 	if ((f = fopen(filename, "r+")) == NULL)
 		err(2, "fopen");
@@ -73,7 +74,7 @@ setup(int line)
 FILE *
 setup_std(FILE *std, int line)
 {
-	int	r;
+	int r;
 
 	if (freopen(filename, "r+", std) == NULL)
 		err(2, "freopen");
@@ -82,44 +83,44 @@ setup_std(FILE *std, int line)
 	return (std);
 }
 
-#define TEST_(x, op)						\
-	do {							\
-		f = setup(__LINE__);				\
-		x;						\
-		if (!((r = fwide(f, 0)) op 0))			\
-			fail(__LINE__, r, #op, #x);		\
-		fclose(f);					\
+#define TEST_(x, op)                                                           \
+	do {                                                                   \
+		f = setup(__LINE__);                                           \
+		x;                                                             \
+		if (!((r = fwide(f, 0)) op 0))                                 \
+			fail(__LINE__, r, #op, #x);                            \
+		fclose(f);                                                     \
 	} while (0)
 
-#define TEST_STD_(std, x, op)					\
-	do {							\
-		f = setup_std(std, __LINE__);			\
-		x;						\
-		if (!((r = fwide(f, 0)) op 0))			\
-			fail(__LINE__, r, #op, #x);		\
+#define TEST_STD_(std, x, op)                                                  \
+	do {                                                                   \
+		f = setup_std(std, __LINE__);                                  \
+		x;                                                             \
+		if (!((r = fwide(f, 0)) op 0))                                 \
+			fail(__LINE__, r, #op, #x);                            \
 	} while (0)
 
-#define TEST_UNCHANGED(x)		TEST_(x, ==)
-#define TEST_NARROW(x)			TEST_(x, <)
-#define TEST_WIDE(x)			TEST_(x, >)
-#define TEST_UNCHANGED_STD(std, x)	TEST_STD_(std, x, ==)
-#define TEST_NARROW_STD(std, x)		TEST_STD_(std, x, <)
-#define TEST_WIDE_STD(std, x)		TEST_STD_(std, x, >)
+#define TEST_UNCHANGED(x) TEST_(x, ==)
+#define TEST_NARROW(x) TEST_(x, <)
+#define TEST_WIDE(x) TEST_(x, >)
+#define TEST_UNCHANGED_STD(std, x) TEST_STD_(std, x, ==)
+#define TEST_NARROW_STD(std, x) TEST_STD_(std, x, <)
+#define TEST_WIDE_STD(std, x) TEST_STD_(std, x, >)
 
 int
 main(int argc, char *argv[])
 {
-	char	buffer[BUFSIZ];
-	wchar_t	wbuffer[BUFSIZ];
+	char	 buffer[BUFSIZ];
+	wchar_t	 wbuffer[BUFSIZ];
 	char	*buf;
-	wchar_t	*wbuf;
+	wchar_t *wbuf;
 	FILE	*f;
-	off_t	off;
-	fpos_t	pos;
-	size_t	size;
-	int	fd, r;
-	char	c;
-	wchar_t	wc;
+	off_t	 off;
+	fpos_t	 pos;
+	size_t	 size;
+	int	 fd, r;
+	char	 c;
+	wchar_t	 wc;
 
 	if ((fd = dup(1)) == -1)
 		err(2, "dup");
@@ -170,8 +171,8 @@ main(int argc, char *argv[])
 	TEST_UNCHANGED(setlinebuf(f));
 
 	/* locking */
-	TEST_UNCHANGED(flockfile(f);funlockfile(f));
-	TEST_UNCHANGED(ftrylockfile(f);funlockfile(f));
+	TEST_UNCHANGED(flockfile(f); funlockfile(f));
+	TEST_UNCHANGED(ftrylockfile(f); funlockfile(f));
 
 	/* input */
 	TEST_NARROW(getc(f));
@@ -217,7 +218,6 @@ main(int argc, char *argv[])
 	TEST_NARROW(getw(f));
 	TEST_NARROW(putw(1234, f));
 
-
 	/* WIDE CHAR TIME! */
 
 	/* input */
@@ -241,7 +241,6 @@ main(int argc, char *argv[])
 	TEST_WIDE_STD(stdout, putwchar(L'c'));
 	TEST_WIDE_STD(stdout, wprintf(L"foo"));
 
-
 	/* memory streams */
 	f = open_memstream(&buf, &size);
 	if (!((r = fwide(f, 0)) < 0))
@@ -252,7 +251,6 @@ main(int argc, char *argv[])
 		fail(__LINE__, r, ">", "open_wmemstream()");
 	fclose(f);
 
-
 	/* random stuff? */
 	TEST_UNCHANGED_STD(stderr, perror("foo"));
 
@@ -261,4 +259,3 @@ main(int argc, char *argv[])
 		exit(1);
 	exit(0);
 }
-

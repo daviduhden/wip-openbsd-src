@@ -3,11 +3,12 @@
 /* Public Domain, 2006, Otto Moerbeek <otto@drijf.net> */
 
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
+
 #include <err.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
  * This code tries to trigger the case present in -current as of April
@@ -17,21 +18,21 @@
  * Having a large (512M) ulimit -m helps a lot in triggering the
  * problem. Note that you may need to run this test multiple times to
  * see the error.
-*/
+ */
 
-#define STARTI	1300
-#define FACTOR	1024
+#define STARTI 1300
+#define FACTOR 1024
 
 /* This test takes forever with junking turned on. */
-const char * const malloc_options = "jj";
+const char *const malloc_options = "jj";
 
 int
 main()
 {
 	struct rlimit lim;
-	size_t sz;
-	int i;
-	void *p;
+	size_t	      sz;
+	int	      i;
+	void	     *p;
 
 	if (getrlimit(RLIMIT_DATA, &lim) == -1)
 		err(1, "getrlimit");
@@ -39,7 +40,7 @@ main()
 	sz = lim.rlim_cur / FACTOR;
 
 	for (i = STARTI; i >= 0; i--) {
-		size_t len = (sz-i) * FACTOR;
+		size_t len = (sz - i) * FACTOR;
 		p = malloc(len);
 		free(p);
 		free(malloc(4096));

@@ -50,21 +50,21 @@ typedef struct _PhysMem {
 	u_int pages;
 } PhysMem;
 
-#define	DRAM_BLOCKS	2
-#define	MAX_BOOT_STRING 255
+#define DRAM_BLOCKS 2
+#define MAX_BOOT_STRING 255
 
 typedef struct _BootConfig {
 	PhysMem dram[DRAM_BLOCKS];
-	u_int dramblocks;
-	char bootstring[MAX_BOOT_STRING];
+	u_int	dramblocks;
+	char	bootstring[MAX_BOOT_STRING];
 } BootConfig;
 
 extern BootConfig bootconfig;
 
-#endif	/* _KERNEL || _STANDALONE */
+#endif /* _KERNEL || _STANDALONE */
 #if defined(_KERNEL)
 extern char *boot_args;
 extern char *boot_file;
-#endif	/* _KERNEL */
+#endif /* _KERNEL */
 
 /* End of bootconfig.h */

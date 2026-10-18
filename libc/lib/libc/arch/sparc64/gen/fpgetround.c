@@ -12,7 +12,7 @@ fpgetround(void)
 {
 	int x;
 
-	__asm__("st %%fsr,%0" : "=m" (*&x));
+	__asm__("st %%fsr,%0" : "=m"(*&x));
 	return (x >> 30) & 0x03;
 }
 DEF_WEAK(fpgetround);

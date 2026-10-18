@@ -34,14 +34,12 @@
 const char *
 _get_locname(int category, const char *locname)
 {
-	static const char *const catname[_LC_LAST - 1] = {
-		"LC_COLLATE",	"LC_CTYPE",	"LC_MONETARY",
-		"LC_NUMERIC",	"LC_TIME",	"LC_MESSAGES"
-	};
+	static const char *const catname[_LC_LAST - 1] = {"LC_COLLATE",
+	    "LC_CTYPE", "LC_MONETARY", "LC_NUMERIC", "LC_TIME", "LC_MESSAGES"};
 
-	FILE		*fp;
-	const char	*cp;
-	int		 save_errno;
+	FILE	   *fp;
+	const char *cp;
+	int	    save_errno;
 
 	/* For empty input, inspect the environment. */
 	if (*locname == '\0')

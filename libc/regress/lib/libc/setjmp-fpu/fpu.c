@@ -8,7 +8,7 @@ int
 main(int argc, char *argv[])
 {
 	fexcept_t flag;
-	int rv;
+	int	  rv;
 
 	/* Set up the FPU control word register. */
 	rv = fesetround(FE_UPWARD);
@@ -37,8 +37,7 @@ main(int argc, char *argv[])
 #if !defined(__arm__) && !defined(__aarch64__) && !defined(__riscv)
 	rv = fegetexcept();
 	if (rv != FE_DIVBYZERO)
-		errx(1, "fegetexcept returned %d, not FE_DIVBYZERO",
-		    rv);
+		errx(1, "fegetexcept returned %d, not FE_DIVBYZERO", rv);
 #endif
 
 	/* Verify that the FPU exception flags weren't clobbered. */

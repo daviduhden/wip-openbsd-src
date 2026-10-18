@@ -31,13 +31,13 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 int
 printf(const char *fmt, ...)
 {
-	int ret;
+	int	ret;
 	va_list ap;
 
 	va_start(ap, fmt);

@@ -22,27 +22,26 @@
 #include <sys/_lock.h>
 
 struct pc_lock {
-	volatile unsigned int	 pcl_gen;
+	volatile unsigned int pcl_gen;
 };
 
 #ifdef _KERNEL
 
-#define PC_LOCK_INITIALIZER() { .pcl_gen = 0 }
+#define PC_LOCK_INITIALIZER() {.pcl_gen = 0}
 
-void		pc_lock_init(struct pc_lock *);
+void pc_lock_init(struct pc_lock *);
 
 /* single (non-interlocking) producer */
-unsigned int	pc_sprod_enter(struct pc_lock *);
-void		pc_sprod_leave(struct pc_lock *, unsigned int);
+unsigned int pc_sprod_enter(struct pc_lock *);
+void	     pc_sprod_leave(struct pc_lock *, unsigned int);
 
 /* multiple (interlocking) producers */
-unsigned int	pc_mprod_enter(struct pc_lock *);
-void		pc_mprod_leave(struct pc_lock *, unsigned int);
+unsigned int pc_mprod_enter(struct pc_lock *);
+void	     pc_mprod_leave(struct pc_lock *, unsigned int);
 
 /* consumer */
-void		pc_cons_enter(struct pc_lock *, unsigned int *);
-__warn_unused_result int
-		pc_cons_leave(struct pc_lock *, unsigned int *);
+void			 pc_cons_enter(struct pc_lock *, unsigned int *);
+__warn_unused_result int pc_cons_leave(struct pc_lock *, unsigned int *);
 
 #endif /* _KERNEL */
 

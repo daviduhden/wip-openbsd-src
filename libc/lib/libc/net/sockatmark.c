@@ -25,9 +25,9 @@
  * $FreeBSD$
  */
 
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/sockio.h>
-#include <sys/ioctl.h>
 
 int
 sockatmark(int s)

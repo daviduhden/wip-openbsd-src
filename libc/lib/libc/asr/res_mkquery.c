@@ -17,12 +17,13 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/nameser.h> /* for MAXDNAME */
-#include <netdb.h>
 
+#include <netinet/in.h>
+
+#include <arpa/nameser.h> /* for MAXDNAME */
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <string.h>
 
@@ -34,11 +35,11 @@ res_mkquery(int op, const char *dname, int class, int type,
     const unsigned char *data, int datalen, const unsigned char *newrr,
     unsigned char *buf, int buflen)
 {
-	struct asr_ctx		*ac;
-	struct asr_pack		 p;
-	struct asr_dns_header	 h;
-	char			 fqdn[MAXDNAME];
-	char			 dn[MAXDNAME];
+	struct asr_ctx	     *ac;
+	struct asr_pack	      p;
+	struct asr_dns_header h;
+	char		      fqdn[MAXDNAME];
+	char		      dn[MAXDNAME];
 
 	/* we currently only support QUERY */
 	if (op != QUERY || data)
@@ -72,8 +73,8 @@ res_mkquery(int op, const char *dname, int class, int type,
 	_asr_pack_header(&p, &h);
 	_asr_pack_query(&p, type, class, dn);
 	if (ac->ac_options & (RES_USE_EDNS0 | RES_USE_DNSSEC))
-		_asr_pack_edns0(&p, MAXPACKETSZ,
-		    ac->ac_options & RES_USE_DNSSEC);
+		_asr_pack_edns0(
+		    &p, MAXPACKETSZ, ac->ac_options & RES_USE_DNSSEC);
 
 	_asr_ctx_unref(ac);
 
@@ -88,18 +89,14 @@ res_mkquery(int op, const char *dname, int class, int type,
  * Put here because it uses asr_private.h too.
  */
 int
-res_querydomain(const char *name,
-    const char *domain,
-    int class,
-    int type,
-    u_char *answer,
-    int anslen)
+res_querydomain(const char *name, const char *domain, int class, int type,
+    u_char *answer, int anslen)
 {
-	char	fqdn[MAXDNAME], ndom[MAXDNAME];
-	size_t	n;
+	char   fqdn[MAXDNAME], ndom[MAXDNAME];
+	size_t n;
 
 	/* we really want domain to end with a dot for now */
-	if (domain && ((n = strlen(domain)) == 0 || domain[n - 1 ] != '.')) {
+	if (domain && ((n = strlen(domain)) == 0 || domain[n - 1] != '.')) {
 		if (strlcpy(ndom, domain, sizeof(ndom)) >= sizeof(ndom) ||
 		    strlcat(ndom, ".", sizeof(ndom)) >= sizeof(ndom)) {
 			h_errno = NETDB_INTERNAL;

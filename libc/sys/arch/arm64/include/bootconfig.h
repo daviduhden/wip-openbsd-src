@@ -26,20 +26,21 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: head/sys/arm64/include/machdep.h 281494 2015-04-13 14:43:10Z andrew $
+ * $FreeBSD: head/sys/arm64/include/machdep.h 281494 2015-04-13 14:43:10Z andrew
+ * $
  */
 
 #ifndef _MACHINE_BOOTCONFIG_H_
-#define	_MACHINE_BOOTCONFIG_H_
+#define _MACHINE_BOOTCONFIG_H_
 
 struct arm64_bootparams {
-	vaddr_t		modulep;
-	vaddr_t		kern_l1pt;	/* L1 page table for the kernel */
-	uint64_t	kern_delta;
-	vaddr_t		kern_stack;
-	void		*arg0; // passed to kernel in R0
-	void		*arg1; // passed to kernel in R1
-	void		*arg2; // passed to kernel in R2
+	vaddr_t	 modulep;
+	vaddr_t	 kern_l1pt; /* L1 page table for the kernel */
+	uint64_t kern_delta;
+	vaddr_t	 kern_stack;
+	void	*arg0; // passed to kernel in R0
+	void	*arg1; // passed to kernel in R1
+	void	*arg2; // passed to kernel in R2
 };
 
 void initarm(struct arm64_bootparams *);

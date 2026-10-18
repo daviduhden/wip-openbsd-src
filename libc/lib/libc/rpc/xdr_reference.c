@@ -38,11 +38,11 @@
  * "pointers".  See xdr.h for more info on the interface to xdr.
  */
 
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 
 /*
  * XDR an indirect pointer
@@ -54,13 +54,12 @@
  * proc is the routine to handle the referenced structure.
  */
 bool_t
-xdr_reference(XDR *xdrs,
-    caddr_t *pp,	/* the pointer to work on */
-    u_int size,		/* size of the object pointed to */
-    xdrproc_t proc)	/* xdr routine to handle the object */
+xdr_reference(XDR *xdrs, caddr_t *pp, /* the pointer to work on */
+    u_int     size,		      /* size of the object pointed to */
+    xdrproc_t proc)		      /* xdr routine to handle the object */
 {
 	caddr_t loc = *pp;
-	bool_t stat;
+	bool_t	stat;
 
 	if (loc == NULL)
 		switch (xdrs->x_op) {
@@ -68,13 +67,13 @@ xdr_reference(XDR *xdrs,
 			return (TRUE);
 
 		case XDR_DECODE:
-			*pp = loc = (caddr_t) calloc(size, 1);
+			*pp = loc = (caddr_t)calloc(size, 1);
 			if (loc == NULL)
 				return (FALSE);
 			break;
 		default:
 			break;
-	}
+		}
 
 	stat = (*proc)(xdrs, loc);
 
@@ -85,7 +84,6 @@ xdr_reference(XDR *xdrs,
 	return (stat);
 }
 DEF_WEAK(xdr_reference);
-
 
 /*
  * xdr_pointer():
@@ -113,13 +111,13 @@ xdr_pointer(XDR *xdrs, char **objpp, u_int obj_size, xdrproc_t xdr_obj)
 	bool_t more_data;
 
 	more_data = (*objpp != NULL);
-	if (! xdr_bool(xdrs,&more_data)) {
+	if (!xdr_bool(xdrs, &more_data)) {
 		return (FALSE);
 	}
-	if (! more_data) {
+	if (!more_data) {
 		*objpp = NULL;
 		return (TRUE);
 	}
-	return (xdr_reference(xdrs,objpp,obj_size,xdr_obj));
+	return (xdr_reference(xdrs, objpp, obj_size, xdr_obj));
 }
 DEF_WEAK(xdr_pointer);

@@ -68,7 +68,7 @@ int
 __fpu_shr(struct fpn *fp, int rsh)
 {
 	u_int m0, m1, m2, m3, s;
-	int lsh;
+	int   lsh;
 
 #ifdef DIAGNOSTIC
 	if (rsh <= 0 || (fp->fp_class != FPC_NUM && !ISNAN(fp)))
@@ -142,7 +142,7 @@ void
 __fpu_norm(struct fpn *fp)
 {
 	u_int m0, m1, m2, m3, top, sup, nrm;
-	int lsh, rsh, exp;
+	int   lsh, rsh, exp;
 
 	exp = fp->fp_exp;
 	m0 = fp->fp_mant[0];
@@ -172,7 +172,7 @@ __fpu_norm(struct fpn *fp)
 		 * We have a supernormal number.  We need to shift it right.
 		 * We may assume m3==0.
 		 */
-		for (rsh = 1, top = m0 >> 1; top >= sup; rsh++)	/* XXX slow */
+		for (rsh = 1, top = m0 >> 1; top >= sup; rsh++) /* XXX slow */
 			top >>= 1;
 		exp += rsh;
 		lsh = 32 - rsh;
@@ -185,7 +185,7 @@ __fpu_norm(struct fpn *fp)
 		 * We have a regular denorm (a subnormal number), and need
 		 * to shift it left.
 		 */
-		for (lsh = 1, top = m0 << 1; top < nrm; lsh++)	/* XXX slow */
+		for (lsh = 1, top = m0 << 1; top < nrm; lsh++) /* XXX slow */
 			top <<= 1;
 		exp -= lsh;
 		rsh = 32 - lsh;

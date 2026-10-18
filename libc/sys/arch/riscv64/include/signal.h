@@ -30,12 +30,13 @@
  *
  *      @(#)signal.h    8.1 (Berkeley) 6/11/93
  *	from: FreeBSD: src/sys/i386/include/signal.h,v 1.13 2000/11/09
- *	from: FreeBSD: src/sys/sparc64/include/signal.h,v 1.6 2001/09/30 18:52:17
- * $FreeBSD: head/sys/riscv/include/signal.h 292407 2015-12-17 18:44:30Z br $
+ *	from: FreeBSD: src/sys/sparc64/include/signal.h,v 1.6 2001/09/30
+ * 18:52:17 $FreeBSD: head/sys/riscv/include/signal.h 292407 2015-12-17
+ * 18:44:30Z br $
  */
 
-#ifndef	_MACHINE_SIGNAL_H_
-#define	_MACHINE_SIGNAL_H_
+#ifndef _MACHINE_SIGNAL_H_
+#define _MACHINE_SIGNAL_H_
 
 #include <sys/cdefs.h>
 
@@ -46,23 +47,23 @@ typedef int sig_atomic_t;
 #include <sys/_types.h>
 
 struct sigcontext {
-	int		__sc_unused;
-	int		sc_mask;
+	int __sc_unused;
+	int sc_mask;
 
-	__register_t	sc_ra;
-	__register_t	sc_sp;
-	__register_t	sc_gp;
-	__register_t	sc_tp;
-	__register_t	sc_t[7];
-	__register_t	sc_s[12];
-	__register_t	sc_a[8];
-	__register_t	sc_sepc;
+	__register_t sc_ra;
+	__register_t sc_sp;
+	__register_t sc_gp;
+	__register_t sc_tp;
+	__register_t sc_t[7];
+	__register_t sc_s[12];
+	__register_t sc_a[8];
+	__register_t sc_sepc;
 
 	/* 64 bit floats as well as integer registers */
-	__register_t	sc_f[32];	/* floating-point registers */
-	__register_t	sc_fcsr;	/* floating-point control register */
+	__register_t sc_f[32]; /* floating-point registers */
+	__register_t sc_fcsr;  /* floating-point control register */
 
-	long	sc_cookie;
+	long sc_cookie;
 };
 
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */

@@ -18,45 +18,45 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <netdb.h>
-
 #include <asr.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <resolv.h>
+#include <limits.h>
+#include <netdb.h>
 #include <poll.h>
+#include <resolv.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <limits.h>
 
 #include "asr_private.h"
-
 #include "thread_private.h"
 
-#define DEFAULT_CONF		"lookup file\n"
-#define DEFAULT_LOOKUP		"lookup bind file"
+#define DEFAULT_CONF "lookup file\n"
+#define DEFAULT_LOOKUP "lookup bind file"
 
-#define RELOAD_DELAY		15 /* seconds */
+#define RELOAD_DELAY 15 /* seconds */
 
-static void asr_check_reload(struct asr *);
+static void	       asr_check_reload(struct asr *);
 static struct asr_ctx *asr_ctx_create(void);
-static void asr_ctx_ref(struct asr_ctx *);
-static void asr_ctx_free(struct asr_ctx *);
-static int asr_ctx_add_searchdomain(struct asr_ctx *, const char *);
-static int asr_ctx_from_fd(struct asr_ctx *, int);
-static int asr_ctx_from_string(struct asr_ctx *, const char *);
-static int asr_ctx_parse(struct asr_ctx *, const char *);
-static int asr_parse_nameserver(struct sockaddr *, const char *);
-static int asr_ndots(const char *);
-static void pass0(char **, int, struct asr_ctx *);
-static int strsplit(char *, char **, int);
-static void asr_ctx_envopts(struct asr_ctx *);
-static void *__THREAD_NAME(_asr);
+static void	       asr_ctx_ref(struct asr_ctx *);
+static void	       asr_ctx_free(struct asr_ctx *);
+static int	       asr_ctx_add_searchdomain(struct asr_ctx *, const char *);
+static int	       asr_ctx_from_fd(struct asr_ctx *, int);
+static int	       asr_ctx_from_string(struct asr_ctx *, const char *);
+static int	       asr_ctx_parse(struct asr_ctx *, const char *);
+static int	       asr_parse_nameserver(struct sockaddr *, const char *);
+static int	       asr_ndots(const char *);
+static void	       pass0(char **, int, struct asr_ctx *);
+static int	       strsplit(char *, char **, int);
+static void	       asr_ctx_envopts(struct asr_ctx *);
+static void	      *__THREAD_NAME(_asr);
 
 static struct asr *_asr = NULL;
 
@@ -64,8 +64,8 @@ static struct asr *_asr = NULL;
 static void *
 _asr_resolver(void)
 {
-	static int	 init = 0;
-	struct asr	*asr;
+	static int  init = 0;
+	struct asr *asr;
 
 	if (init == 0) {
 #ifdef DEBUG
@@ -92,7 +92,7 @@ _asr_resolver(void)
 #endif
 	return (asr);
 
-    fail:
+fail:
 	if (asr) {
 		if (asr->a_ctx)
 			asr_ctx_free(asr->a_ctx);
@@ -110,8 +110,8 @@ void
 _asr_resolver_done(void *arg)
 {
 	struct asr_ctx *ac = arg;
-	struct asr *asr;
-	struct asr **priv;
+	struct asr     *asr;
+	struct asr    **priv;
 
 	if (ac) {
 		_asr_ctx_unref(ac);
@@ -132,7 +132,7 @@ static void
 _asr_resolver_done_tp(void *arg)
 {
 	struct asr **priv = arg;
-	struct asr *asr;
+	struct asr  *asr;
 
 	if (*priv == NULL)
 		return;
@@ -184,7 +184,7 @@ asr_abort(struct asr_query *as)
 int
 asr_run(struct asr_query *as, struct asr_result *ar)
 {
-	int	r, saved_errno = errno;
+	int r, saved_errno = errno;
 
 	memset(ar, 0, sizeof(*ar));
 
@@ -211,7 +211,7 @@ static int
 poll_intrsafe(struct pollfd *fds, nfds_t nfds, int timeout)
 {
 	struct timespec pollstart, pollend, elapsed;
-	int r;
+	int		r;
 
 	if (WRAP(clock_gettime)(CLOCK_MONOTONIC, &pollstart))
 		return -1;
@@ -234,12 +234,13 @@ poll_intrsafe(struct pollfd *fds, nfds_t nfds, int timeout)
 int
 asr_run_sync(struct asr_query *as, struct asr_result *ar)
 {
-	struct pollfd	 fds[1];
-	int		 r, saved_errno = errno;
+	struct pollfd fds[1];
+	int	      r, saved_errno = errno;
 
 	while ((r = asr_run(as, ar)) == ASYNC_COND) {
 		fds[0].fd = ar->ar_fd;
-		fds[0].events = (ar->ar_cond == ASR_WANT_READ) ? POLLIN:POLLOUT;
+		fds[0].events =
+		    (ar->ar_cond == ASR_WANT_READ) ? POLLIN : POLLOUT;
 
 		if (poll_intrsafe(fds, 1, ar->ar_timeout) == -1) {
 			memset(ar, 0, sizeof(*ar));
@@ -272,7 +273,7 @@ DEF_WEAK(asr_run_sync);
 struct asr_query *
 _asr_async_new(struct asr_ctx *ac, int type)
 {
-	struct asr_query	*as;
+	struct asr_query *as;
 
 	DPRINT("asr: asr_async_new(ctx=%p) type=%i refcount=%i\n", ac, type,
 	    ac ? ac->ac_refcount : 0);
@@ -355,17 +356,16 @@ struct asr_ctx *
 _asr_use_resolver(void *arg)
 {
 	struct asr_ctx *ac = arg;
-	struct asr *asr;
-	struct asr **priv;
+	struct asr     *asr;
+	struct asr    **priv;
 
 	if (ac) {
 		asr_ctx_ref(ac);
 		return ac;
-	}
-	else {
+	} else {
 		DPRINT("using thread-local resolver\n");
-		priv = _THREAD_PRIVATE_DT(_asr, _asr, _asr_resolver_done_tp,
-		    &_asr);
+		priv = _THREAD_PRIVATE_DT(
+		    _asr, _asr, _asr_resolver_done_tp, &_asr);
 		if (*priv == NULL) {
 			DPRINT("setting up thread-local resolver\n");
 			*priv = _asr_resolver();
@@ -425,11 +425,11 @@ asr_ctx_free(struct asr_ctx *ac)
 static void
 asr_check_reload(struct asr *asr)
 {
-	struct asr_ctx	*ac;
-	struct stat	 st;
-	struct timespec	 ts;
-	pid_t		 pid;
-	int		 fd;
+	struct asr_ctx *ac;
+	struct stat	st;
+	struct timespec ts;
+	pid_t		pid;
+	int		fd;
 
 	pid = getpid();
 	if (pid != asr->a_pid) {
@@ -445,11 +445,10 @@ asr_check_reload(struct asr *asr)
 	asr->a_rtime = ts.tv_sec;
 
 	DPRINT("asr: checking for update of \"%s\"\n", _PATH_RESCONF);
-	fd = __pledge_open(_PATH_RESCONF, O_RDONLY|O_CLOEXEC);
+	fd = __pledge_open(_PATH_RESCONF, O_RDONLY | O_CLOEXEC);
 	if (fd == -1)
 		return;
-	if (fstat(fd, &st) == -1 ||
-	    asr->a_mtime == st.st_mtime ||
+	if (fstat(fd, &st) == -1 || asr->a_mtime == st.st_mtime ||
 	    (ac = asr_ctx_create()) == NULL) {
 		close(fd);
 		return;
@@ -479,20 +478,20 @@ asr_check_reload(struct asr *asr)
 size_t
 _asr_make_fqdn(const char *name, const char *domain, char *buf, size_t buflen)
 {
-	size_t	len;
+	size_t len;
 
 	if (domain == NULL)
 		domain = ".";
 	else if ((len = strlen(domain)) == 0)
 		return (0);
-	else if (domain[len -1] != '.')
+	else if (domain[len - 1] != '.')
 		return (0);
 
 	len = strlen(name);
 	if (len == 0) {
 		if (strlcpy(buf, domain, buflen) >= buflen)
 			return (0);
-	} else if (name[len - 1] !=  '.') {
+	} else if (name[len - 1] != '.') {
 		if (domain[0] == '.')
 			domain += 1;
 		if (strlcpy(buf, name, buflen) >= buflen ||
@@ -528,7 +527,7 @@ asr_ndots(const char *s)
 static struct asr_ctx *
 asr_ctx_create(void)
 {
-	struct asr_ctx	*ac;
+	struct asr_ctx *ac;
 
 	if ((ac = calloc(1, sizeof(*ac))) == NULL)
 		return (NULL);
@@ -578,11 +577,11 @@ asr_ctx_add_searchdomain(struct asr_ctx *ac, const char *domain)
 static int
 strsplit(char *line, char **tokens, int ntokens)
 {
-	int	ntok;
-	char	*cp, **tp;
+	int   ntok;
+	char *cp, **tp;
 
 	for (cp = line, tp = tokens, ntok = 0;
-	    ntok < ntokens && (*tp = strsep(&cp, " \t")) != NULL; )
+	    ntok < ntokens && (*tp = strsep(&cp, " \t")) != NULL;)
 		if (**tp != '\0') {
 			tp++;
 			ntok++;
@@ -597,9 +596,9 @@ strsplit(char *line, char **tokens, int ntokens)
 static void
 pass0(char **tok, int n, struct asr_ctx *ac)
 {
-	int		 i, j, d;
-	const char	*e;
-	struct sockaddr_storage	ss;
+	int			i, j, d;
+	const char	       *e;
+	struct sockaddr_storage ss;
 
 	if (!strcmp(tok[0], "nameserver")) {
 		if (ac->ac_nscount == ASR_MAXNS)
@@ -652,8 +651,8 @@ pass0(char **tok, int n, struct asr_ctx *ac)
 			if (strcmp(tok[i], "inet4") && strcmp(tok[i], "inet6"))
 				return;
 		for (i = 1; i < n; i++)
-			ac->ac_family[i - 1] = strcmp(tok[i], "inet4") ? \
-			    AF_INET6 : AF_INET;
+			ac->ac_family[i - 1] =
+			    strcmp(tok[i], "inet4") ? AF_INET6 : AF_INET;
 		ac->ac_family[i - 1] = -1;
 
 	} else if (!strcmp(tok[0], "options")) {
@@ -679,10 +678,10 @@ pass0(char **tok, int n, struct asr_ctx *ac)
 static int
 asr_ctx_from_string(struct asr_ctx *ac, const char *str)
 {
-	struct sockaddr_in6	*sin6;
-	struct sockaddr_in	*sin;
-	int			 i, trustad;
-	char			 buf[512], *ch;
+	struct sockaddr_in6 *sin6;
+	struct sockaddr_in  *sin;
+	int		     i, trustad;
+	char		     buf[512], *ch;
 
 	asr_ctx_parse(ac, str);
 
@@ -705,7 +704,7 @@ asr_ctx_from_string(struct asr_ctx *ac, const char *str)
 
 	/* If no search domain was specified, use the local subdomains */
 	if (ac->ac_domcount == 0)
-		for (ch = ac->ac_domain; ch; ) {
+		for (ch = ac->ac_domain; ch;) {
 			asr_ctx_add_searchdomain(ac, ch);
 			ch = strchr(ch, '.');
 			if (ch && asr_ndots(++ch) == 0)
@@ -743,9 +742,9 @@ asr_ctx_from_string(struct asr_ctx *ac, const char *str)
 static int
 asr_ctx_from_fd(struct asr_ctx *ac, int fd)
 {
-	FILE	*cf;
-	char	 buf[4096];
-	ssize_t	 r;
+	FILE   *cf;
+	char	buf[4096];
+	ssize_t r;
 
 	cf = fdopen(fd, "r");
 	if (cf == NULL) {
@@ -773,11 +772,11 @@ asr_ctx_from_fd(struct asr_ctx *ac, int fd)
 static int
 asr_ctx_parse(struct asr_ctx *ac, const char *str)
 {
-	size_t		 len;
-	const char	*line;
-	char		 buf[1024];
-	char		*tok[10];
-	int		 ntok;
+	size_t	    len;
+	const char *line;
+	char	    buf[1024];
+	char	   *tok[10];
+	int	    ntok;
 
 	line = str;
 	while (*line) {
@@ -808,8 +807,8 @@ asr_ctx_parse(struct asr_ctx *ac, const char *str)
 static void
 asr_ctx_envopts(struct asr_ctx *ac)
 {
-	char	buf[4096], *e;
-	size_t	s;
+	char   buf[4096], *e;
+	size_t s;
 
 	if (issetugid()) {
 		ac->ac_options |= RES_NOALIASES;
@@ -839,7 +838,7 @@ asr_ctx_envopts(struct asr_ctx *ac)
 static int
 asr_parse_nameserver(struct sockaddr *sa, const char *s)
 {
-	in_port_t	 portno = 53;
+	in_port_t portno = 53;
 
 	if (_asr_sockaddr_from_str(sa, PF_UNSPEC, s) == -1)
 		return (-1);
@@ -860,10 +859,10 @@ asr_parse_nameserver(struct sockaddr *sa, const char *s)
 char *
 _asr_strdname(const char *_dname, char *buf, size_t max)
 {
-	const unsigned char	*dname = _dname;
-	unsigned char		 c;
-	char			*res;
-	size_t			 left, count;
+	const unsigned char *dname = _dname;
+	unsigned char	     c;
+	char		    *res;
+	size_t		     left, count;
 
 	if (max == 0)
 		return (buf);
@@ -885,7 +884,7 @@ _asr_strdname(const char *_dname, char *buf, size_t max)
 		while (count > 0) {
 			c = *dname++;
 			count--;
-			if ( c == '\\') {
+			if (c == '\\') {
 				*buf++ = '\\';
 				*buf++ = '\\';
 				left -= 2;
@@ -916,13 +915,14 @@ _asr_strdname(const char *_dname, char *buf, size_t max)
  * size "ntoken" and returns the number of token on the line.
  */
 int
-_asr_parse_namedb_line(FILE *file, char **tokens, int ntoken, char *lbuf, size_t sz)
+_asr_parse_namedb_line(
+    FILE *file, char **tokens, int ntoken, char *lbuf, size_t sz)
 {
-	size_t	  len;
-	char	 *buf;
-	int	  ntok;
+	size_t len;
+	char  *buf;
+	int    ntok;
 
-    again:
+again:
 	if ((buf = fgetln(file, &len)) == NULL)
 		return (-1);
 

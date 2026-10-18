@@ -24,7 +24,7 @@
  * clang overrides our <float.h>, but libc still need to define __flt_rounds()
  * to support building with gcc
  */
-int	__flt_rounds(void);
+int __flt_rounds(void);
 PROTO_NORMAL(__flt_rounds);
 
-#endif	/* _LIBC_FLOAT_H_ */
+#endif /* _LIBC_FLOAT_H_ */

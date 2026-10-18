@@ -32,45 +32,45 @@
 
 #include <sys/types.h>
 
-#define MIN_FM_FREQ	87500
-#define MAX_FM_FREQ	108000
+#define MIN_FM_FREQ 87500
+#define MAX_FM_FREQ 108000
 
-#define MIN_TV_CHAN	0
-#define MAX_TV_CHAN	150
+#define MIN_TV_CHAN 0
+#define MAX_TV_CHAN 150
 
-#define IF_FREQ	10700
+#define IF_FREQ 10700
 
 struct radio_info {
-	int	mute;
-	int	volume;
-	int	stereo;
-	int	rfreq;	/* reference frequency */
-	int	lock;	/* locking field strength during an automatic search */
-	u_int32_t	freq;	/* in kHz */
-	u_int32_t	caps;	/* card capabilities */
-#define RADIO_CAPS_DETECT_STEREO	(1<<0)
-#define RADIO_CAPS_DETECT_SIGNAL	(1<<1)
-#define RADIO_CAPS_SET_MONO		(1<<2)
-#define RADIO_CAPS_HW_SEARCH		(1<<3)
-#define RADIO_CAPS_HW_AFC		(1<<4)
-#define RADIO_CAPS_REFERENCE_FREQ	(1<<5)
-#define RADIO_CAPS_LOCK_SENSITIVITY	(1<<6)
-#define RADIO_CAPS_RESERVED1		(1<<7)
-#define RADIO_CAPS_RESERVED2		(0xFF<<8)
-#define RADIO_CARD_TYPE			(0xFF<<16)
-	u_int32_t	info;
-#define RADIO_INFO_STEREO		(1<<0)
-#define RADIO_INFO_SIGNAL		(1<<1)
-	u_int32_t	tuner_mode;
-#define RADIO_TUNER_MODE_RADIO         (1<<0)
-#define RADIO_TUNER_MODE_TV            (1<<1)
-	u_int32_t	chan;
-	u_int32_t	chnlset;
+	int	  mute;
+	int	  volume;
+	int	  stereo;
+	int	  rfreq; /* reference frequency */
+	int	  lock;	 /* locking field strength during an automatic search */
+	u_int32_t freq;	 /* in kHz */
+	u_int32_t caps;	 /* card capabilities */
+#define RADIO_CAPS_DETECT_STEREO (1 << 0)
+#define RADIO_CAPS_DETECT_SIGNAL (1 << 1)
+#define RADIO_CAPS_SET_MONO (1 << 2)
+#define RADIO_CAPS_HW_SEARCH (1 << 3)
+#define RADIO_CAPS_HW_AFC (1 << 4)
+#define RADIO_CAPS_REFERENCE_FREQ (1 << 5)
+#define RADIO_CAPS_LOCK_SENSITIVITY (1 << 6)
+#define RADIO_CAPS_RESERVED1 (1 << 7)
+#define RADIO_CAPS_RESERVED2 (0xFF << 8)
+#define RADIO_CARD_TYPE (0xFF << 16)
+	u_int32_t info;
+#define RADIO_INFO_STEREO (1 << 0)
+#define RADIO_INFO_SIGNAL (1 << 1)
+	u_int32_t tuner_mode;
+#define RADIO_TUNER_MODE_RADIO (1 << 0)
+#define RADIO_TUNER_MODE_TV (1 << 1)
+	u_int32_t chan;
+	u_int32_t chnlset;
 };
 
 /* Radio device operations */
-#define RIOCGINFO	_IOR('R', 21, struct radio_info) /* get info */
-#define RIOCSINFO	_IOWR('R', 22, struct radio_info) /* set info */
-#define RIOCSSRCH	_IOW('R', 23, int) /* search up/down */
+#define RIOCGINFO _IOR('R', 21, struct radio_info)  /* get info */
+#define RIOCSINFO _IOWR('R', 22, struct radio_info) /* set info */
+#define RIOCSSRCH _IOW('R', 23, int)		    /* search up/down */
 
 #endif /* _SYS_RADIOIO_H_ */

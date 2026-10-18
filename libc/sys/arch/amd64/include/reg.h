@@ -48,39 +48,39 @@
 
 /* When referenced during a trap/exception, registers are at these offsets */
 
-#define tRDI	0
-#define tRSI	1
-#define tRDX	2
-#define tRCX	3
-#define tR8	4
-#define tR9	5
-#define tR10	6
-#define tR11	7
-#define	tR12	8
-#define	tR13	9
-#define	tR14	10
-#define	tR15	11
-#define	tRBP	12
-#define	tRBX	13
-#define	tRAX	14
-#define	tRSP	15
-#define	tRIP	16
-#define	tRFLAGS	17
-#define	tCS	18
-#define	tSS	19
-#define	tDS	20
-#define	tES	21
-#define	tFS	22
-#define	tGS	23
+#define tRDI 0
+#define tRSI 1
+#define tRDX 2
+#define tRCX 3
+#define tR8 4
+#define tR9 5
+#define tR10 6
+#define tR11 7
+#define tR12 8
+#define tR13 9
+#define tR14 10
+#define tR15 11
+#define tRBP 12
+#define tRBX 13
+#define tRAX 14
+#define tRSP 15
+#define tRIP 16
+#define tRFLAGS 17
+#define tCS 18
+#define tSS 19
+#define tDS 20
+#define tES 21
+#define tFS 22
+#define tGS 23
 
 /*
  * Registers accessible to ptrace(2) syscall for debugger use.
  */
 struct reg {
-	int64_t	r_rdi;
-	int64_t	r_rsi;
-	int64_t	r_rdx;
-	int64_t	r_rcx;
+	int64_t r_rdi;
+	int64_t r_rsi;
+	int64_t r_rdx;
+	int64_t r_rcx;
 	int64_t r_r8;
 	int64_t r_r9;
 	int64_t r_r10;
@@ -89,34 +89,34 @@ struct reg {
 	int64_t r_r13;
 	int64_t r_r14;
 	int64_t r_r15;
-	int64_t	r_rbp;
-	int64_t	r_rbx;
-	int64_t	r_rax;
-	int64_t	r_rsp;
-	int64_t	r_rip;
-	int64_t	r_rflags;
-	int64_t	r_cs;
-	int64_t	r_ss;
-	int64_t	r_ds;
-	int64_t	r_es;
-	int64_t	r_fs;
-	int64_t	r_gs;
+	int64_t r_rbp;
+	int64_t r_rbx;
+	int64_t r_rax;
+	int64_t r_rsp;
+	int64_t r_rip;
+	int64_t r_rflags;
+	int64_t r_cs;
+	int64_t r_ss;
+	int64_t r_ds;
+	int64_t r_es;
+	int64_t r_fs;
+	int64_t r_gs;
 };
 
 struct fpreg {
 	struct fxsave64 fxstate;
 };
 
-#define fp_fcw		fxstate.fx_fcw
-#define fp_fsw		fxstate.fx_fsw
-#define fp_ftw		fxstate.fx_ftw
-#define fp_fop		fxstate.fx_fop
-#define fp_rip		fxstate.fx_rip
-#define fp_rdp		fxstate.fx_rdp
-#define fp_mxcsr	fxstate.fx_mxcsr
-#define fp_mxcsr_mask	fxstate.fx_mxcsr_mask
-#define fp_st		fxstate.fx_st
-#define fp_xmm		fxstate.fx_xmm
+#define fp_fcw fxstate.fx_fcw
+#define fp_fsw fxstate.fx_fsw
+#define fp_ftw fxstate.fx_ftw
+#define fp_fop fxstate.fx_fop
+#define fp_rip fxstate.fx_rip
+#define fp_rdp fxstate.fx_rdp
+#define fp_mxcsr fxstate.fx_mxcsr
+#define fp_mxcsr_mask fxstate.fx_mxcsr_mask
+#define fp_st fxstate.fx_st
+#define fp_xmm fxstate.fx_xmm
 
 #ifdef _KERNEL
 int check_context(const struct reg *, struct trapframe *);

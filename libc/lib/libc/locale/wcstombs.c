@@ -32,9 +32,9 @@
 #include <wchar.h>
 
 size_t
-wcstombs(char * __restrict s, const wchar_t * __restrict pwcs, size_t n)
+wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, size_t n)
 {
-	mbstate_t mbs;
+	mbstate_t      mbs;
 	const wchar_t *pwcsp;
 
 	memset(&mbs, 0, sizeof(mbs));

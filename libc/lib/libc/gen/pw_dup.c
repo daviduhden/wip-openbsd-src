@@ -23,33 +23,33 @@
 #include <sys/types.h>
 
 #include <pwd.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define PW_SIZE(name, size)				\
-do {							\
-	if (pw->name) {					\
-		size = strlen(pw->name) + 1;		\
-		total += size;				\
-	}						\
-} while (0)
+#define PW_SIZE(name, size)                                                    \
+	do {                                                                   \
+		if (pw->name) {                                                \
+			size = strlen(pw->name) + 1;                           \
+			total += size;                                         \
+		}                                                              \
+	} while (0)
 
-#define PW_COPY(name, size)				\
-do {							\
-	if (pw->name) {					\
-		(void)memcpy(cp, pw->name, size);	\
-		newpw->name = cp;			\
-		cp += size;				\
-	}						\
-} while (0)
+#define PW_COPY(name, size)                                                    \
+	do {                                                                   \
+		if (pw->name) {                                                \
+			(void)memcpy(cp, pw->name, size);                      \
+			newpw->name = cp;                                      \
+			cp += size;                                            \
+		}                                                              \
+	} while (0)
 
 struct passwd *
 pw_dup(const struct passwd *pw)
 {
-	char		*cp;
-	size_t		 nsize, psize, csize, gsize, dsize, ssize, total;
-	struct passwd	*newpw;
+	char	      *cp;
+	size_t	       nsize, psize, csize, gsize, dsize, ssize, total;
+	struct passwd *newpw;
 
 	/* Allocate in one big chunk for easy freeing */
 	total = sizeof(struct passwd);

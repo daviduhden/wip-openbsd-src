@@ -35,10 +35,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <ndbm.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <ndbm.h>
 #include "hash.h"
 
 /*
@@ -59,8 +59,8 @@ static DBM *
 _dbm_open(const char *file, const char *suff, int flags, mode_t mode)
 {
 	HASHINFO info;
-	char path[PATH_MAX];
-	int len;
+	char	 path[PATH_MAX];
+	int	 len;
 
 	len = snprintf(path, sizeof path, "%s%s", file, suff);
 	if (len < 0 || len >= sizeof path) {
@@ -90,7 +90,7 @@ DBM *
 dbm_open(const char *file, int flags, mode_t mode)
 {
 
-	return(_dbm_open(file, DBM_SUFFIX, flags, mode));
+	return (_dbm_open(file, DBM_SUFFIX, flags, mode));
 }
 
 /*
@@ -114,8 +114,8 @@ datum
 dbm_fetch(DBM *db, datum key)
 {
 	datum retdata;
-	int status;
-	DBT dbtkey, dbtretdata;
+	int   status;
+	DBT   dbtkey, dbtretdata;
 
 	dbtkey.data = key.dptr;
 	dbtkey.size = key.dsize;
@@ -138,9 +138,9 @@ DEF_WEAK(dbm_fetch);
 datum
 dbm_firstkey(DBM *db)
 {
-	int status;
+	int   status;
 	datum retkey;
-	DBT dbtretkey, dbtretdata;
+	DBT   dbtretkey, dbtretdata;
 
 	status = (db->seq)(db, &dbtretkey, &dbtretdata, R_FIRST);
 	if (status)
@@ -159,9 +159,9 @@ DEF_WEAK(dbm_firstkey);
 datum
 dbm_nextkey(DBM *db)
 {
-	int status;
+	int   status;
 	datum retkey;
-	DBT dbtretkey, dbtretdata;
+	DBT   dbtretkey, dbtretdata;
 
 	status = (db->seq)(db, &dbtretkey, &dbtretdata, R_NEXT);
 	if (status)
@@ -208,8 +208,8 @@ dbm_store(DBM *db, datum key, datum data, int flags)
 	dbtkey.size = key.dsize;
 	dbtdata.data = data.dptr;
 	dbtdata.size = data.dsize;
-	return ((db->put)(db, &dbtkey, &dbtdata,
-	    (flags == DBM_INSERT) ? R_NOOVERWRITE : 0));
+	return ((db->put)(
+	    db, &dbtkey, &dbtdata, (flags == DBM_INSERT) ? R_NOOVERWRITE : 0));
 }
 DEF_WEAK(dbm_store);
 
@@ -236,7 +236,7 @@ int
 dbm_dirfno(DBM *db)
 {
 
-	return(((HTAB *)db->internal)->fp);
+	return (((HTAB *)db->internal)->fp);
 }
 
 int

@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_ICDB_H_
-#define	_LIBC_ICDB_H_
+#define _LIBC_ICDB_H_
 
 #include_next <icdb.h>
 

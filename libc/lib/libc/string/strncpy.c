@@ -42,7 +42,7 @@ char *
 strncpy(char *dst, const char *src, size_t n)
 {
 	if (n != 0) {
-		char *d = dst;
+		char	   *d = dst;
 		const char *s = src;
 
 		do {

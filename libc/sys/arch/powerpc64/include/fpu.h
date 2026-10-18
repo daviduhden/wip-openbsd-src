@@ -7,10 +7,10 @@
 
 #ifdef _KERNEL
 
-void	save_vsx(struct proc *);
-void	restore_vsx(struct proc *);
+void save_vsx(struct proc *);
+void restore_vsx(struct proc *);
 
-int	fpu_sigcode(struct proc *);
+int fpu_sigcode(struct proc *);
 
 #endif
 

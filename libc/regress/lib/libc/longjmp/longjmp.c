@@ -3,15 +3,15 @@
  *	Artur Grabowski <art@openbsd.org>, 2002 Public Domain.
  */
 
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+
+#include <err.h>
+#include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <setjmp.h>
-#include <err.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-
 
 jmp_buf buf;
 
@@ -25,11 +25,11 @@ int
 main(int argc, char **argv)
 {
 	struct rlimit rl;
-	volatile int i, expect;
-	int (*sj)(jmp_buf);
-	void (*lj)(jmp_buf, int);
-	int ch;
-	extern char *__progname;
+	volatile int  i, expect;
+	int	      (*sj)(jmp_buf);
+	void	      (*lj)(jmp_buf, int);
+	int	      ch;
+	extern char  *__progname;
 
 	sj = setjmp;
 	lj = longjmp;

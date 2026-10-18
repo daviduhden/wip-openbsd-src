@@ -11,6 +11,6 @@ fpgetsticky()
 {
 	int x;
 
-	__asm__("cfc1 %0,$31" : "=r" (x));
+	__asm__("cfc1 %0,$31" : "=r"(x));
 	return (x >> 2) & 0x1f;
 }

@@ -37,64 +37,69 @@
  *	from: @(#)SYS.h	8.1 (Berkeley) 6/4/93
  */
 
-#include "DEFS.h"
 #include <sys/syscall.h>
+
+#include "DEFS.h"
 
 /* r0 will be a non zero errno if there was an error, while r3/r4 will
    contain the return value */
 
 #include "machine/asm.h"
 
-
 /* offsetof(struct tib, tib_errno) - offsetof(struct tib, __tib_tcb) */
-#define TCB_OFFSET_ERRNO	(-20)
+#define TCB_OFFSET_ERRNO (-20)
 /* from <powerpc64/tcb.h>: TCB address == %r13 - TCB_OFFSET */
-#define TCB_OFFSET		0x7008
+#define TCB_OFFSET 0x7008
 
 /* offset of errno from %r13 */
-#define R13_OFFSET_ERRNO		(-TCB_OFFSET + TCB_OFFSET_ERRNO)
+#define R13_OFFSET_ERRNO (-TCB_OFFSET + TCB_OFFSET_ERRNO)
 
-#define SYSENTRY(x)		.weak x; \
-				x = _thread_sys_ ## x; \
-				ENTRY(_thread_sys_ ## x)
-#define SYSENTRY_HIDDEN(x) 	ENTRY(_thread_sys_ ## x)
-#define __END_HIDDEN(p,x)	END(p##x);			\
-				_HIDDEN_FALIAS(x,p##x);		\
-				END(_HIDDEN(x))
-#define __END(p,x)		__END_HIDDEN(p,x); END(x)
+#define SYSENTRY(x)                                                            \
+	.weak x;                                                               \
+	x = _thread_sys_##x;                                                   \
+	ENTRY(_thread_sys_##x)
+#define SYSENTRY_HIDDEN(x) ENTRY(_thread_sys_##x)
+#define __END_HIDDEN(p, x)                                                     \
+	END(p##x);                                                             \
+	_HIDDEN_FALIAS(x, p##x);                                               \
+	END(_HIDDEN(x))
+#define __END(p, x)                                                            \
+	__END_HIDDEN(p, x);                                                    \
+	END(x)
 
-#define ALIAS(x,y)		WEAK_ALIAS(y, x ## y);
-		
-#define PSEUDO_NOERROR(x,y)	ALIAS(_thread_sys_,x) \
-				ENTRY(_thread_sys_ ## x) \
-				RETGUARD_SETUP(_thread_sys_ ## x, %r11); \
-				li %r0, SYS_ ## y ; \
-			97:	sc ; \
-				PINSYSCALL(SYS_ ## y, 97b); \
-				RETGUARD_CHECK(_thread_sys_ ## x, %r11); \
-				blr; \
-				__END(_thread_sys_,x)
+#define ALIAS(x, y) WEAK_ALIAS(y, x##y);
 
-#define PSEUDO_HIDDEN(x,y) 	ENTRY(_thread_sys_ ## x) \
-				RETGUARD_SETUP(_thread_sys_ ## x, %r11); \
-				li %r0, SYS_ ## y ; \
-			97:	sc ; \
-				PINSYSCALL(SYS_ ## y, 97b); \
-				cmpwi %r0, 0 ; \
-				beq .L_ret ; \
-				stw	%r0, R13_OFFSET_ERRNO(%r13); \
-				li	%r3, -1; \
-			.L_ret: \
-				RETGUARD_CHECK(_thread_sys_ ## x, %r11); \
-				blr; \
-				__END_HIDDEN(_thread_sys_,x)
+#define PSEUDO_NOERROR(x, y)                                                   \
+	ALIAS(_thread_sys_, x)                                                 \
+	ENTRY(_thread_sys_##x)                                                 \
+	RETGUARD_SETUP(_thread_sys_##x, % r11);                                \
+	li % r0, SYS_##y;                                                      \
+	97 : sc;                                                               \
+	PINSYSCALL(SYS_##y, 97b);                                              \
+	RETGUARD_CHECK(_thread_sys_##x, % r11);                                \
+	blr;                                                                   \
+	__END(_thread_sys_, x)
 
-#define PSEUDO(x,y)		ALIAS(_thread_sys_,x) \
-				PSEUDO_HIDDEN(x,y); \
-				END(x)
+#define PSEUDO_HIDDEN(x, y)                                                    \
+	ENTRY(_thread_sys_##x)                                                 \
+	RETGUARD_SETUP(_thread_sys_##x, % r11);                                \
+	li % r0, SYS_##y;                                                      \
+	97 : sc;                                                               \
+	PINSYSCALL(SYS_##y, 97b);                                              \
+	cmpwi % r0, 0;                                                         \
+	beq.L_ret;                                                             \
+	stw % r0, R13_OFFSET_ERRNO(% r13);                                     \
+	li % r3, -1;                                                           \
+	.L_ret : RETGUARD_CHECK(_thread_sys_##x, % r11);                       \
+	blr;                                                                   \
+	__END_HIDDEN(_thread_sys_, x)
 
-#define RSYSCALL(x)		PSEUDO(x,x)
-#define RSYSCALL_HIDDEN(x)	PSEUDO_HIDDEN(x,x)
-#define SYSCALL_END_HIDDEN(x)	__END_HIDDEN(_thread_sys_,x)
-#define SYSCALL_END(x)		__END(_thread_sys_,x)
+#define PSEUDO(x, y)                                                           \
+	ALIAS(_thread_sys_, x)                                                 \
+	PSEUDO_HIDDEN(x, y);                                                   \
+	END(x)
 
+#define RSYSCALL(x) PSEUDO(x, x)
+#define RSYSCALL_HIDDEN(x) PSEUDO_HIDDEN(x, x)
+#define SYSCALL_END_HIDDEN(x) __END_HIDDEN(_thread_sys_, x)
+#define SYSCALL_END(x) __END(_thread_sys_, x)

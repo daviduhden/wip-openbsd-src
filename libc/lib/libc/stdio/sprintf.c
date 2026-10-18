@@ -31,23 +31,23 @@
  * SUCH DAMAGE.
  */
 
+#include <limits.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdarg.h>
-#include <limits.h>
+
 #include "local.h"
 
 #if defined(APIWARN)
-__warn_references(sprintf,
-    "sprintf() is often misused, please use snprintf()");
+__warn_references(sprintf, "sprintf() is often misused, please use snprintf()");
 #endif
 
 int
 sprintf(char *str, const char *fmt, ...)
 {
-	int ret;
+	int	ret;
 	va_list ap;
-	FILE f = FILEINIT(__SWR | __SSTR);
+	FILE	f = FILEINIT(__SWR | __SSTR);
 
 	f._bf._base = f._p = (unsigned char *)str;
 	f._bf._size = f._w = INT_MAX;

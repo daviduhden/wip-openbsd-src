@@ -36,7 +36,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* 
+/*
  * seed = random 15bit
  * n = prime, g0 = generator to n,
  * j = random so that gcd(j,n-1) == 1
@@ -44,7 +44,7 @@
  *
  * X[0] = random seed.
  * X[n] = a*X[n-1]+b mod m is a Linear Congruential Generator
- * with a = 7^(even random) mod m, 
+ * with a = 7^(even random) mod m,
  *      b = random with gcd(b,m) == 1
  *      m = 31104 and a maximal period of m-1.
  *
@@ -60,23 +60,24 @@
  */
 
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <sys/time.h>
-#include <resolv.h>
 
-#include <unistd.h>
+#include <netinet/in.h>
+
+#include <resolv.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "thread_private.h"
 
-#define RU_OUT  	180	/* Time after which will be reseeded */
-#define RU_MAX		30000	/* Uniq cycle, avoid blackjack prediction */
-#define RU_GEN		2	/* Starting generator */
-#define RU_N		32749	/* RU_N-1 = 2*2*3*2729 */
-#define RU_AGEN		7	/* determine ru_a as RU_AGEN^(2*rand) */
-#define RU_M		31104	/* RU_M = 2^7*3^5 - don't change */
-#define RU_ROUNDS	11	/* Number of rounds for permute (odd) */
+#define RU_OUT 180   /* Time after which will be reseeded */
+#define RU_MAX 30000 /* Uniq cycle, avoid blackjack prediction */
+#define RU_GEN 2     /* Starting generator */
+#define RU_N 32749   /* RU_N-1 = 2*2*3*2729 */
+#define RU_AGEN 7    /* determine ru_a as RU_AGEN^(2*rand) */
+#define RU_M 31104   /* RU_M = 2^7*3^5 - don't change */
+#define RU_ROUNDS 11 /* Number of rounds for permute (odd) */
 
 struct prf_ctx {
 	/* PRF lookup table for odd rounds (7 bits input to 8 bits output) */
@@ -87,24 +88,20 @@ struct prf_ctx {
 };
 
 #define PFAC_N 3
-static const u_int16_t pfacts[PFAC_N] = {
-	2, 
-	3,
-	2729
-};
+static const u_int16_t pfacts[PFAC_N] = {2, 3, 2729};
 
-static u_int16_t ru_x;
-static u_int16_t ru_seed, ru_seed2;
-static u_int16_t ru_a, ru_b;
-static u_int16_t ru_g;
-static u_int16_t ru_counter = 0;
-static u_int16_t ru_msb = 0;
+static u_int16_t       ru_x;
+static u_int16_t       ru_seed, ru_seed2;
+static u_int16_t       ru_a, ru_b;
+static u_int16_t       ru_g;
+static u_int16_t       ru_counter = 0;
+static u_int16_t       ru_msb = 0;
 static struct prf_ctx *ru_prf = NULL;
-static time_t ru_reseed;
-static pid_t ru_pid;
+static time_t	       ru_reseed;
+static pid_t	       ru_pid;
 
 static u_int16_t pmod(u_int16_t, u_int16_t, u_int16_t);
-static void res_initid(void);
+static void	 res_initid(void);
 
 /*
  * Do a fast modular exponation, returned value will be in the range
@@ -134,7 +131,7 @@ pmod(u_int16_t gen, u_int16_t exp, u_int16_t mod)
 static u_int
 permute15(u_int in)
 {
-	int i;
+	int   i;
 	u_int left, right, tmp;
 
 	if (ru_prf == NULL)
@@ -161,20 +158,20 @@ permute15(u_int in)
 	return (right << 8) | left;
 }
 
-/* 
- * Initializes the seed and chooses a suitable generator. Also toggles 
+/*
+ * Initializes the seed and chooses a suitable generator. Also toggles
  * the msb flag. The msb flag is used to generate two distinct
  * cycles of random numbers and thus avoiding reuse of ids.
  *
- * This function is called from res_randomid() when needed, an 
+ * This function is called from res_randomid() when needed, an
  * application does not have to worry about it.
  */
-static void 
+static void
 res_initid(void)
 {
-	u_int16_t j, i;
-	u_int32_t tmp;
-	int noprime = 1;
+	u_int16_t	j, i;
+	u_int32_t	tmp;
+	int		noprime = 1;
 	struct timespec ts;
 
 	ru_x = arc4random_uniform(RU_M);
@@ -190,10 +187,10 @@ res_initid(void)
 	ru_a = pmod(RU_AGEN, (tmp >> 16) & 0xfffe, RU_M);
 	while (ru_b % 3 == 0)
 		ru_b += 2;
-	
+
 	j = arc4random_uniform(RU_N);
 
-	/* 
+	/*
 	 * Do a fast gcd(j,RU_N-1), so we can find a j with
 	 * gcd(j, RU_N-1) == 1, giving a new generator for
 	 * RU_GEN^j mod RU_N
@@ -206,7 +203,7 @@ res_initid(void)
 
 		if (i >= PFAC_N)
 			noprime = 0;
-		else 
+		else
 			j = (j + 1) % RU_N;
 	}
 
@@ -221,16 +218,16 @@ res_initid(void)
 
 	WRAP(clock_gettime)(CLOCK_MONOTONIC, &ts);
 	ru_reseed = ts.tv_sec + RU_OUT;
-	ru_msb = ru_msb == 0x8000 ? 0 : 0x8000; 
+	ru_msb = ru_msb == 0x8000 ? 0 : 0x8000;
 }
 
 u_int
 __res_randomid(void)
 {
 	struct timespec ts;
-	pid_t pid;
-	u_int r;
-	static void *randomid_mutex;
+	pid_t		pid;
+	u_int		r;
+	static void    *randomid_mutex;
 
 	WRAP(clock_gettime)(CLOCK_MONOTONIC, &ts);
 	pid = getpid();
@@ -278,4 +275,3 @@ main(int argc, char **argv)
 	return 0;
 }
 #endif
-

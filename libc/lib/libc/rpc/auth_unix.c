@@ -32,8 +32,8 @@
  */
 
 /*
- * auth_unix.c, Implements UNIX style authentication parameters. 
- *  
+ * auth_unix.c, Implements UNIX style authentication parameters.
+ *
  * The system is very weak.  The client uses no encryption for its
  * credentials and only sends null verifiers.  The server sends backs
  * null verifiers or optionally a verifier that suggests a new short hand
@@ -41,48 +41,41 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#include <rpc/rpc.h>
 #include <rpc/auth.h>
 #include <rpc/auth_unix.h>
+#include <rpc/rpc.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 /*
  * Unix authenticator operations vector
  */
-static void	authunix_nextverf(struct __rpc_auth *);
-static bool_t	authunix_marshal(struct __rpc_auth *, XDR *);
-static bool_t	authunix_validate(struct __rpc_auth *, struct opaque_auth *);
-static bool_t	authunix_refresh(struct __rpc_auth *);
-static void	authunix_destroy(struct __rpc_auth *);
+static void   authunix_nextverf(struct __rpc_auth *);
+static bool_t authunix_marshal(struct __rpc_auth *, XDR *);
+static bool_t authunix_validate(struct __rpc_auth *, struct opaque_auth *);
+static bool_t authunix_refresh(struct __rpc_auth *);
+static void   authunix_destroy(struct __rpc_auth *);
 
-static const struct auth_ops auth_unix_ops = {
-	authunix_nextverf,
-	authunix_marshal,
-	authunix_validate,
-	authunix_refresh,
-	authunix_destroy
-};
+static const struct auth_ops auth_unix_ops = {authunix_nextverf,
+    authunix_marshal, authunix_validate, authunix_refresh, authunix_destroy};
 
 /*
  * This struct is pointed to by the ah_private field of an auth_handle.
  */
 struct audata {
-	struct opaque_auth	au_origcred;	/* original credentials */
-	struct opaque_auth	au_shcred;	/* short hand cred */
-	u_long			au_shfaults;	/* short hand cache faults */
-	char			au_marshed[MAX_AUTH_BYTES];
-	u_int			au_mpos;	/* xdr pos at end of marshed */
+	struct opaque_auth au_origcred; /* original credentials */
+	struct opaque_auth au_shcred;	/* short hand cred */
+	u_long		   au_shfaults; /* short hand cache faults */
+	char		   au_marshed[MAX_AUTH_BYTES];
+	u_int		   au_mpos; /* xdr pos at end of marshed */
 };
-#define	AUTH_PRIVATE(auth)	((struct audata *)auth->ah_private)
+#define AUTH_PRIVATE(auth) ((struct audata *)auth->ah_private)
 
 static void marshal_new_auth(AUTH *auth);
-
 
 /*
  * Create a unix style authenticator.
@@ -92,11 +85,11 @@ AUTH *
 authunix_create(char *machname, int uid, int gid, int len, int *aup_gids)
 {
 	struct authunix_parms aup;
-	char mymem[MAX_AUTH_BYTES];
-	struct timeval now;
-	XDR xdrs;
-	AUTH *auth;
-	struct audata *au;
+	char		      mymem[MAX_AUTH_BYTES];
+	struct timeval	      now;
+	XDR		      xdrs;
+	AUTH		     *auth;
+	struct audata	     *au;
 
 	/*
 	 * Allocate and set up auth handle
@@ -121,7 +114,7 @@ authunix_create(char *machname, int uid, int gid, int len, int *aup_gids)
 	/*
 	 * fill in param struct from the given params
 	 */
-	(void)WRAP(gettimeofday)(&now,  NULL);
+	(void)WRAP(gettimeofday)(&now, NULL);
 	aup.aup_time = now.tv_sec;
 	aup.aup_machname = machname;
 	aup.aup_uid = uid;
@@ -133,15 +126,15 @@ authunix_create(char *machname, int uid, int gid, int len, int *aup_gids)
 	 * Serialize the parameters into origcred
 	 */
 	xdrmem_create(&xdrs, mymem, MAX_AUTH_BYTES, XDR_ENCODE);
-	if (!xdr_authunix_parms(&xdrs, &aup)) 
-		goto authfail;	
+	if (!xdr_authunix_parms(&xdrs, &aup))
+		goto authfail;
 	au->au_origcred.oa_length = len = XDR_GETPOS(&xdrs);
 	au->au_origcred.oa_flavor = AUTH_UNIX;
 #ifdef KERNEL
-	au->au_origcred.oa_base = mem_alloc((u_int) len);
+	au->au_origcred.oa_base = mem_alloc((u_int)len);
 #else
-	if ((au->au_origcred.oa_base = mem_alloc((u_int) len)) == NULL)
-		goto authfail;	
+	if ((au->au_origcred.oa_base = mem_alloc((u_int)len)) == NULL)
+		goto authfail;
 #endif
 	memcpy(au->au_origcred.oa_base, mymem, (u_int)len);
 
@@ -159,7 +152,6 @@ authfail:
 	return (NULL);
 }
 DEF_WEAK(authunix_create);
-
 
 /*
  * Some servers will refuse mounts if the group list is larger
@@ -182,12 +174,12 @@ set_rpc_maxgrouplist(int num)
 AUTH *
 authunix_create_default(void)
 {
-	int len, i;
-	char machname[MAX_MACHINE_NAME + 1];
+	int   len, i;
+	char  machname[MAX_MACHINE_NAME + 1];
 	uid_t uid;
 	gid_t gid;
 	gid_t gids[NGRPS];
-	int gids2[NGRPS];
+	int   gids2[NGRPS];
 
 	if (gethostname(machname, sizeof machname) == -1)
 		return (NULL);
@@ -225,15 +217,16 @@ static bool_t
 authunix_validate(AUTH *auth, struct opaque_auth *verf)
 {
 	struct audata *au;
-	XDR xdrs;
+	XDR	       xdrs;
 
 	if (verf->oa_flavor == AUTH_SHORT) {
 		au = AUTH_PRIVATE(auth);
-		xdrmem_create(&xdrs, verf->oa_base, verf->oa_length, XDR_DECODE);
+		xdrmem_create(
+		    &xdrs, verf->oa_base, verf->oa_length, XDR_DECODE);
 
 		if (au->au_shcred.oa_base != NULL) {
-			mem_free(au->au_shcred.oa_base,
-			    au->au_shcred.oa_length);
+			mem_free(
+			    au->au_shcred.oa_base, au->au_shcred.oa_length);
 			au->au_shcred.oa_base = NULL;
 		}
 		if (xdr_opaque_auth(&xdrs, &au->au_shcred)) {
@@ -252,25 +245,25 @@ authunix_validate(AUTH *auth, struct opaque_auth *verf)
 static bool_t
 authunix_refresh(AUTH *auth)
 {
-	struct audata *au = AUTH_PRIVATE(auth);
+	struct audata	     *au = AUTH_PRIVATE(auth);
 	struct authunix_parms aup;
-	struct timeval now;
-	XDR xdrs;
-	int stat;
+	struct timeval	      now;
+	XDR		      xdrs;
+	int		      stat;
 
 	if (auth->ah_cred.oa_base == au->au_origcred.oa_base) {
 		/* there is no hope.  Punt */
 		return (FALSE);
 	}
-	au->au_shfaults ++;
+	au->au_shfaults++;
 
 	/* first deserialize the creds back into a struct authunix_parms */
 	aup.aup_machname = NULL;
 	aup.aup_gids = NULL;
-	xdrmem_create(&xdrs, au->au_origcred.oa_base,
-	    au->au_origcred.oa_length, XDR_DECODE);
+	xdrmem_create(&xdrs, au->au_origcred.oa_base, au->au_origcred.oa_length,
+	    XDR_DECODE);
 	stat = xdr_authunix_parms(&xdrs, &aup);
-	if (! stat) 
+	if (!stat)
 		goto done;
 
 	/* update the time and serialize in place */
@@ -279,7 +272,7 @@ authunix_refresh(AUTH *auth)
 	xdrs.x_op = XDR_ENCODE;
 	XDR_SETPOS(&xdrs, 0);
 	stat = xdr_authunix_parms(&xdrs, &aup);
-	if (! stat)
+	if (!stat)
 		goto done;
 	auth->ah_cred = au->au_origcred;
 	marshal_new_auth(auth);
@@ -316,13 +309,13 @@ authunix_destroy(AUTH *auth)
 static void
 marshal_new_auth(AUTH *auth)
 {
-	XDR		xdr_stream;
-	XDR	*xdrs = &xdr_stream;
+	XDR	       xdr_stream;
+	XDR	      *xdrs = &xdr_stream;
 	struct audata *au = AUTH_PRIVATE(auth);
 
 	xdrmem_create(xdrs, au->au_marshed, MAX_AUTH_BYTES, XDR_ENCODE);
-	if ((! xdr_opaque_auth(xdrs, &(auth->ah_cred))) ||
-	    (! xdr_opaque_auth(xdrs, &(auth->ah_verf)))) {
+	if ((!xdr_opaque_auth(xdrs, &(auth->ah_cred))) ||
+	    (!xdr_opaque_auth(xdrs, &(auth->ah_verf)))) {
 		/* XXX nothing we can do */
 	} else {
 		au->au_mpos = XDR_GETPOS(xdrs);

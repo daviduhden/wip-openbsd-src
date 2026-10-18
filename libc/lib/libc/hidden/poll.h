@@ -16,8 +16,8 @@
  */
 /*	$OpenBSD: poll.h,v 1.1 2016/05/07 19:05:22 guenther Exp $ */
 
-#ifndef	_LIBC_POLL_H_
-#define	_LIBC_POLL_H_
+#ifndef _LIBC_POLL_H_
+#define _LIBC_POLL_H_
 
 #include_next <poll.h>
 

@@ -16,6 +16,7 @@
  */
 
 #include <poll.h>
+
 #include "cancel.h"
 
 int

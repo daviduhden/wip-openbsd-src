@@ -23,30 +23,29 @@
 #ifndef _LOCORE
 
 void *codepatch_maprw(vaddr_t *nva, vaddr_t dest);
-void codepatch_unmaprw(vaddr_t nva);
-void codepatch_fill_nop(void *caddr, uint16_t len);
-void codepatch_nop(uint16_t tag);
-void codepatch_replace(uint16_t tag, const void *code, size_t len);
-void codepatch_call(uint16_t tag, void *func);
+void  codepatch_unmaprw(vaddr_t nva);
+void  codepatch_fill_nop(void *caddr, uint16_t len);
+void  codepatch_nop(uint16_t tag);
+void  codepatch_replace(uint16_t tag, const void *code, size_t len);
+void  codepatch_call(uint16_t tag, void *func);
 
 #endif /* !_LOCORE */
 
 /*
  * Mark the start of some code snippet to be patched.
  */
-#define	CODEPATCH_START	998:
+#define CODEPATCH_START 998:
 /*
  * Mark the end of some code to be patched, and assign the given tag.
  */
-#define	CODEPATCH_END(tag)			 \
-	999:					 \
-	.section .codepatch, "a"		;\
-	.int 998b				;\
-	.short (999b - 998b)			;\
-	.short tag				;\
+#define CODEPATCH_END(tag)                                                     \
+	999 :.section.codepatch, "a";                                          \
+	.int 998b;                                                             \
+	.short(999b - 998b);                                                   \
+	.short tag;                                                            \
 	.previous
 
-#define CPTAG_STAC		1
-#define CPTAG_CLAC		2
+#define CPTAG_STAC 1
+#define CPTAG_CLAC 2
 
 #endif /* _MACHINE_CODEPATCH_H_ */

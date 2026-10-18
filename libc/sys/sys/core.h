@@ -31,8 +31,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define COREMAGIC	0507
-#define CORESEGMAGIC	0510
+#define COREMAGIC 0507
+#define CORESEGMAGIC 0510
 
 /*
  * The core structure's c_midmag field (like exec's a_midmag) is a
@@ -43,18 +43,17 @@
  *       `M' is 16 bits worth of magic number, ie. COREMAGIC.
  * The macros below will set/get the needed fields.
  */
-#define	CORE_GETMAGIC(c)  (  ntohl(((c).c_midmag))        & 0xffff )
-#define	CORE_GETMID(c)    ( (ntohl(((c).c_midmag)) >> 16) & 0x03ff )
-#define	CORE_GETFLAG(c)   ( (ntohl(((c).c_midmag)) >> 26) & 0x03f  )
-#define	CORE_SETMAGIC(c,mag,mid,flag) ( (c).c_midmag = htonl ( \
-			( ((flag) & 0x3f)   << 26) | \
-			( ((mid)  & 0x03ff) << 16) | \
-			( ((mag)  & 0xffff)      ) ) )
+#define CORE_GETMAGIC(c) (ntohl(((c).c_midmag)) & 0xffff)
+#define CORE_GETMID(c) ((ntohl(((c).c_midmag)) >> 16) & 0x03ff)
+#define CORE_GETFLAG(c) ((ntohl(((c).c_midmag)) >> 26) & 0x03f)
+#define CORE_SETMAGIC(c, mag, mid, flag)                                       \
+	((c).c_midmag = htonl((((flag) & 0x3f) << 26) |                        \
+	     (((mid) & 0x03ff) << 16) | (((mag) & 0xffff))))
 
 /* Flag definitions */
-#define CORE_CPU	1
-#define CORE_DATA	2
-#define CORE_STACK	4
+#define CORE_CPU 1
+#define CORE_DATA 2
+#define CORE_STACK 4
 
 #ifndef _KERNEL
 /*
@@ -74,26 +73,26 @@
  */
 
 struct core {
-	u_int32_t c_midmag;		/* magic, id, flags */
-	u_int16_t c_hdrsize;		/* Size of this header (machdep algn) */
-	u_int16_t c_seghdrsize;		/* Size of a segment header */
-	u_int32_t c_nseg;		/* # of core segments */
-	char	c_name[_MAXCOMLEN];	/* Copy of p->p_comm, incl NUL */
-	u_int32_t c_signo;		/* Killing signal */
-	u_long	c_ucode;		/* Hmm ? */
-	u_long	c_cpusize;		/* Size of machine dependent segment */
-	u_long	c_tsize;		/* Size of traditional text segment */
-	u_long	c_dsize;		/* Size of traditional data segment */
-	u_long	c_ssize;		/* Size of traditional stack segment */
+	u_int32_t c_midmag;	      /* magic, id, flags */
+	u_int16_t c_hdrsize;	      /* Size of this header (machdep algn) */
+	u_int16_t c_seghdrsize;	      /* Size of a segment header */
+	u_int32_t c_nseg;	      /* # of core segments */
+	char	  c_name[_MAXCOMLEN]; /* Copy of p->p_comm, incl NUL */
+	u_int32_t c_signo;	      /* Killing signal */
+	u_long	  c_ucode;	      /* Hmm ? */
+	u_long	  c_cpusize;	      /* Size of machine dependent segment */
+	u_long	  c_tsize;	      /* Size of traditional text segment */
+	u_long	  c_dsize;	      /* Size of traditional data segment */
+	u_long	  c_ssize;	      /* Size of traditional stack segment */
 };
 
 struct coreseg {
-	u_int32_t c_midmag;		/* magic, id, flags */
-	u_long	c_addr;			/* Virtual address of segment */
-	u_long	c_size;			/* Size of this segment */
+	u_int32_t c_midmag; /* magic, id, flags */
+	u_long	  c_addr;   /* Virtual address of segment */
+	u_long	  c_size;   /* Size of this segment */
 };
 
 #else
-int	coredump_write(void *, enum uio_seg, const void *, size_t, int);
-void	coredump_unmap(void *, vaddr_t, vaddr_t);
+int  coredump_write(void *, enum uio_seg, const void *, size_t, int);
+void coredump_unmap(void *, vaddr_t, vaddr_t);
 #endif

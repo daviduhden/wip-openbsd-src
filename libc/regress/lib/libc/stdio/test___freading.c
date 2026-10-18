@@ -1,4 +1,5 @@
-/*	$OpenBSD: test___freading.c,v 1.2 2025/06/12 07:39:26 yasuoka Exp $	*/
+/*	$OpenBSD: test___freading.c,v 1.2 2025/06/12 07:39:26 yasuoka Exp $
+ */
 
 /*
  * Copyright (c) 2025 YASUOKA Masahiko <yasuoka@yasuoka.net>
@@ -24,9 +25,9 @@
 #include <unistd.h>
 
 /* we use assert() */
-#undef	NDEBUG
+#undef NDEBUG
 
-#define	TMPFILENAME	"test___freading.tmp"
+#define TMPFILENAME "test___freading.tmp"
 
 void setup(void);
 
@@ -37,7 +38,7 @@ void test___freading2(void);
 void
 setup(void)
 {
-	FILE	*fp;
+	FILE *fp;
 
 	/* common setup */
 	unlink(TMPFILENAME);
@@ -50,9 +51,9 @@ setup(void)
 void
 test___freading0(void)
 {
-	FILE	*fp;
-	int	 r;
-	char	 buf[80];
+	FILE *fp;
+	int   r;
+	char  buf[80];
 
 	fp = popen("echo Hello world", "r");
 	assert(fp != NULL);
@@ -66,8 +67,8 @@ test___freading0(void)
 void
 test___freading1(void)
 {
-	FILE	*fp;
-	int	 r;
+	FILE *fp;
+	int   r;
 
 	/* when the last operaiton is read, __freading() returns true */
 	fp = fopen(TMPFILENAME, "w+");
@@ -86,7 +87,7 @@ test___freading1(void)
 	/* ungetc */
 	rewind(fp);
 	assert(ungetc('X', fp) != 0);
-	assert(__freading(fp) != 0);	/* reading */
+	assert(__freading(fp) != 0); /* reading */
 
 	r = fclose(fp);
 	assert(r == 0);
@@ -95,8 +96,8 @@ test___freading1(void)
 void
 test___freading2(void)
 {
-	int	 r;
-	FILE	*fp;
+	int   r;
+	FILE *fp;
 
 	/*
 	 * until v1.10 of fpurge.c mistakenly enables the writing buffer

@@ -31,26 +31,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
-#include <string.h>
+
 #include <limits.h>
 #include <rpc/rpc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
  * Internet version.
  */
 static struct rpcdata {
-	FILE	*rpcf;
-	int	stayopen;
-#define	MAXALIASES	35
-	char	*rpc_aliases[MAXALIASES];
-	struct	rpcent rpc;
-	char	line[BUFSIZ+1];
+	FILE *rpcf;
+	int   stayopen;
+#define MAXALIASES 35
+	char	     *rpc_aliases[MAXALIASES];
+	struct rpcent rpc;
+	char	      line[BUFSIZ + 1];
 } *rpcdata;
 
-static	struct rpcent *interpret(char *val, int len);
+static struct rpcent *interpret(char *val, int len);
 
 static const char RPCDB[] = "/etc/rpc";
 
@@ -60,7 +61,7 @@ _rpcdata(void)
 	struct rpcdata *d = rpcdata;
 
 	if (d == NULL) {
-		d = calloc(1, sizeof (struct rpcdata));
+		d = calloc(1, sizeof(struct rpcdata));
 		rpcdata = d;
 	}
 	return (d);
@@ -70,7 +71,7 @@ struct rpcent *
 getrpcbynumber(int number)
 {
 	struct rpcdata *d = _rpcdata();
-	struct rpcent *p;
+	struct rpcent  *p;
 
 	if (d == NULL)
 		return (0);
@@ -87,7 +88,7 @@ struct rpcent *
 getrpcbyname(char *name)
 {
 	struct rpcent *rpc;
-	char **rp;
+	char	     **rp;
 
 	setrpcent(0);
 	while ((rpc = getrpcent())) {
@@ -138,11 +139,11 @@ getrpcent(void)
 	struct rpcdata *d = _rpcdata();
 
 	if (d == NULL)
-		return(NULL);
+		return (NULL);
 	if (d->rpcf == NULL && (d->rpcf = fopen(RPCDB, "re")) == NULL)
 		return (NULL);
 	/* -1 so there is room to append a \n below */
-        if (fgets(d->line, sizeof(d->line) - 1, d->rpcf) == NULL)
+	if (fgets(d->line, sizeof(d->line) - 1, d->rpcf) == NULL)
 		return (NULL);
 	return (interpret(d->line, strlen(d->line)));
 }
@@ -151,10 +152,10 @@ DEF_WEAK(getrpcent);
 static struct rpcent *
 interpret(char *val, int len)
 {
-	const char *errstr;
+	const char     *errstr;
 	struct rpcdata *d = _rpcdata();
-	char *p;
-	char *cp, *num, **q;
+	char	       *p;
+	char	       *cp, *num, **q;
 
 	if (d == NULL)
 		return (0);
@@ -197,4 +198,3 @@ interpret(char *val, int len)
 	*q = NULL;
 	return (&d->rpc);
 }
-

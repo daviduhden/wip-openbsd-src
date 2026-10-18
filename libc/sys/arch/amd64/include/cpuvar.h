@@ -49,7 +49,7 @@
  *      Foundation, Inc. and its contributors.
  * 4. Neither the name of The NetBSD Foundation nor the names of its
  *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.  
+ *    from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY AUTHOR AND CONTRIBUTORS ``AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -65,30 +65,30 @@
  */
 
 struct cpu_functions {
-	int (*start)(struct cpu_info *);
-	int (*stop)(struct cpu_info *);
+	int  (*start)(struct cpu_info *);
+	int  (*stop)(struct cpu_info *);
 	void (*cleanup)(struct cpu_info *);
 };
 
 extern struct cpu_functions mp_cpu_funcs;
 
-#define CPU_ROLE_SP	0
-#define CPU_ROLE_BP	1
-#define CPU_ROLE_AP	2
+#define CPU_ROLE_SP 0
+#define CPU_ROLE_BP 1
+#define CPU_ROLE_AP 2
 
 struct cpu_attach_args {
-	const char *caa_name;
-	int cpu_apicid;
-	int cpu_acpi_proc_id;
-	int cpu_role;
+	const char	     *caa_name;
+	int		      cpu_apicid;
+	int		      cpu_acpi_proc_id;
+	int		      cpu_role;
 	struct cpu_functions *cpu_func;
 };
 
 #ifdef _KERNEL
 
 #ifdef MULTIPROCESSOR
-extern void (*x86_ipi)(int,int,int);
-void x86_ipi_init(int);
+extern void (*x86_ipi)(int, int, int);
+void	    x86_ipi_init(int);
 #endif
 
 void identifycpu(struct cpu_info *);

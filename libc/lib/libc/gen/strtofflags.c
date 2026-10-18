@@ -34,40 +34,31 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 static const struct {
-	char *name;
+	char	 *name;
 	u_int32_t flag;
-	int invert;
-} mapping[] = {
-	/* shorter names per flag first, all prefixed by "no" */
-	{ "nosappnd",		SF_APPEND,	0 },
-	{ "nosappend",		SF_APPEND,	0 },
-	{ "noarch",		SF_ARCHIVED,	0 },
-	{ "noarchived",		SF_ARCHIVED,	0 },
-	{ "noschg",		SF_IMMUTABLE,	0 },
-	{ "noschange",		SF_IMMUTABLE,	0 },
-	{ "nosimmutable",	SF_IMMUTABLE,	0 },
+	int	  invert;
+} mapping[] = {/* shorter names per flag first, all prefixed by "no" */
+    {"nosappnd", SF_APPEND, 0}, {"nosappend", SF_APPEND, 0},
+    {"noarch", SF_ARCHIVED, 0}, {"noarchived", SF_ARCHIVED, 0},
+    {"noschg", SF_IMMUTABLE, 0}, {"noschange", SF_IMMUTABLE, 0},
+    {"nosimmutable", SF_IMMUTABLE, 0},
 #ifdef __FreeBSD__
-	{ "nosunlnk",		SF_NOUNLINK,	0 },
-	{ "nosunlink",		SF_NOUNLINK,	0 },
+    {"nosunlnk", SF_NOUNLINK, 0}, {"nosunlink", SF_NOUNLINK, 0},
 #endif
-	{ "nouappnd",		UF_APPEND,	0 },
-	{ "nouappend",		UF_APPEND,	0 },
-	{ "nouchg",		UF_IMMUTABLE,	0 },
-	{ "nouchange",		UF_IMMUTABLE,	0 },
-	{ "nouimmutable",	UF_IMMUTABLE,	0 },
-	{ "nodump",		UF_NODUMP,	1 },
-	{ "noopaque",		UF_OPAQUE,	0 },
+    {"nouappnd", UF_APPEND, 0}, {"nouappend", UF_APPEND, 0},
+    {"nouchg", UF_IMMUTABLE, 0}, {"nouchange", UF_IMMUTABLE, 0},
+    {"nouimmutable", UF_IMMUTABLE, 0}, {"nodump", UF_NODUMP, 1},
+    {"noopaque", UF_OPAQUE, 0},
 #ifdef __FreeBSD__
-	{ "nouunlnk",		UF_NOUNLINK,	0 },
-	{ "nouunlink",		UF_NOUNLINK,	0 }
+    {"nouunlnk", UF_NOUNLINK, 0}, {"nouunlink", UF_NOUNLINK, 0}
 #endif
 };
-#define longestflaglen	12
-#define nmappings	(sizeof(mapping) / sizeof(mapping[0]))
+#define longestflaglen 12
+#define nmappings (sizeof(mapping) / sizeof(mapping[0]))
 
 /*
  * fflagstostr --
@@ -77,10 +68,10 @@ static const struct {
 char *
 fflagstostr(u_int32_t flags)
 {
-	char *string;
-	char *sp, *dp;
+	char	 *string;
+	char	 *sp, *dp;
 	u_int32_t setflags;
-	int i;
+	int	  i;
 
 	if ((string = calloc(nmappings, longestflaglen + 1)) == NULL)
 		return (NULL);
@@ -92,7 +83,9 @@ fflagstostr(u_int32_t flags)
 			if (dp > string)
 				*dp++ = ',';
 			for (sp = mapping[i].invert ? mapping[i].name :
-			    mapping[i].name + 2; *sp; *dp++ = *sp++) ;
+						      mapping[i].name + 2;
+			    *sp; *dp++ = *sp++)
+				;
 			setflags &= ~mapping[i].flag;
 		}
 	}
@@ -110,7 +103,7 @@ int
 strtofflags(char **stringp, u_int32_t *setp, u_int32_t *clrp)
 {
 	char *string, *p;
-	int i;
+	int   i;
 
 	if (setp)
 		*setp = 0;

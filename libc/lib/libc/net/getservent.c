@@ -32,21 +32,21 @@
 #include <sys/socket.h>
 
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <netdb.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 void
 setservent_r(int f, struct servent_data *sd)
 {
 	if (sd->fp == NULL) {
-		int fd = __pledge_open(_PATH_SERVICES, O_RDONLY|O_CLOEXEC);
+		int fd = __pledge_open(_PATH_SERVICES, O_RDONLY | O_CLOEXEC);
 		if (fd != -1)
-			sd->fp = fdopen(fd, "r" );
+			sd->fp = fdopen(fd, "r");
 		if (sd->fp == NULL)
 			close(fd);
 	} else
@@ -74,16 +74,16 @@ DEF_WEAK(endservent_r);
 int
 getservent_r(struct servent *se, struct servent_data *sd)
 {
-	char *p, *cp, **q, *endp;
+	char  *p, *cp, **q, *endp;
 	size_t len;
-	long l;
-	int serrno;
+	long   l;
+	int    serrno;
 
 	if (sd->fp == NULL) {
-		int fd = __pledge_open(_PATH_SERVICES, O_RDONLY|O_CLOEXEC);
+		int fd = __pledge_open(_PATH_SERVICES, O_RDONLY | O_CLOEXEC);
 		if (fd == -1)
 			return (-1);
-		if ((sd->fp = fdopen(fd, "r" )) == NULL) {
+		if ((sd->fp = fdopen(fd, "r")) == NULL) {
 			close(fd);
 			return (-1);
 		}
@@ -93,7 +93,7 @@ again:
 		return (-1);
 	if (len == 0 || *p == '#' || *p == '\n')
 		goto again;
-	if (p[len-1] == '\n')
+	if (p[len - 1] == '\n')
 		len--;
 	if ((cp = memchr(p, '#', len)) != NULL)
 		len = cp - p;
@@ -137,8 +137,8 @@ again:
 			continue;
 		}
 		if (q == &se->s_aliases[sd->maxaliases - 1]) {
-			p = reallocarray(se->s_aliases, sd->maxaliases,
-			    2 * sizeof(char *));
+			p = reallocarray(
+			    se->s_aliases, sd->maxaliases, 2 * sizeof(char *));
 			if (p == NULL) {
 				serrno = errno;
 				endservent_r(sd);
@@ -159,7 +159,7 @@ again:
 }
 DEF_WEAK(getservent_r);
 
-struct servent_data _servent_data;	/* shared with getservby{name,port}.c */
+struct servent_data _servent_data; /* shared with getservby{name,port}.c */
 
 void
 setservent(int f)

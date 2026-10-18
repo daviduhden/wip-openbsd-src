@@ -42,16 +42,16 @@
  */
 
 struct opiocdesc {
-	int	op_nodeid;		/* passed or returned node id */
-	int	op_namelen;		/* length of op_name */
-	char	*op_name;		/* pointer to field name */
-	int	op_buflen;		/* length of op_buf (value-result) */
-	char	*op_buf;		/* pointer to field value */
+	int   op_nodeid;  /* passed or returned node id */
+	int   op_namelen; /* length of op_name */
+	char *op_name;	  /* pointer to field name */
+	int   op_buflen;  /* length of op_buf (value-result) */
+	char *op_buf;	  /* pointer to field value */
 };
 
-#define	OPIOCGET	_IOWR('O', 1, struct opiocdesc) /* get openprom field */
-#define	OPIOCSET	_IOW('O', 2, struct opiocdesc) /* set openprom field */
-#define	OPIOCNEXTPROP	_IOWR('O', 3, struct opiocdesc) /* get next property */
-#define	OPIOCGETOPTNODE	_IOR('O', 4, int)	/* get openprom field */
-#define	OPIOCGETNEXT	_IOWR('O', 5, int)	/* get next node of node */
-#define	OPIOCGETCHILD	_IOWR('O', 6, int)	/* get first child of node */
+#define OPIOCGET _IOWR('O', 1, struct opiocdesc)      /* get openprom field */
+#define OPIOCSET _IOW('O', 2, struct opiocdesc)	      /* set openprom field */
+#define OPIOCNEXTPROP _IOWR('O', 3, struct opiocdesc) /* get next property */
+#define OPIOCGETOPTNODE _IOR('O', 4, int)	      /* get openprom field */
+#define OPIOCGETNEXT _IOWR('O', 5, int)	 /* get next node of node */
+#define OPIOCGETCHILD _IOWR('O', 6, int) /* get first child of node */

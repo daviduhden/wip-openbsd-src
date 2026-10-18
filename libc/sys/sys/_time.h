@@ -33,52 +33,52 @@
 #define _SYS__TIME_H_
 
 /* Frequency of ticks reported by clock().  */
-#define CLOCKS_PER_SEC  100
+#define CLOCKS_PER_SEC 100
 
 #if __BSD_VISIBLE
 /*
  * Per-process and per-thread clocks encode the PID or TID into the
  * high bits, with the type in the bottom bits
  */
-#define __CLOCK_ENCODE(type,id)		((type) | ((id) << 12))
-#define __CLOCK_TYPE(c)			((c) & 0xfff)
-#define __CLOCK_PTID(c)			(((c) >> 12) & 0xfffff)
+#define __CLOCK_ENCODE(type, id) ((type) | ((id) << 12))
+#define __CLOCK_TYPE(c) ((c) & 0xfff)
+#define __CLOCK_PTID(c) (((c) >> 12) & 0xfffff)
 #endif
 
 #if __POSIX_VISIBLE >= 199309 || __ISO_C_VISIBLE >= 2011
 #ifndef _TIME_T_DEFINED_
 #define _TIME_T_DEFINED_
-typedef __time_t	time_t;
+typedef __time_t time_t;
 #endif
 
 #ifndef _TIMESPEC_DECLARED
 #define _TIMESPEC_DECLARED
 struct timespec {
-	time_t	tv_sec;		/* seconds */
-	long	tv_nsec;	/* and nanoseconds */
+	time_t tv_sec;	/* seconds */
+	long   tv_nsec; /* and nanoseconds */
 };
 #endif
 #endif
 
 #if __POSIX_VISIBLE >= 199309
-#define CLOCK_REALTIME			0
-#define CLOCK_PROCESS_CPUTIME_ID	2
-#define CLOCK_MONOTONIC			3
-#define CLOCK_THREAD_CPUTIME_ID		4
-#define CLOCK_UPTIME			5
-#define CLOCK_BOOTTIME			6
+#define CLOCK_REALTIME 0
+#define CLOCK_PROCESS_CPUTIME_ID 2
+#define CLOCK_MONOTONIC 3
+#define CLOCK_THREAD_CPUTIME_ID 4
+#define CLOCK_UPTIME 5
+#define CLOCK_BOOTTIME 6
 
 /*
  * Structure defined by POSIX 1003.1b to be like a itimerval,
  * but with timespecs. Used in the timer_*() system calls.
  */
-struct  itimerspec {
-	struct  timespec it_interval;	/* timer interval */
-	struct  timespec it_value;	/* timer expiration */
+struct itimerspec {
+	struct timespec it_interval; /* timer interval */
+	struct timespec it_value;    /* timer expiration */
 };
 
-#define TIMER_RELTIME	0x0	/* relative timer */
-#define TIMER_ABSTIME	0x1	/* absolute timer */
+#define TIMER_RELTIME 0x0 /* relative timer */
+#define TIMER_ABSTIME 0x1 /* absolute timer */
 
 #endif
 

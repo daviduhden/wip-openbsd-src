@@ -23,18 +23,18 @@
  * attachment and detachment notifications.
  */
 
-#define HOTPLUG_DEVAT		0x01	/* device attached	*/
-#define HOTPLUG_DEVDT		0x02	/* device detached	*/
+#define HOTPLUG_DEVAT 0x01 /* device attached	*/
+#define HOTPLUG_DEVDT 0x02 /* device detached	*/
 
 struct hotplug_event {
-	int		he_type;	/* event type		*/
-	enum devclass	he_devclass;	/* device class		*/
-	char		he_devname[16];	/* device name		*/
+	int	      he_type;	      /* event type		*/
+	enum devclass he_devclass;    /* device class		*/
+	char	      he_devname[16]; /* device name		*/
 };
 
 #ifdef _KERNEL
-void	hotplug_device_attach(enum devclass, char *);
-void	hotplug_device_detach(enum devclass, char *);
+void hotplug_device_attach(enum devclass, char *);
+void hotplug_device_detach(enum devclass, char *);
 #endif
 
-#endif	/* _SYS_HOTPLUG_H_ */
+#endif /* _SYS_HOTPLUG_H_ */

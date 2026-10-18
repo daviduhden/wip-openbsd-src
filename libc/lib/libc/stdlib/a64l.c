@@ -11,11 +11,11 @@ long
 a64l(const char *s)
 {
 	long value, digit, shift;
-	int i;
+	int  i;
 
 	if (s == NULL) {
 		errno = EINVAL;
-		return(-1L);
+		return (-1L);
 	}
 
 	value = 0;
@@ -31,12 +31,12 @@ a64l(const char *s)
 			digit = *s - 'a' + 38;
 		else {
 			errno = EINVAL;
-			return(-1L);
+			return (-1L);
 		}
 
 		value |= digit << shift;
 		shift += 6;
 	}
 
-	return(value);
+	return (value);
 }

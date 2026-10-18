@@ -31,18 +31,23 @@ THIS SOFTWARE.
 
 #include "gdtoaimp.h"
 
- float
+float
 #ifdef KR_headers
-strtof(s, sp) CONST char *s; char **sp;
+strtof(s, sp)
+CONST char *s;
+char	  **sp;
 #else
 strtof(CONST char *s, char **sp)
 #endif
 {
-	static FPI fpi0 = { 24, 1-127-24+1,  254-127-24+1, 1, SI };
-	ULong bits[1];
-	Long exp;
-	int k;
-	union { ULong L[1]; float f; } u;
+	static FPI fpi0 = {24, 1 - 127 - 24 + 1, 254 - 127 - 24 + 1, 1, SI};
+	ULong	   bits[1];
+	Long	   exp;
+	int	   k;
+	union {
+		ULong L[1];
+		float f;
+	} u;
 #ifdef Honor_FLT_ROUNDS
 #include "gdtoa_fltrnds.h"
 #else
@@ -50,33 +55,33 @@ strtof(CONST char *s, char **sp)
 #endif
 
 	k = strtodg(s, sp, fpi, &exp, bits);
-	switch(k & STRTOG_Retmask) {
-	  case STRTOG_NoNumber:
-	  case STRTOG_Zero:
+	switch (k & STRTOG_Retmask) {
+	case STRTOG_NoNumber:
+	case STRTOG_Zero:
 		u.L[0] = 0;
 		break;
 
-	  case STRTOG_Normal:
-	  case STRTOG_NaNbits:
+	case STRTOG_Normal:
+	case STRTOG_NaNbits:
 		u.L[0] = (bits[0] & 0x7fffff) | ((exp + 0x7f + 23) << 23);
 		break;
 
-	  case STRTOG_Denormal:
+	case STRTOG_Denormal:
 		u.L[0] = bits[0];
 		break;
 
-	  case STRTOG_NoMemory:
+	case STRTOG_NoMemory:
 		errno = ERANGE;
 		/* FALLTHROUGH */
-	  case STRTOG_Infinite:
+	case STRTOG_Infinite:
 		u.L[0] = 0x7f800000;
 		break;
 
-	  case STRTOG_NaN:
+	case STRTOG_NaN:
 		u.L[0] = f_QNAN;
-	  }
+	}
 	if (k & STRTOG_Neg)
 		u.L[0] |= 0x80000000L;
 	return u.f;
-	}
+}
 DEF_STRONG(strtof);

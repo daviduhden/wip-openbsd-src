@@ -22,8 +22,8 @@ static inline unsigned int
 _atomic_cas_uint(volatile unsigned int *p, unsigned int e, unsigned int n)
 {
 	__asm volatile("cas [%2], %3, %0"
-	    : "+r" (n), "=m" (*p)
-	    : "r" (p), "r" (e), "m" (*p));
+	    : "+r"(n), "=m"(*p)
+	    : "r"(p), "r"(e), "m"(*p));
 
 	return (n);
 }
@@ -33,8 +33,8 @@ static inline unsigned long
 _atomic_cas_ulong(volatile unsigned long *p, unsigned long e, unsigned long n)
 {
 	__asm volatile("casx [%2], %3, %0"
-	    : "+r" (n), "=m" (*p)
-	    : "r" (p), "r" (e), "m" (*p));
+	    : "+r"(n), "=m"(*p)
+	    : "r"(p), "r"(e), "m"(*p));
 
 	return (n);
 }
@@ -44,35 +44,33 @@ static inline void *
 _atomic_cas_ptr(volatile void *p, void *e, void *n)
 {
 	__asm volatile("casx [%2], %3, %0"
-	    : "+r" (n), "=m" (*(volatile unsigned long *)p)
-	    : "r" (p), "r" (e), "m" (*(volatile unsigned long *)p));
+	    : "+r"(n), "=m"(*(volatile unsigned long *)p)
+	    : "r"(p), "r"(e), "m"(*(volatile unsigned long *)p));
 
 	return (n);
 }
 #define atomic_cas_ptr(_p, _e, _n) _atomic_cas_ptr((_p), (_e), (_n))
 
-#define _def_atomic_swap(_f, _t, _c)					\
-static inline _t							\
-_f(volatile _t *p, _t v)						\
-{									\
-	_t e;								\
-	_t r;								\
-									\
-	r = (_t)*p;							\
-	do {								\
-		e = r;							\
-		r = _c(p, e, v);					\
-	} while (r != e);						\
-									\
-	return (r);							\
-}
+#define _def_atomic_swap(_f, _t, _c)                                           \
+	static inline _t _f(volatile _t *p, _t v)                              \
+	{                                                                      \
+		_t e;                                                          \
+		_t r;                                                          \
+                                                                               \
+		r = (_t) * p;                                                  \
+		do {                                                           \
+			e = r;                                                 \
+			r = _c(p, e, v);                                       \
+		} while (r != e);                                              \
+                                                                               \
+		return (r);                                                    \
+	}
 
 _def_atomic_swap(_atomic_swap_uint, unsigned int, atomic_cas_uint)
-_def_atomic_swap(_atomic_swap_ulong, unsigned long, atomic_cas_ulong)
+    _def_atomic_swap(_atomic_swap_ulong, unsigned long, atomic_cas_ulong)
 #undef _def_atomic_swap
 
-static inline void *
-_atomic_swap_ptr(volatile void *p, void *v)
+	static inline void *_atomic_swap_ptr(volatile void *p, void *v)
 {
 	void *e, *r;
 
@@ -85,49 +83,49 @@ _atomic_swap_ptr(volatile void *p, void *v)
 	return (r);
 }
 
-#define atomic_swap_uint(_p, _v)  _atomic_swap_uint(_p, _v)
-#define atomic_swap_ulong(_p, _v)  _atomic_swap_ulong(_p, _v)
-#define atomic_swap_ptr(_p, _v)  _atomic_swap_ptr(_p, _v)
+#define atomic_swap_uint(_p, _v) _atomic_swap_uint(_p, _v)
+#define atomic_swap_ulong(_p, _v) _atomic_swap_ulong(_p, _v)
+#define atomic_swap_ptr(_p, _v) _atomic_swap_ptr(_p, _v)
 
-#define _def_atomic_op_nv(_f, _t, _c, _op)				\
-static inline _t							\
-_f(volatile _t *p, _t v)						\
-{									\
-	_t e, r, f;							\
-									\
-	r = *p;								\
-	do {								\
-		e = r;							\
-		f = e _op v;						\
-		r = _c(p, e, f);					\
-	} while (r != e);						\
-									\
-	return (f);							\
-}
+#define _def_atomic_op_nv(_f, _t, _c, _op)                                     \
+	static inline _t _f(volatile _t *p, _t v)                              \
+	{                                                                      \
+		_t e, r, f;                                                    \
+                                                                               \
+		r = *p;                                                        \
+		do {                                                           \
+			e = r;                                                 \
+			f = e _op v;                                           \
+			r = _c(p, e, f);                                       \
+		} while (r != e);                                              \
+                                                                               \
+		return (f);                                                    \
+	}
 
 _def_atomic_op_nv(_atomic_add_int_nv, unsigned int, atomic_cas_uint, +)
-_def_atomic_op_nv(_atomic_add_long_nv, unsigned long, atomic_cas_ulong, +)
-_def_atomic_op_nv(_atomic_sub_int_nv, unsigned int, atomic_cas_uint, -)
-_def_atomic_op_nv(_atomic_sub_long_nv, unsigned long, atomic_cas_ulong, -)
+    _def_atomic_op_nv(_atomic_add_long_nv, unsigned long, atomic_cas_ulong, +)
+	_def_atomic_op_nv(_atomic_sub_int_nv, unsigned int, atomic_cas_uint, -)
+	    _def_atomic_op_nv(
+		_atomic_sub_long_nv, unsigned long, atomic_cas_ulong, -)
 #undef _def_atomic_op_nv
 
-#define atomic_add_int_nv(_p, _v)  _atomic_add_int_nv(_p, _v)
-#define atomic_add_long_nv(_p, _v)  _atomic_add_long_nv(_p, _v)
-#define atomic_sub_int_nv(_p, _v)  _atomic_sub_int_nv(_p, _v)
-#define atomic_sub_long_nv(_p, _v)  _atomic_sub_long_nv(_p, _v)
+#define atomic_add_int_nv(_p, _v) _atomic_add_int_nv(_p, _v)
+#define atomic_add_long_nv(_p, _v) _atomic_add_long_nv(_p, _v)
+#define atomic_sub_int_nv(_p, _v) _atomic_sub_int_nv(_p, _v)
+#define atomic_sub_long_nv(_p, _v) _atomic_sub_long_nv(_p, _v)
 
-#define __membar(_m)		__asm volatile("membar " _m ::: "memory")
+#define __membar(_m) __asm volatile("membar " _m::: "memory")
 
-#define membar_enter()		__membar("#StoreLoad|#StoreStore")
-#define membar_exit()		__membar("#LoadStore|#StoreStore")
-#define membar_producer()	__membar("#StoreStore")
-#define membar_consumer()	__membar("#LoadLoad")
-#define membar_sync()		__membar("#Sync")
+#define membar_enter() __membar("#StoreLoad|#StoreStore")
+#define membar_exit() __membar("#LoadStore|#StoreStore")
+#define membar_producer() __membar("#StoreStore")
+#define membar_consumer() __membar("#LoadLoad")
+#define membar_sync() __membar("#Sync")
 
 #if defined(_KERNEL)
 
-static __inline void
-atomic_setbits_int(volatile unsigned int *uip, unsigned int v)
+		static __inline void atomic_setbits_int(
+		    volatile unsigned int *uip, unsigned int v)
 {
 	unsigned int e, r;
 

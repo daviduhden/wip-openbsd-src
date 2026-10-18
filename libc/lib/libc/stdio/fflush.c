@@ -34,13 +34,14 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "local.h"
 
 /* Flush a single file, or (if fp is NULL) all files.  */
 int
 fflush(FILE *fp)
 {
-	int	r;
+	int r;
 
 	if (fp == NULL)
 		return (_fwalk(__sflush_locked));
@@ -55,15 +56,15 @@ int
 __sflush(FILE *fp)
 {
 	unsigned char *p;
-	fpos_t off;
-	int n, t;
+	fpos_t	       off;
+	int	       n, t;
 
 	t = fp->_flags;
 	if (t & __SWR) {
 		if ((p = fp->_bf._base) == NULL)
 			return (0);
 
-		n = fp->_p - p;		/* write this much */
+		n = fp->_p - p; /* write this much */
 
 		/*
 		 * Set these immediately to avoid problems with longjmp and to
@@ -71,7 +72,7 @@ __sflush(FILE *fp)
 		 * function.
 		 */
 		fp->_p = p;
-		fp->_w = t & (__SLBF|__SNBF) ? 0 : fp->_bf._size;
+		fp->_w = t & (__SLBF | __SNBF) ? 0 : fp->_bf._size;
 
 		for (; n > 0; n -= t, p += t) {
 			t = (*fp->_write)(fp->_cookie, (char *)p, n);
@@ -110,7 +111,7 @@ __sflush(FILE *fp)
 int
 __sflush_locked(FILE *fp)
 {
-	int	r;
+	int r;
 
 	FLOCKFILE(fp);
 	r = __sflush(fp);

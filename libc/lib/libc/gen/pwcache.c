@@ -49,29 +49,29 @@
  * by the passwd and group files as well as the standard archive formats.
  * CACHE SIZES MUST BE PRIME
  */
-#define UNMLEN		32	/* >= user name found in any protocol */
-#define GNMLEN		32	/* >= group name found in any protocol */
-#define UID_SZ		317	/* size of uid to user_name cache */
-#define UNM_SZ		317	/* size of user_name to uid cache */
-#define GID_SZ		251	/* size of gid to group_name cache */
-#define GNM_SZ		251	/* size of group_name to gid cache */
-#define VALID		1	/* entry and name are valid */
-#define INVALID		2	/* entry valid, name NOT valid */
+#define UNMLEN 32  /* >= user name found in any protocol */
+#define GNMLEN 32  /* >= group name found in any protocol */
+#define UID_SZ 317 /* size of uid to user_name cache */
+#define UNM_SZ 317 /* size of user_name to uid cache */
+#define GID_SZ 251 /* size of gid to group_name cache */
+#define GNM_SZ 251 /* size of group_name to gid cache */
+#define VALID 1	   /* entry and name are valid */
+#define INVALID 2  /* entry valid, name NOT valid */
 
 /*
  * Node structures used in the user, group, uid, and gid caches.
  */
 
 typedef struct uidc {
-	int valid;		/* is this a valid or a miss entry */
-	char name[UNMLEN];	/* uid name */
-	uid_t uid;		/* cached uid */
+	int   valid;	    /* is this a valid or a miss entry */
+	char  name[UNMLEN]; /* uid name */
+	uid_t uid;	    /* cached uid */
 } UIDC;
 
 typedef struct gidc {
-	int valid;		/* is this a valid or a miss entry */
-	char name[GNMLEN];	/* gid name */
-	gid_t gid;		/* cached gid */
+	int   valid;	    /* is this a valid or a miss entry */
+	char  name[GNMLEN]; /* gid name */
+	gid_t gid;	    /* cached gid */
 } GIDC;
 
 /*
@@ -83,10 +83,10 @@ typedef struct gidc {
  * cache both hits and misses.
  */
 
-static UIDC **uidtb;	/* uid to name cache */
-static GIDC **gidtb;	/* gid to name cache */
-static UIDC **usrtb;	/* user name to uid cache */
-static GIDC **grptb;	/* group name to gid cache */
+static UIDC **uidtb; /* uid to name cache */
+static GIDC **gidtb; /* gid to name cache */
+static UIDC **usrtb; /* user name to uid cache */
+static GIDC **grptb; /* group name to gid cache */
 
 static u_int
 st_hash(const char *name, size_t len, int tabsz)
@@ -203,8 +203,8 @@ const char *
 user_from_uid(uid_t uid, int noname)
 {
 	struct passwd pwstore, *pw = NULL;
-	char pwbuf[_PW_BUF_LEN];
-	UIDC **pptr, *ptr = NULL;
+	char	      pwbuf[_PW_BUF_LEN];
+	UIDC	    **pptr, *ptr = NULL;
 
 	if ((uidtb != NULL) || (uidtb_start() == 0)) {
 		/*
@@ -264,8 +264,8 @@ const char *
 group_from_gid(gid_t gid, int noname)
 {
 	struct group grstore, *gr = NULL;
-	char grbuf[_GR_BUF_LEN];
-	GIDC **pptr, *ptr = NULL;
+	char	     grbuf[_GR_BUF_LEN];
+	GIDC	   **pptr, *ptr = NULL;
 
 	if ((gidtb != NULL) || (gidtb_start() == 0)) {
 		/*
@@ -323,9 +323,9 @@ int
 uid_from_user(const char *name, uid_t *uid)
 {
 	struct passwd pwstore, *pw = NULL;
-	char pwbuf[_PW_BUF_LEN];
-	UIDC **pptr, *ptr = NULL;
-	size_t namelen;
+	char	      pwbuf[_PW_BUF_LEN];
+	UIDC	    **pptr, *ptr = NULL;
+	size_t	      namelen;
 
 	/*
 	 * return -1 for mangled names
@@ -384,9 +384,9 @@ int
 gid_from_group(const char *name, gid_t *gid)
 {
 	struct group grstore, *gr = NULL;
-	char grbuf[_GR_BUF_LEN];
-	GIDC **pptr, *ptr = NULL;
-	size_t namelen;
+	char	     grbuf[_GR_BUF_LEN];
+	GIDC	   **pptr, *ptr = NULL;
+	size_t	     namelen;
 
 	/*
 	 * return -1 for mangled names

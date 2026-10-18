@@ -43,25 +43,25 @@
 #include <string.h>
 #include <unistd.h>
 
-#define	BFRAG		1024
-#define	BSIZE		1024
-#define	ESC		('[' & 037)	/* ASCII ESC */
-#define	MAX_RECURSION	32		/* maximum getent recursion */
-#define	SFRAG		100		/* cgetstr mallocs in SFRAG chunks */
+#define BFRAG 1024
+#define BSIZE 1024
+#define ESC ('[' & 037)	 /* ASCII ESC */
+#define MAX_RECURSION 32 /* maximum getent recursion */
+#define SFRAG 100	 /* cgetstr mallocs in SFRAG chunks */
 
-#define RECOK	(char)0
-#define TCERR	(char)1
-#define	SHADOW	(char)2
+#define RECOK (char)0
+#define TCERR (char)1
+#define SHADOW (char)2
 
-static size_t	 topreclen;	/* toprec length */
-static char	*toprec;	/* Additional record specified by cgetset() */
-static int	 gottoprec;	/* Flag indicating retrieval of toprecord */
+static size_t topreclen; /* toprec length */
+static char  *toprec;	 /* Additional record specified by cgetset() */
+static int    gottoprec; /* Flag indicating retrieval of toprecord */
 
-static int	cdbget(DB *, char **, const char *);
-static int 	getent(char **, u_int *, char **, FILE *, const char *, int, char *);
-static int	nfcmp(const char *, char *);
+static int cdbget(DB *, char **, const char *);
+static int getent(char **, u_int *, char **, FILE *, const char *, int, char *);
+static int nfcmp(const char *, char *);
 
-static int	usedb = 1;
+static int usedb = 1;
 
 /*
  * Cgetusedb() allows the user to specify whether or not to use a .db
@@ -74,7 +74,7 @@ cgetusedb(int new_usedb)
 	int old_usedb = usedb;
 
 	usedb = new_usedb;
-	return(old_usedb);
+	return (old_usedb);
 }
 DEF_WEAK(cgetusedb);
 
@@ -116,7 +116,7 @@ DEF_WEAK(cgetset);
 char *
 cgetcap(char *buf, const char *cap, int type)
 {
-	char *bp;
+	char	   *bp;
 	const char *cp;
 
 	bp = buf;
@@ -129,9 +129,8 @@ cgetcap(char *buf, const char *cap, int type)
 		for (;;)
 			if (*bp == '\0')
 				return (NULL);
-			else
-				if (*bp++ == ':')
-					break;
+			else if (*bp++ == ':')
+				break;
 
 		/*
 		 * Try to match (cap, type) in buf.
@@ -145,7 +144,7 @@ cgetcap(char *buf, const char *cap, int type)
 		if (type == ':') {
 			if (*bp != '\0' && *bp != ':')
 				continue;
-			return(bp);
+			return (bp);
 		}
 		if (*bp != type)
 			continue;
@@ -193,15 +192,15 @@ DEF_WEAK(cgetent);
  *	  MAX_RECURSION.
  */
 static int
-getent(char **cap, u_int *len, char **db_array, FILE *fp,
-	const char *name, int depth, char *nfield)
+getent(char **cap, u_int *len, char **db_array, FILE *fp, const char *name,
+    int depth, char *nfield)
 {
-	DB *capdbp;
+	DB   *capdbp;
 	char *r_end, *rp, **db_p;
-	int myfd, eof, foundit, opened, retval, clen;
+	int   myfd, eof, foundit, opened, retval, clen;
 	char *record, *cbuf;
-	int tc_not_resolved;
-	char pbuf[PATH_MAX];
+	int   tc_not_resolved;
+	char  pbuf[PATH_MAX];
 
 	/*
 	 * Return with ``loop detected'' error if we've recursed more than
@@ -252,7 +251,8 @@ getent(char **cap, u_int *len, char **db_array, FILE *fp,
 
 			clen = snprintf(pbuf, sizeof(pbuf), "%s.db", *db_p);
 			if (clen >= 0 && clen < sizeof(pbuf) && usedb &&
-			    (capdbp = __hash_open(pbuf, -1, O_RDONLY, 0, NULL, 0))) {
+			    (capdbp = __hash_open(
+				 pbuf, -1, O_RDONLY, 0, NULL, 0))) {
 				opened++;
 				retval = cdbget(capdbp, &dbrecord, name);
 				if (retval < 0) {
@@ -288,107 +288,114 @@ getent(char **cap, u_int *len, char **db_array, FILE *fp,
 		 * Find the requested capability record ...
 		 */
 		{
-		    char buf[BUFSIZ];
-		    char *b_end, *bp;
-		    int c;
-
-		    /*
-		     * Loop invariants:
-		     *	There is always room for one more character in record.
-		     *	R_end always points just past end of record.
-		     *	Rp always points just past last character in record.
-		     *	B_end always points just past last character in buf.
-		     *	Bp always points at next character in buf.
-		     */
-		    b_end = buf;
-		    bp = buf;
-		    for (;;) {
+			char  buf[BUFSIZ];
+			char *b_end, *bp;
+			int   c;
 
 			/*
-			 * Read in a line implementing (\, newline)
-			 * line continuation.
+			 * Loop invariants:
+			 *	There is always room for one more character in
+			 * record. R_end always points just past end of record.
+			 *	Rp always points just past last character in
+			 * record. B_end always points just past last character
+			 * in buf. Bp always points at next character in buf.
 			 */
-			rp = record;
+			b_end = buf;
+			bp = buf;
 			for (;;) {
-				if (bp >= b_end) {
-					size_t n;
-
-					n = fread(buf, 1, sizeof(buf), fp);
-					if (n == 0) {
-						eof = feof(fp);
-						if (myfd)
-							(void)fclose(fp);
-						if (eof) {
-							fp = NULL;
-							break;
-						}
-						free(record);
-						return (-2);
-					}
-					b_end = buf+n;
-					bp = buf;
-				}
-
-				c = *bp++;
-				if (c == '\n') {
-					if (rp > record && *(rp-1) == '\\') {
-						rp--;
-						continue;
-					} else
-						break;
-				}
-				*rp++ = c;
 
 				/*
-				 * Enforce loop invariant: if no room
-				 * left in record buffer, try to get
-				 * some more.
+				 * Read in a line implementing (\, newline)
+				 * line continuation.
 				 */
-				if (rp >= r_end) {
-					size_t pos;
-					size_t newsize;
-					char *nrecord;
+				rp = record;
+				for (;;) {
+					if (bp >= b_end) {
+						size_t n;
 
-					pos = rp - record;
-					newsize = r_end - record + BFRAG;
-					nrecord = realloc(record, newsize);
-					if (nrecord == NULL) {
-						free(record);
-						if (myfd)
-							(void)fclose(fp);
-						errno = ENOMEM;
-						return (-2);
+						n = fread(
+						    buf, 1, sizeof(buf), fp);
+						if (n == 0) {
+							eof = feof(fp);
+							if (myfd)
+								(void)fclose(
+								    fp);
+							if (eof) {
+								fp = NULL;
+								break;
+							}
+							free(record);
+							return (-2);
+						}
+						b_end = buf + n;
+						bp = buf;
 					}
-					record = nrecord;
-					r_end = record + newsize;
-					rp = record + pos;
+
+					c = *bp++;
+					if (c == '\n') {
+						if (rp > record &&
+						    *(rp - 1) == '\\') {
+							rp--;
+							continue;
+						} else
+							break;
+					}
+					*rp++ = c;
+
+					/*
+					 * Enforce loop invariant: if no room
+					 * left in record buffer, try to get
+					 * some more.
+					 */
+					if (rp >= r_end) {
+						size_t pos;
+						size_t newsize;
+						char  *nrecord;
+
+						pos = rp - record;
+						newsize =
+						    r_end - record + BFRAG;
+						nrecord =
+						    realloc(record, newsize);
+						if (nrecord == NULL) {
+							free(record);
+							if (myfd)
+								(void)fclose(
+								    fp);
+							errno = ENOMEM;
+							return (-2);
+						}
+						record = nrecord;
+						r_end = record + newsize;
+						rp = record + pos;
+					}
 				}
-			}
 				/* loop invariant lets us do this */
-			*rp++ = '\0';
+				*rp++ = '\0';
 
-			/*
-			 * If encountered EOF check next file.
-			 */
-			if (eof)
-				break;
+				/*
+				 * If encountered EOF check next file.
+				 */
+				if (eof)
+					break;
 
-			/*
-			 * Toss blank lines and comments.
-			 */
-			if (*record == '\0' || *record == '#')
-				continue;
+				/*
+				 * Toss blank lines and comments.
+				 */
+				if (*record == '\0' || *record == '#')
+					continue;
 
-			/*
-			 * See if this is the record we want ...
-			 */
-			if (cgetmatch(record, name) == 0) {
-				if (nfield == NULL || !nfcmp(nfield, record)) {
-					foundit = 1;
-					break;	/* found it! */
+				/*
+				 * See if this is the record we want ...
+				 */
+				if (cgetmatch(record, name) == 0) {
+					if (nfield == NULL ||
+					    !nfcmp(nfield, record)) {
+						foundit = 1;
+						break; /* found it! */
+					}
 				}
 			}
-		    }
 		}
 		if (foundit)
 			break;
@@ -403,10 +410,11 @@ getent(char **cap, u_int *len, char **db_array, FILE *fp,
 	 * Got the capability record, but now we have to expand all tc=name
 	 * references in it ...
 	 */
-tc_exp:	{
+tc_exp:
+	{
 		char *s;
 		u_int ilen;
-		int diff, iret, tclen;
+		int   diff, iret, tclen;
 		char *ibuf, *icap, *scan, *tc, *tcstart, *tcend;
 
 		/*
@@ -431,18 +439,17 @@ tc_exp:	{
 			for (;;) {
 				if (*s == '\0')
 					break;
-				else
-					if (*s++ == ':') {
-						*(s - 1) = '\0';
-						break;
-					}
+				else if (*s++ == ':') {
+					*(s - 1) = '\0';
+					break;
+				}
 			}
 			tcstart = tc - 3;
 			tclen = s - tcstart;
 			tcend = s;
 
-			iret = getent(&icap, &ilen, db_p, fp, tc, depth+1,
-				      NULL);
+			iret =
+			    getent(&icap, &ilen, db_p, fp, tc, depth + 1, NULL);
 			if (iret != 0) {
 				/* an error */
 				if (iret < -1) {
@@ -459,7 +466,6 @@ tc_exp:	{
 					scan = s - 1;
 					tc_not_resolved = 1;
 					continue;
-
 				}
 			}
 			/* not interested in name field of tc'ed record */
@@ -467,16 +473,15 @@ tc_exp:	{
 			for (;;)
 				if (*s == '\0')
 					break;
-				else
-					if (*s++ == ':')
-						break;
+				else if (*s++ == ':')
+					break;
 			ilen -= s - icap;
 			icap = s;
 
 			/* make sure interpolated record is `:'-terminated */
 			s += ilen;
-			if (*(s-1) != ':') {
-				*s = ':';	/* overwrite NUL with : */
+			if (*(s - 1) != ':') {
+				*s = ':'; /* overwrite NUL with : */
 				ilen++;
 			}
 
@@ -486,9 +491,9 @@ tc_exp:	{
 			 */
 			diff = ilen - tclen;
 			if (diff >= r_end - rp) {
-				u_int pos, tcpos, tcposend;
+				u_int  pos, tcpos, tcposend;
 				size_t newsize;
-				char *nrecord;
+				char  *nrecord;
 
 				pos = rp - record;
 				newsize = r_end - record + diff + BFRAG;
@@ -523,9 +528,8 @@ tc_exp:	{
 			 * Start scan on `:' so next cgetcap works properly
 			 * (cgetcap always skips first field).
 			 */
-			scan = s-1;
+			scan = s - 1;
 		}
-
 	}
 	/*
 	 * Close file (if we opened it), give back any extra memory, and
@@ -533,7 +537,7 @@ tc_exp:	{
 	 */
 	if (myfd)
 		(void)fclose(fp);
-	*len = rp - record - 1;	/* don't count NUL */
+	*len = rp - record - 1; /* don't count NUL */
 	if (r_end > rp) {
 		char *nrecord;
 
@@ -560,7 +564,7 @@ cdbget(DB *capdbp, char **bp, const char *name)
 
 	for (;;) {
 		/* Get the reference. */
-		switch(capdbp->get(capdbp, &key, &data, 0)) {
+		switch (capdbp->get(capdbp, &key, &data, 0)) {
 		case -1:
 			return (-2);
 		case 1:
@@ -586,7 +590,7 @@ cdbget(DB *capdbp, char **bp, const char *name)
 int
 cgetmatch(char *buf, const char *name)
 {
-	char *bp;
+	char	   *bp;
 	const char *np;
 
 	if (*name == '\0')
@@ -606,20 +610,18 @@ cgetmatch(char *buf, const char *name)
 					return (0);
 				else
 					break;
-			} else
-				if (*bp++ != *np++)
-					break;
+			} else if (*bp++ != *np++)
+				break;
 
 		/*
 		 * Match failed, skip to next name in record.
 		 */
-		bp--;	/* a '|' or ':' may have stopped the match */
+		bp--; /* a '|' or ':' may have stopped the match */
 		for (;;)
 			if (*bp == '\0' || *bp == ':')
-				return (-1);	/* match failed totally */
-			else
-				if (*bp++ == '|')
-					break;	/* found next name */
+				return (-1); /* match failed totally */
+			else if (*bp++ == '|')
+				break; /* found next name */
 	}
 }
 DEF_WEAK(cgetmatch);
@@ -633,8 +635,8 @@ cgetfirst(char **buf, char **db_array)
 }
 DEF_WEAK(cgetfirst);
 
-static FILE *pfp;
-static int slash;
+static FILE  *pfp;
+static int    slash;
 static char **dbp;
 
 int
@@ -648,7 +650,7 @@ cgetclose(void)
 	dbp = NULL;
 	gottoprec = 0;
 	slash = 0;
-	return(0);
+	return (0);
 }
 DEF_WEAK(cgetclose);
 
@@ -661,13 +663,13 @@ int
 cgetnext(char **cap, char **db_array)
 {
 	size_t len, otopreclen = topreclen;
-	int c, serrno, status = -1;
-	char buf[BUFSIZ], nbuf[BSIZE];
-	char *b_end, *bp, *r_end, *rp;
-	char *record = NULL;
-	char *otoprec = toprec;
-	u_int dummy;
-	off_t pos;
+	int    c, serrno, status = -1;
+	char   buf[BUFSIZ], nbuf[BSIZE];
+	char  *b_end, *bp, *r_end, *rp;
+	char  *record = NULL;
+	char  *otoprec = toprec;
+	u_int  dummy;
+	off_t  pos;
 
 	if (dbp == NULL)
 		dbp = db_array;
@@ -723,8 +725,8 @@ cgetnext(char **cap, char **db_array)
 					if (*++dbp == NULL) {
 						status = 0;
 						goto done;
-					} else if ((pfp =
-					    fopen(*dbp, "re")) == NULL) {
+					} else if ((pfp = fopen(*dbp, "re")) ==
+					    NULL) {
 						goto done;
 					} else
 						continue;
@@ -735,7 +737,7 @@ cgetnext(char **cap, char **db_array)
 
 			c = *bp++;
 			if (c == '\n') {
-				if (rp > record && *(rp-1) == '\\') {
+				if (rp > record && *(rp - 1) == '\\') {
 					rp--;
 					continue;
 				} else
@@ -750,7 +752,7 @@ cgetnext(char **cap, char **db_array)
 			 */
 			if (rp >= r_end) {
 				size_t newsize, off;
-				char *nrecord;
+				char  *nrecord;
 
 				off = rp - record;
 				newsize = r_end - record + BFRAG;
@@ -821,7 +823,7 @@ cgetstr(char *buf, const char *cap, char **str)
 {
 	u_int m_room;
 	char *bp, *mp;
-	int len;
+	int   len;
 	char *mem;
 
 	/*
@@ -836,7 +838,7 @@ cgetstr(char *buf, const char *cap, char **str)
 	 * chunks SFRAG in size.
 	 */
 	if ((mem = malloc(SFRAG)) == NULL)
-		return (-2);	/* couldn't even allocate the first fragment */
+		return (-2); /* couldn't even allocate the first fragment */
 	m_room = SFRAG;
 	mp = mem;
 
@@ -850,42 +852,49 @@ cgetstr(char *buf, const char *cap, char **str)
 		if (*bp == '^') {
 			bp++;
 			if (*bp == ':' || *bp == '\0')
-				break;	/* drop unfinished escape */
+				break; /* drop unfinished escape */
 			*mp++ = *bp++ & 037;
 		} else if (*bp == '\\') {
 			bp++;
 			if (*bp == ':' || *bp == '\0')
-				break;	/* drop unfinished escape */
+				break; /* drop unfinished escape */
 			if ('0' <= *bp && *bp <= '7') {
 				int n, i;
 
 				n = 0;
-				i = 3;	/* maximum of three octal digits */
+				i = 3; /* maximum of three octal digits */
 				do {
 					n = n * 8 + (*bp++ - '0');
 				} while (--i && '0' <= *bp && *bp <= '7');
 				*mp++ = n;
-			}
-			else switch (*bp++) {
-				case 'b': case 'B':
+			} else
+				switch (*bp++) {
+				case 'b':
+				case 'B':
 					*mp++ = '\b';
 					break;
-				case 't': case 'T':
+				case 't':
+				case 'T':
 					*mp++ = '\t';
 					break;
-				case 'n': case 'N':
+				case 'n':
+				case 'N':
 					*mp++ = '\n';
 					break;
-				case 'f': case 'F':
+				case 'f':
+				case 'F':
 					*mp++ = '\f';
 					break;
-				case 'r': case 'R':
+				case 'r':
+				case 'R':
 					*mp++ = '\r';
 					break;
-				case 'e': case 'E':
+				case 'e':
+				case 'E':
 					*mp++ = ESC;
 					break;
-				case 'c': case 'C':
+				case 'c':
+				case 'C':
 					*mp++ = ':';
 					break;
 				default:
@@ -893,9 +902,9 @@ cgetstr(char *buf, const char *cap, char **str)
 					 * Catches '\', '^', and
 					 *  everything else.
 					 */
-					*mp++ = *(bp-1);
+					*mp++ = *(bp - 1);
 					break;
-			}
+				}
 		} else
 			*mp++ = *bp++;
 		m_room--;
@@ -906,7 +915,7 @@ cgetstr(char *buf, const char *cap, char **str)
 		 */
 		if (m_room == 0) {
 			size_t size = mp - mem;
-			char *nmem;
+			char  *nmem;
 
 			if ((nmem = realloc(mem, size + SFRAG)) == NULL) {
 				free(mem);
@@ -917,7 +926,7 @@ cgetstr(char *buf, const char *cap, char **str)
 			mp = mem + size;
 		}
 	}
-	*mp++ = '\0';	/* loop invariant let's us do this */
+	*mp++ = '\0'; /* loop invariant let's us do this */
 	m_room--;
 	len = mp - mem - 1;
 
@@ -953,7 +962,7 @@ cgetustr(char *buf, const char *cap, char **str)
 {
 	u_int m_room;
 	char *bp, *mp;
-	int len;
+	int   len;
 	char *mem;
 
 	/*
@@ -967,7 +976,7 @@ cgetustr(char *buf, const char *cap, char **str)
 	 * chunks SFRAG in size.
 	 */
 	if ((mem = malloc(SFRAG)) == NULL)
-		return (-2);	/* couldn't even allocate the first fragment */
+		return (-2); /* couldn't even allocate the first fragment */
 	m_room = SFRAG;
 	mp = mem;
 
@@ -987,7 +996,7 @@ cgetustr(char *buf, const char *cap, char **str)
 		 */
 		if (m_room == 0) {
 			size_t size = mp - mem;
-			char *nmem;
+			char  *nmem;
 
 			if ((nmem = realloc(mem, size + SFRAG)) == NULL) {
 				free(mem);
@@ -998,7 +1007,7 @@ cgetustr(char *buf, const char *cap, char **str)
 			mp = mem + size;
 		}
 	}
-	*mp++ = '\0';	/* loop invariant let's us do this */
+	*mp++ = '\0'; /* loop invariant let's us do this */
 	m_room--;
 	len = mp - mem - 1;
 
@@ -1028,8 +1037,8 @@ DEF_WEAK(cgetustr);
 int
 cgetnum(char *buf, const char *cap, long *num)
 {
-	long n;
-	int base, digit;
+	long  n;
+	int   base, digit;
 	char *bp;
 
 	/*
@@ -1091,7 +1100,7 @@ static int
 nfcmp(const char *nf, char *rec)
 {
 	char *cp, tmp;
-	int ret;
+	int   ret;
 
 	for (cp = rec; *cp != ':'; cp++)
 		;

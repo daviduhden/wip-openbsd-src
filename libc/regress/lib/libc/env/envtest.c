@@ -28,7 +28,7 @@ extern char **environ;
 static int
 count_instances(const char *name)
 {
-	int count = 0;
+	int    count = 0;
 	size_t namelen;
 	char **ep;
 
@@ -59,8 +59,8 @@ fake_env(void)
 int
 main(int argc, char *argv[])
 {
-	char *buf;
-	int n, failures = 0;
+	char  *buf;
+	int    n, failures = 0;
 	size_t len, bufsize;
 
 	fake_env();

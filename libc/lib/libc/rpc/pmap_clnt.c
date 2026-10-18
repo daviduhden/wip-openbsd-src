@@ -36,14 +36,14 @@
  * Client interface to pmap rpc service.
  */
 
-#include <unistd.h>
 #include <errno.h>
-#include <rpc/rpc.h>
-#include <rpc/pmap_prot.h>
 #include <rpc/pmap_clnt.h>
+#include <rpc/pmap_prot.h>
+#include <rpc/rpc.h>
+#include <unistd.h>
 
-static struct timeval timeout = { 5, 0 };
-static struct timeval tottimeout = { 60, 0 };
+static struct timeval timeout = {5, 0};
+static struct timeval tottimeout = {60, 0};
 
 /*
  * Set a mapping between program,version and port.
@@ -53,18 +53,18 @@ bool_t
 pmap_set(u_long program, u_long version, u_int protocol, int iport)
 {
 	struct sockaddr_in myaddress;
-	int sock = -1;
-	CLIENT *client;
-	struct pmap parms;
-	bool_t rslt;
-	int save_errno;
-	u_short port = iport;
+	int		   sock = -1;
+	CLIENT		  *client;
+	struct pmap	   parms;
+	bool_t		   rslt;
+	int		   save_errno;
+	u_short		   port = iport;
 
 	if (get_myaddress(&myaddress) != 0)
 		return (FALSE);
 	myaddress.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	client = clntudp_bufcreate(&myaddress, PMAPPROG, PMAPVERS,
-	    timeout, &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
+	client = clntudp_bufcreate(&myaddress, PMAPPROG, PMAPVERS, timeout,
+	    &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
 	if (client == NULL)
 		return (FALSE);
 	parms.pm_prog = program;
@@ -72,7 +72,7 @@ pmap_set(u_long program, u_long version, u_int protocol, int iport)
 	parms.pm_prot = protocol;
 	parms.pm_port = port;
 	if (CLNT_CALL(client, PMAPPROC_SET, xdr_pmap, &parms, xdr_bool, &rslt,
-	    tottimeout) != RPC_SUCCESS) {
+		tottimeout) != RPC_SUCCESS) {
 		save_errno = errno;
 		rslt = FALSE;
 	} else
@@ -91,16 +91,16 @@ bool_t
 pmap_unset(u_long program, u_long version)
 {
 	struct sockaddr_in myaddress;
-	int sock = -1;
-	CLIENT *client;
-	struct pmap parms;
-	bool_t rslt;
+	int		   sock = -1;
+	CLIENT		  *client;
+	struct pmap	   parms;
+	bool_t		   rslt;
 
 	if (get_myaddress(&myaddress) != 0)
 		return (FALSE);
 	myaddress.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	client = clntudp_bufcreate(&myaddress, PMAPPROG, PMAPVERS,
-	    timeout, &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
+	client = clntudp_bufcreate(&myaddress, PMAPPROG, PMAPVERS, timeout,
+	    &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
 	if (client == NULL)
 		return (FALSE);
 	parms.pm_prog = program;

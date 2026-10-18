@@ -21,7 +21,7 @@
 
 #ifdef _KERNEL
 
-void svc_handler	(trapframe_t *);
+void svc_handler(trapframe_t *);
 
 #endif
 

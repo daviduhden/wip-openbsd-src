@@ -22,7 +22,6 @@
 
 #include <sys/signal.h>
 
-
 /*
  * Exception/Trap Stack Frame
  */
@@ -39,9 +38,9 @@ typedef struct trapframe {
  * pushed on stack for signal delivery
  */
 struct sigframe {
-	int	sf_signum;
-	struct	sigcontext sf_sc;
-	siginfo_t sf_si;
+	int		  sf_signum;
+	struct sigcontext sf_sc;
+	siginfo_t	  sf_si;
 };
 
 /*
@@ -68,8 +67,8 @@ struct switchframe {
 };
 
 struct callframe {
-	struct callframe	*f_frame;
-	register_t		 f_lr;
+	struct callframe *f_frame;
+	register_t	  f_lr;
 };
 
 #endif /* !_LOCORE */

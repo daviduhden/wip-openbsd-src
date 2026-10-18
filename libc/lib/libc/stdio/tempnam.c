@@ -36,17 +36,17 @@
 #include <string.h>
 #include <unistd.h>
 
-__warn_references(tempnam,
-    "tempnam() possibly used unsafely; consider using mkstemp()");
+__warn_references(
+    tempnam, "tempnam() possibly used unsafely; consider using mkstemp()");
 
 char *
 tempnam(const char *dir, const char *pfx)
 {
-	int sverrno, len;
+	int   sverrno, len;
 	char *f, *name;
 
 	if (!(name = malloc(PATH_MAX)))
-		return(NULL);
+		return (NULL);
 
 	if (!pfx)
 		pfx = "tmp.";
@@ -59,7 +59,7 @@ tempnam(const char *dir, const char *pfx)
 			goto fail;
 		}
 		if ((f = _mktemp(name)))
-			return(f);
+			return (f);
 	}
 
 	if (dir != NULL) {
@@ -71,7 +71,7 @@ tempnam(const char *dir, const char *pfx)
 			goto fail;
 		}
 		if ((f = _mktemp(name)))
-			return(f);
+			return (f);
 	}
 
 	f = P_tmpdir;
@@ -81,7 +81,7 @@ tempnam(const char *dir, const char *pfx)
 		goto fail;
 	}
 	if ((f = _mktemp(name)))
-		return(f);
+		return (f);
 
 	f = _PATH_TMP;
 	len = snprintf(name, PATH_MAX, "%s%sXXXXXXXXX", f, pfx);
@@ -90,11 +90,11 @@ tempnam(const char *dir, const char *pfx)
 		goto fail;
 	}
 	if ((f = _mktemp(name)))
-		return(f);
+		return (f);
 
 fail:
 	sverrno = errno;
 	free(name);
 	errno = sverrno;
-	return(NULL);
+	return (NULL);
 }

@@ -41,14 +41,25 @@
 
 /* 128 bits of random data. */
 static const char secret[16] = {
-	0xa0, 0x6c, 0x0c, 0x81, 0xba, 0xd8, 0x5b, 0x0c,
-	0xb0, 0xd6, 0xd4, 0xe3, 0xeb, 0x52, 0x5f, 0x96,
+    0xa0,
+    0x6c,
+    0x0c,
+    0x81,
+    0xba,
+    0xd8,
+    0x5b,
+    0x0c,
+    0xb0,
+    0xd6,
+    0xd4,
+    0xe3,
+    0xeb,
+    0x52,
+    0x5f,
+    0x96,
 };
 
-enum {
-	SECRETCOUNT = 64,
-	SECRETBYTES = SECRETCOUNT * sizeof(secret)
-};
+enum { SECRETCOUNT = 64, SECRETBYTES = SECRETCOUNT * sizeof(secret) };
 
 /*
  * As of glibc 2.34, when _GNU_SOURCE is defined, SIGSTKSZ is no longer
@@ -63,10 +74,7 @@ setup_stack(void)
 	altstack = calloc(1, ALTSTACK_SIZE);
 	ASSERT_NE(NULL, altstack);
 
-	const stack_t sigstk = {
-		.ss_sp = altstack,
-		.ss_size = ALTSTACK_SIZE
-	};
+	const stack_t sigstk = {.ss_sp = altstack, .ss_size = ALTSTACK_SIZE};
 
 	ASSERT_EQ(0, sigaltstack(&sigstk, NULL));
 }
@@ -82,7 +90,7 @@ assert_on_stack(void)
 {
 	stack_t cursigstk;
 	ASSERT_EQ(0, sigaltstack(NULL, &cursigstk));
-	ASSERT_EQ(SS_ONSTACK, cursigstk.ss_flags & (SS_DISABLE|SS_ONSTACK));
+	ASSERT_EQ(SS_ONSTACK, cursigstk.ss_flags & (SS_DISABLE | SS_ONSTACK));
 }
 
 static void
@@ -99,11 +107,11 @@ call_on_stack(void (*fn)(int))
 	 */
 
 	const struct sigaction sigact = {
-		.sa_handler = fn,
-		.sa_flags = SA_ONSTACK,
+	    .sa_handler = fn,
+	    .sa_flags = SA_ONSTACK,
 	};
 	struct sigaction oldsigact;
-	sigset_t sigset, oldsigset;
+	sigset_t	 sigset, oldsigset;
 
 	/* First, block all signals. */
 	ASSERT_EQ(0, sigemptyset(&sigset));
@@ -131,7 +139,8 @@ populate_secret(char *buf, size_t len)
 	ASSERT_EQ(0, pipe(fds));
 
 	for (i = 0; i < SECRETCOUNT; i++)
-		ASSERT_EQ(sizeof(secret), write(fds[1], secret, sizeof(secret)));
+		ASSERT_EQ(
+		    sizeof(secret), write(fds[1], secret, sizeof(secret)));
 	ASSERT_EQ(0, close(fds[1]));
 
 	ASSERT_EQ(len, read(fds[0], buf, len));
@@ -141,11 +150,11 @@ populate_secret(char *buf, size_t len)
 static int
 count_secrets(const char *buf)
 {
-	int res = 0;
+	int    res = 0;
 	size_t i;
 	for (i = 0; i < SECRETCOUNT; i++) {
-		if (memcmp(buf + i * sizeof(secret), secret,
-		    sizeof(secret)) == 0)
+		if (memcmp(buf + i * sizeof(secret), secret, sizeof(secret)) ==
+		    0)
 			res += 1;
 	}
 	return (res);

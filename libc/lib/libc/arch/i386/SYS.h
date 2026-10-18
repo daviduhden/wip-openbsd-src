@@ -32,10 +32,11 @@
  *	$OpenBSD: SYS.h,v 1.28 2023/12/10 16:45:51 deraadt Exp $
  */
 
-#include "DEFS.h"
 #include <sys/syscall.h>
 
-#define TCB_OFFSET_ERRNO	16
+#include "DEFS.h"
+
+#define TCB_OFFSET_ERRNO 16
 
 /*
  * Design note:
@@ -47,80 +48,75 @@
 
 /* Use both _thread_sys_{syscall} and [weak] {syscall}. */
 
-#define	SYSENTRY(x)					\
-			ENTRY(_thread_sys_##x);		\
-			WEAK_ALIAS(x, _thread_sys_##x)
-#define	SYSENTRY_HIDDEN(x)				\
-			ENTRY(_thread_sys_ ## x)
-#define	__END_HIDDEN(x)	END(_thread_sys_ ## x);			\
-			_HIDDEN_FALIAS(x,_thread_sys_ ## x);	\
-			END(_HIDDEN(x))
-#define	__END(x)	__END_HIDDEN(x); END(x)
+#define SYSENTRY(x)                                                            \
+	ENTRY(_thread_sys_##x);                                                \
+	WEAK_ALIAS(x, _thread_sys_##x)
+#define SYSENTRY_HIDDEN(x) ENTRY(_thread_sys_##x)
+#define __END_HIDDEN(x)                                                        \
+	END(_thread_sys_##x);                                                  \
+	_HIDDEN_FALIAS(x, _thread_sys_##x);                                    \
+	END(_HIDDEN(x))
+#define __END(x)                                                               \
+	__END_HIDDEN(x);                                                       \
+	END(x)
 
-#define	__DO_SYSCALL(x)					\
-			movl $(SYS_ ## x),%eax;		\
-		97:	int $0x80;			\
-			PINSYSCALL(SYS_ ## x, 97b)
+#define __DO_SYSCALL(x)                                                        \
+	movl	 $(SYS_##x), % eax;                                            \
+	97 : int $0x80;                                                        \
+	PINSYSCALL(SYS_##x, 97b)
 
-
-#define SET_ERRNO()					\
-	movl	%eax,%gs:(TCB_OFFSET_ERRNO);		\
-	movl	$-1, %eax;				\
-	movl	$-1, %edx	/* for lseek */
-#define HANDLE_ERRNO()					\
-	jnc	99f;					\
-	SET_ERRNO();					\
+#define SET_ERRNO()                                                            \
+	movl % eax, % gs : (TCB_OFFSET_ERRNO);                                 \
+	movl $ - 1, % eax;                                                     \
+	movl $ - 1, % edx /* for lseek */
+#define HANDLE_ERRNO()                                                         \
+	jnc 99f;                                                               \
+	SET_ERRNO();                                                           \
 	99:
 
 /* perform a syscall */
-#define	_SYSCALL_NOERROR(x,y)				\
-		SYSENTRY(x);				\
-			__DO_SYSCALL(y);
-#define	_SYSCALL_HIDDEN_NOERROR(x,y)			\
-		SYSENTRY_HIDDEN(x);			\
-			__DO_SYSCALL(y);
+#define _SYSCALL_NOERROR(x, y)                                                 \
+	SYSENTRY(x);                                                           \
+	__DO_SYSCALL(y);
+#define _SYSCALL_HIDDEN_NOERROR(x, y)                                          \
+	SYSENTRY_HIDDEN(x);                                                    \
+	__DO_SYSCALL(y);
 
-#define	SYSCALL_NOERROR(x)				\
-		_SYSCALL_NOERROR(x,x)
+#define SYSCALL_NOERROR(x) _SYSCALL_NOERROR(x, x)
 
 /* perform a syscall, set errno */
-#define	_SYSCALL(x,y)					\
-			.text;				\
-			.align 2;			\
-		_SYSCALL_NOERROR(x,y)			\
-			HANDLE_ERRNO()
-#define	_SYSCALL_HIDDEN(x,y)				\
-			.text;				\
-			.align 2;			\
-		_SYSCALL_HIDDEN_NOERROR(x,y)		\
-			HANDLE_ERRNO()
+#define _SYSCALL(x, y)                                                         \
+	.text;                                                                 \
+	.align 2;                                                              \
+	_SYSCALL_NOERROR(x, y)                                                 \
+	HANDLE_ERRNO()
+#define _SYSCALL_HIDDEN(x, y)                                                  \
+	.text;                                                                 \
+	.align 2;                                                              \
+	_SYSCALL_HIDDEN_NOERROR(x, y)                                          \
+	HANDLE_ERRNO()
 
-#define	SYSCALL(x)					\
-		_SYSCALL(x,x)
-#define	SYSCALL_HIDDEN(x)				\
-		_SYSCALL_HIDDEN(x,y)
+#define SYSCALL(x) _SYSCALL(x, x)
+#define SYSCALL_HIDDEN(x) _SYSCALL_HIDDEN(x, y)
 
 /* perform a syscall, return */
-#define	PSEUDO_NOERROR(x,y)				\
-		_SYSCALL_NOERROR(x,y);			\
-			ret;				\
-		__END(x)
+#define PSEUDO_NOERROR(x, y)                                                   \
+	_SYSCALL_NOERROR(x, y);                                                \
+	ret;                                                                   \
+	__END(x)
 
 /* perform a syscall, set errno, return */
-#define	PSEUDO(x,y)					\
-		_SYSCALL(x,y);				\
-			ret;				\
-		__END(x)
-#define	PSEUDO_HIDDEN(x,y)				\
-		_SYSCALL_HIDDEN(x,y);			\
-			ret;				\
-		__END_HIDDEN(x)
+#define PSEUDO(x, y)                                                           \
+	_SYSCALL(x, y);                                                        \
+	ret;                                                                   \
+	__END(x)
+#define PSEUDO_HIDDEN(x, y)                                                    \
+	_SYSCALL_HIDDEN(x, y);                                                 \
+	ret;                                                                   \
+	__END_HIDDEN(x)
 
 /* perform a syscall with the same name, set errno, return */
-#define	RSYSCALL(x)					\
-			PSEUDO(x,x);
-#define	RSYSCALL_HIDDEN(x)				\
-			PSEUDO_HIDDEN(x,x)
-#define	SYSCALL_END(x)	__END(x)
-#define	SYSCALL_END_HIDDEN(x)				\
-			__END_HIDDEN(x)
+#define RSYSCALL(x) PSEUDO(x, x);
+#define RSYSCALL_HIDDEN(x) PSEUDO_HIDDEN(x, x)
+#define SYSCALL_END(x) __END(x)
+#define SYSCALL_END_HIDDEN(x) __END_HIDDEN(x)

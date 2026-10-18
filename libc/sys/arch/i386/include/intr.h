@@ -36,24 +36,26 @@
 #define __USE_MI_SOFTINTR
 
 #include <sys/softintr.h>
+
 #include <machine/intrdefs.h>
 
 #ifndef _LOCORE
 #include <sys/mutex.h>
+
 #include <machine/cpu.h>
 
-extern volatile u_int32_t lapic_tpr;	/* Current interrupt priority level. */
+extern volatile u_int32_t lapic_tpr; /* Current interrupt priority level. */
 
-extern int imask[];	/* Bitmasks telling what interrupts are blocked. */
-extern int iunmask[];	/* Bitmasks telling what interrupts are accepted. */
+extern int imask[];   /* Bitmasks telling what interrupts are blocked. */
+extern int iunmask[]; /* Bitmasks telling what interrupts are accepted. */
 
 #define IMASK(level) imask[IPL(level)]
 #define IUNMASK(level) iunmask[IPL(level)]
 
 extern void Xspllower(void);
 
-extern int splraise(int);
-extern int spllower(int);
+extern int  splraise(int);
+extern int  spllower(int);
 extern void splx(int);
 extern void softintr(int);
 
@@ -63,7 +65,7 @@ extern void softintr(int);
  * this "instruction", acting as a sequence point for code generation.
  */
 
-#define	__splbarrier() __asm volatile("":::"memory")
+#define __splbarrier() __asm volatile("" ::: "memory")
 
 /* SPL asserts */
 #ifdef DIAGNOSTIC
@@ -71,60 +73,64 @@ extern void softintr(int);
  * Although this function is implemented in MI code, it must be in this MD
  * header because we don't want this header to include MI includes.
  */
-void splassert_fail(int, int, const char *);
+void	   splassert_fail(int, int, const char *);
 extern int splassert_ctl;
-void splassert_check(int, const char *);
-#define splassert(__wantipl) do {			\
-	if (splassert_ctl > 0) {			\
-		splassert_check(__wantipl, __func__);	\
-	}						\
-} while (0)
+void	   splassert_check(int, const char *);
+#define splassert(__wantipl)                                                   \
+	do {                                                                   \
+		if (splassert_ctl > 0) {                                       \
+			splassert_check(__wantipl, __func__);                  \
+		}                                                              \
+	} while (0)
 #define splsoftassert(wantipl) splassert(wantipl)
 #else
-#define splassert(wantipl)	do { /* nada */ } while (0)
-#define splsoftassert(wantipl)	do { /* nada */ } while (0)
+#define splassert(wantipl)                                                     \
+	do { /* nada */                                                        \
+	} while (0)
+#define splsoftassert(wantipl)                                                 \
+	do { /* nada */                                                        \
+	} while (0)
 #endif
 
 /*
  * Define the splraise and splx code in macros, so that the code can be
  * reused in a profiling build in a way that does not cause recursion.
  */
-#define _SPLRAISE(ocpl, ncpl) 		\
-	ocpl = lapic_tpr;		\
-	if (ncpl > ocpl)		\
-		lapic_tpr = ncpl
+#define _SPLRAISE(ocpl, ncpl)                                                  \
+	ocpl = lapic_tpr;                                                      \
+	if (ncpl > ocpl)                                                       \
+	lapic_tpr = ncpl
 
-
-#define _SPLX(ncpl) 			\
-	lapic_tpr = ncpl;		\
-	if (curcpu()->ci_ipending & IUNMASK(ncpl))	\
-		Xspllower()
+#define _SPLX(ncpl)                                                            \
+	lapic_tpr = ncpl;                                                      \
+	if (curcpu()->ci_ipending & IUNMASK(ncpl))                             \
+	Xspllower()
 
 /*
  * Hardware interrupt masks
  */
-#define	splbio()	splraise(IPL_BIO)
-#define	splnet()	splraise(IPL_NET)
-#define	spltty()	splraise(IPL_TTY)
-#define	splaudio()	splraise(IPL_AUDIO)
-#define	splclock()	splraise(IPL_CLOCK)
-#define	splstatclock()	splclock()
-#define splipi()	splraise(IPL_IPI)
+#define splbio() splraise(IPL_BIO)
+#define splnet() splraise(IPL_NET)
+#define spltty() splraise(IPL_TTY)
+#define splaudio() splraise(IPL_AUDIO)
+#define splclock() splraise(IPL_CLOCK)
+#define splstatclock() splclock()
+#define splipi() splraise(IPL_IPI)
 
 /*
  * Software interrupt masks
  */
-#define	splsoftclock()		splraise(IPL_SOFTCLOCK)
-#define	splsoftnet()		splraise(IPL_SOFTNET)
-#define	splsofttty()		splraise(IPL_SOFTTTY)
+#define splsoftclock() splraise(IPL_SOFTCLOCK)
+#define splsoftnet() splraise(IPL_SOFTNET)
+#define splsofttty() splraise(IPL_SOFTTTY)
 
 /*
  * Miscellaneous
  */
-#define	splvm()		splraise(IPL_VM)
-#define	splhigh()	splraise(IPL_HIGH)
-#define	splsched()	splraise(IPL_SCHED)
-#define	spl0()		spllower(IPL_NONE)
+#define splvm() splraise(IPL_VM)
+#define splhigh() splraise(IPL_HIGH)
+#define splsched() splraise(IPL_SCHED)
+#define spl0() spllower(IPL_NONE)
 
 #include <machine/pic.h>
 
@@ -136,7 +142,7 @@ void intr_disable_wakeup(void);
 
 #ifdef MULTIPROCESSOR
 void i386_send_ipi(struct cpu_info *, int);
-int i386_fast_ipi(struct cpu_info *, int);
+int  i386_fast_ipi(struct cpu_info *, int);
 void i386_broadcast_ipi(int);
 void i386_ipi_handler(void);
 void i386_setperf_ipi(struct cpu_info *);

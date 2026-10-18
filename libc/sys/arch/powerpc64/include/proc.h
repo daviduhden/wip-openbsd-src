@@ -39,8 +39,8 @@
  */
 struct mdproc {
 	struct trapframe *md_regs;
-	volatile int	md_astpending;
-	paddr_t		md_user_slb_pa;
+	volatile int	  md_astpending;
+	paddr_t		  md_user_slb_pa;
 };
 
 #endif /* _MACHINE_PROC_H_ */

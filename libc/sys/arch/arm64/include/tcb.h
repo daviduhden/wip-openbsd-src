@@ -26,32 +26,31 @@
 static inline void
 __aarch64_set_tcb(void *tcb)
 {
-	__asm volatile("msr tpidr_el0, %x0" : : "r" (tcb));
+	__asm volatile("msr tpidr_el0, %x0" : : "r"(tcb));
 }
 
-#define TCB_GET(p)		\
-	((struct pcb *)(p)->p_addr)->pcb_tcb
+#define TCB_GET(p) ((struct pcb *)(p)->p_addr)->pcb_tcb
 
-#define TCB_SET(p, addr)	\
-	do {							\
-		((struct pcb *)(p)->p_addr)->pcb_tcb = (addr);	\
-		__aarch64_set_tcb(addr);			\
+#define TCB_SET(p, addr)                                                       \
+	do {                                                                   \
+		((struct pcb *)(p)->p_addr)->pcb_tcb = (addr);                 \
+		__aarch64_set_tcb(addr);                                       \
 	} while (0)
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for small TCB, with static TLS data after it */
-#define TLS_VARIANT	1
+#define TLS_VARIANT 1
 
 static inline void *
 __aarch64_read_tcb(void)
 {
 	void *tcb;
-	__asm volatile("mrs %x0, tpidr_el0": "=r" (tcb));
+	__asm volatile("mrs %x0, tpidr_el0" : "=r"(tcb));
 	return tcb;
 }
 
-#define TCB_GET()		__aarch64_read_tcb()
+#define TCB_GET() __aarch64_read_tcb()
 
 #endif /* _KERNEL */
 

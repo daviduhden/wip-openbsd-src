@@ -18,10 +18,9 @@
 #include <sys/types.h>
 #include <sys/auxv.h>
 
+#include <sha2.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include <sha2.h>
 
 void
 __sha512_block(uint64_t state[8], const uint8_t *in, size_t num)

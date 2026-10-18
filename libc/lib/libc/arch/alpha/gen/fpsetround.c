@@ -33,17 +33,18 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_rnd
 fpsetround(rnd_dir)
-	fp_rnd rnd_dir;
+fp_rnd rnd_dir;
 {
-	double fpcrval;
+	double	  fpcrval;
 	u_int64_t old, new;
 
 	__asm__("trapb");
-	__asm__("mf_fpcr %0" : "=f" (fpcrval));
+	__asm__("mf_fpcr %0" : "=f"(fpcrval));
 	__asm__("trapb");
 	old = *(u_int64_t *)&fpcrval;
 
@@ -52,7 +53,7 @@ fpsetround(rnd_dir)
 	*(u_int64_t *)&fpcrval = new;
 
 	__asm__("trapb");
-	__asm__("mt_fpcr %0" : : "f" (fpcrval));
+	__asm__("mt_fpcr %0" : : "f"(fpcrval));
 	__asm__("trapb");
 
 	return ((old >> 58) & 0x3);

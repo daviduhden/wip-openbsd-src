@@ -20,5 +20,5 @@ lrand48(void)
 	if (__rand48_deterministic == 0)
 		return arc4random() & 0x7fffffff;
 	__dorand48(__rand48_seed);
-	return ((long) __rand48_seed[2] << 15) + ((long) __rand48_seed[1] >> 1);
+	return ((long)__rand48_seed[2] << 15) + ((long)__rand48_seed[1] >> 1);
 }

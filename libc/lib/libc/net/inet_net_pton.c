@@ -20,18 +20,19 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-static int	inet_net_pton_ipv4(const char *, u_char *, size_t);
-static int	inet_net_pton_ipv6(const char *, u_char *, size_t);
+static int inet_net_pton_ipv4(const char *, u_char *, size_t);
+static int inet_net_pton_ipv6(const char *, u_char *, size_t);
 
 /*
  * static int
@@ -79,22 +80,21 @@ inet_net_pton(int af, const char *src, void *dst, size_t size)
 static int
 inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 {
-	static const char
-		xdigits[] = "0123456789abcdef",
-		digits[] = "0123456789";
-	int n, ch, tmp, dirty, bits;
-	const u_char *odst = dst;
+	static const char xdigits[] = "0123456789abcdef",
+			  digits[] = "0123456789";
+	int		  n, ch, tmp, dirty, bits;
+	const u_char	 *odst = dst;
 
 	ch = (unsigned char)*src++;
-	if (ch == '0' && (src[0] == 'x' || src[0] == 'X')
-	    && isascii((unsigned char)src[1]) && isxdigit((unsigned char)src[1])) {
+	if (ch == '0' && (src[0] == 'x' || src[0] == 'X') &&
+	    isascii((unsigned char)src[1]) && isxdigit((unsigned char)src[1])) {
 		/* Hexadecimal: Eat nybble string. */
 		if (size == 0)
 			goto emsgsize;
 		tmp = 0, dirty = 0;
-		src++;	/* skip x or X. */
-		while ((ch = (unsigned char)*src++) != '\0' &&
-		    isascii(ch) && isxdigit(ch)) {
+		src++; /* skip x or X. */
+		while ((ch = (unsigned char)*src++) != '\0' && isascii(ch) &&
+		    isxdigit(ch)) {
 			if (isupper(ch))
 				ch = tolower(ch);
 			n = strchr(xdigits, ch) - xdigits;
@@ -106,14 +106,14 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 			if (++dirty == 2) {
 				if (size-- == 0)
 					goto emsgsize;
-				*dst++ = (u_char) tmp;
+				*dst++ = (u_char)tmp;
 				dirty = 0;
 			}
 		}
-		if (dirty) {  /* Odd trailing nybble? */
+		if (dirty) { /* Odd trailing nybble? */
 			if (size-- == 0)
 				goto emsgsize;
-			*dst++ = (u_char) (tmp << 4);
+			*dst++ = (u_char)(tmp << 4);
 		}
 	} else if (isascii(ch) && isdigit(ch)) {
 		/* Decimal: eat dotted digit string. */
@@ -127,10 +127,10 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 				if (tmp > 255)
 					goto enoent;
 			} while ((ch = (unsigned char)*src++) != '\0' &&
-				 isascii(ch) && isdigit(ch));
+			    isascii(ch) && isdigit(ch));
 			if (size-- == 0)
 				goto emsgsize;
-			*dst++ = (u_char) tmp;
+			*dst++ = (u_char)tmp;
 			if (ch == '\0' || ch == '/')
 				break;
 			if (ch != '.')
@@ -146,7 +146,7 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 	if (ch == '/' && isascii((unsigned char)src[0]) &&
 	    isdigit((unsigned char)src[0]) && dst > odst) {
 		/* CIDR width specifier.  Nothing can follow it. */
-		ch = (unsigned char)*src++;	/* Skip over the /. */
+		ch = (unsigned char)*src++; /* Skip over the /. */
 		bits = 0;
 		do {
 			n = strchr(digits, ch) - digits;
@@ -155,8 +155,8 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 			bits += n;
 			if (bits > 32)
 				goto emsgsize;
-		} while ((ch = (unsigned char)*src++) != '\0' &&
-			 isascii(ch) && isdigit(ch));
+		} while ((ch = (unsigned char)*src++) != '\0' && isascii(ch) &&
+		    isdigit(ch));
 		if (ch != '\0')
 			goto enoent;
 	}
@@ -170,15 +170,15 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 		goto enoent;
 	/* If no CIDR spec was given, infer width from net class. */
 	if (bits == -1) {
-		if (*odst >= 240)	/* Class E */
+		if (*odst >= 240) /* Class E */
 			bits = 32;
-		else if (*odst >= 224)	/* Class D */
+		else if (*odst >= 224) /* Class D */
 			bits = 4;
-		else if (*odst >= 192)	/* Class C */
+		else if (*odst >= 192) /* Class C */
 			bits = 24;
-		else if (*odst >= 128)	/* Class B */
+		else if (*odst >= 128) /* Class B */
 			bits = 16;
-		else			/* Class A */
+		else /* Class A */
 			bits = 8;
 		/* If imputed mask is narrower than specified octets, widen. */
 		if (bits < ((dst - odst) * 8))
@@ -192,26 +192,25 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size)
 	}
 	return (bits);
 
- enoent:
+enoent:
 	errno = ENOENT;
 	return (-1);
 
- emsgsize:
+emsgsize:
 	errno = EMSGSIZE;
 	return (-1);
 }
 
-
 static int
 inet_net_pton_ipv6(const char *src, u_char *dst, size_t size)
 {
-	struct in6_addr	 in6;
-	int		 ret;
-	int		 bits;
-	size_t		 bytes;
-	char		 buf[INET6_ADDRSTRLEN + sizeof("/128")];
-	char		*sep;
-	const char	*errstr;
+	struct in6_addr in6;
+	int		ret;
+	int		bits;
+	size_t		bytes;
+	char		buf[INET6_ADDRSTRLEN + sizeof("/128")];
+	char	       *sep;
+	const char     *errstr;
 
 	if (strlcpy(buf, src, sizeof buf) >= sizeof buf) {
 		errno = EMSGSIZE;

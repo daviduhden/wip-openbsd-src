@@ -23,11 +23,10 @@
 #include <string.h>
 #include <unistd.h>
 
-
 int atf_test(int, int);
 void atf_require(int, int, const char *, const char *, const int, char *, ...);
 void atf_tc_fail(char *, ...)
-    __attribute__((__noreturn__, __format__ (printf, 1, 2)));
+	__attribute__((__noreturn__, __format__(printf, 1, 2)));
 
 #define ATF_INSPECT_TEST	1
 #define ATF_RUN_TEST		2

@@ -25,16 +25,16 @@ implementations of C, `flag', `uint8', and `int8' should all be `typedef'ed
 to the same as `int'.
 -------------------------------------------------------------------------------
 */
-typedef int flag;
-typedef int uint8;
-typedef int int8;
-typedef int uint16;
-typedef int int16;
+typedef int	     flag;
+typedef int	     uint8;
+typedef int	     int8;
+typedef int	     uint16;
+typedef int	     int16;
 typedef unsigned int uint32;
-typedef signed int int32;
+typedef signed int   int32;
 #ifdef BITS64
 typedef unsigned long long int uint64;
-typedef signed long long int int64;
+typedef signed long long int   int64;
 #endif
 
 /*
@@ -45,15 +45,15 @@ implementation of C, `bits16' and `sbits16' should be `typedef'ed to
 `unsigned short int' and `signed short int' (or `short int'), respectively.
 -------------------------------------------------------------------------------
 */
-typedef unsigned char bits8;
-typedef signed char sbits8;
+typedef unsigned char	   bits8;
+typedef signed char	   sbits8;
 typedef unsigned short int bits16;
-typedef signed short int sbits16;
-typedef unsigned int bits32;
-typedef signed int sbits32;
+typedef signed short int   sbits16;
+typedef unsigned int	   bits32;
+typedef signed int	   sbits32;
 #ifdef BITS64
 typedef unsigned long long int bits64;
-typedef signed long long int sbits64;
+typedef signed long long int   sbits64;
 #endif
 
 #ifdef BITS64
@@ -67,7 +67,7 @@ name for the 64-bit integer type.  Some compilers may allow `LIT64' to be
 defined as the identity macro:  `#define LIT64( a ) a'.
 -------------------------------------------------------------------------------
 */
-#define LIT64( a ) a##LL
+#define LIT64(a) a##LL
 #endif
 
 /*
@@ -84,5 +84,5 @@ to be `static'.
 Sh FPU is sane
 -------------------------------------------------------------------------------
 */
-#define FLOAT64_DEMANGLE(a)	(a)
-#define FLOAT64_MANGLE(a)	(a)
+#define FLOAT64_DEMANGLE(a) (a)
+#define FLOAT64_MANGLE(a) (a)

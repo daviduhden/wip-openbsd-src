@@ -4,7 +4,7 @@
  *	The Regents of the University of California.  All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
- * Peter McIlroy and by Dan Bernstein at New York University, 
+ * Peter McIlroy and by Dan Bernstein at New York University,
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,60 +33,62 @@
 
 /*
  * Radixsort routines.
- * 
+ *
  * Program r_sort_a() is unstable but uses O(logN) extra memory for a stack.
  * Use radixsort(a, n, trace, endchar) for this case.
- * 
+ *
  * For stable sorting (using N extra pointers) use sradixsort(), which calls
  * r_sort_b().
- * 
+ *
  * For a description of this code, see D. McIlroy, P. McIlroy, K. Bostic,
  * "Engineering Radix Sort".
  */
 
 #include <sys/types.h>
-#include <stdlib.h>
+
 #include <errno.h>
+#include <stdlib.h>
 
 typedef struct {
 	const u_char **sa;
-	int sn, si;
+	int	       sn, si;
 } stack;
 
-static __inline void simplesort
-(const u_char **, int, int, const u_char *, u_int);
+static __inline void simplesort(
+    const u_char **, int, int, const u_char *, u_int);
 static void r_sort_a(const u_char **, int, int, const u_char *, u_int);
-static void r_sort_b(const u_char **,
-	    const u_char **, int, int, const u_char *, u_int);
+static void r_sort_b(
+    const u_char **, const u_char **, int, int, const u_char *, u_int);
 
-#define	THRESHOLD	20		/* Divert to simplesort(). */
-#define	SIZE		512		/* Default stack size. */
+#define THRESHOLD 20 /* Divert to simplesort(). */
+#define SIZE 512     /* Default stack size. */
 
-#define SETUP {								\
-	if (tab == NULL) {						\
-		tr = tr0;						\
-		for (c = 0; c < endch; c++)				\
-			tr0[c] = c + 1;					\
-		tr0[c] = 0;						\
-		for (c++; c < 256; c++)					\
-			tr0[c] = c;					\
-		endch = 0;						\
-	} else {							\
-		endch = tab[endch];					\
-		tr = tab;						\
-		if (endch != 0 && endch != 255) {			\
-			errno = EINVAL;					\
-			return (-1);					\
-		}							\
-	}								\
-}
+#define SETUP                                                                  \
+	{                                                                      \
+		if (tab == NULL) {                                             \
+			tr = tr0;                                              \
+			for (c = 0; c < endch; c++)                            \
+				tr0[c] = c + 1;                                \
+			tr0[c] = 0;                                            \
+			for (c++; c < 256; c++)                                \
+				tr0[c] = c;                                    \
+			endch = 0;                                             \
+		} else {                                                       \
+			endch = tab[endch];                                    \
+			tr = tab;                                              \
+			if (endch != 0 && endch != 255) {                      \
+				errno = EINVAL;                                \
+				return (-1);                                   \
+			}                                                      \
+		}                                                              \
+	}
 
 int
 radixsort(const u_char **a, int n, const u_char *tab, u_int endch)
 {
 	const u_char *tr;
-	int c;
-	u_char tr0[256];
+	int	      c;
+	u_char	      tr0[256];
 
 	SETUP;
 	r_sort_a(a, n, 0, tr, endch);
@@ -97,8 +99,8 @@ int
 sradixsort(const u_char **a, int n, const u_char *tab, u_int endch)
 {
 	const u_char *tr, **ta;
-	int c;
-	u_char tr0[256];
+	int	      c;
+	u_char	      tr0[256];
 
 	SETUP;
 	if (n < THRESHOLD)
@@ -112,20 +114,20 @@ sradixsort(const u_char **a, int n, const u_char *tab, u_int endch)
 	return (0);
 }
 
-#define empty(s)	(s >= sp)
-#define pop(a, n, i)	a = (--sp)->sa, n = sp->sn, i = sp->si
-#define push(a, n, i)	sp->sa = a, sp->sn = n, (sp++)->si = i
-#define swap(a, b, t)	t = a, a = b, b = t
+#define empty(s) (s >= sp)
+#define pop(a, n, i) a = (--sp)->sa, n = sp->sn, i = sp->si
+#define push(a, n, i) sp->sa = a, sp->sn = n, (sp++)->si = i
+#define swap(a, b, t) t = a, a = b, b = t
 
 /* Unstable, in-place sort. */
 void
 r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch)
 {
-	static int count[256], nc, bmin;
-	int c;
+	static int     count[256], nc, bmin;
+	int	       c;
 	const u_char **ak, *r;
-	stack s[SIZE], *sp, *sp0, *sp1, temp;
-	int *cp, bigc;
+	stack	       s[SIZE], *sp, *sp0, *sp1, temp;
+	int	      *cp, bigc;
 	const u_char **an, *t, **aj, **top[256];
 
 	/* Set up stack. */
@@ -141,7 +143,7 @@ r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch)
 
 		/* Make character histogram. */
 		if (nc == 0) {
-			bmin = 255;	/* First occupied bin, excluding eos. */
+			bmin = 255; /* First occupied bin, excluding eos. */
 			for (ak = a; ak < an;) {
 				c = tr[(*ak++)[i]];
 				if (++count[c] == 1 && c != endch) {
@@ -150,7 +152,7 @@ r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch)
 					nc++;
 				}
 			}
-			if (sp + nc > s + SIZE) {	/* Get more stack. */
+			if (sp + nc > s + SIZE) { /* Get more stack. */
 				r_sort_a(a, n, i, tr, endch);
 				continue;
 			}
@@ -163,28 +165,28 @@ r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch)
 		 * Before permuting: top[c-1] + count[c] = top[c];
 		 * during deal: top[c] counts down to top[c-1].
 		 */
-		sp0 = sp1 = sp;		/* Stack position of biggest bin. */
-		bigc = 2;		/* Size of biggest bin. */
-		if (endch == 0)		/* Special case: set top[eos]. */
+		sp0 = sp1 = sp; /* Stack position of biggest bin. */
+		bigc = 2;	/* Size of biggest bin. */
+		if (endch == 0) /* Special case: set top[eos]. */
 			top[0] = ak = a + count[0];
 		else {
 			ak = a;
 			top[255] = an;
 		}
 		for (cp = count + bmin; nc > 0; cp++) {
-			while (*cp == 0)	/* Find next non-empty pile. */
+			while (*cp == 0) /* Find next non-empty pile. */
 				cp++;
 			if (*cp > 1) {
 				if (*cp > bigc) {
 					bigc = *cp;
 					sp1 = sp;
 				}
-				push(ak, *cp, i+1);
+				push(ak, *cp, i + 1);
 			}
-			top[cp-count] = ak += *cp;
+			top[cp - count] = ak += *cp;
 			nc--;
 		}
-		swap(*sp0, *sp1, temp);	/* Play it safe -- biggest bin last. */
+		swap(*sp0, *sp1, temp); /* Play it safe -- biggest bin last. */
 
 		/*
 		 * Permute misplacements home.  Already home: everything
@@ -198,8 +200,8 @@ r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch)
 		 *	aj<-aj + count[c] connects the bins in a linked list;
 		 *	reset count[c].
 		 */
-		for (aj = a; aj < an;  *aj = r, aj += count[c], count[c] = 0)
-			for (r = *aj;  aj < (ak = --top[c = tr[r[i]]]);)
+		for (aj = a; aj < an; *aj = r, aj += count[c], count[c] = 0)
+			for (r = *aj; aj < (ak = --top[c = tr[r[i]]]);)
 				swap(*ak, r, t);
 	}
 }
@@ -209,12 +211,12 @@ void
 r_sort_b(const u_char **a, const u_char **ta, int n, int i, const u_char *tr,
     u_int endch)
 {
-	static int count[256], nc, bmin;
-	int c;
+	static int     count[256], nc, bmin;
+	int	       c;
 	const u_char **ak, **ai;
-	stack s[512], *sp, *sp0, *sp1, temp;
+	stack	       s[512], *sp, *sp0, *sp1, temp;
 	const u_char **top[256];
-	int *cp, bigc;
+	int	      *cp, bigc;
 
 	sp = s;
 	push(a, n, i);
@@ -259,29 +261,29 @@ r_sort_b(const u_char **a, const u_char **ta, int n, int i, const u_char *tr,
 					bigc = c;
 					sp1 = sp;
 				}
-				push(ak, c, i+1);
+				push(ak, c, i + 1);
 			}
-			top[cp-count] = ak += c;
-			*cp = 0;			/* Reset count[]. */
+			top[cp - count] = ak += c;
+			*cp = 0; /* Reset count[]. */
 			nc--;
 		}
 		swap(*sp0, *sp1, temp);
 
-		for (ak = ta + n, ai = a+n; ak > ta;)	/* Copy to temp. */
+		for (ak = ta + n, ai = a + n; ak > ta;) /* Copy to temp. */
 			*--ak = *--ai;
-		for (ak = ta+n; --ak >= ta;)		/* Deal to piles. */
+		for (ak = ta + n; --ak >= ta;) /* Deal to piles. */
 			*--top[tr[(*ak)[i]]] = *ak;
 	}
 }
-		
+
 static __inline void
 simplesort(const u_char **a, int n, int b, const u_char *tr, u_int endch)
-    /* insertion sort */
+/* insertion sort */
 {
-	u_char ch;
-	const u_char  **ak, **ai, *s, *t;
+	u_char	       ch;
+	const u_char **ak, **ai, *s, *t;
 
-	for (ak = a+1; --n >= 1; ak++)
+	for (ak = a + 1; --n >= 1; ak++)
 		for (ai = ak; ai > a; ai--) {
 			for (s = ai[0] + b, t = ai[-1] + b;
 			    (ch = tr[*s]) != endch; s++, t++)

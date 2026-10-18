@@ -4,7 +4,7 @@
 /*
  * Copyright (C) 1995, 1996, 1997, and 1998 WIDE Project.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  * 3. Neither the name of the project nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,8 +36,8 @@
 #include <netinet/in.h>
 #include <netinet/ip6.h>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 static int ip6optlen(u_int8_t *opt, u_int8_t *lim);
 
@@ -81,12 +81,12 @@ inet6_opt_init(void *extbuf, socklen_t extlen)
 		ext->ip6e_len = (extlen >> 3) - 1;
 	}
 
-	return (2);		/* sizeof the next and the length fields */
+	return (2); /* sizeof the next and the length fields */
 }
 
 int
 inet6_opt_append(void *extbuf, socklen_t extlen, int offset, u_int8_t type,
-		 socklen_t len, u_int8_t align, void **databufp)
+    socklen_t len, u_int8_t align, void **databufp)
 {
 	int currentlen = offset, padlen = 0;
 
@@ -118,13 +118,13 @@ inet6_opt_append(void *extbuf, socklen_t extlen, int offset, u_int8_t type,
 		return (-1);
 
 	/* Calculate the padding length. */
-	currentlen += 2 + len;	/* 2 means "type + len" */
+	currentlen += 2 + len; /* 2 means "type + len" */
 	if (currentlen % align)
 		padlen = align - (currentlen % align);
 
 	/* The option must fit in the extension header buffer. */
 	currentlen += padlen;
-	if (extlen &&		/* XXX: right? */
+	if (extlen && /* XXX: right? */
 	    currentlen > extlen)
 		return (-1);
 
@@ -159,7 +159,7 @@ inet6_opt_finish(void *extbuf, socklen_t extlen, int offset)
 
 	if (extbuf) {
 		u_int8_t *padp;
-		int padlen = updatelen - offset;
+		int	  padlen = updatelen - offset;
 
 		if (updatelen > extlen)
 			return (-1);
@@ -187,10 +187,10 @@ inet6_opt_set_val(void *databuf, int offset, void *val, socklen_t vallen)
 
 int
 inet6_opt_next(void *extbuf, socklen_t extlen, int offset, u_int8_t *typep,
-	       socklen_t *lenp, void **databufp)
+    socklen_t *lenp, void **databufp)
 {
 	u_int8_t *optp, *lim;
-	int optlen;
+	int	  optlen;
 
 	/* Validate extlen. XXX: is the variable really necessary?? */
 	if (extlen == 0 || (extlen % 8))
@@ -209,7 +209,7 @@ inet6_opt_next(void *extbuf, socklen_t extlen, int offset, u_int8_t *typep,
 
 	/* Find the next option skipping any padding options. */
 	while (optp < lim) {
-		switch(*optp) {
+		switch (*optp) {
 		case IP6OPT_PAD1:
 			optp++;
 			break;
@@ -218,7 +218,7 @@ inet6_opt_next(void *extbuf, socklen_t extlen, int offset, u_int8_t *typep,
 				goto optend;
 			optp += optlen;
 			break;
-		default:	/* found */
+		default: /* found */
 			if ((optlen = ip6optlen(optp, lim)) == 0)
 				goto optend;
 			*typep = *optp;
@@ -228,17 +228,17 @@ inet6_opt_next(void *extbuf, socklen_t extlen, int offset, u_int8_t *typep,
 		}
 	}
 
-  optend:
+optend:
 	*databufp = NULL; /* for safety */
 	return (-1);
 }
 
 int
 inet6_opt_find(void *extbuf, socklen_t extlen, int offset, u_int8_t type,
-	       socklen_t *lenp, void **databufp)
+    socklen_t *lenp, void **databufp)
 {
 	u_int8_t *optp, *lim;
-	int optlen;
+	int	  optlen;
 
 	/* Validate extlen. XXX: is the variable really necessary?? */
 	if (extlen == 0 || (extlen % 8))
@@ -269,7 +269,7 @@ inet6_opt_find(void *extbuf, socklen_t extlen, int offset, u_int8_t type,
 		optp += optlen;
 	}
 
-  optend:
+optend:
 	*databufp = NULL; /* for safety */
 	return (-1);
 }

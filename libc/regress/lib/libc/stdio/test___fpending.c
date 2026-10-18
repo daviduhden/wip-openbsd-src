@@ -1,4 +1,5 @@
-/*	$OpenBSD: test___fpending.c,v 1.1 2025/05/25 00:20:54 yasuoka Exp $	*/
+/*	$OpenBSD: test___fpending.c,v 1.1 2025/05/25 00:20:54 yasuoka Exp $
+ */
 
 /*
  * Copyright (c) 2025 YASUOKA Masahiko <yasuoka@yasuoka.net>
@@ -22,29 +23,29 @@
 #include <stdlib.h>
 
 /* we use assert() */
-#undef	NDEBUG
+#undef NDEBUG
 
-#define	TMPFILENAME	"test___fpending.tmp"
+#define TMPFILENAME "test___fpending.tmp"
 
 void test___fpending0(void);
 
 void
 test___fpending0(void)
 {
-	FILE	*fp;
-	int	 r;
-	size_t	 s;
+	FILE  *fp;
+	int    r;
+	size_t s;
 
 	fp = fopen(TMPFILENAME, "w");
 	assert(fp != NULL);
 	r = fputs("Hello world", fp);
 	assert(r >= 0);
 	s = __fpending(fp);
-	assert(s > 0);		/* assume buffered */
+	assert(s > 0); /* assume buffered */
 	r = fflush(fp);
 	assert(r == 0);
 	s = __fpending(fp);
-	assert(s == 0);		/* buffer must be 0 */
+	assert(s == 0); /* buffer must be 0 */
 	r = fclose(fp);
 	assert(r == 0);
 }

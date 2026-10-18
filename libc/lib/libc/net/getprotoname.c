@@ -33,11 +33,11 @@
 #include <string.h>
 
 int
-getprotobyname_r(const char *name, struct protoent *pe,
-    struct protoent_data *pd)
+getprotobyname_r(
+    const char *name, struct protoent *pe, struct protoent_data *pd)
 {
 	char **cp;
-	int error;
+	int    error;
 
 	setprotoent_r(pd->stayopen, pd);
 	while ((error = getprotoent_r(pe, pd)) == 0) {
@@ -60,7 +60,7 @@ struct protoent *
 getprotobyname(const char *name)
 {
 	extern struct protoent_data _protoent_data;
-	static struct protoent proto;
+	static struct protoent	    proto;
 
 	if (getprotobyname_r(name, &proto, &_protoent_data) != 0)
 		return (NULL);

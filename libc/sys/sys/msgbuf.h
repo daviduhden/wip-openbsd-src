@@ -38,21 +38,21 @@
  *	L	log_mtx
  *	Lw	log_mtx for writing
  */
-struct	msgbuf {
-#define	MSG_MAGIC	0x063061
-	long	msg_magic;		/* [I] buffer magic value */
-	long	msg_bufx;		/* [L] write pointer */
-	long	msg_bufr;		/* [L] read pointer */
-	long	msg_bufs;		/* [I] real msg_bufc size (bytes) */
-	long	msg_bufd;		/* [L] number of dropped bytes */
-	char	msg_bufc[1];		/* [Lw] buffer */
+struct msgbuf {
+#define MSG_MAGIC 0x063061
+	long msg_magic;	  /* [I] buffer magic value */
+	long msg_bufx;	  /* [L] write pointer */
+	long msg_bufr;	  /* [L] read pointer */
+	long msg_bufs;	  /* [I] real msg_bufc size (bytes) */
+	long msg_bufd;	  /* [L] number of dropped bytes */
+	char msg_bufc[1]; /* [Lw] buffer */
 };
 #ifdef _KERNEL
-#define CONSBUFSIZE	(16 * 1024)	/* console message buffer size */
+#define CONSBUFSIZE (16 * 1024) /* console message buffer size */
 extern struct msgbuf *msgbufp;
 extern struct msgbuf *consbufp;
 
-void	initmsgbuf(caddr_t buf, size_t bufsize);
-void	initconsbuf(void);
-void	msgbuf_putchar(struct msgbuf *, const char c);
+void initmsgbuf(caddr_t buf, size_t bufsize);
+void initconsbuf(void);
+void msgbuf_putchar(struct msgbuf *, const char c);
 #endif

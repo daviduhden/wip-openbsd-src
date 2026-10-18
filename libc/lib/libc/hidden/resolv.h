@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_RESOLV_H_
-#define	_LIBC_RESOLV_H_
+#define _LIBC_RESOLV_H_
 
 #include_next <resolv.h>
 

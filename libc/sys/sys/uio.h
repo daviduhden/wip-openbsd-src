@@ -33,74 +33,74 @@
  */
 
 #ifndef _SYS_UIO_H_
-#define	_SYS_UIO_H_
+#define _SYS_UIO_H_
 
-#include <sys/cdefs.h>
 #include <sys/_types.h>
+#include <sys/cdefs.h>
 
-#ifndef	_SIZE_T_DEFINED_
-#define	_SIZE_T_DEFINED_
-typedef	__size_t	size_t;
+#ifndef _SIZE_T_DEFINED_
+#define _SIZE_T_DEFINED_
+typedef __size_t size_t;
 #endif
 
-#ifndef	_SSIZE_T_DEFINED_
-#define	_SSIZE_T_DEFINED_
-typedef	__ssize_t	ssize_t;
+#ifndef _SSIZE_T_DEFINED_
+#define _SSIZE_T_DEFINED_
+typedef __ssize_t ssize_t;
 #endif
 
 struct iovec {
-	void	*iov_base;	/* Base address. */
-	size_t	 iov_len;	/* Length. */
+	void  *iov_base; /* Base address. */
+	size_t iov_len;	 /* Length. */
 };
 
-#if __BSD_VISIBLE	/* needed by kdump */
-enum	uio_rw { UIO_READ, UIO_WRITE };
+#if __BSD_VISIBLE /* needed by kdump */
+enum uio_rw { UIO_READ, UIO_WRITE };
 
 /* Segment flag values. */
 enum uio_seg {
-	UIO_USERSPACE,		/* from user data space */
-	UIO_SYSSPACE		/* from system space */
+	UIO_USERSPACE, /* from user data space */
+	UIO_SYSSPACE   /* from system space */
 };
 #endif /* __BSD_VISIBLE */
 
 #ifdef _KERNEL
 struct uio {
-	struct	iovec *uio_iov;	/* pointer to array of iovecs */
-	int	uio_iovcnt;	/* number of iovecs in array */
-	off_t	uio_offset;	/* offset into file this uio corresponds to */
-	size_t	uio_resid;	/* residual i/o count */
-	enum	uio_seg uio_segflg; /* see above */
-	enum	uio_rw uio_rw;	/* see above */
-	struct	proc *uio_procp;/* associated thread or NULL */
+	struct iovec *uio_iov;	  /* pointer to array of iovecs */
+	int	      uio_iovcnt; /* number of iovecs in array */
+	off_t	      uio_offset; /* offset into file this uio corresponds to */
+	size_t	      uio_resid;  /* residual i/o count */
+	enum uio_seg  uio_segflg; /* see above */
+	enum uio_rw   uio_rw;	  /* see above */
+	struct proc  *uio_procp;  /* associated thread or NULL */
 };
 
 /*
  * Limits
  */
-#define UIO_SMALLIOV	8		/* 8 on stack, else malloc */
-#endif /* _KERNEL */
+#define UIO_SMALLIOV 8 /* 8 on stack, else malloc */
+#endif		       /* _KERNEL */
 
 #if __BSD_VISIBLE
-#define UIO_MAXIOV	1024		/* Deprecated, use IOV_MAX instead */
+#define UIO_MAXIOV 1024 /* Deprecated, use IOV_MAX instead */
 #endif
 
-#ifndef	_KERNEL
+#ifndef _KERNEL
 __BEGIN_DECLS
 #if __BSD_VISIBLE
 ssize_t preadv(int, const struct iovec *, int, __off_t);
 ssize_t pwritev(int, const struct iovec *, int, __off_t);
 #endif /* __BSD_VISIBLE */
-ssize_t	readv(int, const struct iovec *, int);
-ssize_t	writev(int, const struct iovec *, int);
+ssize_t readv(int, const struct iovec *, int);
+ssize_t writev(int, const struct iovec *, int);
 __END_DECLS
 #else
-int	ureadc(int c, struct uio *);
+int ureadc(int c, struct uio *);
 
-int	iovec_copyin(const struct iovec *, struct iovec **, struct iovec *,
-	    unsigned int, size_t *);
-void	iovec_free(struct iovec *, unsigned int );
-int	dofilereadv(struct proc *, int, struct uio *, int, register_t *);
-int	dofilewritev(struct proc *, int, struct uio *, int, register_t *);
+int  iovec_copyin(const struct iovec *, struct iovec **, struct iovec *,
+    unsigned int, size_t *);
+void iovec_free(struct iovec *, unsigned int);
+int  dofilereadv(struct proc *, int, struct uio *, int, register_t *);
+int  dofilewritev(struct proc *, int, struct uio *, int, register_t *);
 
 #endif /* !_KERNEL */
 

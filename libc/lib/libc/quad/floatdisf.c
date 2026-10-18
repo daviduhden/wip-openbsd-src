@@ -40,9 +40,9 @@
 float
 __floatdisf(quad_t x)
 {
-	float f;
+	float	 f;
 	union uu u;
-	int neg;
+	int	 neg;
 
 	/*
 	 * Get an unsigned number first, by negating if necessary.

@@ -30,8 +30,10 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
 #include <net/if_dl.h>
+
 #include <string.h>
 
 static const char hexlist[] = "0123456789abcdef";
@@ -39,10 +41,10 @@ static const char hexlist[] = "0123456789abcdef";
 char *
 link_ntoa(const struct sockaddr_dl *sdl)
 {
-	static char obuf[64];
-	char *out;
+	static char   obuf[64];
+	char	     *out;
 	const u_char *in, *inlim;
-	int namelen, i, rem;
+	int	      namelen, i, rem;
 
 	namelen = (sdl->sdl_nlen <= IFNAMSIZ) ? sdl->sdl_nlen : IFNAMSIZ;
 

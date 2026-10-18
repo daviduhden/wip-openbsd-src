@@ -43,10 +43,11 @@ __RCSID("$NetBSD: fixdfdi_ieee754.c,v 1.1 2013/08/24 00:51:48 matt Exp $");
 #include "softfloat/softfloat-for-gcc.h"
 #endif
 
-#include "../../../quad/quad.h"
 #include <limits.h>
-#include <stdbool.h>
 #include <machine/ieee.h>
+#include <stdbool.h>
+
+#include "../../../quad/quad.h"
 
 /*
  * Convert double to signed quad.
@@ -57,14 +58,14 @@ quad_t
 __fixdfdi(double x)
 {
 	struct ieee_double ux = *(struct ieee_double *)&x;
-	signed int exp = ux.dbl_exp - DBL_EXP_BIAS;
-	const bool neg = ux.dbl_sign;
-	quad_t r;
+	signed int	   exp = ux.dbl_exp - DBL_EXP_BIAS;
+	const bool	   neg = ux.dbl_sign;
+	quad_t		   r;
 
 	if (exp > 62)
 		return neg ? QUAD_MIN : QUAD_MAX;
 
-	r = 1 << DBL_FRACHBITS;		/* implicit bit */
+	r = 1 << DBL_FRACHBITS; /* implicit bit */
 	r |= ux.dbl_frach;
 	exp -= DBL_FRACHBITS;
 	if (exp < 0) {

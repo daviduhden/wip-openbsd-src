@@ -32,8 +32,8 @@
  *	@(#)signalvar.h	8.3 (Berkeley) 1/4/94
  */
 
-#ifndef	_SYS_SIGNALVAR_H_		/* tmp for user.h */
-#define	_SYS_SIGNALVAR_H_
+#ifndef _SYS_SIGNALVAR_H_ /* tmp for user.h */
+#define _SYS_SIGNALVAR_H_
 
 /*
  * Kernel signal definitions and data structures,
@@ -48,45 +48,45 @@
  *	a	atomic operations
  *	m	this process' `ps_mtx'
  */
-struct	sigacts {
-	sig_t	ps_sigact[NSIG];	/* [m] disposition of signals */
-	sigset_t ps_catchmask[NSIG];	/* [m] signals to be blocked */
-	sigset_t ps_sigonstack;		/* [m] signals to take on sigstack */
-	sigset_t ps_sigintr;		/* [m] signals interrupt syscalls */
-	sigset_t ps_sigreset;		/* [m] signals that reset when caught */
-	sigset_t ps_siginfo;		/* [m] signals that provide siginfo */
-	sigset_t ps_sigignore;		/* [m] signals being ignored */
-	sigset_t ps_sigcatch;		/* [m] signals being caught by user */
-	int	ps_sigflags;		/* [a] signal flags, below */
+struct sigacts {
+	sig_t	 ps_sigact[NSIG];    /* [m] disposition of signals */
+	sigset_t ps_catchmask[NSIG]; /* [m] signals to be blocked */
+	sigset_t ps_sigonstack;	     /* [m] signals to take on sigstack */
+	sigset_t ps_sigintr;	     /* [m] signals interrupt syscalls */
+	sigset_t ps_sigreset;	     /* [m] signals that reset when caught */
+	sigset_t ps_siginfo;	     /* [m] signals that provide siginfo */
+	sigset_t ps_sigignore;	     /* [m] signals being ignored */
+	sigset_t ps_sigcatch;	     /* [m] signals being caught by user */
+	int	 ps_sigflags;	     /* [a] signal flags, below */
 };
 
 /* signal flags */
-#define	SAS_NOCLDSTOP	0x01	/* No SIGCHLD when children stop. */
-#define	SAS_NOCLDWAIT	0x02	/* No zombies if child dies */
+#define SAS_NOCLDSTOP 0x01 /* No SIGCHLD when children stop. */
+#define SAS_NOCLDWAIT 0x02 /* No zombies if child dies */
 
 /* additional signal action values, used only temporarily/internally */
-#define	SIG_CATCH	(void (*)(int))2
-#define	SIG_HOLD	(void (*)(int))3
+#define SIG_CATCH (void (*)(int))2
+#define SIG_HOLD (void (*)(int))3
 
 /*
  * Check if process p has an unmasked signal pending.
  * Return mask of pending signals.
  */
-#define SIGPENDING(p)							\
+#define SIGPENDING(p)                                                          \
 	(((p)->p_siglist | (p)->p_p->ps_siglist) & ~(p)->p_sigmask)
 
 /*
  * Signal properties and actions.
  */
-#define	SA_KILL		0x01		/* terminates process by default */
-#define	SA_CORE		0x02		/* ditto and coredumps */
-#define	SA_STOP		0x04		/* suspend process */
-#define	SA_TTYSTOP	0x08		/* ditto, from tty */
-#define	SA_IGNORE	0x10		/* ignore by default */
-#define	SA_CONT		0x20		/* continue if suspended */
-#define	SA_CANTMASK	0x40		/* non-maskable, catchable */
+#define SA_KILL 0x01	 /* terminates process by default */
+#define SA_CORE 0x02	 /* ditto and coredumps */
+#define SA_STOP 0x04	 /* suspend process */
+#define SA_TTYSTOP 0x08	 /* ditto, from tty */
+#define SA_IGNORE 0x10	 /* ignore by default */
+#define SA_CONT 0x20	 /* continue if suspended */
+#define SA_CANTMASK 0x40 /* non-maskable, catchable */
 
-#define	sigcantmask	(sigmask(SIGKILL) | sigmask(SIGSTOP))
+#define sigcantmask (sigmask(SIGKILL) | sigmask(SIGSTOP))
 
 #ifdef _KERNEL
 enum signal_type { SPROCESS, STHREAD };
@@ -94,47 +94,47 @@ enum signal_type { SPROCESS, STHREAD };
 struct sigio_ref;
 
 struct sigctx {
-	sig_t		sig_action;
-	sigset_t	sig_catchmask;
-	int		sig_onstack;
-	int		sig_intr;
-	int		sig_reset;
-	int		sig_info;
-	int		sig_ignore;
-	int		sig_catch;
-	int		sig_stop;
+	sig_t	 sig_action;
+	sigset_t sig_catchmask;
+	int	 sig_onstack;
+	int	 sig_intr;
+	int	 sig_reset;
+	int	 sig_info;
+	int	 sig_ignore;
+	int	 sig_catch;
+	int	 sig_stop;
 };
 
 /*
  * Machine-independent functions:
  */
-int	coredump(struct proc *p);
-void	execsigs(struct proc *p);
-int	cursig(struct proc *p, struct sigctx *, int);
-void	pgsigio(struct sigio_ref *sir, int sig, int checkctty);
-void	pgsignal(struct pgrp *pgrp, int sig, int checkctty);
-void	psignal(struct proc *p, int sig);
-void	ptsignal(struct proc *p, int sig, enum signal_type type);
-void	prsignal(struct process *pr, int sig);
-void	trapsignal(struct proc *p, int sig, u_long code, int type,
-	    union sigval val);
+int  coredump(struct proc *p);
+void execsigs(struct proc *p);
+int  cursig(struct proc *p, struct sigctx *, int);
+void pgsigio(struct sigio_ref *sir, int sig, int checkctty);
+void pgsignal(struct pgrp *pgrp, int sig, int checkctty);
+void psignal(struct proc *p, int sig);
+void ptsignal(struct proc *p, int sig, enum signal_type type);
+void prsignal(struct process *pr, int sig);
+void trapsignal(
+    struct proc *p, int sig, u_long code, int type, union sigval val);
 __dead void sigexit(struct proc *, int);
-void	sigabort(struct proc *);
-int	sigismasked(struct proc *, int);
-int	sigonstack(size_t);
-int	killpg1(struct proc *, int, int, int);
+void	    sigabort(struct proc *);
+int	    sigismasked(struct proc *, int);
+int	    sigonstack(size_t);
+int	    killpg1(struct proc *, int, int, int);
 
-void	signal_init(void);
+void signal_init(void);
 
-void	sigstkinit(struct sigaltstack *);
-struct sigacts	*sigactsinit(struct process *);
-void	sigactsfree(struct sigacts *);
-void	siginit(struct sigacts *);
+void		sigstkinit(struct sigaltstack *);
+struct sigacts *sigactsinit(struct process *);
+void		sigactsfree(struct sigacts *);
+void		siginit(struct sigacts *);
 
 /*
  * Machine-dependent functions:
  */
-int	sendsig(sig_t _catcher, int _sig, sigset_t _mask, const siginfo_t *_si,
-	    int _info, int _onstack);
-#endif	/* _KERNEL */
-#endif	/* !_SYS_SIGNALVAR_H_ */
+int sendsig(sig_t _catcher, int _sig, sigset_t _mask, const siginfo_t *_si,
+    int _info, int _onstack);
+#endif /* _KERNEL */
+#endif /* !_SYS_SIGNALVAR_H_ */

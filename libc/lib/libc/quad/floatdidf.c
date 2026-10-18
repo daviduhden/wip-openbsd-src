@@ -40,9 +40,9 @@
 double
 __floatdidf(quad_t x)
 {
-	double d;
+	double	 d;
 	union uu u;
-	int neg;
+	int	 neg;
 
 	/*
 	 * Get an unsigned number first, by negating if necessary.

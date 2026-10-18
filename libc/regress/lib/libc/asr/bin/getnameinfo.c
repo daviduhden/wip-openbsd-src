@@ -27,26 +27,27 @@
 static void
 usage(void)
 {
-	extern const char * __progname;
+	extern const char *__progname;
 
-	fprintf(stderr, "usage: %s [-DFHNSe] [-p portno] <addr...>\n", __progname);
+	fprintf(
+	    stderr, "usage: %s [-DFHNSe] [-p portno] <addr...>\n", __progname);
 	exit(1);
 }
 
 int
 main(int argc, char *argv[])
 {
-	char			 serv[1024];
-	char			 host[1024];
-	const char		 *e;
-	int			 i, ch, flags = 0, port = 0;
-	struct sockaddr_storage	 ss;
-	struct sockaddr		*sa;
+	char			serv[1024];
+	char			host[1024];
+	const char	       *e;
+	int			i, ch, flags = 0, port = 0;
+	struct sockaddr_storage ss;
+	struct sockaddr	       *sa;
 
-	sa = (struct sockaddr*)&ss;
+	sa = (struct sockaddr *)&ss;
 
-	while((ch = getopt(argc, argv, "DFHNR:Saep:")) !=  -1) {
-		switch(ch) {
+	while ((ch = getopt(argc, argv, "DFHNR:Saep:")) != -1) {
+		switch (ch) {
 		case 'D':
 			flags |= NI_DGRAM;
 			break;
@@ -81,7 +82,7 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	for(i = 0; i < argc; i++) {
+	for (i = 0; i < argc; i++) {
 
 		if (i)
 			printf("\n");
@@ -108,7 +109,6 @@ main(int argc, char *argv[])
 		if (gai_errno == 0)
 			printf("   %s:%s\n", host, serv);
 		print_errors();
-
 	}
 
 	return (0);

@@ -20,30 +20,28 @@
 
 #ifdef _KERNEL
 
-#include <machine/sysarch.h>
 #include <machine/pcb.h>
+#include <machine/sysarch.h>
 
-#define TCB_GET(p)		\
-	((void *)i386_get_threadbase(p, TSEG_GS))
-#define TCB_SET(p, addr)	\
-	i386_set_threadbase(p, (uint32_t)(addr), TSEG_GS)
+#define TCB_GET(p) ((void *)i386_get_threadbase(p, TSEG_GS))
+#define TCB_SET(p, addr) i386_set_threadbase(p, (uint32_t)(addr), TSEG_GS)
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for big TCB, with static TLS data at negative offsets */
-#define TLS_VARIANT	2
+#define TLS_VARIANT 2
 
 /* Read a slot from the TCB */
 static inline void *
 __i386_read_tcb(int offset)
 {
-	void	*val;
-	__asm__ ("movl %%gs:(%1),%0" : "=r" (val) : "r" (offset));
+	void *val;
+	__asm__("movl %%gs:(%1),%0" : "=r"(val) : "r"(offset));
 	return val;
 }
 
 /* Get a pointer to the TCB itself */
-#define TCB_GET()		__i386_read_tcb(0)
+#define TCB_GET() __i386_read_tcb(0)
 
 /* Setting the TCB pointer can only be done via syscall, so no TCB_SET() */
 

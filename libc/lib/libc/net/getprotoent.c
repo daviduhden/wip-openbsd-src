@@ -32,21 +32,21 @@
 #include <sys/socket.h>
 
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 void
 setprotoent_r(int f, struct protoent_data *pd)
 {
 	if (pd->fp == NULL) {
-		int fd = __pledge_open(_PATH_PROTOCOLS, O_RDONLY|O_CLOEXEC);
+		int fd = __pledge_open(_PATH_PROTOCOLS, O_RDONLY | O_CLOEXEC);
 		if (fd != -1)
-			pd->fp = fdopen(fd, "r" );
+			pd->fp = fdopen(fd, "r");
 		if (pd->fp == NULL)
 			close(fd);
 	} else
@@ -74,19 +74,19 @@ DEF_WEAK(endprotoent_r);
 int
 getprotoent_r(struct protoent *pe, struct protoent_data *pd)
 {
-	char *p, *cp, **q, *endp;
+	char  *p, *cp, **q, *endp;
 	size_t len;
-	long l;
-	int serrno;
+	long   l;
+	int    serrno;
 
-	if (pd->fp == NULL && (pd->fp = fopen(_PATH_PROTOCOLS, "re" )) == NULL)
+	if (pd->fp == NULL && (pd->fp = fopen(_PATH_PROTOCOLS, "re")) == NULL)
 		return (-1);
 again:
 	if ((p = fgetln(pd->fp, &len)) == NULL)
 		return (-1);
 	if (len == 0 || *p == '#' || *p == '\n')
 		goto again;
-	if (p[len-1] == '\n')
+	if (p[len - 1] == '\n')
 		len--;
 	if ((cp = memchr(p, '#', len)) != NULL)
 		len = cp - p;
@@ -127,8 +127,8 @@ again:
 				continue;
 			}
 			if (q == &pe->p_aliases[pd->maxaliases - 1]) {
-				p = reallocarray(pe->p_aliases,
-				    pd->maxaliases, 2 * sizeof(char *));
+				p = reallocarray(pe->p_aliases, pd->maxaliases,
+				    2 * sizeof(char *));
 				if (p == NULL) {
 					serrno = errno;
 					endprotoent_r(pd);
@@ -150,7 +150,7 @@ again:
 }
 DEF_WEAK(getprotoent_r);
 
-struct protoent_data _protoent_data;	/* shared with getproto{,name}.c */
+struct protoent_data _protoent_data; /* shared with getproto{,name}.c */
 
 void
 setprotoent(int f)

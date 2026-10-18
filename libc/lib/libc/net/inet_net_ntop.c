@@ -1,4 +1,5 @@
-/*	$OpenBSD: inet_net_ntop.c,v 1.9 2019/07/03 03:24:04 deraadt Exp $	*/
+/*	$OpenBSD: inet_net_ntop.c,v 1.9 2019/07/03 03:24:04 deraadt Exp $
+ */
 
 /*
  * Copyright (c) 2012 by Gilles Chehade <gilles@openbsd.org>
@@ -20,13 +21,14 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 static char *inet_net_ntop_ipv4(const u_char *, int, char *, size_t);
 static char *inet_net_ntop_ipv6(const u_char *, int, char *, size_t);
@@ -73,9 +75,9 @@ inet_net_ntop_ipv4(const u_char *src, int bits, char *dst, size_t size)
 {
 	char *odst = dst;
 	u_int m;
-	int b;
+	int   b;
 	char *ep;
-	int advance;
+	int   advance;
 
 	ep = dst + size;
 	if (ep <= dst)
@@ -131,7 +133,7 @@ inet_net_ntop_ipv4(const u_char *src, int bits, char *dst, size_t size)
 	dst += advance;
 	return (odst);
 
- emsgsize:
+emsgsize:
 	errno = EMSGSIZE;
 	return (NULL);
 }
@@ -139,8 +141,8 @@ inet_net_ntop_ipv4(const u_char *src, int bits, char *dst, size_t size)
 static char *
 inet_net_ntop_ipv6(const u_char *src, int bits, char *dst, size_t size)
 {
-	int	ret;
-	char	buf[sizeof("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:255:255:255:255/128")];
+	int  ret;
+	char buf[sizeof("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:255:255:255:255/128")];
 
 	if (bits < 0 || bits > 128) {
 		errno = EINVAL;
@@ -153,7 +155,7 @@ inet_net_ntop_ipv6(const u_char *src, int bits, char *dst, size_t size)
 	ret = snprintf(dst, size, "%s/%d", buf, bits);
 	if (ret < 0 || ret >= size) {
 		errno = EMSGSIZE;
-		return (NULL); 
+		return (NULL);
 	}
 
 	return (dst);

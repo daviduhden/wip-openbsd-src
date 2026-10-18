@@ -28,13 +28,13 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/sysctl.h>
+#include <sys/time.h>
 
 #include <stdlib.h>
 
-#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 /*
  * getloadavg() -- Get system load averages.
@@ -46,9 +46,9 @@ int
 getloadavg(double loadavg[], int nelem)
 {
 	struct loadavg loadinfo;
-	const int mib[2] = { CTL_VM, VM_LOADAVG };
-	int i;
-	size_t size;
+	const int      mib[2] = {CTL_VM, VM_LOADAVG};
+	int	       i;
+	size_t	       size;
 
 	size = sizeof(loadinfo);
 	if (sysctl(mib, 2, &loadinfo, &size, NULL, 0) == -1)
@@ -56,6 +56,6 @@ getloadavg(double loadavg[], int nelem)
 
 	nelem = MINIMUM(nelem, sizeof(loadinfo.ldavg) / sizeof(fixpt_t));
 	for (i = 0; i < nelem; i++)
-		loadavg[i] = (double) loadinfo.ldavg[i] / loadinfo.fscale;
+		loadavg[i] = (double)loadinfo.ldavg[i] / loadinfo.fscale;
 	return (nelem);
 }

@@ -20,28 +20,28 @@
  */
 
 #include <sys/types.h>
-#include <sys/time.h>
-#include <sys/futex.h>
 #include <sys/atomic.h>
+#include <sys/futex.h>
 #include <sys/gmon.h>
+#include <sys/time.h>
 
+#include <assert.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <tib.h>
 #include <unistd.h>
-#include <assert.h>
 
 #include "rthread.h"
 
-#define RTHREAD_ENV_DEBUG	"RTHREAD_DEBUG"
+#define RTHREAD_ENV_DEBUG "RTHREAD_DEBUG"
 
 int _rthread_debug_level;
 
 static int _threads_inited;
 
 struct pthread _initial_thread = {
-	.flags_lock = _SPINLOCK_UNLOCKED,
-	.name = "Original thread",
+    .flags_lock = _SPINLOCK_UNLOCKED,
+    .name = "Original thread",
 };
 
 /*
@@ -89,8 +89,8 @@ __cmtx_init(struct __cmtx *cmtx)
 int
 __cmtx_enter_try(struct __cmtx *cmtx)
 {
-	if (atomic_cas_uint(&cmtx->lock,
-	    __CMTX_UNLOCKED, __CMTX_LOCKED) == __CMTX_UNLOCKED) {
+	if (atomic_cas_uint(&cmtx->lock, __CMTX_UNLOCKED, __CMTX_LOCKED) ==
+	    __CMTX_UNLOCKED) {
 		membar_enter_after_atomic();
 		return (1);
 	}
@@ -103,8 +103,7 @@ __cmtx_enter(struct __cmtx *cmtx)
 {
 	unsigned int locked;
 
-	locked = atomic_cas_uint(&cmtx->lock,
-	    __CMTX_UNLOCKED, __CMTX_LOCKED);
+	locked = atomic_cas_uint(&cmtx->lock, __CMTX_UNLOCKED, __CMTX_LOCKED);
 	if (locked == __CMTX_UNLOCKED) {
 		membar_enter_after_atomic();
 		return;
@@ -115,21 +114,21 @@ __cmtx_enter(struct __cmtx *cmtx)
 	do {
 		switch (locked) {
 		case __CMTX_LOCKED:
-			locked = atomic_cas_uint(&cmtx->lock,
-			    __CMTX_LOCKED, __CMTX_CONTENDED);
+			locked = atomic_cas_uint(
+			    &cmtx->lock, __CMTX_LOCKED, __CMTX_CONTENDED);
 			if (locked == __CMTX_UNLOCKED)
 				break;
 
 			/* lock is LOCKED -> CONTENDED or was CONTENDED */
 			/* FALLTHROUGH */
 		case __CMTX_CONTENDED:
-			futex(&cmtx->lock, FUTEX_WAIT_PRIVATE,
-			    __CMTX_CONTENDED, NULL, NULL);
+			futex(&cmtx->lock, FUTEX_WAIT_PRIVATE, __CMTX_CONTENDED,
+			    NULL, NULL);
 			break;
 		}
 
-		locked = atomic_cas_uint(&cmtx->lock,
-		    __CMTX_UNLOCKED, __CMTX_CONTENDED);
+		locked = atomic_cas_uint(
+		    &cmtx->lock, __CMTX_UNLOCKED, __CMTX_CONTENDED);
 	} while (locked != __CMTX_UNLOCKED);
 
 	membar_enter_after_atomic();
@@ -141,8 +140,7 @@ __cmtx_leave(struct __cmtx *cmtx)
 	unsigned int locked;
 
 	membar_exit_before_atomic();
-	locked = atomic_cas_uint(&cmtx->lock,
-	    __CMTX_LOCKED, __CMTX_UNLOCKED);
+	locked = atomic_cas_uint(&cmtx->lock, __CMTX_LOCKED, __CMTX_UNLOCKED);
 	if (locked != __CMTX_LOCKED) {
 		assert(locked != __CMTX_UNLOCKED);
 		cmtx->lock = __CMTX_UNLOCKED;
@@ -197,8 +195,8 @@ __cmtx_enter(struct __cmtx *cmtx)
 	_spinunlock(&cmtx->spin);
 
 	while (locked != __CMTX_UNLOCKED) {
-		futex(&cmtx->lock, FUTEX_WAIT_PRIVATE,
-		    __CMTX_CONTENDED, NULL, NULL);
+		futex(&cmtx->lock, FUTEX_WAIT_PRIVATE, __CMTX_CONTENDED, NULL,
+		    NULL);
 
 		_spinlock(&cmtx->spin);
 		locked = cmtx->lock;
@@ -292,7 +290,7 @@ __rcmtx_leave(struct __rcmtx *rcmtx)
 static void
 _rthread_init(void)
 {
-	pthread_t thread = &_initial_thread;
+	pthread_t   thread = &_initial_thread;
 	struct tib *tib;
 
 	if (_threads_inited)
@@ -315,7 +313,7 @@ _rthread_init(void)
 		if (envp != NULL) {
 			char *rem;
 
-			_rthread_debug_level = (int) strtol(envp, &rem, 0);
+			_rthread_debug_level = (int)strtol(envp, &rem, 0);
 			if (*rem != '\0' || _rthread_debug_level < 0)
 				_rthread_debug_level = 0;
 		}
@@ -344,8 +342,8 @@ void
 pthread_exit(void *retval)
 {
 	struct rthread_cleanup_fn *clfn;
-	struct tib *tib;
-	pthread_t thread = pthread_self();
+	struct tib		  *tib;
+	pthread_t		   thread = pthread_self();
 
 	tib = thread->tib;
 
@@ -362,7 +360,7 @@ pthread_exit(void *retval)
 
 	thread->retval = retval;
 
-	for (clfn = thread->cleanup_fns; clfn; ) {
+	for (clfn = thread->cleanup_fns; clfn;) {
 		struct rthread_cleanup_fn *oclfn = clfn;
 		clfn = clfn->next;
 		oclfn->fn(oclfn->arg);
@@ -375,7 +373,8 @@ pthread_exit(void *retval)
 		_thread_cb.tc_thread_release(thread);
 
 	__threxit(&tib->tib_tid);
-	for(;;);
+	for (;;)
+		;
 }
 DEF_STRONG(pthread_exit);
 
@@ -384,4 +383,3 @@ pthread_equal(pthread_t t1, pthread_t t2)
 {
 	return (t1 == t2);
 }
-

@@ -52,15 +52,15 @@ bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
 {
 	const char *base = base0;
 	const void *p;
-	size_t lim;
-	int cmp;
+	size_t	    lim;
+	int	    cmp;
 
 	for (lim = nmemb; lim != 0; lim >>= 1) {
 		p = base + (lim >> 1) * size;
 		cmp = (*compar)(key, p);
 		if (cmp == 0)
 			return ((void *)p);
-		if (cmp > 0) {	/* key > p: move right */
+		if (cmp > 0) { /* key > p: move right */
 			base = (char *)p + size;
 			lim--;
 		} /* else move left */

@@ -36,15 +36,17 @@
  * Client interface to pmap rpc service.
  */
 
-#include <unistd.h>
-#include <rpc/rpc.h>
-#include <rpc/pmap_prot.h>
-#include <rpc/pmap_clnt.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
 
-static struct timeval timeout = { 5, 0 };
-static struct timeval tottimeout = { 60, 0 };
+#include <rpc/pmap_clnt.h>
+#include <rpc/pmap_prot.h>
+#include <rpc/rpc.h>
+#include <unistd.h>
+
+static struct timeval timeout = {5, 0};
+static struct timeval tottimeout = {60, 0};
 
 /*
  * Find the mapped port for program,version.
@@ -52,24 +54,24 @@ static struct timeval tottimeout = { 60, 0 };
  * Returns 0 if no map exists.
  */
 u_short
-pmap_getport(struct sockaddr_in *address, u_long program, u_long version,
-    u_int protocol)
+pmap_getport(
+    struct sockaddr_in *address, u_long program, u_long version, u_int protocol)
 {
-	u_short port = 0;
-	int sock = -1;
-	CLIENT *client;
+	u_short	    port = 0;
+	int	    sock = -1;
+	CLIENT	   *client;
 	struct pmap parms;
 
 	address->sin_port = htons(PMAPPORT);
-	client = clntudp_bufcreate(address, PMAPPROG,
-	    PMAPVERS, timeout, &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
+	client = clntudp_bufcreate(address, PMAPPROG, PMAPVERS, timeout, &sock,
+	    RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
 	if (client != NULL) {
 		parms.pm_prog = program;
 		parms.pm_vers = version;
 		parms.pm_prot = protocol;
-		parms.pm_port = 0;  /* not needed or used */
+		parms.pm_port = 0; /* not needed or used */
 		if (CLNT_CALL(client, PMAPPROC_GETPORT, xdr_pmap, &parms,
-		    xdr_u_short, &port, tottimeout) != RPC_SUCCESS){
+			xdr_u_short, &port, tottimeout) != RPC_SUCCESS) {
 			rpc_createerr.cf_stat = RPC_PMAPFAILURE;
 			clnt_geterr(client, &rpc_createerr.cf_error);
 		} else if (port == 0) {

@@ -23,4 +23,4 @@
 PROTO_NORMAL(nl_langinfo);
 PROTO_DEPRECATED(nl_langinfo_l);
 
-#endif	/* _LIBC_LANGINFO_H_ */
+#endif /* _LIBC_LANGINFO_H_ */

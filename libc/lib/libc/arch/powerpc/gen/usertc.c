@@ -19,10 +19,10 @@
 #include <sys/timetc.h>
 
 static __inline u_int32_t
-ppc_mftbl (void)
+ppc_mftbl(void)
 {
 	int ret;
-	__asm volatile ("mftb %0" : "=r" (ret));
+	__asm volatile("mftb %0" : "=r"(ret));
 	return ret;
 }
 

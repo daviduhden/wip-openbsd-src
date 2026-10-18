@@ -16,7 +16,9 @@
  */
 
 #include <sys/select.h>
+
 #include <signal.h>
+
 #include "cancel.h"
 
 int
@@ -24,7 +26,7 @@ pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
     const struct timespec *timeout, const sigset_t *sigmask)
 {
 	sigset_t set;
-	int ret;
+	int	 ret;
 
 	if (sigmask != NULL && sigismember(sigmask, SIGTHR)) {
 		set = *sigmask;
@@ -33,8 +35,8 @@ pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	}
 
 	ENTER_CANCEL_POINT(1);
-	ret = HIDDEN(pselect)(nfds, readfds, writefds, exceptfds, timeout,
-	    sigmask);
+	ret = HIDDEN(pselect)(
+	    nfds, readfds, writefds, exceptfds, timeout, sigmask);
 	LEAVE_CANCEL_POINT(ret == -1);
 
 	return (ret);

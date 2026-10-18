@@ -26,16 +26,15 @@
  * SUCH DAMAGE.
  */
 
-
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
 
 size_t
-mbstowcs(wchar_t * __restrict pwcs, const char * __restrict s, size_t n)
+mbstowcs(wchar_t *__restrict pwcs, const char *__restrict s, size_t n)
 {
-	mbstate_t mbs;
+	mbstate_t   mbs;
 	const char *sp;
 
 	memset(&mbs, 0, sizeof(mbs));

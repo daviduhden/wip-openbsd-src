@@ -1,4 +1,5 @@
-/*	$OpenBSD: getnameinfo_async.c,v 1.16 2026/06/23 17:48:06 florian Exp $	*/
+/*	$OpenBSD: getnameinfo_async.c,v 1.16 2026/06/23 17:48:06 florian Exp $
+ */
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -17,14 +18,15 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <netdb.h>
-
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -48,9 +50,9 @@ getnameinfo_async(const struct sockaddr *sa, socklen_t slen, char *host,
 	as->as_run = getnameinfo_async_run;
 
 	if (sa->sa_family == AF_INET)
-		memmove(&as->as.ni.sa.sa, sa, sizeof (as->as.ni.sa.sain));
+		memmove(&as->as.ni.sa.sa, sa, sizeof(as->as.ni.sa.sain));
 	else if (sa->sa_family == AF_INET6)
-		memmove(&as->as.ni.sa.sa, sa, sizeof (as->as.ni.sa.sain6));
+		memmove(&as->as.ni.sa.sa, sa, sizeof(as->as.ni.sa.sain6));
 
 	as->as.ni.sa.sa.sa_len = slen;
 	as->as.ni.hostname = host;
@@ -62,7 +64,7 @@ getnameinfo_async(const struct sockaddr *sa, socklen_t slen, char *host,
 	_asr_ctx_unref(ac);
 	return (as);
 
-    abort:
+abort:
 	if (as)
 		_asr_async_free(as);
 	_asr_ctx_unref(ac);
@@ -73,11 +75,11 @@ DEF_WEAK(getnameinfo_async);
 static int
 getnameinfo_async_run(struct asr_query *as, struct asr_result *ar)
 {
-	void		*addr;
-	socklen_t	 addrlen;
-	int		 r;
+	void	 *addr;
+	socklen_t addrlen;
+	int	  r;
 
-    next:
+next:
 	switch (as->as_state) {
 
 	case ASR_STATE_INIT:
@@ -92,9 +94,11 @@ getnameinfo_async_run(struct asr_query *as, struct asr_result *ar)
 		}
 
 		if ((as->as.ni.sa.sa.sa_family == AF_INET &&
-		    (as->as.ni.sa.sa.sa_len != sizeof (as->as.ni.sa.sain))) ||
+			(as->as.ni.sa.sa.sa_len !=
+			    sizeof(as->as.ni.sa.sain))) ||
 		    (as->as.ni.sa.sa.sa_family == AF_INET6 &&
-		    (as->as.ni.sa.sa.sa_len != sizeof (as->as.ni.sa.sain6)))) {
+			(as->as.ni.sa.sa.sa_len !=
+			    sizeof(as->as.ni.sa.sain6)))) {
 			ar->ar_gai_errno = EAI_FAIL;
 			async_set_state(as, ASR_STATE_HALT);
 			break;
@@ -140,9 +144,8 @@ getnameinfo_async_run(struct asr_query *as, struct asr_result *ar)
 		/*
 		 * Create a subquery to lookup the address.
 		 */
-		as->as_subq = _gethostbyaddr_async_ctx(addr, addrlen,
-		    as->as.ni.sa.sa.sa_family,
-		    as->as_ctx);
+		as->as_subq = _gethostbyaddr_async_ctx(
+		    addr, addrlen, as->as.ni.sa.sa.sa_family, as->as_ctx);
 		if (as->as_subq == NULL) {
 			ar->ar_gai_errno = EAI_MEMORY;
 			async_set_state(as, ASR_STATE_HALT);
@@ -177,9 +180,8 @@ getnameinfo_async_run(struct asr_query *as, struct asr_result *ar)
 			} else
 				ar->ar_gai_errno = 0;
 		} else {
-			if (strlcpy(as->as.ni.hostname,
-			    ar->ar_hostent->h_name,
-			    as->as.ni.hostnamelen) >= as->as.ni.hostnamelen)
+			if (strlcpy(as->as.ni.hostname, ar->ar_hostent->h_name,
+				as->as.ni.hostnamelen) >= as->as.ni.hostnamelen)
 				ar->ar_gai_errno = EAI_OVERFLOW;
 			else
 				ar->ar_gai_errno = 0;
@@ -201,7 +203,6 @@ getnameinfo_async_run(struct asr_query *as, struct asr_result *ar)
 	goto next;
 }
 
-
 /*
  * Set the service name on the result buffer is not NULL.
  * return (-1) if the buffer is too small.
@@ -209,11 +210,11 @@ getnameinfo_async_run(struct asr_query *as, struct asr_result *ar)
 static int
 _servname(struct asr_query *as)
 {
-	struct servent		 s;
-	struct servent_data	 sd;
-	int			 port, r;
-	char			*buf = as->as.ni.servname;
-	size_t			 n, buflen = as->as.ni.servnamelen;
+	struct servent	    s;
+	struct servent_data sd;
+	int		    port, r;
+	char		   *buf = as->as.ni.servname;
+	size_t		    n, buflen = as->as.ni.servnamelen;
 
 	if (as->as.ni.servname == NULL || as->as.ni.servnamelen == 0)
 		return (0);
@@ -224,9 +225,9 @@ _servname(struct asr_query *as)
 		port = as->as.ni.sa.sain6.sin6_port;
 
 	if (!(as->as.ni.flags & NI_NUMERICSERV)) {
-		memset(&sd, 0, sizeof (sd));
-		r = getservbyport_r(port, (as->as.ni.flags & NI_DGRAM) ?
-		    "udp" : "tcp", &s, &sd);
+		memset(&sd, 0, sizeof(sd));
+		r = getservbyport_r(port,
+		    (as->as.ni.flags & NI_DGRAM) ? "udp" : "tcp", &s, &sd);
 		if (r == 0)
 			n = strlcpy(buf, s.s_name, buflen);
 		endservent_r(&sd);
@@ -250,11 +251,11 @@ _servname(struct asr_query *as)
 static int
 _numerichost(struct asr_query *as)
 {
-	unsigned int	ifidx;
-	char		scope[IF_NAMESIZE + 1], *ifname;
-	void		*addr;
-	char		*buf = as->as.ni.hostname;
-	size_t		 buflen = as->as.ni.hostnamelen;
+	unsigned int ifidx;
+	char	     scope[IF_NAMESIZE + 1], *ifname;
+	void	    *addr;
+	char	    *buf = as->as.ni.hostname;
+	size_t	     buflen = as->as.ni.hostnamelen;
 
 	if (as->as.ni.sa.sa.sa_family == AF_INET)
 		addr = &as->as.ni.sa.sain.sin_addr;

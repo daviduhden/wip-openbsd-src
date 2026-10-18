@@ -15,8 +15,8 @@ void
 checkp(int n, struct protoent *p, int proto, const char *name, ...)
 {
 	va_list va;
-	char *a;
-	int i;
+	char   *a;
+	int	i;
 
 	if (p == NULL) {
 		warnx("%d proto struct is NULL", n);
@@ -44,20 +44,19 @@ checkp(int n, struct protoent *p, int proto, const char *name, ...)
 		a = va_arg(va, char *);
 	}
 	if (p->p_aliases[i] != NULL) {
-			warnx("%d proto alias list does not end with NULL", n);
-			ret = 1;
+		warnx("%d proto alias list does not end with NULL", n);
+		ret = 1;
 	}
 	va_end(va);
 }
 
-
 void
-checks(int n, struct servent *s, int port, const char *proto,
-    const char *name, ...)
+checks(int n, struct servent *s, int port, const char *proto, const char *name,
+    ...)
 {
 	va_list va;
-	char *a;
-	int i;
+	char   *a;
+	int	i;
 
 	if (s == NULL) {
 		warnx("%d serv struct is NULL", n);
@@ -65,7 +64,7 @@ checks(int n, struct servent *s, int port, const char *proto,
 		return;
 	}
 	if (s->s_port != ntohs(port)) {
-		warnx("%d port num mismatch %d %d", n, s->s_port, port);	
+		warnx("%d port num mismatch %d %d", n, s->s_port, port);
 		ret = 1;
 	}
 	if (strcmp(s->s_name, name) != 0) {
@@ -89,8 +88,8 @@ checks(int n, struct servent *s, int port, const char *proto,
 		a = va_arg(va, char *);
 	}
 	if (s->s_aliases[i] != NULL) {
-			warnx("%d serv alias list does not end with NULL", n);
-			ret = 1;
+		warnx("%d serv alias list does not end with NULL", n);
+		ret = 1;
 	}
 	va_end(va);
 }
@@ -98,25 +97,25 @@ checks(int n, struct servent *s, int port, const char *proto,
 int
 main()
 {
-	struct protoent *p;
-	struct protoent protoent;
+	struct protoent	    *p;
+	struct protoent	     protoent;
 	struct protoent_data protoent_data;
-	struct servent *s;
-	struct servent servent;
-	struct servent_data servent_data;
-	int r;
+	struct servent	    *s;
+	struct servent	     servent;
+	struct servent_data  servent_data;
+	int		     r;
 
 	p = getprotobynumber(35);
 	checkp(1, p, 35, "idpr", "IDPR", (char *)NULL);
 
 	p = getprotobyname("igp");
-	checkp(2, p, 9, "igp", "IGP", (char *) NULL);
+	checkp(2, p, 9, "igp", "IGP", (char *)NULL);
 
 	p = getprotobyname("RDP");
-	checkp(3, p, 27, "rdp", "RDP", (char *) NULL);
+	checkp(3, p, 27, "rdp", "RDP", (char *)NULL);
 
 	p = getprotobyname("vrrp");
-	checkp(4, p, 112, "carp", "CARP", "vrrp", (char *) NULL);
+	checkp(4, p, 112, "carp", "CARP", "vrrp", (char *)NULL);
 
 	p = getprotobyname("nonexistent");
 	if (p != NULL)
@@ -124,15 +123,15 @@ main()
 
 	memset(&protoent_data, 0, sizeof(protoent_data));
 	r = getprotobynumber_r(35, &protoent, &protoent_data);
-	if (r != 0) 
+	if (r != 0)
 		err(1, "proto not found");
 
 	checkp(5, &protoent, 35, "idpr", "IDPR", (char *)NULL);
 
 	r = getprotobyname_r("vrrp", &protoent, &protoent_data);
-	if (r != 0) 
+	if (r != 0)
 		err(1, "proto not found");
-	checkp(6, &protoent, 112, "carp", "CARP", "vrrp", (char *) NULL);
+	checkp(6, &protoent, 112, "carp", "CARP", "vrrp", (char *)NULL);
 
 	r = getprotobyname_r("nonexistent", &protoent, &protoent_data);
 	if (r != -1)
@@ -141,7 +140,6 @@ main()
 	r = getprotobyname_r("", &protoent, &protoent_data);
 	if (r != -1)
 		err(1, "nonexistent proto found");
-
 
 	r = getprotobynumber_r(256, &protoent, &protoent_data);
 	if (r != -1)
@@ -158,25 +156,26 @@ main()
 
 	memset(&servent_data, 0, sizeof(servent_data));
 	r = getservbyname_r("zip", "ddp", &servent, &servent_data);
-	if (r != 0) 
+	if (r != 0)
 		err(1, "servent not found");
 	checks(10, &servent, 6, "ddp", "zip", (char *)NULL);
 
 	r = getservbyport_r(htons(520), NULL, &servent, &servent_data);
-	if (r != 0) 
+	if (r != 0)
 		err(1, "servent not found");
-	checks(11, &servent, 520, "udp", "route", "router", "routed", (char *)NULL);
+	checks(11, &servent, 520, "udp", "route", "router", "routed",
+	    (char *)NULL);
 
 	r = getservbyname_r("nonexistent", NULL, &servent, &servent_data);
-	if (r != -1) 
+	if (r != -1)
 		err(1, "nonexiststent servent found");
 
 	r = getservbyport_r(htons(50000), NULL, &servent, &servent_data);
-	if (r != -1) 
+	if (r != -1)
 		err(1, "nonexistent servent found");
 
 	r = getservbyport_r(htons(520), "tcp", &servent, &servent_data);
-	if (r != -1) 
+	if (r != -1)
 		err(1, "nonexistent servent found");
 
 	return ret;

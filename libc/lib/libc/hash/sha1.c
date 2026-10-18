@@ -18,11 +18,10 @@
 #include <sys/types.h>
 
 #include <endian.h>
+#include <sha1.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
-#include <sha1.h>
 
 #ifndef SHA1_SMALL
 #if defined(__aarch64__)
@@ -157,8 +156,8 @@ void
 __sha1_block_generic(uint32_t state[5], const uint8_t *in, size_t num)
 {
 	const uint32_t *in32;
-	uint32_t a, b, c, d, e;
-	uint32_t W[16];
+	uint32_t	a, b, c, d, e;
+	uint32_t	W[16];
 
 	while (num-- > 0) {
 		a = state[0];
@@ -375,9 +374,9 @@ void
 __sha1_block(uint32_t state[5], const uint8_t *in, size_t num)
 {
 	const uint32_t *in32;
-	uint32_t a, b, c, d, e;
-	uint32_t W[16];
-	int i;
+	uint32_t	a, b, c, d, e;
+	uint32_t	W[16];
+	int		i;
 
 	while (num-- > 0) {
 		a = state[0];
@@ -489,8 +488,7 @@ SHA1Pad(SHA1_CTX *ctx)
 		memset(ctx->buffer, 0, sizeof(ctx->buffer));
 	}
 
-	crypto_store_htobe64(&ctx->buffer[SHA1_BLOCK_LENGTH - 8],
-	    ctx->count);
+	crypto_store_htobe64(&ctx->buffer[SHA1_BLOCK_LENGTH - 8], ctx->count);
 
 	__sha1_block(ctx->state, ctx->buffer, 1);
 	memset(ctx->buffer, 0, sizeof(ctx->buffer));

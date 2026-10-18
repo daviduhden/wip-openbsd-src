@@ -61,8 +61,8 @@ typedef int sig_atomic_t;
  * a non-standard exit is performed.
  */
 struct sigcontext {
-	long	sc_cookie;
-	int	sc_mask;	/* signal mask to restore */
+	long sc_cookie;
+	int  sc_mask; /* signal mask to restore */
 
 	unsigned int sc_spsr;
 	unsigned int sc_r0;
@@ -83,11 +83,11 @@ struct sigcontext {
 	unsigned int sc_svc_lr;
 	unsigned int sc_pc;
 
-	unsigned int sc_fpused;
-	unsigned int sc_fpscr;
+	unsigned int	   sc_fpused;
+	unsigned int	   sc_fpscr;
 	unsigned long long sc_fpreg[32];
 };
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */
 #endif /* !_LOCORE */
 
-#endif	/* !_ARM_SIGNAL_H_ */
+#endif /* !_ARM_SIGNAL_H_ */

@@ -41,7 +41,7 @@
 double
 __floatunsdidf(u_quad_t x)
 {
-	double d;
+	double	 d;
 	union uu u;
 
 	u.uq = x;

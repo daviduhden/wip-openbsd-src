@@ -36,7 +36,7 @@
 #include <wchar.h>
 
 int
-vwprintf(const wchar_t * __restrict fmt, __va_list ap)
+vwprintf(const wchar_t *__restrict fmt, __va_list ap)
 {
 	return (vfwprintf(stdout, fmt, ap));
 }

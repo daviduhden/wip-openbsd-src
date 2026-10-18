@@ -44,53 +44,57 @@
 
 #include "DEFS.h"
 
-
 /* offsetof(struct tib, tib_errno) - offsetof(struct tib, __tib_tcb) */
-#define	TCB_OFFSET_ERRNO	(-8)
+#define TCB_OFFSET_ERRNO (-8)
 /* from <powerpc/tcb.h>: TCB address == %r2 - TCB_OFFSET */
-#define	TCB_OFFSET		0x7000
+#define TCB_OFFSET 0x7000
 
 /* offset of errno from %r2 */
-#define	R2_OFFSET_ERRNO		(-TCB_OFFSET + TCB_OFFSET_ERRNO)
+#define R2_OFFSET_ERRNO (-TCB_OFFSET + TCB_OFFSET_ERRNO)
 
-#define SYSENTRY(x)		WEAK_ALIAS(x, _thread_sys_ ## x);	\
-				ENTRY(_thread_sys_ ## x)
-#define SYSENTRY_HIDDEN(x)	ENTRY(_thread_sys_ ## x)
-#define __END_HIDDEN(x)		END(_thread_sys_ ## x);			\
-				_HIDDEN_FALIAS(x, _thread_sys_ ## x);	\
-				END(_HIDDEN(x))
-#define __END(x)		__END_HIDDEN(x); END(x)
+#define SYSENTRY(x)                                                            \
+	WEAK_ALIAS(x, _thread_sys_##x);                                        \
+	ENTRY(_thread_sys_##x)
+#define SYSENTRY_HIDDEN(x) ENTRY(_thread_sys_##x)
+#define __END_HIDDEN(x)                                                        \
+	END(_thread_sys_##x);                                                  \
+	_HIDDEN_FALIAS(x, _thread_sys_##x);                                    \
+	END(_HIDDEN(x))
+#define __END(x)                                                               \
+	__END_HIDDEN(x);                                                       \
+	END(x)
 
-#define	PSEUDO_NOERROR(x,y)	SYSENTRY(x)				\
-				RETGUARD_SETUP(x, %r11, %r12);		\
-				li	%r0, SYS_ ## y ;		\
-			97:	sc;					\
-				PINSYSCALL(SYS_ ## y, 97b);		\
-				RETGUARD_CHECK(x, %r11, %r12);		\
-				blr;					\
-				__END(x)
+#define PSEUDO_NOERROR(x, y)                                                   \
+	SYSENTRY(x)                                                            \
+	RETGUARD_SETUP(x, % r11, % r12);                                       \
+	li % r0, SYS_##y;                                                      \
+	97 : sc;                                                               \
+	PINSYSCALL(SYS_##y, 97b);                                              \
+	RETGUARD_CHECK(x, % r11, % r12);                                       \
+	blr;                                                                   \
+	__END(x)
 
-#define	PSEUDO_HIDDEN(x,y)	SYSENTRY_HIDDEN(x)			\
-				RETGUARD_SETUP(x, %r11, %r12);		\
-				li	%r0, SYS_ ## y;			\
-			97:	sc;					\
-				PINSYSCALL(SYS_ ## y, 97b);		\
-				cmpwi	%r0, 0;				\
-				beq+	.L_ret;				\
-				stw	%r0, R2_OFFSET_ERRNO(2);	\
-				li	%r3, -1;			\
-				li	%r4, -1;	/* for lseek */	\
-			.L_ret:						\
-				RETGUARD_CHECK(x, %r11, %r12);		\
-				blr;					\
-				__END_HIDDEN(x)
+#define PSEUDO_HIDDEN(x, y)                                                    \
+	SYSENTRY_HIDDEN(x)                                                     \
+	RETGUARD_SETUP(x, % r11, % r12);                                       \
+	li % r0, SYS_##y;                                                      \
+	97 : sc;                                                               \
+	PINSYSCALL(SYS_##y, 97b);                                              \
+	cmpwi % r0, 0;                                                         \
+	beq +.L_ret;                                                           \
+	stw % r0, R2_OFFSET_ERRNO(2);                                          \
+	li % r3, -1;                                                           \
+	li % r4, -1; /* for lseek */                                           \
+	.L_ret : RETGUARD_CHECK(x, % r11, % r12);                              \
+	blr;                                                                   \
+	__END_HIDDEN(x)
 
-#define	PSEUDO(x,y)		WEAK_ALIAS(x, _thread_sys_ ## x);	\
-				PSEUDO_HIDDEN(x,y);			\
-				END(x)
+#define PSEUDO(x, y)                                                           \
+	WEAK_ALIAS(x, _thread_sys_##x);                                        \
+	PSEUDO_HIDDEN(x, y);                                                   \
+	END(x)
 
-#define RSYSCALL(x)		PSEUDO(x,x)
-#define RSYSCALL_HIDDEN(x)	PSEUDO_HIDDEN(x,x)
-#define SYSCALL_END_HIDDEN(x)	__END_HIDDEN(x)
-#define SYSCALL_END(x)		__END(x)
-
+#define RSYSCALL(x) PSEUDO(x, x)
+#define RSYSCALL_HIDDEN(x) PSEUDO_HIDDEN(x, x)
+#define SYSCALL_END_HIDDEN(x) __END_HIDDEN(x)
+#define SYSCALL_END(x) __END(x)

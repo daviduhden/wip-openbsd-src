@@ -17,7 +17,7 @@
 
 #include <ieeefp.h>
 
-__weak_alias(_fpgetmask,fpgetmask);
+__weak_alias(_fpgetmask, fpgetmask);
 
 fp_except
 fpgetmask(void)

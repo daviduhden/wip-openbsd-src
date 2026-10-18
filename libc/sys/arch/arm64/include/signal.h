@@ -48,9 +48,9 @@ typedef int sig_atomic_t;
  * to the handler to allow it to restore state properly if
  * a non-standard exit is performed.
  */
-struct	sigcontext {
-	int	__sc_unused;
-	int	sc_mask;	/* signal mask to restore */
+struct sigcontext {
+	int __sc_unused;
+	int sc_mask; /* signal mask to restore */
 
 	unsigned long sc_sp;
 	unsigned long sc_lr;
@@ -58,7 +58,7 @@ struct	sigcontext {
 	unsigned long sc_spsr;
 	unsigned long sc_x[30];
 
-	long	sc_cookie;
+	long sc_cookie;
 };
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */
-#endif	/* !_MACHINE_SIGNAL_H_ */
+#endif /* !_MACHINE_SIGNAL_H_ */

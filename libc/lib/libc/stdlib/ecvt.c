@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "gdtoa.h"
 
 static char *__cvt(double, int, int *, int *, int, int);
@@ -31,8 +32,8 @@ static char *
 __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
 {
 	static char *s;
-	char *p, *rve, c;
-	size_t siz;
+	char	    *p, *rve, c;
+	size_t	     siz;
 
 	if (ndigit == 0) {
 		*sign = value < 0.0;
@@ -48,13 +49,12 @@ __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
 	else
 		siz = ndigit + 1;
 
-
 	/* __dtoa() doesn't allocate space for 0 so we do it by hand */
 	if (value == 0.0) {
-		*decpt = 1 - fmode;	/* 1 for 'e', 0 for 'f' */
+		*decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
 		*sign = 0;
 		if ((rve = s = malloc(siz)) == NULL)
-			return(NULL);
+			return (NULL);
 		*rve++ = '0';
 		*rve = '\0';
 	} else {
@@ -66,16 +66,16 @@ __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
 			*decpt = 0;
 			c = *p;
 			__freedtoa(p);
-			return(c == 'I' ? "inf" : "nan");
+			return (c == 'I' ? "inf" : "nan");
 		}
 		/* Make a local copy and adjust rve to be in terms of s */
 		if (pad && fmode)
 			siz += *decpt;
 		if ((s = malloc(siz)) == NULL) {
 			__freedtoa(p);
-			return(NULL);
+			return (NULL);
 		}
-		(void) strlcpy(s, p, siz);
+		(void)strlcpy(s, p, siz);
 		rve = s + (rve - p);
 		__freedtoa(p);
 	}
@@ -88,17 +88,17 @@ __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad)
 		*rve = '\0';
 	}
 
-	return(s);
+	return (s);
 }
 
 char *
 ecvt(double value, int ndigit, int *decpt, int *sign)
 {
-	return(__cvt(value, ndigit, decpt, sign, 0, 1));
+	return (__cvt(value, ndigit, decpt, sign, 0, 1));
 }
 
 char *
 fcvt(double value, int ndigit, int *decpt, int *sign)
 {
-	return(__cvt(value, ndigit, decpt, sign, 1, 1));
+	return (__cvt(value, ndigit, decpt, sign, 1, 1));
 }

@@ -26,6 +26,7 @@ size_t
 __mb_cur_max(void)
 {
 	return _CurrentRuneLocale() == _Utf8RuneLocale ?
-	    _CITRUS_UTF8_MB_CUR_MAX : 1;
+	    _CITRUS_UTF8_MB_CUR_MAX :
+	    1;
 }
 DEF_STRONG(__mb_cur_max);

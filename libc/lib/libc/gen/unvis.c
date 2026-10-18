@@ -29,21 +29,22 @@
  */
 
 #include <sys/types.h>
+
 #include <ctype.h>
 #include <vis.h>
 
 /*
  * decode driven by state machine
  */
-#define	S_GROUND	0	/* haven't seen escape char */
-#define	S_START		1	/* start decoding special sequence */
-#define	S_META		2	/* metachar started (M) */
-#define	S_META1		3	/* metachar more, regular char (-) */
-#define	S_CTRL		4	/* control char started (^) */
-#define	S_OCTAL2	5	/* octal digit 2 */
-#define	S_OCTAL3	6	/* octal digit 3 */
+#define S_GROUND 0 /* haven't seen escape char */
+#define S_START 1  /* start decoding special sequence */
+#define S_META 2   /* metachar started (M) */
+#define S_META1 3  /* metachar more, regular char (-) */
+#define S_CTRL 4   /* control char started (^) */
+#define S_OCTAL2 5 /* octal digit 2 */
+#define S_OCTAL3 6 /* octal digit 3 */
 
-#define	isoctal(c)	(((u_char)(c)) >= '0' && ((u_char)(c)) <= '7')
+#define isoctal(c) (((u_char)(c)) >= '0' && ((u_char)(c)) <= '7')
 
 /*
  * unvis - decode characters previously encoded by vis
@@ -56,7 +57,7 @@ unvis(char *cp, char c, int *astate, int flag)
 		if (*astate == S_OCTAL2 || *astate == S_OCTAL3) {
 			*astate = S_GROUND;
 			return (UNVIS_VALID);
-		} 
+		}
 		return (*astate == S_GROUND ? UNVIS_NOCHAR : UNVIS_SYNBAD);
 	}
 
@@ -67,12 +68,12 @@ unvis(char *cp, char c, int *astate, int flag)
 		if (c == '\\') {
 			*astate = S_START;
 			return (0);
-		} 
+		}
 		*cp = c;
 		return (UNVIS_VALID);
 
 	case S_START:
-		switch(c) {
+		switch (c) {
 		case '-':
 			*cp = 0;
 			*astate = S_GROUND;
@@ -82,13 +83,19 @@ unvis(char *cp, char c, int *astate, int flag)
 			*cp = c;
 			*astate = S_GROUND;
 			return (UNVIS_VALID);
-		case '0': case '1': case '2': case '3':
-		case '4': case '5': case '6': case '7':
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
 			*cp = (c - '0');
 			*astate = S_OCTAL2;
 			return (0);
 		case 'M':
-			*cp = (char) 0200;
+			*cp = (char)0200;
 			*astate = S_META;
 			return (0);
 		case '^':
@@ -145,7 +152,7 @@ unvis(char *cp, char c, int *astate, int flag)
 		}
 		*astate = S_GROUND;
 		return (UNVIS_SYNBAD);
-		 
+
 	case S_META:
 		if (c == '-')
 			*astate = S_META1;
@@ -156,12 +163,12 @@ unvis(char *cp, char c, int *astate, int flag)
 			return (UNVIS_SYNBAD);
 		}
 		return (0);
-		 
+
 	case S_META1:
 		*astate = S_GROUND;
 		*cp |= c;
 		return (UNVIS_VALID);
-		 
+
 	case S_CTRL:
 		if (c == '?')
 			*cp |= 0177;
@@ -170,22 +177,22 @@ unvis(char *cp, char c, int *astate, int flag)
 		*astate = S_GROUND;
 		return (UNVIS_VALID);
 
-	case S_OCTAL2:	/* second possible octal digit */
+	case S_OCTAL2: /* second possible octal digit */
 		if (isoctal(c)) {
-			/* 
-			 * yes - and maybe a third 
+			/*
+			 * yes - and maybe a third
 			 */
 			*cp = (*cp << 3) + (c - '0');
-			*astate = S_OCTAL3;	
+			*astate = S_OCTAL3;
 			return (0);
-		} 
-		/* 
-		 * no - done with current sequence, push back passed char 
+		}
+		/*
+		 * no - done with current sequence, push back passed char
 		 */
 		*astate = S_GROUND;
 		return (UNVIS_VALIDPUSH);
 
-	case S_OCTAL3:	/* third possible octal digit */
+	case S_OCTAL3: /* third possible octal digit */
 		*astate = S_GROUND;
 		if (isoctal(c)) {
 			*cp = (*cp << 3) + (c - '0');
@@ -196,9 +203,9 @@ unvis(char *cp, char c, int *astate, int flag)
 		 */
 		return (UNVIS_VALIDPUSH);
 
-	default:	
-		/* 
-		 * decoder in unknown state - (probably uninitialized) 
+	default:
+		/*
+		 * decoder in unknown state - (probably uninitialized)
 		 */
 		*astate = S_GROUND;
 		return (UNVIS_SYNBAD);
@@ -207,7 +214,7 @@ unvis(char *cp, char c, int *astate, int flag)
 DEF_WEAK(unvis);
 
 /*
- * strunvis - decode src into dst 
+ * strunvis - decode src into dst
  *
  *	Number of chars decoded into dst is returned, -1 on error.
  *	Dst is null terminated.
@@ -216,9 +223,9 @@ DEF_WEAK(unvis);
 int
 strunvis(char *dst, const char *src)
 {
-	char c;
+	char  c;
 	char *start = dst;
-	int state = 0;
+	int   state = 0;
 
 	while ((c = *src++)) {
 	again:
@@ -246,9 +253,9 @@ strunvis(char *dst, const char *src)
 ssize_t
 strnunvis(char *dst, const char *src, size_t sz)
 {
-	char c, p;
+	char  c, p;
 	char *start = dst, *end = dst + sz - 1;
-	int state = 0;
+	int   state = 0;
 
 	if (sz > 0)
 		*end = '\0';
@@ -283,4 +290,3 @@ strnunvis(char *dst, const char *src, size_t sz)
 		*dst = '\0';
 	return (dst - start);
 }
-

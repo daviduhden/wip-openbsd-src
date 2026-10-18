@@ -17,12 +17,12 @@
  */
 
 #include <errno.h>
+#include <limits.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <limits.h>
 #include <syslog.h>
-#include <stdarg.h>
+#include <unistd.h>
 
 /*
  * wrapper for kernel __realpath

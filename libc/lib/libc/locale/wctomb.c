@@ -34,7 +34,7 @@ int
 wctomb(char *s, wchar_t wchar)
 {
 	static mbstate_t mbs;
-	size_t rval;
+	size_t		 rval;
 
 	if (s == NULL) {
 		/* No support for state dependent encodings. */

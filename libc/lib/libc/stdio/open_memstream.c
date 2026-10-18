@@ -1,4 +1,5 @@
-/*	$OpenBSD: open_memstream.c,v 1.10 2023/07/11 12:14:16 claudio Exp $	*/
+/*	$OpenBSD: open_memstream.c,v 1.10 2023/07/11 12:14:16 claudio Exp $
+ */
 
 /*
  * Copyright (c) 2011 Martin Pieuchot <mpi@openbsd.org>
@@ -22,31 +23,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "local.h"
 
-#define	MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 struct state {
-	char		 *string;	/* actual stream */
-	char		**pbuf;		/* point to the stream */
-	size_t		 *psize;	/* point to min(pos, len) */
-	size_t		  pos;		/* current position */
-	size_t		  size;		/* number of allocated char */
-	size_t		  len;		/* length of the data */
+	char   *string; /* actual stream */
+	char  **pbuf;	/* point to the stream */
+	size_t *psize;	/* point to min(pos, len) */
+	size_t	pos;	/* current position */
+	size_t	size;	/* number of allocated char */
+	size_t	len;	/* length of the data */
 };
 
 static int
 memstream_write(void *v, const char *b, int l)
 {
-	struct state	*st = v;
-	char		*p;
-	size_t		 i, end;
+	struct state *st = v;
+	char	     *p;
+	size_t	      i, end;
 
 	end = (st->pos + l);
 
 	if (end >= st->size) {
 		/* 1.6 is (very) close to the golden ratio. */
-		size_t	sz = st->size * 8 / 5;
+		size_t sz = st->size * 8 / 5;
 
 		if (sz < end + 1)
 			sz = end + 1;
@@ -74,8 +76,8 @@ memstream_write(void *v, const char *b, int l)
 static fpos_t
 memstream_seek(void *v, fpos_t off, int whence)
 {
-	struct state	*st = v;
-	size_t		 base = 0;
+	struct state *st = v;
+	size_t	      base = 0;
 
 	switch (whence) {
 	case SEEK_SET:
@@ -102,7 +104,7 @@ memstream_seek(void *v, fpos_t off, int whence)
 static int
 memstream_close(void *v)
 {
-	struct state	*st = v;
+	struct state *st = v;
 
 	free(st);
 
@@ -112,8 +114,8 @@ memstream_close(void *v)
 FILE *
 open_memstream(char **pbuf, size_t *psize)
 {
-	struct state	*st;
-	FILE		*fp;
+	struct state *st;
+	FILE	     *fp;
 
 	if (pbuf == NULL || psize == NULL) {
 		errno = EINVAL;

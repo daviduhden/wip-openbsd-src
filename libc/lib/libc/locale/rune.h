@@ -35,23 +35,24 @@
  *	@(#)rune.h	8.1 (Berkeley) 6/27/93
  */
 
-#ifndef	_RUNE_H_
-#define	_RUNE_H_
+#ifndef _RUNE_H_
+#define _RUNE_H_
 
 #include <locale.h>
+
 #include "runetype.h"
 
-#define	_LOCALE_NONE	(locale_t)0
-#define	_LOCALE_C	(locale_t)1
-#define	_LOCALE_UTF8	(locale_t)2
+#define _LOCALE_NONE (locale_t)0
+#define _LOCALE_C (locale_t)1
+#define _LOCALE_UTF8 (locale_t)2
 
 __BEGIN_HIDDEN_DECLS
-extern _RuneLocale	 _DefaultRuneLocale;
-extern _RuneLocale	*_Utf8RuneLocale;
-extern _RuneLocale	*_GlobalRuneLocale;
+extern _RuneLocale  _DefaultRuneLocale;
+extern _RuneLocale *_Utf8RuneLocale;
+extern _RuneLocale *_GlobalRuneLocale;
 
-_RuneLocale		*_CurrentRuneLocale(void);
-const char		*_get_locname(int, const char *);
+_RuneLocale *_CurrentRuneLocale(void);
+const char  *_get_locname(int, const char *);
 __END_HIDDEN_DECLS
 
-#endif	/*! _RUNE_H_ */
+#endif /*! _RUNE_H_ */

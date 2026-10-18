@@ -32,21 +32,21 @@
  */
 struct dom_binding {
 	struct sockaddr_in dom_server_addr;
-	int dom_socket;
-	CLIENT *dom_client;
+	int		   dom_socket;
+	CLIENT		  *dom_client;
 };
 
-#define BINDINGDIR	"/var/yp/binding"
+#define BINDINGDIR "/var/yp/binding"
 
 __BEGIN_HIDDEN_DECLS
 extern struct dom_binding *_ypbindlist;
-extern char _yp_domain[HOST_NAME_MAX+1];
-extern int _yplib_timeout;
+extern char		   _yp_domain[HOST_NAME_MAX + 1];
+extern int		   _yplib_timeout;
 
-void	_yp_unbind(struct dom_binding *);
-int	ypconnect(int type);
+void _yp_unbind(struct dom_binding *);
+int  ypconnect(int type);
 __END_HIDDEN_DECLS
 
-int	_yp_check(char **);
+int _yp_check(char **);
 PROTO_NORMAL(_yp_check);
 PROTO_WRAP(ypconnect);

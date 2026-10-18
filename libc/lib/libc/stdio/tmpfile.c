@@ -31,21 +31,21 @@
  * SUCH DAMAGE.
  */
 
-#include <unistd.h>
-#include <signal.h>
 #include <errno.h>
+#include <paths.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <paths.h>
+#include <unistd.h>
 
 FILE *
 tmpfile(void)
 {
 	sigset_t set, oset;
-	FILE *fp;
-	int fd, sverrno;
-	char buf[] = _PATH_TMP "tmp.XXXXXXXXXX";
+	FILE	*fp;
+	int	 fd, sverrno;
+	char	 buf[] = _PATH_TMP "tmp.XXXXXXXXXX";
 
 	sigfillset(&set);
 	(void)sigprocmask(SIG_BLOCK, &set, &oset);

@@ -53,37 +53,37 @@ typedef int sig_atomic_t;
  */
 struct sigcontext {
 	/* plain match trapframe */
-	long	sc_rdi;
-	long	sc_rsi;
-	long	sc_rdx;
-	long	sc_rcx;
-	long	sc_r8;
-	long	sc_r9;
-	long	sc_r10;
-	long	sc_r11;
-	long	sc_r12;
-	long	sc_r13;
-	long	sc_r14;
-	long	sc_r15;
-	long	sc_rbp;
-	long	sc_rbx;
-	long	sc_rax;
-	long	sc_gs;
-	long	sc_fs;
-	long	sc_es;
-	long	sc_ds;
-	long	sc_trapno;
-	long	sc_err;
-	long	sc_rip;
-	long	sc_cs;
-	long	sc_rflags;
-	long	sc_rsp;
-	long	sc_ss;
+	long sc_rdi;
+	long sc_rsi;
+	long sc_rdx;
+	long sc_rcx;
+	long sc_r8;
+	long sc_r9;
+	long sc_r10;
+	long sc_r11;
+	long sc_r12;
+	long sc_r13;
+	long sc_r14;
+	long sc_r15;
+	long sc_rbp;
+	long sc_rbx;
+	long sc_rax;
+	long sc_gs;
+	long sc_fs;
+	long sc_es;
+	long sc_ds;
+	long sc_trapno;
+	long sc_err;
+	long sc_rip;
+	long sc_cs;
+	long sc_rflags;
+	long sc_rsp;
+	long sc_ss;
 
 	struct fxsave64 *sc_fpstate;
-	int	__sc_unused;
-	int	sc_mask;
-	long	sc_cookie;
+	int		 __sc_unused;
+	int		 sc_mask;
+	long		 sc_cookie;
 };
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */
-#endif	/* !_MACHINE_SIGNAL_H_ */
+#endif /* !_MACHINE_SIGNAL_H_ */

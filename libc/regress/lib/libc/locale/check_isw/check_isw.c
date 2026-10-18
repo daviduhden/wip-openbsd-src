@@ -19,9 +19,9 @@
  * functions.
  */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <wchar.h>
 #include <wctype.h>
 
@@ -36,7 +36,7 @@ check_bool(int v1, int v2, char msg)
 	}
 }
 
-void 
+void
 check_value(int v1, int v2, char msg)
 {
 	if (v1 != v2) {
@@ -77,10 +77,10 @@ test2()
 {
 	unsigned char *s;
 	unsigned char *buf;
-	int i, j;
-	size_t n;
-	wchar_t c, d;
-	mbstate_t state;
+	int	       i, j;
+	size_t	       n;
+	wchar_t	       c, d;
+	mbstate_t      state;
 
 	s = malloc(256);
 	if (!s) {
@@ -94,13 +94,13 @@ test2()
 		return;
 	}
 	for (i = 0; i < 256; i++)
-		s[i] = i+1;
+		s[i] = i + 1;
 
 	j = 0;
 	mbrtowc(NULL, NULL, 1, &state);
 	printf(" %02x: ", 0);
 
-	while ((n = mbrtowc(&c, s+j, 256-j, &state)) == 1) {
+	while ((n = mbrtowc(&c, s + j, 256 - j, &state)) == 1) {
 		printf(" %02x: ", s[j]);
 		check_bool(isalnum(s[j]), iswalnum(c), '1');
 		check_bool(isalpha(s[j]), iswalpha(c), '2');
@@ -115,13 +115,13 @@ test2()
 		check_bool(isupper(s[j]), iswupper(c), 'a');
 		check_bool(isxdigit(s[j]), iswxdigit(c), 'b');
 		d = towlower(c);
-		if (wctomb(buf, d) == 1) {	
+		if (wctomb(buf, d) == 1) {
 			check_value(tolower(s[j]), buf[0], 'c');
 		} else {
 			bad++;
 		}
 		d = towupper(c);
-		if (wctomb(buf, d) == 1) {	
+		if (wctomb(buf, d) == 1) {
 			check_value(toupper(s[j]), buf[0], 'c');
 		} else {
 			bad++;
@@ -137,11 +137,10 @@ test2()
 	free(buf);
 }
 
-
 int
 main()
 {
 	test1();
 	test2();
-	return bad !=0;
+	return bad != 0;
 }

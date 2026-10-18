@@ -38,19 +38,19 @@
 #ifndef _ARM_ASM_H_
 #define _ARM_ASM_H_
 
-#define _C_LABEL(x)	x
-#define	_ASM_LABEL(x)	x
+#define _C_LABEL(x) x
+#define _ASM_LABEL(x) x
 
 #ifdef __STDC__
-# define __CONCAT(x,y)	x ## y
-# define __STRING(x)	#x
+#define __CONCAT(x, y) x##y
+#define __STRING(x) #x
 #else
-# define __CONCAT(x,y)	x/**/y
-# define __STRING(x)	"x"
+#define __CONCAT(x, y) x /**/ y
+#define __STRING(x) "x"
 #endif
 
 #ifndef _ALIGN_TEXT
-# define _ALIGN_TEXT .align 2
+#define _ALIGN_TEXT .align 2
 #endif
 
 /*
@@ -59,39 +59,51 @@
  * We define a couple of macros so that assembly code will not be dependant
  * on one or the other.
  */
-#define _ASM_TYPE_FUNCTION	#function
-#define _ASM_TYPE_OBJECT	#object
+#define _ASM_TYPE_FUNCTION #function
+#define _ASM_TYPE_OBJECT #object
 
 /* NB == No Binding: use .globl or .weak as necessary */
-#define _ENTRY_NB(x) \
-	.text; _ALIGN_TEXT; .type x,_ASM_TYPE_FUNCTION; x:
-#define _ENTRY(x)		.globl x; _ENTRY_NB(x)
+#define _ENTRY_NB(x)                                                           \
+	.text;                                                                 \
+	_ALIGN_TEXT;                                                           \
+	.type x, _ASM_TYPE_FUNCTION;                                           \
+	x:
+#define _ENTRY(x)                                                              \
+	.globl x;                                                              \
+	_ENTRY_NB(x)
 
 #if defined(PROF) || defined(GPROF)
-# define _PROF_PROLOGUE	\
-	mov ip, lr; bl __mcount
+#define _PROF_PROLOGUE                                                         \
+	mov ip, lr;                                                            \
+	bl  __mcount
 #else
-# define _PROF_PROLOGUE
+#define _PROF_PROLOGUE
 #endif
 
-#define	ENTRY(y)	_ENTRY(y); _PROF_PROLOGUE
-#define	ENTRY_NP(y)	_ENTRY(y)
-#define	ENTRY_NB(y)	_ENTRY_NB(y); _PROF_PROLOGUE
-#define	ASENTRY(y)	_ENTRY(y); _PROF_PROLOGUE
-#define	ASENTRY_NP(y)	_ENTRY(y)
-#define	END(y)		.size y, . - y
+#define ENTRY(y)                                                               \
+	_ENTRY(y);                                                             \
+	_PROF_PROLOGUE
+#define ENTRY_NP(y) _ENTRY(y)
+#define ENTRY_NB(y)                                                            \
+	_ENTRY_NB(y);                                                          \
+	_PROF_PROLOGUE
+#define ASENTRY(y)                                                             \
+	_ENTRY(y);                                                             \
+	_PROF_PROLOGUE
+#define ASENTRY_NP(y) _ENTRY(y)
+#define END(y) .size y, .- y
 
 #if defined(__PIC__)
-#define	PIC_SYM(x,y)	x(y)
+#define PIC_SYM(x, y) x(y)
 #else
-#define	PIC_SYM(x,y)	x
+#define PIC_SYM(x, y) x
 #endif
 
-#define	STRONG_ALIAS(alias,sym)						\
-	.global alias;							\
+#define STRONG_ALIAS(alias, sym)                                               \
+	.global alias;                                                         \
 	alias = sym
-#define	WEAK_ALIAS(alias,sym)						\
-	.weak alias;							\
+#define WEAK_ALIAS(alias, sym)                                                 \
+	.weak alias;                                                           \
 	alias = sym
 
 #endif /* !_ARM_ASM_H_ */

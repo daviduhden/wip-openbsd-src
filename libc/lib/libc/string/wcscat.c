@@ -32,15 +32,15 @@
 #include <wchar.h>
 
 #if defined(APIWARN)
-__warn_references(wcscat,
-    "wcscat() is almost always misused, please use wcslcat()");
+__warn_references(
+    wcscat, "wcscat() is almost always misused, please use wcslcat()");
 #endif
 
 wchar_t *
 wcscat(wchar_t *s1, const wchar_t *s2)
 {
-	wchar_t *p;
-	wchar_t *q;
+	wchar_t	      *p;
+	wchar_t	      *q;
 	const wchar_t *r;
 
 	p = s1;

@@ -41,7 +41,7 @@
  *	@(#)signal.h	8.1 (Berkeley) 6/11/93
  */
 
-#ifndef	_MACHINE_SIGNAL_H_
+#ifndef _MACHINE_SIGNAL_H_
 #define _MACHINE_SIGNAL_H_
 
 #include <sys/cdefs.h>
@@ -57,15 +57,15 @@ typedef int sig_atomic_t;
  * a non-standard exit is performed.
  */
 struct sigcontext {
-	long		sc_cookie;
+	long sc_cookie;
 	/* begin machine dependent portion */
-	long		sc_sp;		/* %sp to restore */
-	long		sc_pc;		/* pc to restore */
-	long		sc_npc;		/* npc to restore */
-	long		sc_tstate;	/* tstate to restore */
-	long		sc_g1;		/* %g1 to restore */
-	long		sc_o0;		/* %o0 to restore */
-	int		sc_mask;	/* signal mask to restore */
+	long sc_sp;	/* %sp to restore */
+	long sc_pc;	/* pc to restore */
+	long sc_npc;	/* npc to restore */
+	long sc_tstate; /* tstate to restore */
+	long sc_g1;	/* %g1 to restore */
+	long sc_o0;	/* %o0 to restore */
+	int  sc_mask;	/* signal mask to restore */
 };
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */
 
@@ -75,13 +75,13 @@ struct sigcontext {
  * are defined so as to match up with what SunOS uses; I have no idea why
  * they did the numbers that way, except maybe to match up with the 68881.
  */
-#define	FPE_INTOVF_TRAP		0x01	/* integer overflow */
-#define	FPE_INTDIV_TRAP		0x14	/* integer divide by zero */
-#define	FPE_FLTINEX_TRAP	0xc4	/* inexact */
-#define	FPE_FLTDIV_TRAP		0xc8	/* divide by zero */
-#define	FPE_FLTUND_TRAP		0xcc	/* underflow */
-#define	FPE_FLTOPERR_TRAP	0xd0	/* operand error */
-#define	FPE_FLTOVF_TRAP		0xd4	/* overflow */
+#define FPE_INTOVF_TRAP 0x01   /* integer overflow */
+#define FPE_INTDIV_TRAP 0x14   /* integer divide by zero */
+#define FPE_FLTINEX_TRAP 0xc4  /* inexact */
+#define FPE_FLTDIV_TRAP 0xc8   /* divide by zero */
+#define FPE_FLTUND_TRAP 0xcc   /* underflow */
+#define FPE_FLTOPERR_TRAP 0xd0 /* operand error */
+#define FPE_FLTOVF_TRAP 0xd4   /* overflow */
 #endif
 
-#endif	/* !_MACHINE_SIGNAL_H_ */
+#endif /* !_MACHINE_SIGNAL_H_ */

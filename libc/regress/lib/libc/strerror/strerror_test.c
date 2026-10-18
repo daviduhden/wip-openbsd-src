@@ -14,21 +14,21 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <signal.h>
-#include <string.h>
-#include <stdio.h>
-#include <limits.h>
 #include <errno.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdio.h>
+#include <string.h>
 
 void
 check_strerror_r(int val)
 {
 	char buffer[NL_TEXTMAX + 1];
-	int i, r;
+	int  i, r;
 
 	memset(buffer, 'X', sizeof(buffer) - 1);
 	buffer[sizeof(buffer) - 1] = '\0';
-	(void)strerror_r(val, NULL, 0);	/* XXX */
+	(void)strerror_r(val, NULL, 0); /* XXX */
 	for (i = 0; i < 25; i++) {
 		r = strerror_r(val, buffer, i);
 		printf("%d %d %zu: %s\n", i, r, strlen(buffer), buffer);
@@ -41,7 +41,7 @@ check_strsignal(int val)
 	printf("%s\n", strsignal(val));
 }
 
-int 
+int
 main()
 {
 	printf("%s\n", strerror(21345));
@@ -55,7 +55,7 @@ main()
 	check_strsignal(-1);
 	check_strsignal(0);
 	check_strsignal(10);
-	check_strsignal(NSIG-1);
+	check_strsignal(NSIG - 1);
 	check_strsignal(NSIG);
 	check_strsignal(100);
 	check_strsignal(INT_MAX);

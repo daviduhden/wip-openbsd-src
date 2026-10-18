@@ -36,9 +36,9 @@
  * arm-dependent ptrace definitions
  */
 #ifndef _KERNEL
-#define PT_STEP		(PT_FIRSTMACH + 0) /* Not implemented */
+#define PT_STEP (PT_FIRSTMACH + 0) /* Not implemented */
 #endif
-#define	PT_GETREGS	(PT_FIRSTMACH + 1)
-#define	PT_SETREGS	(PT_FIRSTMACH + 2)
-#define	PT_GETFPREGS	(PT_FIRSTMACH + 3)
-#define	PT_SETFPREGS	(PT_FIRSTMACH + 4)
+#define PT_GETREGS (PT_FIRSTMACH + 1)
+#define PT_SETREGS (PT_FIRSTMACH + 2)
+#define PT_GETFPREGS (PT_FIRSTMACH + 3)
+#define PT_SETFPREGS (PT_FIRSTMACH + 4)

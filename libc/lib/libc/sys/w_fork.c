@@ -27,19 +27,21 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: /repoman/r/ncvs/src/lib/libc_r/uthread/uthread_atfork.c,v 1.1 2004/12/10 03:36:45 grog Exp $
+ * $FreeBSD: /repoman/r/ncvs/src/lib/libc_r/uthread/uthread_atfork.c,v 1.1
+ * 2004/12/10 03:36:45 grog Exp $
  */
 
 #include <tib.h>
 #include <unistd.h>
-#include "thread_private.h"
+
 #include "atfork.h"
+#include "thread_private.h"
 
 pid_t
 WRAP(fork)(void)
 {
 	struct atfork_fn *p;
-	pid_t newid;
+	pid_t		  newid;
 
 	/*
 	 * In the common case the list is empty; remain async-signal-safe
@@ -56,8 +58,8 @@ WRAP(fork)(void)
 
 	_ATFORK_LOCK();
 	TAILQ_FOREACH_REVERSE(p, &_atfork_list, atfork_listhead, fn_next)
-		if (p->fn_prepare)
-			p->fn_prepare();
+	if (p->fn_prepare)
+		p->fn_prepare();
 
 	if (_thread_cb.tc_fork != NULL)
 		newid = _thread_cb.tc_fork();
@@ -69,12 +71,12 @@ WRAP(fork)(void)
 
 	if (newid == 0) {
 		TAILQ_FOREACH(p, &_atfork_list, fn_next)
-			if (p->fn_child)
-				p->fn_child();
+		if (p->fn_child)
+			p->fn_child();
 	} else {
 		TAILQ_FOREACH(p, &_atfork_list, fn_next)
-			if (p->fn_parent)
-				p->fn_parent();
+		if (p->fn_parent)
+			p->fn_parent();
 	}
 	_ATFORK_UNLOCK();
 

@@ -18,9 +18,9 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 
 /*
  * Simple getopt_long() and getopt_long_only() excerciser.
@@ -33,16 +33,17 @@ int
 main(int argc, char **argv)
 {
 	int ch, idx, goggles;
-	int (*gl)(int, char * const *, const char *, const struct option *, int *);
+	int (*gl)(
+	    int, char *const *, const char *, const struct option *, int *);
 	struct option longopts[] = {
-		{ "force", no_argument, 0, 0 },
-		{ "fast", no_argument, 0, '1' },
-		{ "best", no_argument, 0, '9' },
-		{ "input", required_argument, 0, 'i' },
-		{ "illiterate", no_argument, 0, 0 },
-		{ "drinking", required_argument, &goggles, 42 },
-		{ "help", no_argument, 0, 'h' },
-		{ 0, 0, 0, 0 },
+	    {"force", no_argument, 0, 0},
+	    {"fast", no_argument, 0, '1'},
+	    {"best", no_argument, 0, '9'},
+	    {"input", required_argument, 0, 'i'},
+	    {"illiterate", no_argument, 0, 0},
+	    {"drinking", required_argument, &goggles, 42},
+	    {"help", no_argument, 0, 'h'},
+	    {0, 0, 0, 0},
 	};
 
 	if (getenv("LONG_ONLY")) {
@@ -77,8 +78,8 @@ main(int argc, char **argv)
 					printf("option %s, arg %s\n",
 					    longopts[idx].name, optarg);
 				else
-					printf("option %s\n",
-					    longopts[idx].name);
+					printf(
+					    "option %s\n", longopts[idx].name);
 			} else
 				printf("option %c\n", ch);
 			break;
@@ -110,5 +111,5 @@ main(int argc, char **argv)
 	}
 	printf("\n");
 
-	exit (0);
+	exit(0);
 }

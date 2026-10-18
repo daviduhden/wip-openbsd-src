@@ -40,7 +40,7 @@ size_t
 strcspn(const char *s1, const char *s2)
 {
 	const char *p, *spanp;
-	char c, sc;
+	char	    c, sc;
 
 	/*
 	 * Stop as soon as we find any character from s2.  Note that there

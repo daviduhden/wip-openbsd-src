@@ -31,14 +31,15 @@
  */
 
 #include <sys/sem.h>
+
 #include <stdarg.h>
 #include <stdlib.h>
 
 int
 semctl(int semid, int semnum, int cmd, ...)
 {
-	va_list ap;
-	union semun semun;
+	va_list	     ap;
+	union semun  semun;
 	union semun *semun_ptr = NULL;
 
 	va_start(ap, cmd);

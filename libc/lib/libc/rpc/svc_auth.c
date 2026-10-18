@@ -39,16 +39,16 @@
 #include <rpc/rpc.h>
 
 /*
- * svcauthsw is the bdevsw of server side authentication. 
- * 
+ * svcauthsw is the bdevsw of server side authentication.
+ *
  * Server side authenticators are called from authenticate by
  * using the client auth struct flavor field to index into svcauthsw.
- * The server auth flavors must implement a routine that looks  
- * like: 
- * 
+ * The server auth flavors must implement a routine that looks
+ * like:
+ *
  *	enum auth_stat
  *	flavorx_auth(rqst, msg)
- *		struct svc_req *rqst; 
+ *		struct svc_req *rqst;
  *		struct rpc_msg *msg;
  *
  */
@@ -60,12 +60,11 @@ PROTO_NORMAL(_svcauth_null);
 static struct {
 	enum auth_stat (*authenticator)();
 } svcauthsw[] = {
-	{ _svcauth_null },		/* AUTH_NULL */
-	{ _svcauth_unix },		/* AUTH_UNIX */
-	{ _svcauth_short }		/* AUTH_SHORT */
+    {_svcauth_null}, /* AUTH_NULL */
+    {_svcauth_unix}, /* AUTH_UNIX */
+    {_svcauth_short} /* AUTH_SHORT */
 };
-#define	AUTH_MAX	2		/* HIGHEST AUTH NUMBER */
-
+#define AUTH_MAX 2 /* HIGHEST AUTH NUMBER */
 
 /*
  * The call rpc message, msg has been obtained from the wire.  The msg contains
@@ -103,8 +102,8 @@ _authenticate(struct svc_req *rqst, struct rpc_msg *msg)
 
 enum auth_stat
 _svcauth_null(void)
-	/*struct svc_req *rqst;
-	struct rpc_msg *msg;*/
+/*struct svc_req *rqst;
+struct rpc_msg *msg;*/
 {
 
 	return (AUTH_OK);

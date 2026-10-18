@@ -1,4 +1,5 @@
-/*	$OpenBSD: if_nametoindex.c,v 1.10 2015/10/23 13:09:19 claudio Exp $	*/
+/*	$OpenBSD: if_nametoindex.c,v 1.10 2015/10/23 13:09:19 claudio Exp $
+ */
 /*	$KAME: if_nametoindex.c,v 1.5 2000/11/24 08:04:40 itojun Exp $	*/
 
 /*-
@@ -29,10 +30,12 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
+
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 /*
  * From RFC 2553:
@@ -57,10 +60,10 @@ unsigned int
 if_nametoindex(const char *ifname)
 {
 	struct if_nameindex *ifni, *ifni2;
-	unsigned int index;
+	unsigned int	     index;
 
 	if ((ifni = if_nameindex()) == NULL)
-		return(0);
+		return (0);
 
 	for (ifni2 = ifni; ifni2->if_index != 0; ifni2++) {
 		if (strcmp(ifni2->if_name, ifname) == 0) {

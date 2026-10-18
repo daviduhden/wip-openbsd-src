@@ -44,17 +44,17 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
 #include <ctype.h>
 #include <resolv.h>
-
 #include <stdlib.h>
 #include <string.h>
 
 static const char Base64[] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static const char Pad64 = '=';
 
 /* (From RFC1521 and draft-ietf-dnssec-secext-03.txt)
@@ -76,26 +76,26 @@ static const char Pad64 = '=';
    characters. The character referenced by the index is placed in the
    output string.
 
-                         Table 1: The Base64 Alphabet
+			 Table 1: The Base64 Alphabet
 
       Value Encoding  Value Encoding  Value Encoding  Value Encoding
-          0 A            17 R            34 i            51 z
-          1 B            18 S            35 j            52 0
-          2 C            19 T            36 k            53 1
-          3 D            20 U            37 l            54 2
-          4 E            21 V            38 m            55 3
-          5 F            22 W            39 n            56 4
-          6 G            23 X            40 o            57 5
-          7 H            24 Y            41 p            58 6
-          8 I            25 Z            42 q            59 7
-          9 J            26 a            43 r            60 8
-         10 K            27 b            44 s            61 9
-         11 L            28 c            45 t            62 +
-         12 M            29 d            46 u            63 /
-         13 N            30 e            47 v
-         14 O            31 f            48 w         (pad) =
-         15 P            32 g            49 x
-         16 Q            33 h            50 y
+	  0 A            17 R            34 i            51 z
+	  1 B            18 S            35 j            52 0
+	  2 C            19 T            36 k            53 1
+	  3 D            20 U            37 l            54 2
+	  4 E            21 V            38 m            55 3
+	  5 F            22 W            39 n            56 4
+	  6 G            23 X            40 o            57 5
+	  7 H            24 Y            41 p            58 6
+	  8 I            25 Z            42 q            59 7
+	  9 J            26 a            43 r            60 8
+	 10 K            27 b            44 s            61 9
+	 11 L            28 c            45 t            62 +
+	 12 M            29 d            46 u            63 /
+	 13 N            30 e            47 v
+	 14 O            31 f            48 w         (pad) =
+	 15 P            32 g            49 x
+	 16 Q            33 h            50 y
 
    Special processing is performed if fewer than 24 bits are available
    at the end of the data being encoded.  A full encoding quantum is
@@ -105,29 +105,29 @@ static const char Pad64 = '=';
    end of the data is performed using the '=' character.
 
    Since all base64 input is an integral number of octets, only the
-         -------------------------------------------------
+	 -------------------------------------------------
    following cases can arise:
 
        (1) the final quantum of encoding input is an integral
-           multiple of 24 bits; here, the final unit of encoded
+	   multiple of 24 bits; here, the final unit of encoded
 	   output will be an integral multiple of 4 characters
 	   with no "=" padding,
        (2) the final quantum of encoding input is exactly 8 bits;
-           here, the final unit of encoded output will be two
+	   here, the final unit of encoded output will be two
 	   characters followed by two "=" padding characters, or
        (3) the final quantum of encoding input is exactly 16 bits;
-           here, the final unit of encoded output will be three
+	   here, the final unit of encoded output will be three
 	   characters followed by one "=" padding character.
    */
 
 int
-b64_ntop(unsigned char const *src, size_t srclength, char *target,
-    size_t targsize)
+b64_ntop(
+    unsigned char const *src, size_t srclength, char *target, size_t targsize)
 {
-	size_t datalength = 0;
+	size_t	      datalength = 0;
 	unsigned char input[3];
 	unsigned char output[4];
-	int i;
+	int	      i;
 
 	while (2 < srclength) {
 		input[0] = *src++;
@@ -171,7 +171,7 @@ b64_ntop(unsigned char const *src, size_t srclength, char *target,
 	}
 	if (datalength >= targsize)
 		return (-1);
-	target[datalength] = '\0';	/* Returned value doesn't count \0. */
+	target[datalength] = '\0'; /* Returned value doesn't count \0. */
 	return (datalength);
 }
 
@@ -184,22 +184,22 @@ b64_ntop(unsigned char const *src, size_t srclength, char *target,
 int
 b64_pton(char const *src, unsigned char *target, size_t targsize)
 {
-	int tarindex, state, ch;
+	int	      tarindex, state, ch;
 	unsigned char nextbyte;
-	char *pos;
+	char	     *pos;
 
 	state = 0;
 	tarindex = 0;
 
 	while ((ch = (unsigned char)*src++) != '\0') {
-		if (isspace(ch))	/* Skip whitespace anywhere. */
+		if (isspace(ch)) /* Skip whitespace anywhere. */
 			continue;
 
 		if (ch == Pad64)
 			break;
 
 		pos = strchr(Base64, ch);
-		if (pos == 0)		/* A non-base64 character. */
+		if (pos == 0) /* A non-base64 character. */
 			return (-1);
 
 		switch (state) {
@@ -215,10 +215,10 @@ b64_pton(char const *src, unsigned char *target, size_t targsize)
 			if (target) {
 				if (tarindex >= targsize)
 					return (-1);
-				target[tarindex]   |=  (pos - Base64) >> 4;
+				target[tarindex] |= (pos - Base64) >> 4;
 				nextbyte = ((pos - Base64) & 0x0f) << 4;
 				if (tarindex + 1 < targsize)
-					target[tarindex+1] = nextbyte;
+					target[tarindex + 1] = nextbyte;
 				else if (nextbyte)
 					return (-1);
 			}
@@ -229,10 +229,10 @@ b64_pton(char const *src, unsigned char *target, size_t targsize)
 			if (target) {
 				if (tarindex >= targsize)
 					return (-1);
-				target[tarindex]   |=  (pos - Base64) >> 2;
+				target[tarindex] |= (pos - Base64) >> 2;
 				nextbyte = ((pos - Base64) & 0x03) << 6;
 				if (tarindex + 1 < targsize)
-					target[tarindex+1] = nextbyte;
+					target[tarindex + 1] = nextbyte;
 				else if (nextbyte)
 					return (-1);
 			}
@@ -256,14 +256,14 @@ b64_pton(char const *src, unsigned char *target, size_t targsize)
 	 * on a byte boundary, and/or with erroneous trailing characters.
 	 */
 
-	if (ch == Pad64) {			/* We got a pad char. */
-		ch = (unsigned char)*src++;	/* Skip it, get next. */
+	if (ch == Pad64) {		    /* We got a pad char. */
+		ch = (unsigned char)*src++; /* Skip it, get next. */
 		switch (state) {
-		case 0:		/* Invalid = in first position */
-		case 1:		/* Invalid = in second position */
+		case 0: /* Invalid = in first position */
+		case 1: /* Invalid = in second position */
 			return (-1);
 
-		case 2:		/* Valid, means one byte of info */
+		case 2: /* Valid, means one byte of info */
 			/* Skip any number of spaces. */
 			for (; ch != '\0'; ch = (unsigned char)*src++)
 				if (!isspace(ch))
@@ -271,11 +271,11 @@ b64_pton(char const *src, unsigned char *target, size_t targsize)
 			/* Make sure there is another trailing = sign. */
 			if (ch != Pad64)
 				return (-1);
-			ch = (unsigned char)*src++;		/* Skip the = */
+			ch = (unsigned char)*src++; /* Skip the = */
 			/* Fall through to "single trailing =" case. */
 			/* FALLTHROUGH */
 
-		case 3:		/* Valid, means two bytes of info */
+		case 3: /* Valid, means two bytes of info */
 			/*
 			 * We know this char is an =.  Is there anything but
 			 * whitespace after it?

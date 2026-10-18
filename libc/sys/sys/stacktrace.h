@@ -19,17 +19,17 @@
 #ifndef _SYS_STACKTRACE_H_
 #define _SYS_STACKTRACE_H_
 
-#define STACKTRACE_MAX	19
+#define STACKTRACE_MAX 19
 
 struct stacktrace {
-	unsigned int	st_count;
-	unsigned long	st_pc[STACKTRACE_MAX];
+	unsigned int  st_count;
+	unsigned long st_pc[STACKTRACE_MAX];
 };
 
 #ifdef _KERNEL
-void	stacktrace_print(struct stacktrace *, int (*)(const char *, ...));
-void	stacktrace_save_at(struct stacktrace *, unsigned int);
-void	stacktrace_save_utrace(struct stacktrace *);
+void stacktrace_print(struct stacktrace *, int (*)(const char *, ...));
+void stacktrace_save_at(struct stacktrace *, unsigned int);
+void stacktrace_save_utrace(struct stacktrace *);
 
 static inline void
 stacktrace_save(struct stacktrace *st)

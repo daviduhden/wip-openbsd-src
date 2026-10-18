@@ -30,19 +30,19 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sched.h>
-#include <spawn.h>
 #include <signal.h>
+#include <spawn.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 struct __posix_spawnattr {
-	short			sa_flags;
-	pid_t			sa_pgroup;
-	struct sched_param	sa_schedparam;
-	int			sa_schedpolicy;
-	sigset_t		sa_sigdefault;
-	sigset_t		sa_sigmask;
+	short		   sa_flags;
+	pid_t		   sa_pgroup;
+	struct sched_param sa_schedparam;
+	int		   sa_schedpolicy;
+	sigset_t	   sa_sigdefault;
+	sigset_t	   sa_sigmask;
 };
 
 struct __posix_spawn_file_actions {
@@ -51,21 +51,27 @@ struct __posix_spawn_file_actions {
 
 typedef struct __posix_spawn_file_actions_entry {
 	SIMPLEQ_ENTRY(__posix_spawn_file_actions_entry) fae_list;
-	enum { FAE_OPEN, FAE_DUP2, FAE_CLOSE, FAE_CHDIR, FAE_FCHDIR } fae_action;
+	enum {
+		FAE_OPEN,
+		FAE_DUP2,
+		FAE_CLOSE,
+		FAE_CHDIR,
+		FAE_FCHDIR
+	} fae_action;
 
 	int fae_fildes;
 	union {
 		struct {
 			char *path;
-#define fae_path	fae_data.open.path
+#define fae_path fae_data.open.path
 			int oflag;
-#define fae_oflag	fae_data.open.oflag
+#define fae_oflag fae_data.open.oflag
 			mode_t mode;
-#define fae_mode	fae_data.open.mode
+#define fae_mode fae_data.open.mode
 		} open;
 		struct {
 			int newfildes;
-#define fae_newfildes	fae_data.dup2.newfildes
+#define fae_newfildes fae_data.dup2.newfildes
 		} dup2;
 	} fae_data;
 } posix_spawn_file_actions_entry_t;
@@ -78,7 +84,7 @@ static int
 process_spawnattr(const posix_spawnattr_t sa)
 {
 	struct sigaction sigact;
-	int i;
+	int		 i;
 
 	memset(&sigact, 0, sizeof(sigact));
 	sigact.sa_handler = SIG_DFL;
@@ -162,7 +168,7 @@ process_file_actions_entry(posix_spawn_file_actions_entry_t *fae)
 
 			if (flags == -1 ||
 			    ((flags & FD_CLOEXEC) &&
-			    fcntl(fd, F_SETFD, flags & ~FD_CLOEXEC) == -1))
+				fcntl(fd, F_SETFD, flags & ~FD_CLOEXEC) == -1))
 				return (errno);
 		} else if (dup2(fd, fae->fae_newfildes) == -1)
 			return (errno);
@@ -187,25 +193,25 @@ static int
 process_file_actions(const posix_spawn_file_actions_t fa)
 {
 	posix_spawn_file_actions_entry_t *fae;
-	int error;
+	int				  error;
 
 	/* Replay all file descriptor modifications */
-	SIMPLEQ_FOREACH(fae, &fa->fa_list, fae_list) {
+	SIMPLEQ_FOREACH(fae, &fa->fa_list, fae_list)
+	{
 		error = process_file_actions_entry(fae);
 		if (error)
 			return (error);
 	}
-	return (0);	
+	return (0);
 }
 
 static int
 do_posix_spawn(pid_t *pid, const char *path,
-    const posix_spawn_file_actions_t *fa,
-    const posix_spawnattr_t *sa,
+    const posix_spawn_file_actions_t *fa, const posix_spawnattr_t *sa,
     char *const argv[], char *const envp[], int use_env_path)
 {
 	pid_t p;
-	
+
 	p = fork();
 	switch (p) {
 	case -1:
@@ -236,19 +242,15 @@ do_posix_spawn(pid_t *pid, const char *path,
 }
 
 int
-posix_spawn(pid_t *pid, const char *path,
-    const posix_spawn_file_actions_t *fa,
-    const posix_spawnattr_t *sa,
-    char *const argv[], char *const envp[])
+posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *fa,
+    const posix_spawnattr_t *sa, char *const argv[], char *const envp[])
 {
 	return do_posix_spawn(pid, path, fa, sa, argv, envp, 0);
 }
 
 int
-posix_spawnp(pid_t *pid, const char *path,
-    const posix_spawn_file_actions_t *fa,
-    const posix_spawnattr_t *sa,
-    char *const argv[], char *const envp[])
+posix_spawnp(pid_t *pid, const char *path, const posix_spawn_file_actions_t *fa,
+    const posix_spawnattr_t *sa, char *const argv[], char *const envp[])
 {
 	return do_posix_spawn(pid, path, fa, sa, argv, envp, 1);
 }
@@ -281,8 +283,7 @@ posix_spawn_file_actions_destroy(posix_spawn_file_actions_t *fa)
 		SIMPLEQ_REMOVE_HEAD(&(*fa)->fa_list, fae_list);
 
 		/* Deallocate file action entry */
-		if (fae->fae_action == FAE_OPEN ||
-		    fae->fae_action == FAE_CHDIR)
+		if (fae->fae_action == FAE_OPEN || fae->fae_action == FAE_CHDIR)
 			free(fae->fae_path);
 		free(fae);
 	}
@@ -296,7 +297,7 @@ posix_spawn_file_actions_addopen(posix_spawn_file_actions_t *__restrict fa,
     int fildes, const char *__restrict path, int oflag, mode_t mode)
 {
 	posix_spawn_file_actions_entry_t *fae;
-	int error;
+	int				  error;
 
 	if (fildes < 0)
 		return (EBADF);
@@ -323,8 +324,8 @@ posix_spawn_file_actions_addopen(posix_spawn_file_actions_t *__restrict fa,
 }
 
 int
-posix_spawn_file_actions_adddup2(posix_spawn_file_actions_t *fa,
-    int fildes, int newfildes)
+posix_spawn_file_actions_adddup2(
+    posix_spawn_file_actions_t *fa, int fildes, int newfildes)
 {
 	posix_spawn_file_actions_entry_t *fae;
 
@@ -346,8 +347,7 @@ posix_spawn_file_actions_adddup2(posix_spawn_file_actions_t *fa,
 }
 
 int
-posix_spawn_file_actions_addclose(posix_spawn_file_actions_t *fa,
-    int fildes)
+posix_spawn_file_actions_addclose(posix_spawn_file_actions_t *fa, int fildes)
 {
 	posix_spawn_file_actions_entry_t *fae;
 
@@ -368,11 +368,11 @@ posix_spawn_file_actions_addclose(posix_spawn_file_actions_t *fa,
 }
 
 int
-posix_spawn_file_actions_addchdir(posix_spawn_file_actions_t *fa,
-    const char *__restrict path)
+posix_spawn_file_actions_addchdir(
+    posix_spawn_file_actions_t *fa, const char *__restrict path)
 {
 	posix_spawn_file_actions_entry_t *fae;
-	int error;
+	int				  error;
 
 	/* Allocate object */
 	fae = malloc(sizeof(posix_spawn_file_actions_entry_t));
@@ -393,8 +393,7 @@ posix_spawn_file_actions_addchdir(posix_spawn_file_actions_t *fa,
 }
 
 int
-posix_spawn_file_actions_addfchdir(posix_spawn_file_actions_t *fa,
-    int fildes)
+posix_spawn_file_actions_addfchdir(posix_spawn_file_actions_t *fa, int fildes)
 {
 	posix_spawn_file_actions_entry_t *fae;
 
@@ -440,16 +439,16 @@ posix_spawnattr_destroy(posix_spawnattr_t *sa)
 }
 
 int
-posix_spawnattr_getflags(const posix_spawnattr_t *__restrict sa,
-    short *__restrict flags)
+posix_spawnattr_getflags(
+    const posix_spawnattr_t *__restrict sa, short *__restrict flags)
 {
 	*flags = (*sa)->sa_flags;
 	return (0);
 }
 
 int
-posix_spawnattr_getpgroup(const posix_spawnattr_t *__restrict sa,
-    pid_t *__restrict pgroup)
+posix_spawnattr_getpgroup(
+    const posix_spawnattr_t *__restrict sa, pid_t *__restrict pgroup)
 {
 	*pgroup = (*sa)->sa_pgroup;
 	return (0);
@@ -464,24 +463,24 @@ posix_spawnattr_getschedparam(const posix_spawnattr_t *__restrict sa,
 }
 
 int
-posix_spawnattr_getschedpolicy(const posix_spawnattr_t *__restrict sa,
-    int *__restrict schedpolicy)
+posix_spawnattr_getschedpolicy(
+    const posix_spawnattr_t *__restrict sa, int *__restrict schedpolicy)
 {
 	*schedpolicy = (*sa)->sa_schedpolicy;
 	return (0);
 }
 
 int
-posix_spawnattr_getsigdefault(const posix_spawnattr_t *__restrict sa,
-    sigset_t *__restrict sigdefault)
+posix_spawnattr_getsigdefault(
+    const posix_spawnattr_t *__restrict sa, sigset_t *__restrict sigdefault)
 {
 	*sigdefault = (*sa)->sa_sigdefault;
 	return (0);
 }
 
 int
-posix_spawnattr_getsigmask(const posix_spawnattr_t *__restrict sa,
-    sigset_t *__restrict sigmask)
+posix_spawnattr_getsigmask(
+    const posix_spawnattr_t *__restrict sa, sigset_t *__restrict sigmask)
 {
 	*sigmask = (*sa)->sa_sigmask;
 	return (0);
@@ -517,16 +516,16 @@ posix_spawnattr_setschedpolicy(posix_spawnattr_t *sa, int schedpolicy)
 }
 
 int
-posix_spawnattr_setsigdefault(posix_spawnattr_t *__restrict sa,
-    const sigset_t *__restrict sigdefault)
+posix_spawnattr_setsigdefault(
+    posix_spawnattr_t *__restrict sa, const sigset_t *__restrict sigdefault)
 {
 	(*sa)->sa_sigdefault = *sigdefault;
 	return (0);
 }
 
 int
-posix_spawnattr_setsigmask(posix_spawnattr_t *__restrict sa,
-    const sigset_t *__restrict sigmask)
+posix_spawnattr_setsigmask(
+    posix_spawnattr_t *__restrict sa, const sigset_t *__restrict sigmask)
 {
 	(*sa)->sa_sigmask = *sigmask;
 	return (0);

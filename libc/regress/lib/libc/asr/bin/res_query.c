@@ -20,9 +20,9 @@
 #include <sys/time.h>
 
 #include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <arpa/inet.h>
 
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
 #include <err.h>
 #include <errno.h>
 #include <getopt.h>
@@ -40,40 +40,38 @@ static void dump_packet(const void *, size_t);
 static char *print_query(struct query *, char *, size_t);
 static char *print_rr(struct rr *, char *, size_t);
 static char *print_host(const struct sockaddr *, char *, size_t);
-static char* print_dname(const char *, char *, size_t);
-
+static char *print_dname(const char *, char *, size_t);
 
 static int
 msec(struct timeval start, struct timeval end)
 {
-	return (int)((end.tv_sec - start.tv_sec) * 1000
-	    + (end.tv_usec - start.tv_usec) / 1000);
+	return (int)((end.tv_sec - start.tv_sec) * 1000 +
+	    (end.tv_usec - start.tv_usec) / 1000);
 }
 
 static void
 usage(void)
 {
-	extern const char * __progname;
+	extern const char *__progname;
 
-	fprintf(stderr, "usage: %s [-deq] [-t type] [host...]\n",
-	    __progname);
+	fprintf(stderr, "usage: %s [-deq] [-t type] [host...]\n", __progname);
 	exit(1);
 }
 
 int
 main(int argc, char *argv[])
 {
-	struct timeval		 start, end;
-	time_t			 when;
-	int			 ch, i, qflag, dflag, r;
-	uint16_t		 type = T_A;
-	char			 buf[1024], *host;
+	struct timeval start, end;
+	time_t	       when;
+	int	       ch, i, qflag, dflag, r;
+	uint16_t       type = T_A;
+	char	       buf[1024], *host;
 
 	dflag = 0;
 	qflag = 0;
 
-	while((ch = getopt(argc, argv, "R:deqt:")) !=  -1) {
-		switch(ch) {
+	while ((ch = getopt(argc, argv, "R:deqt:")) != -1) {
+		switch (ch) {
 		case 'R':
 			parseresopt(optarg);
 			break;
@@ -139,22 +137,21 @@ main(int argc, char *argv[])
 	return (0);
 }
 
-#define OPCODE_SHIFT	11
-#define Z_SHIFT		4
+#define OPCODE_SHIFT 11
+#define Z_SHIFT 4
 
-static char*
+static char *
 print_header(struct header *h, char *buf, size_t max)
 {
 	snprintf(buf, max,
-	"id:0x.... %s op:%i %s %s %s %s z:%i r:%s qd:%i an:%i ns:%i ar:%i",
-	    (h->flags & QR_MASK) ? "QR":"  ",
+	    "id:0x.... %s op:%i %s %s %s %s z:%i r:%s qd:%i an:%i ns:%i ar:%i",
+	    (h->flags & QR_MASK) ? "QR" : "  ",
 	    (int)(OPCODE(h->flags) >> OPCODE_SHIFT),
-	    (h->flags & AA_MASK) ? "AA":"  ",
-	    (h->flags & TC_MASK) ? "TC":"  ",
-	    (h->flags & RD_MASK) ? "RD":"  ",
-	    (h->flags & RA_MASK) ? "RA":"  ",  
-	    ((h->flags & Z_MASK) >> Z_SHIFT),
-	    rcodetostr(RCODE(h->flags)),
+	    (h->flags & AA_MASK) ? "AA" : "  ",
+	    (h->flags & TC_MASK) ? "TC" : "  ",
+	    (h->flags & RD_MASK) ? "RD" : "  ",
+	    (h->flags & RA_MASK) ? "RA" : "  ",
+	    ((h->flags & Z_MASK) >> Z_SHIFT), rcodetostr(RCODE(h->flags)),
 	    h->qdcount, h->ancount, h->nscount, h->arcount);
 
 	return buf;
@@ -163,12 +160,12 @@ print_header(struct header *h, char *buf, size_t max)
 static void
 dump_packet(const void *data, size_t len)
 {
-	char		buf[1024];
-	struct packed	p;
-	struct header	h;
-	struct query	q;
-	struct rr	rr;
-	int		i, an, ns, ar, n;
+	char	      buf[1024];
+	struct packed p;
+	struct header h;
+	struct query  q;
+	struct rr     rr;
+	int	      i, an, ns, ar, n;
 
 	packed_init(&p, (char *)data, len);
 
@@ -208,40 +205,38 @@ dump_packet(const void *data, size_t len)
 	if (p.offset != len)
 		printf(";; REMAINING GARBAGE %zu\n", len - p.offset);
 
-    error:
+error:
 	if (p.err)
-		printf(";; ERROR AT OFFSET %zu/%zu: %s\n", p.offset, p.len,
-		    p.err);
+		printf(
+		    ";; ERROR AT OFFSET %zu/%zu: %s\n", p.offset, p.len, p.err);
 }
 
 static const char *
 inet6_ntoa(struct in6_addr a)
 {
-	static char buf[256];
-	struct sockaddr_in6	si;
+	static char	    buf[256];
+	struct sockaddr_in6 si;
 
 	si.sin6_len = sizeof(si);
 	si.sin6_family = PF_INET6;
 	si.sin6_addr = a;
 
-	return print_host((struct sockaddr*)&si, buf, sizeof buf);
+	return print_host((struct sockaddr *)&si, buf, sizeof buf);
 }
 
-static char*
+static char *
 print_rr(struct rr *rr, char *buf, size_t max)
 {
-	char	*res;
-	char	 tmp[256];
-	char	 tmp2[256];
-	int	 r;
+	char *res;
+	char  tmp[256];
+	char  tmp2[256];
+	int   r;
 
 	res = buf;
 
 	r = snprintf(buf, max, "%s %u %s %s ",
-	    print_dname(rr->rr_dname, tmp, sizeof tmp),
-	    rr->rr_ttl,
-	    classtostr(rr->rr_class),
-	    typetostr(rr->rr_type));
+	    print_dname(rr->rr_dname, tmp, sizeof tmp), rr->rr_ttl,
+	    classtostr(rr->rr_class), typetostr(rr->rr_type));
 	if (r == -1) {
 		buf[0] = '\0';
 		return buf;
@@ -253,13 +248,12 @@ print_rr(struct rr *rr, char *buf, size_t max)
 	max -= r;
 	buf += r;
 
-	switch(rr->rr_type) {
+	switch (rr->rr_type) {
 	case T_CNAME:
 		print_dname(rr->rr.cname.cname, buf, max);
 		break;
 	case T_MX:
-		snprintf(buf, max, "%"PRIu32" %s",
-		    rr->rr.mx.preference,
+		snprintf(buf, max, "%" PRIu32 " %s", rr->rr.mx.preference,
 		    print_dname(rr->rr.mx.exchange, tmp, sizeof tmp));
 		break;
 	case T_NS:
@@ -270,14 +264,12 @@ print_rr(struct rr *rr, char *buf, size_t max)
 		break;
 	case T_SOA:
 		snprintf(buf, max,
-		    "%s %s %" PRIu32 " %" PRIu32 " %" PRIu32 " %" PRIu32 " %" PRIu32,
+		    "%s %s %" PRIu32 " %" PRIu32 " %" PRIu32 " %" PRIu32
+		    " %" PRIu32,
 		    print_dname(rr->rr.soa.rname, tmp, sizeof tmp),
 		    print_dname(rr->rr.soa.mname, tmp2, sizeof tmp2),
-		    rr->rr.soa.serial,
-		    rr->rr.soa.refresh,
-		    rr->rr.soa.retry,
-		    rr->rr.soa.expire,
-		    rr->rr.soa.minimum);
+		    rr->rr.soa.serial, rr->rr.soa.refresh, rr->rr.soa.retry,
+		    rr->rr.soa.expire, rr->rr.soa.minimum);
 		break;
 	case T_A:
 		if (rr->rr_class != C_IN)
@@ -291,35 +283,35 @@ print_rr(struct rr *rr, char *buf, size_t max)
 		break;
 	default:
 	other:
-		snprintf(buf, max, "(rdlen=%"PRIu16 ")", rr->rr.other.rdlen);
+		snprintf(buf, max, "(rdlen=%" PRIu16 ")", rr->rr.other.rdlen);
 		break;
 	}
 
 	return (res);
 }
 
-static char*
+static char *
 print_query(struct query *q, char *buf, size_t max)
 {
 	char b[256];
 
-	snprintf(buf, max, "%s	%s %s",
-	    print_dname(q->q_dname, b, sizeof b),
+	snprintf(buf, max, "%s	%s %s", print_dname(q->q_dname, b, sizeof b),
 	    classtostr(q->q_class), typetostr(q->q_type));
 
 	return (buf);
 }
-
 
 static char *
 print_host(const struct sockaddr *sa, char *buf, size_t len)
 {
 	switch (sa->sa_family) {
 	case AF_INET:
-		inet_ntop(AF_INET, &((struct sockaddr_in*)sa)->sin_addr, buf, len);
+		inet_ntop(
+		    AF_INET, &((struct sockaddr_in *)sa)->sin_addr, buf, len);
 		break;
 	case AF_INET6:
-		inet_ntop(AF_INET6, &((struct sockaddr_in6*)sa)->sin6_addr, buf, len);
+		inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr,
+		    buf, len);
 		break;
 	default:
 		buf[0] = '\0';
@@ -327,12 +319,12 @@ print_host(const struct sockaddr *sa, char *buf, size_t len)
 	return (buf);
 }
 
-static char*
+static char *
 print_dname(const char *_dname, char *buf, size_t max)
 {
 	const unsigned char *dname = _dname;
-	char	*res;
-	size_t	 left, count;
+	char		    *res;
+	size_t		     left, count;
 
 	if (_dname[0] == 0) {
 		strlcpy(buf, ".", max);

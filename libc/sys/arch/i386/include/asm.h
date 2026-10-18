@@ -39,92 +39,114 @@
 #define _MACHINE_ASM_H_
 
 #ifdef __PIC__
-#define PIC_PROLOGUE	\
-	pushl	%ebx;	\
-	call	666f;	\
-666:			\
-	popl	%ebx;	\
-	addl	$_GLOBAL_OFFSET_TABLE_+[.-666b], %ebx
-#define PIC_EPILOGUE	\
-	popl	%ebx
-#define PIC_PLT(x)	x@PLT
-#define PIC_GOT(x)	x@GOT(%ebx)
-#define PIC_GOTOFF(x)	x@GOTOFF(%ebx)
+#define PIC_PROLOGUE                                                           \
+	pushl % ebx;                                                           \
+	call 666f;                                                             \
+	666 : popl % ebx;                                                      \
+	addl $_GLOBAL_OFFSET_TABLE_ + [.- 666b], % ebx
+#define PIC_EPILOGUE popl % ebx
+#define PIC_PLT(x) x @PLT
+#define PIC_GOT(x) x @GOT(% ebx)
+#define PIC_GOTOFF(x) x @GOTOFF(% ebx)
 #else
 #define PIC_PROLOGUE
 #define PIC_EPILOGUE
-#define PIC_PLT(x)	x
-#define PIC_GOT(x)	x
-#define PIC_GOTOFF(x)	x
+#define PIC_PLT(x) x
+#define PIC_GOT(x) x
+#define PIC_GOTOFF(x) x
 #endif
 
-#define _C_LABEL(name)	name
-#define	_ASM_LABEL(x)	x
+#define _C_LABEL(name) name
+#define _ASM_LABEL(x) x
 
-#define CVAROFF(x, y)	x + y
+#define CVAROFF(x, y) x + y
 
 #ifdef __STDC__
-# define __CONCAT(x,y)	x ## y
-# define __STRING(x)	#x
+#define __CONCAT(x, y) x##y
+#define __STRING(x) #x
 #else
-# define __CONCAT(x,y)	x/**/y
-# define __STRING(x)	"x"
+#define __CONCAT(x, y) x /**/ y
+#define __STRING(x) "x"
 #endif
 
 /*
  * STRONG_ALIAS, WEAK_ALIAS
  *	Create a strong or weak alias.
  */
-#define STRONG_ALIAS(alias,sym) \
-	.global alias; \
+#define STRONG_ALIAS(alias, sym)                                               \
+	.global alias;                                                         \
 	alias = sym
-#define WEAK_ALIAS(alias,sym) \
-	.weak alias; \
+#define WEAK_ALIAS(alias, sym)                                                 \
+	.weak alias;                                                           \
 	alias = sym
 
 /* let kernels and others override entrypoint alignment */
 #ifndef _ALIGN_TEXT
-# define _ALIGN_TEXT .align 2, 0x90
+#define _ALIGN_TEXT .align 2, 0x90
 #endif
 
 /* NB == No Binding: use .globl or .weak as necessary */
-#define _ENTRY_NB(x) \
-	.text; _ALIGN_TEXT; .type x,@function; x:
-#define _ENTRY(x)	.globl x; _ENTRY_NB(x)
+#define _ENTRY_NB(x)                                                           \
+	.text;                                                                 \
+	_ALIGN_TEXT;                                                           \
+	.type x, @function;                                                    \
+	x:
+#define _ENTRY(x)                                                              \
+	.globl x;                                                              \
+	_ENTRY_NB(x)
 
 #ifdef _KERNEL
-#define KUTEXT	.section .kutext, "ax"
+#define KUTEXT .section.kutext, "ax"
 
-#define IDTVEC(name)    \
-	KUTEXT; ALIGN_TEXT;	\
-	.globl X##name; X##name:
-#define KIDTVEC(name)    \
-	.text; ALIGN_TEXT;	\
-	.globl X##name; X##name:
-#define KUENTRY(x) \
-	KUTEXT; _ALIGN_TEXT; .globl x; .type x,@function; x:
+#define IDTVEC(name)                                                           \
+	KUTEXT;                                                                \
+	ALIGN_TEXT;                                                            \
+	.globl X##name;                                                        \
+	X##name:
+#define KIDTVEC(name)                                                          \
+	.text;                                                                 \
+	ALIGN_TEXT;                                                            \
+	.globl X##name;                                                        \
+	X##name:
+#define KUENTRY(x)                                                             \
+	KUTEXT;                                                                \
+	_ALIGN_TEXT;                                                           \
+	.globl x;                                                              \
+	.type  x, @function;                                                   \
+	x:
 
-#endif	/* _KERNEL */
+#endif /* _KERNEL */
 
 #if defined(PROF) || defined(GPROF)
-# define _PROF_PROLOGUE	\
-	pushl %ebp; movl %esp,%ebp; call PIC_PLT(mcount); popl %ebp
+#define _PROF_PROLOGUE                                                         \
+	pushl % ebp;                                                           \
+	movl % esp, % ebp;                                                     \
+	call PIC_PLT(mcount);                                                  \
+	popl % ebp
 #else
-# define _PROF_PROLOGUE
+#define _PROF_PROLOGUE
 #endif
 
-#define	ENTRY(y)	_ENTRY(y); _PROF_PROLOGUE
-#define	ENTRY_NB(y)	_ENTRY_NB(y); _PROF_PROLOGUE
-#define	NENTRY(y)	_ENTRY(y)
-#define	ASENTRY(y)	_ENTRY(y); _PROF_PROLOGUE
-#define	NASENTRY(y)	_ENTRY(y)
-#define	END(y)		.size y, . - y
+#define ENTRY(y)                                                               \
+	_ENTRY(y);                                                             \
+	_PROF_PROLOGUE
+#define ENTRY_NB(y)                                                            \
+	_ENTRY_NB(y);                                                          \
+	_PROF_PROLOGUE
+#define NENTRY(y) _ENTRY(y)
+#define ASENTRY(y)                                                             \
+	_ENTRY(y);                                                             \
+	_PROF_PROLOGUE
+#define NASENTRY(y) _ENTRY(y)
+#define END(y) .size y, .- y
 
-#define	ALTENTRY(name)	.globl name; name:
+#define ALTENTRY(name)                                                         \
+	.globl name;                                                           \
+	name:
 
 #ifdef _KERNEL
 
-#define CPUVAR(var)	%fs:__CONCAT(CPU_INFO_,var)
+#define CPUVAR(var) % fs : __CONCAT(CPU_INFO_, var)
 
 #endif /* _KERNEL */
 

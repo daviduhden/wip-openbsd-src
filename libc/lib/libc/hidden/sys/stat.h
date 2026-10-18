@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_SYS_STAT_H_
-#define	_LIBC_SYS_STAT_H_
+#define _LIBC_SYS_STAT_H_
 
 #include_next <sys/stat.h>
 

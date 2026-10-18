@@ -5,7 +5,7 @@
  * -
  * Copyright (c) 1983, 1990, 1993
  *    The Regents of the University of California.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -17,7 +17,7 @@
  * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,14 +31,14 @@
  * SUCH DAMAGE.
  * -
  * Portions Copyright (c) 1993 by Digital Equipment Corporation.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies, and that
  * the name of Digital Equipment Corporation not be used in advertising or
  * publicity pertaining to distribution of the document or software without
  * specific, written prior permission.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND DIGITAL EQUIPMENT CORP. DISCLAIMS ALL
  * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL DIGITAL EQUIPMENT
@@ -52,7 +52,9 @@
  */
 
 #include <sys/types.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <ctype.h>
 
@@ -70,7 +72,7 @@ inet_addr(const char *cp)
 	return (INADDR_NONE);
 }
 
-/* 
+/*
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
  * Returns 1 if the address is valid, 0 if not.
@@ -81,10 +83,10 @@ int
 inet_aton(const char *cp, struct in_addr *addr)
 {
 	in_addr_t val;
-	int base, n;
-	char c;
-	u_int parts[4];
-	u_int *pp = parts;
+	int	  base, n;
+	char	  c;
+	u_int	  parts[4];
+	u_int	 *pp = parts;
 
 	c = *cp;
 	for (;;) {
@@ -95,7 +97,8 @@ inet_aton(const char *cp, struct in_addr *addr)
 		 */
 		if (!isdigit((unsigned char)c))
 			return (0);
-		val = 0; base = 10;
+		val = 0;
+		base = 10;
 		if (c == '0') {
 			c = *++cp;
 			if (c == 'x' || c == 'X')
@@ -108,11 +111,12 @@ inet_aton(const char *cp, struct in_addr *addr)
 			    isdigit((unsigned char)c)) {
 				val = (val * base) + (c - '0');
 				c = *++cp;
-			} else if (base == 16 &&
-			    isascii((unsigned char)c) &&
+			} else if (base == 16 && isascii((unsigned char)c) &&
 			    isxdigit((unsigned char)c)) {
 				val = (val << 4) |
-				    (c + 10 - (islower((unsigned char)c) ? 'a' : 'A'));
+				    (c + 10 -
+					(islower((unsigned char)c) ? 'a' :
+								     'A'));
 				c = *++cp;
 			} else
 				break;
@@ -145,25 +149,26 @@ inet_aton(const char *cp, struct in_addr *addr)
 	switch (n) {
 
 	case 0:
-		return (0);		/* initial nondigit */
+		return (0); /* initial nondigit */
 
-	case 1:				/* a -- 32 bits */
+	case 1: /* a -- 32 bits */
 		break;
 
-	case 2:				/* a.b -- 8.24 bits */
+	case 2: /* a.b -- 8.24 bits */
 		if ((val > 0xffffff) || (parts[0] > 0xff))
 			return (0);
 		val |= parts[0] << 24;
 		break;
 
-	case 3:				/* a.b.c -- 8.8.16 bits */
+	case 3: /* a.b.c -- 8.8.16 bits */
 		if ((val > 0xffff) || (parts[0] > 0xff) || (parts[1] > 0xff))
 			return (0);
 		val |= (parts[0] << 24) | (parts[1] << 16);
 		break;
 
-	case 4:				/* a.b.c.d -- 8.8.8.8 bits */
-		if ((val > 0xff) || (parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff))
+	case 4: /* a.b.c.d -- 8.8.8.8 bits */
+		if ((val > 0xff) || (parts[0] > 0xff) || (parts[1] > 0xff) ||
+		    (parts[2] > 0xff))
 			return (0);
 		val |= (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8);
 		break;

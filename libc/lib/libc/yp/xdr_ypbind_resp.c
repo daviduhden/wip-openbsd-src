@@ -26,6 +26,7 @@
  */
 
 #include <sys/types.h>
+
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
@@ -39,11 +40,11 @@ xdr_ypbind_resp(XDR *xdrs, struct ypbind_resp *objp)
 
 	switch (objp->ypbind_status) {
 	case YPBIND_FAIL_VAL:
-		return xdr_u_int(xdrs,
-		    (u_int *)&objp->ypbind_resp_u.ypbind_error);
+		return xdr_u_int(
+		    xdrs, (u_int *)&objp->ypbind_resp_u.ypbind_error);
 	case YPBIND_SUCC_VAL:
-		return xdr_ypbind_binding(xdrs,
-		    &objp->ypbind_resp_u.ypbind_bindinfo);
+		return xdr_ypbind_binding(
+		    xdrs, &objp->ypbind_resp_u.ypbind_bindinfo);
 	default:
 		return FALSE;
 	}

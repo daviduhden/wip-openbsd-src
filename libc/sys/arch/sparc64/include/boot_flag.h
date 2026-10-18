@@ -36,15 +36,15 @@
 
 /* MD boot data in .openbsd.bootdata ELF segment */
 struct openbsd_bootdata {
-	u_int64_t 	version;
-	u_int64_t 	len;	/* of structure */
+	u_int64_t version;
+	u_int64_t len; /* of structure */
 
-	u_int8_t	sr_uuid[BOOTSR_UUID_MAX];
-	u_int8_t	sr_maskkey[BOOTSR_CRYPTO_MAXKEYBYTES];
-	u_int32_t	boothowto;
+	u_int8_t  sr_uuid[BOOTSR_UUID_MAX];
+	u_int8_t  sr_maskkey[BOOTSR_CRYPTO_MAXKEYBYTES];
+	u_int32_t boothowto;
 } __packed;
 
-#define BOOTDATA_VERSION	1
-#define BOOTDATA_LEN_BOOTHOWTO	68
+#define BOOTDATA_VERSION 1
+#define BOOTDATA_LEN_BOOTHOWTO 68
 
 #endif /* _MACHINE_BOOT_FLAG_H_ */

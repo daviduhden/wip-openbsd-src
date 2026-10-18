@@ -50,29 +50,29 @@
 struct cpu_functions {
 
 	/* CPU functions */
-	
-	u_int	(*cf_id)		(void);
-	void	(*cf_cpwait)		(void);
+
+	u_int (*cf_id)(void);
+	void  (*cf_cpwait)(void);
 
 	/* MMU functions */
 
-	u_int	(*cf_control)		(u_int clear, u_int set);
-	u_int	(*cf_auxcontrol)	(u_int clear, u_int set);
-	void	(*cf_domains)		(u_int domains);
-	void	(*cf_setttb)		(u_int ttb);
-	u_int	(*cf_dfsr)		(void);
-	u_int	(*cf_dfar)		(void);
-	u_int	(*cf_ifsr)		(void);
-	u_int	(*cf_ifar)		(void);
+	u_int (*cf_control)(u_int clear, u_int set);
+	u_int (*cf_auxcontrol)(u_int clear, u_int set);
+	void  (*cf_domains)(u_int domains);
+	void  (*cf_setttb)(u_int ttb);
+	u_int (*cf_dfsr)(void);
+	u_int (*cf_dfar)(void);
+	u_int (*cf_ifsr)(void);
+	u_int (*cf_ifar)(void);
 
 	/* TLB functions */
 
-	void	(*cf_tlb_flushID)	(void);	
-	void	(*cf_tlb_flushID_SE)	(u_int va);	
-	void	(*cf_tlb_flushI)	(void);
-	void	(*cf_tlb_flushI_SE)	(u_int va);	
-	void	(*cf_tlb_flushD)	(void);
-	void	(*cf_tlb_flushD_SE)	(u_int va);	
+	void (*cf_tlb_flushID)(void);
+	void (*cf_tlb_flushID_SE)(u_int va);
+	void (*cf_tlb_flushI)(void);
+	void (*cf_tlb_flushI_SE)(u_int va);
+	void (*cf_tlb_flushD)(void);
+	void (*cf_tlb_flushD_SE)(u_int va);
 
 	/*
 	 * Cache operations:
@@ -124,139 +124,142 @@ struct cpu_functions {
 	 *		Valid virtual addresses must be passed to each
 	 *		cache operation.
 	 */
-	void	(*cf_icache_sync_all)	(void);
-	void	(*cf_icache_sync_range)	(vaddr_t, vsize_t);
+	void (*cf_icache_sync_all)(void);
+	void (*cf_icache_sync_range)(vaddr_t, vsize_t);
 
-	void	(*cf_dcache_wbinv_all)	(void);
-	void	(*cf_dcache_wbinv_range) (vaddr_t, vsize_t);
-	void	(*cf_dcache_inv_range)	(vaddr_t, vsize_t);
-	void	(*cf_dcache_wb_range)	(vaddr_t, vsize_t);
+	void (*cf_dcache_wbinv_all)(void);
+	void (*cf_dcache_wbinv_range)(vaddr_t, vsize_t);
+	void (*cf_dcache_inv_range)(vaddr_t, vsize_t);
+	void (*cf_dcache_wb_range)(vaddr_t, vsize_t);
 
-	void	(*cf_idcache_wbinv_all)	(void);
-	void	(*cf_idcache_wbinv_range) (vaddr_t, vsize_t);
+	void (*cf_idcache_wbinv_all)(void);
+	void (*cf_idcache_wbinv_range)(vaddr_t, vsize_t);
 
-	void	(*cf_sdcache_wbinv_all)	(void);
-	void	(*cf_sdcache_wbinv_range) (vaddr_t, paddr_t, vsize_t);
-	void	(*cf_sdcache_inv_range)	(vaddr_t, paddr_t, vsize_t);
-	void	(*cf_sdcache_wb_range)	(vaddr_t, paddr_t, vsize_t);
-	void	(*cf_sdcache_drain_writebuf) (void);
+	void (*cf_sdcache_wbinv_all)(void);
+	void (*cf_sdcache_wbinv_range)(vaddr_t, paddr_t, vsize_t);
+	void (*cf_sdcache_inv_range)(vaddr_t, paddr_t, vsize_t);
+	void (*cf_sdcache_wb_range)(vaddr_t, paddr_t, vsize_t);
+	void (*cf_sdcache_drain_writebuf)(void);
 
 	/* Other functions */
 
-	void	(*cf_flush_prefetchbuf)	(void);
-	void	(*cf_drain_writebuf)	(void);
+	void (*cf_flush_prefetchbuf)(void);
+	void (*cf_drain_writebuf)(void);
 
-	void	(*cf_sleep)		(int mode);
+	void (*cf_sleep)(int mode);
 
 	/* Soft functions */
-	void	(*cf_context_switch)	(u_int);
-	void	(*cf_setup)		(void);
+	void (*cf_context_switch)(u_int);
+	void (*cf_setup)(void);
 };
 
 extern struct cpu_functions cpufuncs;
-extern u_int cputype;
+extern u_int		    cputype;
 
-#define cpu_id()		cpufuncs.cf_id()
-#define	cpu_cpwait()		cpufuncs.cf_cpwait()
+#define cpu_id() cpufuncs.cf_id()
+#define cpu_cpwait() cpufuncs.cf_cpwait()
 
-#define cpu_control(c, s)	cpufuncs.cf_control(c, s)
-#define cpu_auxcontrol(c, s)	cpufuncs.cf_auxcontrol(c, s)
-#define cpu_domains(d)		cpufuncs.cf_domains(d)
-#define cpu_setttb(t)		cpufuncs.cf_setttb(t)
-#define cpu_dfsr()		cpufuncs.cf_dfsr()
-#define cpu_dfar()		cpufuncs.cf_dfar()
-#define cpu_ifsr()		cpufuncs.cf_ifsr()
-#define cpu_ifar()		cpufuncs.cf_ifar()
+#define cpu_control(c, s) cpufuncs.cf_control(c, s)
+#define cpu_auxcontrol(c, s) cpufuncs.cf_auxcontrol(c, s)
+#define cpu_domains(d) cpufuncs.cf_domains(d)
+#define cpu_setttb(t) cpufuncs.cf_setttb(t)
+#define cpu_dfsr() cpufuncs.cf_dfsr()
+#define cpu_dfar() cpufuncs.cf_dfar()
+#define cpu_ifsr() cpufuncs.cf_ifsr()
+#define cpu_ifar() cpufuncs.cf_ifar()
 
-#define	cpu_tlb_flushID()	cpufuncs.cf_tlb_flushID()
-#define	cpu_tlb_flushID_SE(e)	cpufuncs.cf_tlb_flushID_SE(e)
-#define	cpu_tlb_flushI()	cpufuncs.cf_tlb_flushI()
-#define	cpu_tlb_flushI_SE(e)	cpufuncs.cf_tlb_flushI_SE(e)
-#define	cpu_tlb_flushD()	cpufuncs.cf_tlb_flushD()
-#define	cpu_tlb_flushD_SE(e)	cpufuncs.cf_tlb_flushD_SE(e)
+#define cpu_tlb_flushID() cpufuncs.cf_tlb_flushID()
+#define cpu_tlb_flushID_SE(e) cpufuncs.cf_tlb_flushID_SE(e)
+#define cpu_tlb_flushI() cpufuncs.cf_tlb_flushI()
+#define cpu_tlb_flushI_SE(e) cpufuncs.cf_tlb_flushI_SE(e)
+#define cpu_tlb_flushD() cpufuncs.cf_tlb_flushD()
+#define cpu_tlb_flushD_SE(e) cpufuncs.cf_tlb_flushD_SE(e)
 
-#define	cpu_icache_sync_all()	cpufuncs.cf_icache_sync_all()
-#define	cpu_icache_sync_range(a, s) cpufuncs.cf_icache_sync_range((a), (s))
+#define cpu_icache_sync_all() cpufuncs.cf_icache_sync_all()
+#define cpu_icache_sync_range(a, s) cpufuncs.cf_icache_sync_range((a), (s))
 
-#define	cpu_dcache_wbinv_all()	cpufuncs.cf_dcache_wbinv_all()
-#define	cpu_dcache_wbinv_range(a, s) cpufuncs.cf_dcache_wbinv_range((a), (s))
-#define	cpu_dcache_inv_range(a, s) cpufuncs.cf_dcache_inv_range((a), (s))
-#define	cpu_dcache_wb_range(a, s) cpufuncs.cf_dcache_wb_range((a), (s))
+#define cpu_dcache_wbinv_all() cpufuncs.cf_dcache_wbinv_all()
+#define cpu_dcache_wbinv_range(a, s) cpufuncs.cf_dcache_wbinv_range((a), (s))
+#define cpu_dcache_inv_range(a, s) cpufuncs.cf_dcache_inv_range((a), (s))
+#define cpu_dcache_wb_range(a, s) cpufuncs.cf_dcache_wb_range((a), (s))
 
-#define	cpu_idcache_wbinv_all()	cpufuncs.cf_idcache_wbinv_all()
-#define	cpu_idcache_wbinv_range(a, s) cpufuncs.cf_idcache_wbinv_range((a), (s))
+#define cpu_idcache_wbinv_all() cpufuncs.cf_idcache_wbinv_all()
+#define cpu_idcache_wbinv_range(a, s) cpufuncs.cf_idcache_wbinv_range((a), (s))
 
-#define	cpu_sdcache_enabled()	(cpufuncs.cf_sdcache_wbinv_all != cpufunc_nullop)
-#define	cpu_sdcache_wbinv_all()	cpufuncs.cf_sdcache_wbinv_all()
-#define	cpu_sdcache_wbinv_range(va, pa, s) cpufuncs.cf_sdcache_wbinv_range((va), (pa), (s))
-#define	cpu_sdcache_inv_range(va, pa, s) cpufuncs.cf_sdcache_inv_range((va), (pa), (s))
-#define	cpu_sdcache_wb_range(va, pa, s) cpufuncs.cf_sdcache_wb_range((va), (pa), (s))
-#define	cpu_sdcache_drain_writebuf() cpufuncs.cf_sdcache_drain_writebuf()
+#define cpu_sdcache_enabled() (cpufuncs.cf_sdcache_wbinv_all != cpufunc_nullop)
+#define cpu_sdcache_wbinv_all() cpufuncs.cf_sdcache_wbinv_all()
+#define cpu_sdcache_wbinv_range(va, pa, s)                                     \
+	cpufuncs.cf_sdcache_wbinv_range((va), (pa), (s))
+#define cpu_sdcache_inv_range(va, pa, s)                                       \
+	cpufuncs.cf_sdcache_inv_range((va), (pa), (s))
+#define cpu_sdcache_wb_range(va, pa, s)                                        \
+	cpufuncs.cf_sdcache_wb_range((va), (pa), (s))
+#define cpu_sdcache_drain_writebuf() cpufuncs.cf_sdcache_drain_writebuf()
 
-#define	cpu_flush_prefetchbuf()	cpufuncs.cf_flush_prefetchbuf()
-#define	cpu_drain_writebuf()	cpufuncs.cf_drain_writebuf()
+#define cpu_flush_prefetchbuf() cpufuncs.cf_flush_prefetchbuf()
+#define cpu_drain_writebuf() cpufuncs.cf_drain_writebuf()
 
-#define cpu_sleep(m)		cpufuncs.cf_sleep(m)
+#define cpu_sleep(m) cpufuncs.cf_sleep(m)
 
-#define cpu_context_switch(a)		cpufuncs.cf_context_switch(a)
-#define cpu_setup(a)			cpufuncs.cf_setup(a)
+#define cpu_context_switch(a) cpufuncs.cf_context_switch(a)
+#define cpu_setup(a) cpufuncs.cf_setup(a)
 
-int	set_cpufuncs		(void);
-#define ARCHITECTURE_NOT_PRESENT	1	/* known but not configured */
-#define ARCHITECTURE_NOT_SUPPORTED	2	/* not known */
+int set_cpufuncs(void);
+#define ARCHITECTURE_NOT_PRESENT 1   /* known but not configured */
+#define ARCHITECTURE_NOT_SUPPORTED 2 /* not known */
 
-void	cpufunc_nullop		(void);
-int	early_abort_fixup	(void *);
-int	late_abort_fixup	(void *);
-u_int	cpufunc_id		(void);
-u_int	cpufunc_control		(u_int clear, u_int set);
-u_int	cpufunc_auxcontrol	(u_int clear, u_int set);
-void	cpufunc_domains		(u_int domains);
-u_int	cpufunc_dfsr		(void);
-u_int	cpufunc_dfar		(void);
-u_int	cpufunc_ifsr		(void);
-u_int	cpufunc_ifar		(void);
+void  cpufunc_nullop(void);
+int   early_abort_fixup(void *);
+int   late_abort_fixup(void *);
+u_int cpufunc_id(void);
+u_int cpufunc_control(u_int clear, u_int set);
+u_int cpufunc_auxcontrol(u_int clear, u_int set);
+void  cpufunc_domains(u_int domains);
+u_int cpufunc_dfsr(void);
+u_int cpufunc_dfar(void);
+u_int cpufunc_ifsr(void);
+u_int cpufunc_ifar(void);
 
-void	armv7_setttb		(u_int);
+void armv7_setttb(u_int);
 
-void	armv7_tlb_flushID_SE	(u_int);
-void	armv7_tlb_flushI_SE	(u_int);
+void armv7_tlb_flushID_SE(u_int);
+void armv7_tlb_flushI_SE(u_int);
 
-void	armv7_context_switch	(u_int);
+void armv7_context_switch(u_int);
 
-void	armv7_setup		(void);
-void	armv7_tlb_flushID	(void);
-void	armv7_tlb_flushI	(void);
-void	armv7_tlb_flushD	(void);
-void	armv7_tlb_flushD_SE	(u_int va);
+void armv7_setup(void);
+void armv7_tlb_flushID(void);
+void armv7_tlb_flushI(void);
+void armv7_tlb_flushD(void);
+void armv7_tlb_flushD_SE(u_int va);
 
-void	armv7_flush_bp(void);
-void	cortex_a15_flush_bp(void);
+void armv7_flush_bp(void);
+void cortex_a15_flush_bp(void);
 
-void	armv7_drain_writebuf	(void);
-void	armv7_cpu_sleep		(int mode);
+void armv7_drain_writebuf(void);
+void armv7_cpu_sleep(int mode);
 
-u_int	armv7_periphbase	(void);
+u_int armv7_periphbase(void);
 
-void	armv7_icache_sync_all		(void);
-void	armv7_icache_sync_range		(vaddr_t, vsize_t);
+void armv7_icache_sync_all(void);
+void armv7_icache_sync_range(vaddr_t, vsize_t);
 
-void	armv7_dcache_wbinv_all		(void);
-void	armv7_dcache_wbinv_range	(vaddr_t, vsize_t);
-void	armv7_dcache_inv_range		(vaddr_t, vsize_t);
-void	armv7_dcache_wb_range		(vaddr_t, vsize_t);
+void armv7_dcache_wbinv_all(void);
+void armv7_dcache_wbinv_range(vaddr_t, vsize_t);
+void armv7_dcache_inv_range(vaddr_t, vsize_t);
+void armv7_dcache_wb_range(vaddr_t, vsize_t);
 
-void	armv7_idcache_wbinv_all		(void);
-void	armv7_idcache_wbinv_range	(vaddr_t, vsize_t);
+void armv7_idcache_wbinv_all(void);
+void armv7_idcache_wbinv_range(vaddr_t, vsize_t);
 
 extern unsigned armv7_dcache_sets_max;
 extern unsigned armv7_dcache_sets_inc;
 extern unsigned armv7_dcache_index_max;
 extern unsigned armv7_dcache_index_inc;
 
-#define tlb_flush	cpu_tlb_flushID
-#define setttb		cpu_setttb
-#define drain_writebuf	cpu_drain_writebuf
+#define tlb_flush cpu_tlb_flushID
+#define setttb cpu_setttb
+#define drain_writebuf cpu_drain_writebuf
 
 /*
  * Macros for manipulating CPU interrupts
@@ -268,15 +271,14 @@ static __inline u_int32_t __get_cpsr(void);
 static __inline u_int32_t
 __set_cpsr_c(u_int bic, u_int eor)
 {
-	u_int32_t	tmp, ret;
+	u_int32_t tmp, ret;
 
-	__asm volatile(
-		"mrs	%0, cpsr\n\t"	/* Get the CPSR */
-		"bic	%1, %0, %2\n\t"	/* Clear bits */
-		"eor	%1, %1, %3\n\t"	/* XOR bits */
-		"msr	cpsr_c, %1"	/* Set CPSR control field */
-	: "=&r" (ret), "=&r" (tmp)
-	: "r" (bic), "r" (eor));
+	__asm volatile("mrs	%0, cpsr\n\t"	/* Get the CPSR */
+		       "bic	%1, %0, %2\n\t" /* Clear bits */
+		       "eor	%1, %1, %3\n\t" /* XOR bits */
+		       "msr	cpsr_c, %1"	/* Set CPSR control field */
+	    : "=&r"(ret), "=&r"(tmp)
+	    : "r"(bic), "r"(eor));
 
 	return ret;
 }
@@ -284,21 +286,19 @@ __set_cpsr_c(u_int bic, u_int eor)
 static __inline u_int32_t
 __get_cpsr(void)
 {
-	u_int32_t	ret;
+	u_int32_t ret;
 
-	__asm volatile("mrs	%0, cpsr" : "=&r" (ret));
+	__asm volatile("mrs	%0, cpsr" : "=&r"(ret));
 
 	return ret;
 }
 
-#define disable_interrupts(mask)					\
-	(__set_cpsr_c((mask) & (PSR_I | PSR_F), \
-		      (mask) & (PSR_I | PSR_F)))
+#define disable_interrupts(mask)                                               \
+	(__set_cpsr_c((mask) & (PSR_I | PSR_F), (mask) & (PSR_I | PSR_F)))
 
-#define enable_interrupts(mask)						\
-	(__set_cpsr_c((mask) & (PSR_I | PSR_F), 0))
+#define enable_interrupts(mask) (__set_cpsr_c((mask) & (PSR_I | PSR_F), 0))
 
-#define restore_interrupts(old_cpsr)					\
+#define restore_interrupts(old_cpsr)                                           \
 	(__set_cpsr_c((PSR_I | PSR_F), (old_cpsr) & (PSR_I | PSR_F)))
 
 /*
@@ -306,33 +306,33 @@ __get_cpsr(void)
  * (in arm/arm/setstack.S)
  */
 
-void set_stackptr	(u_int mode, u_int address);
-u_int get_stackptr	(u_int mode);
+void  set_stackptr(u_int mode, u_int address);
+u_int get_stackptr(u_int mode);
 
 /*
  * CPU functions from locore.S
  */
 
-void cpu_reset		(void) __attribute__((__noreturn__));
+void cpu_reset(void) __attribute__((__noreturn__));
 
 /*
  * Cache info variables.
  */
 
 /* PRIMARY CACHE VARIABLES */
-extern int	arm_picache_size;
-extern int	arm_picache_line_size;
-extern int	arm_picache_ways;
+extern int arm_picache_size;
+extern int arm_picache_line_size;
+extern int arm_picache_ways;
 
-extern int	arm_pdcache_size;	/* and unified */
-extern int	arm_pdcache_line_size;
-extern int	arm_pdcache_ways; 
+extern int arm_pdcache_size; /* and unified */
+extern int arm_pdcache_line_size;
+extern int arm_pdcache_ways;
 
-extern int	arm_pcache_type;
-extern int	arm_pcache_unified;
+extern int arm_pcache_type;
+extern int arm_pcache_unified;
 
-extern int	arm_dcache_align;
-extern int	arm_dcache_align_mask;
+extern int arm_dcache_align;
+extern int arm_dcache_align_mask;
 
-#endif	/* _KERNEL */
-#endif	/* _ARM_CPUFUNC_H_ */
+#endif /* _KERNEL */
+#endif /* _ARM_CPUFUNC_H_ */

@@ -37,9 +37,9 @@
  * allocated and linked in via this glue structure.
  */
 struct glue {
-	struct	glue *next;
-	int	niobs;
-	FILE	*iobs;
+	struct glue *next;
+	int	     niobs;
+	FILE	    *iobs;
 };
 
 __BEGIN_HIDDEN_DECLS

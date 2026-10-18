@@ -16,18 +16,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_RISCV64_SYSARCH_H_
-#define	_RISCV64_SYSARCH_H_
+#ifndef _RISCV64_SYSARCH_H_
+#define _RISCV64_SYSARCH_H_
 
 /*
  * Architecture specific syscalls (riscv64)
  */
 
-#define	RISCV_SYNC_ICACHE	0
+#define RISCV_SYNC_ICACHE 0
 
 struct riscv_sync_icache_args {
-	u_int64_t	addr;		/* Virtual start address */
-	size_t		len;		/* Region size */
+	u_int64_t addr; /* Virtual start address */
+	size_t	  len;	/* Region size */
 };
 
 #ifndef _KERNEL
@@ -35,9 +35,9 @@ struct riscv_sync_icache_args {
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
-int	sysarch(int, void *);
+int sysarch(int, void *);
 __END_DECLS
 
-#endif	/* _KERNEL */
+#endif /* _KERNEL */
 
-#endif	/* _RISCV64_SYSARCH_H_ */
+#endif /* _RISCV64_SYSARCH_H_ */

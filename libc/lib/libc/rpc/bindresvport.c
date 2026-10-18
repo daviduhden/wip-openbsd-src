@@ -1,4 +1,5 @@
-/*	$OpenBSD: bindresvport.c,v 1.19 2019/06/28 13:32:42 deraadt Exp $	*/
+/*	$OpenBSD: bindresvport.c,v 1.19 2019/06/28 13:32:42 deraadt Exp $
+ */
 
 /*
  * Copyright 1996, Jason Downs.  All rights reserved.
@@ -25,11 +26,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+
+#include <errno.h>
+#include <string.h>
 
 /*
  * Bind a socket to a privileged IP port
@@ -47,20 +50,20 @@ DEF_WEAK(bindresvport);
 int
 bindresvport_sa(int sd, struct sockaddr *sa)
 {
-	int old, error, af;
+	int			old, error, af;
 	struct sockaddr_storage myaddr;
-	struct sockaddr_in *sin;
-	struct sockaddr_in6 *sin6;
-	int proto, portrange, portlow;
-	u_int16_t port;
-	socklen_t salen;
+	struct sockaddr_in     *sin;
+	struct sockaddr_in6    *sin6;
+	int			proto, portrange, portlow;
+	u_int16_t		port;
+	socklen_t		salen;
 
 	if (sa == NULL) {
 		salen = sizeof(myaddr);
 		sa = (struct sockaddr *)&myaddr;
 
 		if (getsockname(sd, sa, &salen) == -1)
-			return -1;	/* errno is correctly set */
+			return -1; /* errno is correctly set */
 
 		af = sa->sa_family;
 		memset(&myaddr, 0, salen);
@@ -95,8 +98,8 @@ bindresvport_sa(int sd, struct sockaddr *sa)
 		if (error == -1)
 			return (error);
 
-		error = setsockopt(sd, proto, portrange, &portlow,
-		    sizeof(portlow));
+		error =
+		    setsockopt(sd, proto, portrange, &portlow, sizeof(portlow));
 		if (error == -1)
 			return (error);
 	}
@@ -107,8 +110,8 @@ bindresvport_sa(int sd, struct sockaddr *sa)
 		int saved_errno = errno;
 
 		if (error) {
-			if (setsockopt(sd, proto, portrange, &old,
-			    sizeof(old)) == -1)
+			if (setsockopt(
+				sd, proto, portrange, &old, sizeof(old)) == -1)
 				errno = saved_errno;
 			return (error);
 		}

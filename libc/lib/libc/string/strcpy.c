@@ -32,8 +32,8 @@
 #include <string.h>
 
 #if defined(APIWARN)
-__warn_references(strcpy,
-    "strcpy() is almost always misused, please use strlcpy()");
+__warn_references(
+    strcpy, "strcpy() is almost always misused, please use strlcpy()");
 #endif
 
 char *
@@ -41,6 +41,7 @@ strcpy(char *to, const char *from)
 {
 	char *save = to;
 
-	for (; (*to = *from) != '\0'; ++from, ++to);
-	return(save);
+	for (; (*to = *from) != '\0'; ++from, ++to)
+		;
+	return (save);
 }

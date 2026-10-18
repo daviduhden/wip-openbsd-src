@@ -38,25 +38,25 @@
 #include <machine/apicvar.h>
 
 struct ioapic_pin {
-	struct ioapic_pin	*ip_next;	/* next pin on this vector */
-	struct mp_intr_map 	*ip_map;
-	int			ip_vector;	/* IDT vector */
-	int			ip_type;
-	struct cpu_info		*ip_cpu;	/* target CPU */
+	struct ioapic_pin  *ip_next; /* next pin on this vector */
+	struct mp_intr_map *ip_map;
+	int		    ip_vector; /* IDT vector */
+	int		    ip_type;
+	struct cpu_info	   *ip_cpu; /* target CPU */
 };
 
 struct ioapic_softc {
-	struct pic		sc_pic;
-	struct ioapic_softc	*sc_next;
-	int			sc_apicid;
-	int			sc_apic_vers;
-	int			sc_apic_vecbase; /* global int base if ACPI */
-	int			sc_apic_sz;	/* apic size*/
-	int			sc_flags;
-	bus_space_tag_t		sc_memt;
-	bus_space_handle_t	sc_memh;
-	struct ioapic_pin	*sc_pins;	/* sc_apic_sz entries */
-};      
+	struct pic	     sc_pic;
+	struct ioapic_softc *sc_next;
+	int		     sc_apicid;
+	int		     sc_apic_vers;
+	int		     sc_apic_vecbase; /* global int base if ACPI */
+	int		     sc_apic_sz;      /* apic size*/
+	int		     sc_flags;
+	bus_space_tag_t	     sc_memt;
+	bus_space_handle_t   sc_memh;
+	struct ioapic_pin   *sc_pins; /* sc_apic_sz entries */
+};
 
 /*
  * MP: intr_handle_t is bitfielded.
@@ -66,27 +66,27 @@ struct ioapic_softc {
  * (ih&0x00ff00)>>8 -> ioapic pin.
  */
 
-#define APIC_INT_VIA_APIC	0x10000000
-#define APIC_INT_VIA_MSG	0x20000000
-#define APIC_INT_VIA_MSGX	0x40000000
-#define APIC_INT_APIC_MASK	0x00ff0000
-#define APIC_INT_APIC_SHIFT	16
-#define APIC_INT_PIN_MASK	0x0000ff00
-#define APIC_INT_PIN_SHIFT	8
+#define APIC_INT_VIA_APIC 0x10000000
+#define APIC_INT_VIA_MSG 0x20000000
+#define APIC_INT_VIA_MSGX 0x40000000
+#define APIC_INT_APIC_MASK 0x00ff0000
+#define APIC_INT_APIC_SHIFT 16
+#define APIC_INT_PIN_MASK 0x0000ff00
+#define APIC_INT_PIN_SHIFT 8
 
 #define APIC_IRQ_APIC(x) ((x & APIC_INT_APIC_MASK) >> APIC_INT_APIC_SHIFT)
 #define APIC_IRQ_PIN(x) ((x & APIC_INT_PIN_MASK) >> APIC_INT_PIN_SHIFT)
 #define APIC_IRQ_ISLEGACY(x) (!((x) & APIC_INT_VIA_APIC))
 #define APIC_IRQ_LEGACY_IRQ(x) ((x) & 0xff)
 
-void ioapic_print_redir(struct ioapic_softc *, char *, int);
+void		     ioapic_print_redir(struct ioapic_softc *, char *, int);
 struct ioapic_softc *ioapic_find(int);
 struct ioapic_softc *ioapic_find_bybase(int);
 
 void ioapic_enable(void);
 
-extern int ioapic_bsp_id;
-extern int nioapics;
+extern int		    ioapic_bsp_id;
+extern int		    nioapics;
 extern struct ioapic_softc *ioapics;
 
 #endif /* !_MACHINE_I82093VAR_H_ */

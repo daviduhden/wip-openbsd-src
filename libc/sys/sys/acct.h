@@ -47,37 +47,37 @@
 typedef u_int16_t comp_t;
 
 struct acct {
-	char	  ac_comm[_MAXCOMLEN];	/* command name, incl NUL */
-	comp_t	  ac_utime;		/* user time */
-	comp_t	  ac_stime;		/* system time */
-	comp_t	  ac_etime;		/* elapsed time */
-	comp_t	  ac_io;		/* count of IO blocks */
-	time_t	  ac_btime;		/* starting time */
-	uid_t	  ac_uid;		/* user id */
-	gid_t	  ac_gid;		/* group id */
-	u_int32_t ac_mem;		/* average memory usage */
-	dev_t	  ac_tty;		/* controlling tty, or -1 */
-	pid_t	  ac_pid;		/* process id */
+	char	  ac_comm[_MAXCOMLEN]; /* command name, incl NUL */
+	comp_t	  ac_utime;	       /* user time */
+	comp_t	  ac_stime;	       /* system time */
+	comp_t	  ac_etime;	       /* elapsed time */
+	comp_t	  ac_io;	       /* count of IO blocks */
+	time_t	  ac_btime;	       /* starting time */
+	uid_t	  ac_uid;	       /* user id */
+	gid_t	  ac_gid;	       /* group id */
+	u_int32_t ac_mem;	       /* average memory usage */
+	dev_t	  ac_tty;	       /* controlling tty, or -1 */
+	pid_t	  ac_pid;	       /* process id */
 
-	u_int32_t ac_flag;		/* accounting flags */
-#define	AFORK	0x00000001	/* fork'd but not exec'd */
-#define	AMAP	0x00000004	/* killed by syscall or stack mapping violation */
-#define	ACORE	0x00000008	/* dumped core */
-#define	AXSIG	0x00000010	/* killed by a signal */
-#define	APLEDGE	0x00000020	/* killed due to pledge violation */
-#define	ATRAP	0x00000040	/* memory access violation */
-#define	AUNVEIL	0x00000080	/* unveil access violation */
-#define	APINSYS	0x00000200	/* killed by syscall pin violation */
-#define	ABTCFI	0x00000400	/* BT CFI violation */
+	u_int32_t ac_flag; /* accounting flags */
+#define AFORK 0x00000001   /* fork'd but not exec'd */
+#define AMAP 0x00000004	   /* killed by syscall or stack mapping violation */
+#define ACORE 0x00000008   /* dumped core */
+#define AXSIG 0x00000010   /* killed by a signal */
+#define APLEDGE 0x00000020 /* killed due to pledge violation */
+#define ATRAP 0x00000040   /* memory access violation */
+#define AUNVEIL 0x00000080 /* unveil access violation */
+#define APINSYS 0x00000200 /* killed by syscall pin violation */
+#define ABTCFI 0x00000400  /* BT CFI violation */
 };
 
 /*
  * 1/AHZ is the granularity of the data encoded in the comp_t fields.
  * This is not necessarily equal to hz.
  */
-#define	AHZ	64
+#define AHZ 64
 
 #ifdef _KERNEL
-int	acct_process(struct proc *p);
-void	acct_shutdown(void);
+int  acct_process(struct proc *p);
+void acct_shutdown(void);
 #endif

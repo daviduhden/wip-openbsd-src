@@ -10,18 +10,18 @@
 
 fp_rnd
 fpsetround(rnd_dir)
-	fp_rnd rnd_dir;
+fp_rnd rnd_dir;
 {
 	fp_rnd old;
 	fp_rnd new;
 
-	__asm__ volatile("fldcr %0, %%fcr63" : "=r" (old));
+	__asm__ volatile("fldcr %0, %%fcr63" : "=r"(old));
 
 	new = old;
-	new &= ~(0x03 << 14); 		/* clear old value */
-	new |= ((rnd_dir & 0x03) << 14);/* and set new one */
+	new &= ~(0x03 << 14);		 /* clear old value */
+	new |= ((rnd_dir & 0x03) << 14); /* and set new one */
 
-	__asm__ volatile("fstcr %0, %%fcr63" : : "r" (new));
+	__asm__ volatile("fstcr %0, %%fcr63" : : "r"(new));
 
 	return (old >> 14) & 0x03;
 }

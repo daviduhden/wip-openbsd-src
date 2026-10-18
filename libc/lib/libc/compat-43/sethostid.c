@@ -30,12 +30,13 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
+
 #include <unistd.h>
 
 int
 sethostid(long hostid)
 {
-	const int mib[2] = { CTL_KERN, KERN_HOSTID };
+	const int mib[2] = {CTL_KERN, KERN_HOSTID};
 
 	if (sysctl(mib, 2, NULL, NULL, &hostid, sizeof hostid) == -1)
 		return (-1);

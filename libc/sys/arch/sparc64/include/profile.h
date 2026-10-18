@@ -42,26 +42,26 @@
 
 #ifdef __PIC__
 /* Inline expansion of PICCY_SET() (see <machine/asm.h>). */
-#define MCOUNT \
-	__asm__(".global _mcount");\
-	__asm__("_mcount:");\
-	__asm__("add %o7, 8, %o1");\
-	__asm__("1: rd %pc, %o2");\
-	__asm__("add %o2, __mcount-1b, %o2");\
-	__asm__("ld [%o2], %o2");\
-	__asm__("jmpl %o2, %g0");\
+#define MCOUNT                                                                 \
+	__asm__(".global _mcount");                                            \
+	__asm__("_mcount:");                                                   \
+	__asm__("add %o7, 8, %o1");                                            \
+	__asm__("1: rd %pc, %o2");                                             \
+	__asm__("add %o2, __mcount-1b, %o2");                                  \
+	__asm__("ld [%o2], %o2");                                              \
+	__asm__("jmpl %o2, %g0");                                              \
 	__asm__("add %i7, 8, %o0");
 #else
-#define MCOUNT \
-	__asm__(".global _mcount");\
-	__asm__("_mcount:");\
-	__asm__("add %i7, 8, %o0");\
-	__asm__("sethi %hi(__mcount), %o2");\
-	__asm__("jmpl %o2 + %lo(__mcount), %g0");\
+#define MCOUNT                                                                 \
+	__asm__(".global _mcount");                                            \
+	__asm__("_mcount:");                                                   \
+	__asm__("add %i7, 8, %o0");                                            \
+	__asm__("sethi %hi(__mcount), %o2");                                   \
+	__asm__("jmpl %o2 + %lo(__mcount), %g0");                              \
 	__asm__("add %o7, 8, %o1");
 #endif
 
-#define	_MCOUNT_DECL	static void __mcount
+#define _MCOUNT_DECL static void __mcount
 
 #ifdef _KERNEL
 /*
@@ -69,6 +69,6 @@
  * counted (as soon as we get done with the current counting).  On the
  * SPARC, we just splhigh/splx as those do not recursively invoke mcount.
  */
-#define	MCOUNT_ENTER	s = splhigh()
-#define	MCOUNT_EXIT	splx(s)
+#define MCOUNT_ENTER s = splhigh()
+#define MCOUNT_EXIT splx(s)
 #endif /* _KERNEL */

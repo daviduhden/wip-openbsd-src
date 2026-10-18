@@ -30,6 +30,7 @@
 
 #include <sys/types.h>
 #include <sys/mount.h>
+
 #include <stdlib.h>
 
 /*
@@ -39,8 +40,8 @@ int
 getmntinfo(struct statfs **mntbufp, int flags)
 {
 	static struct statfs *mntbuf;
-	static int mntsize;
-	static size_t bufsize;
+	static int	      mntsize;
+	static size_t	      bufsize;
 
 	if (mntsize <= 0 && (mntsize = getfsstat(0, 0, MNT_NOWAIT)) == -1)
 		return (0);

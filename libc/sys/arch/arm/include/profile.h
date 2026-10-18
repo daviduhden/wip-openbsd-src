@@ -31,7 +31,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define	_MCOUNT_DECL void _mcount
+#define _MCOUNT_DECL void _mcount
 
 /*
  * Cannot implement mcount in C as GCC will trash the ip register when it
@@ -41,41 +41,41 @@
 
 #define MCOUNT_ASM_NAME "__mcount"
 #ifdef __PIC__
-#define	PLTSYM		"(PLT)"
+#define PLTSYM "(PLT)"
 #endif
 
 #ifndef PLTSYM
-#define	PLTSYM
+#define PLTSYM
 #endif
 
-#define	MCOUNT								\
-	__asm__(".text");						\
-	__asm__(".align	2");						\
-	__asm__(".type	" MCOUNT_ASM_NAME ",%function");		\
-	__asm__(".global	" MCOUNT_ASM_NAME);			\
-	__asm__(MCOUNT_ASM_NAME ":");					\
-	/*								\
-	 * Preserve registers that are trashed during mcount		\
-	 */								\
-	__asm__("stmfd	sp!, {r0-r3, ip, lr}");				\
-	/*								\
-	 * find the return address for mcount,				\
-	 * and the return address for mcount's caller.			\
-	 *								\
-	 * frompcindex = pc pushed by call into self.			\
-	 */								\
-	__asm__("mov	r0, ip");					\
-	/*								\
-	 * selfpc = pc pushed by mcount call				\
-	 */								\
-	__asm__("mov	r1, lr");					\
-	/*								\
-	 * Call the real mcount code					\
-	 */								\
-	__asm__("bl	" __STRING(_mcount) PLTSYM);		\
-	/*								\
-	 * Restore registers that were trashed during mcount		\
-	 */								\
+#define MCOUNT                                                                 \
+	__asm__(".text");                                                      \
+	__asm__(".align	2");                                                   \
+	__asm__(".type	" MCOUNT_ASM_NAME ",%function");                       \
+	__asm__(".global	" MCOUNT_ASM_NAME);                            \
+	__asm__(MCOUNT_ASM_NAME ":");                                          \
+	/*                                                                     \
+	 * Preserve registers that are trashed during mcount                   \
+	 */                                                                    \
+	__asm__("stmfd	sp!, {r0-r3, ip, lr}");                                \
+	/*                                                                     \
+	 * find the return address for mcount,                                 \
+	 * and the return address for mcount's caller.                         \
+	 *                                                                     \
+	 * frompcindex = pc pushed by call into self.                          \
+	 */                                                                    \
+	__asm__("mov	r0, ip");                                              \
+	/*                                                                     \
+	 * selfpc = pc pushed by mcount call                                   \
+	 */                                                                    \
+	__asm__("mov	r1, lr");                                              \
+	/*                                                                     \
+	 * Call the real mcount code                                           \
+	 */                                                                    \
+	__asm__("bl	" __STRING(_mcount) PLTSYM);                           \
+	/*                                                                     \
+	 * Restore registers that were trashed during mcount                   \
+	 */                                                                    \
 	__asm__("ldmfd	sp!, {r0-r3, lr, pc}");
 
 #ifdef _KERNEL
@@ -86,6 +86,6 @@
  *
  * We're lucky that the CPSR and 's' both happen to be 'int's.
  */
-#define	MCOUNT_ENTER	s = __set_cpsr_c(0x0080, 0x0080);	/* kill IRQ */
-#define	MCOUNT_EXIT	__set_cpsr_c(0xffffffff, s);	/* restore old value */
-#endif /* _KERNEL */
+#define MCOUNT_ENTER s = __set_cpsr_c(0x0080, 0x0080); /* kill IRQ */
+#define MCOUNT_EXIT __set_cpsr_c(0xffffffff, s);       /* restore old value */
+#endif						       /* _KERNEL */

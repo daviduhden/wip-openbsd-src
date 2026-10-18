@@ -18,8 +18,8 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#include "thread_private.h"
 #include "telldir.h"
+#include "thread_private.h"
 
 /*
  * Seek to an entry in a directory.
@@ -43,9 +43,8 @@ seekdir(DIR *dirp, long loc)
 		return;
 	}
 
-	for (dirp->dd_loc = 0;
-	     dirp->dd_loc < dirp->dd_size;
-	     dirp->dd_loc += dp->d_reclen) {
+	for (dirp->dd_loc = 0; dirp->dd_loc < dirp->dd_size;
+	    dirp->dd_loc += dp->d_reclen) {
 		dp = (struct dirent *)(dirp->dd_buf + dirp->dd_loc);
 		if (dp->d_off != loc)
 			continue;

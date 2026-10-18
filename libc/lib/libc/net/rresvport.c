@@ -33,20 +33,20 @@
 #include <sys/stat.h>
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
-#include <signal.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
-#include <unistd.h>
+#include <netgroup.h>
 #include <pwd.h>
-#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
-#include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
-#include <stdlib.h>
-#include <netgroup.h>
+#include <unistd.h>
 
 int
 rresvport(int *alport)
@@ -54,14 +54,13 @@ rresvport(int *alport)
 	return rresvport_af(alport, AF_INET);
 }
 
-
 int
 rresvport_af(int *alport, int af)
 {
 	struct sockaddr_storage ss;
-	struct sockaddr *sa;
-	u_int16_t *portp;
-	int s;
+	struct sockaddr	       *sa;
+	u_int16_t	       *portp;
+	int			s;
 
 	bzero(&ss, sizeof ss);
 	sa = (struct sockaddr *)&ss;
@@ -80,7 +79,7 @@ rresvport_af(int *alport, int af)
 		return (-1);
 	}
 	sa->sa_family = af;
-	
+
 	s = socket(af, SOCK_STREAM, 0);
 	if (s == -1)
 		return (-1);

@@ -26,12 +26,14 @@
  */
 
 #include <sys/types.h>
-#include <machine/ieee.h>
+
 #include <float.h>
-#include <stdint.h>
 #include <limits.h>
+#include <machine/ieee.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
+
 #include "gdtoaimp.h"
 
 #if (LDBL_MANT_DIG > DBL_MANT_DIG)
@@ -44,25 +46,24 @@
  * use INT_MAX in ldtoa() instead.
  */
 char *
-__ldtoa(long double *ld, int mode, int ndigits, int *decpt, int *sign,
-    char **rve)
+__ldtoa(
+    long double *ld, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
-	FPI fpi = {
-		LDBL_MANT_DIG,			/* nbits */
-		LDBL_MIN_EXP - LDBL_MANT_DIG,	/* emin */
-		LDBL_MAX_EXP - LDBL_MANT_DIG,	/* emax */
-		FLT_ROUNDS,	       		/* rounding */
-#ifdef Sudden_Underflow	/* unused, but correct anyway */
-		1
+	FPI fpi = {LDBL_MANT_DIG,	  /* nbits */
+	    LDBL_MIN_EXP - LDBL_MANT_DIG, /* emin */
+	    LDBL_MAX_EXP - LDBL_MANT_DIG, /* emax */
+	    FLT_ROUNDS,			  /* rounding */
+#ifdef Sudden_Underflow			  /* unused, but correct anyway */
+	    1
 #else
-		0
+	    0
 #endif
 	};
-	int be, kind;
-	char *ret;
+	int		 be, kind;
+	char		*ret;
 	struct ieee_ext *p = (struct ieee_ext *)ld;
-	uint32_t bits[(LDBL_MANT_DIG + 31) / 32];
-	void *vbits = bits;
+	uint32_t	 bits[(LDBL_MANT_DIG + 31) / 32];
+	void		*vbits = bits;
 
 	/*
 	 * gdtoa doesn't know anything about the sign of the number, so
@@ -106,11 +107,11 @@ __ldtoa(long double *ld, int mode, int ndigits, int *decpt, int *sign,
 }
 DEF_STRONG(__ldtoa);
 
-#else   /* (LDBL_MANT_DIG == DBL_MANT_DIG) */
+#else /* (LDBL_MANT_DIG == DBL_MANT_DIG) */
 
 char *
-__ldtoa(long double *ld, int mode, int ndigits, int *decpt, int *sign,
-    char **rve)
+__ldtoa(
+    long double *ld, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
 	char *ret;
 
@@ -121,4 +122,4 @@ __ldtoa(long double *ld, int mode, int ndigits, int *decpt, int *sign,
 }
 DEF_STRONG(__ldtoa);
 
-#endif  /* (LDBL_MANT_DIG == DBL_MANT_DIG) */
+#endif /* (LDBL_MANT_DIG == DBL_MANT_DIG) */

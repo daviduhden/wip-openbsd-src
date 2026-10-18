@@ -84,19 +84,19 @@ typedef struct trapframe {
 #define tf_r15 tf_pc
 
 /* Determine if a fault came from user mode */
-#define	TRAP_USERMODE(tf)	((tf->tf_spsr & PSR_MODE) == PSR_USR32_MODE)
+#define TRAP_USERMODE(tf) ((tf->tf_spsr & PSR_MODE) == PSR_USR32_MODE)
 
 /*
  * Signal frame.  Pushed onto user stack before calling sigcode.
  */
 
 struct sigframe {
-	int	sf_signum;
-	siginfo_t *sf_sip;
-	struct	sigcontext *sf_scp;
-	sig_t	sf_handler;
-	struct	sigcontext sf_sc;
-	siginfo_t sf_si;
+	int		   sf_signum;
+	siginfo_t	  *sf_sip;
+	struct sigcontext *sf_scp;
+	sig_t		   sf_handler;
+	struct sigcontext  sf_sc;
+	siginfo_t	   sf_si;
 };
 
 /* the pointers are used in the trampoline code to locate the ucontext */
@@ -151,50 +151,50 @@ typedef struct irqframe {
  */
 
 struct switchframe {
-	u_int	sf_pad;
-	u_int	sf_r4;
-	u_int	sf_r5;
-	u_int	sf_r6;
-	u_int	sf_r7;
-	u_int	sf_pc;
+	u_int sf_pad;
+	u_int sf_r4;
+	u_int sf_r5;
+	u_int sf_r6;
+	u_int sf_r7;
+	u_int sf_pc;
 };
 
 /*
  * Stack frame. Used during stack traces (db_trace.c)
  */
 struct frame {
-	u_int	fr_fp;
-	u_int	fr_sp;
-	u_int	fr_lr;
-	u_int	fr_pc;
+	u_int fr_fp;
+	u_int fr_sp;
+	u_int fr_lr;
+	u_int fr_pc;
 };
 
 #else /* _LOCORE */
 
-#define	AST_LOCALS							 \
-.Laflt_astpending:							;\
-	.word	astpending
+#define AST_LOCALS                                                             \
+	.Laflt_astpending :;                                                   \
+	.word astpending
 
-#define	DO_AST								 \
-	ldr	r0, [sp]		/* Get the SPSR from stack */	;\
-	mrs	r4, cpsr		/* save CPSR */			;\
-	and	r0, r0, #(PSR_MODE)	/* Returning to USR mode? */	;\
-	teq	r0, #(PSR_USR32_MODE)					;\
-	ldreq	r5, .Laflt_astpending					;\
-	bne	2f			/* Nope, get out now */		;\
-	bic	r4, r4, #(PSR_I)					;\
-1:	orr	r0, r4, #(PSR_I)	/* Disable IRQs */		;\
-	msr	cpsr_c, r0						;\
-	ldr	r1, [r5]		/* Pending AST? */		;\
-	teq	r1, #0x00000000						;\
-	beq	2f			/* Nope. Just bail */		;\
-	mov	r1, #0x00000000						;\
-	str	r1, [r5]		/* Clear astpending */		;\
-	msr	cpsr_c, r4		/* Restore interrupts */	;\
-	mov	r0, sp							;\
-	adr	lr, 1b							;\
-	b	ast			/* ast(frame) */		;\
-2:
+#define DO_AST                                                                 \
+	ldr r0, [sp] /* Get the SPSR from stack */;                            \
+	mrs r4, cpsr /* save CPSR */;                                          \
+	and r0, r0, #(PSR_MODE) /* Returning to USR mode? */;                  \
+	teq   r0, #(PSR_USR32_MODE);                                           \
+	ldreq r5, .Laflt_astpending;                                           \
+	bne 2f /* Nope, get out now */;                                        \
+	bic	r4, r4, #(PSR_I);                                              \
+	1 : orr r0, r4, #(PSR_I) /* Disable IRQs */;                           \
+	msr	cpsr_c, r0;                                                    \
+	ldr	r1, [r5] /* Pending AST? */;                                   \
+	teq	r1, #0x00000000;                                               \
+	beq 2f /* Nope. Just bail */;                                          \
+	mov r1, #0x00000000;                                                   \
+	str r1, [r5] /* Clear astpending */;                                   \
+	msr cpsr_c, r4 /* Restore interrupts */;                               \
+	mov r0, sp;                                                            \
+	adr lr, 1b;                                                            \
+	b   ast /* ast(frame) */;                                              \
+	2:
 
 /*
  * ASM macros for pushing and pulling trapframes from the stack
@@ -219,30 +219,30 @@ struct frame {
  * Since the current mode is used, the SVC lr field is not defined.
  */
 
-#define PUSHFRAME							   \
-	clrex;								   \
-	sub	sp, sp, #4;		/* Align the stack */		   \
-	str	lr, [sp, #-4]!;		/* Push the return address */	   \
-	sub	sp, sp, #(4*17);	/* Adjust the stack pointer */	   \
-	stmia	sp, {r0-r14}^;		/* Push the user mode registers */ \
-	mov	r0, r0;			/* NOP for previous instruction */ \
-	mrs	r0, spsr;		/* Put the SPSR on the stack */	   \
-	str	r0, [sp, #-4]!
+#define PUSHFRAME                                                              \
+	clrex;                                                                 \
+	sub   sp, sp, #4;	   /* Align the stack */                       \
+	str   lr, [ sp, # - 4 ] !; /* Push the return address */               \
+	sub   sp, sp, #(4 * 17);   /* Adjust the stack pointer */              \
+	stmia sp, {r0 - r14} ^ ;   /* Push the user mode registers */          \
+	mov   r0, r0;		   /* NOP for previous instruction */          \
+	mrs   r0, spsr;		   /* Put the SPSR on the stack */             \
+	str   r0, [ sp, # - 4 ] !
 
 /*
  * PULLFRAME - macro to pull a trap frame from the stack in the current mode
  * Since the current mode is used, the SVC lr field is ignored.
  */
 
-#define PULLFRAME							   \
-	clrex;								   \
-	ldr	r0, [sp], #0x0004;	/* Get the SPSR from stack */	   \
-	msr	spsr_fsxc, r0;						   \
-	ldmia	sp, {r0-r14}^;		/* Restore registers (usr mode) */ \
-	mov	r0, r0;			/* NOP for previous instruction */ \
-	add	sp, sp, #(4*17);	/* Adjust the stack pointer */	   \
-	ldr	lr, [sp], #0x0004;	/* Pull the return address */	   \
-	add	sp, sp, #4		/* Align the stack */
+#define PULLFRAME                                                              \
+	clrex;                                                                 \
+	ldr   r0, [sp], #0x0004; /* Get the SPSR from stack */                 \
+	msr   spsr_fsxc, r0;                                                   \
+	ldmia sp, {r0 - r14} ^ ; /* Restore registers (usr mode) */            \
+	mov   r0, r0;		 /* NOP for previous instruction */            \
+	add   sp, sp, #(4 * 17); /* Adjust the stack pointer */                \
+	ldr   lr, [sp], #0x0004; /* Pull the return address */                 \
+	add   sp, sp, #4	 /* Align the stack */
 
 /*
  * PUSHFRAMEINSVC - macro to push a trap frame on the stack in SVC32 mode
@@ -252,29 +252,29 @@ struct frame {
  * lr in SVC mode.
  */
 
-#define PUSHFRAMEINSVC							   \
-	clrex;								   \
-	stmdb	sp, {r0-r3};		/* Save 4 registers */		   \
-	mov	r0, lr;			/* Save xxx32 r14 */		   \
-	mov	r1, sp;			/* Save xxx32 sp */		   \
-	mrs	r3, spsr;		/* Save xxx32 spsr */		   \
-	mrs	r2, cpsr; 		/* Get the CPSR */		   \
-	bic	r2, r2, #(PSR_MODE);	/* Fix for SVC mode */		   \
-	orr	r2, r2, #(PSR_SVC32_MODE);				   \
-	msr	cpsr_c, r2;		/* Punch into SVC mode */	   \
-	mov	r2, sp;			/* Save	SVC sp */		   \
-	bic	sp, sp, #7;		/* Align sp to an 8-byte address */   \
-	sub	sp, sp, #4;		/* Pad trapframe to keep alignment */ \
-	str	r0, [sp, #-4]!;		/* Push return address */	   \
-	str	lr, [sp, #-4]!;		/* Push SVC lr */		   \
-	str	r2, [sp, #-4]!;		/* Push SVC sp */		   \
-	msr	spsr_fsxc, r3;		/* Restore correct spsr */	   \
-	ldmdb	r1, {r0-r3};		/* Restore 4 regs from xxx mode */ \
-	sub	sp, sp, #(4*15);	/* Adjust the stack pointer */	   \
-	stmia	sp, {r0-r14}^;		/* Push the user mode registers */ \
-	mov	r0, r0;			/* NOP for previous instruction */ \
-	mrs	r0, spsr;		/* Put the SPSR on the stack */	   \
-	str	r0, [sp, #-4]!
+#define PUSHFRAMEINSVC                                                         \
+	clrex;                                                                 \
+	stmdb sp, {r0 - r3};	   /* Save 4 registers */                      \
+	mov   r0, lr;		   /* Save xxx32 r14 */                        \
+	mov   r1, sp;		   /* Save xxx32 sp */                         \
+	mrs   r3, spsr;		   /* Save xxx32 spsr */                       \
+	mrs   r2, cpsr;		   /* Get the CPSR */                          \
+	bic   r2, r2, #(PSR_MODE); /* Fix for SVC mode */                      \
+	orr   r2, r2, #(PSR_SVC32_MODE);                                       \
+	msr   cpsr_c, r2;	   /* Punch into SVC mode */                   \
+	mov   r2, sp;		   /* Save	SVC sp */                           \
+	bic   sp, sp, #7;	   /* Align sp to an 8-byte address */         \
+	sub   sp, sp, #4;	   /* Pad trapframe to keep alignment */       \
+	str   r0, [ sp, # - 4 ] !; /* Push return address */                   \
+	str   lr, [ sp, # - 4 ] !; /* Push SVC lr */                           \
+	str   r2, [ sp, # - 4 ] !; /* Push SVC sp */                           \
+	msr   spsr_fsxc, r3;	   /* Restore correct spsr */                  \
+	ldmdb r1, {r0 - r3};	   /* Restore 4 regs from xxx mode */          \
+	sub   sp, sp, #(4 * 15);   /* Adjust the stack pointer */              \
+	stmia sp, {r0 - r14} ^ ;   /* Push the user mode registers */          \
+	mov   r0, r0;		   /* NOP for previous instruction */          \
+	mrs   r0, spsr;		   /* Put the SPSR on the stack */             \
+	str   r0, [ sp, # - 4 ] !
 
 /*
  * PULLFRAMEFROMSVCANDEXIT - macro to pull a trap frame from the stack
@@ -283,14 +283,14 @@ struct frame {
  * exit.
  */
 
-#define PULLFRAMEFROMSVCANDEXIT						   \
-	clrex;								   \
-	ldr	r0, [sp], #0x0004;	/* Get the SPSR from stack */	   \
-	msr	spsr_fsxc, r0;		/* restore SPSR */		   \
-	ldmia	sp, {r0-r14}^;		/* Restore registers (usr mode) */ \
-	mov	r0, r0;			/* NOP for previous instruction */ \
-	add	sp, sp, #(4*15);	/* Adjust the stack pointer */	   \
-	ldmia	sp, {sp, lr, pc}^	/* Restore lr and exit */
+#define PULLFRAMEFROMSVCANDEXIT                                                \
+	clrex;                                                                 \
+	ldr   r0, [sp], #0x0004; /* Get the SPSR from stack */                 \
+	msr   spsr_fsxc, r0;	 /* restore SPSR */                            \
+	ldmia sp, {r0 - r14} ^ ; /* Restore registers (usr mode) */            \
+	mov   r0, r0;		 /* NOP for previous instruction */            \
+	add   sp, sp, #(4 * 15); /* Adjust the stack pointer */                \
+	ldmia sp, {sp, lr, pc} ^ /* Restore lr and exit */
 
 #endif /* _LOCORE */
 

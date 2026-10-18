@@ -1,4 +1,5 @@
-/*	$OpenBSD: fpsetsticky.c,v 1.3 2014/04/18 15:09:52 guenther Exp $	*/
+/*	$OpenBSD: fpsetsticky.c,v 1.3 2014/04/18 15:09:52 guenther Exp $
+ */
 /*
  * Copyright (c) 2006 Miodrag Vallat.
  *
@@ -17,6 +18,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_except
@@ -29,8 +31,8 @@ fpsetsticky(fp_except mask)
 	__fpscr_values[0] = (__fpscr_values[0] & ~(0x1f << 2)) | (mask << 2);
 	__fpscr_values[1] = (__fpscr_values[1] & ~(0x1f << 2)) | (mask << 2);
 #endif
-	__asm__ volatile ("sts fpscr, %0" : "=r" (fpscr));
+	__asm__ volatile("sts fpscr, %0" : "=r"(fpscr));
 	nfpscr = (fpscr & ~(0x1f << 2)) | (mask << 2);
-	__asm__ volatile ("lds %0, fpscr" : : "r" (nfpscr));
+	__asm__ volatile("lds %0, fpscr" : : "r"(nfpscr));
 	return ((fpscr >> 2) & 0x1f);
 }

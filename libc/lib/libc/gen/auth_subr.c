@@ -50,9 +50,9 @@
  *	BSDI $From: auth_subr.c,v 2.4 1999/09/08 04:10:40 prb Exp $
  */
 
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 
 #include <ctype.h>
@@ -60,6 +60,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <login_cap.h>
 #include <paths.h>
 #include <pwd.h>
 #include <stdarg.h>
@@ -69,55 +70,53 @@
 #include <syslog.h>
 #include <unistd.h>
 
-#include <login_cap.h>
-
-#define	MAXSPOOLSIZE	(8*1024)	/* Spool up to 8K of back info */
+#define MAXSPOOLSIZE (8 * 1024) /* Spool up to 8K of back info */
 
 struct rmfiles {
-	struct rmfiles	*next;
-	char		*file;
+	struct rmfiles *next;
+	char	       *file;
 };
 
 struct authopts {
-	struct authopts	*next;
+	struct authopts *next;
 	char		*opt;
 };
 
 struct authdata {
-	struct	authdata *next;
-	void	*ptr;
-	size_t	len;
+	struct authdata *next;
+	void		*ptr;
+	size_t		 len;
 };
 
 struct auth_session_t {
-	char	*name;			/* name of use being authenticated */
-	char	*style;			/* style of authentication used */
-	char	*class;			/* class of user */
-	char	*service;		/* type of service being performed */
-	char	*challenge;		/* last challenge issued */
-	int	flags;			/* see below */
-	struct	passwd *pwd;		/* password entry for user */
-	struct	timeval now;		/* time of authentication */
+	char	      *name;	  /* name of use being authenticated */
+	char	      *style;	  /* style of authentication used */
+	char	      *class;	  /* class of user */
+	char	      *service;	  /* type of service being performed */
+	char	      *challenge; /* last challenge issued */
+	int	       flags;	  /* see below */
+	struct passwd *pwd;	  /* password entry for user */
+	struct timeval now;	  /* time of authentication */
 
-	int	state;			/* authenticated state */
+	int state; /* authenticated state */
 
-	struct	rmfiles *rmlist;	/* list of files to remove on failure */
-	struct	authopts *optlist;	/* list of options to scripts */ 
-	struct	authdata *data;		/* additional data to send to scripts */
+	struct rmfiles	*rmlist;  /* list of files to remove on failure */
+	struct authopts *optlist; /* list of options to scripts */
+	struct authdata *data;	  /* additional data to send to scripts */
 
-	char	spool[MAXSPOOLSIZE];	/* data returned from login script */
-	int	index;			/* how much returned thus far */
+	char spool[MAXSPOOLSIZE]; /* data returned from login script */
+	int  index;		  /* how much returned thus far */
 
-	int	fd;			/* connection to authenticator */
+	int fd; /* connection to authenticator */
 
-	va_list	ap0;			/* argument list to auth_call */
-	va_list	ap;			/* additional arguments to auth_call */
+	va_list ap0; /* argument list to auth_call */
+	va_list ap;  /* additional arguments to auth_call */
 };
 
 /*
  * Internal flags
  */
-#define	AF_INTERACTIVE		0x0001	/* This is an interactive session */
+#define AF_INTERACTIVE 0x0001 /* This is an interactive session */
 
 /*
  * We cannot include bsd_auth.h until we define the above structures
@@ -127,17 +126,17 @@ struct auth_session_t {
 /*
  * Internally used functions
  */
-static void _add_rmlist(auth_session_t *, char *);
-static void _auth_spool(auth_session_t *, int);
-static void _recv_fd(auth_session_t *, int);
+static void  _add_rmlist(auth_session_t *, char *);
+static void  _auth_spool(auth_session_t *, int);
+static void  _recv_fd(auth_session_t *, int);
 static char *_auth_next_arg(auth_session_t *);
 /*
  * Set up a known environment for all authentication scripts.
  */
-static char * const auth_environ[] = {
-	"PATH=" _PATH_DEFPATH,
-	"SHELL=" _PATH_BSHELL,
-	NULL,
+static char *const auth_environ[] = {
+    "PATH=" _PATH_DEFPATH,
+    "SHELL=" _PATH_BSHELL,
+    NULL,
 };
 
 static char defservice[] = LOGIN_DEFSERVICE;
@@ -147,10 +146,26 @@ static va_list nilap;
 /*
  * Quick one liners that only exist to keep auth_session_t opaque
  */
-void	auth_setstate(auth_session_t *as, int s){ as->state = s; }
-void	auth_set_va_list(auth_session_t *as, va_list ap) { va_copy(as->ap, ap); }
-int	auth_getstate(auth_session_t *as)	{ return (as->state); }
-struct passwd *auth_getpwd(auth_session_t *as)	{ return (as->pwd); }
+void
+auth_setstate(auth_session_t *as, int s)
+{
+	as->state = s;
+}
+void
+auth_set_va_list(auth_session_t *as, va_list ap)
+{
+	va_copy(as->ap, ap);
+}
+int
+auth_getstate(auth_session_t *as)
+{
+	return (as->state);
+}
+struct passwd *
+auth_getpwd(auth_session_t *as)
+{
+	return (as->pwd);
+}
 DEF_WEAK(auth_setstate);
 DEF_WEAK(auth_set_va_list);
 DEF_WEAK(auth_getstate);
@@ -180,7 +195,7 @@ DEF_WEAK(auth_open);
 void
 auth_clean(auth_session_t *as)
 {
-	struct rmfiles *rm;
+	struct rmfiles	*rm;
 	struct authdata *data;
 
 	as->state = 0;
@@ -228,10 +243,10 @@ DEF_WEAK(auth_clean);
 int
 auth_close(auth_session_t *as)
 {
-	struct rmfiles *rm;
+	struct rmfiles	*rm;
 	struct authopts *opt;
 	struct authdata *data;
-	int s;
+	int		 s;
 
 	/*
 	 * Save our return value
@@ -242,7 +257,6 @@ auth_close(auth_session_t *as)
 		as->index = 0;
 
 	auth_setenv(as);
-
 
 	/*
 	 * Clean out the rmlist and remove specified files if the
@@ -302,7 +316,7 @@ char *
 auth_challenge(auth_session_t *as)
 {
 	char path[PATH_MAX];
-	int len;
+	int  len;
 
 	if (as == NULL || as->style == NULL || as->name == NULL ||
 	    !_auth_validuser(as->name))
@@ -322,7 +336,7 @@ auth_challenge(auth_session_t *as)
 	if (as->state & AUTH_CHALLENGE)
 		as->challenge = auth_getvalue(as, "challenge");
 	as->state = 0;
-	as->index = 0;	/* toss our data */
+	as->index = 0; /* toss our data */
 	return (as->challenge);
 }
 DEF_WEAK(auth_challenge);
@@ -340,14 +354,17 @@ auth_setenv(auth_session_t *as)
 	/*
 	 * Set any environment variables we were asked for
 	 */
-    	for (line = as->spool; line < as->spool + as->index;) {
-		if (!strncasecmp(line, BI_SETENV, sizeof(BI_SETENV)-1)) {
-			if (isblank((unsigned char)line[sizeof(BI_SETENV) - 1])) {
+	for (line = as->spool; line < as->spool + as->index;) {
+		if (!strncasecmp(line, BI_SETENV, sizeof(BI_SETENV) - 1)) {
+			if (isblank(
+				(unsigned char)line[sizeof(BI_SETENV) - 1])) {
 				/* only do it once! */
-				line[0] = 'd'; line[1] = 'i'; line[2] = 'd';
+				line[0] = 'd';
+				line[1] = 'i';
+				line[2] = 'd';
 				line += sizeof(BI_SETENV) - 1;
-				for (name = line;
-				    isblank((unsigned char)*name); ++name)
+				for (name = line; isblank((unsigned char)*name);
+				    ++name)
 					;
 				for (line = name;
 				    *line && !isblank((unsigned char)*line);
@@ -360,14 +377,17 @@ auth_setenv(auth_session_t *as)
 				if (*line != '\0' && setenv(name, line, 1))
 					warn("setenv(%s, %s)", name, line);
 			}
-		} else
-		if (!strncasecmp(line, BI_UNSETENV, sizeof(BI_UNSETENV)-1)) {
-			if (isblank((unsigned char)line[sizeof(BI_UNSETENV) - 1])) {
+		} else if (!strncasecmp(
+			       line, BI_UNSETENV, sizeof(BI_UNSETENV) - 1)) {
+			if (isblank(
+				(unsigned char)line[sizeof(BI_UNSETENV) - 1])) {
 				/* only do it once! */
-				line[2] = 'd'; line[3] = 'i'; line[4] = 'd';
+				line[2] = 'd';
+				line[3] = 'i';
+				line[4] = 'd';
 				line += sizeof(BI_UNSETENV) - 1;
-				for (name = line;
-				    isblank((unsigned char)*name); ++name)
+				for (name = line; isblank((unsigned char)*name);
+				    ++name)
 					;
 				for (line = name;
 				    *line && !isblank((unsigned char)*line);
@@ -393,14 +413,20 @@ auth_clrenv(auth_session_t *as)
 	char *line;
 
 	for (line = as->spool; line < as->spool + as->index;) {
-		if (!strncasecmp(line, BI_SETENV, sizeof(BI_SETENV)-1)) {
-			if (isblank((unsigned char)line[sizeof(BI_SETENV) - 1])) {
-				line[0] = 'i'; line[1] = 'g'; line[2] = 'n';
+		if (!strncasecmp(line, BI_SETENV, sizeof(BI_SETENV) - 1)) {
+			if (isblank(
+				(unsigned char)line[sizeof(BI_SETENV) - 1])) {
+				line[0] = 'i';
+				line[1] = 'g';
+				line[2] = 'n';
 			}
-		} else
-		if (!strncasecmp(line, BI_UNSETENV, sizeof(BI_UNSETENV)-1)) {
-			if (isblank((unsigned char)line[sizeof(BI_UNSETENV) - 1])) {
-				line[2] = 'i'; line[3] = 'g'; line[4] = 'n';
+		} else if (!strncasecmp(
+			       line, BI_UNSETENV, sizeof(BI_UNSETENV) - 1)) {
+			if (isblank(
+				(unsigned char)line[sizeof(BI_UNSETENV) - 1])) {
+				line[2] = 'i';
+				line[3] = 'g';
+				line[4] = 'n';
 			}
 		}
 		while (*line++)
@@ -527,8 +553,8 @@ int
 auth_setoption(auth_session_t *as, char *n, char *v)
 {
 	struct authopts *opt;
-	size_t len = strlen(n) + strlen(v) + 2;
-	int ret;
+	size_t		 len = strlen(n) + strlen(v) + 2;
+	int		 ret;
 
 	if ((opt = malloc(sizeof(*opt) + len)) == NULL)
 		return (-1);
@@ -543,7 +569,7 @@ auth_setoption(auth_session_t *as, char *n, char *v)
 	}
 	opt->next = as->optlist;
 	as->optlist = opt;
-	return(0);
+	return (0);
 }
 DEF_WEAK(auth_setoption);
 
@@ -563,7 +589,7 @@ void
 auth_clroption(auth_session_t *as, char *option)
 {
 	struct authopts *opt, *oopt;
-	size_t len;
+	size_t		 len;
 
 	len = strlen(option);
 
@@ -620,10 +646,10 @@ int
 auth_setpwd(auth_session_t *as, struct passwd *pwd)
 {
 	struct passwd pwstore;
-	char *instance, pwbuf[_PW_BUF_LEN];
+	char	     *instance, pwbuf[_PW_BUF_LEN];
 
 	if (pwd == NULL && as->pwd == NULL && as->name == NULL)
-		return (-1);		/* true failure */
+		return (-1); /* true failure */
 
 	if (pwd == NULL) {
 		/*
@@ -651,7 +677,7 @@ auth_setpwd(auth_session_t *as, struct passwd *pwd)
 		}
 	}
 	if ((pwd = pw_dup(pwd)) == NULL)
-		return (-1);		/* true failure */
+		return (-1); /* true failure */
 	if (as->pwd) {
 		explicit_bzero(as->pwd->pw_passwd, strlen(as->pwd->pw_passwd));
 		free(as->pwd);
@@ -665,12 +691,12 @@ char *
 auth_getvalue(auth_session_t *as, char *what)
 {
 	char *line, *v, *value;
-	int n, len;
+	int   n, len;
 
 	len = strlen(what);
 
-    	for (line = as->spool; line < as->spool + as->index;) {
-		if (strncasecmp(line, BI_VALUE, sizeof(BI_VALUE)-1) != 0)
+	for (line = as->spool; line < as->spool + as->index;) {
+		if (strncasecmp(line, BI_VALUE, sizeof(BI_VALUE) - 1) != 0)
 			goto next;
 		line += sizeof(BI_VALUE) - 1;
 
@@ -706,19 +732,24 @@ auth_getvalue(auth_session_t *as, char *what)
 				case 't':
 					*v++ = '\t';
 					break;
-				case '0': case '1': case '2':
-				case '3': case '4': case '5':
-				case '6': case '7':
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
 					n = *line - '0';
 					if (isdigit((unsigned char)line[1])) {
 						++line;
 						n <<= 3;
-						n |= *line-'0';
+						n |= *line - '0';
 					}
 					if (isdigit((unsigned char)line[1])) {
 						++line;
 						n <<= 3;
-						n |= *line-'0';
+						n |= *line - '0';
 					}
 					break;
 				default:
@@ -730,7 +761,7 @@ auth_getvalue(auth_session_t *as, char *what)
 		}
 		*v = '\0';
 		return (value);
-next:
+	next:
 		while (*line++)
 			;
 	}
@@ -743,7 +774,7 @@ auth_check_expire(auth_session_t *as)
 {
 	if (as->pwd == NULL && auth_setpwd(as, NULL) < 0) {
 		as->state &= ~AUTH_ALLOW;
-		as->state |= AUTH_EXPIRED;	/* XXX */
+		as->state |= AUTH_EXPIRED; /* XXX */
 		return (-1);
 	}
 
@@ -770,7 +801,7 @@ auth_check_change(auth_session_t *as)
 {
 	if (as->pwd == NULL && auth_setpwd(as, NULL) < 0) {
 		as->state &= ~AUTH_ALLOW;
-		as->state |= AUTH_PWEXPIRED;	/* XXX */
+		as->state |= AUTH_PWEXPIRED; /* XXX */
 		return (-1);
 	}
 
@@ -805,16 +836,16 @@ DEF_WEAK(auth_check_change);
 int
 auth_call(auth_session_t *as, char *path, ...)
 {
-	char *line;
+	char		*line;
 	struct authdata *data;
 	struct authopts *opt;
-	pid_t pid;
-	int status;
-	int okay;
-	int pfd[2];
-	int argc;
-	char *argv[64];		/* 64 args should be more than enough */
-#define	Nargc	(sizeof(argv)/sizeof(argv[0]))
+	pid_t		 pid;
+	int		 status;
+	int		 okay;
+	int		 pfd[2];
+	int		 argc;
+	char		*argv[64]; /* 64 args should be more than enough */
+#define Nargc (sizeof(argv) / sizeof(argv[0]))
 
 	va_start(as->ap0, path);
 
@@ -824,7 +855,7 @@ auth_call(auth_session_t *as, char *path, ...)
 
 	if (as->fd != -1) {
 		argv[argc++] = "-v";
-		argv[argc++] = "fd=4";		/* AUTH_FD, see below */
+		argv[argc++] = "fd=4"; /* AUTH_FD, see below */
 	}
 	/* XXX - fail if out of space in argv */
 	for (opt = as->optlist; opt != NULL; opt = opt->next) {
@@ -868,8 +899,8 @@ auth_call(auth_session_t *as, char *path, ...)
 		close(pfd[1]);
 		goto fail;
 	case 0:
-#define	COMM_FD	3
-#define	AUTH_FD	4
+#define COMM_FD 3
+#define AUTH_FD 4
 		if (dup2(pfd[1], COMM_FD) == -1)
 			err(1, "dup of backchannel");
 		if (as->fd != -1) {
@@ -884,7 +915,7 @@ auth_call(auth_session_t *as, char *path, ...)
 	default:
 		close(pfd[1]);
 		if (as->fd != -1) {
-			close(as->fd);		/* so child has only ref */
+			close(as->fd); /* so child has only ref */
 			as->fd = -1;
 		}
 		while ((data = as->data) != NULL) {
@@ -916,8 +947,8 @@ auth_call(auth_session_t *as, char *path, ...)
 	 * It is easier to wait for all the data before starting
 	 * to scan it.
 	 */
-    	for (line = as->spool; line < as->spool + as->index;) {
-		if (!strncasecmp(line, BI_REJECT, sizeof(BI_REJECT)-1)) {
+	for (line = as->spool; line < as->spool + as->index;) {
+		if (!strncasecmp(line, BI_REJECT, sizeof(BI_REJECT) - 1)) {
 			line += sizeof(BI_REJECT) - 1;
 			if (!*line || *line == ' ' || *line == '\t') {
 				while (*line == ' ' || *line == '\t')
@@ -927,20 +958,20 @@ auth_call(auth_session_t *as, char *path, ...)
 					break;
 				}
 				if (!strcasecmp(line, "challenge")) {
-					as->state  = AUTH_CHALLENGE;
+					as->state = AUTH_CHALLENGE;
 					break;
 				}
 				if (!strcasecmp(line, "expired")) {
-					as->state  = AUTH_EXPIRED;
+					as->state = AUTH_EXPIRED;
 					break;
 				}
 				if (!strcasecmp(line, "pwexpired")) {
-					as->state  = AUTH_PWEXPIRED;
+					as->state = AUTH_PWEXPIRED;
 					break;
 				}
 			}
 			break;
-		} else if (!strncasecmp(line, BI_AUTH, sizeof(BI_AUTH)-1)) {
+		} else if (!strncasecmp(line, BI_AUTH, sizeof(BI_AUTH) - 1)) {
 			line += sizeof(BI_AUTH) - 1;
 			if (!*line || *line == ' ' || *line == '\t') {
 				while (*line == ' ' || *line == '\t')
@@ -952,7 +983,8 @@ auth_call(auth_session_t *as, char *path, ...)
 				else if (!strcasecmp(line, "secure"))
 					as->state |= AUTH_SECURE;
 			}
-		} else if (!strncasecmp(line, BI_REMOVE, sizeof(BI_REMOVE)-1)) {
+		} else if (!strncasecmp(
+			       line, BI_REMOVE, sizeof(BI_REMOVE) - 1)) {
 			line += sizeof(BI_REMOVE) - 1;
 			while (*line == ' ' || *line == '\t')
 				++line;
@@ -972,7 +1004,7 @@ auth_call(auth_session_t *as, char *path, ...)
 		auth_clrenv(as);
 
 	if (0) {
-fail:
+	fail:
 		auth_clrenv(as);
 		as->state = 0;
 		okay = -1;
@@ -999,11 +1031,11 @@ DEF_WEAK(auth_call);
 static void
 _recv_fd(auth_session_t *as, int fd)
 {
-	struct msghdr msg;
+	struct msghdr	msg;
 	struct cmsghdr *cmp;
 	union {
 		struct cmsghdr hdr;
-		char buf[CMSG_SPACE(sizeof(int))];
+		char	       buf[CMSG_SPACE(sizeof(int))];
 	} cmsgbuf;
 
 	memset(&msg, 0, sizeof(msg));
@@ -1022,11 +1054,10 @@ _recv_fd(auth_session_t *as, int fd)
 			syslog(LOG_ERR, "unexpected cmsg_level %d",
 			    cmp->cmsg_level);
 		else if (cmp->cmsg_type != SCM_RIGHTS)
-			syslog(LOG_ERR, "unexpected cmsg_type %d",
-			    cmp->cmsg_type);
+			syslog(
+			    LOG_ERR, "unexpected cmsg_type %d", cmp->cmsg_type);
 		else if (cmp->cmsg_len != CMSG_LEN(sizeof(int)))
-			syslog(LOG_ERR, "bad cmsg_len %d",
-			    cmp->cmsg_len);
+			syslog(LOG_ERR, "bad cmsg_len %d", cmp->cmsg_len);
 		else {
 			if (as->fd != -1)
 				close(as->fd);
@@ -1039,11 +1070,11 @@ static void
 _auth_spool(auth_session_t *as, int fd)
 {
 	ssize_t r;
-	char *b, *s;
+	char   *b, *s;
 
-	for (s = as->spool + as->index; as->index < sizeof(as->spool) - 1; ) {
-		r = read(fd, as->spool + as->index,
-		    sizeof(as->spool) - as->index);
+	for (s = as->spool + as->index; as->index < sizeof(as->spool) - 1;) {
+		r = read(
+		    fd, as->spool + as->index, sizeof(as->spool) - as->index);
 		if (r <= 0) {
 			as->spool[as->index] = '\0';
 			return;
@@ -1074,7 +1105,7 @@ static void
 _add_rmlist(auth_session_t *as, char *file)
 {
 	struct rmfiles *rm;
-	size_t i = strlen(file) + 1;
+	size_t		i = strlen(file) + 1;
 
 	// XXX should rangecheck i since we are about to add?
 

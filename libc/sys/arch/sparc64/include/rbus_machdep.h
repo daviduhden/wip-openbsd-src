@@ -1,4 +1,5 @@
-/*	$OpenBSD: rbus_machdep.h,v 1.4 2011/03/23 16:54:37 pirofti Exp $	*/
+/*	$OpenBSD: rbus_machdep.h,v 1.4 2011/03/23 16:54:37 pirofti Exp $
+ */
 
 /*
  * Copyright (c) 2007 Mark Kettenis
@@ -24,16 +25,16 @@ struct pci_attach_args;
 rbus_tag_t rbus_pccbb_parent_io(struct device *, struct pci_attach_args *);
 rbus_tag_t rbus_pccbb_parent_mem(struct device *, struct pci_attach_args *);
 
-#define md_space_map(rbt, addr, size, flags, hp) \
+#define md_space_map(rbt, addr, size, flags, hp)                               \
 	bus_space_map((rbt)->rb_bt, (addr), (size), (flags), (hp))
-#define md_space_unmap(rbt, h, size, addrp) \
-	do { \
-		*addrp = (rbt)->rb_bt->sparc_bus_addr((rbt)->rb_bt, \
-		    (rbt)->rb_bt, (h)); \
-		bus_space_unmap((rbt)->rb_bt, (h), (size)); \
+#define md_space_unmap(rbt, h, size, addrp)                                    \
+	do {                                                                   \
+		*addrp = (rbt)->rb_bt->sparc_bus_addr(                         \
+		    (rbt)->rb_bt, (rbt)->rb_bt, (h));                          \
+		bus_space_unmap((rbt)->rb_bt, (h), (size));                    \
 	} while (0)
 
-void pccbb_attach_hook(struct device *, struct device *,
-	struct pci_attach_args *);
+void pccbb_attach_hook(
+    struct device *, struct device *, struct pci_attach_args *);
 
 #endif /* _MACHINE_RBUS_MACHDEP_H_ */

@@ -31,8 +31,9 @@
 #define _NLS_PRIVATE
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -41,32 +42,32 @@
 #include <string.h>
 #include <unistd.h>
 
-#define MAXIMUM(a, b)	(((a) > (b)) ? (a) : (b))
+#define MAXIMUM(a, b) (((a) > (b)) ? (a) : (b))
 
 #define NLS_DEFAULT_LANG "C"
 
-static nl_catd	load_msgcat(const char *);
-static int	verify_msgcat(nl_catd);
+static nl_catd load_msgcat(const char *);
+static int     verify_msgcat(nl_catd);
 
 nl_catd
 catopen(const char *name, int oflag)
 {
-	char tmppath[PATH_MAX];
-	char *nlspath;
-	char *lang;
-	char *s, *t, *sep, *dot;
+	char	    tmppath[PATH_MAX];
+	char	   *nlspath;
+	char	   *lang;
+	char	   *s, *t, *sep, *dot;
 	const char *u;
-	nl_catd catd;
-		
+	nl_catd	    catd;
+
 	if (name == NULL || *name == '\0')
-		return (nl_catd) -1;
+		return (nl_catd)-1;
 
 	/* absolute or relative path? */
 	if (strchr(name, '/'))
 		return load_msgcat(name);
 
 	if (issetugid() != 0 || (nlspath = getenv("NLSPATH")) == NULL)
-		return (nl_catd) -1;
+		return (nl_catd)-1;
 
 	lang = NULL;
 	if (oflag & NL_CAT_LOCALE) {
@@ -98,19 +99,20 @@ catopen(const char *name, int oflag)
 		while (*s && *s != ':') {
 			if (*s == '%') {
 				switch (*(++s)) {
-				case 'L':	/* LANG or LC_MESSAGES */
+				case 'L': /* LANG or LC_MESSAGES */
 					u = lang;
-					while (*u && t < tmppath + PATH_MAX-1)
+					while (*u && t < tmppath + PATH_MAX - 1)
 						*t++ = *u++;
 					break;
-				case 'N':	/* value of name parameter */
+				case 'N': /* value of name parameter */
 					u = name;
-					while (*u && t < tmppath + PATH_MAX-1)
+					while (*u && t < tmppath + PATH_MAX - 1)
 						*t++ = *u++;
 					break;
-				case 'l':	/* language part */
+				case 'l': /* language part */
 					u = lang;
-					while (*u && t < tmppath + PATH_MAX-1) {
+					while (
+					    *u && t < tmppath + PATH_MAX - 1) {
 						*t++ = *u++;
 						if (sep && u >= sep)
 							break;
@@ -118,29 +120,30 @@ catopen(const char *name, int oflag)
 							break;
 					}
 					break;
-				case 't':	/* territory part */
+				case 't': /* territory part */
 					if (sep == NULL)
 						break;
 					u = sep + 1;
-					while (*u && t < tmppath + PATH_MAX-1) {
+					while (
+					    *u && t < tmppath + PATH_MAX - 1) {
 						*t++ = *u++;
 						if (dot && u >= dot)
 							break;
 					}
 					break;
-				case 'c':	/* codeset part */
+				case 'c': /* codeset part */
 					if (dot == NULL)
 						break;
 					u = dot + 1;
-					while (*u && t < tmppath + PATH_MAX-1)
+					while (*u && t < tmppath + PATH_MAX - 1)
 						*t++ = *u++;
 					break;
 				default:
-					if (t < tmppath + PATH_MAX-1)
+					if (t < tmppath + PATH_MAX - 1)
 						*t++ = *s;
 				}
 			} else {
-				if (t < tmppath + PATH_MAX-1)
+				if (t < tmppath + PATH_MAX - 1)
 					*t++ = *s;
 			}
 			s++;
@@ -148,7 +151,7 @@ catopen(const char *name, int oflag)
 
 		*t = '\0';
 		catd = load_msgcat(tmppath);
-		if (catd != (nl_catd) -1)
+		if (catd != (nl_catd)-1)
 			return catd;
 
 		if (*s)
@@ -156,7 +159,7 @@ catopen(const char *name, int oflag)
 		t = tmppath;
 	} while (*s);
 
-	return (nl_catd) -1;
+	return (nl_catd)-1;
 }
 DEF_WEAK(catopen);
 
@@ -164,36 +167,36 @@ static nl_catd
 load_msgcat(const char *path)
 {
 	struct stat st;
-	nl_catd catd;
-	void *data;
-	int fd;
+	nl_catd	    catd;
+	void	   *data;
+	int	    fd;
 
 	catd = NULL;
 
-	if ((fd = open(path, O_RDONLY|O_CLOEXEC)) == -1)
-		return (nl_catd) -1;
+	if ((fd = open(path, O_RDONLY | O_CLOEXEC)) == -1)
+		return (nl_catd)-1;
 
 	if (fstat(fd, &st) != 0) {
-		close (fd);
-		return (nl_catd) -1;
+		close(fd);
+		return (nl_catd)-1;
 	}
 
-	if (st.st_size > INT_MAX || st.st_size < sizeof (struct _nls_cat_hdr)) {
+	if (st.st_size > INT_MAX || st.st_size < sizeof(struct _nls_cat_hdr)) {
 		errno = EINVAL;
-		close (fd);
-		return (nl_catd) -1;
+		close(fd);
+		return (nl_catd)-1;
 	}
 
 	data = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-	close (fd);
+	close(fd);
 
 	if (data == MAP_FAILED)
-		return (nl_catd) -1;
+		return (nl_catd)-1;
 
-	if (ntohl(((struct _nls_cat_hdr *) data)->__magic) != _NLS_MAGIC)
+	if (ntohl(((struct _nls_cat_hdr *)data)->__magic) != _NLS_MAGIC)
 		goto invalid;
 
-	if ((catd = malloc(sizeof (*catd))) == 0)
+	if ((catd = malloc(sizeof(*catd))) == 0)
 		goto invalid;
 
 	catd->__data = data;
@@ -208,7 +211,7 @@ invalid:
 	free(catd);
 	munmap(data, st.st_size);
 	errno = EINVAL;
-	return (nl_catd) -1;
+	return (nl_catd)-1;
 }
 
 static int
@@ -217,11 +220,11 @@ verify_msgcat(nl_catd catd)
 	struct _nls_cat_hdr *cat;
 	struct _nls_set_hdr *set;
 	struct _nls_msg_hdr *msg;
-	size_t remain;
+	size_t		     remain;
 	int hdr_offset, i, index, j, msgs, nmsgs, nsets, off, txt_offset;
 
 	remain = catd->__size;
-	cat = (struct _nls_cat_hdr *) catd->__data;
+	cat = (struct _nls_cat_hdr *)catd->__data;
 
 	hdr_offset = ntohl(cat->__msg_hdr_offset);
 	nsets = ntohl(cat->__nsets);
@@ -231,21 +234,21 @@ verify_msgcat(nl_catd catd)
 	if (nsets < 1 || hdr_offset < 0 || txt_offset < 0)
 		return (1);
 
-	remain -= sizeof (*cat);
+	remain -= sizeof(*cat);
 
 	/* check if offsets or set size overflow */
 	if (remain <= hdr_offset || remain <= ntohl(cat->__msg_txt_offset) ||
-	    remain / sizeof (*set) < nsets)
+	    remain / sizeof(*set) < nsets)
 		return (1);
 
-	set = (struct _nls_set_hdr *) ((char *) catd->__data + sizeof (*cat));
+	set = (struct _nls_set_hdr *)((char *)catd->__data + sizeof(*cat));
 
 	/* make sure that msg has space for at least one index */
 	if (remain - hdr_offset < sizeof(*msg))
 		return (1);
 
-	msg = (struct _nls_msg_hdr *) ((char *) catd->__data + sizeof (*cat)
-	    + hdr_offset);
+	msg = (struct _nls_msg_hdr *)((char *)catd->__data + sizeof(*cat) +
+	    hdr_offset);
 
 	/* validate and retrieve largest string offset from sets */
 	off = 0;
@@ -274,10 +277,9 @@ verify_msgcat(nl_catd catd)
 
 	/* check if largest string offset is nul-terminated */
 	if (remain - txt_offset < off ||
-	    memchr((char *) catd->__data + sizeof(*cat) + txt_offset + off,
-	    '\0', remain - txt_offset - off) == NULL)
+	    memchr((char *)catd->__data + sizeof(*cat) + txt_offset + off, '\0',
+		remain - txt_offset - off) == NULL)
 		return (1);
 
 	return (0);
 }
-

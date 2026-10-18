@@ -42,37 +42,39 @@
  * to the APM devices.
  */
 
-#define		APM_AC_OFF		0x00
-#define		APM_AC_ON		0x01
-#define		APM_AC_BACKUP		0x02
-#define		APM_AC_UNKNOWN		0xff
-#define		APM_BATT_HIGH		0x00
-#define		APM_BATT_LOW		0x01
-#define		APM_BATT_CRITICAL	0x02
-#define		APM_BATT_CHARGING	0x03
-#define		APM_BATT_UNKNOWN	0xff
-#define		APM_BATT_LIFE_UNKNOWN	0xff
+#define APM_AC_OFF 0x00
+#define APM_AC_ON 0x01
+#define APM_AC_BACKUP 0x02
+#define APM_AC_UNKNOWN 0xff
+#define APM_BATT_HIGH 0x00
+#define APM_BATT_LOW 0x01
+#define APM_BATT_CRITICAL 0x02
+#define APM_BATT_CHARGING 0x03
+#define APM_BATT_UNKNOWN 0xff
+#define APM_BATT_LIFE_UNKNOWN 0xff
 
-#define		APM_NOEVENT		0x0000
-#define		APM_STANDBY_REQ		0x0001
-#define		APM_SUSPEND_REQ		0x0002
-#define		APM_NORMAL_RESUME	0x0003
-#define		APM_CRIT_RESUME		0x0004 /* suspend/resume happened
-						  without us */
-#define		APM_BATTERY_LOW		0x0005
-#define		APM_POWER_CHANGE	0x0006
-#define		APM_UPDATE_TIME		0x0007
-#define		APM_CRIT_SUSPEND_REQ	0x0008
-#define		APM_USER_STANDBY_REQ	0x0009
-#define		APM_USER_SUSPEND_REQ	0x000A
-#define		APM_SYS_STANDBY_RESUME	0x000B
-#define		APM_CAPABILITY_CHANGE	0x000C	/* apm v1.2 */
-#define		APM_USER_HIBERNATE_REQ	0x000D
-#define		APM_EVENT_MASK		0xffff
+#define APM_NOEVENT 0x0000
+#define APM_STANDBY_REQ 0x0001
+#define APM_SUSPEND_REQ 0x0002
+#define APM_NORMAL_RESUME 0x0003
+#define APM_CRIT_RESUME                                                        \
+	0x0004 /* suspend/resume happened                                      \
+		  without us */
+#define APM_BATTERY_LOW 0x0005
+#define APM_POWER_CHANGE 0x0006
+#define APM_UPDATE_TIME 0x0007
+#define APM_CRIT_SUSPEND_REQ 0x0008
+#define APM_USER_STANDBY_REQ 0x0009
+#define APM_USER_SUSPEND_REQ 0x000A
+#define APM_SYS_STANDBY_RESUME 0x000B
+#define APM_CAPABILITY_CHANGE 0x000C /* apm v1.2 */
+#define APM_USER_HIBERNATE_REQ 0x000D
+#define APM_EVENT_MASK 0xffff
 
-#define	APM_EVENT_COMPOSE(t,i)	((((i) & 0x7fff) << 16)|((t) & APM_EVENT_MASK))
-#define	APM_EVENT_TYPE(e)	((e) & APM_EVENT_MASK)
-#define	APM_EVENT_INDEX(e)	((e) >> 16)
+#define APM_EVENT_COMPOSE(t, i)                                                \
+	((((i) & 0x7fff) << 16) | ((t) & APM_EVENT_MASK))
+#define APM_EVENT_TYPE(e) ((e) & APM_EVENT_MASK)
+#define APM_EVENT_INDEX(e) ((e) >> 16)
 
 /*
  * LP (Laptop Package)
@@ -96,8 +98,8 @@ struct apm_power_info {
 	u_char ac_state;
 	u_char battery_life;
 	u_char spare1;
-	u_int minutes_left;		/* estimate */
-	u_int spare2[6];
+	u_int  minutes_left; /* estimate */
+	u_int  spare2[6];
 };
 
 struct apm_ctl {
@@ -105,18 +107,22 @@ struct apm_ctl {
 	u_int mode;
 };
 
-#define	APM_IOC_REJECT	_IOW('A', 0, struct apm_event_info) /* reject request # */
-#define	APM_IOC_STANDBY	_IO('A', 1)	/* put system into standby */
-#define	APM_IOC_SUSPEND	_IO('A', 2)	/* put system into suspend */
-#define	APM_IOC_GETPOWER _IOR('A', 3, struct apm_power_info) /* fetch battery state */
-#define	APM_IOC_DEV_CTL	_IOW('A', 5, struct apm_ctl) /* put device into mode */
-#define APM_IOC_PRN_CTL _IOW('A', 6, int ) /* driver power status msg */
-#define		APM_PRINT_ON	0	/* driver power status displayed */
-#define		APM_PRINT_OFF	1	/* driver power status not displayed */
-#define		APM_PRINT_PCT	2	/* driver power status only displayed
+#define APM_IOC_REJECT                                                         \
+	_IOW('A', 0, struct apm_event_info) /* reject request # */
+#define APM_IOC_STANDBY _IO('A', 1)	    /* put system into standby */
+#define APM_IOC_SUSPEND _IO('A', 2)	    /* put system into suspend */
+#define APM_IOC_GETPOWER                                                       \
+	_IOR('A', 3, struct apm_power_info)	     /* fetch battery state */
+#define APM_IOC_DEV_CTL _IOW('A', 5, struct apm_ctl) /* put device into mode   \
+						      */
+#define APM_IOC_PRN_CTL _IOW('A', 6, int) /* driver power status msg */
+#define APM_PRINT_ON 0			  /* driver power status displayed */
+#define APM_PRINT_OFF 1 /* driver power status not displayed */
+#define APM_PRINT_PCT                                                          \
+	2				/* driver power status only displayed  \
 					   if the percentage changes */
-#define	APM_IOC_STANDBY_REQ	_IO('A', 7)	/* request standby */
-#define	APM_IOC_SUSPEND_REQ	_IO('A', 8)	/* request suspend */
-#define	APM_IOC_HIBERNATE	_IO('A', 9)	/* put system into hibernate */
+#define APM_IOC_STANDBY_REQ _IO('A', 7) /* request standby */
+#define APM_IOC_SUSPEND_REQ _IO('A', 8) /* request suspend */
+#define APM_IOC_HIBERNATE _IO('A', 9)	/* put system into hibernate */
 
 #endif /* _ARM_APMVAR_H_ */

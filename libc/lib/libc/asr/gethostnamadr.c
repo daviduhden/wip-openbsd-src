@@ -1,4 +1,5 @@
-/*	$OpenBSD: gethostnamadr.c,v 1.13 2015/09/14 07:38:37 guenther Exp $	*/
+/*	$OpenBSD: gethostnamadr.c,v 1.13 2015/09/14 07:38:37 guenther Exp $
+ */
 /*
  * Copyright (c) 2012,2013 Eric Faurot <eric@openbsd.org>
  *
@@ -15,35 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/param.h>	/* ALIGN */
+#include <sys/param.h> /* ALIGN */
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
-#include <netdb.h>
 
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-static int _gethostbyname(const char *, int, struct hostent *, char *, size_t,
-    int *);
-static int _fillhostent(const struct hostent *, struct hostent *, char *,
-    size_t);
+static int _gethostbyname(
+    const char *, int, struct hostent *, char *, size_t, int *);
+static int _fillhostent(
+    const struct hostent *, struct hostent *, char *, size_t);
 
-static struct hostent	 _hostent;
-static char		 _entbuf[4096];
+static struct hostent _hostent;
+static char	      _entbuf[4096];
 
-static char *_empty[] = { NULL, };
+static char *_empty[] = {
+    NULL,
+};
 
 static int
 _fillhostent(const struct hostent *h, struct hostent *r, char *buf, size_t len)
 {
-	char	**ptr, *end, *pos;
-	size_t	n, i;
-	int	naliases, naddrs;
+	char **ptr, *end, *pos;
+	size_t n, i;
+	int    naliases, naddrs;
 
 	bzero(buf, len);
 	bzero(r, sizeof(*r));
@@ -106,7 +110,7 @@ _gethostbyname(const char *name, int af, struct hostent *ret, char *buf,
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	int r;
+	int		  r;
 
 	if (af == -1)
 		as = gethostbyname_async(name, NULL);
@@ -132,7 +136,7 @@ _gethostbyname(const char *name, int af, struct hostent *ret, char *buf,
 struct hostent *
 gethostbyname(const char *name)
 {
-	struct hostent	*h;
+	struct hostent *h;
 
 	res_init();
 
@@ -147,12 +151,12 @@ DEF_WEAK(gethostbyname);
 struct hostent *
 gethostbyname2(const char *name, int af)
 {
-	int	r;
+	int r;
 
 	res_init();
 
-	r = _gethostbyname(name, af, &_hostent, _entbuf, sizeof(_entbuf),
-	    &h_errno);
+	r = _gethostbyname(
+	    name, af, &_hostent, _entbuf, sizeof(_entbuf), &h_errno);
 	if (r) {
 		h_errno = NETDB_INTERNAL;
 		errno = r;
@@ -170,7 +174,7 @@ gethostbyaddr(const void *addr, socklen_t len, int af)
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	int r;
+	int		  r;
 
 	res_init();
 

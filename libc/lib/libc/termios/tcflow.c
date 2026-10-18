@@ -29,15 +29,16 @@
  */
 
 #include <sys/ioctl.h>
+
+#include <errno.h>
 #include <termios.h>
 #include <unistd.h>
-#include <errno.h>
 
 int
 tcflow(int fd, int action)
 {
 	struct termios term;
-	u_char c;
+	u_char	       c;
 
 	switch (action) {
 	case TCOOFF:

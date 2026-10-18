@@ -18,5 +18,5 @@ long
 jrand48(unsigned short xseed[3])
 {
 	__dorand48(xseed);
-	return ((long) xseed[2] << 16) + (long) xseed[1];
+	return ((long)xseed[2] << 16) + (long)xseed[1];
 }

@@ -17,15 +17,16 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <netdb.h>
-
 #include <asr.h>
 #include <ctype.h>
 #include <errno.h>
+#include <netdb.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,9 +35,9 @@
 
 #include "asr_private.h"
 
-static int dname_check_label(const char *, size_t);
-static ssize_t dname_expand(const unsigned char *, size_t, size_t, size_t *,
-    char *, size_t);
+static int     dname_check_label(const char *, size_t);
+static ssize_t dname_expand(
+    const unsigned char *, size_t, size_t, size_t *, char *, size_t);
 
 static int unpack_data(struct asr_unpack *, void *, size_t);
 static int unpack_u16(struct asr_unpack *, uint16_t *);
@@ -61,9 +62,9 @@ dname_check_label(const char *s, size_t l)
 ssize_t
 _asr_dname_from_fqdn(const char *str, char *dst, size_t max)
 {
-	ssize_t	 res;
-	size_t	 l, n;
-	char	*d;
+	ssize_t res;
+	size_t	l, n;
+	char   *d;
 
 	res = 0;
 
@@ -112,8 +113,8 @@ static ssize_t
 dname_expand(const unsigned char *data, size_t len, size_t offset,
     size_t *newoffset, char *dst, size_t max)
 {
-	size_t		 n, end, ptr, start;
-	ssize_t		 res;
+	size_t	n, end, ptr, start;
+	ssize_t res;
 
 	if (offset >= len)
 		return (-1);
@@ -121,7 +122,7 @@ dname_expand(const unsigned char *data, size_t len, size_t offset,
 	res = 0;
 	end = start = offset;
 
-	for (; (n = data[offset]); ) {
+	for (; (n = data[offset]);) {
 		if ((n & 0xc0) == 0xc0) {
 			if (offset + 1 >= len)
 				return (-1);
@@ -283,8 +284,8 @@ _asr_unpack_query(struct asr_unpack *p, struct asr_dns_query *q)
 int
 _asr_unpack_rr(struct asr_unpack *p, struct asr_dns_rr *rr)
 {
-	uint16_t	rdlen;
-	size_t		save_offset;
+	uint16_t rdlen;
+	size_t	 save_offset;
 
 	unpack_dname(p, rr->rr_dname, sizeof(rr->rr_dname));
 	unpack_u16(p, &rr->rr_type);
@@ -409,7 +410,8 @@ _asr_pack_header(struct asr_pack *p, const struct asr_dns_header *h)
 }
 
 int
-_asr_pack_query(struct asr_pack *p, uint16_t type, uint16_t class, const char *dname)
+_asr_pack_query(
+    struct asr_pack *p, uint16_t type, uint16_t class, const char *dname)
 {
 	pack_dname(p, dname);
 	pack_u16(p, type);
@@ -421,18 +423,18 @@ _asr_pack_query(struct asr_pack *p, uint16_t type, uint16_t class, const char *d
 int
 _asr_pack_edns0(struct asr_pack *p, uint16_t pktsz, int dnssec_do)
 {
-	DPRINT("asr EDNS0 pktsz:%hu dnssec:%s\n", pktsz,
-	    dnssec_do ? "yes" : "no");
+	DPRINT(
+	    "asr EDNS0 pktsz:%hu dnssec:%s\n", pktsz, dnssec_do ? "yes" : "no");
 
-	pack_dname(p, "");	/* root */
-	pack_u16(p, T_OPT);	/* OPT */
-	pack_u16(p, pktsz);	/* UDP payload size */
+	pack_dname(p, "");  /* root */
+	pack_u16(p, T_OPT); /* OPT */
+	pack_u16(p, pktsz); /* UDP payload size */
 
 	/* extended RCODE and flags */
 	pack_u16(p, 0);
 	pack_u16(p, dnssec_do ? DNS_MESSAGEEXTFLAG_DO : 0);
 
-	pack_u16(p, 0);		/* RDATA len */
+	pack_u16(p, 0); /* RDATA len */
 
 	return (p->err) ? (-1) : (0);
 }
@@ -440,12 +442,12 @@ _asr_pack_edns0(struct asr_pack *p, uint16_t pktsz, int dnssec_do)
 int
 _asr_sockaddr_from_str(struct sockaddr *sa, int family, const char *str)
 {
-	struct in_addr		 ina;
-	struct in6_addr		 in6a;
-	struct sockaddr_in	*sin;
-	struct sockaddr_in6	*sin6;
-	char			*cp, *str2;
-	const char		*errstr;
+	struct in_addr	     ina;
+	struct in6_addr	     in6a;
+	struct sockaddr_in  *sin;
+	struct sockaddr_in6 *sin6;
+	char		    *cp, *str2;
+	const char	    *errstr;
 
 	switch (family) {
 	case PF_UNSPEC:
@@ -510,17 +512,14 @@ _asr_sockaddr_from_str(struct sockaddr *sa, int family, const char *str)
 ssize_t
 _asr_addr_as_fqdn(const char *addr, int family, char *dst, size_t max)
 {
-	const struct in6_addr	*in6_addr;
-	in_addr_t		 in_addr;
+	const struct in6_addr *in6_addr;
+	in_addr_t	       in_addr;
 
 	switch (family) {
 	case AF_INET:
 		in_addr = ntohl(*((const in_addr_t *)addr));
-		snprintf(dst, max,
-		    "%d.%d.%d.%d.in-addr.arpa.",
-		    in_addr & 0xff,
-		    (in_addr >> 8) & 0xff,
-		    (in_addr >> 16) & 0xff,
+		snprintf(dst, max, "%d.%d.%d.%d.in-addr.arpa.", in_addr & 0xff,
+		    (in_addr >> 8) & 0xff, (in_addr >> 16) & 0xff,
 		    (in_addr >> 24) & 0xff);
 		break;
 	case AF_INET6:
@@ -579,10 +578,12 @@ hnok_lenient(const char *dn)
 			return 0;
 		if (pch == '.' && ch == '.')
 			return 0;
-		if (!(isalpha((unsigned char)ch) || isdigit((unsigned char)ch) ||
-		    ch == '.' || ch == '-' || ch == '_'))
+		if (!(isalpha((unsigned char)ch) ||
+			isdigit((unsigned char)ch) || ch == '.' || ch == '-' ||
+			ch == '_'))
 			return 0;
-		pch = ch; ch = *dn++;
+		pch = ch;
+		ch = *dn++;
 	}
 	return 1;
 }
@@ -591,7 +592,7 @@ hnok_lenient(const char *dn)
 int
 _asr_is_localhost(const char *hn)
 {
-	size_t	 hnlen, localhostlen;
+	size_t hnlen, localhostlen;
 
 	if (hn == NULL)
 		return 0;

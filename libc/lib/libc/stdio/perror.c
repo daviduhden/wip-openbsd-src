@@ -30,18 +30,19 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <unistd.h>
+
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
+#include <unistd.h>
 
 void
 perror(const char *s)
 {
 	struct iovec *v;
-	struct iovec iov[4];
-	char buf[NL_TEXTMAX];
+	struct iovec  iov[4];
+	char	      buf[NL_TEXTMAX];
 
 	v = iov;
 	if (s && *s) {

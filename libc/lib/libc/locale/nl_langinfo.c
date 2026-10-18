@@ -4,9 +4,9 @@
  * Public domain.
  */
 
+#include <langinfo.h>
 #include <locale.h>
 #include <nl_types.h>
-#include <langinfo.h>
 
 #include "localedef.h"
 #include "rune.h"
@@ -98,7 +98,7 @@ nl_langinfo(nl_item item)
 	case NOEXPR:
 		s = _CurrentMessagesLocale->noexpr;
 		break;
-	case CRNCYSTR:				/* XXX */
+	case CRNCYSTR: /* XXX */
 		s = "";
 		break;
 	case CODESET:
@@ -111,6 +111,6 @@ nl_langinfo(nl_item item)
 		break;
 	}
 
-	return (char *) s;
+	return (char *)s;
 }
 DEF_WEAK(nl_langinfo);

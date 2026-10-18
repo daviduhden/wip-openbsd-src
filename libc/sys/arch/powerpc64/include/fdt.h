@@ -21,16 +21,16 @@
 #include <machine/bus.h>
 
 struct fdt_attach_args {
-	const char		*fa_name;
-	int			 fa_node;
-	bus_space_tag_t		 fa_iot;
-	bus_dma_tag_t		 fa_dmat;
-	struct fdt_reg		*fa_reg;
-	int			 fa_nreg;
-	uint32_t		*fa_intr;
-	int			 fa_nintr;
-	int			 fa_acells;
-	int			 fa_scells;
+	const char     *fa_name;
+	int		fa_node;
+	bus_space_tag_t fa_iot;
+	bus_dma_tag_t	fa_dmat;
+	struct fdt_reg *fa_reg;
+	int		fa_nreg;
+	uint32_t       *fa_intr;
+	int		fa_nintr;
+	int		fa_acells;
+	int		fa_scells;
 };
 
 extern int stdout_node;

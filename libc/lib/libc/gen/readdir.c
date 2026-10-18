@@ -30,6 +30,7 @@
 
 #include <dirent.h>
 #include <errno.h>
+
 #include "telldir.h"
 #include "thread_private.h"
 
@@ -45,15 +46,15 @@ _readdir_unlocked(DIR *dirp, struct dirent **result)
 	for (;;) {
 		if (dirp->dd_loc >= dirp->dd_size) {
 			dirp->dd_loc = 0;
-			dirp->dd_size = getdents(dirp->dd_fd, dirp->dd_buf,
-			    dirp->dd_len);
+			dirp->dd_size =
+			    getdents(dirp->dd_fd, dirp->dd_buf, dirp->dd_len);
 			if (dirp->dd_size == 0)
 				return (0);
 			if (dirp->dd_size < 0)
 				return (-1);
 		}
 		dp = (struct dirent *)(dirp->dd_buf + dirp->dd_loc);
-		if ((long)dp & 03 ||	/* bogus pointer check */
+		if ((long)dp & 03 || /* bogus pointer check */
 		    dp->d_reclen <= 0 ||
 		    dp->d_reclen > dirp->dd_len + 1 - dirp->dd_loc) {
 			errno = EINVAL;

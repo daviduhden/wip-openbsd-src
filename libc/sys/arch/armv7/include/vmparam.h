@@ -30,23 +30,23 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_MACHINE_VMPARAM_H_
-#define	_MACHINE_VMPARAM_H_
+#ifndef _MACHINE_VMPARAM_H_
+#define _MACHINE_VMPARAM_H_
 
-#define	ARM_KERNEL_BASE		0xc0000000U
+#define ARM_KERNEL_BASE 0xc0000000U
 
 /* Allow armv7 to have bigger limits than generic arm, allow user to override */
-#ifndef	MAXDSIZ
-#define	MAXDSIZ		(2UL*1024*1024*1024)	/* max data size */
+#ifndef MAXDSIZ
+#define MAXDSIZ (2UL * 1024 * 1024 * 1024) /* max data size */
 #endif
 #ifndef BRKSIZ
-#define	BRKSIZ		MAXDSIZ			/* heap gap size */
+#define BRKSIZ MAXDSIZ /* heap gap size */
 #endif
-#ifndef	DFLSSIZ
-#define	DFLSSIZ		(4*1024*1024)		/* initial stack size limit */
+#ifndef DFLSSIZ
+#define DFLSSIZ (4 * 1024 * 1024) /* initial stack size limit */
 #endif
-#ifndef	MAXSSIZ
-#define	MAXSSIZ		(32*1024*1024)		/* max stack size */
+#ifndef MAXSSIZ
+#define MAXSSIZ (32 * 1024 * 1024) /* max stack size */
 #endif
 
 #include <arm/vmparam.h>
@@ -60,39 +60,39 @@
  * The line between user space and kernel space
  * Mappings >= KERNEL_BASE are constant across all processes
  */
-#define	KERNEL_BASE		ARM_KERNEL_BASE
+#define KERNEL_BASE ARM_KERNEL_BASE
 
-#define VM_KERNEL_SPACE_SIZE	0x20000000
+#define VM_KERNEL_SPACE_SIZE 0x20000000
 
 /*
  * Override the default pager_map size, there's not enough KVA.
  */
-#define PAGER_MAP_SIZE		(4 * 1024 * 1024)
+#define PAGER_MAP_SIZE (4 * 1024 * 1024)
 
 /*
  * Size of User Raw I/O map
  */
 
-#define USRIOSIZE       300
+#define USRIOSIZE 300
 
 /* virtual sizes (bytes) for various kernel submaps */
 
-#define VM_PHYS_SIZE		(USRIOSIZE*PAGE_SIZE)
+#define VM_PHYS_SIZE (USRIOSIZE * PAGE_SIZE)
 
 /*
  * max number of non-contig chunks of physical RAM you can have
  */
 
-#define	VM_PHYSSEG_MAX		32
-#define	VM_PHYSSEG_STRAT	VM_PSTRAT_BSEARCH
+#define VM_PHYSSEG_MAX 32
+#define VM_PHYSSEG_STRAT VM_PSTRAT_BSEARCH
 
 /*
  * this indicates that we can't add RAM to the VM system after the
  * vm system is init'd.
  */
 
-#define	VM_PHYSSEG_NOADD
+#define VM_PHYSSEG_NOADD
 
 #endif /* _KERNEL */
 
-#endif	/* _MACHINE_VMPARAM_H_ */
+#endif /* _MACHINE_VMPARAM_H_ */

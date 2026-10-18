@@ -30,30 +30,30 @@
 #endif
 
 struct bpp_param {
-	int	bp_burst;	/* chars to send/recv in one call */
-	int	bp_timeout;	/* timeout: -1 blocking, 0 non blocking >0 ms */
-	int	bp_delay;	/* delay between polls (ms) */
+	int bp_burst;	/* chars to send/recv in one call */
+	int bp_timeout; /* timeout: -1 blocking, 0 non blocking >0 ms */
+	int bp_delay;	/* delay between polls (ms) */
 };
 
-#define BPP_BLOCK	-1
-#define BPP_NOBLOCK	0
+#define BPP_BLOCK -1
+#define BPP_NOBLOCK 0
 
 /* defaults */
-#define BPP_BURST	1024
-#define BPP_TIMEOUT	BPP_BLOCK
-#define BPP_DELAY	10
+#define BPP_BURST 1024
+#define BPP_TIMEOUT BPP_BLOCK
+#define BPP_DELAY 10
 
 /* limits */
-#define BPP_BURST_MIN	1
-#define BPP_BURST_MAX	1024
-#define BPP_DELAY_MIN	0
-#define BPP_DELAY_MAX	30000
+#define BPP_BURST_MIN 1
+#define BPP_BURST_MAX 1024
+#define BPP_DELAY_MIN 0
+#define BPP_DELAY_MAX 30000
 
 /* status bits */
-#define BPP_BUSY	(1<<0)
-#define BPP_PAPER	(1<<1)
+#define BPP_BUSY (1 << 0)
+#define BPP_PAPER (1 << 1)
 
 /* ioctl commands */
-#define BPPIOCSPARAM	_IOW('P', 0x1, struct bpp_param)
-#define BPPIOCGPARAM	_IOR('P', 0x2, struct bpp_param)
-#define BPPIOCGSTAT	_IOR('P', 0x4, int)
+#define BPPIOCSPARAM _IOW('P', 0x1, struct bpp_param)
+#define BPPIOCGPARAM _IOR('P', 0x2, struct bpp_param)
+#define BPPIOCGSTAT _IOR('P', 0x4, int)

@@ -41,59 +41,62 @@
  */
 
 #include <sys/types.h>
+
 #include <netinet/in.h>
-#include <string.h>
 
 #include <rpc/types.h>
 #include <rpc/xdr.h>
+#include <string.h>
 
-static bool_t	xdrmem_getlong_aligned(XDR *, long *);
-static bool_t	xdrmem_putlong_aligned(XDR *, long *);
-static bool_t	xdrmem_getlong_unaligned(XDR *, long *);
-static bool_t	xdrmem_putlong_unaligned(XDR *, long *);
-static bool_t	xdrmem_getbytes(XDR *, caddr_t, u_int);
-static bool_t	xdrmem_putbytes(XDR *, caddr_t, u_int);
-static u_int	xdrmem_getpos(XDR *); /* XXX w/64-bit pointers, u_int not enough! */
+static bool_t xdrmem_getlong_aligned(XDR *, long *);
+static bool_t xdrmem_putlong_aligned(XDR *, long *);
+static bool_t xdrmem_getlong_unaligned(XDR *, long *);
+static bool_t xdrmem_putlong_unaligned(XDR *, long *);
+static bool_t xdrmem_getbytes(XDR *, caddr_t, u_int);
+static bool_t xdrmem_putbytes(XDR *, caddr_t, u_int);
+static u_int  xdrmem_getpos(
+    XDR *); /* XXX w/64-bit pointers, u_int not enough! */
 static bool_t	xdrmem_setpos(XDR *, u_int);
 static int32_t *xdrmem_inline_aligned(XDR *, u_int);
 static int32_t *xdrmem_inline_unaligned(XDR *, u_int);
 static void	xdrmem_destroy(XDR *);
 
 static const struct xdr_ops xdrmem_ops_aligned = {
-	xdrmem_getlong_aligned,
-	xdrmem_putlong_aligned,
-	xdrmem_getbytes,
-	xdrmem_putbytes,
-	xdrmem_getpos,
-	xdrmem_setpos,
-	xdrmem_inline_aligned,
-	xdrmem_destroy,
-	NULL,	/* xdrmem_control */
+    xdrmem_getlong_aligned,
+    xdrmem_putlong_aligned,
+    xdrmem_getbytes,
+    xdrmem_putbytes,
+    xdrmem_getpos,
+    xdrmem_setpos,
+    xdrmem_inline_aligned,
+    xdrmem_destroy,
+    NULL, /* xdrmem_control */
 };
 
 static const struct xdr_ops xdrmem_ops_unaligned = {
-	xdrmem_getlong_unaligned,
-	xdrmem_putlong_unaligned,
-	xdrmem_getbytes,
-	xdrmem_putbytes,
-	xdrmem_getpos,
-	xdrmem_setpos,
-	xdrmem_inline_unaligned,
-	xdrmem_destroy,
-	NULL,	/* xdrmem_control */
+    xdrmem_getlong_unaligned,
+    xdrmem_putlong_unaligned,
+    xdrmem_getbytes,
+    xdrmem_putbytes,
+    xdrmem_getpos,
+    xdrmem_setpos,
+    xdrmem_inline_unaligned,
+    xdrmem_destroy,
+    NULL, /* xdrmem_control */
 };
 
 /*
  * The procedure xdrmem_create initializes a stream descriptor for a
- * memory buffer.  
+ * memory buffer.
  */
 void
 xdrmem_create(XDR *xdrs, caddr_t addr, u_int size, enum xdr_op op)
 {
 
 	xdrs->x_op = op;
-	xdrs->x_ops = ((size_t)addr & (sizeof(int32_t) - 1))
-	    ? &xdrmem_ops_unaligned : &xdrmem_ops_aligned;
+	xdrs->x_ops = ((size_t)addr & (sizeof(int32_t) - 1)) ?
+	    &xdrmem_ops_unaligned :
+	    &xdrmem_ops_aligned;
 	xdrs->x_private = xdrs->x_base = addr;
 	xdrs->x_handy = size;
 }
@@ -197,7 +200,8 @@ xdrmem_setpos(XDR *xdrs, u_int pos)
 	if (newaddr > lastaddr)
 		return (FALSE);
 	xdrs->x_private = newaddr;
-	xdrs->x_handy = (u_int)(lastaddr - newaddr);	/* XXX w/64-bit pointers, u_int not enough! */
+	xdrs->x_handy = (u_int)(lastaddr -
+	    newaddr); /* XXX w/64-bit pointers, u_int not enough! */
 	return (TRUE);
 }
 

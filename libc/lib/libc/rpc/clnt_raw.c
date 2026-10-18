@@ -40,10 +40,10 @@
  * any interference from the kernel.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <rpc/rpc.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MCALL_MSG_SIZE 24
 
@@ -51,31 +51,25 @@
  * This is the "network" we will be moving stuff over.
  */
 static struct clntraw_private {
-	CLIENT	client_object;
-	XDR	xdr_stream;
-	char	_raw_buf[UDPMSGSIZE];
-	char	mashl_callmsg[MCALL_MSG_SIZE];
-	u_int	mcnt;
+	CLIENT client_object;
+	XDR    xdr_stream;
+	char   _raw_buf[UDPMSGSIZE];
+	char   mashl_callmsg[MCALL_MSG_SIZE];
+	u_int  mcnt;
 } *clntraw_private;
 
-static enum clnt_stat	clntraw_call(CLIENT *, u_long, xdrproc_t, caddr_t,
-			    xdrproc_t, caddr_t, struct timeval);
-static void		clntraw_abort(CLIENT *);
-static void		clntraw_geterr(CLIENT *, struct rpc_err *);
-static bool_t		clntraw_freeres(CLIENT *, xdrproc_t, caddr_t);
-static bool_t		clntraw_control(CLIENT *, u_int, void *);
-static void		clntraw_destroy(CLIENT *);
+static enum clnt_stat clntraw_call(
+    CLIENT *, u_long, xdrproc_t, caddr_t, xdrproc_t, caddr_t, struct timeval);
+static void   clntraw_abort(CLIENT *);
+static void   clntraw_geterr(CLIENT *, struct rpc_err *);
+static bool_t clntraw_freeres(CLIENT *, xdrproc_t, caddr_t);
+static bool_t clntraw_control(CLIENT *, u_int, void *);
+static void   clntraw_destroy(CLIENT *);
 
-static const struct clnt_ops client_ops = {
-	clntraw_call,
-	clntraw_abort,
-	clntraw_geterr,
-	clntraw_freeres,
-	clntraw_destroy,
-	clntraw_control
-};
+static const struct clnt_ops client_ops = {clntraw_call, clntraw_abort,
+    clntraw_geterr, clntraw_freeres, clntraw_destroy, clntraw_control};
 
-void	svc_getreq(int rdfds);
+void svc_getreq(int rdfds);
 
 /*
  * Create a client handle for memory based rpc.
@@ -84,12 +78,12 @@ CLIENT *
 clntraw_create(u_long prog, u_long vers)
 {
 	struct clntraw_private *clp = clntraw_private;
-	struct rpc_msg call_msg;
-	XDR *xdrs;
-	CLIENT	*client;
+	struct rpc_msg		call_msg;
+	XDR		       *xdrs;
+	CLIENT		       *client;
 
 	if (clp == NULL) {
-		clp = calloc(1, sizeof (*clp));
+		clp = calloc(1, sizeof(*clp));
 		if (clp == NULL)
 			goto fail;
 		clntraw_private = clp;
@@ -103,7 +97,7 @@ clntraw_create(u_long prog, u_long vers)
 	call_msg.rm_call.cb_rpcvers = RPC_MSG_VERSION;
 	call_msg.rm_call.cb_prog = prog;
 	call_msg.rm_call.cb_vers = vers;
-	xdrmem_create(xdrs, clp->mashl_callmsg, MCALL_MSG_SIZE, XDR_ENCODE); 
+	xdrmem_create(xdrs, clp->mashl_callmsg, MCALL_MSG_SIZE, XDR_ENCODE);
 	if (!xdr_callhdr(xdrs, &call_msg))
 		goto fail;
 	clp->mcnt = XDR_GETPOS(xdrs);
@@ -131,15 +125,15 @@ fail:
 	return (NULL);
 }
 
-static enum clnt_stat 
+static enum clnt_stat
 clntraw_call(CLIENT *h, u_long proc, xdrproc_t xargs, caddr_t argsp,
     xdrproc_t xresults, caddr_t resultsp, struct timeval timeout)
 {
 	struct clntraw_private *clp = clntraw_private;
-	XDR *xdrs;
-	struct rpc_msg msg;
-	enum clnt_stat status;
-	struct rpc_err error;
+	XDR		       *xdrs;
+	struct rpc_msg		msg;
+	enum clnt_stat		status;
+	struct rpc_err		error;
 
 	if (clp == NULL)
 		return (RPC_FAILED);
@@ -150,14 +144,13 @@ call_again:
 	 */
 	xdrs->x_op = XDR_ENCODE;
 	XDR_SETPOS(xdrs, 0);
-	((struct rpc_msg *)clp->mashl_callmsg)->rm_xid ++ ;
-	if ((! XDR_PUTBYTES(xdrs, clp->mashl_callmsg, clp->mcnt)) ||
-	    (! XDR_PUTLONG(xdrs, (long *)&proc)) ||
-	    (! AUTH_MARSHALL(h->cl_auth, xdrs)) ||
-	    (! (*xargs)(xdrs, argsp))) {
+	((struct rpc_msg *)clp->mashl_callmsg)->rm_xid++;
+	if ((!XDR_PUTBYTES(xdrs, clp->mashl_callmsg, clp->mcnt)) ||
+	    (!XDR_PUTLONG(xdrs, (long *)&proc)) ||
+	    (!AUTH_MARSHALL(h->cl_auth, xdrs)) || (!(*xargs)(xdrs, argsp))) {
 		return (RPC_CANTENCODEARGS);
 	}
-	(void)XDR_GETPOS(xdrs);  /* called just to cause overhead */
+	(void)XDR_GETPOS(xdrs); /* called just to cause overhead */
 
 	/*
 	 * We have to call server input routine here because this is
@@ -173,7 +166,7 @@ call_again:
 	msg.acpted_rply.ar_verf = _null_auth;
 	msg.acpted_rply.ar_results.where = resultsp;
 	msg.acpted_rply.ar_results.proc = xresults;
-	if (! xdr_replymsg(xdrs, &msg)) {
+	if (!xdr_replymsg(xdrs, &msg)) {
 		/* xdr_replymsg() may have left some things allocated */
 		int op = xdrs->x_op;
 		xdrs->x_op = XDR_FREE;
@@ -185,17 +178,17 @@ call_again:
 	status = error.re_status;
 
 	if (status == RPC_SUCCESS) {
-		if (! AUTH_VALIDATE(h->cl_auth, &msg.acpted_rply.ar_verf)) {
+		if (!AUTH_VALIDATE(h->cl_auth, &msg.acpted_rply.ar_verf)) {
 			status = RPC_AUTHERROR;
 		}
-	}  /* end successful completion */
+	} /* end successful completion */
 	else {
 		if (AUTH_REFRESH(h->cl_auth))
 			goto call_again;
-	}  /* end of unsuccessful completion */
+	} /* end of unsuccessful completion */
 
 	if (status == RPC_SUCCESS) {
-		if (! AUTH_VALIDATE(h->cl_auth, &msg.acpted_rply.ar_verf)) {
+		if (!AUTH_VALIDATE(h->cl_auth, &msg.acpted_rply.ar_verf)) {
 			status = RPC_AUTHERROR;
 		}
 		if (msg.acpted_rply.ar_verf.oa_base != NULL) {
@@ -216,11 +209,11 @@ static bool_t
 clntraw_freeres(CLIENT *cl, xdrproc_t xdr_res, caddr_t res_ptr)
 {
 	struct clntraw_private *clp = clntraw_private;
-	XDR *xdrs;
-	bool_t rval;
+	XDR		       *xdrs;
+	bool_t			rval;
 
 	if (clp == NULL) {
-		rval = (bool_t) RPC_FAILED;
+		rval = (bool_t)RPC_FAILED;
 		return (rval);
 	}
 	xdrs = &clp->xdr_stream;

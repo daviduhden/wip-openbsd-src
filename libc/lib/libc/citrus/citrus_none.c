@@ -35,8 +35,7 @@
 
 #include "citrus_ctype.h"
 
-static char	 wrapv(unsigned char);
-
+static char wrapv(unsigned char);
 
 /*
  * Convert an unsigned char value into a char value without relying on
@@ -52,8 +51,8 @@ wrapv(unsigned char ch)
 }
 
 size_t
-_citrus_none_ctype_mbrtowc(wchar_t * __restrict pwc,
-    const char * __restrict s, size_t n)
+_citrus_none_ctype_mbrtowc(
+    wchar_t *__restrict pwc, const char *__restrict s, size_t n)
 {
 	if (s == NULL)
 		return 0;
@@ -65,8 +64,8 @@ _citrus_none_ctype_mbrtowc(wchar_t * __restrict pwc,
 }
 
 size_t
-_citrus_none_ctype_mbsnrtowcs(wchar_t * __restrict dst,
-    const char ** __restrict src, size_t nmc, size_t len)
+_citrus_none_ctype_mbsnrtowcs(wchar_t *__restrict dst,
+    const char **__restrict src, size_t nmc, size_t len)
 {
 	size_t i;
 
@@ -84,7 +83,7 @@ _citrus_none_ctype_mbsnrtowcs(wchar_t * __restrict dst,
 }
 
 size_t
-_citrus_none_ctype_wcrtomb(char * __restrict s, wchar_t wc)
+_citrus_none_ctype_wcrtomb(char *__restrict s, wchar_t wc)
 {
 	if (s == NULL)
 		return 1;
@@ -99,8 +98,8 @@ _citrus_none_ctype_wcrtomb(char * __restrict s, wchar_t wc)
 }
 
 size_t
-_citrus_none_ctype_wcsnrtombs(char * __restrict dst,
-    const wchar_t ** __restrict src, size_t nwc, size_t len)
+_citrus_none_ctype_wcsnrtombs(char *__restrict dst,
+    const wchar_t **__restrict src, size_t nwc, size_t len)
 {
 	size_t i;
 

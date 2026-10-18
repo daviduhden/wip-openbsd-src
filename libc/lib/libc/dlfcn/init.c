@@ -15,59 +15,57 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #define _DYN_LOADER
 
 #include <sys/types.h>
-#include <sys/syscall.h>
-#include <sys/timetc.h>		/* timekeep */
-#include <sys/auxv.h>		/* _hwcap */
+#include <sys/auxv.h> /* _hwcap */
 #include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/timetc.h> /* timekeep */
 
 #ifndef PIC
 #include <sys/mman.h>
 #endif
 
-#include <tib.h>
-#include <limits.h>		/* NAME_MAX */
+#include <limits.h> /* NAME_MAX */
 #include <link.h>
-#include <stdlib.h>		/* atexit */
+#include <stdlib.h> /* atexit */
 #include <string.h>
 #include <syslog.h>
+#include <tib.h>
 #include <unistd.h>
 
 #include "init.h"
 
-#define MAX(a,b)	(((a)>(b))?(a):(b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 #ifdef TIB_EXTRA_ALIGN
-# define TIB_ALIGN	MAX(__alignof__(struct tib), TIB_EXTRA_ALIGN)
+#define TIB_ALIGN MAX(__alignof__(struct tib), TIB_EXTRA_ALIGN)
 #else
-# define TIB_ALIGN	__alignof__(struct tib)
+#define TIB_ALIGN __alignof__(struct tib)
 #endif
 
-mode_t	_permit_setugid __attribute__((weak));
+mode_t _permit_setugid __attribute__((weak));
 
 /* XXX should be in an include file shared with csu */
-char	***_csu_finish(char **_argv, char **_envp, void (*_cleanup)(void));
+char ***_csu_finish(char **_argv, char **_envp, void (*_cleanup)(void));
 
 /* provide definitions for these */
-int	_pagesize = 0;
-struct timekeep	*_timekeep;
-unsigned long	_hwcap, _hwcap2;
-int	_hwcap_avail, _hwcap2_avail;
-char	*_execpath;
+int		 _pagesize = 0;
+struct timekeep *_timekeep;
+unsigned long	 _hwcap, _hwcap2;
+int		 _hwcap_avail, _hwcap2_avail;
+char		*_execpath;
 
 /*
  * In dynamically linked binaries environ and __progname are overridden by
  * the definitions in ld.so.
  */
-char	**environ __attribute__((weak)) = NULL;
-char	*__progname __attribute__((weak)) = NULL;
-
+char **environ __attribute__((weak)) = NULL;
+char  *__progname __attribute__((weak)) = NULL;
 
 #ifndef PIC
-struct dl_phdr_info	_static_phdr_info __relro = { .dlpi_name = "a.out" };
+struct dl_phdr_info _static_phdr_info __relro = {.dlpi_name = "a.out"};
 
 static inline void early_static_init(char **_argv, char **_envp);
 static inline void setup_static_tib(Elf_Phdr *_phdr, int _phnum);
@@ -79,18 +77,18 @@ extern Elf_Ehdr __executable_start[] __attribute__((weak));
 /* provide definitions for these */
 const dl_cb *_dl_cb __relro = NULL;
 
-int	HIDDEN(execve)(const char *, char *const *, char *const *)
-	__attribute__((weak));
+int HIDDEN(execve)(const char *, char *const *, char *const *)
+    __attribute__((weak));
 
 void _libc_preinit(int, char **, char **, dl_cb_cb *) __dso_hidden;
 void
 _libc_preinit(int argc, char **argv, char **envp, dl_cb_cb *cb)
 {
-	AuxInfo	*aux;
-	char sugidmsg[400], *suid = NULL, *sgid = NULL;
+	AuxInfo *aux;
+	char	 sugidmsg[400], *suid = NULL, *sgid = NULL;
 #ifndef PIC
 	Elf_Phdr *phdr = NULL;
-	int phnum = 0;
+	int	  phnum = 0;
 
 	/* static libc in a static link? */
 	if (cb == NULL)
@@ -141,17 +139,19 @@ _libc_preinit(int argc, char **argv, char **envp, dl_cb_cb *cb)
 			_execpath = (void *)aux->au_v;
 			break;
 		case AUX_openbsd_execmode:
-			if ((aux->au_v & S_ISUID) && !(_permit_setugid & S_ISUID))
+			if ((aux->au_v & S_ISUID) &&
+			    !(_permit_setugid & S_ISUID))
 				suid = "setuid";
-			if ((aux->au_v & S_ISGID) && !(_permit_setugid & S_ISGID))
+			if ((aux->au_v & S_ISGID) &&
+			    !(_permit_setugid & S_ISGID))
 				sgid = "setgid";
 			if (!suid && !sgid)
 				break;
 
 			strlcpy(sugidmsg, _execpath ? _execpath : argv[0],
 			    sizeof sugidmsg);
-			strlcat(sugidmsg, ": not supposed to be ",
-			    sizeof sugidmsg);
+			strlcat(
+			    sugidmsg, ": not supposed to be ", sizeof sugidmsg);
 			if (suid) {
 				strlcat(sugidmsg, suid, sizeof sugidmsg);
 				if (sgid)
@@ -187,8 +187,10 @@ _libc_preinit(int argc, char **argv, char **envp, dl_cb_cb *cb)
 		for (i = 0; i < phnum; i++) {
 			if (phdr[i].p_type == PT_LOAD &&
 			    (phdr[i].p_flags & PF_W) == 0)
-				mimmutable((void *)(_static_phdr_info.dlpi_addr +
-				    phdr[i].p_vaddr), phdr[i].p_memsz);
+				mimmutable(
+				    (void *)(_static_phdr_info.dlpi_addr +
+					phdr[i].p_vaddr),
+				    phdr[i].p_memsz);
 		}
 	}
 #endif /* !PIC */
@@ -196,22 +198,22 @@ _libc_preinit(int argc, char **argv, char **envp, dl_cb_cb *cb)
 
 /* ARM just had to be different... */
 #ifndef __arm__
-# define TYPE	"@"
+#define TYPE "@"
 #else
-# define TYPE	"%"
+#define TYPE "%"
 #endif
 
 #ifdef __LP64__
-# define VALUE_ALIGN		".balign 8"
-# define VALUE_DIRECTIVE	".quad"
+#define VALUE_ALIGN ".balign 8"
+#define VALUE_DIRECTIVE ".quad"
 #else
-# define VALUE_ALIGN		".balign 4"
-# ifdef __hppa__
-   /* hppa just had to be different: func pointers prefix with 'P%' */
-#  define VALUE_DIRECTIVE	".int P%"
-# else
-#  define VALUE_DIRECTIVE	".int"
-# endif
+#define VALUE_ALIGN ".balign 4"
+#ifdef __hppa__
+/* hppa just had to be different: func pointers prefix with 'P%' */
+#define VALUE_DIRECTIVE ".int P%"
+#else
+#define VALUE_DIRECTIVE ".int"
+#endif
 #endif
 
 #ifdef PIC
@@ -219,11 +221,11 @@ _libc_preinit(int argc, char **argv, char **envp, dl_cb_cb *cb)
  * Set a priority so _libc_preinit gets called before the constructor
  * on libcompiler_rt that may use elf_aux_info(3).
  */
-__asm(" .section .init_array.50,\"a\","TYPE"init_array\n " \
-	VALUE_ALIGN"\n "VALUE_DIRECTIVE" _libc_preinit\n .previous");
+__asm(" .section .init_array.50,\"a\"," TYPE "init_array\n " VALUE_ALIGN
+      "\n " VALUE_DIRECTIVE " _libc_preinit\n .previous");
 #else
-__asm(" .section .preinit_array,\"a\","TYPE"preinit_array\n " \
-	VALUE_ALIGN"\n "VALUE_DIRECTIVE" _libc_preinit\n .previous");
+__asm(" .section .preinit_array,\"a\"," TYPE "preinit_array\n " VALUE_ALIGN
+      "\n " VALUE_DIRECTIVE " _libc_preinit\n .previous");
 #endif
 
 /*
@@ -249,12 +251,12 @@ _csu_finish(char **argv, char **envp, void (*cleanup)(void))
 static inline void
 early_static_init(char **argv, char **envp)
 {
-	static char progname_storage[NAME_MAX+1];
+	static char progname_storage[NAME_MAX + 1];
 
 	environ = envp;
 
 	/* set up __progname */
-	if (*argv != NULL) {		/* NULL ptr if argc = 0 */
+	if (*argv != NULL) { /* NULL ptr if argc = 0 */
 		const char *p = strrchr(*argv, '/');
 
 		if (p == NULL)
@@ -269,22 +271,22 @@ early_static_init(char **argv, char **envp)
 /*
  * static TLS handling
  */
-#define ELF_ROUND(x,malign)	(((x) + (malign)-1) & ~((malign)-1))
+#define ELF_ROUND(x, malign) (((x) + (malign) - 1) & ~((malign) - 1))
 
 /* for static binaries, the location and size of the TLS image */
-static void		*static_tls __relro;
-static size_t		static_tls_fsize __relro;
+static void *static_tls	       __relro;
+static size_t static_tls_fsize __relro;
 
-size_t			_static_tls_size __relro = 0;
-int			_static_tls_align __relro;
-int			_static_tls_align_offset __relro;
+size_t _static_tls_size	     __relro = 0;
+int _static_tls_align	     __relro;
+int _static_tls_align_offset __relro;
 
 static inline void
 setup_static_tib(Elf_Phdr *phdr, int phnum)
 {
 	struct tib *tib;
-	char *base;
-	int i;
+	char	   *base;
+	int	    i;
 
 	_static_tls_align = TIB_ALIGN;
 	if (phdr != NULL) {
@@ -294,9 +296,9 @@ setup_static_tib(Elf_Phdr *phdr, int phnum)
 			if (phdr[i].p_memsz == 0)
 				break;
 			if (phdr[i].p_memsz < phdr[i].p_filesz)
-				break;		/* invalid */
+				break; /* invalid */
 			if (phdr[i].p_align > getpagesize())
-				break;		/* nope */
+				break; /* nope */
 			_static_tls_align = MAX(phdr[i].p_align, TIB_ALIGN);
 #if TLS_VARIANT == 1
 			/*
@@ -324,10 +326,11 @@ setup_static_tib(Elf_Phdr *phdr, int phnum)
 			 * - need to allocate 8 bytes so that the TIB is
 			 * - properly aligned
 			 */
-			_static_tls_size = ELF_ROUND(phdr[i].p_memsz,
-			    phdr[i].p_align);
-			_static_tls_align_offset = ELF_ROUND(_static_tls_size,
-			    _static_tls_align) - _static_tls_size;
+			_static_tls_size =
+			    ELF_ROUND(phdr[i].p_memsz, phdr[i].p_align);
+			_static_tls_align_offset =
+			    ELF_ROUND(_static_tls_size, _static_tls_align) -
+			    _static_tls_size;
 #endif
 			if (phdr[i].p_vaddr != 0 && phdr[i].p_filesz != 0) {
 				static_tls = (void *)phdr[i].p_vaddr +
@@ -338,13 +341,14 @@ setup_static_tib(Elf_Phdr *phdr, int phnum)
 		}
 	}
 
-	base = mmap(NULL, _static_tls_size + _static_tls_align_offset
-	    + sizeof *tib, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0);
+	base = mmap(NULL,
+	    _static_tls_size + _static_tls_align_offset + sizeof *tib,
+	    PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 
 	tib = _static_tls_init(base, NULL);
 	tib->tib_tid = getthrid();
 	TCB_SET(TIB_TO_TCB(tib));
-#if ! TCB_HAVE_MD_GET
+#if !TCB_HAVE_MD_GET
 	_libc_single_tcb = TIB_TO_TCB(tib);
 #endif
 }
@@ -355,12 +359,12 @@ _static_tls_init(char *base, void *thread)
 	struct tib *tib;
 
 	base += _static_tls_align_offset;
-# if TLS_VARIANT == 1
+#if TLS_VARIANT == 1
 	tib = (struct tib *)base;
 	base += sizeof(struct tib);
-# elif TLS_VARIANT == 2
+#elif TLS_VARIANT == 2
 	tib = (struct tib *)(base + _static_tls_size);
-# endif
+#endif
 
 	if (_static_tls_size) {
 		if (static_tls != NULL)

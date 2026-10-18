@@ -29,29 +29,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef _MACHINE_REG_H
 #define _MACHINE_REG_H
 
 /*
  * Logical mapping for onboard/integrated peripherals
  */
-#define	MACHINE_IO_AREA_VBASE	0xfd000000
-#define MACHINE_GPIO_VBASE	0xfd000000
-#define MACHINE_CLKMAN_VBASE 	0xfd100000
-#define MACHINE_INTCTL_VBASE 	0xfd200000
-#define MACHINE_AGPIO_VBASE	0xfd300000
-#define MACHINE_VBASE_FREE	0xfd400000
+#define MACHINE_IO_AREA_VBASE 0xfd000000
+#define MACHINE_GPIO_VBASE 0xfd000000
+#define MACHINE_CLKMAN_VBASE 0xfd100000
+#define MACHINE_INTCTL_VBASE 0xfd200000
+#define MACHINE_AGPIO_VBASE 0xfd300000
+#define MACHINE_VBASE_FREE 0xfd400000
 /* FFUART and/or BTUART are mapped to this area when
    used for console */
 
-#define ioreg_read(a)  (*(volatile unsigned *)(a))
-#define ioreg_write(a,v)  (*(volatile unsigned *)(a)=(v))
+#define ioreg_read(a) (*(volatile unsigned *)(a))
+#define ioreg_write(a, v) (*(volatile unsigned *)(a) = (v))
 
-#define ioreg16_read(a)  (*(volatile uint16_t *)(a))
-#define ioreg16_write(a,v)  (*(volatile uint16_t *)(a)=(v))
+#define ioreg16_read(a) (*(volatile uint16_t *)(a))
+#define ioreg16_write(a, v) (*(volatile uint16_t *)(a) = (v))
 
-#define ioreg8_read(a)  (*(volatile uint8_t *)(a))
-#define ioreg8_write(a,v)  (*(volatile uint8_t *)(a)=(v))
+#define ioreg8_read(a) (*(volatile uint8_t *)(a))
+#define ioreg8_write(a, v) (*(volatile uint8_t *)(a) = (v))
 
 #endif /* _MACHINE_REG_H */

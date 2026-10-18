@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_REGEX_H_
-#define	_LIBC_REGEX_H_
+#define _LIBC_REGEX_H_
 
 #include_next <regex.h>
 

@@ -115,7 +115,7 @@ __fpu_uitof(struct fpn *fp, u_int i)
 		return (FPC_ZERO);
 	/*
 	 * The value FP_1 represents 2^FP_LG, so set the exponent
-	 * there and let normalization fix it up. 
+	 * there and let normalization fix it up.
 	 * Note that this relies on fpu_norm()'s handling of
 	 * `supernormals'; see fpu_subr.c.
 	 */
@@ -146,7 +146,7 @@ __fpu_xtof(struct fpn *fp, u_int64_t i)
 	fp->fp_exp = FP_LG2;
 	i = (fp->fp_sign && (int64_t)i < 0) ? -i : i;
 	fp->fp_mant[0] = (i >> 32) & 0xffffffff;
-	fp->fp_mant[1] = (i >> 0)  & 0xffffffff;
+	fp->fp_mant[1] = (i >> 0) & 0xffffffff;
 	fp->fp_mant[2] = 0;
 	fp->fp_mant[3] = 0;
 	__fpu_norm(fp);
@@ -170,45 +170,45 @@ __fpu_uxtof(struct fpn *fp, u_int64_t i)
 	 */
 	fp->fp_exp = FP_LG2;
 	fp->fp_mant[0] = (i >> 32) & 0xffffffff;
-	fp->fp_mant[1] = (i >> 0)  & 0xffffffff;
+	fp->fp_mant[1] = (i >> 0) & 0xffffffff;
 	fp->fp_mant[2] = 0;
 	fp->fp_mant[3] = 0;
 	__fpu_norm(fp);
 	return (FPC_NUM);
 }
 
-#define	mask(nbits) ((1L << (nbits)) - 1)
+#define mask(nbits) ((1L << (nbits)) - 1)
 
 /*
  * All external floating formats convert to internal in the same manner,
  * as defined here.  Note that only normals get an implied 1.0 inserted.
  */
-#define	FP_TOF(exp, expbias, allfrac, f0, f1, f2, f3) \
-	if (exp == 0) { \
-		if (allfrac == 0) \
-			return (FPC_ZERO); \
-		fp->fp_exp = 1 - expbias; \
-		fp->fp_mant[0] = f0; \
-		fp->fp_mant[1] = f1; \
-		fp->fp_mant[2] = f2; \
-		fp->fp_mant[3] = f3; \
-		__fpu_norm(fp); \
-		return (FPC_NUM); \
-	} \
-	if (exp == (2 * expbias + 1)) { \
-		if (allfrac == 0) \
-			return (FPC_INF); \
-		fp->fp_mant[0] = f0; \
-		fp->fp_mant[1] = f1; \
-		fp->fp_mant[2] = f2; \
-		fp->fp_mant[3] = f3; \
-		return (FPC_QNAN); \
-	} \
-	fp->fp_exp = exp - expbias; \
-	fp->fp_mant[0] = FP_1 | f0; \
-	fp->fp_mant[1] = f1; \
-	fp->fp_mant[2] = f2; \
-	fp->fp_mant[3] = f3; \
+#define FP_TOF(exp, expbias, allfrac, f0, f1, f2, f3)                          \
+	if (exp == 0) {                                                        \
+		if (allfrac == 0)                                              \
+			return (FPC_ZERO);                                     \
+		fp->fp_exp = 1 - expbias;                                      \
+		fp->fp_mant[0] = f0;                                           \
+		fp->fp_mant[1] = f1;                                           \
+		fp->fp_mant[2] = f2;                                           \
+		fp->fp_mant[3] = f3;                                           \
+		__fpu_norm(fp);                                                \
+		return (FPC_NUM);                                              \
+	}                                                                      \
+	if (exp == (2 * expbias + 1)) {                                        \
+		if (allfrac == 0)                                              \
+			return (FPC_INF);                                      \
+		fp->fp_mant[0] = f0;                                           \
+		fp->fp_mant[1] = f1;                                           \
+		fp->fp_mant[2] = f2;                                           \
+		fp->fp_mant[3] = f3;                                           \
+		return (FPC_QNAN);                                             \
+	}                                                                      \
+	fp->fp_exp = exp - expbias;                                            \
+	fp->fp_mant[0] = FP_1 | f0;                                            \
+	fp->fp_mant[1] = f1;                                                   \
+	fp->fp_mant[2] = f2;                                                   \
+	fp->fp_mant[3] = f3;                                                   \
 	return (FPC_NUM)
 
 /*
@@ -219,7 +219,7 @@ __fpu_uxtof(struct fpn *fp, u_int64_t i)
 int
 __fpu_stof(struct fpn *fp, u_int i)
 {
-	int exp;
+	int   exp;
 	u_int frac, f0, f1;
 #define SNG_SHIFT (SNG_FRACBITS - FP_LG)
 
@@ -237,7 +237,7 @@ __fpu_stof(struct fpn *fp, u_int i)
 int
 __fpu_dtof(struct fpn *fp, u_int i, u_int j)
 {
-	int exp;
+	int   exp;
 	u_int frac, f0, f1, f2;
 #define DBL_SHIFT (DBL_FRACBITS - 32 - FP_LG)
 
@@ -256,9 +256,9 @@ __fpu_dtof(struct fpn *fp, u_int i, u_int j)
 int
 __fpu_qtof(struct fpn *fp, u_int i, u_int j, u_int k, u_int l)
 {
-	int exp;
+	int   exp;
 	u_int frac, f0, f1, f2, f3;
-#define EXT_SHIFT (-(EXT_FRACBITS - 3 * 32 - FP_LG))	/* left shift! */
+#define EXT_SHIFT (-(EXT_FRACBITS - 3 * 32 - FP_LG)) /* left shift! */
 
 	/*
 	 * Note that ext and fpn `line up', hence no shifting needed.
@@ -273,7 +273,7 @@ __fpu_qtof(struct fpn *fp, u_int i, u_int j, u_int k, u_int l)
 	FP_TOF(exp, EXT_EXP_BIAS, frac, f0, f1, f2, f3);
 }
 
-#if 0	/* __fpu_explode is unused */
+#if 0 /* __fpu_explode is unused */
 /*
  * Explode the contents of a / regpair / regquad.
  * If the input is a signalling NaN, an NV (invalid) exception

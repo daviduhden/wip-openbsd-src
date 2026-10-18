@@ -26,18 +26,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/ipc.h>
+#include <sys/stat.h>
 
 key_t
 ftok(const char *path, int id)
 {
 	const unsigned int u_id = id;
-	struct stat st;
+	struct stat	   st;
 
 	if (stat(path, &st) == -1)
 		return (key_t)-1;
 
-	return (key_t)
-	    ((u_id & 0xff) << 24 | (st.st_dev & 0xff) << 16 | (st.st_ino & 0xffff));
+	return (key_t)((u_id & 0xff) << 24 | (st.st_dev & 0xff) << 16 |
+	    (st.st_ino & 0xffff));
 }

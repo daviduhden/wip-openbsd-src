@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_PTHREAD_H_
-#define	_LIBC_PTHREAD_H_
+#define _LIBC_PTHREAD_H_
 
 #include_next <pthread.h>
 

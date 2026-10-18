@@ -1,7 +1,7 @@
 #ifdef __MIPSEB__
 #define IEEE_MC68k
 #else
-#define	IEEE_8087
+#define IEEE_8087
 #endif
 #define Arith_Kind_ASL 2
 #define Long int

@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -38,7 +39,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <db.h>
 #include "recno.h"
 
 /*
@@ -56,10 +56,10 @@
 int
 __rec_get(const DB *dbp, const DBT *key, DBT *data, u_int flags)
 {
-	BTREE *t;
-	EPG *e;
+	BTREE  *t;
+	EPG    *e;
 	recno_t nrec;
-	int status;
+	int	status;
 
 	t = dbp->internal;
 
@@ -111,12 +111,12 @@ __rec_get(const DB *dbp, const DBT *key, DBT *data, u_int flags)
 int
 __rec_fpipe(BTREE *t, recno_t top)
 {
-	DBT data;
+	DBT	data;
 	recno_t nrec;
-	size_t len;
-	int ch;
+	size_t	len;
+	int	ch;
 	u_char *p;
-	void *tp;
+	void   *tp;
 
 	if (t->bt_rdata.size < t->bt_reclen) {
 		tp = realloc(t->bt_rdata.data, t->bt_reclen);
@@ -136,8 +136,8 @@ __rec_fpipe(BTREE *t, recno_t top)
 					*p = ch;
 				if (len != 0)
 					memset(p, t->bt_bval, len);
-				if (__rec_iput(t,
-				    nrec, &data, 0) != RET_SUCCESS)
+				if (__rec_iput(t, nrec, &data, 0) !=
+				    RET_SUCCESS)
 					return (RET_ERROR);
 				++nrec;
 				break;
@@ -165,32 +165,33 @@ __rec_fpipe(BTREE *t, recno_t top)
 int
 __rec_vpipe(BTREE *t, recno_t top)
 {
-	DBT data;
+	DBT	data;
 	recno_t nrec;
-	size_t len;
-	size_t sz;
-	int bval, ch;
+	size_t	len;
+	size_t	sz;
+	int	bval, ch;
 	u_char *p;
-	void *tp;
+	void   *tp;
 
 	bval = t->bt_bval;
 	for (nrec = t->bt_nrecs; nrec < top; ++nrec) {
-		for (p = t->bt_rdata.data,
-		    sz = t->bt_rdata.size;; *p++ = ch, --sz) {
+		for (p = t->bt_rdata.data, sz = t->bt_rdata.size;;
+		    *p++ = ch, --sz) {
 			if ((ch = getc(t->bt_rfp)) == EOF || ch == bval) {
 				data.data = t->bt_rdata.data;
 				data.size = p - (u_char *)t->bt_rdata.data;
 				if (ch == EOF && data.size == 0)
 					break;
-				if (__rec_iput(t, nrec, &data, 0)
-				    != RET_SUCCESS)
+				if (__rec_iput(t, nrec, &data, 0) !=
+				    RET_SUCCESS)
 					return (RET_ERROR);
 				break;
 			}
 			if (sz == 0) {
 				len = p - (u_char *)t->bt_rdata.data;
 				t->bt_rdata.size += (sz = 256);
-				tp = realloc(t->bt_rdata.data, t->bt_rdata.size);
+				tp =
+				    realloc(t->bt_rdata.data, t->bt_rdata.size);
 				if (tp == NULL)
 					return (RET_ERROR);
 				t->bt_rdata.data = tp;
@@ -220,11 +221,11 @@ __rec_vpipe(BTREE *t, recno_t top)
 int
 __rec_fmap(BTREE *t, recno_t top)
 {
-	DBT data;
+	DBT	data;
 	recno_t nrec;
 	u_char *sp, *ep, *p;
-	size_t len;
-	void *tp;
+	size_t	len;
+	void   *tp;
 
 	if (t->bt_rdata.size < t->bt_reclen) {
 		tp = realloc(t->bt_rdata.data, t->bt_reclen);
@@ -244,8 +245,9 @@ __rec_fmap(BTREE *t, recno_t top)
 			return (RET_SPECIAL);
 		}
 		len = t->bt_reclen;
-		for (p = t->bt_rdata.data;
-		    sp < ep && len > 0; *p++ = *sp++, --len);
+		for (p = t->bt_rdata.data; sp < ep && len > 0;
+		    *p++ = *sp++, --len)
+			;
 		if (len != 0)
 			memset(p, t->bt_bval, len);
 		if (__rec_iput(t, nrec, &data, 0) != RET_SUCCESS)
@@ -268,10 +270,10 @@ __rec_fmap(BTREE *t, recno_t top)
 int
 __rec_vmap(BTREE *t, recno_t top)
 {
-	DBT data;
+	DBT	data;
 	u_char *sp, *ep;
 	recno_t nrec;
-	int bval;
+	int	bval;
 
 	sp = (u_char *)t->bt_cmap;
 	ep = (u_char *)t->bt_emap;
@@ -282,7 +284,8 @@ __rec_vmap(BTREE *t, recno_t top)
 			F_SET(t, R_EOF);
 			return (RET_SPECIAL);
 		}
-		for (data.data = sp; sp < ep && *sp != bval; ++sp);
+		for (data.data = sp; sp < ep && *sp != bval; ++sp)
+			;
 		data.size = sp - (u_char *)data.data;
 		if (__rec_iput(t, nrec, &data, 0) != RET_SUCCESS)
 			return (RET_ERROR);

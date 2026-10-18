@@ -1,6 +1,7 @@
 /*	$OpenBSD: flockfile.c,v 1.12 2026/01/19 23:01:00 guenther Exp $	*/
 
 #include <stdio.h>
+
 #include "local.h"
 
 /*
@@ -16,7 +17,6 @@ flockfile(FILE *fp)
 	__rcmtx_enter(&fp->_lock);
 }
 DEF_WEAK(flockfile);
-
 
 int
 ftrylockfile(FILE *fp)

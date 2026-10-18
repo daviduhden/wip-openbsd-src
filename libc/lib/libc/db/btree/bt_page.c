@@ -31,9 +31,9 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <stdio.h>
 
-#include <db.h>
 #include "btree.h"
 
 /*

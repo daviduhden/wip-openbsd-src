@@ -156,8 +156,8 @@ struct fpn *
 __fpu_div(struct fpemu *fe)
 {
 	struct fpn *x = &fe->fe_f1, *y = &fe->fe_f2;
-	u_int q, bit;
-	u_int r0, r1, r2, r3, d0, d1, d2, d3, y0, y1, y2, y3;
+	u_int	    q, bit;
+	u_int	    r0, r1, r2, r3, d0, d1, d2, d3, y0, y1, y2, y3;
 	FPU_DECL_CARRY
 
 	/*
@@ -203,37 +203,40 @@ __fpu_div(struct fpemu *fe)
 	 * Note that we expand R, D, and Y here.
 	 */
 
-#define	SUBTRACT		/* D = R - Y */ \
-	FPU_SUBS(d3, r3, y3); FPU_SUBCS(d2, r2, y2); \
-	FPU_SUBCS(d1, r1, y1); FPU_SUBC(d0, r0, y0)
+#define SUBTRACT /* D = R - Y */                                               \
+	FPU_SUBS(d3, r3, y3);                                                  \
+	FPU_SUBCS(d2, r2, y2);                                                 \
+	FPU_SUBCS(d1, r1, y1);                                                 \
+	FPU_SUBC(d0, r0, y0)
 
-#define	NONNEGATIVE		/* D >= 0 */ \
-	((int)d0 >= 0)
+#define NONNEGATIVE /* D >= 0 */ ((int)d0 >= 0)
 
 #ifdef FPU_SHL1_BY_ADD
-#define	SHL1			/* R <<= 1 */ \
-	FPU_ADDS(r3, r3, r3); FPU_ADDCS(r2, r2, r2); \
-	FPU_ADDCS(r1, r1, r1); FPU_ADDC(r0, r0, r0)
+#define SHL1 /* R <<= 1 */                                                     \
+	FPU_ADDS(r3, r3, r3);                                                  \
+	FPU_ADDCS(r2, r2, r2);                                                 \
+	FPU_ADDCS(r1, r1, r1);                                                 \
+	FPU_ADDC(r0, r0, r0)
 #else
-#define	SHL1 \
-	r0 = (r0 << 1) | (r1 >> 31), r1 = (r1 << 1) | (r2 >> 31), \
+#define SHL1                                                                   \
+	r0 = (r0 << 1) | (r1 >> 31), r1 = (r1 << 1) | (r2 >> 31),              \
 	r2 = (r2 << 1) | (r3 >> 31), r3 <<= 1
 #endif
 
-#define	LOOP			/* do ... while (bit >>= 1) */ \
-	do { \
-		SHL1; \
-		SUBTRACT; \
-		if (NONNEGATIVE) { \
-			q |= bit; \
-			r0 = d0, r1 = d1, r2 = d2, r3 = d3; \
-		} \
+#define LOOP /* do ... while (bit >>= 1) */                                    \
+	do {                                                                   \
+		SHL1;                                                          \
+		SUBTRACT;                                                      \
+		if (NONNEGATIVE) {                                             \
+			q |= bit;                                              \
+			r0 = d0, r1 = d1, r2 = d2, r3 = d3;                    \
+		}                                                              \
 	} while ((bit >>= 1) != 0)
 
-#define	WORD(r, i)			/* calculate r->fp_mant[i] */ \
-	q = 0; \
-	bit = 1U << 31; \
-	LOOP; \
+#define WORD(r, i) /* calculate r->fp_mant[i] */                               \
+	q = 0;                                                                 \
+	bit = 1U << 31;                                                        \
+	LOOP;                                                                  \
 	(x)->fp_mant[i] = q
 
 	/* Setup.  Note that we put our result in x. */

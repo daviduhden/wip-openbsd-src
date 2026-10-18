@@ -42,7 +42,7 @@
  *
  *	u = 2^n u1  *  u0	(n = number of bits in `u_int', usu. 32)
  *
- * and 
+ * and
  *
  *	v = 2^n v1  *  v0
  *
@@ -95,15 +95,15 @@ static quad_t __lmulq(u_int, u_int);
 
 quad_t
 __muldi3(a, b)
-	quad_t a, b;
+quad_t a, b;
 {
 	union uu u, v, low, prod;
-	u_int high, mid, udiff, vdiff;
-	int negall, negmid;
-#define	u1	u.ul[H]
-#define	u0	u.ul[L]
-#define	v1	v.ul[H]
-#define	v0	v.ul[L]
+	u_int	 high, mid, udiff, vdiff;
+	int	 negall, negmid;
+#define u1 u.ul[H]
+#define u0 u.ul[L]
+#define v1 v.ul[H]
+#define v0 v.ul[L]
 
 	/*
 	 * Get u and v such that u, v >= 0.  When this is finished,
@@ -150,8 +150,8 @@ __muldi3(a, b)
 		/*
 		 * Assemble the final product.
 		 */
-		prod.ul[H] = high + (negmid ? -mid : mid) + low.ul[L] +
-		    low.ul[H];
+		prod.ul[H] =
+		    high + (negmid ? -mid : mid) + low.ul[L] + low.ul[H];
 		prod.ul[L] = low.ul[L];
 	}
 	return (negall ? -prod.q : prod.q);
@@ -181,10 +181,10 @@ __muldi3(a, b)
 static quad_t
 __lmulq(u_int u, u_int v)
 {
-	u_int u1, u0, v1, v0, udiff, vdiff, high, mid, low;
-	u_int prodh, prodl, was;
+	u_int	 u1, u0, v1, v0, udiff, vdiff, high, mid, low;
+	u_int	 prodh, prodl, was;
 	union uu prod;
-	int neg;
+	int	 neg;
 
 	u1 = HHALF(u);
 	u0 = LHALF(u);

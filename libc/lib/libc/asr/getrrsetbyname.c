@@ -1,4 +1,5 @@
-/*	$OpenBSD: getrrsetbyname.c,v 1.7 2026/06/23 17:48:36 florian Exp $	*/
+/*	$OpenBSD: getrrsetbyname.c,v 1.7 2026/06/23 17:48:36 florian Exp $
+ */
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -17,11 +18,12 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
-#include <netdb.h>
 
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <stdlib.h>
 
@@ -31,7 +33,7 @@ getrrsetbyname(const char *name, unsigned int class, unsigned int type,
 {
 	struct asr_query *as;
 	struct asr_result ar;
-	int r, saved_errno = errno;
+	int		  r, saved_errno = errno;
 
 	res_init();
 

@@ -15,12 +15,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <ctype.h>
 #include <err.h>
 #include <locale.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 /*
  * test helpers for __LINE__
@@ -28,7 +28,6 @@
 #define test_setlocale(_e, _c, _l) _test_setlocale(_e, _c, _l, __LINE__)
 #define test_MB_CUR_MAX(_e) _test_MB_CUR_MAX(_e, __LINE__)
 #define test_isalpha(_e, _c) _test_isalpha(_e, _c, __LINE__)
-
 
 static void
 _test_setlocale(char *expected, int category, char *locale, int line)
@@ -40,20 +39,20 @@ _test_setlocale(char *expected, int category, char *locale, int line)
 			return;
 
 		errx(1, "[%d] setlocale(%d, \"%s\")=\"%s\" [expected: \"%s\"]",
-		       line, category, locale, result, expected);
+		    line, category, locale, result, expected);
 	}
 
 	if (strcmp(expected, result) != 0)
 		errx(1, "[%d] setlocale(%d, \"%s\")=\"%s\" [expected: \"%s\"]",
-		       line, category, locale, result, expected);
+		    line, category, locale, result, expected);
 }
 
 static void
 _test_MB_CUR_MAX(size_t expected, int line)
 {
 	if (MB_CUR_MAX != expected)
-		errx(1, "[%d] MB_CUR_MAX=%ld [expected %ld]", 
-			line, MB_CUR_MAX, expected);
+		errx(1, "[%d] MB_CUR_MAX=%ld [expected %ld]", line, MB_CUR_MAX,
+		    expected);
 }
 
 static void
@@ -61,8 +60,8 @@ _test_isalpha(int expected, int c, int line)
 {
 	int result = isalpha(c);
 	if (!!result != expected)
-		errx(1, "[%d] isalpha(%d)=%d [expected %d]",
-			line, c, result, expected);
+		errx(1, "[%d] isalpha(%d)=%d [expected %d]", line, c, result,
+		    expected);
 }
 
 int
@@ -75,7 +74,7 @@ main(int argc, char *argv[])
 
 	/* load from env */
 	/* NOTE: we don't support non-C locales for some categories */
-	test_setlocale("fr_FR.UTF-8", LC_CTYPE, ""); /* set */
+	test_setlocale("fr_FR.UTF-8", LC_CTYPE, "");	/* set */
 	test_setlocale("fr_FR.UTF-8", LC_MESSAGES, ""); /* set */
 	test_MB_CUR_MAX(4);
 	test_isalpha(0, 0xe9); /* iso-8859-1 eacute */
@@ -92,31 +91,31 @@ main(int argc, char *argv[])
 	test_setlocale("C", LC_ALL, "C"); /* reset */
 	test_setlocale(NULL, -1, NULL);
 	test_setlocale(NULL, _LC_LAST, NULL);
-	test_setlocale(NULL, _LC_LAST+0xff, NULL);
+	test_setlocale(NULL, _LC_LAST + 0xff, NULL);
 	test_setlocale("C", LC_ALL, NULL); /* check */
 
 	/* check for errors on setting */
 	test_setlocale(NULL, -1, "");
 	test_setlocale(NULL, _LC_LAST, "");
-	test_setlocale(NULL, _LC_LAST+0xff, "");
+	test_setlocale(NULL, _LC_LAST + 0xff, "");
 	test_setlocale("C", LC_ALL, NULL); /* check */
 
 	/* no codeset, fallback to ASCII */
-	test_setlocale("C", LC_ALL, "C"); /* reset */
+	test_setlocale("C", LC_ALL, "C");		/* reset */
 	test_setlocale("invalid", LC_CTYPE, "invalid"); /* set */
 	test_setlocale("invalid", LC_CTYPE, NULL);
 	test_MB_CUR_MAX(1);
 	test_isalpha(0, 0xe9); /* iso-8859-1 eacute */
 
 	/* with codeset */
-	test_setlocale("C", LC_ALL, "C"); /* reset */
+	test_setlocale("C", LC_ALL, "C");			    /* reset */
 	test_setlocale("invalid.UTF-8", LC_CTYPE, "invalid.UTF-8"); /* set */
 	test_setlocale("invalid.UTF-8", LC_CTYPE, NULL);
 	test_setlocale("C/invalid.UTF-8/C/C/C/C", LC_ALL, NULL);
 	test_MB_CUR_MAX(4);
 
 	/* with invalid codeset (is an error) */
-	test_setlocale("C", LC_ALL, "C"); /* reset */
+	test_setlocale("C", LC_ALL, "C");		 /* reset */
 	test_setlocale(NULL, LC_CTYPE, "fr_FR.invalid"); /* set */
 	test_setlocale("C", LC_CTYPE, NULL);
 	test_MB_CUR_MAX(1);

@@ -74,13 +74,13 @@
  * Autoconfiguration information.
  */
 
-#include <machine/bus.h>
 #include <dev/sbus/sbusvar.h>
+#include <machine/bus.h>
 
 /* This is used to map device classes to IPLs */
 struct intrmap {
-	char	*in_class;
-	int	in_lev;
+	char *in_class;
+	int   in_lev;
 };
 extern struct intrmap intrmap[];
 
@@ -91,69 +91,69 @@ extern struct intrmap intrmap[];
 
 /* Device register space description */
 struct upa_reg {
-	int64_t	ur_paddr;
-	int64_t	ur_len;
+	int64_t ur_paddr;
+	int64_t ur_len;
 };
 
-/* 
- * Attach arguments presented by mainbus_attach() 
+/*
+ * Attach arguments presented by mainbus_attach()
  *
  * Large fields first followed by smaller ones to minimize stack space used.
  */
 struct mainbus_attach_args {
-	bus_space_tag_t	ma_bustag;	/* parent bus tag */
+	bus_space_tag_t ma_bustag; /* parent bus tag */
 	bus_dma_tag_t	ma_dmatag;
-	char		*ma_name;	/* PROM node name */
-	struct upa_reg	*ma_reg;	/* "reg" properties */
-	u_int		*ma_address;	/* "address" properties -- 32 bits */
-	u_int		*ma_interrupts;	/* "interrupts" properties */
-	int		ma_upaid;	/* UPA bus ID */
-	int		ma_node;	/* PROM handle */
-	int		ma_nreg;	/* Counts for those properties */
+	char	       *ma_name;       /* PROM node name */
+	struct upa_reg *ma_reg;	       /* "reg" properties */
+	u_int	       *ma_address;    /* "address" properties -- 32 bits */
+	u_int	       *ma_interrupts; /* "interrupts" properties */
+	int		ma_upaid;      /* UPA bus ID */
+	int		ma_node;       /* PROM handle */
+	int		ma_nreg;       /* Counts for those properties */
 	int		ma_naddress;
 	int		ma_ninterrupts;
-	int		ma_pri;		/* priority (IPL) */
+	int		ma_pri; /* priority (IPL) */
 };
 
 /*
  * length; the others convert or make some other guarantee.
  */
-long	getproplen(int node, char *name);
-int	getprop(int, char *, size_t, int *, void **);
-char	*getpropstring(int node, char *name);
-int	getpropint(int node, char *name, int deflt);
-int	getpropspeed(int node, char *name);
+long  getproplen(int node, char *name);
+int   getprop(int, char *, size_t, int *, void **);
+char *getpropstring(int node, char *name);
+int   getpropint(int node, char *name, int deflt);
+int   getpropspeed(int node, char *name);
 
 /* Frequently used options node */
 extern int optionsnode;
 
-	/* new interfaces: */
-char	*getpropstringA(int, char *, char *);
+/* new interfaces: */
+char *getpropstringA(int, char *, char *);
 
 /*
  * `clockfreq' produces a printable representation of a clock frequency
  * (this is just a frill).
  */
-char	*clockfreq(long freq);
+char *clockfreq(long freq);
 
 /* Openprom V2 style boot path */
 struct device;
 struct bootpath {
-	int	node;
-	char	name[16];	/* name of this node */
-	long	val[3];		/* up to three optional values */
-	struct device *dev;	/* device that recognised this component */
+	int	       node;
+	char	       name[16]; /* name of this node */
+	long	       val[3];	 /* up to three optional values */
+	struct device *dev;	 /* device that recognised this component */
 };
-struct bootpath	*bootpath_store(int, struct bootpath *);
+struct bootpath *bootpath_store(int, struct bootpath *);
 
-void	bootstrap(int);
-int	firstchild(int);
-int	nextsibling(int);
-void	callrom(void);
+void	       bootstrap(int);
+int	       firstchild(int);
+int	       nextsibling(int);
+void	       callrom(void);
 struct device *getdevunit(const char *, int);
-int	romgetcursoraddr(int **, int **);
-int	findroot(void);
-int	findnode(int, const char *);
-int	checkstatus(int);
-int	node_has_property(int, const char *);
-void	device_register(struct device *, void *);
+int	       romgetcursoraddr(int **, int **);
+int	       findroot(void);
+int	       findnode(int, const char *);
+int	       checkstatus(int);
+int	       node_has_property(int, const char *);
+void	       device_register(struct device *, void *);

@@ -34,10 +34,10 @@
  *
  */
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #include <unistd.h>
 
 /*
@@ -48,16 +48,16 @@
 void *aligned_alloc(size_t, size_t);
 #endif
 
-#include "include/namespace.h"
 #include "hidden/stdlib.h"
+#include "include/namespace.h"
 #include "stdlib/atexit.h"
 
-void	handle_first(void);
-void	handle_middle(void);
-void	handle_last(void);
-void	handle_invalid(void *);
-void	handle_cleanup(void);
-void	handle_signal(int);
+void handle_first(void);
+void handle_middle(void);
+void handle_last(void);
+void handle_invalid(void *);
+void handle_cleanup(void);
+void handle_signal(int);
 
 static int counter;
 
@@ -66,9 +66,9 @@ main(int argc, char *argv[])
 {
 	int i;
 
-	if (argc != 2 || (strcmp(argv[1], "-valid") &&
-	    strcmp(argv[1], "-invalid-atexit") &&
-	    strcmp(argv[1], "-invalid-cleanup"))) {
+	if (argc != 2 ||
+	    (strcmp(argv[1], "-valid") && strcmp(argv[1], "-invalid-atexit") &&
+		strcmp(argv[1], "-invalid-cleanup"))) {
 		fprintf(stderr, "%s -valid/-invalid-atexit/-invalid-cleanup\n",
 		    argv[0]);
 		return (1);
@@ -135,7 +135,8 @@ handle_cleanup(void)
 void
 handle_invalid(void *arg)
 {
-	fprintf(stderr, "handle_invalid() THIS SHOULD HAVE SEGFAULTED INSTEAD!\n");
+	fprintf(
+	    stderr, "handle_invalid() THIS SHOULD HAVE SEGFAULTED INSTEAD!\n");
 }
 
 void

@@ -25,20 +25,19 @@
 
 #include "rthread.h"
 
-
 struct rthread_key {
-	int used;
+	int  used;
 	void (*destructor)(void *);
 };
 
 static struct rthread_key rkeys[PTHREAD_KEYS_MAX];
-static struct __cmtx rkeyslock = __CMTX_INITIALIZER();
+static struct __cmtx	  rkeyslock = __CMTX_INITIALIZER();
 
 int
-pthread_key_create(pthread_key_t *key, void (*destructor)(void*))
+pthread_key_create(pthread_key_t *key, void (*destructor)(void *))
 {
 	static int hint;
-	int i;
+	int	   i;
 
 	__cmtx_enter(&rkeyslock);
 	if (rkeys[hint].used) {
@@ -68,7 +67,7 @@ int
 pthread_key_delete(pthread_key_t key)
 {
 	struct rthread_storage *rs;
-	int rv = 0;
+	int			rv = 0;
 
 	if (key < 0 || key >= PTHREAD_KEYS_MAX)
 		return (EINVAL);
@@ -99,7 +98,7 @@ static struct rthread_storage *
 _rthread_findstorage(pthread_key_t key)
 {
 	struct rthread_storage *rs;
-	pthread_t self;
+	pthread_t		self;
 
 	if (!rkeys[key].used) {
 		rs = NULL;
@@ -163,7 +162,7 @@ void
 _rthread_tls_destructors(pthread_t thread)
 {
 	struct rthread_storage *rs;
-	int i;
+	int			i;
 
 	__cmtx_enter(&rkeyslock);
 	for (i = 0; i < PTHREAD_DESTRUCTOR_ITERATIONS; i++) {

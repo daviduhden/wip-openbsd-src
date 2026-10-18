@@ -34,36 +34,37 @@
 #include <sys/_lock.h>
 
 struct __mp_lock_cpu {
-	u_int			mplc_ticket;
-	u_int			mplc_depth;
+	u_int mplc_ticket;
+	u_int mplc_depth;
 };
 
 struct __mp_lock {
-	struct __mp_lock_cpu	mpl_cpus[MAXCPUS];
-	volatile u_int		mpl_ticket;
-	u_int			mpl_users;
+	struct __mp_lock_cpu mpl_cpus[MAXCPUS];
+	volatile u_int	     mpl_ticket;
+	u_int		     mpl_users;
 #ifdef WITNESS
-	struct lock_object	mpl_lock_obj;
+	struct lock_object mpl_lock_obj;
 #endif
 };
 
-void	___mp_lock_init(struct __mp_lock *, const struct lock_type *);
-void	__mp_lock(struct __mp_lock *);
-void	__mp_unlock(struct __mp_lock *);
-int	__mp_release_all(struct __mp_lock *);
-void	__mp_acquire_count(struct __mp_lock *, int);
-int	__mp_lock_held(struct __mp_lock *, struct cpu_info *);
+void ___mp_lock_init(struct __mp_lock *, const struct lock_type *);
+void __mp_lock(struct __mp_lock *);
+void __mp_unlock(struct __mp_lock *);
+int  __mp_release_all(struct __mp_lock *);
+void __mp_acquire_count(struct __mp_lock *, int);
+int  __mp_lock_held(struct __mp_lock *, struct cpu_info *);
 
 #ifdef WITNESS
 
-#define __mp_lock_init(mpl) do {					\
-	static const struct lock_type __lock_type = { .lt_name = #mpl };\
-	___mp_lock_init((mpl), &__lock_type);				\
-} while (0)
+#define __mp_lock_init(mpl)                                                    \
+	do {                                                                   \
+		static const struct lock_type __lock_type = {.lt_name = #mpl}; \
+		___mp_lock_init((mpl), &__lock_type);                          \
+	} while (0)
 
 #else /* WITNESS */
 
-#define __mp_lock_init(mpl)	___mp_lock_init((mpl), NULL)
+#define __mp_lock_init(mpl) ___mp_lock_init((mpl), NULL)
 
 #endif /* WITNESS */
 

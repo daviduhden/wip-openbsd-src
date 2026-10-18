@@ -34,7 +34,7 @@ int
 wctob(wint_t c)
 {
 	mbstate_t mbs;
-	char buf[MB_LEN_MAX];
+	char	  buf[MB_LEN_MAX];
 
 	memset(&mbs, 0, sizeof(mbs));
 	if (c == WEOF || wcrtomb(buf, c, &mbs) != 1)

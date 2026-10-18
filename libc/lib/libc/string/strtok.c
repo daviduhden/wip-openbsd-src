@@ -42,8 +42,8 @@ char *
 strtok_r(char *s, const char *delim, char **last)
 {
 	const char *spanp;
-	int c, sc;
-	char *tok;
+	int	    c, sc;
+	char	   *tok;
 
 	if (s == NULL && (s = *last) == NULL)
 		return (NULL);
@@ -58,7 +58,7 @@ cont:
 			goto cont;
 	}
 
-	if (c == 0) {		/* no non-delimiter characters */
+	if (c == 0) { /* no non-delimiter characters */
 		*last = NULL;
 		return (NULL);
 	}

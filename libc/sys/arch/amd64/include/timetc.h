@@ -18,7 +18,7 @@
 #ifndef _MACHINE_TIMETC_H_
 #define _MACHINE_TIMETC_H_
 
-#define TC_TSC_LFENCE	1
-#define TC_TSC_RDTSCP	2
+#define TC_TSC_LFENCE 1
+#define TC_TSC_RDTSCP 2
 
-#endif	/* _MACHINE_TIMETC_H_ */
+#endif /* _MACHINE_TIMETC_H_ */

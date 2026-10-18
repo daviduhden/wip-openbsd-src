@@ -22,22 +22,21 @@ __digits10(unsigned int num)
 static int
 __itoa(int num, int sign, char *buffer, size_t start, size_t end)
 {
-	size_t pos;
+	size_t	     pos;
 	unsigned int a;
-	int neg;
+	int	     neg;
 
 	if (sign && num < 0) {
 		a = -num;
 		neg = 1;
-	}
-	else {
+	} else {
 		a = num;
 		neg = 0;
 	}
 
 	pos = start + __digits10(a);
 	if (neg)
-	    pos++;
+		pos++;
 
 	if (pos < end)
 		buffer[pos] = '\0';
@@ -54,12 +53,11 @@ __itoa(int num, int sign, char *buffer, size_t start, size_t end)
 	return 0;
 }
 
-
 static int
 __num2string(int num, int sign, int setid, char *buf, size_t buflen,
-    const char * const list[], size_t max, const char *def)
+    const char *const list[], size_t max, const char *def)
 {
-	int ret = 0;
+	int    ret = 0;
 	size_t len;
 
 	if (0 <= num && num < max) {
@@ -80,15 +78,15 @@ __num2string(int num, int sign, int setid, char *buf, size_t buflen,
 	return ret;
 }
 
-#define	UPREFIX	"Unknown error: "
+#define UPREFIX "Unknown error: "
 
 int
 strerror_r(int errnum, char *strerrbuf, size_t buflen)
 {
 	int ret_errno;
 
-	ret_errno = __num2string(errnum, 1, 1, strerrbuf, buflen,
-	    sys_errlist, sys_nerr, UPREFIX);
+	ret_errno = __num2string(
+	    errnum, 1, 1, strerrbuf, buflen, sys_errlist, sys_nerr, UPREFIX);
 
 	if (ret_errno)
 		errno = ret_errno;
@@ -101,7 +99,6 @@ DEF_WEAK(strerror_r);
 char *
 __strsignal(int num, char *buf)
 {
-	__num2string(num, 0, 2, buf, NL_TEXTMAX, sys_siglist, NSIG,
-	    USIGPREFIX);
+	__num2string(num, 0, 2, buf, NL_TEXTMAX, sys_siglist, NSIG, USIGPREFIX);
 	return buf;
 }

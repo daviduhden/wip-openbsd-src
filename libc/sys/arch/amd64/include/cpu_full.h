@@ -18,7 +18,8 @@
 #ifndef _MACHINE_CPU_FULL_H_
 #define _MACHINE_CPU_FULL_H_
 
-#include <sys/param.h>			/* offsetof, PAGE_SIZE */
+#include <sys/param.h> /* offsetof, PAGE_SIZE */
+
 #include <machine/segments.h>
 #include <machine/tss.h>
 
@@ -30,17 +31,18 @@ struct cpu_info_full {
 	/* page mapped kRO in u-k */
 	union {
 		struct {
-			struct x86_64_tss	uu_tss;
-			uint64_t		uu_gdt[GDT_SIZE / 8];
+			struct x86_64_tss uu_tss;
+			uint64_t	  uu_gdt[GDT_SIZE / 8];
 		} u_tssgdt;
-		char			u_align[PAGE_SIZE];
+		char u_align[PAGE_SIZE];
 	} cif_RO;
-#define cif_tss	cif_RO.u_tssgdt.uu_tss
-#define cif_gdt	cif_RO.u_tssgdt.uu_gdt
+#define cif_tss cif_RO.u_tssgdt.uu_tss
+#define cif_gdt cif_RO.u_tssgdt.uu_gdt
 
 	/* start of page mapped kRW in u-k */
-	uint64_t cif_tramp_stack[(PAGE_SIZE / 4
-		- offsetof(struct cpu_info, ci_PAGEALIGN)) / sizeof(uint64_t)];
+	uint64_t cif_tramp_stack[(PAGE_SIZE / 4 -
+				     offsetof(struct cpu_info, ci_PAGEALIGN)) /
+	    sizeof(uint64_t)];
 	uint64_t cif_dblflt_stack[(PAGE_SIZE / 4) / sizeof(uint64_t)];
 	uint64_t cif_nmi_stack[(2 * PAGE_SIZE / 4) / sizeof(uint64_t)];
 
@@ -53,8 +55,8 @@ struct cpu_info_full {
 
 /* tss, align shim, and gdt must fit in a page */
 CTASSERT(_ALIGN(sizeof(struct x86_64_tss)) +
-	 sizeof(struct mem_segment_descriptor) * (NGDT_MEM + 2*NGDT_SYS)
-	 < PAGE_SIZE);
+	sizeof(struct mem_segment_descriptor) * (NGDT_MEM + 2 * NGDT_SYS) <
+    PAGE_SIZE);
 
 /* verify expected alignment */
 CTASSERT(offsetof(struct cpu_info_full, cif_cpu.ci_PAGEALIGN) % PAGE_SIZE == 0);

@@ -16,12 +16,13 @@
  */
 
 #include <sys/stat.h>
+
 #include <stdlib.h>
 
 static int
 mkdtemp_cb(const char *path, int flags)
 {
-	return mkdir(path, S_IRUSR|S_IWUSR|S_IXUSR);
+	return mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
 char *

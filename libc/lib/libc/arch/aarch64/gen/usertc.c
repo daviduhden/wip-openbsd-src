@@ -22,11 +22,11 @@ static inline uint64_t
 agtimer_readcnt64_sun50i(void)
 {
 	uint64_t val;
-	int retry;
+	int	 retry;
 
 	__asm volatile("isb" ::: "memory");
 	for (retry = 0; retry < 150; retry++) {
-		__asm volatile("mrs %x0, CNTVCT_EL0" : "=r" (val));
+		__asm volatile("mrs %x0, CNTVCT_EL0" : "=r"(val));
 
 		if (((val + 1) & 0x1ff) > 1)
 			break;
@@ -45,7 +45,7 @@ agtimer_get_timecount_default(struct timecounter *tc)
 	 * only look at the low 32 bits here.
 	 */
 	__asm volatile("isb" ::: "memory");
-	__asm volatile("mrs %x0, CNTVCT_EL0" : "=r" (val));
+	__asm volatile("mrs %x0, CNTVCT_EL0" : "=r"(val));
 	return (val & 0xffffffff);
 }
 

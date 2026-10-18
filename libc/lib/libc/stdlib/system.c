@@ -30,24 +30,25 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+
 #include <errno.h>
+#include <paths.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <paths.h>
 
 int
 system(const char *command)
 {
-	pid_t pid, cpid;
+	pid_t		 pid, cpid;
 	struct sigaction intsave, quitsave, sa;
-	sigset_t mask, omask;
-	int pstat;
-	char *argp[] = {"sh", "-c", NULL, NULL};
+	sigset_t	 mask, omask;
+	int		 pstat;
+	char		*argp[] = {"sh", "-c", NULL, NULL};
 
-	if (!command)		/* just checking... */
-		return(1);
+	if (!command) /* just checking... */
+		return (1);
 
 	argp[2] = (char *)command;
 
@@ -57,10 +58,10 @@ system(const char *command)
 	sigaddset(&mask, SIGQUIT);
 	sigprocmask(SIG_BLOCK, &mask, &omask);
 	switch (cpid = vfork()) {
-	case -1:			/* error */
+	case -1: /* error */
 		sigprocmask(SIG_SETMASK, &omask, NULL);
-		return(-1);
-	case 0:				/* child */
+		return (-1);
+	case 0: /* child */
 		sigprocmask(SIG_SETMASK, &omask, NULL);
 		execve(_PATH_BSHELL, argp, environ);
 		_exit(127);

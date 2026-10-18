@@ -29,7 +29,9 @@
  */
 
 #include <sys/types.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <ctype.h>
 
@@ -42,12 +44,13 @@ in_addr_t
 inet_network(const char *cp)
 {
 	in_addr_t val, base, n;
-	u_char c;
+	u_char	  c;
 	in_addr_t parts[4], *pp = parts;
-	int i;
+	int	  i;
 
 again:
-	val = 0; base = 10;
+	val = 0;
+	base = 10;
 	if (*cp == '0')
 		base = 8, cp++;
 	if (*cp == 'x' || *cp == 'X')

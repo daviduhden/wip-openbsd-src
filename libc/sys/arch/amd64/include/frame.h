@@ -72,6 +72,7 @@
 #define _MACHINE_FRAME_H_
 
 #include <sys/signal.h>
+
 #include <machine/fpu.h>
 
 /*
@@ -82,62 +83,61 @@
  * Exception/Trap Stack Frame
  */
 struct trapframe {
-	int64_t	tf_rdi;		/* ordered by syscall args... */
-	int64_t	tf_rsi;
-	int64_t	tf_rdx;
+	int64_t tf_rdi; /* ordered by syscall args... */
+	int64_t tf_rsi;
+	int64_t tf_rdx;
 	int64_t tf_r10;
 	int64_t tf_r8;
-	int64_t tf_r9;		/* ...to here */
-	int64_t	tf_rcx;
+	int64_t tf_r9; /* ...to here */
+	int64_t tf_rcx;
 	int64_t tf_r11;
 	int64_t tf_r12;
 	int64_t tf_r13;
 	int64_t tf_r14;
 	int64_t tf_r15;
-	int64_t	tf_err;		/* not the hardware position */
-	int64_t	tf_rbx;
-	int64_t	tf_rax;
-	int64_t	tf_trapno;
-	int64_t	tf_rbp;	/* hardware puts err here, INTRENTRY() moves it up */
+	int64_t tf_err; /* not the hardware position */
+	int64_t tf_rbx;
+	int64_t tf_rax;
+	int64_t tf_trapno;
+	int64_t tf_rbp; /* hardware puts err here, INTRENTRY() moves it up */
 	/* below portion defined in hardware */
-	int64_t	tf_rip;
-	int64_t	tf_cs;
-	int64_t	tf_rflags;
+	int64_t tf_rip;
+	int64_t tf_cs;
+	int64_t tf_rflags;
 	/* These are pushed unconditionally on the x86-64 */
-	int64_t	tf_rsp;
-	int64_t	tf_ss;
+	int64_t tf_rsp;
+	int64_t tf_ss;
 };
 
 /*
  * Interrupt stack frame
  */
 struct intrframe {
-	int64_t	if_rdi;
-	int64_t	if_rsi;
-	int64_t	if_rdx;
+	int64_t if_rdi;
+	int64_t if_rsi;
+	int64_t if_rdx;
 	int64_t if_r10;
 	int64_t if_r8;
 	int64_t if_r9;
-	int64_t	if_rcx;
+	int64_t if_rcx;
 	int64_t if_r11;
 	int64_t if_r12;
 	int64_t if_r13;
 	int64_t if_r14;
 	int64_t if_r15;
-	int64_t	if_err;		/* IREENT_MAGIC if resume/recurse */
-	int64_t	if_rbx;
-	int64_t	if_rax;
-	int64_t if_ppl;		/* previous priority level */
-	int64_t	if_rbp;
+	int64_t if_err; /* IREENT_MAGIC if resume/recurse */
+	int64_t if_rbx;
+	int64_t if_rax;
+	int64_t if_ppl; /* previous priority level */
+	int64_t if_rbp;
 	/* below portion defined in hardware */
-	int64_t	if_rip;
-	int64_t	if_cs;
-	int64_t	if_rflags;
+	int64_t if_rip;
+	int64_t if_cs;
+	int64_t if_rflags;
 	/* These are pushed unconditionally on the x86-64 */
-	int64_t	if_rsp;
-	int64_t	if_ss;
+	int64_t if_rsp;
+	int64_t if_ss;
 };
-
 
 /*
  * The trampoline frame used on the kernel stack page which is present
@@ -145,30 +145,30 @@ struct intrframe {
  * the minimum for iretq operation.
  */
 struct iretq_frame {
-	int64_t	iretq_rip;
-	int64_t	iretq_cs;
-	int64_t	iretq_rflags;
-	int64_t	iretq_rsp;
-	int64_t	iretq_ss;
+	int64_t iretq_rip;
+	int64_t iretq_cs;
+	int64_t iretq_rflags;
+	int64_t iretq_rsp;
+	int64_t iretq_ss;
 };
 
 /*
  * Stack frame inside cpu_switch()
  */
 struct switchframe {
-	int64_t	sf_r15;
-	int64_t	sf_r14;
-	int64_t	sf_r13;
-	int64_t	sf_r12;
+	int64_t sf_r15;
+	int64_t sf_r14;
+	int64_t sf_r13;
+	int64_t sf_r12;
 	int64_t sf_rbp;
-	int64_t	sf_rbx;
-	int64_t	sf_rip;
+	int64_t sf_rbx;
+	int64_t sf_rip;
 };
 
 struct callframe {
-	struct callframe	*f_frame;
-	long			f_retaddr;
-	long			f_arg0;
+	struct callframe *f_frame;
+	long		  f_retaddr;
+	long		  f_arg0;
 };
 
-#endif  /* _MACHINE_FRAME_H_ */
+#endif /* _MACHINE_FRAME_H_ */

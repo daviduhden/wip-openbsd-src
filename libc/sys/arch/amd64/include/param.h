@@ -32,8 +32,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_MACHINE_PARAM_H_
-#define	_MACHINE_PARAM_H_
+#ifndef _MACHINE_PARAM_H_
+#define _MACHINE_PARAM_H_
 
 #ifdef _KERNEL
 #ifdef _LOCORE
@@ -43,35 +43,35 @@
 #endif
 #endif
 
-#define	_MACHINE	amd64
-#define	MACHINE		"amd64"
-#define	_MACHINE_ARCH	amd64
-#define	MACHINE_ARCH	"amd64"
-#define	MID_MACHINE	MID_AMD64
+#define _MACHINE amd64
+#define MACHINE "amd64"
+#define _MACHINE_ARCH amd64
+#define MACHINE_ARCH "amd64"
+#define MID_MACHINE MID_AMD64
 
-#define	PAGE_SHIFT	12
-#define	PAGE_SIZE	(1 << PAGE_SHIFT)
-#define	PAGE_MASK	(PAGE_SIZE - 1)
+#define PAGE_SHIFT 12
+#define PAGE_SIZE (1 << PAGE_SHIFT)
+#define PAGE_MASK (PAGE_SIZE - 1)
 
-#define	KERNBASE	0xffffffff80000000	/* start of kernel virtual space */
+#define KERNBASE 0xffffffff80000000 /* start of kernel virtual space */
 
 #ifdef _KERNEL
 
-#define	KERNTEXTOFF	(KERNBASE+0x1000000)	/* start of kernel text */
+#define KERNTEXTOFF (KERNBASE + 0x1000000) /* start of kernel text */
 
-#define	NBPG		PAGE_SIZE		/* bytes/page */
-#define	PGSHIFT		PAGE_SHIFT		/* LOG2(PAGE_SIZE) */
-#define	PGOFSET		PAGE_MASK		/* byte offset into page */
+#define NBPG PAGE_SIZE	   /* bytes/page */
+#define PGSHIFT PAGE_SHIFT /* LOG2(PAGE_SIZE) */
+#define PGOFSET PAGE_MASK  /* byte offset into page */
 
-#define	UPAGES		6			/* pages of u-area */
-#define	USPACE		(UPAGES * PAGE_SIZE)	/* total size of u-area */
-#define	USPACE_ALIGN	0			/* u-area alignment 0-none */
+#define UPAGES 6		    /* pages of u-area */
+#define USPACE (UPAGES * PAGE_SIZE) /* total size of u-area */
+#define USPACE_ALIGN 0		    /* u-area alignment 0-none */
 #define __HAVE_USPACE_GUARD
 
-#define	NMBCLUSTERS	(256 * 1024)		/* max cluster allocation */
+#define NMBCLUSTERS (256 * 1024) /* max cluster allocation */
 
-#ifndef	MSGBUFSIZE
-#define	MSGBUFSIZE	(32 * PAGE_SIZE)	/* default message buffer size */
+#ifndef MSGBUFSIZE
+#define MSGBUFSIZE (32 * PAGE_SIZE) /* default message buffer size */
 #endif
 
 #define __HAVE_ACPI

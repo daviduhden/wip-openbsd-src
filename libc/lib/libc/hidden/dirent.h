@@ -16,12 +16,12 @@
  */
 
 #ifndef _LIBC_DIRENT_H_
-#define	_LIBC_DIRENT_H_
+#define _LIBC_DIRENT_H_
 
 #include_next <dirent.h>
 
 __BEGIN_HIDDEN_DECLS
-DIR	*__fdopendir(int fd);
+DIR *__fdopendir(int fd);
 __END_HIDDEN_DECLS
 
 PROTO_DEPRECATED(alphasort);

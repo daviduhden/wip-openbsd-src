@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <db.h>
 #include <dirent.h>
@@ -37,25 +37,26 @@
 #include <limits.h>
 #include <paths.h>
 #include <stdbool.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 static char *
 devname_nodb(dev_t dev, mode_t type)
 {
-	static char buf[NAME_MAX + 1];
-	char *name = NULL;
+	static char    buf[NAME_MAX + 1];
+	char	      *name = NULL;
 	struct dirent *dp;
-	struct stat sb;
-	DIR *dirp;
+	struct stat    sb;
+	DIR	      *dirp;
 
 	if ((dirp = opendir(_PATH_DEV)) == NULL)
 		return (NULL);
 	while ((dp = readdir(dirp)) != NULL) {
 		if (dp->d_type != DT_UNKNOWN && DTTOIF(dp->d_type) != type)
 			continue;
-		if (fstatat(dirfd(dirp), dp->d_name, &sb, AT_SYMLINK_NOFOLLOW)
-		    || sb.st_rdev != dev || (sb.st_mode & S_IFMT) != type)
+		if (fstatat(
+			dirfd(dirp), dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) ||
+		    sb.st_rdev != dev || (sb.st_mode & S_IFMT) != type)
 			continue;
 		strlcpy(buf, dp->d_name, sizeof(buf));
 		name = buf;
@@ -73,13 +74,13 @@ devname_nodb(dev_t dev, mode_t type)
 char *
 devname(dev_t dev, mode_t type)
 {
-	static DB *db;
+	static DB  *db;
 	static bool failure;
 	struct {
 		mode_t type;
-		dev_t dev;
+		dev_t  dev;
 	} bkey;
-	DBT data, key;
+	DBT   data, key;
 	char *name = NULL;
 
 	if (!db && !failure) {

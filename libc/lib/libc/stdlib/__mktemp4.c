@@ -21,12 +21,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TEMPCHARS	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-#define NUM_CHARS	(sizeof(TEMPCHARS) - 1)
-#define MIN_X		6
+#define TEMPCHARS                                                              \
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+#define NUM_CHARS (sizeof(TEMPCHARS) - 1)
+#define MIN_X 6
 
 #ifndef nitems
-#define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
+#define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
 /*
@@ -37,11 +38,11 @@
 int
 __mktemp4(char *path, int slen, int flags, int (*cb)(const char *, int))
 {
-	char *start, *cp, *ep;
-	const char tempchars[] = TEMPCHARS;
+	char	    *start, *cp, *ep;
+	const char   tempchars[] = TEMPCHARS;
 	unsigned int tries;
-	size_t len;
-	int ret;
+	size_t	     len;
+	int	     ret;
 
 	len = strlen(path);
 	if (len < MIN_X || slen < 0 || (size_t)slen > len - MIN_X) {
@@ -62,7 +63,7 @@ __mktemp4(char *path, int slen, int flags, int (*cb)(const char *, int))
 		cp = start;
 		do {
 			unsigned short rbuf[16];
-			unsigned int i;
+			unsigned int   i;
 
 			/*
 			 * Avoid lots of arc4random() calls by using

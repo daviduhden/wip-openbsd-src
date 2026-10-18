@@ -1,5 +1,7 @@
-/*	$OpenBSD: loadfile_machdep.h,v 1.9 2019/05/28 04:51:26 mlarkin Exp $	*/
-/*	$NetBSD: loadfile_machdep.h,v 1.1 1999/04/29 03:17:12 tsubai Exp $	*/
+/*	$OpenBSD: loadfile_machdep.h,v 1.9 2019/05/28 04:51:26 mlarkin Exp $
+ */
+/*	$NetBSD: loadfile_machdep.h,v 1.1 1999/04/29 03:17:12 tsubai Exp $
+ */
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -37,25 +39,23 @@
 /* Keep a default ELFSIZE */
 #define ELFSIZE 64
 
-#define LOAD_KERNEL		LOAD_ALL
-#define COUNT_KERNEL		COUNT_ALL
+#define LOAD_KERNEL LOAD_ALL
+#define COUNT_KERNEL COUNT_ALL
 
 #ifdef EFIBOOT
-extern u_long			efi_loadaddr;
-#define LOADADDR(a)		(((((u_long)(a)) + offset)&0xfffffff) + \
-				    efi_loadaddr)
+extern u_long efi_loadaddr;
+#define LOADADDR(a) (((((u_long)(a)) + offset) & 0xfffffff) + efi_loadaddr)
 #else
-#define LOADADDR(a)		((a) + offset)
+#define LOADADDR(a) ((a) + offset)
 #endif
-#define ALIGNENTRY(a)		((u_long)(a))
-#define READ(f, b, c)		read((f), (void *)LOADADDR(b), (c))
-#define BCOPY(s, d, c)		memcpy((void *)LOADADDR(d), (void *)(s), (c))
-#define BZERO(d, c)		memset((void *)LOADADDR(d), 0, (c))
-#define	WARN(a)			(void)(printf a, \
-				    printf((errno ? ": %s\n" : "\n"), \
-				    strerror(errno)))
-#define PROGRESS(a)		(void) printf a
-#define ALLOC(a)		alloc(a)
-#define FREE(a, b)		free(a, b)
+#define ALIGNENTRY(a) ((u_long)(a))
+#define READ(f, b, c) read((f), (void *)LOADADDR(b), (c))
+#define BCOPY(s, d, c) memcpy((void *)LOADADDR(d), (void *)(s), (c))
+#define BZERO(d, c) memset((void *)LOADADDR(d), 0, (c))
+#define WARN(a)                                                                \
+	(void)(printf a, printf((errno ? ": %s\n" : "\n"), strerror(errno)))
+#define PROGRESS(a) (void)printf a
+#define ALLOC(a) alloc(a)
+#define FREE(a, b) free(a, b)
 
 void run_loadfile(uint64_t *, int);

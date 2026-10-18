@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 #include <sys/mman.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <tib.h>
@@ -41,11 +42,10 @@
 #include "thread_private.h"
 
 struct atexit *__atexit;
-static int restartloop;
+static int     restartloop;
 
 /* define and initialize the list */
 struct atfork_listhead _atfork_list = TAILQ_HEAD_INITIALIZER(_atfork_list);
-
 
 /*
  * Function pointers are stored in a linked list of pages. The list
@@ -67,10 +67,10 @@ struct atfork_listhead _atfork_list = TAILQ_HEAD_INITIALIZER(_atfork_list);
 int
 __cxa_atexit(void (*func)(void *), void *arg, void *dso)
 {
-	struct atexit *p;
+	struct atexit	 *p;
 	struct atexit_fn *fnp;
-	int pgsize = getpagesize();
-	int ret = -1;
+	int		  pgsize = getpagesize();
+	int		  ret = -1;
 
 	if (pgsize < sizeof(*p))
 		return (-1);
@@ -144,10 +144,10 @@ _thread_finalize(void)
 void
 __cxa_finalize(void *dso)
 {
-	struct atexit *p, *q;
+	struct atexit	*p, *q;
 	struct atexit_fn fn;
-	int n, pgsize = getpagesize();
-	static int call_depth;
+	int		 n, pgsize = getpagesize();
+	static int	 call_depth;
 
 	if (dso == NULL)
 		_thread_finalize();
@@ -160,9 +160,9 @@ restart:
 	for (p = __atexit; p != NULL; p = p->next) {
 		for (n = p->ind; --n >= 0;) {
 			if (p->fns[n].fn_ptr == NULL)
-				continue;	/* already called */
+				continue; /* already called */
 			if (dso != NULL && dso != p->fns[n].fn_dso)
-				continue;	/* wrong DSO */
+				continue; /* wrong DSO */
 
 			/*
 			 * Mark handler as having been already called to avoid
@@ -189,7 +189,7 @@ restart:
 	 * we don't unmap things prematurely if called recursively.
 	 */
 	if (dso == NULL && call_depth == 0) {
-		for (p = __atexit; p != NULL; ) {
+		for (p = __atexit; p != NULL;) {
 			q = p;
 			p = p->next;
 			munmap(q, pgsize);
@@ -207,12 +207,11 @@ restart:
 
 		_ATFORK_LOCK();
 		TAILQ_FOREACH_SAFE(af, &_atfork_list, fn_next, afnext)
-			if (af->fn_dso == dso) {
-				TAILQ_REMOVE(&_atfork_list, af, fn_next);
-				free(af);
-			}
+		if (af->fn_dso == dso) {
+			TAILQ_REMOVE(&_atfork_list, af, fn_next);
+			free(af);
+		}
 		_ATFORK_UNLOCK();
-
 	}
 }
 DEF_STRONG(__cxa_finalize);
@@ -224,7 +223,7 @@ void
 __atexit_register_cleanup(void (*func)(void))
 {
 	struct atexit *p;
-	int pgsize = getpagesize();
+	int	       pgsize = getpagesize();
 
 	if (pgsize < sizeof(*p))
 		return;

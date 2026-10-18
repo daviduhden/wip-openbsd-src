@@ -31,66 +31,73 @@ THIS SOFTWARE.
 
 #include "gdtoaimp.h"
 
- void
+void
 #ifdef KR_headers
-ULtod(L, bits, exp, k) ULong *L; ULong *bits; Long exp; int k;
+       ULtod(L, bits, exp, k) ULong *L;
+ULong *bits;
+Long   exp;
+int    k;
 #else
 ULtod(ULong *L, ULong *bits, Long exp, int k)
 #endif
 {
-	switch(k & STRTOG_Retmask) {
-	  case STRTOG_NoNumber:
-	  case STRTOG_Zero:
+	switch (k & STRTOG_Retmask) {
+	case STRTOG_NoNumber:
+	case STRTOG_Zero:
 		L[0] = L[1] = 0;
 		break;
 
-	  case STRTOG_Denormal:
+	case STRTOG_Denormal:
 		L[_1] = bits[0];
 		L[_0] = bits[1];
 		break;
 
-	  case STRTOG_Normal:
-	  case STRTOG_NaNbits:
+	case STRTOG_Normal:
+	case STRTOG_NaNbits:
 		L[_1] = bits[0];
 		L[_0] = (bits[1] & ~0x100000) | ((exp + 0x3ff + 52) << 20);
 		break;
 
-	  case STRTOG_NoMemory:
+	case STRTOG_NoMemory:
 		errno = ERANGE;
 		/* FALLTHROUGH */
-	  case STRTOG_Infinite:
+	case STRTOG_Infinite:
 		L[_0] = 0x7ff00000;
 		L[_1] = 0;
 		break;
 
-	  case STRTOG_NaN:
+	case STRTOG_NaN:
 		L[0] = d_QNAN0;
 		L[1] = d_QNAN1;
-	  }
+	}
 	if (k & STRTOG_Neg)
 		L[_0] |= 0x80000000L;
-	}
+}
 
- int
+int
 #ifdef KR_headers
-strtord(s, sp, rounding, d) CONST char *s; char **sp; int rounding; double *d;
+strtord(s, sp, rounding, d)
+CONST char *s;
+char	  **sp;
+int	    rounding;
+double	   *d;
 #else
 strtord(CONST char *s, char **sp, int rounding, double *d)
 #endif
 {
-	static FPI fpi0 = { 53, 1-1023-53+1, 2046-1023-53+1, 1, SI };
-	FPI *fpi, fpi1;
-	ULong bits[2];
-	Long exp;
-	int k;
+	static FPI fpi0 = {53, 1 - 1023 - 53 + 1, 2046 - 1023 - 53 + 1, 1, SI};
+	FPI	  *fpi, fpi1;
+	ULong	   bits[2];
+	Long	   exp;
+	int	   k;
 
 	fpi = &fpi0;
 	if (rounding != FPI_Round_near) {
 		fpi1 = fpi0;
 		fpi1.rounding = rounding;
 		fpi = &fpi1;
-		}
-	k = strtodg(s, sp, fpi, &exp, bits);
-	ULtod((ULong*)d, bits, exp, k);
-	return k;
 	}
+	k = strtodg(s, sp, fpi, &exp, bits);
+	ULtod((ULong *)d, bits, exp, k);
+	return k;
+}

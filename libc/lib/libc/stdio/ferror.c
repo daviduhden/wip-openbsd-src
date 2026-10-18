@@ -32,6 +32,7 @@
  */
 
 #include <stdio.h>
+
 #include "local.h"
 
 /*
@@ -42,7 +43,7 @@
 int
 ferror(FILE *fp)
 {
-	int     ret;
+	int ret;
 
 	FLOCKFILE(fp);
 	ret = __sferror(fp);

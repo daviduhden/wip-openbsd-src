@@ -17,13 +17,14 @@
 
 #include <fcntl.h>
 #include <stdarg.h>
+
 #include "cancel.h"
 
 int
 fcntl(int fd, int cmd, ...)
 {
 	va_list ap;
-	int ret;
+	int	ret;
 
 	va_start(ap, cmd);
 	switch (cmd) {
@@ -50,7 +51,7 @@ fcntl(int fd, int cmd, ...)
 		ret = HIDDEN(fcntl)(fd, cmd, va_arg(ap, struct flock *));
 		LEAVE_CANCEL_POINT(ret == -1);
 		break;
-	default:	/* should never happen? */
+	default: /* should never happen? */
 		ret = HIDDEN(fcntl)(fd, cmd, va_arg(ap, void *));
 		break;
 	}

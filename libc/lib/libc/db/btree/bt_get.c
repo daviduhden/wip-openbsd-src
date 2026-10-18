@@ -34,11 +34,11 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 
-#include <db.h>
 #include "btree.h"
 
 /*
@@ -57,8 +57,8 @@ int
 __bt_get(const DB *dbp, const DBT *key, DBT *data, u_int flags)
 {
 	BTREE *t;
-	EPG *e;
-	int exact, status;
+	EPG   *e;
+	int    exact, status;
 
 	t = dbp->internal;
 

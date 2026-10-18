@@ -44,8 +44,8 @@
 /* Pull in CC64FSZ and BIAS from frame.h */
 #include <machine/frame.h>
 
-#define	_C_LABEL(name)		name
-#define	_ASM_LABEL(name)	name
+#define _C_LABEL(name) name
+#define _ASM_LABEL(name) name
 
 #ifdef __PIC__
 /*
@@ -54,43 +54,61 @@
  * clobbering register TMP in the process. Using the temporary enables us
  * to work without a stack frame (doing so requires saving %o7) .
  */
-#define PIC_PROLOGUE(dest,tmp) \
-	sethi %hi(_GLOBAL_OFFSET_TABLE_-4),dest; \
-	rd %pc, tmp; \
-	or dest,%lo(_GLOBAL_OFFSET_TABLE_+4),dest; \
-	add dest,tmp,dest
+#define PIC_PROLOGUE(dest, tmp)                                                \
+	sethi % hi(_GLOBAL_OFFSET_TABLE_ - 4), dest;                           \
+	rd % pc, tmp;                                                          \
+	or dest, % lo(_GLOBAL_OFFSET_TABLE_ + 4), dest;                        \
+	add dest, tmp, dest
 #else
-#define PIC_PROLOGUE(dest,tmp)
+#define PIC_PROLOGUE(dest, tmp)
 #endif
 
-#define FTYPE(x)		.type x,@function
-#define OTYPE(x)		.type x,@object
+#define FTYPE(x) .type x, @function
+#define OTYPE(x) .type x, @object
 
-#define	_ENTRY_NB(name) \
-	.align 4; .proc 1; FTYPE(name); name:
-#define	_ENTRY(name)	.globl name; _ENTRY_NB(name)
+#define _ENTRY_NB(name)                                                        \
+	.align 4;                                                              \
+	.proc 1;                                                               \
+	FTYPE(name);                                                           \
+	name:
+#define _ENTRY(name)                                                           \
+	.globl name;                                                           \
+	_ENTRY_NB(name)
 
 #if defined(PROF) || defined(GPROF)
-#define _PROF_PROLOGUE \
-	.data; .align 8; 1: .uaword 0; .uaword 0; \
-	.text; save %sp,-CC64FSZ,%sp; sethi %hi(1b),%o0; call _mcount; \
-	or %o0,%lo(1b),%o0; restore
+#define _PROF_PROLOGUE                                                         \
+	.data;                                                                 \
+	.align 8;                                                              \
+	1 :.uaword 0;                                                          \
+	.uaword 0;                                                             \
+	.text;                                                                 \
+	save % sp, -CC64FSZ, % sp;                                             \
+	sethi % hi(1b), % o0;                                                  \
+	call _mcount;                                                          \
+	or % o0, % lo(1b), % o0;                                               \
+	restore
 #else
 #define _PROF_PROLOGUE
 #endif
 
-#define ENTRY(name)		_ENTRY(name); _PROF_PROLOGUE
-#define NENTRY(name)		_ENTRY(name)
-#define ENTRY_NB(name)		_ENTRY_NB(name); _PROF_PROLOGUE
-#define	ASENTRY(name)		_ENTRY(name); _PROF_PROLOGUE
-#define	FUNC(name)		ASENTRY(name)
-#define	END(y)			.size y, . - y
+#define ENTRY(name)                                                            \
+	_ENTRY(name);                                                          \
+	_PROF_PROLOGUE
+#define NENTRY(name) _ENTRY(name)
+#define ENTRY_NB(name)                                                         \
+	_ENTRY_NB(name);                                                       \
+	_PROF_PROLOGUE
+#define ASENTRY(name)                                                          \
+	_ENTRY(name);                                                          \
+	_PROF_PROLOGUE
+#define FUNC(name) ASENTRY(name)
+#define END(y) .size y, .- y
 
-#define	STRONG_ALIAS(alias,sym)						\
-	.global alias;							\
+#define STRONG_ALIAS(alias, sym)                                               \
+	.global alias;                                                         \
 	alias = sym
-#define	WEAK_ALIAS(alias,sym)						\
-	.weak alias;							\
+#define WEAK_ALIAS(alias, sym)                                                 \
+	.weak alias;                                                           \
 	alias = sym
 
 #endif /* _MACHINE_ASM_H_ */

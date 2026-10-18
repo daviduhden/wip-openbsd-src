@@ -17,14 +17,15 @@
  */
 
 #include <sys/types.h>
+
 #include <float.h>
 #include <ieeefp.h>
 
 static const int rndmap[] = {
-	1,	/* round to nearest */
-	0,	/* round to zero */
-	2,	/* round to positive infinity */
-	3	/* round to negative infinity */
+    1, /* round to nearest */
+    0, /* round to zero */
+    2, /* round to positive infinity */
+    3  /* round to negative infinity */
 };
 
 int
@@ -33,7 +34,7 @@ __flt_rounds()
 #if !defined(SOFTFLOAT)
 	register_t fpscr;
 
-	__asm__ volatile ("sts fpscr, %0" : "=r" (fpscr));
+	__asm__ volatile("sts fpscr, %0" : "=r"(fpscr));
 	return rndmap[fpscr & 0x03];
 #else
 	return rndmap[fpgetround()];

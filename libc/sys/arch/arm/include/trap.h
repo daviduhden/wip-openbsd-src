@@ -57,13 +57,13 @@
  * instructions that look like 0x.7f...f. .
  */
 
-#define GDB_BREAKPOINT		0xe6000011	/* Used by GDB 4.x */
-#define IPKDB_BREAKPOINT	0xe6000010	/* Used by IPKDB */
-#define GDB5_BREAKPOINT		0xe7ffdefe	/* Used by GDB 5.0 */
-#define KERNEL_BREAKPOINT	0xe7ffffff	/* Used by DDB */
+#define GDB_BREAKPOINT 0xe6000011    /* Used by GDB 4.x */
+#define IPKDB_BREAKPOINT 0xe6000010  /* Used by IPKDB */
+#define GDB5_BREAKPOINT 0xe7ffdefe   /* Used by GDB 5.0 */
+#define KERNEL_BREAKPOINT 0xe7ffffff /* Used by DDB */
 
-#define KBPT_ASM		".word 0xe7ffdefe"
+#define KBPT_ASM ".word 0xe7ffdefe"
 
-#define USER_BREAKPOINT		GDB_BREAKPOINT
+#define USER_BREAKPOINT GDB_BREAKPOINT
 
-#define T_FAULT			1
+#define T_FAULT 1

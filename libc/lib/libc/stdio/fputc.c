@@ -31,8 +31,8 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
 
 int
 fputc(int c, FILE *fp)

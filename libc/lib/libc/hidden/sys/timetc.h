@@ -21,7 +21,6 @@
 #define _LIBC
 #include <sys/types.h>
 #include <sys/time.h>
-
 #include_next <sys/timetc.h>
 
 __BEGIN_HIDDEN_DECLS

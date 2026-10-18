@@ -19,44 +19,44 @@
 #define _LIBC_CTYPE_H_
 
 /* sigh: predeclare and rename the functions which we'll declare inline */
-__only_inline int	isalnum(int _c);
-__only_inline int	isalpha(int _c);
-__only_inline int	iscntrl(int _c);
-__only_inline int	isdigit(int _c);
-__only_inline int	isgraph(int _c);
-__only_inline int	islower(int _c);
-__only_inline int	isprint(int _c);
-__only_inline int	ispunct(int _c);
-__only_inline int	isspace(int _c);
-__only_inline int	isupper(int _c);
-__only_inline int	isxdigit(int _c);
-__only_inline int	tolower(int _c);
-__only_inline int	toupper(int _c);
-__only_inline int	isblank(int _c);
-__only_inline int	isascii(int _c);
-__only_inline int	toascii(int _c);
-__only_inline int	_tolower(int _c);
-__only_inline int	_toupper(int _c);
+__only_inline int isalnum(int _c);
+__only_inline int isalpha(int _c);
+__only_inline int iscntrl(int _c);
+__only_inline int isdigit(int _c);
+__only_inline int isgraph(int _c);
+__only_inline int islower(int _c);
+__only_inline int isprint(int _c);
+__only_inline int ispunct(int _c);
+__only_inline int isspace(int _c);
+__only_inline int isupper(int _c);
+__only_inline int isxdigit(int _c);
+__only_inline int tolower(int _c);
+__only_inline int toupper(int _c);
+__only_inline int isblank(int _c);
+__only_inline int isascii(int _c);
+__only_inline int toascii(int _c);
+__only_inline int _tolower(int _c);
+__only_inline int _toupper(int _c);
 
-#ifndef	_LOCALE_T_DEFINED_
-#define	_LOCALE_T_DEFINED_
-typedef void	*locale_t;
+#ifndef _LOCALE_T_DEFINED_
+#define _LOCALE_T_DEFINED_
+typedef void *locale_t;
 #endif
 
-__only_inline int	isalnum_l(int _c, locale_t _l);
-__only_inline int	isalpha_l(int _c, locale_t _l);
-__only_inline int	iscntrl_l(int _c, locale_t _l);
-__only_inline int	isdigit_l(int _c, locale_t _l);
-__only_inline int	isgraph_l(int _c, locale_t _l);
-__only_inline int	islower_l(int _c, locale_t _l);
-__only_inline int	isprint_l(int _c, locale_t _l);
-__only_inline int	ispunct_l(int _c, locale_t _l);
-__only_inline int	isspace_l(int _c, locale_t _l);
-__only_inline int	isupper_l(int _c, locale_t _l);
-__only_inline int	isxdigit_l(int _c, locale_t _l);
-__only_inline int	tolower_l(int _c, locale_t _l);
-__only_inline int	toupper_l(int _c, locale_t _l);
-__only_inline int	isblank_l(int _c, locale_t _l);
+__only_inline int isalnum_l(int _c, locale_t _l);
+__only_inline int isalpha_l(int _c, locale_t _l);
+__only_inline int iscntrl_l(int _c, locale_t _l);
+__only_inline int isdigit_l(int _c, locale_t _l);
+__only_inline int isgraph_l(int _c, locale_t _l);
+__only_inline int islower_l(int _c, locale_t _l);
+__only_inline int isprint_l(int _c, locale_t _l);
+__only_inline int ispunct_l(int _c, locale_t _l);
+__only_inline int isspace_l(int _c, locale_t _l);
+__only_inline int isupper_l(int _c, locale_t _l);
+__only_inline int isxdigit_l(int _c, locale_t _l);
+__only_inline int tolower_l(int _c, locale_t _l);
+__only_inline int toupper_l(int _c, locale_t _l);
+__only_inline int isblank_l(int _c, locale_t _l);
 
 PROTO_NORMAL(isalnum);
 PROTO_DEPRECATED(isalnum_l);

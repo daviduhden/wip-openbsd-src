@@ -13,6 +13,7 @@
  */
 
 #include <math.h>
+
 #include "rand48.h"
 
 double
@@ -22,9 +23,8 @@ drand48(void)
 		unsigned short rseed[3];
 
 		arc4random_buf(rseed, sizeof rseed);
-		return ldexp((double) rseed[0], -48) +
-		       ldexp((double) rseed[1], -32) +
-		       ldexp((double) rseed[2], -16);
+		return ldexp((double)rseed[0], -48) +
+		    ldexp((double)rseed[1], -32) + ldexp((double)rseed[2], -16);
 	}
 	return erand48(__rand48_seed);
 }

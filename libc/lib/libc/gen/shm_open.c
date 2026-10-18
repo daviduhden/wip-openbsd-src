@@ -32,7 +32,7 @@
 #define SHM_PATH_SIZE (5 + SHA256_DIGEST_STRING_LENGTH + 4)
 
 /* O_CLOEXEC, O_CLOFORK, and O_NOFOLLOW are extensions to POSIX */
-#define OK_FLAGS \
+#define OK_FLAGS                                                               \
 	(O_CREAT | O_EXCL | O_TRUNC | O_CLOEXEC | O_CLOFORK | O_NOFOLLOW)
 
 static void
@@ -47,12 +47,13 @@ makeshmpath(const char *origpath, char *shmpath, size_t len)
 int
 shm_open(const char *path, int flags, mode_t mode)
 {
-	char shmpath[SHM_PATH_SIZE];
+	char	    shmpath[SHM_PATH_SIZE];
 	struct stat sb;
-	int fd;
+	int	    fd;
 
-	if (((flags & O_ACCMODE) != O_RDONLY && (flags & O_ACCMODE) != O_RDWR)
-	    || (flags & ~(O_ACCMODE | OK_FLAGS))) {
+	if (((flags & O_ACCMODE) != O_RDONLY &&
+		(flags & O_ACCMODE) != O_RDWR) ||
+	    (flags & ~(O_ACCMODE | OK_FLAGS))) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -92,8 +93,8 @@ int
 shm_mkstemp(char *template)
 {
 	size_t templatelen;
-	char *t;
-	int i, fd;
+	char  *t;
+	int    i, fd;
 
 	templatelen = strlen(template);
 	t = malloc(templatelen + 1);
@@ -116,4 +117,3 @@ shm_mkstemp(char *template)
 	free(t);
 	return fd;
 }
-

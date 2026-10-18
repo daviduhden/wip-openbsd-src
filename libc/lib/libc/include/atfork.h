@@ -27,17 +27,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: /repoman/r/ncvs/src/lib/libc_r/uthread/uthread_atfork.c,v 1.1 2004/12/10 03:36:45 grog Exp $
+ * $FreeBSD: /repoman/r/ncvs/src/lib/libc_r/uthread/uthread_atfork.c,v 1.1
+ * 2004/12/10 03:36:45 grog Exp $
  */
 
 #include <sys/queue.h>
 
 struct atfork_fn {
 	TAILQ_ENTRY(atfork_fn) fn_next;
-	void	(*fn_prepare)(void);
-	void	(*fn_parent)(void);
-	void	(*fn_child)(void);
-	void	*fn_dso;
+	void  (*fn_prepare)(void);
+	void  (*fn_parent)(void);
+	void  (*fn_child)(void);
+	void *fn_dso;
 };
 
 __BEGIN_HIDDEN_DECLS

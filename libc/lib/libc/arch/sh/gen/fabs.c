@@ -18,6 +18,7 @@
 
 #if !defined(__SH4__) || defined(__SH4_NOFPU__)
 #include <sys/types.h>
+
 #include <machine/ieee.h>
 #endif /* !defined(__SH4__) || defined(__SH4_NOFPU__) */
 
@@ -27,7 +28,7 @@ double
 fabs(double d)
 {
 #if defined(__SH4__) && !defined(__SH4_NOFPU__)
-	__asm__ volatile("fabs %0" : "+f" (d));
+	__asm__ volatile("fabs %0" : "+f"(d));
 #else
 	struct ieee_double *p = (struct ieee_double *)&d;
 

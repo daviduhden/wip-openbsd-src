@@ -1,4 +1,5 @@
-/*	$OpenBSD: _atomic_lock.c,v 1.1 2017/08/15 06:13:24 guenther Exp $	*/
+/*	$OpenBSD: _atomic_lock.c,v 1.1 2017/08/15 06:13:24 guenther Exp $
+ */
 
 /*-
  * Copyright (c) 2002 The NetBSD Foundation, Inc.
@@ -36,11 +37,10 @@ _atomic_lock(volatile _atomic_lock_t *lock)
 {
 	_atomic_lock_t old;
 
-	__asm volatile(
-		"	tas.b	%0	\n"
-		"	mov	#0, %1	\n"
-		"	rotcl	%1	\n"
-		: "=m" (*lock), "=r" (old));
+	__asm volatile("	tas.b	%0	\n"
+		       "	mov	#0, %1	\n"
+		       "	rotcl	%1	\n"
+	    : "=m"(*lock), "=r"(old));
 
 	return (old == 0);
 }

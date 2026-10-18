@@ -31,14 +31,15 @@
  * SUCH DAMAGE.
  */
 
+#include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <errno.h>
-#include "local.h"
-#include "fvwrite.h"
 
-#define MUL_NO_OVERFLOW	(1UL << (sizeof(size_t) * 4))
+#include "fvwrite.h"
+#include "local.h"
+
+#define MUL_NO_OVERFLOW (1UL << (sizeof(size_t) * 4))
 
 /*
  * Write `count' objects (each size `size') from memory to the given file.
@@ -47,16 +48,16 @@
 size_t
 fwrite(const void *buf, size_t size, size_t count, FILE *fp)
 {
-	size_t n;
+	size_t	      n;
 	struct __suio uio;
 	struct __siov iov;
-	int ret;
+	int	      ret;
 
 	/*
 	 * Extension:  Catch integer overflow
 	 */
-	if ((size >= MUL_NO_OVERFLOW || count >= MUL_NO_OVERFLOW) &&
-	    size > 0 && SIZE_MAX / size < count) {
+	if ((size >= MUL_NO_OVERFLOW || count >= MUL_NO_OVERFLOW) && size > 0 &&
+	    SIZE_MAX / size < count) {
 		errno = EOVERFLOW;
 		fp->_flags |= __SERR;
 		return (0);

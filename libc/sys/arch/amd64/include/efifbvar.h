@@ -20,15 +20,15 @@
 #define _MACHINE_EFIFB_H_
 
 struct efifb_attach_args {
-	const char		*eaa_name;
+	const char *eaa_name;
 };
 
 struct pci_attach_args;
 
-int efifb_cnattach(void);
+int  efifb_cnattach(void);
 void efifb_cnremap(void);
-int efifb_is_console(struct pci_attach_args *);
-int efifb_is_primary(struct pci_attach_args *);
+int  efifb_is_console(struct pci_attach_args *);
+int  efifb_is_primary(struct pci_attach_args *);
 void efifb_detach(void);
 void efifb_reattach(void);
 

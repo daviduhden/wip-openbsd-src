@@ -45,11 +45,12 @@
 #endif
 
 #include <db.h>
+
+#include "extern.h"
 #include "hash.h"
 #include "page.h"
-#include "extern.h"
 
-#define MAXIMUM(a, b)	(((a) > (b)) ? (a) : (b))
+#define MAXIMUM(a, b) (((a) > (b)) ? (a) : (b))
 
 static int   alloc_segs(HTAB *, int);
 static int   flush_meta(HTAB *);
@@ -66,19 +67,23 @@ static int   hdestroy(HTAB *);
 static HTAB *init_hash(HTAB *, const char *, const HASHINFO *);
 static int   init_htab(HTAB *, int);
 #if BYTE_ORDER == LITTLE_ENDIAN
-static void  swap_header(HTAB *);
-static void  swap_header_copy(HASHHDR *, HASHHDR *);
+static void swap_header(HTAB *);
+static void swap_header_copy(HASHHDR *, HASHHDR *);
 #endif
 
 /* Fast arithmetic, relying on powers of 2, */
-#define MOD(x, y)		((x) & ((y) - 1))
+#define MOD(x, y) ((x) & ((y) - 1))
 
-#define RETURN_ERROR(ERR, LOC)	{ save_errno = ERR; goto LOC; }
+#define RETURN_ERROR(ERR, LOC)                                                 \
+	{                                                                      \
+		save_errno = ERR;                                              \
+		goto LOC;                                                      \
+	}
 
 /* Return values */
-#define	SUCCESS	 (0)
-#define	ERROR	(-1)
-#define	ABNORMAL (1)
+#define SUCCESS (0)
+#define ERROR (-1)
+#define ABNORMAL (1)
 
 #ifdef HASH_STATISTICS
 int hash_accesses, hash_collisions, hash_expansions, hash_overflows;
@@ -89,13 +94,13 @@ int hash_accesses, hash_collisions, hash_expansions, hash_overflows;
 
 DB *
 __hash_open(const char *file, int fd, int flags, int mode,
-    const HASHINFO *info,	/* Special directives for create */
-    int dflags)
+    const HASHINFO *info, /* Special directives for create */
+    int		    dflags)
 {
-	HTAB *hashp;
+	HTAB	   *hashp;
 	struct stat statbuf;
-	DB *dbp;
-	int bpages, hdrsize, new_table, nsegs, save_errno;
+	DB	   *dbp;
+	int	    bpages, hdrsize, new_table, nsegs, save_errno;
 
 	if ((flags & O_ACCMODE) == O_WRONLY) {
 		errno = EINVAL;
@@ -147,7 +152,7 @@ __hash_open(const char *file, int fd, int flags, int mode,
 		/* Verify file type, versions and hash function */
 		if (hashp->MAGIC != HASHMAGIC)
 			RETURN_ERROR(EFTYPE, error1);
-#define	OLDHASHVERSION	1
+#define OLDHASHVERSION 1
 		if (hashp->VERSION != HASHVERSION &&
 		    hashp->VERSION != OLDHASHVERSION)
 			RETURN_ERROR(EFTYPE, error1);
@@ -158,8 +163,8 @@ __hash_open(const char *file, int fd, int flags, int mode,
 		 * maximum bucket number, so the number of buckets is
 		 * max_bucket + 1.
 		 */
-		nsegs = (hashp->MAX_BUCKET + 1 + hashp->SGSIZE - 1) /
-			 hashp->SGSIZE;
+		nsegs =
+		    (hashp->MAX_BUCKET + 1 + hashp->SGSIZE - 1) / hashp->SGSIZE;
 		if (alloc_segs(hashp, nsegs))
 			/*
 			 * If alloc_segs fails, table will have been destroyed
@@ -168,7 +173,7 @@ __hash_open(const char *file, int fd, int flags, int mode,
 			return (NULL);
 		/* Read in bitmaps */
 		bpages = (hashp->SPARES[hashp->OVFL_POINT] +
-		    (hashp->BSIZE << BYTE_SHIFT) - 1) >>
+			     (hashp->BSIZE << BYTE_SHIFT) - 1) >>
 		    (hashp->BSHIFT + BYTE_SHIFT);
 
 		hashp->nmaps = bpages;
@@ -202,21 +207,16 @@ __hash_open(const char *file, int fd, int flags, int mode,
 
 #ifdef DEBUG
 	(void)fprintf(stderr,
-"%s\n%s%p\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%x\n%s%x\n%s%d\n%s%d\n",
-	    "init_htab:",
-	    "TABLE POINTER   ", hashp,
-	    "BUCKET SIZE     ", hashp->BSIZE,
-	    "BUCKET SHIFT    ", hashp->BSHIFT,
-	    "DIRECTORY SIZE  ", hashp->DSIZE,
-	    "SEGMENT SIZE    ", hashp->SGSIZE,
-	    "SEGMENT SHIFT   ", hashp->SSHIFT,
-	    "FILL FACTOR     ", hashp->FFACTOR,
-	    "MAX BUCKET      ", hashp->MAX_BUCKET,
-	    "OVFL POINT	     ", hashp->OVFL_POINT,
-	    "LAST FREED      ", hashp->LAST_FREED,
-	    "HIGH MASK       ", hashp->HIGH_MASK,
-	    "LOW  MASK       ", hashp->LOW_MASK,
-	    "NSEGS	     ", hashp->nsegs,
+	    "%s\n%s%p\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%"
+	    "s%x\n%s%x\n%s%d\n%s%d\n",
+	    "init_htab:", "TABLE POINTER   ", hashp, "BUCKET SIZE     ",
+	    hashp->BSIZE, "BUCKET SHIFT    ", hashp->BSHIFT, "DIRECTORY SIZE  ",
+	    hashp->DSIZE, "SEGMENT SIZE    ", hashp->SGSIZE, "SEGMENT SHIFT   ",
+	    hashp->SSHIFT, "FILL FACTOR     ", hashp->FFACTOR,
+	    "MAX BUCKET      ", hashp->MAX_BUCKET, "OVFL POINT	     ",
+	    hashp->OVFL_POINT, "LAST FREED      ", hashp->LAST_FREED,
+	    "HIGH MASK       ", hashp->HIGH_MASK, "LOW  MASK       ",
+	    hashp->LOW_MASK, "NSEGS	     ", hashp->nsegs,
 	    "NKEYS	     ", hashp->NKEYS);
 #endif
 #ifdef HASH_STATISTICS
@@ -238,7 +238,7 @@ static int
 hash_close(DB *dbp)
 {
 	HTAB *hashp;
-	int retval;
+	int   retval;
 
 	if (!dbp)
 		return (ERROR);
@@ -270,7 +270,7 @@ static HTAB *
 init_hash(HTAB *hashp, const char *file, const HASHINFO *info)
 {
 	struct stat statbuf;
-	int nelem;
+	int	    nelem;
 
 	nelem = 1;
 	hashp->NKEYS = 0;
@@ -283,7 +283,7 @@ init_hash(HTAB *hashp, const char *file, const HASHINFO *info)
 	hashp->FFACTOR = DEF_FFACTOR;
 	hashp->hash = __default_hash;
 	memset(hashp->SPARES, 0, sizeof(hashp->SPARES));
-	memset(hashp->BITMAPS, 0, sizeof (hashp->BITMAPS));
+	memset(hashp->BITMAPS, 0, sizeof(hashp->BITMAPS));
 
 	/* Fix bucket size to be optimal for file system */
 	if (file != NULL) {
@@ -356,8 +356,8 @@ init_htab(HTAB *hashp, int nelem)
 
 	hashp->MAX_BUCKET = hashp->LOW_MASK = nbuckets - 1;
 	hashp->HIGH_MASK = (nbuckets << 1) - 1;
-	hashp->HDRPAGES = ((MAXIMUM(sizeof(HASHHDR), MINHDRSIZE) - 1) >>
-	    hashp->BSHIFT) + 1;
+	hashp->HDRPAGES =
+	    ((MAXIMUM(sizeof(HASHHDR), MINHDRSIZE) - 1) >> hashp->BSHIFT) + 1;
 
 	nsegs = (nbuckets - 1) / hashp->SGSIZE + 1;
 	nsegs = 1 << __log2(nsegs);
@@ -383,16 +383,13 @@ hdestroy(HTAB *hashp)
 #ifdef HASH_STATISTICS
 	(void)fprintf(stderr, "hdestroy: accesses %ld collisions %ld\n",
 	    hash_accesses, hash_collisions);
-	(void)fprintf(stderr, "hdestroy: expansions %ld\n",
-	    hash_expansions);
-	(void)fprintf(stderr, "hdestroy: overflows %ld\n",
-	    hash_overflows);
+	(void)fprintf(stderr, "hdestroy: expansions %ld\n", hash_expansions);
+	(void)fprintf(stderr, "hdestroy: overflows %ld\n", hash_overflows);
 	(void)fprintf(stderr, "keys %ld maxp %d segmentcount %d\n",
 	    hashp->NKEYS, hashp->MAX_BUCKET, hashp->nsegs);
 
 	for (i = 0; i < NCACHED; i++)
-		(void)fprintf(stderr,
-		    "spares[%d] = %d\n", i, hashp->SPARES[i]);
+		(void)fprintf(stderr, "spares[%d] = %d\n", i, hashp->SPARES[i]);
 #endif
 	/*
 	 * Call on buffer manager to free buffers, and if required,
@@ -401,7 +398,7 @@ hdestroy(HTAB *hashp)
 	if (__buf_free(hashp, 1, hashp->save_file))
 		save_errno = errno;
 	if (hashp->dir) {
-		free(*hashp->dir);	/* Free initial segments */
+		free(*hashp->dir); /* Free initial segments */
 		/* Free extra segments */
 		while (hashp->exsegs--)
 			free(hashp->dir[--hashp->nsegs]);
@@ -483,12 +480,11 @@ flush_meta(HTAB *hashp)
 #endif
 	if ((wsize = pwrite(fp, whdrp, sizeof(HASHHDR), 0)) == -1)
 		return (-1);
-	else
-		if (wsize != sizeof(HASHHDR)) {
-			errno = EFTYPE;
-			hashp->err = errno;
-			return (-1);
-		}
+	else if (wsize != sizeof(HASHHDR)) {
+		errno = EFTYPE;
+		hashp->err = errno;
+		return (-1);
+	}
 	for (i = 0; i < NCACHED; i++)
 		if (hashp->mapp[i])
 			if (__put_page(hashp, (char *)hashp->mapp[i],
@@ -533,13 +529,13 @@ hash_put(const DB *dbp, DBT *key, const DBT *data, u_int32_t flag)
 		hashp->err = errno = EPERM;
 		return (ERROR);
 	}
-	return (hash_access(hashp, flag == R_NOOVERWRITE ?
-	    HASH_PUTNEW : HASH_PUT, (DBT *)key, (DBT *)data));
+	return (
+	    hash_access(hashp, flag == R_NOOVERWRITE ? HASH_PUTNEW : HASH_PUT,
+		(DBT *)key, (DBT *)data));
 }
 
 static int
-hash_delete(const DB *dbp, const DBT *key,
-    u_int32_t flag)		/* Ignored */
+hash_delete(const DB *dbp, const DBT *key, u_int32_t flag) /* Ignored */
 {
 	HTAB *hashp;
 
@@ -561,12 +557,12 @@ hash_delete(const DB *dbp, const DBT *key,
 static int
 hash_access(HTAB *hashp, ACTION action, DBT *key, DBT *val)
 {
-	BUFHEAD *rbufp;
-	BUFHEAD *bufp, *save_bufp;
+	BUFHEAD	  *rbufp;
+	BUFHEAD	  *bufp, *save_bufp;
 	u_int16_t *bp;
-	int n, ndx, off, size;
-	char *kp;
-	u_int16_t pageno;
+	int	   n, ndx, off, size;
+	char	  *kp;
+	u_int16_t  pageno;
 
 #ifdef HASH_STATISTICS
 	hash_accesses++;
@@ -606,16 +602,16 @@ hash_access(HTAB *hashp, ACTION action, DBT *key, DBT *val)
 			ndx = 1;
 			off = hashp->BSIZE;
 		} else if (bp[1] < REAL_KEY) {
-			if ((ndx =
-			    __find_bigpair(hashp, rbufp, ndx, kp, size)) > 0)
+			if ((ndx = __find_bigpair(
+				 hashp, rbufp, ndx, kp, size)) > 0)
 				goto found;
 			if (ndx == -2) {
 				bufp = rbufp;
 				if (!(pageno =
-				    __find_last_page(hashp, &bufp))) {
+					    __find_last_page(hashp, &bufp))) {
 					ndx = 0;
 					rbufp = bufp;
-					break;	/* FOR */
+					break; /* FOR */
 				}
 				rbufp = __get_buf(hashp, pageno, bufp, 0);
 				if (!rbufp) {
@@ -687,9 +683,9 @@ found:
 static int
 hash_seq(const DB *dbp, DBT *key, DBT *data, u_int32_t flag)
 {
-	u_int32_t bucket;
-	BUFHEAD *bufp;
-	HTAB *hashp;
+	u_int32_t  bucket;
+	BUFHEAD	  *bufp;
+	HTAB	  *hashp;
 	u_int16_t *bp, ndx;
 
 	hashp = (HTAB *)dbp->internal;
@@ -705,8 +701,8 @@ hash_seq(const DB *dbp, DBT *key, DBT *data, u_int32_t flag)
 		hashp->cndx = 1;
 		hashp->cpage = NULL;
 	}
- next_bucket:
-	for (bp = NULL; !bp || !bp[0]; ) {
+next_bucket:
+	for (bp = NULL; !bp || !bp[0];) {
 		if (!(bufp = hashp->cpage)) {
 			for (bucket = hashp->cbucket;
 			    bucket <= hashp->MAX_BUCKET;
@@ -780,7 +776,7 @@ int
 __expand_table(HTAB *hashp)
 {
 	u_int32_t old_bucket, new_bucket;
-	int dirsize, new_segnum, spare_ndx;
+	int	  dirsize, new_segnum, spare_ndx;
 
 #ifdef HASH_STATISTICS
 	hash_expansions++;
@@ -800,8 +796,8 @@ __expand_table(HTAB *hashp)
 				return (-1);
 			hashp->DSIZE = dirsize << 1;
 		}
-		if ((hashp->dir[new_segnum] =
-		    (SEGMENT)calloc(hashp->SGSIZE, sizeof(SEGMENT))) == NULL)
+		if ((hashp->dir[new_segnum] = (SEGMENT)calloc(
+			 hashp->SGSIZE, sizeof(SEGMENT))) == NULL)
 			return (-1);
 		hashp->exsegs++;
 		hashp->nsegs++;
@@ -864,13 +860,13 @@ __call_hash(HTAB *hashp, char *k, int len)
 static int
 alloc_segs(HTAB *hashp, int nsegs)
 {
-	int i;
+	int	i;
 	SEGMENT store;
 
 	int save_errno;
 
-	if ((hashp->dir =
-	    (SEGMENT *)calloc(hashp->DSIZE, sizeof(SEGMENT *))) == NULL) {
+	if ((hashp->dir = (SEGMENT *)calloc(hashp->DSIZE, sizeof(SEGMENT *))) ==
+	    NULL) {
 		save_errno = errno;
 		(void)hdestroy(hashp);
 		errno = save_errno;
@@ -880,8 +876,8 @@ alloc_segs(HTAB *hashp, int nsegs)
 	if (nsegs == 0)
 		return (0);
 	/* Allocate segments */
-	if ((store = (SEGMENT)calloc(nsegs << hashp->SSHIFT,
-	    sizeof(SEGMENT))) == NULL) {
+	if ((store = (SEGMENT)calloc(
+		 nsegs << hashp->SSHIFT, sizeof(SEGMENT))) == NULL) {
 		save_errno = errno;
 		(void)hdestroy(hashp);
 		errno = save_errno;
@@ -928,7 +924,7 @@ static void
 swap_header(HTAB *hashp)
 {
 	HASHHDR *hdrp;
-	int i;
+	int	 i;
 
 	hdrp = &hashp->hdr;
 

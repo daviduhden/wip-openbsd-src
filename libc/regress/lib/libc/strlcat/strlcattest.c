@@ -18,30 +18,30 @@
 
 #include <sys/types.h>
 
+#include <setjmp.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <setjmp.h>
-#include <signal.h>
 #include <unistd.h>
 
 volatile sig_atomic_t got_signal;
-sigjmp_buf jmpenv;
+sigjmp_buf	      jmpenv;
 
 void
 handler(int signo)
 {
-        got_signal = signo;
+	got_signal = signo;
 	siglongjmp(jmpenv, 1);
 }
 
 int
 main(int argc, char *argv[])
 {
-	char *buf, *cp, *ep;
+	char		*buf, *cp, *ep;
 	struct sigaction sa;
-	size_t len, bufsize;
-	volatile int failures = 0;
+	size_t		 len, bufsize;
+	volatile int	 failures = 0;
 
 	bufsize = getpagesize(); /* trigger guard pages easily */
 	buf = malloc(bufsize);
@@ -55,8 +55,8 @@ main(int argc, char *argv[])
 	/* Test appending to an unterminated string. */
 	len = strlcat(buf, "abcd", bufsize);
 	if (len != 4 + bufsize) {
-		fprintf(stderr,
-		    "strlcat: failed unterminated buffer test (1a)\n");
+		fprintf(
+		    stderr, "strlcat: failed unterminated buffer test (1a)\n");
 		failures++;
 	}
 	/* Make sure we only wrote where expected. */
@@ -79,8 +79,8 @@ main(int argc, char *argv[])
 	/* Make sure we only wrote where expected. */
 	for (cp = buf; cp < ep - 1; cp++) {
 		if (*cp != 'z') {
-			fprintf(stderr,
-			    "strlcat: failed full buffer test (2b)\n");
+			fprintf(
+			    stderr, "strlcat: failed full buffer test (2b)\n");
 			failures++;
 			break;
 		}
@@ -101,8 +101,8 @@ main(int argc, char *argv[])
 	}
 	for (cp = buf + len + 1; cp < ep; cp++) {
 		if (*cp != 'z') {
-			fprintf(stderr,
-			    "strlcat: failed empty buffer test (3c)\n");
+			fprintf(
+			    stderr, "strlcat: failed empty buffer test (3c)\n");
 			failures++;
 			break;
 		}
@@ -122,50 +122,58 @@ main(int argc, char *argv[])
 	}
 	for (cp = buf + len + 1; cp < ep; cp++) {
 		if (*cp != 'z') {
-			fprintf(stderr,
-			    "strlcat: failed empty buffer test (4c)\n");
+			fprintf(
+			    stderr, "strlcat: failed empty buffer test (4c)\n");
 			failures++;
 			break;
 		}
 	}
 
-        /*
-         * The following tests should result in SIGSEGV, however some
-         * systems may erroneously report SIGBUS.
-         * These tests assume that strlcat() is signal-safe.
-         */
-        memset(&sa, 0, sizeof(sa));
-        sigemptyset(&sa.sa_mask);
-        sa.sa_handler = handler;
-        sigaction(SIGSEGV, &sa, NULL);
-        sigaction(SIGBUS, &sa, NULL);
+	/*
+	 * The following tests should result in SIGSEGV, however some
+	 * systems may erroneously report SIGBUS.
+	 * These tests assume that strlcat() is signal-safe.
+	 */
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = handler;
+	sigaction(SIGSEGV, &sa, NULL);
+	sigaction(SIGBUS, &sa, NULL);
 
-        /* Test copying to a NULL buffer with non-zero size. */
-        got_signal = 0;
-        if (sigsetjmp(jmpenv, 1) == 0) {
-                len = strlcat(NULL, "abcd", sizeof(buf));
-                fprintf(stderr, "strlcat: failed NULL dst test (5a), "
-                    "expected signal %d, got len %zu\n", SIGSEGV, len);
-                failures++;
-        } else if (got_signal != SIGSEGV) {
-                fprintf(stderr, "strlcat: failed NULL dst test (5b), "
-                    "expected signal %d, got %d\n", SIGSEGV, got_signal);
-                failures++;
-        }
+	/* Test copying to a NULL buffer with non-zero size. */
+	got_signal = 0;
+	if (sigsetjmp(jmpenv, 1) == 0) {
+		len = strlcat(NULL, "abcd", sizeof(buf));
+		fprintf(stderr,
+		    "strlcat: failed NULL dst test (5a), "
+		    "expected signal %d, got len %zu\n",
+		    SIGSEGV, len);
+		failures++;
+	} else if (got_signal != SIGSEGV) {
+		fprintf(stderr,
+		    "strlcat: failed NULL dst test (5b), "
+		    "expected signal %d, got %d\n",
+		    SIGSEGV, got_signal);
+		failures++;
+	}
 
-        /* Test copying from a NULL src. */
+	/* Test copying from a NULL src. */
 	memcpy(buf, "abcd", sizeof("abcd"));
-        got_signal = 0;
-        if (sigsetjmp(jmpenv, 1) == 0) {
-                len = strlcat(buf, NULL, sizeof(buf));
-                fprintf(stderr, "strlcat: failed NULL src test (6a), "
-                    "expected signal %d, got len %zu\n", SIGSEGV, len);
-                failures++;
-        } else if (got_signal != SIGSEGV) {
-                fprintf(stderr, "strlcat: failed NULL src test (6b), "
-                    "expected signal %d, got %d\n", SIGSEGV, got_signal);
-                failures++;
-        }
+	got_signal = 0;
+	if (sigsetjmp(jmpenv, 1) == 0) {
+		len = strlcat(buf, NULL, sizeof(buf));
+		fprintf(stderr,
+		    "strlcat: failed NULL src test (6a), "
+		    "expected signal %d, got len %zu\n",
+		    SIGSEGV, len);
+		failures++;
+	} else if (got_signal != SIGSEGV) {
+		fprintf(stderr,
+		    "strlcat: failed NULL src test (6b), "
+		    "expected signal %d, got %d\n",
+		    SIGSEGV, got_signal);
+		failures++;
+	}
 
 	return failures;
 }

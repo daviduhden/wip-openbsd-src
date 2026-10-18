@@ -26,17 +26,19 @@
  */
 
 #include <sys/types.h>
+
 #include <limits.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+
 #include "ypinternal.h"
 
 int
 _yp_check(char **dom)
 {
-	char           *unused;
+	char *unused;
 
 	if (_yp_domain[0] == '\0')
 		if (yp_get_default_domain(&unused))

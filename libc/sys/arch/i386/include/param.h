@@ -32,8 +32,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_MACHINE_PARAM_H_
-#define	_MACHINE_PARAM_H_
+#ifndef _MACHINE_PARAM_H_
+#define _MACHINE_PARAM_H_
 
 #ifdef _KERNEL
 #ifdef _LOCORE
@@ -43,34 +43,34 @@
 #endif
 #endif
 
-#define	_MACHINE	i386
-#define	MACHINE		"i386"
-#define	_MACHINE_ARCH	i386
-#define	MACHINE_ARCH	"i386"
-#define	MID_MACHINE	MID_I386
+#define _MACHINE i386
+#define MACHINE "i386"
+#define _MACHINE_ARCH i386
+#define MACHINE_ARCH "i386"
+#define MID_MACHINE MID_I386
 
-#define	PAGE_SHIFT	12
-#define	PAGE_SIZE	(1 << PAGE_SHIFT)
-#define	PAGE_MASK	(PAGE_SIZE - 1)
+#define PAGE_SHIFT 12
+#define PAGE_SIZE (1 << PAGE_SHIFT)
+#define PAGE_MASK (PAGE_SIZE - 1)
 
-#define	KERNBASE	0xd0000000
+#define KERNBASE 0xd0000000
 
 #ifdef _KERNEL
 
-#define	KERNTEXTOFF	(KERNBASE+0x200000)	/* start of kernel text */
+#define KERNTEXTOFF (KERNBASE + 0x200000) /* start of kernel text */
 
-#define	NBPG		PAGE_SIZE		/* bytes/page */
-#define	PGSHIFT		PAGE_SHIFT		/* LOG2(PAGE_SIZE) */
-#define	PGOFSET		PAGE_MASK		/* byte offset into page */
+#define NBPG PAGE_SIZE	   /* bytes/page */
+#define PGSHIFT PAGE_SHIFT /* LOG2(PAGE_SIZE) */
+#define PGOFSET PAGE_MASK  /* byte offset into page */
 
-#define	UPAGES		3			/* pages of u-area */
-#define	USPACE		(UPAGES * PAGE_SIZE)	/* total size of u-area */
-#define	USPACE_ALIGN	0			/* u-area alignment 0-none */
+#define UPAGES 3		    /* pages of u-area */
+#define USPACE (UPAGES * PAGE_SIZE) /* total size of u-area */
+#define USPACE_ALIGN 0		    /* u-area alignment 0-none */
 
-#define	NMBCLUSTERS	(32 * 1024)		/* max cluster allocation */
+#define NMBCLUSTERS (32 * 1024) /* max cluster allocation */
 
-#ifndef	MSGBUFSIZE
-#define	MSGBUFSIZE	(8 * PAGE_SIZE)		/* default message buffer size */
+#ifndef MSGBUFSIZE
+#define MSGBUFSIZE (8 * PAGE_SIZE) /* default message buffer size */
 #endif
 
 #define __HAVE_ACPI

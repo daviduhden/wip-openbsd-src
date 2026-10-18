@@ -21,26 +21,25 @@
 #include <dev/clock_subr.h>
 
 struct efi_softc {
-	struct device	sc_dev;
-	struct pmap	*sc_pm;
-	EFI_RUNTIME_SERVICES *sc_rs;
+	struct device		   sc_dev;
+	struct pmap		  *sc_pm;
+	EFI_RUNTIME_SERVICES	  *sc_rs;
 	EFI_SYSTEM_RESOURCE_TABLE *sc_esrt;
-	u_long		sc_psw;
+	u_long			   sc_psw;
 
 	struct todr_chip_handle sc_todr;
 };
 
-
-extern EFI_GET_VARIABLE efi_get_variable;
-extern EFI_SET_VARIABLE efi_set_variable;
+extern EFI_GET_VARIABLE		  efi_get_variable;
+extern EFI_SET_VARIABLE		  efi_set_variable;
 extern EFI_GET_NEXT_VARIABLE_NAME efi_get_next_variable_name;
 
-void	efi_enter(struct efi_softc *);
-void	efi_leave(struct efi_softc *);
+void efi_enter(struct efi_softc *);
+void efi_leave(struct efi_softc *);
 
 extern label_t efi_jmpbuf;
 
-#define efi_enter_check(sc) (setjmp(&efi_jmpbuf) ? \
-    (efi_leave(sc), EFAULT) : (efi_enter(sc), 0))
+#define efi_enter_check(sc)                                                    \
+	(setjmp(&efi_jmpbuf) ? (efi_leave(sc), EFAULT) : (efi_enter(sc), 0))
 
 #endif /* _MACHINE_EFIVAR_H_ */

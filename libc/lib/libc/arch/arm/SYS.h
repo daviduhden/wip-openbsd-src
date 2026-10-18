@@ -35,78 +35,69 @@
  *	from: @(#)SYS.h	5.5 (Berkeley) 5/7/91
  */
 
-#include "DEFS.h"
 #include <sys/syscall.h>
 
+#include "DEFS.h"
 
-#define SYSENTRY(x)					\
-	.weak x;					\
-	x = _thread_sys_ ## x;				\
-	ENTRY(_thread_sys_ ## x)
-#define SYSENTRY_HIDDEN(x)				\
-	ENTRY(_thread_sys_ ## x)
-#define __END_HIDDEN(x)					\
-	END(_thread_sys_ ## x);				\
-	_HIDDEN_FALIAS(x, _thread_sys_ ## x);		\
+#define SYSENTRY(x)                                                            \
+	.weak x;                                                               \
+	x = _thread_sys_##x;                                                   \
+	ENTRY(_thread_sys_##x)
+#define SYSENTRY_HIDDEN(x) ENTRY(_thread_sys_##x)
+#define __END_HIDDEN(x)                                                        \
+	END(_thread_sys_##x);                                                  \
+	_HIDDEN_FALIAS(x, _thread_sys_##x);                                    \
 	END(_HIDDEN(x))
-#define __END(x)					\
-	__END_HIDDEN(x); END(x)
+#define __END(x)                                                               \
+	__END_HIDDEN(x);                                                       \
+	END(x)
 
-#define SYSTRAP(x) \
-	ldr	r12, =SYS_ ## x;			\
-97:	swi	0;					\
-	PINSYSCALL(SYS_ ## x, 97b);			\
-	dsb	nsh;					\
+#define SYSTRAP(x)                                                             \
+	ldr r12, = SYS_##x;                                                    \
+	97 : swi 0;                                                            \
+	PINSYSCALL(SYS_##x, 97b);                                              \
+	dsb nsh;                                                               \
 	isb
 
-#define	CERROR		__cerror
+#define CERROR __cerror
 
-#define _SYSCALL_NOERROR(x,y)						\
-	SYSENTRY(x);							\
+#define _SYSCALL_NOERROR(x, y)                                                 \
+	SYSENTRY(x);                                                           \
 	SYSTRAP(y)
-#define _SYSCALL_HIDDEN_NOERROR(x,y)					\
-	SYSENTRY_HIDDEN(x);						\
+#define _SYSCALL_HIDDEN_NOERROR(x, y)                                          \
+	SYSENTRY_HIDDEN(x);                                                    \
 	SYSTRAP(y)
 
-#define _SYSCALL(x, y)							\
-	_SYSCALL_NOERROR(x,y);						\
+#define _SYSCALL(x, y)                                                         \
+	_SYSCALL_NOERROR(x, y);                                                \
 	bcs CERROR
-#define _SYSCALL_HIDDEN(x, y)						\
-	_SYSCALL_HIDDEN_NOERROR(x,y);					\
+#define _SYSCALL_HIDDEN(x, y)                                                  \
+	_SYSCALL_HIDDEN_NOERROR(x, y);                                         \
 	bcs CERROR
 
-#define SYSCALL_NOERROR(x)						\
-	_SYSCALL_NOERROR(x,x)
+#define SYSCALL_NOERROR(x) _SYSCALL_NOERROR(x, x)
 
-#define SYSCALL(x)							\
-	_SYSCALL(x,x)
+#define SYSCALL(x) _SYSCALL(x, x)
 
-
-#define PSEUDO_NOERROR(x,y)						\
-	_SYSCALL_NOERROR(x,y);						\
-	mov r15, r14;							\
+#define PSEUDO_NOERROR(x, y)                                                   \
+	_SYSCALL_NOERROR(x, y);                                                \
+	mov r15, r14;                                                          \
 	__END(x)
 
-#define PSEUDO(x,y)							\
-	_SYSCALL(x,y);							\
-	mov r15, r14;							\
+#define PSEUDO(x, y)                                                           \
+	_SYSCALL(x, y);                                                        \
+	mov r15, r14;                                                          \
 	__END(x)
-#define PSEUDO_HIDDEN(x,y)						\
-	_SYSCALL_HIDDEN(x,y);						\
-	mov r15, r14;							\
+#define PSEUDO_HIDDEN(x, y)                                                    \
+	_SYSCALL_HIDDEN(x, y);                                                 \
+	mov r15, r14;                                                          \
 	__END_HIDDEN(x)
 
+#define RSYSCALL_NOERROR(x) PSEUDO_NOERROR(x, x)
 
-#define RSYSCALL_NOERROR(x)						\
-	PSEUDO_NOERROR(x,x)
+#define RSYSCALL(x) PSEUDO(x, x)
+#define RSYSCALL_HIDDEN(x) PSEUDO_HIDDEN(x, x)
+#define SYSCALL_END(x) __END(x)
+#define SYSCALL_END_HIDDEN(x) __END_HIDDEN(x)
 
-#define RSYSCALL(x)							\
-	PSEUDO(x,x)
-#define RSYSCALL_HIDDEN(x)						\
-	PSEUDO_HIDDEN(x,x)
-#define SYSCALL_END(x)							\
-	__END(x)
-#define SYSCALL_END_HIDDEN(x)						\
-	__END_HIDDEN(x)
-
-	.globl	CERROR
+.globl CERROR

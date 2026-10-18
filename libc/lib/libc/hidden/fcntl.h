@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_FCNTL_H_
-#define	_LIBC_FCNTL_H_
+#define _LIBC_FCNTL_H_
 
 #include_next <fcntl.h>
 
@@ -24,7 +24,7 @@
  * Exactly like open(2), but a seperate system call so that kernel can know
  * the request came from the libc.
  */
-int        __pledge_open(const char *, int, ...);
+int __pledge_open(const char *, int, ...);
 
 PROTO_DEPRECATED(creat);
 PROTO_CANCEL(fcntl);

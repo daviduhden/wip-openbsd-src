@@ -40,12 +40,12 @@
  * Architecture specific syscalls (arm)
  */
 
-#define ARM_SYNC_ICACHE		0
-#define ARM_DRAIN_WRITEBUF	1
+#define ARM_SYNC_ICACHE 0
+#define ARM_DRAIN_WRITEBUF 1
 
 struct arm_sync_icache_args {
-	u_int32_t	addr;		/* Virtual start address */
-	size_t		len;		/* Region size */
+	u_int32_t addr; /* Virtual start address */
+	size_t	  len;	/* Region size */
 };
 
 #ifndef _KERNEL
@@ -53,9 +53,9 @@ struct arm_sync_icache_args {
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
-int	arm_sync_icache (u_int addr, int len);
-int	arm_drain_writebuf (void);
-int	sysarch (int, void *);
+int arm_sync_icache(u_int addr, int len);
+int arm_drain_writebuf(void);
+int sysarch(int, void *);
 __END_DECLS
 #endif
 

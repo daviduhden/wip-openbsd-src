@@ -13,7 +13,7 @@ fpgetround(void)
 {
 	int x;
 
-	__asm__ volatile ("fldcr %0, %%fcr63" : "=r" (x));
+	__asm__ volatile("fldcr %0, %%fcr63" : "=r"(x));
 	return (x >> 14) & 0x03;
 }
 DEF_WEAK(fpgetround);

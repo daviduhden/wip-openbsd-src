@@ -1,4 +1,5 @@
-/*	$OpenBSD: stack_protector.c,v 1.24 2017/11/29 05:13:57 guenther Exp $	*/
+/*	$OpenBSD: stack_protector.c,v 1.24 2017/11/29 05:13:57 guenther Exp $
+ */
 
 /*
  * Copyright (c) 2002 Hiroaki Etoh, Federico G. Schwindt, and Miodrag Vallat.
@@ -51,8 +52,8 @@ void
 __stack_smash_handler(const char func[], int damaged)
 {
 	struct sigaction sa;
-	sigset_t mask;
-	char buf[1024];
+	sigset_t	 mask;
+	char		 buf[1024];
 
 	/* Immediately block all signal handlers from running code */
 	sigfillset(&mask);
@@ -63,7 +64,7 @@ __stack_smash_handler(const char func[], int damaged)
 	strlcpy(buf, "<10>", sizeof buf);
 
 	/* Make sure progname does not fill the whole buffer */
-	strlcat(buf, __progname, sizeof(buf) / 2 );
+	strlcat(buf, __progname, sizeof(buf) / 2);
 
 	strlcat(buf, ": stack overflow in function ", sizeof buf);
 	strlcat(buf, func, sizeof buf);

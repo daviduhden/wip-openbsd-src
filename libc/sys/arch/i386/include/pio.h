@@ -41,27 +41,24 @@
  * variable port number.  The former can be compiled as a smaller instruction.
  */
 
-
 #ifdef __OPTIMIZE__
 
-#define	__use_immediate_port(port) \
+#define __use_immediate_port(port)                                             \
 	(__builtin_constant_p((port)) && (port) < 0x100)
 
 #else
 
-#define	__use_immediate_port(port)	0
+#define __use_immediate_port(port) 0
 
 #endif
 
-
-#define	inb(port) \
-	(__use_immediate_port(port) ? __inbc(port) : __inb(port))
+#define inb(port) (__use_immediate_port(port) ? __inbc(port) : __inb(port))
 
 static __inline u_int8_t
 __inbc(int port)
 {
 	u_int8_t data;
-	__asm volatile("inb %w1,%0" : "=a" (data) : "id" (port));
+	__asm volatile("inb %w1,%0" : "=a"(data) : "id"(port));
 	return data;
 }
 
@@ -69,7 +66,7 @@ static __inline u_int8_t
 __inb(int port)
 {
 	u_int8_t data;
-	__asm volatile("inb %w1,%0" : "=a" (data) : "d" (port));
+	__asm volatile("inb %w1,%0" : "=a"(data) : "d"(port));
 	return data;
 }
 
@@ -77,17 +74,18 @@ static __inline void
 insb(int port, void *addr, int cnt)
 {
 	__asm volatile("repne\n\tinsb"
-	    : "+D" (addr), "+c" (cnt) : "d" (port) : "memory", "cc");
+	    : "+D"(addr), "+c"(cnt)
+	    : "d"(port)
+	    : "memory", "cc");
 }
 
-#define	inw(port) \
-	(__use_immediate_port(port) ? __inwc(port) : __inw(port))
+#define inw(port) (__use_immediate_port(port) ? __inwc(port) : __inw(port))
 
 static __inline u_int16_t
 __inwc(int port)
 {
 	u_int16_t data;
-	__asm volatile("inw %w1,%0" : "=a" (data) : "id" (port));
+	__asm volatile("inw %w1,%0" : "=a"(data) : "id"(port));
 	return data;
 }
 
@@ -95,7 +93,7 @@ static __inline u_int16_t
 __inw(int port)
 {
 	u_int16_t data;
-	__asm volatile("inw %w1,%0" : "=a" (data) : "d" (port));
+	__asm volatile("inw %w1,%0" : "=a"(data) : "d"(port));
 	return data;
 }
 
@@ -103,17 +101,18 @@ static __inline void
 insw(int port, void *addr, int cnt)
 {
 	__asm volatile("repne\n\tinsw"
-	    : "+D" (addr), "+c" (cnt) : "d" (port) : "memory", "cc");
+	    : "+D"(addr), "+c"(cnt)
+	    : "d"(port)
+	    : "memory", "cc");
 }
 
-#define	inl(port) \
-	(__use_immediate_port(port) ? __inlc(port) : __inl(port))
+#define inl(port) (__use_immediate_port(port) ? __inlc(port) : __inl(port))
 
 static __inline u_int32_t
 __inlc(int port)
 {
 	u_int32_t data;
-	__asm volatile("inl %w1,%0" : "=a" (data) : "id" (port));
+	__asm volatile("inl %w1,%0" : "=a"(data) : "id"(port));
 	return data;
 }
 
@@ -121,7 +120,7 @@ static __inline u_int32_t
 __inl(int port)
 {
 	u_int32_t data;
-	__asm volatile("inl %w1,%0" : "=a" (data) : "d" (port));
+	__asm volatile("inl %w1,%0" : "=a"(data) : "d"(port));
 	return data;
 }
 
@@ -129,73 +128,81 @@ static __inline void
 insl(int port, void *addr, int cnt)
 {
 	__asm volatile("repne\n\tinsl"
-	    : "+D" (addr), "+c" (cnt) : "d" (port) : "memory", "cc");
+	    : "+D"(addr), "+c"(cnt)
+	    : "d"(port)
+	    : "memory", "cc");
 }
 
-#define	outb(port, data) \
+#define outb(port, data)                                                       \
 	(__use_immediate_port(port) ? __outbc(port, data) : __outb(port, data))
 
 static __inline void
 __outbc(int port, u_int8_t data)
 {
-	__asm volatile("outb %0,%w1" : : "a" (data), "id" (port));
+	__asm volatile("outb %0,%w1" : : "a"(data), "id"(port));
 }
 
 static __inline void
 __outb(int port, u_int8_t data)
 {
-	__asm volatile("outb %0,%w1" : : "a" (data), "d" (port));
+	__asm volatile("outb %0,%w1" : : "a"(data), "d"(port));
 }
 
 static __inline void
 outsb(int port, const void *addr, int cnt)
 {
 	__asm volatile("repne\n\toutsb"
-	    : "+S" (addr), "+c" (cnt) : "d" (port) : "cc");
+	    : "+S"(addr), "+c"(cnt)
+	    : "d"(port)
+	    : "cc");
 }
 
-#define	outw(port, data) \
+#define outw(port, data)                                                       \
 	(__use_immediate_port(port) ? __outwc(port, data) : __outw(port, data))
 
 static __inline void
 __outwc(int port, u_int16_t data)
 {
-	__asm volatile("outw %0,%w1" : : "a" (data), "id" (port));
+	__asm volatile("outw %0,%w1" : : "a"(data), "id"(port));
 }
 
 static __inline void
 __outw(int port, u_int16_t data)
 {
-	__asm volatile("outw %0,%w1" : : "a" (data), "d" (port));
+	__asm volatile("outw %0,%w1" : : "a"(data), "d"(port));
 }
 
 static __inline void
 outsw(int port, const void *addr, int cnt)
 {
 	__asm volatile("repne\n\toutsw"
-	    : "+S" (addr), "+c" (cnt) : "d" (port) : "cc");
+	    : "+S"(addr), "+c"(cnt)
+	    : "d"(port)
+	    : "cc");
 }
 
-#define	outl(port, data) \
+#define outl(port, data)                                                       \
 	(__use_immediate_port(port) ? __outlc(port, data) : __outl(port, data))
 
 static __inline void
 __outlc(int port, u_int32_t data)
 {
-	__asm volatile("outl %0,%w1" : : "a" (data), "id" (port));
+	__asm volatile("outl %0,%w1" : : "a"(data), "id"(port));
 }
 
 static __inline void
 __outl(int port, u_int32_t data)
 {
-	__asm volatile("outl %0,%w1" : : "a" (data), "d" (port));
+	__asm volatile("outl %0,%w1" : : "a"(data), "d"(port));
 }
 
 static __inline void
 outsl(int port, const void *addr, int cnt)
 {
 	__asm volatile("repne\n\toutsl"
-	    : "+S" (addr), "+c" (cnt) : "d" (port) : "cc");
+	    : "+S"(addr), "+c"(cnt)
+	    : "d"(port)
+	    : "cc");
 }
 
 #endif /* _MACHINE_PIO_H_ */

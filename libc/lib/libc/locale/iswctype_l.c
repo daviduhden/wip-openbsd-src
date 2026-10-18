@@ -42,13 +42,13 @@
 #include <wchar.h>
 #include <wctype.h>
 
-#include "rune.h"
-#include "runetype.h"
-#include "rune_local.h"
 #include "_wctrans_local.h"
+#include "rune.h"
+#include "rune_local.h"
+#include "runetype.h"
 
-static _RuneLocale	*__runelocale(locale_t);
-static int		 __isctype_wl(wint_t, _RuneType, locale_t);
+static _RuneLocale *__runelocale(locale_t);
+static int	    __isctype_wl(wint_t, _RuneType, locale_t);
 
 /*
  * For all these functions, POSIX says that behaviour is undefined
@@ -58,7 +58,7 @@ static int		 __isctype_wl(wint_t, _RuneType, locale_t);
 static _RuneLocale *
 __runelocale(locale_t locale)
 {
-	_RuneLocale	*rl;
+	_RuneLocale *rl;
 
 	rl = NULL;
 	if (locale == _LOCALE_UTF8)
@@ -71,8 +71,8 @@ __runelocale(locale_t locale)
 static int
 __isctype_wl(wint_t c, _RuneType f, locale_t locale)
 {
-	_RuneLocale	*rl;
-	_RuneType	 rt;
+	_RuneLocale *rl;
+	_RuneType    rt;
 
 	rl = __runelocale(locale);
 	rt = _RUNE_ISCACHED(c) ? rl->rl_runetype[c] : ___runetype_mb(c, rl);
@@ -82,7 +82,7 @@ __isctype_wl(wint_t c, _RuneType f, locale_t locale)
 int
 iswalnum_l(wint_t c, locale_t locale)
 {
-	return __isctype_wl(c, _RUNETYPE_A|_RUNETYPE_D, locale);
+	return __isctype_wl(c, _RUNETYPE_A | _RUNETYPE_D, locale);
 }
 
 int
@@ -167,8 +167,8 @@ DEF_WEAK(towlower_l);
 wctrans_t
 wctrans_l(const char *charclass, locale_t locale)
 {
-	_RuneLocale	*rl;
-	int		 i;
+	_RuneLocale *rl;
+	int	     i;
 
 	rl = __runelocale(locale);
 	if (rl->rl_wctrans[_WCTRANS_INDEX_LOWER].te_name == NULL)
@@ -188,8 +188,8 @@ wctrans_l(const char *charclass, locale_t locale)
  * and rely on the desc argument only.
  */
 wint_t
-towctrans_l(wint_t c, wctrans_t desc,
-    locale_t locale __attribute__((__unused__)))
+towctrans_l(
+    wint_t c, wctrans_t desc, locale_t locale __attribute__((__unused__)))
 {
 	return towctrans(c, desc);
 }
@@ -198,7 +198,7 @@ int
 iswctype_l(wint_t c, wctype_t charclass, locale_t locale)
 {
 	if (charclass == (wctype_t)0)
-		return 0;  /* Required by SUSv3. */
+		return 0; /* Required by SUSv3. */
 
 	return __isctype_wl(c, ((_WCTypeEntry *)charclass)->te_mask, locale);
 }

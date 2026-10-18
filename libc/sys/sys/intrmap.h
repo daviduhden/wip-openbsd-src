@@ -21,13 +21,13 @@
 
 struct intrmap;
 
-#define INTRMAP_POWEROF2	(1 << 0)
+#define INTRMAP_POWEROF2 (1 << 0)
 
-struct intrmap	*intrmap_create(const struct device *,
-		     unsigned int, unsigned int, unsigned int);
-void		 intrmap_destroy(struct intrmap *);
+struct intrmap *intrmap_create(
+    const struct device *, unsigned int, unsigned int, unsigned int);
+void intrmap_destroy(struct intrmap *);
 
 unsigned int	 intrmap_count(const struct intrmap *);
-struct cpu_info	*intrmap_cpu(const struct intrmap *, unsigned int);
+struct cpu_info *intrmap_cpu(const struct intrmap *, unsigned int);
 
 #endif /* _SYS_INTRMAP_H_ */

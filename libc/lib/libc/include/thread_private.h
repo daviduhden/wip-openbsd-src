@@ -83,29 +83,29 @@ PROTO_NORMAL(_malloc_init);
 struct __sFILE;
 struct pthread;
 struct thread_callbacks {
-	int	*(*tc_errnoptr)(void);		/* MUST BE FIRST */
-	void	*(*tc_tcb)(void);
-	__dead void	(*tc_canceled)(void);
-	void	(*tc_flockfile)(struct __sFILE *);
-	int	(*tc_ftrylockfile)(struct __sFILE *);
-	void	(*tc_funlockfile)(struct __sFILE *);
-	void	(*tc_malloc_lock)(int);
-	void	(*tc_malloc_unlock)(int);
-	void	(*tc_atexit_lock)(void);
-	void	(*tc_atexit_unlock)(void);
-	void	(*tc_atfork_lock)(void);
-	void	(*tc_atfork_unlock)(void);
-	void	(*tc_arc4_lock)(void);
-	void	(*tc_arc4_unlock)(void);
-	void	(*tc_mutex_lock)(void **);
-	void	(*tc_mutex_unlock)(void **);
-	void	(*tc_mutex_destroy)(void **);
-	void	(*tc_tag_lock)(void **);
-	void	(*tc_tag_unlock)(void **);
-	void	*(*tc_tag_storage)(void **, void *, size_t, void (*)(void *),
-	   void *);
-	__pid_t	(*tc_fork)(void);
-	__pid_t	(*tc_vfork)(void);
+	int	   *(*tc_errnoptr)(void); /* MUST BE FIRST */
+	void	   *(*tc_tcb)(void);
+	__dead void (*tc_canceled)(void);
+	void	    (*tc_flockfile)(struct __sFILE *);
+	int	    (*tc_ftrylockfile)(struct __sFILE *);
+	void	    (*tc_funlockfile)(struct __sFILE *);
+	void	    (*tc_malloc_lock)(int);
+	void	    (*tc_malloc_unlock)(int);
+	void	    (*tc_atexit_lock)(void);
+	void	    (*tc_atexit_unlock)(void);
+	void	    (*tc_atfork_lock)(void);
+	void	    (*tc_atfork_unlock)(void);
+	void	    (*tc_arc4_lock)(void);
+	void	    (*tc_arc4_unlock)(void);
+	void	    (*tc_mutex_lock)(void **);
+	void	    (*tc_mutex_unlock)(void **);
+	void	    (*tc_mutex_destroy)(void **);
+	void	    (*tc_tag_lock)(void **);
+	void	    (*tc_tag_unlock)(void **);
+	void	   *(*tc_tag_storage)(
+	    void **, void *, size_t, void (*)(void *), void *);
+	__pid_t (*tc_fork)(void);
+	__pid_t (*tc_vfork)(void);
 	void	(*tc_thread_release)(struct pthread *);
 	void	(*tc_thread_key_zero)(int);
 };
@@ -114,7 +114,7 @@ __BEGIN_PUBLIC_DECLS
 /*
  *  Set the callbacks used by libc
  */
-void	_thread_set_callbacks(const struct thread_callbacks *_cb, size_t _len);
+void _thread_set_callbacks(const struct thread_callbacks *_cb, size_t _len);
 __END_PUBLIC_DECLS
 
 #ifdef __LIBC__
@@ -127,7 +127,7 @@ __END_HIDDEN_DECLS
 /*
  * helper macro to make unique names in the thread namespace
  */
-#define __THREAD_NAME(name)	__CONCAT(_thread_tagname_,name)
+#define __THREAD_NAME(name) __CONCAT(_thread_tagname_, name)
 
 /*
  * Macros used in libc to access thread mutex, keys, and per thread storage.
@@ -136,118 +136,142 @@ __END_HIDDEN_DECLS
  * keyed by 'name' that identifies a mutex and a key to identify per thread
  * data.
  */
-#define _THREAD_PRIVATE_KEY(name)					\
-	static void *__THREAD_NAME(name)
-#define _THREAD_PRIVATE_MUTEX(name)					\
-	static void *__THREAD_NAME(name)
+#define _THREAD_PRIVATE_KEY(name) static void *__THREAD_NAME(name)
+#define _THREAD_PRIVATE_MUTEX(name) static void *__THREAD_NAME(name)
 
+#ifndef __LIBC__ /* building some sort of reach around */
 
-#ifndef __LIBC__	/* building some sort of reach around */
-
-#define _THREAD_PRIVATE_MUTEX_LOCK(name)		do {} while (0)
-#define _THREAD_PRIVATE_MUTEX_UNLOCK(name)		do {} while (0)
-#define _THREAD_PRIVATE(keyname, storage, error)	&(storage)
-#define _THREAD_PRIVATE_DT(keyname, storage, dt, error)	&(storage)
-#define _MUTEX_LOCK(mutex)				do {} while (0)
-#define _MUTEX_UNLOCK(mutex)				do {} while (0)
-#define _MUTEX_DESTROY(mutex)				do {} while (0)
-#define _MALLOC_LOCK(n)					do {} while (0)
-#define _MALLOC_UNLOCK(n)				do {} while (0)
-#define _ATEXIT_LOCK()					do {} while (0)
-#define _ATEXIT_UNLOCK()				do {} while (0)
-#define _ATFORK_LOCK()					do {} while (0)
-#define _ATFORK_UNLOCK()				do {} while (0)
-#define _ARC4_LOCK()					do {} while (0)
-#define _ARC4_UNLOCK()					do {} while (0)
-
-#else		/* building libc */
-#define _THREAD_PRIVATE_MUTEX_LOCK(name)				\
-	do {								\
-		if (_thread_cb.tc_tag_lock != NULL)			\
-			_thread_cb.tc_tag_lock(&(__THREAD_NAME(name)));	\
+#define _THREAD_PRIVATE_MUTEX_LOCK(name)                                       \
+	do {                                                                   \
 	} while (0)
-#define _THREAD_PRIVATE_MUTEX_UNLOCK(name)				\
-	do {								\
-		if (_thread_cb.tc_tag_unlock != NULL)			\
-			_thread_cb.tc_tag_unlock(&(__THREAD_NAME(name))); \
+#define _THREAD_PRIVATE_MUTEX_UNLOCK(name)                                     \
+	do {                                                                   \
 	} while (0)
-#define _THREAD_PRIVATE(keyname, storage, error)			\
-	(_thread_cb.tc_tag_storage == NULL ? &(storage) :		\
-	    _thread_cb.tc_tag_storage(&(__THREAD_NAME(keyname)),	\
-		&(storage), sizeof(storage), NULL, (error)))
+#define _THREAD_PRIVATE(keyname, storage, error) &(storage)
+#define _THREAD_PRIVATE_DT(keyname, storage, dt, error) &(storage)
+#define _MUTEX_LOCK(mutex)                                                     \
+	do {                                                                   \
+	} while (0)
+#define _MUTEX_UNLOCK(mutex)                                                   \
+	do {                                                                   \
+	} while (0)
+#define _MUTEX_DESTROY(mutex)                                                  \
+	do {                                                                   \
+	} while (0)
+#define _MALLOC_LOCK(n)                                                        \
+	do {                                                                   \
+	} while (0)
+#define _MALLOC_UNLOCK(n)                                                      \
+	do {                                                                   \
+	} while (0)
+#define _ATEXIT_LOCK()                                                         \
+	do {                                                                   \
+	} while (0)
+#define _ATEXIT_UNLOCK()                                                       \
+	do {                                                                   \
+	} while (0)
+#define _ATFORK_LOCK()                                                         \
+	do {                                                                   \
+	} while (0)
+#define _ATFORK_UNLOCK()                                                       \
+	do {                                                                   \
+	} while (0)
+#define _ARC4_LOCK()                                                           \
+	do {                                                                   \
+	} while (0)
+#define _ARC4_UNLOCK()                                                         \
+	do {                                                                   \
+	} while (0)
 
-#define _THREAD_PRIVATE_DT(keyname, storage, dt, error)			\
-	(_thread_cb.tc_tag_storage == NULL ? &(storage) :		\
-	    _thread_cb.tc_tag_storage(&(__THREAD_NAME(keyname)),	\
-		&(storage), sizeof(storage), (dt), (error)))
+#else /* building libc */
+#define _THREAD_PRIVATE_MUTEX_LOCK(name)                                       \
+	do {                                                                   \
+		if (_thread_cb.tc_tag_lock != NULL)                            \
+			_thread_cb.tc_tag_lock(&(__THREAD_NAME(name)));        \
+	} while (0)
+#define _THREAD_PRIVATE_MUTEX_UNLOCK(name)                                     \
+	do {                                                                   \
+		if (_thread_cb.tc_tag_unlock != NULL)                          \
+			_thread_cb.tc_tag_unlock(&(__THREAD_NAME(name)));      \
+	} while (0)
+#define _THREAD_PRIVATE(keyname, storage, error)                               \
+	(_thread_cb.tc_tag_storage == NULL ?                                   \
+		&(storage) :                                                   \
+		_thread_cb.tc_tag_storage(&(__THREAD_NAME(keyname)),           \
+		    &(storage), sizeof(storage), NULL, (error)))
+
+#define _THREAD_PRIVATE_DT(keyname, storage, dt, error)                        \
+	(_thread_cb.tc_tag_storage == NULL ?                                   \
+		&(storage) :                                                   \
+		_thread_cb.tc_tag_storage(&(__THREAD_NAME(keyname)),           \
+		    &(storage), sizeof(storage), (dt), (error)))
 
 /*
  * Macros used in libc to access mutexes.
  */
-#define _MUTEX_LOCK(mutex)						\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_mutex_lock(mutex);		\
+#define _MUTEX_LOCK(mutex)                                                     \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_mutex_lock(mutex);                       \
 	} while (0)
-#define _MUTEX_UNLOCK(mutex)						\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_mutex_unlock(mutex);		\
+#define _MUTEX_UNLOCK(mutex)                                                   \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_mutex_unlock(mutex);                     \
 	} while (0)
-#define _MUTEX_DESTROY(mutex)						\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_mutex_destroy(mutex);		\
+#define _MUTEX_DESTROY(mutex)                                                  \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_mutex_destroy(mutex);                    \
 	} while (0)
 
 /*
  * malloc lock/unlock prototypes and definitions
  */
-#define _MALLOC_LOCK(n)							\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_malloc_lock(n);			\
+#define _MALLOC_LOCK(n)                                                        \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_malloc_lock(n);                          \
 	} while (0)
-#define _MALLOC_UNLOCK(n)						\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_malloc_unlock(n);			\
-	} while (0)
-
-#define _ATEXIT_LOCK()							\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_atexit_lock();			\
-	} while (0)
-#define _ATEXIT_UNLOCK()						\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_atexit_unlock();			\
+#define _MALLOC_UNLOCK(n)                                                      \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_malloc_unlock(n);                        \
 	} while (0)
 
-#define _ATFORK_LOCK()							\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_atfork_lock();			\
+#define _ATEXIT_LOCK()                                                         \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_atexit_lock();                           \
 	} while (0)
-#define _ATFORK_UNLOCK()						\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_atfork_unlock();			\
+#define _ATEXIT_UNLOCK()                                                       \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_atexit_unlock();                         \
 	} while (0)
 
-#define _ARC4_LOCK()							\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_arc4_lock();			\
+#define _ATFORK_LOCK()                                                         \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_atfork_lock();                           \
 	} while (0)
-#define _ARC4_UNLOCK()							\
-	do {								\
-		if (__isthreaded)					\
-			_thread_cb.tc_arc4_unlock();			\
+#define _ATFORK_UNLOCK()                                                       \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_atfork_unlock();                         \
+	} while (0)
+
+#define _ARC4_LOCK()                                                           \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_arc4_lock();                             \
+	} while (0)
+#define _ARC4_UNLOCK()                                                         \
+	do {                                                                   \
+		if (__isthreaded)                                              \
+			_thread_cb.tc_arc4_unlock();                           \
 	} while (0)
 #endif /* __LIBC__ */
-
 
 /*
  * Copyright (c) 2004,2005 Ted Unangst <tedu@openbsd.org>
@@ -278,17 +302,18 @@ __END_HIDDEN_DECLS
  */
 
 #include <sys/queue.h>
+
+#include <machine/spinlock.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <machine/spinlock.h>
 
-#define	_SPINLOCK_UNLOCKED _ATOMIC_LOCK_UNLOCKED
+#define _SPINLOCK_UNLOCKED _ATOMIC_LOCK_UNLOCKED
 
 struct __sem {
 	_atomic_lock_t lock;
-	volatile int waitcount;
-	volatile int value;
-	int shared;
+	volatile int   waitcount;
+	volatile int   value;
+	int	       shared;
 };
 
 TAILQ_HEAD(pthread_queue, pthread);
@@ -303,15 +328,15 @@ TAILQ_HEAD(pthread_queue, pthread);
 
 struct pthread_mutex {
 	volatile unsigned int lock;
-	int type;
-	pthread_t owner;
-	int count;
-	int prioceiling;
+	int		      type;
+	pthread_t	      owner;
+	int		      count;
+	int		      prioceiling;
 };
 
 struct pthread_cond {
 	volatile unsigned int seq;
-	clockid_t clock;
+	clockid_t	      clock;
 	struct pthread_mutex *mutex;
 };
 
@@ -326,68 +351,71 @@ struct pthread_rwlock {
  */
 
 struct pthread_mutex {
-	_atomic_lock_t lock;
+	_atomic_lock_t	     lock;
 	struct pthread_queue lockers;
-	int type;
-	pthread_t owner;
-	int count;
-	int prioceiling;
+	int		     type;
+	pthread_t	     owner;
+	int		     count;
+	int		     prioceiling;
 };
 
 struct pthread_cond {
-	_atomic_lock_t lock;
-	struct pthread_queue waiters;
+	_atomic_lock_t	      lock;
+	struct pthread_queue  waiters;
 	struct pthread_mutex *mutex;
-	clockid_t clock;
+	clockid_t	      clock;
 };
 
 struct pthread_rwlock {
-	_atomic_lock_t lock;
-	pthread_t owner;
+	_atomic_lock_t	     lock;
+	pthread_t	     owner;
 	struct pthread_queue writers;
-	int readers;
+	int		     readers;
 };
 #endif /* FUTEX */
 
 /* libc mutex */
 
-#define __CMTX_UNLOCKED		0
-#define __CMTX_LOCKED		1
-#define __CMTX_CONTENDED	2
+#define __CMTX_UNLOCKED 0
+#define __CMTX_LOCKED 1
+#define __CMTX_CONTENDED 2
 
 #ifdef __CMTX_CAS
 struct __cmtx {
-	volatile unsigned int	lock;
+	volatile unsigned int lock;
 };
 
-#define __CMTX_INITIALIZER() {						\
-	.lock = __CMTX_UNLOCKED,					\
-}
+#define __CMTX_INITIALIZER()                                                   \
+	{                                                                      \
+	    .lock = __CMTX_UNLOCKED,                                           \
+	}
 #else /* __CMTX_CAS */
 struct __cmtx {
-	_atomic_lock_t		spin;
-	volatile unsigned int	lock;
+	_atomic_lock_t	      spin;
+	volatile unsigned int lock;
 };
 
-#define __CMTX_INITIALIZER() {						\
-	.spin = _SPINLOCK_UNLOCKED,					\
-	.lock = __CMTX_UNLOCKED,					\
-}
+#define __CMTX_INITIALIZER()                                                   \
+	{                                                                      \
+	    .spin = _SPINLOCK_UNLOCKED,                                        \
+	    .lock = __CMTX_UNLOCKED,                                           \
+	}
 #endif /* __CMTX_CAS */
 
 /* libc recursive mutex */
 
 struct __rcmtx {
-	volatile pthread_t	owner;
-	struct __cmtx		mtx;
-	unsigned int		depth;
+	volatile pthread_t owner;
+	struct __cmtx	   mtx;
+	unsigned int	   depth;
 };
 
-#define __RCMTX_INITIALIZER() {						\
-	.owner = NULL,							\
-	.mtx = __CMTX_INITIALIZER(),					\
-	.depth = 0,							\
-}
+#define __RCMTX_INITIALIZER()                                                  \
+	{                                                                      \
+	    .owner = NULL,                                                     \
+	    .mtx = __CMTX_INITIALIZER(),                                       \
+	    .depth = 0,                                                        \
+	}
 
 struct pthread_mutex_attr {
 	int ma_type;
@@ -400,92 +428,92 @@ struct pthread_cond_attr {
 };
 
 struct pthread_attr {
-	void *stack_addr;
-	size_t stack_size;
-	size_t guard_size;
-	int detach_state;
-	int contention_scope;
-	int sched_policy;
+	void		  *stack_addr;
+	size_t		   stack_size;
+	size_t		   guard_size;
+	int		   detach_state;
+	int		   contention_scope;
+	int		   sched_policy;
 	struct sched_param sched_param;
-	int sched_inherit;
+	int		   sched_inherit;
 };
 
 struct rthread_storage {
-	int keyid;
+	int			keyid;
 	struct rthread_storage *next;
-	void *data;
+	void		       *data;
 };
 
 struct rthread_cleanup_fn {
-	void (*fn)(void *);
-	void *arg;
+	void			   (*fn)(void *);
+	void			  *arg;
 	struct rthread_cleanup_fn *next;
 };
 
 struct tib;
 struct stack;
 struct pthread {
-	struct __sem donesem;
-	unsigned int flags;
+	struct __sem   donesem;
+	unsigned int   flags;
 	_atomic_lock_t flags_lock;
-	struct tib *tib;
-	void *retval;
-	void *(*fn)(void *);
-	void *arg;
-	char name[32];
-	struct stack *stack;
+	struct tib    *tib;
+	void	      *retval;
+	void	      *(*fn)(void *);
+	void	      *arg;
+	char	       name[32];
+	struct stack  *stack;
 	LIST_ENTRY(pthread) threads;
 	TAILQ_ENTRY(pthread) waiting;
-	pthread_cond_t blocking_cond;
-	struct pthread_attr attr;
-	struct rthread_storage *local_storage;
+	pthread_cond_t		   blocking_cond;
+	struct pthread_attr	   attr;
+	struct rthread_storage	  *local_storage;
 	struct rthread_cleanup_fn *cleanup_fns;
 
 	/* cancel received in a delayed cancel block? */
-	int delayed_cancel;
+	int		  delayed_cancel;
 	struct gmonparam *gmonparam;
 };
 /* flags in pthread->flags */
-#define	THREAD_DONE		0x001
-#define	THREAD_DETACHED		0x002
+#define THREAD_DONE 0x001
+#define THREAD_DETACHED 0x002
 
 /* flags in tib->tib_thread_flags */
-#define	TIB_THREAD_ASYNC_CANCEL		0x001
-#define	TIB_THREAD_INITIAL_STACK	0x002	/* has stack from exec */
+#define TIB_THREAD_ASYNC_CANCEL 0x001
+#define TIB_THREAD_INITIAL_STACK 0x002 /* has stack from exec */
 
-#define ENTER_DELAYED_CANCEL_POINT(tib, self)				\
-	(self)->delayed_cancel = 0;					\
+#define ENTER_DELAYED_CANCEL_POINT(tib, self)                                  \
+	(self)->delayed_cancel = 0;                                            \
 	ENTER_CANCEL_POINT_INNER(tib, 1, 1)
 
 /*
  * Internal functions exported from libc's thread bits for use by libpthread
  */
-void	_spinlock(volatile _atomic_lock_t *);
-int	_spinlocktry(volatile _atomic_lock_t *);
-void	_spinunlock(volatile _atomic_lock_t *);
+void _spinlock(volatile _atomic_lock_t *);
+int  _spinlocktry(volatile _atomic_lock_t *);
+void _spinunlock(volatile _atomic_lock_t *);
 
-void	__cmtx_init(struct __cmtx *);
-int	__cmtx_enter_try(struct __cmtx *);
-void	__cmtx_enter(struct __cmtx *);
-void	__cmtx_leave(struct __cmtx *);
+void __cmtx_init(struct __cmtx *);
+int  __cmtx_enter_try(struct __cmtx *);
+void __cmtx_enter(struct __cmtx *);
+void __cmtx_leave(struct __cmtx *);
 
-void	__rcmtx_init(struct __rcmtx *);
-int	__rcmtx_enter_try(struct __rcmtx *);
-void	__rcmtx_enter(struct __rcmtx *);
-void	__rcmtx_leave(struct __rcmtx *);
+void __rcmtx_init(struct __rcmtx *);
+int  __rcmtx_enter_try(struct __rcmtx *);
+void __rcmtx_enter(struct __rcmtx *);
+void __rcmtx_leave(struct __rcmtx *);
 
-void	_rthread_debug(int, const char *, ...)
-		__attribute__((__format__ (printf, 2, 3)));
-pid_t	_thread_dofork(pid_t (*_sys_fork)(void));
-void	_thread_finalize(void);
+void _rthread_debug(int, const char *, ...)
+    __attribute__((__format__(printf, 2, 3)));
+pid_t _thread_dofork(pid_t (*_sys_fork)(void));
+void  _thread_finalize(void);
 
 /*
  * Threading syscalls not declared in system headers
  */
-__dead void	__threxit(pid_t *);
-int		__thrsleep(const volatile void *, clockid_t,
-		    const struct timespec *, volatile void *, const int *);
-int		__thrwakeup(const volatile void *, int n);
-int		__thrsigdivert(sigset_t, siginfo_t *, const struct timespec *);
+__dead void __threxit(pid_t *);
+int __thrsleep(const volatile void *, clockid_t, const struct timespec *,
+    volatile void *, const int *);
+int __thrwakeup(const volatile void *, int n);
+int __thrsigdivert(sigset_t, siginfo_t *, const struct timespec *);
 
 #endif /* _THREAD_PRIVATE_H_ */

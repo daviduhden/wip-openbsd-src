@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_GRP_H_
-#define	_LIBC_GRP_H_
+#define _LIBC_GRP_H_
 
 #include_next <grp.h>
 

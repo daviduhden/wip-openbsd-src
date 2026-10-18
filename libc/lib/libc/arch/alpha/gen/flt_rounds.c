@@ -33,23 +33,24 @@
  */
 
 #include <sys/types.h>
+
 #include <float.h>
 
 static const int map[] = {
-	0,	/* round to zero */
-	3,	/* round to negative infinity */
-	1,	/* round to nearest */
-	2	/* round to positive infinity */
+    0, /* round to zero */
+    3, /* round to negative infinity */
+    1, /* round to nearest */
+    2  /* round to positive infinity */
 };
 
 int
 __flt_rounds()
 {
-	double fpcrval;
+	double	  fpcrval;
 	u_int64_t old;
 
 	__asm__("trapb");
-	__asm__("mf_fpcr %0" : "=f" (fpcrval));
+	__asm__("mf_fpcr %0" : "=f"(fpcrval));
 	__asm__("trapb");
 	old = *(u_int64_t *)&fpcrval;
 

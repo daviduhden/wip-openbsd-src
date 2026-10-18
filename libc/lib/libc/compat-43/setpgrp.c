@@ -29,10 +29,11 @@
  */
 
 #include <sys/types.h>
+
 #include <unistd.h>
 
 int
 setpgrp(pid_t pid, pid_t pgid)
 {
-	return(setpgid(pid, pgid));
+	return (setpgid(pid, pgid));
 }

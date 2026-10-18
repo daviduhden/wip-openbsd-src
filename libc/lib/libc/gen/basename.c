@@ -25,7 +25,7 @@ char *
 basename(char *path)
 {
 	static char bname[PATH_MAX];
-	size_t len;
+	size_t	    len;
 	const char *endp, *startp;
 
 	/* Empty or NULL string gets treated as "." */

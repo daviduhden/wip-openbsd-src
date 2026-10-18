@@ -31,8 +31,8 @@
 int
 main(int argc, char *argv[])
 {
-	char	*optstring;
-	int	 ch;
+	char *optstring;
+	int   ch;
 
 	if ((optstring = getenv("OPTS")) == NULL)
 		optstring = "";

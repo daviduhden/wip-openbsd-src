@@ -17,7 +17,7 @@
 /*	$OpenBSD: select.h,v 1.1 2016/05/07 19:05:22 guenther Exp $	*/
 
 #ifndef _LIBC_SYS_SELECT_H_
-#define	_LIBC_SYS_SELECT_H_
+#define _LIBC_SYS_SELECT_H_
 
 #include_next <sys/select.h>
 

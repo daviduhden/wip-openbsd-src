@@ -35,13 +35,13 @@
 struct cpumem;
 
 struct evcount {
-	u_int64_t		ec_count;	/* main counter */
-	int			ec_id;		/* counter ID */
-	const char		*ec_name;	/* counter name */
-	void			*ec_data;	/* user data */
-	struct cpumem		*ec_percpu;	/* per-cpu counter */
+	u_int64_t      ec_count;  /* main counter */
+	int	       ec_id;	  /* counter ID */
+	const char    *ec_name;	  /* counter name */
+	void	      *ec_data;	  /* user data */
+	struct cpumem *ec_percpu; /* per-cpu counter */
 
-	TAILQ_ENTRY(evcount)	next;
+	TAILQ_ENTRY(evcount) next;
 };
 
 void evcount_attach(struct evcount *, const char *, void *);
@@ -49,7 +49,7 @@ void evcount_detach(struct evcount *);
 void evcount_inc(struct evcount *);
 void evcount_init_percpu(void);
 void evcount_percpu(struct evcount *);
-int evcount_sysctl(int *, u_int, void *, size_t *, void *, size_t);
+int  evcount_sysctl(int *, u_int, void *, size_t *, void *, size_t);
 
 #endif /* _KERNEL */
 

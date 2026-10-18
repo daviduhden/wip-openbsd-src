@@ -39,7 +39,7 @@
  * /etc/shells.
  */
 
-static char *okshells[] = { _PATH_BSHELL, _PATH_CSHELL, _PATH_KSHELL, NULL };
+static char  *okshells[] = {_PATH_BSHELL, _PATH_CSHELL, _PATH_KSHELL, NULL};
 static char **curshell, **shells;
 static char **initshells(void);
 
@@ -84,8 +84,8 @@ static char **
 initshells(void)
 {
 	size_t nshells, nalloc, linesize;
-	char *line;
-	FILE *fp;
+	char  *line;
+	FILE  *fp;
 
 	free(shells);
 	shells = NULL;
@@ -96,7 +96,7 @@ initshells(void)
 	line = NULL;
 	nalloc = 10; // just an initial guess
 	nshells = 0;
-	shells = reallocarray(NULL, nalloc, sizeof (char *));
+	shells = reallocarray(NULL, nalloc, sizeof(char *));
 	if (shells == NULL)
 		goto fail;
 	linesize = 0;
@@ -108,7 +108,8 @@ initshells(void)
 			goto fail;
 
 		if (nshells + 1 == nalloc) {
-			char **new = reallocarray(shells, nalloc * 2, sizeof(char *));
+			char **new =
+			    reallocarray(shells, nalloc * 2, sizeof(char *));
 			if (!new)
 				goto fail;
 			shells = new;

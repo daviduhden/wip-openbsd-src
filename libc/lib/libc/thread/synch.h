@@ -16,8 +16,8 @@
  */
 
 #include <sys/atomic.h>
-#include <sys/time.h>
 #include <sys/futex.h>
+#include <sys/time.h>
 
 static inline int
 _wake(volatile uint32_t *p, int n)
@@ -26,11 +26,12 @@ _wake(volatile uint32_t *p, int n)
 }
 
 static inline int
-_twait(volatile uint32_t *p, int val, clockid_t clockid, const struct timespec *abs)
+_twait(volatile uint32_t *p, int val, clockid_t clockid,
+    const struct timespec *abs)
 {
 	struct timespec now, rel;
-	int saved_errno = errno;
-	int error;
+	int		saved_errno = errno;
+	int		error;
 
 	if (abs == NULL) {
 		error = futex(p, FUTEX_WAIT_PRIVATE, val, NULL, NULL);

@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_LIBC_LINK_ELF_H_
-#define	_LIBC_LINK_ELF_H_
+#ifndef _LIBC_LINK_ELF_H_
+#define _LIBC_LINK_ELF_H_
 
 #include_next <link_elf.h>
 

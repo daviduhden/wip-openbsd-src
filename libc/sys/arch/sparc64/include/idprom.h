@@ -40,13 +40,13 @@
  * not actually used.  The checksum seems to include them, however.
  */
 struct idprom {
-	u_char	id_format;		/* format identifier (= 1) */
-	u_char	id_machine;		/* machine type (see param.h) */
-	u_char	id_ether[6];		/* ethernet address */
-	int	id_date;		/* date of manufacture */
-	u_char	id_hostid[3];		/* ``host id'' bytes */
-	u_char	id_checksum;		/* xor of everything else */
-	char	id_undef[16];		/* undefined */
+	u_char id_format;    /* format identifier (= 1) */
+	u_char id_machine;   /* machine type (see param.h) */
+	u_char id_ether[6];  /* ethernet address */
+	int    id_date;	     /* date of manufacture */
+	u_char id_hostid[3]; /* ``host id'' bytes */
+	u_char id_checksum;  /* xor of everything else */
+	char   id_undef[16]; /* undefined */
 };
 
 #define IDPROM_VERSION 1

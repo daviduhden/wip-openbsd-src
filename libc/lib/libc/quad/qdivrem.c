@@ -39,10 +39,10 @@
 
 #include "quad.h"
 
-#define	B	((int)1 << HALF_BITS)	/* digit base */
+#define B ((int)1 << HALF_BITS) /* digit base */
 
 /* Combine two `digits' to make a single two-digit number. */
-#define	COMBINE(a, b) (((u_int)(a) << HALF_BITS) | (b))
+#define COMBINE(a, b) (((u_int)(a) << HALF_BITS) | (b))
 
 /* select a type for digits in base B: use unsigned short if they fit */
 #if UINT_MAX == 0xffffffffU && USHRT_MAX >= 0xffff
@@ -65,11 +65,11 @@ u_quad_t
 __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 {
 	union uu tmp;
-	digit *u, *v, *q;
-	digit v1, v2;
-	u_int qhat, rhat, t;
-	int m, n, d, j, i;
-	digit uspace[5], vspace[5], qspace[5];
+	digit	*u, *v, *q;
+	digit	 v1, v2;
+	u_int	 qhat, rhat, t;
+	int	 m, n, d, j, i;
+	digit	 uspace[5], vspace[5], qspace[5];
 
 	/*
 	 * Take care of special cases: divide by zero, and u < v.
@@ -118,7 +118,7 @@ __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 	v[4] = (digit)LHALF(tmp.ul[L]);
 	for (n = 4; v[1] == 0; v++) {
 		if (--n == 1) {
-			u_int rbj;	/* r*B+u[j] (not root boy jim) */
+			u_int rbj; /* r*B+u[j] (not root boy jim) */
 			digit q1, q2, q3, q4;
 
 			/*
@@ -129,7 +129,7 @@ __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 			 *		r = (r*B + u[j]) % v;
 			 * We unroll this completely here.
 			 */
-			t = v[2];	/* nonzero, by definition */
+			t = v[2]; /* nonzero, by definition */
 			q1 = (digit)(u[1] / t);
 			rbj = COMBINE(u[1] % t, u[2]);
 			q2 = (digit)(rbj / t);
@@ -166,18 +166,18 @@ __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 	for (t = v[1]; t < B / 2; t <<= 1)
 		d++;
 	if (d > 0) {
-		shl(&u[0], m + n, d);		/* u <<= d */
-		shl(&v[1], n - 1, d);		/* v <<= d */
+		shl(&u[0], m + n, d); /* u <<= d */
+		shl(&v[1], n - 1, d); /* v <<= d */
 	}
 	/*
 	 * D2: j = 0.
 	 */
 	j = 0;
-	v1 = v[1];	/* for D3 -- note that v[1..n] are constant */
-	v2 = v[2];	/* for D3 */
+	v1 = v[1]; /* for D3 -- note that v[1..n] are constant */
+	v2 = v[2]; /* for D3 */
 	do {
 		digit uj0, uj1, uj2;
-		
+
 		/*
 		 * D3: Calculate qhat (\^q, in TeX notation).
 		 * Let qhat = min((u[j]*B + u[j+1])/v[1], B-1), and
@@ -186,9 +186,9 @@ __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 		 * decrement qhat and increase rhat correspondingly.
 		 * Note that if rhat >= B, v[2]*qhat < rhat*B.
 		 */
-		uj0 = u[j + 0];	/* for D3 only -- note that u[j+...] change */
-		uj1 = u[j + 1];	/* for D3 only */
-		uj2 = u[j + 2];	/* for D3 only */
+		uj0 = u[j + 0]; /* for D3 only -- note that u[j+...] change */
+		uj1 = u[j + 1]; /* for D3 only */
+		uj2 = u[j + 2]; /* for D3 only */
 		if (uj0 == v1) {
 			qhat = B;
 			rhat = uj1;
@@ -199,7 +199,7 @@ __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 			rhat = nn % v1;
 		}
 		while (v2 * qhat > COMBINE(rhat, uj2)) {
-	qhat_too_big:
+		qhat_too_big:
 			qhat--;
 			if ((rhat += v1) >= B)
 				break;
@@ -233,7 +233,7 @@ __qdivrem(u_quad_t uq, u_quad_t vq, u_quad_t *arq)
 			u[j] = (digit)LHALF(u[j] + t);
 		}
 		q[j] = (digit)qhat;
-	} while (++j <= m);		/* D7: loop on j. */
+	} while (++j <= m); /* D7: loop on j. */
 
 	/*
 	 * If caller wants the remainder, we have to calculate it as

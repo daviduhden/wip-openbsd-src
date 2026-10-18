@@ -18,18 +18,17 @@
 #include <tib.h>
 
 #ifndef PIC
-# include <stdlib.h>		/* posix_memalign and free */
+#include <stdlib.h> /* posix_memalign and free */
 #endif
 
-#define ELF_ROUND(x,malign)	(((x) + (malign)-1) & ~((malign)-1))
-
+#define ELF_ROUND(x, malign) (((x) + (malign) - 1) & ~((malign) - 1))
 
 /*
  * The functions here are weak so that the ld.so versions are used
  * in dynamic links, whether or not libc is static
  */
-void	*_dl_allocate_tib(size_t _extra) __attribute__((weak));
-void	_dl_free_tib(void *_tib, size_t _extra) __attribute__((weak));
+void *_dl_allocate_tib(size_t _extra) __attribute__((weak));
+void  _dl_free_tib(void *_tib, size_t _extra) __attribute__((weak));
 
 /*
  * Allocate a TIB for passing to __tfork for a new thread.  'extra'
@@ -41,31 +40,33 @@ void *
 _dl_allocate_tib(size_t extra)
 {
 #ifdef PIC
-	return NULL;			/* overridden by ld.so */
+	return NULL; /* overridden by ld.so */
 #else
 	void *base;
 	char *thread;
 
-# if TLS_VARIANT == 1
+#if TLS_VARIANT == 1
 	/* round up the extra size to align the TIB and TLS data after it */
-	extra = (extra <= _static_tls_align_offset) ? 0 :
+	extra = (extra <= _static_tls_align_offset) ?
+	    0 :
 	    ELF_ROUND(extra - _static_tls_align_offset, _static_tls_align);
-	if (posix_memalign(&base, _static_tls_align, extra +
-	    _static_tls_align_offset + sizeof(struct tib) +
-	    _static_tls_size) != 0)
+	if (posix_memalign(&base, _static_tls_align,
+		extra + _static_tls_align_offset + sizeof(struct tib) +
+		    _static_tls_size) != 0)
 		return NULL;
 	thread = base;
 	base = (char *)base + extra;
 
-# elif TLS_VARIANT == 2
+#elif TLS_VARIANT == 2
 	/* round up the TIB size to align the extra area after it */
 	if (posix_memalign(&base, _static_tls_align,
-	    _static_tls_align_offset + _static_tls_size +
-	    ELF_ROUND(sizeof(struct tib), TIB_EXTRA_ALIGN) + extra) != 0)
+		_static_tls_align_offset + _static_tls_size +
+		    ELF_ROUND(sizeof(struct tib), TIB_EXTRA_ALIGN) + extra) !=
+	    0)
 		return NULL;
 	thread = (char *)base + _static_tls_align_offset + _static_tls_size +
 	    ELF_ROUND(sizeof(struct tib), TIB_EXTRA_ALIGN);
-# endif
+#endif
 
 	return _static_tls_init(base, thread);
 #endif /* !PIC */
@@ -77,12 +78,13 @@ _dl_free_tib(void *tib, size_t extra)
 #ifndef PIC
 	size_t tib_offset;
 
-# if TLS_VARIANT == 1
-	tib_offset = (extra <= _static_tls_align_offset) ? 0 :
+#if TLS_VARIANT == 1
+	tib_offset = (extra <= _static_tls_align_offset) ?
+	    0 :
 	    ELF_ROUND(extra - _static_tls_align_offset, _static_tls_align);
-# elif TLS_VARIANT == 2
+#elif TLS_VARIANT == 2
 	tib_offset = _static_tls_size;
-# endif
+#endif
 	tib_offset += _static_tls_align_offset;
 
 	free((char *)tib - tib_offset);

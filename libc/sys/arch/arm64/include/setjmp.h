@@ -5,7 +5,7 @@
  * machine/setjmp.h: machine dependent setjmp-related information.
  */
 
-#define	_JBLEN	64		/* size, in longs, of a jmp_buf */
+#define _JBLEN 64 /* size, in longs, of a jmp_buf */
 
 /*
  * NOTE: The internal structure of a jmp_buf is *PRIVATE*
@@ -55,29 +55,29 @@
  * mysteriously.
  */
 
-#define _JB_MAGIC__SETJMP	0x4278f500
-#define _JB_MAGIC_SETJMP	0x4278f501
+#define _JB_MAGIC__SETJMP 0x4278f500
+#define _JB_MAGIC_SETJMP 0x4278f501
 
 /* Valid for all jmp_buf's */
 
-#define _JB_MAGIC		 0
-#define _JB_REG_F4		 1
-#define _JB_REG_F5		 4
-#define _JB_REG_F6		 7
-#define _JB_REG_F7		10
-#define _JB_REG_FPSR		13
-#define _JB_REG_R4		14
-#define _JB_REG_R5		15
-#define _JB_REG_R6		16
-#define _JB_REG_R7		17
-#define _JB_REG_R8		18
-#define _JB_REG_R9		19
-#define _JB_REG_R10		20
-#define _JB_REG_R11		21
-#define _JB_REG_R12		22
-#define _JB_REG_R13		23
-#define _JB_REG_R14		24
+#define _JB_MAGIC 0
+#define _JB_REG_F4 1
+#define _JB_REG_F5 4
+#define _JB_REG_F6 7
+#define _JB_REG_F7 10
+#define _JB_REG_FPSR 13
+#define _JB_REG_R4 14
+#define _JB_REG_R5 15
+#define _JB_REG_R6 16
+#define _JB_REG_R7 17
+#define _JB_REG_R8 18
+#define _JB_REG_R9 19
+#define _JB_REG_R10 20
+#define _JB_REG_R11 21
+#define _JB_REG_R12 22
+#define _JB_REG_R13 23
+#define _JB_REG_R14 24
 
 /* Only valid with the _JB_MAGIC_SETJMP magic */
 
-#define _JB_SIGMASK		25
+#define _JB_SIGMASK 25

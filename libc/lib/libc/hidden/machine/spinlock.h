@@ -15,13 +15,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_LIBC_MACHINE_SPINLOCK_H_
-#define	_LIBC_MACHINE_SPINLOCK_H_
+#ifndef _LIBC_MACHINE_SPINLOCK_H_
+#define _LIBC_MACHINE_SPINLOCK_H_
 
 #include_next <machine/spinlock.h>
 
 __BEGIN_HIDDEN_DECLS
-int	_atomic_lock(volatile _atomic_lock_t *);
+int _atomic_lock(volatile _atomic_lock_t *);
 __END_HIDDEN_DECLS
 
 #endif /* !_LIBC_MACHINE_SPINLOCK_H_ */

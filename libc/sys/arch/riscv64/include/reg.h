@@ -41,28 +41,28 @@
 #define _MACHINE_REG_H_
 
 struct reg {
-	uint64_t	r_ra;		/* return address */
-	uint64_t	r_sp;		/* stack pointer */
-	uint64_t	r_gp;		/* global pointer */
-	uint64_t	r_tp;		/* thread pointer */
-	uint64_t	r_t[7];		/* temporary registers */
-	uint64_t	r_s[12];	/* saved registers */
-	uint64_t	r_a[8];		/* argument registers */
-	uint64_t	r_sepc;		/* exception program counter */
-	uint64_t	r_sstatus;	/* status register */
+	uint64_t r_ra;	    /* return address */
+	uint64_t r_sp;	    /* stack pointer */
+	uint64_t r_gp;	    /* global pointer */
+	uint64_t r_tp;	    /* thread pointer */
+	uint64_t r_t[7];    /* temporary registers */
+	uint64_t r_s[12];   /* saved registers */
+	uint64_t r_a[8];    /* argument registers */
+	uint64_t r_sepc;    /* exception program counter */
+	uint64_t r_sstatus; /* status register */
 };
 
 struct fpreg {
-	uint64_t	fp_f[32];	/* floating-point registers */
-	uint64_t	fp_fcsr;	/* floating-point control register */
+	uint64_t fp_f[32]; /* floating-point registers */
+	uint64_t fp_fcsr;  /* floating-point control register */
 };
 
 struct vreg {
-	uint64_t	v_vtype;	/* vector type control register */
-	uint64_t	v_vl;		/* vector length control register */
-	uint64_t	v_vstart;	/* vector start control register */
-	uint64_t	v_vcsr;		/* vector control and status register */
-	uint8_t		v_vdata[];	/* vector register data (sized based on vlenb) */
+	uint64_t v_vtype;   /* vector type control register */
+	uint64_t v_vl;	    /* vector length control register */
+	uint64_t v_vstart;  /* vector start control register */
+	uint64_t v_vcsr;    /* vector control and status register */
+	uint8_t	 v_vdata[]; /* vector register data (sized based on vlenb) */
 };
 
 #endif /* !_MACHINE_REG_H_ */

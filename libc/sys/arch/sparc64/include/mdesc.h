@@ -16,40 +16,40 @@
  */
 
 struct md_header {
-	uint32_t	transport_version;
-	uint32_t	node_blk_sz;
-	uint32_t	name_blk_sz;
-	uint32_t	data_blk_sz;
+	uint32_t transport_version;
+	uint32_t node_blk_sz;
+	uint32_t name_blk_sz;
+	uint32_t data_blk_sz;
 };
 
 struct md_element {
-	uint8_t		tag;
-	uint8_t		name_len;
-	uint16_t	_reserved_field;
-	uint32_t	name_offset;
+	uint8_t	 tag;
+	uint8_t	 name_len;
+	uint16_t _reserved_field;
+	uint32_t name_offset;
 	union {
 		struct {
-			uint32_t	data_len;
-			uint32_t	data_offset;
+			uint32_t data_len;
+			uint32_t data_offset;
 		} y;
-		uint64_t	val;
+		uint64_t val;
 	} d;
 };
 
 #ifdef _KERNEL
 
 extern caddr_t mdesc;
-extern size_t mdesc_len;
+extern size_t  mdesc_len;
 
 extern caddr_t pri;
-extern size_t pri_len;
+extern size_t  pri_len;
 
-void	 mdesc_init(void);
-uint64_t mdesc_get_prop_val(int, const char *);
+void	    mdesc_init(void);
+uint64_t    mdesc_get_prop_val(int, const char *);
 const char *mdesc_get_prop_str(int, const char *);
 const char *mdesc_get_prop_data(int, const char *, size_t *);
-int	mdesc_find(const char *, uint64_t);
-int	mdesc_find_child(int, const char *, uint64_t);
-int	mdesc_find_node(const char *);
+int	    mdesc_find(const char *, uint64_t);
+int	    mdesc_find_child(int, const char *, uint64_t);
+int	    mdesc_find_node(const char *);
 
 #endif

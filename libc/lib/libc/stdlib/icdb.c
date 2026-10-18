@@ -15,20 +15,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <icdb.h>
+#include <siphash.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include <sys/mman.h>
-#include <sys/stat.h>
-
-#include <siphash.h>
 
 /*
  * Creating a new icdb: icdb_new
@@ -78,15 +77,15 @@
  * Header info for icdb. This struct is stored on disk.
  */
 struct icdbinfo {
-	uint32_t magic;		/* magic */
-	uint32_t version;	/* user specified version */
-	uint32_t nentries;	/* number of entries stored */
-	uint32_t entrysize;	/* size of each entry */
-	uint32_t indexsize;	/* number of entries in hash index */
-	uint32_t nkeys;		/* number of keys defined */
-	uint32_t keysize[8];	/* size of each key */
-	uint32_t keyoffset[8];	/* offset of each key in entry */
-	SIPHASH_KEY siphashkey;	/* random hash key */
+	uint32_t    magic;	  /* magic */
+	uint32_t    version;	  /* user specified version */
+	uint32_t    nentries;	  /* number of entries stored */
+	uint32_t    entrysize;	  /* size of each entry */
+	uint32_t    indexsize;	  /* number of entries in hash index */
+	uint32_t    nkeys;	  /* number of keys defined */
+	uint32_t    keysize[8];	  /* size of each key */
+	uint32_t    keyoffset[8]; /* offset of each key in entry */
+	SIPHASH_KEY siphashkey;	  /* random hash key */
 };
 
 /*
@@ -95,11 +94,11 @@ struct icdbinfo {
  */
 struct icdb {
 	struct icdbinfo *info;
-	void *idxdata[8];
-	void *entries;
-	size_t maplen;
-	uint32_t allocated;
-	int fd;
+	void		*idxdata[8];
+	void		*entries;
+	size_t		 maplen;
+	uint32_t	 allocated;
+	int		 fd;
 };
 
 static const uint32_t magic = 0x1ca9d0b7;
@@ -118,9 +117,9 @@ struct icdb *
 icdb_new(uint32_t version, uint32_t nentries, uint32_t entrysize,
     uint32_t nkeys, const uint32_t *keysizes, const uint32_t *keyoffsets)
 {
-	struct icdb *db;
+	struct icdb	*db;
 	struct icdbinfo *info;
-	int i;
+	int		 i;
 
 	if (entrysize == 0 || entrysize > 1048576 || nkeys > 8) {
 		errno = EINVAL;
@@ -153,12 +152,12 @@ DEF_WEAK(icdb_new);
 struct icdb *
 icdb_open(const char *name, int flags, uint32_t version)
 {
-	struct icdb *db = NULL;
+	struct icdb	*db = NULL;
 	struct icdbinfo *info;
-	struct stat sb;
-	uint8_t *ptr = MAP_FAILED;
-	uint32_t baseoff, indexsize, idxmask, idxlen;
-	int fd, i, saved_errno;
+	struct stat	 sb;
+	uint8_t		*ptr = MAP_FAILED;
+	uint32_t	 baseoff, indexsize, idxmask, idxlen;
+	int		 fd, i, saved_errno;
 
 	if ((fd = open(name, flags | O_CLOEXEC)) == -1)
 		return NULL;
@@ -166,8 +165,8 @@ icdb_open(const char *name, int flags, uint32_t version)
 		goto fail;
 	if (sb.st_size < sizeof(struct icdbinfo))
 		goto fail;
-	ptr = mmap(NULL, sb.st_size, PROT_READ |
-	    ((flags & O_RDWR) ? PROT_WRITE : 0), MAP_SHARED, fd, 0);
+	ptr = mmap(NULL, sb.st_size,
+	    PROT_READ | ((flags & O_RDWR) ? PROT_WRITE : 0), MAP_SHARED, fd, 0);
 	if (ptr == MAP_FAILED)
 		goto fail;
 	info = (struct icdbinfo *)ptr;
@@ -215,14 +214,14 @@ icdb_get(struct icdb *db, void *entry, uint32_t idx)
 DEF_WEAK(icdb_get);
 
 int
-icdb_lookup(struct icdb *db, int keynum, const void *key, void *entry,
-    uint32_t *idxp)
+icdb_lookup(
+    struct icdb *db, int keynum, const void *key, void *entry, uint32_t *idxp)
 {
 	struct icdbinfo *info = db->info;
-	uint32_t offset;
-	uint64_t hash;
-	uint32_t indexsize, idxmask, idxlen;
-	uint32_t *idxdata;
+	uint32_t	 offset;
+	uint64_t	 hash;
+	uint32_t	 indexsize, idxmask, idxlen;
+	uint32_t	*idxdata;
 
 	indexsize = info->indexsize;
 	idxmask = indexsize - 1;
@@ -237,7 +236,7 @@ icdb_lookup(struct icdb *db, int keynum, const void *key, void *entry,
 			return -1;
 		}
 		if (memcmp((uint8_t *)entry + info->keyoffset[keynum], key,
-		    info->keysize[keynum]) == 0) {
+			info->keysize[keynum]) == 0) {
 			if (idxp)
 				*idxp = offset;
 			return 0;
@@ -266,9 +265,9 @@ int
 icdb_update(struct icdb *db, const void *entry, int offset)
 {
 	struct icdbinfo *info = db->info;
-	uint32_t entrysize = info->entrysize;
-	uint32_t baseoff;
-	uint32_t indexsize, idxmask, idxlen;
+	uint32_t	 entrysize = info->entrysize;
+	uint32_t	 baseoff;
+	uint32_t	 indexsize, idxmask, idxlen;
 
 	indexsize = info->indexsize;
 	idxmask = indexsize - 1;
@@ -288,18 +287,18 @@ int
 icdb_add(struct icdb *db, const void *entry)
 {
 	struct icdbinfo *info = db->info;
-	size_t entrysize = info->entrysize;
+	size_t		 entrysize = info->entrysize;
 
 	if (db->allocated == info->nentries) {
-		void *p;
+		void  *p;
 		size_t amt = db->allocated ? db->allocated * 2 : 63;
 		if (!(p = reallocarray(db->entries, amt, entrysize)))
 			return -1;
 		db->allocated = amt;
 		db->entries = p;
 	}
-	memcpy((uint8_t *)db->entries + info->nentries * entrysize,
-	    entry, entrysize);
+	memcpy((uint8_t *)db->entries + info->nentries * entrysize, entry,
+	    entrysize);
 	info->nentries++;
 	return 0;
 }
@@ -309,9 +308,9 @@ int
 icdb_rehash(struct icdb *db)
 {
 	struct icdbinfo *info = db->info;
-	uint32_t entrysize = info->entrysize;
-	uint32_t indexsize, idxmask, idxlen;
-	int i, j;
+	uint32_t	 entrysize = info->entrysize;
+	uint32_t	 indexsize, idxmask, idxlen;
+	int		 i, j;
 
 	indexsize = info->indexsize = roundup(info->nentries);
 	idxmask = indexsize - 1;
@@ -320,8 +319,8 @@ icdb_rehash(struct icdb *db)
 	arc4random_buf(&info->siphashkey, sizeof(info->siphashkey));
 
 	for (i = 0; i < info->nkeys; i++) {
-		uint32_t *idxdata = reallocarray(db->idxdata[i],
-		    indexsize, sizeof(uint32_t));
+		uint32_t *idxdata =
+		    reallocarray(db->idxdata[i], indexsize, sizeof(uint32_t));
 		if (!idxdata)
 			return -1;
 		memset(idxdata, 0xff, idxlen);
@@ -330,11 +329,13 @@ icdb_rehash(struct icdb *db)
 	for (j = 0; j < info->nentries; j++) {
 		for (i = 0; i < info->nkeys; i++) {
 			uint32_t *idxdata = db->idxdata[i];
-			uint64_t hash = SipHash24(&info->siphashkey,
+			uint64_t  hash = SipHash24(&info->siphashkey,
 			    (uint8_t *)db->entries + j * entrysize +
-			    info->keyoffset[i], info->keysize[i]);
+				info->keyoffset[i],
+			    info->keysize[i]);
 			while (idxdata[hash & idxmask] != -1)
-				hash = SipHash24(&info->siphashkey, &hash, sizeof(hash));
+				hash = SipHash24(
+				    &info->siphashkey, &hash, sizeof(hash));
 			idxdata[hash & idxmask] = j;
 		}
 	}
@@ -346,9 +347,9 @@ int
 icdb_save(struct icdb *db, int fd)
 {
 	struct icdbinfo *info = db->info;
-	uint32_t entrysize = info->entrysize;
-	uint32_t indexsize, idxlen;
-	int i;
+	uint32_t	 entrysize = info->entrysize;
+	uint32_t	 indexsize, idxlen;
+	int		 i;
 
 	if (icdb_rehash(db) != 0)
 		return -1;

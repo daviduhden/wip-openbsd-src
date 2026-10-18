@@ -27,17 +27,17 @@
  * _citrus_utf8_ctype_mbrtowc().
  */
 struct _utf16_state {
-	wchar_t	ch;
+	wchar_t ch;
 	int	want;
 };
 
 size_t
 mbrtoc16(char16_t *pc16, const char *s, size_t n, mbstate_t *ps)
 {
-	static mbstate_t	 mbs;
-	struct _utf16_state	*us;
-	size_t			 rv;
-	wchar_t			 wc;
+	static mbstate_t     mbs;
+	struct _utf16_state *us;
+	size_t		     rv;
+	wchar_t		     wc;
 
 	/*
 	 * Fall back to a state object local to this function

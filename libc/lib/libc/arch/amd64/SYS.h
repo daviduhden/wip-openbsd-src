@@ -35,93 +35,89 @@
  *	$NetBSD: SYS.h,v 1.5 2002/06/03 18:30:32 fvdl Exp $
  */
 
-#include "DEFS.h"
 #include <sys/syscall.h>
 
+#include "DEFS.h"
+
 /* offsetof(struct tib, tib_errno) - offsetof(struct tib, __tib_tcb) */
-#define	TCB_OFFSET_ERRNO	32
+#define TCB_OFFSET_ERRNO 32
 
-#define SYSTRAP(x)							\
-	movl $(SYS_ ## x),%eax;						\
-	movq %rcx, %r10;						\
-97:	syscall;							\
-	PINSYSCALL(SYS_ ## x, 97b)
+#define SYSTRAP(x)                                                             \
+	movl $(SYS_##x), % eax;                                                \
+	movq % rcx, % r10;                                                     \
+	97 : syscall;                                                          \
+	PINSYSCALL(SYS_##x, 97b)
 
-#define SYSENTRY(x)							\
-	SYSENTRY_HIDDEN(x);						\
+#define SYSENTRY(x)                                                            \
+	SYSENTRY_HIDDEN(x);                                                    \
 	WEAK_ALIAS(x, _thread_sys_##x)
-#define SYSENTRY_HIDDEN(x)						\
-	ENTRY(_thread_sys_ ## x)
+#define SYSENTRY_HIDDEN(x) ENTRY(_thread_sys_##x)
 
-#define	SYSCALL_END_HIDDEN(x)						\
-	END(_thread_sys_ ## x);						\
-	_HIDDEN_FALIAS(x,_thread_sys_##x);				\
+#define SYSCALL_END_HIDDEN(x)                                                  \
+	END(_thread_sys_##x);                                                  \
+	_HIDDEN_FALIAS(x, _thread_sys_##x);                                    \
 	END(_HIDDEN(x))
-#define	SYSCALL_END(x)		SYSCALL_END_HIDDEN(x); END(x)
+#define SYSCALL_END(x)                                                         \
+	SYSCALL_END_HIDDEN(x);                                                 \
+	END(x)
 
-
-#define SET_ERRNO							\
-	movl	%eax,%fs:(TCB_OFFSET_ERRNO);				\
-	movq	$-1, %rax
-#define HANDLE_ERRNO							\
-	jnc	99f;							\
-	SET_ERRNO;							\
+#define SET_ERRNO                                                              \
+	movl % eax, % fs : (TCB_OFFSET_ERRNO);                                 \
+	movq $ - 1, % rax
+#define HANDLE_ERRNO                                                           \
+	jnc 99f;                                                               \
+	SET_ERRNO;                                                             \
 	99:
 
-#define _SYSCALL_NOERROR(x,y)						\
-	SYSENTRY(x);							\
+#define _SYSCALL_NOERROR(x, y)                                                 \
+	SYSENTRY(x);                                                           \
 	SYSTRAP(y)
-#define _SYSCALL_HIDDEN_NOERROR(x,y)					\
-	SYSENTRY_HIDDEN(x);						\
+#define _SYSCALL_HIDDEN_NOERROR(x, y)                                          \
+	SYSENTRY_HIDDEN(x);                                                    \
 	SYSTRAP(y)
 
-#define SYSCALL_NOERROR(x)						\
-	_SYSCALL_NOERROR(x,x)
+#define SYSCALL_NOERROR(x) _SYSCALL_NOERROR(x, x)
 
-#define SYSCALL_HIDDEN(x)						\
-	_SYSCALL_HIDDEN_NOERROR(x,x);					\
+#define SYSCALL_HIDDEN(x)                                                      \
+	_SYSCALL_HIDDEN_NOERROR(x, x);                                         \
 	HANDLE_ERRNO
-#define SYSCALL(x)							\
-	_SYSCALL_NOERROR(x,x);						\
+#define SYSCALL(x)                                                             \
+	_SYSCALL_NOERROR(x, x);                                                \
 	HANDLE_ERRNO
 
-
-#define PSEUDO_NOERROR(x,y)						\
-	SYSENTRY(x);							\
-	RETGUARD_SETUP(_thread_sys_##x, r11);				\
-	RETGUARD_PUSH(r11);						\
-	SYSTRAP(y);							\
-	RETGUARD_POP(r11);						\
-	RETGUARD_CHECK(_thread_sys_##x, r11);				\
-	ret;								\
+#define PSEUDO_NOERROR(x, y)                                                   \
+	SYSENTRY(x);                                                           \
+	RETGUARD_SETUP(_thread_sys_##x, r11);                                  \
+	RETGUARD_PUSH(r11);                                                    \
+	SYSTRAP(y);                                                            \
+	RETGUARD_POP(r11);                                                     \
+	RETGUARD_CHECK(_thread_sys_##x, r11);                                  \
+	ret;                                                                   \
 	SYSCALL_END(x)
 
-#define PSEUDO(x,y)							\
-	SYSENTRY(x);							\
-	RETGUARD_SETUP(_thread_sys_##x, r11);				\
-	RETGUARD_PUSH(r11);						\
-	SYSTRAP(y);							\
-	HANDLE_ERRNO;							\
-	RETGUARD_POP(r11);						\
-	RETGUARD_CHECK(_thread_sys_##x, r11);				\
-	ret;								\
+#define PSEUDO(x, y)                                                           \
+	SYSENTRY(x);                                                           \
+	RETGUARD_SETUP(_thread_sys_##x, r11);                                  \
+	RETGUARD_PUSH(r11);                                                    \
+	SYSTRAP(y);                                                            \
+	HANDLE_ERRNO;                                                          \
+	RETGUARD_POP(r11);                                                     \
+	RETGUARD_CHECK(_thread_sys_##x, r11);                                  \
+	ret;                                                                   \
 	SYSCALL_END(x)
 
-#define PSEUDO_HIDDEN(x,y)						\
-	SYSENTRY_HIDDEN(x);						\
-	RETGUARD_SETUP(_thread_sys_##x, r11);				\
-	RETGUARD_PUSH(r11);						\
-	SYSTRAP(y);							\
-	HANDLE_ERRNO;							\
-	RETGUARD_POP(r11);						\
-	RETGUARD_CHECK(_thread_sys_##x , r11);				\
-	ret;								\
+#define PSEUDO_HIDDEN(x, y)                                                    \
+	SYSENTRY_HIDDEN(x);                                                    \
+	RETGUARD_SETUP(_thread_sys_##x, r11);                                  \
+	RETGUARD_PUSH(r11);                                                    \
+	SYSTRAP(y);                                                            \
+	HANDLE_ERRNO;                                                          \
+	RETGUARD_POP(r11);                                                     \
+	RETGUARD_CHECK(_thread_sys_##x, r11);                                  \
+	ret;                                                                   \
 	SYSCALL_END_HIDDEN(x)
 
-#define RSYSCALL_NOERROR(x)						\
-	PSEUDO_NOERROR(x,x)
+#define RSYSCALL_NOERROR(x) PSEUDO_NOERROR(x, x)
 
-#define RSYSCALL(x)							\
-	PSEUDO(x,x)
-#define RSYSCALL_HIDDEN(x)						\
-	PSEUDO_HIDDEN(x,x)
+#define RSYSCALL(x) PSEUDO(x, x)
+#define RSYSCALL_HIDDEN(x) PSEUDO_HIDDEN(x, x)

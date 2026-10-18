@@ -32,22 +32,22 @@
 #include <sys/stat.h>
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
-#include <signal.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <limits.h>
-#include <pwd.h>
-#include <errno.h>
-#include <stdio.h>
+#include <arpa/inet.h>
 #include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <netdb.h>
+#include <poll.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <time.h>
-#include <stdlib.h>
-#include <poll.h>
+#include <unistd.h>
 
 int
 rcmd(char **ahost, int rport, const char *locuser, const char *remuser,
@@ -60,27 +60,26 @@ int
 rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
     const char *cmd, int *fd2p, int af)
 {
-	static char hbuf[HOST_NAME_MAX+1];
-	char pbuf[NI_MAXSERV];
-	struct addrinfo hints, *res, *r;
-	int error;
+	static char		hbuf[HOST_NAME_MAX + 1];
+	char			pbuf[NI_MAXSERV];
+	struct addrinfo		hints, *res, *r;
+	int			error;
 	struct sockaddr_storage from;
-	sigset_t oldmask, mask;
-	pid_t pid;
-	int s, lport;
-	struct timespec timo;
-	char c, *p;
-	int refused;
-	in_port_t rport = porta;
-	int numread;
+	sigset_t		oldmask, mask;
+	pid_t			pid;
+	int			s, lport;
+	struct timespec		timo;
+	char			c, *p;
+	int			refused;
+	in_port_t		rport = porta;
+	int			numread;
 
 	/* call rcmdsh() with specified remote shell if appropriate. */
 	if (!issetugid() && (p = getenv("RSH")) && *p) {
 		struct servent *sp = getservbyname("shell", "tcp");
 
 		if (sp && sp->s_port == rport)
-			return (rcmdsh(ahost, rport, locuser, remuser,
-			    cmd, p));
+			return (rcmdsh(ahost, rport, locuser, remuser, cmd, p));
 	}
 
 	/* use rsh(1) if non-root and remote port is shell. */
@@ -88,8 +87,8 @@ rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
 		struct servent *sp = getservbyname("shell", "tcp");
 
 		if (sp && sp->s_port == rport)
-			return (rcmdsh(ahost, rport, locuser, remuser,
-			    cmd, NULL));
+			return (
+			    rcmdsh(ahost, rport, locuser, remuser, cmd, NULL));
 	}
 
 	pid = getpid();
@@ -100,8 +99,8 @@ rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
 	hints.ai_flags = AI_CANONNAME;
 	error = getaddrinfo(*ahost, pbuf, &hints, &res);
 	if (error) {
-		(void)fprintf(stderr, "rcmd: %s: %s\n", *ahost,
-		    gai_strerror(error));
+		(void)fprintf(
+		    stderr, "rcmd: %s: %s\n", *ahost, gai_strerror(error));
 		return (-1);
 	}
 	if (res->ai_canonname) {
@@ -120,8 +119,8 @@ rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
 		s = rresvport_af(&lport, r->ai_family);
 		if (s < 0) {
 			if (errno == EAGAIN)
-				(void)fprintf(stderr,
-				    "rcmd: socket: All ports in use\n");
+				(void)fprintf(
+				    stderr, "rcmd: socket: All ports in use\n");
 			else
 				(void)fprintf(stderr, "rcmd: socket: %s\n",
 				    strerror(errno));
@@ -145,21 +144,21 @@ rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
 		if (errno == ECONNREFUSED)
 			refused++;
 		if (r->ai_next) {
-			int oerrno = errno;
-			char hbuf[NI_MAXHOST];
+			int	  oerrno = errno;
+			char	  hbuf[NI_MAXHOST];
 			const int niflags = NI_NUMERICHOST;
 
 			hbuf[0] = '\0';
-			if (getnameinfo(r->ai_addr, r->ai_addrlen,
-			    hbuf, sizeof(hbuf), NULL, 0, niflags) != 0)
+			if (getnameinfo(r->ai_addr, r->ai_addrlen, hbuf,
+				sizeof(hbuf), NULL, 0, niflags) != 0)
 				strlcpy(hbuf, "(invalid)", sizeof hbuf);
 			(void)fprintf(stderr, "connect to address %s: ", hbuf);
 			errno = oerrno;
 			perror(0);
 			r = r->ai_next;
 			hbuf[0] = '\0';
-			if (getnameinfo(r->ai_addr, r->ai_addrlen,
-			    hbuf, sizeof(hbuf), NULL, 0, niflags) != 0)
+			if (getnameinfo(r->ai_addr, r->ai_addrlen, hbuf,
+				sizeof(hbuf), NULL, 0, niflags) != 0)
 				strlcpy(hbuf, "(invalid)", sizeof hbuf);
 			(void)fprintf(stderr, "Trying %s...\n", hbuf);
 			continue;
@@ -171,8 +170,8 @@ rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
 			refused = 0;
 			continue;
 		}
-		(void)fprintf(stderr, "%s: %s\n", res->ai_canonname,
-		    strerror(errno));
+		(void)fprintf(
+		    stderr, "%s: %s\n", res->ai_canonname, strerror(errno));
 		sigprocmask(SIG_SETMASK, &oldmask, NULL);
 		freeaddrinfo(res);
 		return (-1);
@@ -185,23 +184,23 @@ rcmd_af(char **ahost, int porta, const char *locuser, const char *remuser,
 		lport = 0;
 	} else {
 		struct pollfd pfd[2];
-		char num[8];
-		int s2 = rresvport_af(&lport, af), s3;
-		socklen_t len = sizeof(from);
+		char	      num[8];
+		int	      s2 = rresvport_af(&lport, af), s3;
+		socklen_t     len = sizeof(from);
 
 		if (s2 < 0)
 			goto bad;
 
 		listen(s2, 1);
 		(void)snprintf(num, sizeof(num), "%d", lport);
-		if (write(s, num, strlen(num)+1) != strlen(num)+1) {
+		if (write(s, num, strlen(num) + 1) != strlen(num) + 1) {
 			(void)fprintf(stderr,
 			    "rcmd: write (setting up stderr): %s\n",
 			    strerror(errno));
 			(void)close(s2);
 			goto bad;
 		}
-again:
+	again:
 		pfd[0].fd = s;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = s2;
@@ -209,21 +208,22 @@ again:
 
 		errno = 0;
 		if (poll(pfd, 2, INFTIM) < 1 ||
-		    (pfd[1].revents & (POLLIN|POLLHUP)) == 0) {
+		    (pfd[1].revents & (POLLIN | POLLHUP)) == 0) {
 			if (errno != 0)
 				(void)fprintf(stderr,
 				    "rcmd: poll (setting up stderr): %s\n",
 				    strerror(errno));
 			else
 				(void)fprintf(stderr,
-				"poll: protocol failure in circuit setup\n");
+				    "poll: protocol failure in circuit "
+				    "setup\n");
 			(void)close(s2);
 			goto bad;
 		}
 		s3 = accept(s2, (struct sockaddr *)&from, &len);
 		if (s3 < 0) {
-			(void)fprintf(stderr,
-			    "rcmd: accept: %s\n", strerror(errno));
+			(void)fprintf(
+			    stderr, "rcmd: accept: %s\n", strerror(errno));
 			lport = 0;
 			close(s2);
 			goto bad;
@@ -236,8 +236,8 @@ again:
 		switch (from.ss_family) {
 		case AF_INET:
 		case AF_INET6:
-			if (getnameinfo((struct sockaddr *)&from, len,
-			    NULL, 0, num, sizeof(num), NI_NUMERICSERV) == 0 &&
+			if (getnameinfo((struct sockaddr *)&from, len, NULL, 0,
+				num, sizeof(num), NI_NUMERICSERV) == 0 &&
 			    atoi(num) != 20) {
 				break;
 			}
@@ -252,12 +252,13 @@ again:
 		switch (from.ss_family) {
 		case AF_INET:
 		case AF_INET6:
-			if (getnameinfo((struct sockaddr *)&from, len,
-			    NULL, 0, num, sizeof(num), NI_NUMERICSERV) != 0 ||
+			if (getnameinfo((struct sockaddr *)&from, len, NULL, 0,
+				num, sizeof(num), NI_NUMERICSERV) != 0 ||
 			    (atoi(num) >= IPPORT_RESERVED ||
-			     atoi(num) < IPPORT_RESERVED / 2)) {
+				atoi(num) < IPPORT_RESERVED / 2)) {
 				(void)fprintf(stderr,
-				    "socket: protocol failure in circuit setup.\n");
+				    "socket: protocol failure in circuit "
+				    "setup.\n");
 				goto bad2;
 			}
 			break;
@@ -265,12 +266,11 @@ again:
 			break;
 		}
 	}
-	(void)write(s, locuser, strlen(locuser)+1);
-	(void)write(s, remuser, strlen(remuser)+1);
-	(void)write(s, cmd, strlen(cmd)+1);
+	(void)write(s, locuser, strlen(locuser) + 1);
+	(void)write(s, remuser, strlen(remuser) + 1);
+	(void)write(s, cmd, strlen(cmd) + 1);
 	if ((numread = read(s, &c, 1)) != 1) {
-		(void)fprintf(stderr,
-		    "rcmd: %s: %s\n", *ahost,
+		(void)fprintf(stderr, "rcmd: %s: %s\n", *ahost,
 		    numread == -1 ? strerror(errno) : "Short read");
 		goto bad2;
 	}
@@ -293,4 +293,3 @@ bad:
 	return (-1);
 }
 DEF_WEAK(rcmd_af);
-

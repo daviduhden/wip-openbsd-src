@@ -29,7 +29,7 @@
 #include <wchar.h>
 
 size_t
-mbrlen(const char * __restrict s, size_t n, mbstate_t * __restrict ps)
+mbrlen(const char *__restrict s, size_t n, mbstate_t *__restrict ps)
 {
 	static mbstate_t mbs;
 

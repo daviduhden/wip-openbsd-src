@@ -18,6 +18,6 @@
 #ifndef _MACHINE_TIMETC_H_
 #define _MACHINE_TIMETC_H_
 
-#define	TC_LAST	0
+#define TC_LAST 0
 
-#endif	/* _MACHINE_TIMETC_H_ */
+#endif /* _MACHINE_TIMETC_H_ */

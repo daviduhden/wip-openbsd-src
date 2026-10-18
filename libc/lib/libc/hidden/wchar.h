@@ -23,8 +23,8 @@
 typedef struct __sFILE FILE;
 #endif
 
+#include <_stdio.h> /* struct __sFILE, std{in,out,err} */
 #include_next <wchar.h>
-#include <_stdio.h>		/* struct __sFILE, std{in,out,err} */
 
 PROTO_NORMAL(btowc);
 PROTO_NORMAL(fgetwc);

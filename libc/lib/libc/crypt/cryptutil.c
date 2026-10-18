@@ -14,12 +14,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <pwd.h>
-#include <login_cap.h>
 #include <errno.h>
+#include <login_cap.h>
+#include <pwd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 int
 crypt_checkpass(const char *pass, const char *goodhash)
@@ -53,20 +53,20 @@ DEF_WEAK(crypt_checkpass);
 int
 crypt_newhash(const char *pass, const char *pref, char *hash, size_t hashlen)
 {
-	int rv = -1;
+	int	    rv = -1;
 	const char *defaultpref = "bcrypt,8";
 	const char *errstr;
-	const char *choices[] = { "blowfish", "bcrypt" };
-	size_t maxchoice = sizeof(choices) / sizeof(choices[0]);
-	int i;
-	int rounds;
+	const char *choices[] = {"blowfish", "bcrypt"};
+	size_t	    maxchoice = sizeof(choices) / sizeof(choices[0]);
+	int	    i;
+	int	    rounds;
 
 	if (pref == NULL)
 		pref = defaultpref;
 
 	for (i = 0; i < maxchoice; i++) {
 		const char *choice = choices[i];
-		size_t len = strlen(choice);
+		size_t	    len = strlen(choice);
 		if (strcmp(pref, choice) == 0) {
 			rounds = _bcrypt_autorounds();
 			break;
@@ -75,7 +75,8 @@ crypt_newhash(const char *pass, const char *pref, char *hash, size_t hashlen)
 			if (strcmp(pref + len + 1, "a") == 0) {
 				rounds = _bcrypt_autorounds();
 			} else {
-				rounds = strtonum(pref + len + 1, 4, 31, &errstr);
+				rounds =
+				    strtonum(pref + len + 1, 4, 31, &errstr);
 				if (errstr) {
 					errno = EINVAL;
 					goto err;

@@ -27,123 +27,123 @@
 
 #include <machine/frame.h>
 
-#define GHCB_OFFSET(m)			((m) / 8)
-#define GHCB_IDX(m)			(GHCB_OFFSET((m)) / 8)
-#define GHCB_BIT(m)			(GHCB_OFFSET((m)) % 8)
+#define GHCB_OFFSET(m) ((m) / 8)
+#define GHCB_IDX(m) (GHCB_OFFSET((m)) / 8)
+#define GHCB_BIT(m) (GHCB_OFFSET((m)) % 8)
 
-#define GHCB_XSS			0x140
-#define GHCB_RAX			0x1F8
-#define GHCB_RBX			0x318
-#define GHCB_RCX			0x308
-#define GHCB_RDX			0x310
-#define GHCB_SW_EXITCODE		0x390
-#define GHCB_SW_EXITINFO1		0x398
-#define GHCB_SW_EXITINFO2		0x3A0
-#define GHCB_SW_SCRATCH			0x3A8
-#define GHCB_XCR0			0x3E8
+#define GHCB_XSS 0x140
+#define GHCB_RAX 0x1F8
+#define GHCB_RBX 0x318
+#define GHCB_RCX 0x308
+#define GHCB_RDX 0x310
+#define GHCB_SW_EXITCODE 0x390
+#define GHCB_SW_EXITINFO1 0x398
+#define GHCB_SW_EXITINFO2 0x3A0
+#define GHCB_SW_SCRATCH 0x3A8
+#define GHCB_XCR0 0x3E8
 
-#define GHCB_MAX			0xFFF
+#define GHCB_MAX 0xFFF
 
-#endif	/* !_LOCORE */
+#endif /* !_LOCORE */
 
 /* Definitions used with the MSR protocol */
-#define MSR_PROTO_CPUID_REQ			0x4
-#define MSR_PROTO_CPUID_RESP			0x5
-#define MSR_PROTO_PREFERRED_GHCB_PA_REQ		0x10
-#define MSR_PROTO_PREFERRED_GHCB_PA_RESP	0x11
-#define MSR_PROTO_REGISTER_GHCB_PA_REQ		0x12
-#define MSR_PROTO_REGISTER_GHCB_PA_RESP		0x13
-#define MSR_PROTO_TERMINATION_REQ		0x100
+#define MSR_PROTO_CPUID_REQ 0x4
+#define MSR_PROTO_CPUID_RESP 0x5
+#define MSR_PROTO_PREFERRED_GHCB_PA_REQ 0x10
+#define MSR_PROTO_PREFERRED_GHCB_PA_RESP 0x11
+#define MSR_PROTO_REGISTER_GHCB_PA_REQ 0x12
+#define MSR_PROTO_REGISTER_GHCB_PA_RESP 0x13
+#define MSR_PROTO_TERMINATION_REQ 0x100
 
 #ifndef _LOCORE
 
 struct ghcb_sa {
-	uint8_t			v_pad0[0xcb];		/* 000h-0CAh */
-	uint8_t			v_cpl;			/* 0CBh */
-	uint8_t			v_pad1[0x74];		/* 0CCh-13Fh */
-	uint64_t		v_xss;			/* 140h */
-	uint8_t			v_pad2[0x18];		/* 148h-15Fh */
-	uint64_t		v_dr7;			/* 160h */
-	uint8_t			v_pad3[0x10];		/* 168h-177h */
-	uint64_t		v_rip;			/* 178h */
-	uint8_t			v_pad4[0x58];		/* 180h-1D7h */
-	uint64_t		v_rsp;			/* 1D8h */
-	uint8_t			v_pad5[0x18];		/* 1E0h-1F7h */
-	uint64_t		v_rax;			/* 1F8h */
-	uint8_t			v_pad6[0x108];		/* 200h-307h */
-	uint64_t		v_rcx;			/* 308h */
-	uint64_t		v_rdx;			/* 310h */
-	uint64_t		v_rbx;			/* 318h */
-	uint8_t			v_pad7[0x8];		/* 320h-327h */
-	uint64_t		v_rbp;			/* 328h */
-	uint64_t		v_rsi;			/* 330h */
-	uint64_t		v_rdi;			/* 338h */
-	uint64_t		v_r8;			/* 340h */
-	uint64_t		v_r9;			/* 348h */
-	uint64_t		v_r10;			/* 350h */
-	uint64_t		v_r11;			/* 358h */
-	uint64_t		v_r12;			/* 360h */
-	uint64_t		v_r13;			/* 368h */
-	uint64_t		v_r14;			/* 370h */
-	uint64_t		v_r15;			/* 378h */
-	uint8_t			v_pad8[0x10];		/* 380h-38Fh */
-	uint64_t		v_sw_exitcode;		/* 390h */
-	uint64_t		v_sw_exitinfo1;		/* 398h */
-	uint64_t		v_sw_exitinfo2;		/* 3a0h */
-	uint64_t		v_sw_scratch;		/* 3a8h */
-	uint8_t			v_pad9[0x38];		/* 3B0h-3E7h */
-	uint64_t		v_xcr0;			/* 3E8h */
-#define GHCB_VB_SZ	0x10
-	uint8_t			valid_bitmap[GHCB_VB_SZ];
-							/* 3F0h-3FFh */
-	uint64_t		v_x87_state_gpa;	/* 400h */
-	uint8_t			v_pad10[0x3f8];		/* 408h-7FFh */
-	uint8_t			v_sharedbuf[0x7f0];	/* 800h-FEFh */
-	uint8_t			v_pad11[0xa];		/* FF0h-FF9h */
-	uint16_t		v_ghcb_proto_version;	/* FFAh-FFBh */
-	uint32_t		v_ghcb_usage;		/* FFCh-FFFh */
+	uint8_t	 v_pad0[0xcb];	 /* 000h-0CAh */
+	uint8_t	 v_cpl;		 /* 0CBh */
+	uint8_t	 v_pad1[0x74];	 /* 0CCh-13Fh */
+	uint64_t v_xss;		 /* 140h */
+	uint8_t	 v_pad2[0x18];	 /* 148h-15Fh */
+	uint64_t v_dr7;		 /* 160h */
+	uint8_t	 v_pad3[0x10];	 /* 168h-177h */
+	uint64_t v_rip;		 /* 178h */
+	uint8_t	 v_pad4[0x58];	 /* 180h-1D7h */
+	uint64_t v_rsp;		 /* 1D8h */
+	uint8_t	 v_pad5[0x18];	 /* 1E0h-1F7h */
+	uint64_t v_rax;		 /* 1F8h */
+	uint8_t	 v_pad6[0x108];	 /* 200h-307h */
+	uint64_t v_rcx;		 /* 308h */
+	uint64_t v_rdx;		 /* 310h */
+	uint64_t v_rbx;		 /* 318h */
+	uint8_t	 v_pad7[0x8];	 /* 320h-327h */
+	uint64_t v_rbp;		 /* 328h */
+	uint64_t v_rsi;		 /* 330h */
+	uint64_t v_rdi;		 /* 338h */
+	uint64_t v_r8;		 /* 340h */
+	uint64_t v_r9;		 /* 348h */
+	uint64_t v_r10;		 /* 350h */
+	uint64_t v_r11;		 /* 358h */
+	uint64_t v_r12;		 /* 360h */
+	uint64_t v_r13;		 /* 368h */
+	uint64_t v_r14;		 /* 370h */
+	uint64_t v_r15;		 /* 378h */
+	uint8_t	 v_pad8[0x10];	 /* 380h-38Fh */
+	uint64_t v_sw_exitcode;	 /* 390h */
+	uint64_t v_sw_exitinfo1; /* 398h */
+	uint64_t v_sw_exitinfo2; /* 3a0h */
+	uint64_t v_sw_scratch;	 /* 3a8h */
+	uint8_t	 v_pad9[0x38];	 /* 3B0h-3E7h */
+	uint64_t v_xcr0;	 /* 3E8h */
+#define GHCB_VB_SZ 0x10
+	uint8_t valid_bitmap[GHCB_VB_SZ];
+	/* 3F0h-3FFh */
+	uint64_t v_x87_state_gpa;      /* 400h */
+	uint8_t	 v_pad10[0x3f8];       /* 408h-7FFh */
+	uint8_t	 v_sharedbuf[0x7f0];   /* 800h-FEFh */
+	uint8_t	 v_pad11[0xa];	       /* FF0h-FF9h */
+	uint16_t v_ghcb_proto_version; /* FFAh-FFBh */
+	uint32_t v_ghcb_usage;	       /* FFCh-FFFh */
 };
 
-#define GHCB_SZ8	0
-#define GHCB_SZ16	1
-#define GHCB_SZ32	2
-#define GHCB_SZ64	3
+#define GHCB_SZ8 0
+#define GHCB_SZ16 1
+#define GHCB_SZ32 2
+#define GHCB_SZ64 3
 
 struct ghcb_sync {
-	uint8_t			valid_bitmap[GHCB_VB_SZ];
+	uint8_t valid_bitmap[GHCB_VB_SZ];
 
-	int			sz_a;
-	int			sz_b;
-	int			sz_c;
-	int			sz_d;
+	int sz_a;
+	int sz_b;
+	int sz_c;
+	int sz_d;
 };
 
 extern vaddr_t ghcb_vaddr;
 extern paddr_t ghcb_paddr;
 
 struct ghcb_extra_regs {
-	uint64_t	 exitcode;
-	uint64_t	 exitinfo1;
-	uint64_t	 exitinfo2;
-	uint64_t	 scratch;
-	void		*data;
-	size_t		 data_sz;
+	uint64_t exitcode;
+	uint64_t exitinfo1;
+	uint64_t exitinfo2;
+	uint64_t scratch;
+	void	*data;
+	size_t	 data_sz;
 };
 
-void	ghcb_clear(struct ghcb_sa *);
-int	ghcb_valbm_set(uint8_t *, int);
-int	ghcb_valbm_isset(uint8_t *, int);
-int	ghcb_verify_bm(uint8_t *, uint8_t *);
-int	ghcb_valid(struct ghcb_sa *);
-int	ghcb_empty(struct ghcb_sa *);
+void ghcb_clear(struct ghcb_sa *);
+int  ghcb_valbm_set(uint8_t *, int);
+int  ghcb_valbm_isset(uint8_t *, int);
+int  ghcb_verify_bm(uint8_t *, uint8_t *);
+int  ghcb_valid(struct ghcb_sa *);
+int  ghcb_empty(struct ghcb_sa *);
 
-void	ghcb_sync_val(int, int, struct ghcb_sync *);
-void	ghcb_sync_out(struct trapframe *, const struct ghcb_extra_regs *,
-	    struct ghcb_sa *, struct ghcb_sync *);
-void	ghcb_sync_in(struct trapframe *, struct ghcb_extra_regs *,
-	    struct ghcb_sa *, struct ghcb_sync *);
-void	_ghcb_mem_rw(vaddr_t, int, void *, bool);
-void	_ghcb_io_rw(uint16_t, int, uint32_t *, bool);
+void ghcb_sync_val(int, int, struct ghcb_sync *);
+void ghcb_sync_out(struct trapframe *, const struct ghcb_extra_regs *,
+    struct ghcb_sa *, struct ghcb_sync *);
+void ghcb_sync_in(struct trapframe *, struct ghcb_extra_regs *,
+    struct ghcb_sa *, struct ghcb_sync *);
+void _ghcb_mem_rw(vaddr_t, int, void *, bool);
+void _ghcb_io_rw(uint16_t, int, uint32_t *, bool);
 
 static inline uint8_t
 ghcb_mem_read_1(vaddr_t addr)
@@ -256,11 +256,11 @@ ghcb_io_write_4(uint16_t port, uint32_t v)
 
 #endif /* !_LOCORE */
 
-#else	/* !AMDSEV */
+#else /* !AMDSEV */
 
 /* Definitions used with the MSR protocol */
-#define MSR_PROTO_TERMINATION_REQ		0x100
+#define MSR_PROTO_TERMINATION_REQ 0x100
 
-#endif	/* AMDSEV */
+#endif /* AMDSEV */
 
 #endif /* !_MACHINE_GHCB_H_ */

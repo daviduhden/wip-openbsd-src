@@ -16,10 +16,11 @@
  */
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-
 #include <err.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -34,7 +35,6 @@ int long_err;
 int gai_errno;
 int rrset_errno;
 
-
 char *
 gethostarg(char *n)
 {
@@ -48,30 +48,31 @@ gethostarg(char *n)
 }
 
 const char *rrsetstrerror(int);
-char * print_addr(const struct sockaddr *, char *, size_t);
+char	   *print_addr(const struct sockaddr *, char *, size_t);
 
-struct kv { int code; const char *name; };
+struct kv {
+	int	    code;
+	const char *name;
+};
 
-struct kv kv_family[] = {
-	{ AF_UNIX,	"unix" },
-	{ AF_INET,	"inet" },
-	{ AF_INET6,	"inet6" },
-	{ 0,	NULL, }
-};
-struct kv kv_socktype[] = {
-	{ SOCK_STREAM,		"stream" },
-	{ SOCK_DGRAM,		"dgram" },
-	{ SOCK_RAW,		"raw" },
-	{ SOCK_SEQPACKET,	"seqpacket" },
-	{ 0,	NULL, }
-};
-struct kv kv_protocol[] = {
-	{ IPPROTO_UDP, "udp" },
-	{ IPPROTO_TCP, "tcp" },
-	{ IPPROTO_ICMP, "icmp" },
-	{ IPPROTO_ICMPV6, "icmpv6" },
-	{ 0,	NULL, }
-};
+struct kv kv_family[] = {{AF_UNIX, "unix"}, {AF_INET, "inet"},
+    {AF_INET6, "inet6"},
+    {
+	0,
+	NULL,
+    }};
+struct kv kv_socktype[] = {{SOCK_STREAM, "stream"}, {SOCK_DGRAM, "dgram"},
+    {SOCK_RAW, "raw"}, {SOCK_SEQPACKET, "seqpacket"},
+    {
+	0,
+	NULL,
+    }};
+struct kv kv_protocol[] = {{IPPROTO_UDP, "udp"}, {IPPROTO_TCP, "tcp"},
+    {IPPROTO_ICMP, "icmp"}, {IPPROTO_ICMPV6, "icmpv6"},
+    {
+	0,
+	NULL,
+    }};
 
 static const char *
 kv_lookup_name(struct kv *kv, int code, char *buf, size_t sz)
@@ -86,85 +87,85 @@ kv_lookup_name(struct kv *kv, int code, char *buf, size_t sz)
 }
 
 struct keyval {
-        const char *key;
-        int	    value;   
+	const char *key;
+	int	    value;
 };
 
 static struct keyval kv_class[] = {
-	{ "IN",	C_IN },
-	{ "CHAOS", C_CHAOS },
-	{ "HS", C_HS },
-	{ "ANY", C_ANY },
-	{ NULL, 	0 },
+    {"IN", C_IN},
+    {"CHAOS", C_CHAOS},
+    {"HS", C_HS},
+    {"ANY", C_ANY},
+    {NULL, 0},
 };
 
 static struct keyval kv_type[] = {
-	{ "A",		T_A	},
-	{ "NS",		T_NS	},
-	{ "MD",		T_MD	},
-	{ "MF",		T_MF	},
-	{ "CNAME",	T_CNAME	},
-	{ "SOA",	T_SOA	},
-	{ "MB",		T_MB	},
-	{ "MG",		T_MG	},
-	{ "MR",		T_MR	},
-	{ "NULL",	T_NULL	},
-	{ "WKS",	T_WKS	},
-	{ "PTR",	T_PTR	},
-	{ "HINFO",	T_HINFO	},
-	{ "MINFO",	T_MINFO	},
-	{ "MX",		T_MX	},
-	{ "TXT",	T_TXT	},
+    {"A", T_A},
+    {"NS", T_NS},
+    {"MD", T_MD},
+    {"MF", T_MF},
+    {"CNAME", T_CNAME},
+    {"SOA", T_SOA},
+    {"MB", T_MB},
+    {"MG", T_MG},
+    {"MR", T_MR},
+    {"NULL", T_NULL},
+    {"WKS", T_WKS},
+    {"PTR", T_PTR},
+    {"HINFO", T_HINFO},
+    {"MINFO", T_MINFO},
+    {"MX", T_MX},
+    {"TXT", T_TXT},
 
-	{ "AAAA",	T_AAAA	},
+    {"AAAA", T_AAAA},
 
-	{ "AXFR",	T_AXFR	},
-	{ "MAILB",	T_MAILB	},
-	{ "MAILA",	T_MAILA	},
-	{ "ANY",	T_ANY	},
-	{ NULL, 	0 },
+    {"AXFR", T_AXFR},
+    {"MAILB", T_MAILB},
+    {"MAILA", T_MAILA},
+    {"ANY", T_ANY},
+    {NULL, 0},
 };
 
 static struct keyval kv_rcode[] = {
-	{ "NOERROR",	NOERROR	},
-	{ "FORMERR",	FORMERR },
-	{ "SERVFAIL",	SERVFAIL },
-	{ "NXDOMAIN",	NXDOMAIN },
-	{ "NOTIMP",	NOTIMP },
-	{ "REFUSED",	REFUSED },
-	{ NULL, 	0 },
+    {"NOERROR", NOERROR},
+    {"FORMERR", FORMERR},
+    {"SERVFAIL", SERVFAIL},
+    {"NXDOMAIN", NXDOMAIN},
+    {"NOTIMP", NOTIMP},
+    {"REFUSED", REFUSED},
+    {NULL, 0},
 };
 
 static struct keyval kv_resopt[] = {
-	{ "DEBUG",	RES_DEBUG },
-	{ "AAONLY",	RES_AAONLY },
-	{ "USEVC",	RES_USEVC },
-	{ "PRIMARY",	RES_PRIMARY },
-	{ "IGNTC",	RES_IGNTC },
-	{ "RECURSE",	RES_RECURSE },
-	{ "DEFNAMES",	RES_DEFNAMES },
-	{ "STAYOPEN",	RES_STAYOPEN },
-	{ "DNSRCH",	RES_DNSRCH },
-	{ "INSECURE1",	RES_INSECURE1 },
-	{ "INSECURE2",	RES_INSECURE2 },
-	{ "NOALIASES",	RES_NOALIASES },
-	{ "USE_INET6",	RES_USE_INET6 },
-	{ "USE_EDNS0",	RES_USE_EDNS0 },
-	{ "USE_DNSSEC",	RES_USE_DNSSEC },
-	{ NULL, 	0 },
+    {"DEBUG", RES_DEBUG},
+    {"AAONLY", RES_AAONLY},
+    {"USEVC", RES_USEVC},
+    {"PRIMARY", RES_PRIMARY},
+    {"IGNTC", RES_IGNTC},
+    {"RECURSE", RES_RECURSE},
+    {"DEFNAMES", RES_DEFNAMES},
+    {"STAYOPEN", RES_STAYOPEN},
+    {"DNSRCH", RES_DNSRCH},
+    {"INSECURE1", RES_INSECURE1},
+    {"INSECURE2", RES_INSECURE2},
+    {"NOALIASES", RES_NOALIASES},
+    {"USE_INET6", RES_USE_INET6},
+    {"USE_EDNS0", RES_USE_EDNS0},
+    {"USE_DNSSEC", RES_USE_DNSSEC},
+    {NULL, 0},
 };
 
 const char *
 rcodetostr(uint16_t v)
 {
-	static char	buf[16];
-	size_t		i;
+	static char buf[16];
+	size_t	    i;
 
-	for(i = 0; kv_rcode[i].key; i++)
+	for (i = 0; kv_rcode[i].key; i++)
 		if (kv_rcode[i].value == v)
 			return (kv_rcode[i].key);
 
-	snprintf(buf, sizeof buf, "%"PRIu16"?", v);
+	snprintf(buf, sizeof buf, "%" PRIu16 "?", v);
 
 	return (buf);
 }
@@ -172,14 +173,14 @@ rcodetostr(uint16_t v)
 const char *
 typetostr(uint16_t v)
 {
-	static char	 buf[16];
-	size_t		 i;
+	static char buf[16];
+	size_t	    i;
 
-	for(i = 0; kv_type[i].key; i++)
+	for (i = 0; kv_type[i].key; i++)
 		if (kv_type[i].value == v)
 			return (kv_type[i].key);
 
-	snprintf(buf, sizeof buf, "%"PRIu16"?", v);
+	snprintf(buf, sizeof buf, "%" PRIu16 "?", v);
 
 	return (buf);
 }
@@ -187,14 +188,14 @@ typetostr(uint16_t v)
 const char *
 classtostr(uint16_t v)
 {
-	static char	 buf[16];
-	size_t		 i;
+	static char buf[16];
+	size_t	    i;
 
-	for(i = 0; kv_class[i].key; i++)
+	for (i = 0; kv_class[i].key; i++)
 		if (kv_class[i].value == v)
 			return (kv_class[i].key);
 
-	snprintf(buf, sizeof buf, "%"PRIu16"?", v);
+	snprintf(buf, sizeof buf, "%" PRIu16 "?", v);
 
 	return (buf);
 }
@@ -202,9 +203,9 @@ classtostr(uint16_t v)
 uint16_t
 strtotype(const char *name)
 {
-	size_t	i;
+	size_t i;
 
-	for(i = 0; kv_type[i].key; i++)
+	for (i = 0; kv_type[i].key; i++)
 		if (!strcasecmp(kv_type[i].key, name))
 			return (kv_type[i].value);
 
@@ -214,9 +215,9 @@ strtotype(const char *name)
 uint16_t
 strtoclass(const char *name)
 {
-	size_t	i;
+	size_t i;
 
-	for(i = 0; kv_class[i].key; i++)
+	for (i = 0; kv_class[i].key; i++)
 		if (!strcasecmp(kv_class[i].key, name))
 			return (kv_class[i].value);
 
@@ -226,9 +227,9 @@ strtoclass(const char *name)
 int
 strtoresopt(const char *name)
 {
-	size_t	i;
+	size_t i;
 
-	for(i = 0; kv_resopt[i].key; i++)
+	for (i = 0; kv_resopt[i].key; i++)
 		if (!strcasecmp(kv_resopt[i].key, name))
 			return (kv_resopt[i].value);
 
@@ -239,7 +240,7 @@ void
 parseresopt(const char *name)
 {
 	static int init = 0;
-	int flag, neg = 0;
+	int	   flag, neg = 0;
 
 	if (init == 0) {
 		res_init();
@@ -249,14 +250,13 @@ parseresopt(const char *name)
 	if (name[0] == '-') {
 		neg = 1;
 		name++;
-	}
-	else if (name[0] == '+')
+	} else if (name[0] == '+')
 		name++;
 
 	flag = strtoresopt(name);
 	if (flag == 0)
 		errx(1, "unknown reslover option %s", name);
-	
+
 	if (neg)
 		_res.options &= ~flag;
 	else
@@ -266,17 +266,17 @@ parseresopt(const char *name)
 void
 print_hostent(struct hostent *e)
 {
-	char	buf[256], **c;
+	char buf[256], **c;
 
 	printf("name = \"%s\"\n", e->h_name);
 	printf("aliases =");
-	for(c = e->h_aliases; *c; c++)
+	for (c = e->h_aliases; *c; c++)
 		printf(" \"%s\"", *c);
 	printf("\n");
 	printf("addrtype = %i\n", e->h_addrtype);
 	printf("addrlength = %i\n", e->h_length);
 	printf("addr_list =");
-	for(c = e->h_addr_list; *c; c++) {
+	for (c = e->h_addr_list; *c; c++) {
 		printf(" %s", inet_ntop(e->h_addrtype, *c, buf, sizeof buf));
 	}
 	printf("\n");
@@ -285,7 +285,7 @@ print_hostent(struct hostent *e)
 void
 print_netent(struct netent *e)
 {
-	char	buf[256], **c;
+	char	 buf[256], **c;
 	uint32_t addr;
 
 	/* network number are given in host order */
@@ -303,14 +303,13 @@ print_netent(struct netent *e)
 void
 print_addrinfo(struct addrinfo *ai)
 {
-	char	buf[256], bf[64], bt[64], bp[64];
+	char buf[256], bf[64], bt[64], bp[64];
 
 	printf("family=%s socktype=%s protocol=%s addr=%s canonname=%s\n",
-		kv_lookup_name(kv_family, ai->ai_family, bf, sizeof bf),
-		kv_lookup_name(kv_socktype, ai->ai_socktype, bt, sizeof bt),
-		kv_lookup_name(kv_protocol, ai->ai_protocol, bp, sizeof bp),
-		print_addr(ai->ai_addr, buf, sizeof buf),
-		ai->ai_canonname);
+	    kv_lookup_name(kv_family, ai->ai_family, bf, sizeof bf),
+	    kv_lookup_name(kv_socktype, ai->ai_socktype, bt, sizeof bt),
+	    kv_lookup_name(kv_protocol, ai->ai_protocol, bp, sizeof bp),
+	    print_addr(ai->ai_addr, buf, sizeof buf), ai->ai_canonname);
 }
 
 const char *
@@ -335,7 +334,7 @@ rrsetstrerror(int e)
 }
 
 void
-print_rrsetinfo(struct rrsetinfo * rrset)
+print_rrsetinfo(struct rrsetinfo *rrset)
 {
 	printf("rri_flags=%u\n", rrset->rri_flags);
 	printf("rri_rdclass=%u\n", rrset->rri_rdclass);
@@ -356,30 +355,30 @@ print_errors(void)
 		printf("  => errno %i, h_errno %i", errno, h_errno);
 		printf(", rrset_errno %i", rrset_errno);
 		printf(", gai_errno %i", gai_errno);
-		printf ("\n");
+		printf("\n");
 		return;
 	default:
-		printf("  => errno %i: %s\n  => h_errno %i: %s\n  => rrset_errno %i: %s\n",
-		    errno, errno ? strerror(errno) : "ok",
-		    h_errno, h_errno ? hstrerror(h_errno) : "ok",
-		    rrset_errno, rrset_errno ? rrsetstrerror(rrset_errno) : "ok");
-		printf("  => gai_errno %i: %s\n",
-		    gai_errno, gai_errno ? gai_strerror(gai_errno) : "ok");
+		printf("  => errno %i: %s\n  => h_errno %i: %s\n  => "
+		       "rrset_errno %i: %s\n",
+		    errno, errno ? strerror(errno) : "ok", h_errno,
+		    h_errno ? hstrerror(h_errno) : "ok", rrset_errno,
+		    rrset_errno ? rrsetstrerror(rrset_errno) : "ok");
+		printf("  => gai_errno %i: %s\n", gai_errno,
+		    gai_errno ? gai_strerror(gai_errno) : "ok");
 	}
 }
-
 
 static char *
 print_host(const struct sockaddr *sa, char *buf, size_t len)
 {
 	switch (sa->sa_family) {
 	case AF_INET:
-		inet_ntop(AF_INET, &((struct sockaddr_in*)sa)->sin_addr,
-			  buf, len);
+		inet_ntop(
+		    AF_INET, &((struct sockaddr_in *)sa)->sin_addr, buf, len);
 		break;
 	case AF_INET6:
-		inet_ntop(AF_INET6, &((struct sockaddr_in6*)sa)->sin6_addr,
-			  buf, len);
+		inet_ntop(AF_INET6, &((struct sockaddr_in6 *)sa)->sin6_addr,
+		    buf, len);
 		break;
 	default:
 		buf[0] = '\0';
@@ -387,22 +386,21 @@ print_host(const struct sockaddr *sa, char *buf, size_t len)
 	return (buf);
 }
 
-
 char *
 print_addr(const struct sockaddr *sa, char *buf, size_t len)
 {
-	char	h[256];
+	char h[256];
 
 	print_host(sa, h, sizeof h);
 
 	switch (sa->sa_family) {
 	case AF_INET:
 		snprintf(buf, len, "%s:%i", h,
-		    ntohs(((struct sockaddr_in*)(sa))->sin_port));
+		    ntohs(((struct sockaddr_in *)(sa))->sin_port));
 		break;
 	case AF_INET6:
 		snprintf(buf, len, "[%s]:%i", h,
-		    ntohs(((struct sockaddr_in6*)(sa))->sin6_port));
+		    ntohs(((struct sockaddr_in6 *)(sa))->sin6_port));
 		break;
 	default:
 		snprintf(buf, len, "?");
@@ -421,13 +419,12 @@ packed_init(struct packed *pack, char *data, size_t len)
 	pack->err = NULL;
 }
 
-
 static ssize_t
 dname_expand(const unsigned char *data, size_t len, size_t offset,
     size_t *newoffset, char *dst, size_t max)
 {
-	size_t		 n, count, end, ptr, start;
-	ssize_t		 res;
+	size_t	n, count, end, ptr, start;
+	ssize_t res;
 
 	if (offset >= len)
 		return (-1);
@@ -435,7 +432,7 @@ dname_expand(const unsigned char *data, size_t len, size_t offset,
 	res = 0;
 	end = start = offset;
 
-	for(; (n = data[offset]); ) {
+	for (; (n = data[offset]);) {
 		if ((n & 0xc0) == 0xc0) {
 			if (offset + 2 > len)
 				return (-1);
@@ -449,7 +446,6 @@ dname_expand(const unsigned char *data, size_t len, size_t offset,
 		}
 		if (offset + n + 1 > len)
 			return (-1);
-
 
 		/* copy n + at offset+1 */
 		if (dst != NULL && max != 0) {
@@ -573,8 +569,8 @@ unpack_query(struct packed *p, struct query *q)
 int
 unpack_rr(struct packed *p, struct rr *rr)
 {
-	uint16_t	rdlen;
-	size_t		save_offset;
+	uint16_t rdlen;
+	size_t	 save_offset;
 
 	unpack_dname(p, rr->rr_dname, sizeof(rr->rr_dname));
 	unpack_u16(p, &rr->rr_type);
@@ -592,7 +588,7 @@ unpack_rr(struct packed *p, struct rr *rr)
 
 	save_offset = p->offset;
 
-	switch(rr->rr_type) {
+	switch (rr->rr_type) {
 
 	case T_CNAME:
 		unpack_dname(p, rr->rr.cname.cname, sizeof(rr->rr.cname.cname));
@@ -652,10 +648,10 @@ unpack_rr(struct packed *p, struct rr *rr)
 int
 sockaddr_from_str(struct sockaddr *sa, int family, const char *str)
 {
-	struct in_addr		 ina;
-	struct in6_addr		 in6a;
-	struct sockaddr_in	*sin;
-	struct sockaddr_in6	*sin6;
+	struct in_addr	     ina;
+	struct in6_addr	     in6a;
+	struct sockaddr_in  *sin;
+	struct sockaddr_in6 *sin6;
 
 	switch (family) {
 	case PF_UNSPEC:

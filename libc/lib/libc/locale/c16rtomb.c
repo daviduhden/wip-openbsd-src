@@ -24,16 +24,16 @@
  * struct _utf8_state in the file citrus/citrus_utf8.c.
  */
 struct _utf16_state {
-	wchar_t	ch;
+	wchar_t ch;
 	int	want;
 };
 
 size_t
 c16rtomb(char *s, char16_t c16, mbstate_t *ps)
 {
-	static mbstate_t	 mbs;
-	struct _utf16_state	*us;
-	wchar_t			 wc;
+	static mbstate_t     mbs;
+	struct _utf16_state *us;
+	wchar_t		     wc;
 
 	if (ps == NULL)
 		ps = &mbs;

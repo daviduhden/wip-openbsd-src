@@ -13,6 +13,6 @@ fpgetsticky()
 {
 	int x;
 
-	__asm__ volatile("fldcr %0, %%fcr62" : "=r" (x));
+	__asm__ volatile("fldcr %0, %%fcr62" : "=r"(x));
 	return x & 0x1f;
 }

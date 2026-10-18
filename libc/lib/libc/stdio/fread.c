@@ -31,27 +31,28 @@
  * SUCH DAMAGE.
  */
 
+#include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
-#include <errno.h>
+
 #include "local.h"
 
-#define MUL_NO_OVERFLOW	(1UL << (sizeof(size_t) * 4))
+#define MUL_NO_OVERFLOW (1UL << (sizeof(size_t) * 4))
 
 size_t
 fread(void *buf, size_t size, size_t count, FILE *fp)
 {
 	size_t resid;
-	char *p;
-	int r;
+	char  *p;
+	int    r;
 	size_t total;
 
 	/*
 	 * Extension:  Catch integer overflow
 	 */
-	if ((size >= MUL_NO_OVERFLOW || count >= MUL_NO_OVERFLOW) &&
-	    size > 0 && SIZE_MAX / size < count) {
+	if ((size >= MUL_NO_OVERFLOW || count >= MUL_NO_OVERFLOW) && size > 0 &&
+	    SIZE_MAX / size < count) {
 		errno = EOVERFLOW;
 		fp->_flags |= __SERR;
 		return (0);

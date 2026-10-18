@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* 
+/*
  * ethers(3) a la Sun.
  * Originally Written by Roland McGrath <roland@frob.com> 10/14/93.
  * Substantially modified by Todd C. Miller <millert@openbsd.org>
@@ -24,22 +24,24 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <net/if.h>
-#include <netinet/in.h>
 #include <netinet/if_ether.h>
-#include <paths.h>
+#include <netinet/in.h>
+
+#include <ctype.h>
 #include <errno.h>
+#include <limits.h>
+#include <paths.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <limits.h>
 
 #ifndef _PATH_ETHERS
-#define _PATH_ETHERS	"/etc/ethers"
+#define _PATH_ETHERS "/etc/ethers"
 #endif
 
-static char * _ether_aton(const char *, struct ether_addr *);
+static char *_ether_aton(const char *, struct ether_addr *);
 
 char *
 ether_ntoa(const struct ether_addr *e)
@@ -57,8 +59,8 @@ ether_ntoa(const struct ether_addr *e)
 static char *
 _ether_aton(const char *s, struct ether_addr *e)
 {
-	int i;
-	long l;
+	int   i;
+	long  l;
 	char *pp;
 
 	while (isspace((unsigned char)*s))
@@ -70,8 +72,8 @@ _ether_aton(const char *s, struct ether_addr *e)
 		if (pp == s || l > 0xFF || l < 0)
 			return (NULL);
 		if (!(*pp == ':' ||
-		    (i == 5 && (isspace((unsigned char)*pp) ||
-		    *pp == '\0'))))
+			(i == 5 &&
+			    (isspace((unsigned char)*pp) || *pp == '\0'))))
 			return (NULL);
 		e->ether_addr_octet[i] = (u_char)l;
 		s = pp + 1;
@@ -92,22 +94,22 @@ ether_aton(const char *s)
 int
 ether_ntohost(char *hostname, struct ether_addr *e)
 {
-	FILE *f; 
-	char buf[BUFSIZ+1], *p;
-	size_t len;
+	FILE		 *f;
+	char		  buf[BUFSIZ + 1], *p;
+	size_t		  len;
 	struct ether_addr try;
 
 	f = fopen(_PATH_ETHERS, "re");
 	if (f == NULL)
 		return (-1);
 	while ((p = fgetln(f, &len)) != NULL) {
-		if (p[len-1] == '\n')
+		if (p[len - 1] == '\n')
 			len--;
 		if (len > sizeof(buf) - 2)
 			continue;
 		(void)memcpy(buf, p, len);
-		buf[len] = '\n';	/* code assumes newlines later on */
-		buf[len+1] = '\0';
+		buf[len] = '\n'; /* code assumes newlines later on */
+		buf[len + 1] = '\0';
 		/* A + in the file meant try YP, ignore it. */
 		if (!strncmp(buf, "+\n", sizeof(buf)))
 			continue;
@@ -115,7 +117,7 @@ ether_ntohost(char *hostname, struct ether_addr *e)
 		    memcmp(&try, e, sizeof(try)) == 0) {
 			(void)fclose(f);
 			return (0);
-		}     
+		}
 	}
 	(void)fclose(f);
 	errno = ENOENT;
@@ -125,27 +127,28 @@ ether_ntohost(char *hostname, struct ether_addr *e)
 int
 ether_hostton(const char *hostname, struct ether_addr *e)
 {
-	FILE *f;
-	char buf[BUFSIZ+1], *p;
-	char try[HOST_NAME_MAX+1];
+	FILE  *f;
+	char   buf[BUFSIZ + 1], *p;
+	char   try[HOST_NAME_MAX + 1];
 	size_t len;
 
 	f = fopen(_PATH_ETHERS, "re");
-	if (f==NULL)
+	if (f == NULL)
 		return (-1);
 
 	while ((p = fgetln(f, &len)) != NULL) {
-		if (p[len-1] == '\n')
+		if (p[len - 1] == '\n')
 			len--;
 		if (len > sizeof(buf) - 2)
 			continue;
 		memcpy(buf, p, len);
-		buf[len] = '\n';	/* code assumes newlines later on */
-		buf[len+1] = '\0';
+		buf[len] = '\n'; /* code assumes newlines later on */
+		buf[len + 1] = '\0';
 		/* A + in the file meant try YP, ignore it. */
 		if (!strncmp(buf, "+\n", sizeof(buf)))
 			continue;
-		if (ether_line(buf, e, try) == 0 && strcmp(hostname, try) == 0) {
+		if (ether_line(buf, e, try) == 0 &&
+		    strcmp(hostname, try) == 0) {
 			(void)fclose(f);
 			return (0);
 		}
@@ -158,7 +161,7 @@ ether_hostton(const char *hostname, struct ether_addr *e)
 int
 ether_line(const char *line, struct ether_addr *e, char *hostname)
 {
-	char *p;
+	char  *p;
 	size_t n;
 
 	/* Parse "xx:xx:xx:xx:xx:xx" */
@@ -171,7 +174,7 @@ ether_line(const char *line, struct ether_addr *e, char *hostname)
 	if (*p == '\0')
 		goto bad;
 	n = strcspn(p, " \t\n");
-	if (n >= HOST_NAME_MAX+1)
+	if (n >= HOST_NAME_MAX + 1)
 		goto bad;
 	strlcpy(hostname, p, n + 1);
 	return (0);

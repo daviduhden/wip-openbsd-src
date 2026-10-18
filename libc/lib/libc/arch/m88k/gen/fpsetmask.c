@@ -10,18 +10,18 @@
 
 fp_except
 fpsetmask(mask)
-	fp_except mask;
+fp_except mask;
 {
 	fp_except old;
 	fp_except new;
 
-	__asm__ volatile("fldcr %0, %%fcr63" : "=r" (old));
+	__asm__ volatile("fldcr %0, %%fcr63" : "=r"(old));
 
 	new = old;
-	new &= ~0x1f;		/* clear bottom 5 bits and */
-	new |= (mask & 0x1f);	/* set them to mask */
+	new &= ~0x1f;	      /* clear bottom 5 bits and */
+	new |= (mask & 0x1f); /* set them to mask */
 
-	__asm__ volatile("fstcr %0, %%fcr63" : : "r" (new));
+	__asm__ volatile("fstcr %0, %%fcr63" : : "r"(new));
 
 	return (old & 0x1f);
 }

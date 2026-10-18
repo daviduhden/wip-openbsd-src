@@ -27,23 +27,24 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: /repoman/r/ncvs/src/lib/libc_r/uthread/uthread_atfork.c,v 1.1 2004/12/10 03:36:45 grog Exp $
+ * $FreeBSD: /repoman/r/ncvs/src/lib/libc_r/uthread/uthread_atfork.c,v 1.1
+ * 2004/12/10 03:36:45 grog Exp $
  */
 
 #include <errno.h>
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "thread_private.h"
 #include "atfork.h"
+#include "thread_private.h"
 
-int	_thread_atfork(void (*_prepare)(void), void (*_parent)(void),
-	    void (*_child)(void), void *_dso);
+int _thread_atfork(void (*_prepare)(void), void (*_parent)(void),
+    void (*_child)(void), void *_dso);
 PROTO_NORMAL(_thread_atfork);
 
 int
-_thread_atfork(void (*prepare)(void), void (*parent)(void),
-    void (*child)(void), void *dso)
+_thread_atfork(
+    void (*prepare)(void), void (*parent)(void), void (*child)(void), void *dso)
 {
 	struct atfork_fn *af;
 

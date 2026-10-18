@@ -1,4 +1,5 @@
-/*	$OpenBSD: clock_getcpuclockid.c,v 1.1 2013/06/17 19:11:54 guenther Exp $ */
+/*	$OpenBSD: clock_getcpuclockid.c,v 1.1 2013/06/17 19:11:54 guenther Exp $
+ */
 /*
  * Copyright (c) 2013 Philip Guenther <guenther@openbsd.org>
  * All Rights Reserved.
@@ -16,9 +17,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <errno.h>
 #include <time.h>
 #include <unistd.h>
-#include <errno.h>
 
 int
 clock_getcpuclockid(pid_t pid, clockid_t *clock_id)

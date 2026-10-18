@@ -28,8 +28,8 @@
  * $FreeBSD: head/sys/cpu/include/cpufunc.h 299683 2016-05-13 16:03:50Z andrew $
  */
 
-#ifndef	_MACHINE_CPUFUNC_H_
-#define	_MACHINE_CPUFUNC_H_
+#ifndef _MACHINE_CPUFUNC_H_
+#define _MACHINE_CPUFUNC_H_
 
 static __inline void
 breakpoint(void)
@@ -41,10 +41,10 @@ breakpoint(void)
 
 #include <machine/riscvreg.h>
 
-#define	rdcycle()			csr_read(cycle)
-#define	rdtime()			csr_read(time)
-#define	rdinstret()			csr_read(instret)
-#define	rdhpmcounter(n)			csr_read(hpmcounter##n)
+#define rdcycle() csr_read(cycle)
+#define rdtime() csr_read(time)
+#define rdinstret() csr_read(instret)
+#define rdhpmcounter(n) csr_read(hpmcounter##n)
 
 static __inline void
 fence_i(void)
@@ -61,29 +61,20 @@ sfence_vma(void)
 static __inline void
 sfence_vma_page(uintptr_t addr)
 {
-	__asm volatile("sfence.vma %0"
-			:
-			: "r" (addr)
-			: "memory");
+	__asm volatile("sfence.vma %0" : : "r"(addr) : "memory");
 }
 
 // XXX ASIDs in riscv64 are only 16 bits.
 static __inline void
 sfence_vma_asid(uint64_t asid)
 {
-	__asm volatile("sfence.vma x0, %0"
-			:
-			: "r" (asid)
-			: "memory");
+	__asm volatile("sfence.vma x0, %0" : : "r"(asid) : "memory");
 }
 
 static __inline void
 sfence_vma_page_asid(uintptr_t addr, uint64_t asid)
 {
-	__asm volatile("sfence.vma %0, %1"
-			 :
-			 : "r" (addr), "r" (asid)
-			 : "memory");
+	__asm volatile("sfence.vma %0, %1" : : "r"(addr), "r"(asid) : "memory");
 }
 
 extern int64_t dcache_line_size;
@@ -96,8 +87,8 @@ extern void (*cpu_dcache_wb_range)(vaddr_t, vsize_t);
 static __inline void
 load_satp(uint64_t val)
 {
-	__asm volatile("csrw satp, %0" :: "r"(val));
+	__asm volatile("csrw satp, %0" ::"r"(val));
 }
 
-#endif	/* _KERNEL */
-#endif	/* _MACHINE_CPUFUNC_H_ */
+#endif /* _KERNEL */
+#endif /* _MACHINE_CPUFUNC_H_ */

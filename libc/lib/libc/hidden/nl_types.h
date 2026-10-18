@@ -24,4 +24,4 @@ PROTO_NORMAL(catclose);
 PROTO_NORMAL(catgets);
 PROTO_NORMAL(catopen);
 
-#endif	/* _LIBC_NL_TYPES_H_ */
+#endif /* _LIBC_NL_TYPES_H_ */

@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 void
 setprogname(const char *progname)

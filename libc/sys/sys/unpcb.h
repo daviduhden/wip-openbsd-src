@@ -65,81 +65,79 @@
  *      s       socket lock
  */
 
-
-struct	unpcb {
-	struct  refcnt unp_refcnt;      /* references to this pcb */
-	struct	socket *unp_socket;	/* [I] pointer back to socket */
-	struct	vnode *unp_vnode;	/* [s] if associated with file */
-	struct	file *unp_file;		/* [G] backpointer for unp_gc() */
-	struct	unpcb *unp_conn;	/* [s] control block of connected
+struct unpcb {
+	struct refcnt  unp_refcnt;	/* references to this pcb */
+	struct socket *unp_socket;	/* [I] pointer back to socket */
+	struct vnode  *unp_vnode;	/* [s] if associated with file */
+	struct file   *unp_file;	/* [G] backpointer for unp_gc() */
+	struct unpcb  *unp_conn;	/* [s] control block of connected
 						socket */
-	ino_t	unp_ino;		/* [s] fake inode number */
-	SLIST_HEAD(,unpcb) unp_refs;	/* [s] referencing socket linked list */
-	SLIST_ENTRY(unpcb) unp_nextref;	/* [s] link in unp_refs list */
-	struct	mbuf *unp_addr;		/* [s] bound address of socket */
-	long	unp_msgcount;		/* [G] references from socket rcv buf */
-	long	unp_gcrefs;		/* [G] references from gc */
-	int	unp_flags;		/* [s] this unpcb contains peer eids */
-	int	unp_gcflags;		/* [G] garbage collector flags */
-	struct	sockpeercred unp_connid;/* [s] id of peer process */
-	struct	timespec unp_ctime;	/* [I] holds creation time */
+	ino_t unp_ino;			/* [s] fake inode number */
+	SLIST_HEAD(, unpcb) unp_refs;	/* [s] referencing socket linked list */
+	SLIST_ENTRY(unpcb) unp_nextref; /* [s] link in unp_refs list */
+	struct mbuf *unp_addr;		/* [s] bound address of socket */
+	long	     unp_msgcount;	/* [G] references from socket rcv buf */
+	long	     unp_gcrefs;	/* [G] references from gc */
+	int	     unp_flags;		/* [s] this unpcb contains peer eids */
+	int	     unp_gcflags;	/* [G] garbage collector flags */
+	struct sockpeercred unp_connid; /* [s] id of peer process */
+	struct timespec	    unp_ctime;	/* [I] holds creation time */
 	LIST_ENTRY(unpcb) unp_link;	/* [G] link in per-AF list of sockets */
 };
 
 /*
  * flag bits in unp_flags
  */
-#define UNP_FEIDS	0x01		/* unp_connid contains information */
-#define UNP_FEIDSBIND	0x02		/* unp_connid was set by a bind */
-#define UNP_BINDING	0x04		/* unp is binding now */
-#define UNP_CONNECTING	0x08		/* unp is connecting now */
+#define UNP_FEIDS 0x01	    /* unp_connid contains information */
+#define UNP_FEIDSBIND 0x02  /* unp_connid was set by a bind */
+#define UNP_BINDING 0x04    /* unp is binding now */
+#define UNP_CONNECTING 0x08 /* unp is connecting now */
 
 /*
  * flag bits in unp_gcflags
  */
-#define UNP_GCDEAD	0x01		/* unp could be dead */
+#define UNP_GCDEAD 0x01 /* unp could be dead */
 
-#define	sotounpcb(so)	((struct unpcb *)((so)->so_pcb))
+#define sotounpcb(so) ((struct unpcb *)((so)->so_pcb))
 
 #ifdef _KERNEL
 
 struct stat;
 
 struct fdpass {
-	struct file	*fp;
-	int		 flags;
+	struct file *fp;
+	int	     flags;
 };
 
 extern const struct pr_usrreqs uipc_usrreqs;
 extern const struct pr_usrreqs uipc_dgram_usrreqs;
 
-int	uipc_attach(struct socket *, int, int);
-int	uipc_detach(struct socket *);
-int	uipc_bind(struct socket *, struct mbuf *, struct proc *);
-int	uipc_listen(struct socket *);
-int	uipc_connect(struct socket *, struct mbuf *);
-int	uipc_accept(struct socket *, struct mbuf *);
-int	uipc_disconnect(struct socket *);
-int	uipc_shutdown(struct socket *);
-int	uipc_dgram_shutdown(struct socket *);
-void	uipc_rcvd(struct socket *);
-int	uipc_send(struct socket *, struct mbuf *, struct mbuf *,
-	    struct mbuf *);
-int	uipc_dgram_send(struct socket *, struct mbuf *, struct mbuf *,
-	    struct mbuf *);
-void	uipc_abort(struct socket *);
-int	uipc_sense(struct socket *, struct stat *);
-int	uipc_sockaddr(struct socket *, struct mbuf *);
-int	uipc_peeraddr(struct socket *, struct mbuf *);
-int	uipc_connect2(struct socket *, struct socket *);
+int  uipc_attach(struct socket *, int, int);
+int  uipc_detach(struct socket *);
+int  uipc_bind(struct socket *, struct mbuf *, struct proc *);
+int  uipc_listen(struct socket *);
+int  uipc_connect(struct socket *, struct mbuf *);
+int  uipc_accept(struct socket *, struct mbuf *);
+int  uipc_disconnect(struct socket *);
+int  uipc_shutdown(struct socket *);
+int  uipc_dgram_shutdown(struct socket *);
+void uipc_rcvd(struct socket *);
+int  uipc_send(struct socket *, struct mbuf *, struct mbuf *, struct mbuf *);
+int  uipc_dgram_send(
+    struct socket *, struct mbuf *, struct mbuf *, struct mbuf *);
+void uipc_abort(struct socket *);
+int  uipc_sense(struct socket *, struct stat *);
+int  uipc_sockaddr(struct socket *, struct mbuf *);
+int  uipc_peeraddr(struct socket *, struct mbuf *);
+int  uipc_connect2(struct socket *, struct socket *);
 
-void	unp_init(void);
-int	unp_connect(struct socket *, struct mbuf *, struct proc *);
-int	unp_connect2(struct socket *, struct socket *);
-void	unp_detach(struct unpcb *);
-void	unp_disconnect(struct unpcb *);
-void	unp_gc(void *);
-int 	unp_externalize(struct mbuf *, socklen_t, int);
-int	unp_internalize(struct mbuf *, struct proc *);
-void 	unp_dispose(struct mbuf *);
+void unp_init(void);
+int  unp_connect(struct socket *, struct mbuf *, struct proc *);
+int  unp_connect2(struct socket *, struct socket *);
+void unp_detach(struct unpcb *);
+void unp_disconnect(struct unpcb *);
+void unp_gc(void *);
+int  unp_externalize(struct mbuf *, socklen_t, int);
+int  unp_internalize(struct mbuf *, struct proc *);
+void unp_dispose(struct mbuf *);
 #endif /* _KERNEL */

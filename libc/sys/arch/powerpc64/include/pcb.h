@@ -19,19 +19,19 @@
 #ifndef _MACHINE_PCB_H_
 #define _MACHINE_PCB_H_
 
-#include <machine/reg.h>
 #include <machine/pte.h>
+#include <machine/reg.h>
 
 struct pcb {
-	register_t	pcb_sp;
-	u_int		pcb_flags;
-#define PCB_FPU		0x000000001
-#define PCB_VEC		0x000000002
-#define PCB_VSX		0x000000004
-	struct slb	pcb_slb[32];
-	vaddr_t		pcb_onfault;
-	vaddr_t		pcb_userva;
-	struct fpreg	pcb_fpstate;
+	register_t pcb_sp;
+	u_int	   pcb_flags;
+#define PCB_FPU 0x000000001
+#define PCB_VEC 0x000000002
+#define PCB_VSX 0x000000004
+	struct slb   pcb_slb[32];
+	vaddr_t	     pcb_onfault;
+	vaddr_t	     pcb_userva;
+	struct fpreg pcb_fpstate;
 };
 
 #endif /* _MACHINE_PCB_H_ */

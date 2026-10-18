@@ -36,17 +36,16 @@
  * Protocol for the local binder service, or pmap.
  */
 
+#include <rpc/pmap_prot.h>
 #include <rpc/types.h>
 #include <rpc/xdr.h>
-#include <rpc/pmap_prot.h>
-
 
 bool_t
 xdr_pmap(XDR *xdrs, struct pmap *regs)
 {
 
-	if (xdr_u_long(xdrs, &regs->pm_prog) && 
-	    xdr_u_long(xdrs, &regs->pm_vers) && 
+	if (xdr_u_long(xdrs, &regs->pm_prog) &&
+	    xdr_u_long(xdrs, &regs->pm_vers) &&
 	    xdr_u_long(xdrs, &regs->pm_prot))
 		return (xdr_u_long(xdrs, &regs->pm_port));
 	return (FALSE);

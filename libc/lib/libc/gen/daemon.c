@@ -30,8 +30,8 @@
 
 #include <fcntl.h>
 #include <paths.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 int
 daemon(int nochdir, int noclose)

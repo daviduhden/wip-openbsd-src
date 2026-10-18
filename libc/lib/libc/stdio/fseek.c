@@ -33,13 +33,15 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
+
 #include "local.h"
 
-#define	POS_ERR	(-(fpos_t)1)
+#define POS_ERR (-(fpos_t)1)
 
 /*
  * Seek the given file to the given offset.
@@ -48,11 +50,11 @@
 int
 fseeko(FILE *fp, off_t offset, int whence)
 {
-	fpos_t (*seekfn)(void *, fpos_t, int);
-	fpos_t target, curoff;
-	size_t n;
+	fpos_t	    (*seekfn)(void *, fpos_t, int);
+	fpos_t	    target, curoff;
+	size_t	    n;
 	struct stat st;
-	int havepos;
+	int	    havepos;
 
 	/* make sure stdio is set up */
 	if (!__sdidinit)
@@ -62,7 +64,7 @@ fseeko(FILE *fp, off_t offset, int whence)
 	 * Have to be able to seek.
 	 */
 	if ((seekfn = fp->_seek) == NULL) {
-		errno = ESPIPE;			/* historic practice */
+		errno = ESPIPE; /* historic practice */
 		return (EOF);
 	}
 
@@ -79,7 +81,7 @@ fseeko(FILE *fp, off_t offset, int whence)
 		 * we have to first find the current stream offset a la
 		 * ftell (see ftell for details).
 		 */
-		__sflush(fp);	/* may adjust seek offset on append stream */
+		__sflush(fp); /* may adjust seek offset on append stream */
 		if (fp->_flags & __SOFF)
 			curoff = fp->_offset;
 		else {
@@ -103,7 +105,7 @@ fseeko(FILE *fp, off_t offset, int whence)
 
 	case SEEK_SET:
 	case SEEK_END:
-		curoff = 0;		/* XXX just to keep gcc quiet */
+		curoff = 0; /* XXX just to keep gcc quiet */
 		havepos = 0;
 		break;
 
@@ -129,8 +131,8 @@ fseeko(FILE *fp, off_t offset, int whence)
 	if (fp->_r == 0 && (fp->_p == NULL || fp->_p == fp->_bf._base))
 		goto dumb;
 	if ((fp->_flags & __SOPT) == 0) {
-		if (seekfn != __sseek ||
-		    fp->_file < 0 || fstat(fp->_file, &st) == -1 ||
+		if (seekfn != __sseek || fp->_file < 0 ||
+		    fstat(fp->_file, &st) == -1 ||
 		    (st.st_mode & S_IFMT) != S_IFREG) {
 			fp->_flags |= __SNPT;
 			goto dumb;
@@ -171,7 +173,7 @@ fseeko(FILE *fp, off_t offset, int whence)
 	 * file offset for the first byte in the current input buffer.
 	 */
 	if (HASUB(fp)) {
-		curoff += fp->_r;	/* kill off ungetc */
+		curoff += fp->_r; /* kill off ungetc */
 		n = fp->_up - fp->_bf._base;
 		curoff -= n;
 		n += fp->_ur;
@@ -187,8 +189,8 @@ fseeko(FILE *fp, off_t offset, int whence)
 	 * and return.  (If the buffer was modified, we have to
 	 * skip this; see fgetln.c.)
 	 */
-	if ((fp->_flags & __SMOD) == 0 &&
-	    target >= curoff && target < curoff + n) {
+	if ((fp->_flags & __SMOD) == 0 && target >= curoff &&
+	    target < curoff + n) {
 		int o = target - curoff;
 
 		fp->_p = fp->_bf._base + o;
@@ -212,7 +214,7 @@ fseeko(FILE *fp, off_t offset, int whence)
 	if ((*seekfn)(fp->_cookie, curoff, SEEK_SET) == POS_ERR)
 		goto dumb;
 	fp->_r = 0;
- 	fp->_p = fp->_bf._base;
+	fp->_p = fp->_bf._base;
 	if (HASUB(fp))
 		FREEUB(fp);
 	fp->_flags &= ~__SEOF;
@@ -241,7 +243,7 @@ dumb:
 		FREEUB(fp);
 	fp->_p = fp->_bf._base;
 	fp->_r = 0;
-	/* fp->_w = 0; */	/* unnecessary (I think...) */
+	/* fp->_w = 0; */ /* unnecessary (I think...) */
 	fp->_flags &= ~__SEOF;
 	FUNLOCKFILE(fp);
 	return (0);

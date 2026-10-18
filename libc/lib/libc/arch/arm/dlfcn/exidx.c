@@ -16,6 +16,7 @@
  */
 
 #include <sys/types.h>
+
 #include <link.h>
 #include <stddef.h>
 
@@ -23,8 +24,8 @@ void *dl_unwind_find_exidx(const void *pc, int *pcount) __attribute__((weak));
 
 struct exidx_data {
 	u_long pc;
-	void *exidx;
-	int *pcount;
+	void  *exidx;
+	int   *pcount;
 };
 
 struct exidx_entry {
@@ -35,11 +36,11 @@ static int
 find_exidx(struct dl_phdr_info *info, size_t size, void *p)
 {
 	struct exidx_data *data = p;
-	const Elf_Phdr *phdr;
-	void *exidx;
-	int count = 0;
-	int found = 0;
-	int i;
+	const Elf_Phdr	  *phdr;
+	void		  *exidx;
+	int		   count = 0;
+	int		   found = 0;
+	int		   i;
 
 	for (i = 0; i < info->dlpi_phnum; i++) {
 		phdr = &info->dlpi_phdr[i];

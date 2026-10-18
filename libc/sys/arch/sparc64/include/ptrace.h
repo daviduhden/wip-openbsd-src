@@ -44,11 +44,11 @@
 /*
  * SPARC-dependent ptrace definitions.
  */
-#define	PT_GETREGS	(PT_FIRSTMACH + 0)
-#define	PT_SETREGS	(PT_FIRSTMACH + 1)
-#define	PT_GETFPREGS	(PT_FIRSTMACH + 2)
-#define	PT_SETFPREGS	(PT_FIRSTMACH + 3)
-#define PT_WCOOKIE	(PT_FIRSTMACH + 4)
+#define PT_GETREGS (PT_FIRSTMACH + 0)
+#define PT_SETREGS (PT_FIRSTMACH + 1)
+#define PT_GETFPREGS (PT_FIRSTMACH + 2)
+#define PT_SETFPREGS (PT_FIRSTMACH + 3)
+#define PT_WCOOKIE (PT_FIRSTMACH + 4)
 
 #ifdef _KERNEL
 register_t process_get_wcookie(struct proc *p);

@@ -26,19 +26,20 @@
  */
 
 #include <sys/types.h>
-#include <machine/ieee.h>
+
 #include <float.h>
 #include <limits.h>
+#include <machine/ieee.h>
 #include <math.h>
 
 #include "gdtoaimp.h"
 
 /* Strings values used by dtoa() */
-#define	INFSTR	"Infinity"
-#define	NANSTR	"NaN"
+#define INFSTR "Infinity"
+#define NANSTR "NaN"
 
-#define	DBL_ADJ		(DBL_MAX_EXP - 2 + ((DBL_MANT_DIG - 1) % 4))
-#define	LDBL_ADJ	(LDBL_MAX_EXP - 2 + ((LDBL_MANT_DIG - 1) % 4))
+#define DBL_ADJ (DBL_MAX_EXP - 2 + ((DBL_MANT_DIG - 1) % 4))
+#define LDBL_ADJ (LDBL_MAX_EXP - 2 + ((LDBL_MANT_DIG - 1) % 4))
 
 /*
  * Round up the given digit string.  If the digit string is fff...f,
@@ -70,22 +71,22 @@ roundup(char *s0, int ndigits)
 static void
 dorounding(char *s0, int ndigits, int sign, int *decpt)
 {
-	int adjust = 0;	/* do we need to adjust the exponent? */
+	int adjust = 0; /* do we need to adjust the exponent? */
 
 	switch (FLT_ROUNDS) {
-	case 0:		/* toward zero */
-	default:	/* implementation-defined */
+	case 0:	 /* toward zero */
+	default: /* implementation-defined */
 		break;
-	case 1:		/* to nearest, halfway rounds to even */
+	case 1: /* to nearest, halfway rounds to even */
 		if ((s0[ndigits] > 8) ||
 		    (s0[ndigits] == 8 && s0[ndigits + 1] & 1))
 			adjust = roundup(s0, ndigits);
 		break;
-	case 2:		/* toward +inf */
+	case 2: /* toward +inf */
 		if (sign == 0)
 			adjust = roundup(s0, ndigits);
 		break;
-	case 3:		/* toward -inf */
+	case 3: /* toward -inf */
 		if (sign != 0)
 			adjust = roundup(s0, ndigits);
 		break;
@@ -120,13 +121,13 @@ dorounding(char *s0, int ndigits, int sign, int *decpt)
  * Outputs:	decpt, sign, rve
  */
 char *
-__hdtoa(double d, const char *xdigs, int ndigits, int *decpt, int *sign,
-    char **rve)
+__hdtoa(
+    double d, const char *xdigs, int ndigits, int *decpt, int *sign, char **rve)
 {
-	static const int sigfigs = (DBL_MANT_DIG + 3) / 4;
+	static const int    sigfigs = (DBL_MANT_DIG + 3) / 4;
 	struct ieee_double *p = (struct ieee_double *)&d;
-	char *s, *s0;
-	int bufsize;
+	char		   *s, *s0;
+	int		    bufsize;
 
 	*sign = p->dbl_sign;
 
@@ -153,7 +154,7 @@ __hdtoa(double d, const char *xdigs, int ndigits, int *decpt, int *sign,
 
 	/* FP_NORMAL or FP_SUBNORMAL */
 
-	if (ndigits == 0)		/* dtoa() compatibility */
+	if (ndigits == 0) /* dtoa() compatibility */
 		ndigits = 1;
 
 	/*
@@ -223,9 +224,9 @@ __hldtoa(long double e, const char *xdigs, int ndigits, int *decpt, int *sign,
 {
 	static const int sigfigs = (LDBL_MANT_DIG + 3) / 4;
 	struct ieee_ext *p = (struct ieee_ext *)&e;
-	char *s, *s0;
-	int bufsize;
-	int fbits = 0;
+	char		*s, *s0;
+	int		 bufsize;
+	int		 fbits = 0;
 
 	*sign = p->ext_sign;
 
@@ -252,7 +253,7 @@ __hldtoa(long double e, const char *xdigs, int ndigits, int *decpt, int *sign,
 
 	/* FP_NORMAL or FP_SUBNORMAL */
 
-	if (ndigits == 0)		/* dtoa() compatibility */
+	if (ndigits == 0) /* dtoa() compatibility */
 		ndigits = 1;
 
 	/*
@@ -324,7 +325,7 @@ __hldtoa(long double e, const char *xdigs, int ndigits, int *decpt, int *sign,
 }
 DEF_STRONG(__hldtoa);
 
-#else	/* (LDBL_MANT_DIG == DBL_MANT_DIG) */
+#else /* (LDBL_MANT_DIG == DBL_MANT_DIG) */
 
 char *
 __hldtoa(long double e, const char *xdigs, int ndigits, int *decpt, int *sign,
@@ -334,4 +335,4 @@ __hldtoa(long double e, const char *xdigs, int ndigits, int *decpt, int *sign,
 }
 DEF_STRONG(__hldtoa);
 
-#endif	/* (LDBL_MANT_DIG == DBL_MANT_DIG) */
+#endif /* (LDBL_MANT_DIG == DBL_MANT_DIG) */

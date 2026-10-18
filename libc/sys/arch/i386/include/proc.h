@@ -36,10 +36,10 @@
  * Machine-dependent part of the proc structure for i386.
  */
 struct mdproc {
-	struct	trapframe *md_regs;	/* registers on current frame */
-	int	md_flags;		/* machine-dependent flags */
-	int	md_astpending;
+	struct trapframe *md_regs;  /* registers on current frame */
+	int		  md_flags; /* machine-dependent flags */
+	int		  md_astpending;
 };
 
 /* md_flags */
-#define	MDP_USEDFPU	0x0001	/* has used the FPU */
+#define MDP_USEDFPU 0x0001 /* has used the FPU */

@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 	const char *errstr, *num;
 
 	while ((ch = getopt(argc, argv, "c:i:nr:")) != -1) {
-		switch(ch) {
+		switch (ch) {
 		case 'c':
 			cleanup = 1;
 			num = optarg;

@@ -26,7 +26,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	$Citrus: xpg4dl/FreeBSD/lib/libc/string/wcsspn.c,v 1.3 2001/09/21 16:06:43 yamt Exp $
+ *	$Citrus: xpg4dl/FreeBSD/lib/libc/string/wcsspn.c,v 1.3 2001/09/21
+ * 16:06:43 yamt Exp $
  */
 
 #include <wchar.h>

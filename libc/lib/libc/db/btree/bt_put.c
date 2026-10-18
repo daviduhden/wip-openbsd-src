@@ -34,12 +34,12 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <db.h>
 #include "btree.h"
 
 static EPG *bt_fast(BTREE *, const DBT *, const DBT *, int *);
@@ -60,15 +60,15 @@ static EPG *bt_fast(BTREE *, const DBT *, const DBT *, int *);
 int
 __bt_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 {
-	BTREE *t;
-	DBT tkey, tdata;
-	EPG *e;
-	PAGE *h;
-	indx_t idx, nxtindex;
-	pgno_t pg;
+	BTREE	 *t;
+	DBT	  tkey, tdata;
+	EPG	 *e;
+	PAGE	 *h;
+	indx_t	  idx, nxtindex;
+	pgno_t	  pg;
 	u_int32_t nbytes, size32;
-	int dflags, exact, status;
-	char *dest, db[NOVFLSIZE], kb[NOVFLSIZE];
+	int	  dflags, exact, status;
+	char	 *dest, db[NOVFLSIZE], kb[NOVFLSIZE];
 
 	t = dbp->internal;
 
@@ -94,8 +94,8 @@ __bt_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 		 * have started a scan and not have already deleted it.
 		 */
 		if (F_ISSET(&t->bt_cursor, CURS_INIT) &&
-		    !F_ISSET(&t->bt_cursor,
-			CURS_ACQUIRE | CURS_AFTER | CURS_BEFORE))
+		    !F_ISSET(
+			&t->bt_cursor, CURS_ACQUIRE | CURS_AFTER | CURS_BEFORE))
 			break;
 		/* FALLTHROUGH */
 	default:
@@ -114,14 +114,15 @@ __bt_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 	dflags = 0;
 	if (key->size + data->size > t->bt_ovflsize) {
 		if (key->size > t->bt_ovflsize) {
-storekey:		if (__ovfl_put(t, key, &pg) == RET_ERROR)
+		storekey:
+			if (__ovfl_put(t, key, &pg) == RET_ERROR)
 				return (RET_ERROR);
 			tkey.data = kb;
 			tkey.size = NOVFLSIZE;
 			memmove(kb, &pg, sizeof(pgno_t));
 			size32 = key->size;
-			memmove(kb + sizeof(pgno_t),
-			    &size32, sizeof(u_int32_t));
+			memmove(
+			    kb + sizeof(pgno_t), &size32, sizeof(u_int32_t));
 			dflags |= P_BIGKEY;
 			key = &tkey;
 		}
@@ -132,8 +133,8 @@ storekey:		if (__ovfl_put(t, key, &pg) == RET_ERROR)
 			tdata.size = NOVFLSIZE;
 			memmove(db, &pg, sizeof(pgno_t));
 			size32 = data->size;
-			memmove(db + sizeof(pgno_t),
-			    &size32, sizeof(u_int32_t));
+			memmove(
+			    db + sizeof(pgno_t), &size32, sizeof(u_int32_t));
 			dflags |= P_BIGDATA;
 			data = &tdata;
 		}
@@ -179,7 +180,8 @@ storekey:		if (__ovfl_put(t, key, &pg) == RET_ERROR)
 		 * Note, the delete may empty the page, so we need to put a
 		 * new entry into the page immediately.
 		 */
-delete:		if (__bt_dleaf(t, key, h, idx) == RET_ERROR) {
+	delete:
+		if (__bt_dleaf(t, key, h, idx) == RET_ERROR) {
 			mpool_put(t->bt_mp, h, 0);
 			return (RET_ERROR);
 		}
@@ -194,8 +196,8 @@ delete:		if (__bt_dleaf(t, key, h, idx) == RET_ERROR) {
 	 */
 	nbytes = NBLEAFDBT(key->size, data->size);
 	if (h->upper - h->lower < nbytes + sizeof(indx_t)) {
-		if ((status = __bt_split(t, h, key,
-		    data, dflags, nbytes, idx)) != RET_SUCCESS)
+		if ((status = __bt_split(
+			 t, h, key, data, dflags, nbytes, idx)) != RET_SUCCESS)
 			return (status);
 		goto success;
 	}
@@ -258,9 +260,9 @@ u_long bt_cache_hit, bt_cache_miss;
 static EPG *
 bt_fast(BTREE *t, const DBT *key, const DBT *data, int *exactp)
 {
-	PAGE *h;
+	PAGE	 *h;
 	u_int32_t nbytes;
-	int cmp;
+	int	  cmp;
 
 	if ((h = mpool_get(t->bt_mp, t->bt_last.pgno, 0)) == NULL) {
 		t->bt_order = NOT;

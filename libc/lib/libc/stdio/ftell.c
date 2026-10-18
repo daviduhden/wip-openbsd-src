@@ -31,9 +31,10 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdio.h>
+
 #include "local.h"
 
 /*
@@ -45,7 +46,7 @@ ftello(FILE *fp)
 	fpos_t pos;
 
 	if (fp->_seek == NULL) {
-		errno = ESPIPE;			/* historic practice */
+		errno = ESPIPE; /* historic practice */
 		pos = -1;
 		goto out;
 	}
@@ -56,7 +57,7 @@ ftello(FILE *fp)
 	 */
 	FLOCKFILE(fp);
 	if (fp->_flags & __SWR)
-		__sflush(fp);	/* may adjust seek offset on append stream */
+		__sflush(fp); /* may adjust seek offset on append stream */
 	if (fp->_flags & __SOFF)
 		pos = fp->_offset;
 	else {
@@ -81,7 +82,8 @@ ftello(FILE *fp)
 		 */
 		pos += fp->_p - fp->_bf._base;
 	}
-out:	FUNLOCKFILE(fp);
+out:
+	FUNLOCKFILE(fp);
 	return (pos);
 }
 DEF_WEAK(ftello);

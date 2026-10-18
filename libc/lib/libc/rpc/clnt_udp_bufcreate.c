@@ -1,4 +1,5 @@
-/*	$OpenBSD: clnt_udp_bufcreate.c,v 1.1 2024/01/22 16:18:06 deraadt Exp $ */
+/*	$OpenBSD: clnt_udp_bufcreate.c,v 1.1 2024/01/22 16:18:06 deraadt Exp $
+ */
 
 /*
  * Copyright (c) 2010, Oracle America, Inc.
@@ -35,16 +36,18 @@
  * clnt_udp.c, Implements a UDP/IP based, client side RPC.
  */
 
+#include <sys/socket.h>
+
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <rpc/pmap_clnt.h>
+#include <rpc/rpc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <rpc/rpc.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <errno.h>
-#include <rpc/pmap_clnt.h>
+
 #include "clnt_udp.h"
 
 /*
@@ -85,16 +88,16 @@ clntudp_bufcreate(struct sockaddr_in *raddr, u_long program, u_long version,
 
 	if (raddr->sin_port == 0) {
 		u_short port;
-		if ((port =
-		    pmap_getport(raddr, program, version, IPPROTO_UDP)) == 0) {
+		if ((port = pmap_getport(
+			 raddr, program, version, IPPROTO_UDP)) == 0) {
 			goto fooy;
 		}
 		raddr->sin_port = htons(port);
 	}
 	args.cu->cu_raddr = *raddr;
 	if (*sockp < 0) {
-		*sockp = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK,
-		    IPPROTO_UDP);
+		*sockp =
+		    socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
 		if (*sockp == -1) {
 			rpc_createerr.cf_stat = RPC_SYSTEMERROR;
 			rpc_createerr.cf_error.re_errno = errno;
@@ -124,7 +127,7 @@ clntudp_create(struct sockaddr_in *raddr, u_long program, u_long version,
     struct timeval wait, int *sockp)
 {
 
-	return(clntudp_bufcreate(raddr, program, version, wait, sockp,
-	    UDPMSGSIZE, UDPMSGSIZE));
+	return (clntudp_bufcreate(
+	    raddr, program, version, wait, sockp, UDPMSGSIZE, UDPMSGSIZE));
 }
 DEF_WEAK(clntudp_create);

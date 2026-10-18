@@ -37,7 +37,7 @@
  * The file also includes a conditional assembly definition
  * for the type of computer arithmetic (IEEE, DEC, Motorola
  * IEEE, or UNKnown).
- * 
+ *
  * For Digital Equipment PDP-11 and VAX computers, certain
  * IBM systems, and others that use numbers with a 56-bit
  * significand, the symbol DEC should be defined.  In this
@@ -76,42 +76,41 @@
  */
 
 #include <sys/types.h>
+
 #include <endian.h>
 
 /* Constant definitions for math error conditions
  */
 
-#define DOMAIN		1	/* argument domain error */
-#define SING		2	/* argument singularity */
-#define OVERFLOW	3	/* overflow range error */
-#define UNDERFLOW	4	/* underflow range error */
-#define TLOSS		5	/* total loss of precision */
-#define PLOSS		6	/* partial loss of precision */
+#define DOMAIN 1    /* argument domain error */
+#define SING 2	    /* argument singularity */
+#define OVERFLOW 3  /* overflow range error */
+#define UNDERFLOW 4 /* underflow range error */
+#define TLOSS 5	    /* total loss of precision */
+#define PLOSS 6	    /* partial loss of precision */
 
-#define EDOM		33
-#define ERANGE		34
+#define EDOM 33
+#define ERANGE 34
 
 /* Complex numeral.  */
-typedef struct
-	{
+typedef struct {
 	double r;
 	double i;
-	} cmplx;
+} cmplx;
 
 /* Long double complex numeral.  */
-typedef struct
-	{
+typedef struct {
 	double r;
 	double i;
-	} cmplxl;
+} cmplxl;
 
 /* Type of computer arithmetic */
 
 /* PDP-11, Pro350, VAX:
  */
-#ifdef	__vax__
+#ifdef __vax__
 #define DEC 1
-#endif	/* __vax__ */
+#endif /* __vax__ */
 
 /* Intel IEEE, low order words come first:
  */
@@ -128,14 +127,14 @@ typedef struct
  * roundoff problems in pow.c:
  * (Sun SPARCstation)
  */
-#ifndef	__vax__
+#ifndef __vax__
 #define UNK 1
-#endif	/* !__vax__ */
+#endif /* !__vax__ */
 
 /* If you define UNK, then be sure to set BIGENDIAN properly. */
-#if	BYTE_ORDER == BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 #define BIGENDIAN 1
-#endif	/* BYTE_ORDER == BIG_ENDIAN */
+#endif /* BYTE_ORDER == BIG_ENDIAN */
 
 /* Define this `volatile' if your compiler thinks
  * that floating point arithmetic obeys the associative
@@ -159,20 +158,20 @@ typedef struct
 #define XPD 0,
 
 /* Define to support tiny denormal numbers, else undefine. */
-#ifndef	__vax__
+#ifndef __vax__
 #define DENORMAL 1
-#endif	/* !__vax__ */
+#endif /* !__vax__ */
 
 /* Define to ask for infinity support, else undefine. */
-#ifndef	__vax__
+#ifndef __vax__
 #define INFINITIES 1
-#endif	/* !__vax__ */
+#endif /* !__vax__ */
 
 /* Define to ask for support of numbers that are Not-a-Number,
    else undefine.  This may automatically define INFINITIES in some files. */
-#ifndef	__vax__
+#ifndef __vax__
 #define NANS 1
-#endif	/* !__vax__ */
+#endif /* !__vax__ */
 
 /* Define to distinguish between -0.0 and +0.0.  */
 #define MINUSZERO 1

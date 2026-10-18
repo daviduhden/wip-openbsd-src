@@ -14,8 +14,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef	_MACHINE_PCB_H_
-#define	_MACHINE_PCB_H_
+#ifndef _MACHINE_PCB_H_
+#define _MACHINE_PCB_H_
 
 #include <machine/frame.h>
 #include <machine/reg.h>
@@ -27,19 +27,19 @@ struct trapframe;
  * of this structure.
  */
 struct pcb {
-	u_int		pcb_flags;
-#define	PCB_FPU		0x00000001	/* Process had FPU initialized */
-#define	PCB_SINGLESTEP	0x00000002	/* Single step process */
-#define	PCB_SVE		0x00000004	/* Process had SVE initialized */
-	struct		trapframe *pcb_tf;
+	u_int pcb_flags;
+#define PCB_FPU 0x00000001	  /* Process had FPU initialized */
+#define PCB_SINGLESTEP 0x00000002 /* Single step process */
+#define PCB_SVE 0x00000004	  /* Process had SVE initialized */
+	struct trapframe *pcb_tf;
 
-	register_t	pcb_sp;		/* stack pointer of switchframe */
+	register_t pcb_sp; /* stack pointer of switchframe */
 
-	caddr_t		pcb_onfault;	/* On fault handler */
-	struct fpreg	pcb_fpstate;	/* Floating Point state */
-	__uint16_t	pcb_sve_p[16];	/* SVE predicate registers */
-	__uint16_t	pcb_sve_ffr;	/* SVE first fault register */
+	caddr_t	     pcb_onfault;   /* On fault handler */
+	struct fpreg pcb_fpstate;   /* Floating Point state */
+	__uint16_t   pcb_sve_p[16]; /* SVE predicate registers */
+	__uint16_t   pcb_sve_ffr;   /* SVE first fault register */
 
-	void		*pcb_tcb;
+	void *pcb_tcb;
 };
-#endif	/* _MACHINE_PCB_H_ */
+#endif /* _MACHINE_PCB_H_ */

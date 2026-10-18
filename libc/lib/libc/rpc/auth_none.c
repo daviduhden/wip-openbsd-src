@@ -33,49 +33,44 @@
 
 /*
  * auth_none.c
- * Creates a client authentication handle for passing "null" 
- * credentials and verifiers to remote systems. 
+ * Creates a client authentication handle for passing "null"
+ * credentials and verifiers to remote systems.
  */
 
-#include <stdlib.h>
-#include <rpc/types.h>
-#include <rpc/rpc.h>
-#include <rpc/xdr.h>
 #include <rpc/auth.h>
+#include <rpc/rpc.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#include <stdlib.h>
 #define MAX_MARSHEL_SIZE 20
 
 /*
  * Authenticator operations routines
  */
-static void	authnone_destroy(struct __rpc_auth *);
-static void	authnone_verf(struct __rpc_auth *);
-static bool_t	authnone_validate(struct __rpc_auth *, struct opaque_auth *);
-static bool_t	authnone_marshal(struct __rpc_auth *, XDR *);
-static bool_t	authnone_refresh(struct __rpc_auth *);
+static void   authnone_destroy(struct __rpc_auth *);
+static void   authnone_verf(struct __rpc_auth *);
+static bool_t authnone_validate(struct __rpc_auth *, struct opaque_auth *);
+static bool_t authnone_marshal(struct __rpc_auth *, XDR *);
+static bool_t authnone_refresh(struct __rpc_auth *);
 
-static const struct auth_ops ops = {
-	authnone_verf,
-	authnone_marshal,
-	authnone_validate,
-	authnone_refresh,
-	authnone_destroy
-};
+static const struct auth_ops ops = {authnone_verf, authnone_marshal,
+    authnone_validate, authnone_refresh, authnone_destroy};
 
 static struct authnone_private {
-	AUTH	no_client;
-	char	marshalled_client[MAX_MARSHEL_SIZE];
-	u_int	mcnt;
+	AUTH  no_client;
+	char  marshalled_client[MAX_MARSHEL_SIZE];
+	u_int mcnt;
 } *authnone_private;
 
 AUTH *
 authnone_create(void)
 {
 	struct authnone_private *ap = authnone_private;
-	XDR xdr_stream;
-	XDR *xdrs;
+	XDR			 xdr_stream;
+	XDR			*xdrs;
 
 	if (ap == NULL) {
-		ap = calloc(1, sizeof (*ap));
+		ap = calloc(1, sizeof(*ap));
 		if (ap == NULL)
 			return (NULL);
 		authnone_private = ap;
@@ -84,8 +79,8 @@ authnone_create(void)
 		ap->no_client.ah_cred = ap->no_client.ah_verf = _null_auth;
 		ap->no_client.ah_ops = &ops;
 		xdrs = &xdr_stream;
-		xdrmem_create(xdrs, ap->marshalled_client, (u_int)MAX_MARSHEL_SIZE,
-		    XDR_ENCODE);
+		xdrmem_create(xdrs, ap->marshalled_client,
+		    (u_int)MAX_MARSHEL_SIZE, XDR_ENCODE);
 		(void)xdr_opaque_auth(xdrs, &ap->no_client.ah_cred);
 		(void)xdr_opaque_auth(xdrs, &ap->no_client.ah_verf);
 		ap->mcnt = XDR_GETPOS(xdrs);
@@ -102,11 +97,11 @@ authnone_marshal(AUTH *client, XDR *xdrs)
 
 	if (ap == NULL)
 		return (0);
-	return ((*xdrs->x_ops->x_putbytes)(xdrs,
-	    ap->marshalled_client, ap->mcnt));
+	return (
+	    (*xdrs->x_ops->x_putbytes)(xdrs, ap->marshalled_client, ap->mcnt));
 }
 
-static void 
+static void
 authnone_verf(struct __rpc_auth *none)
 {
 }

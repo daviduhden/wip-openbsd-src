@@ -37,35 +37,34 @@ cdev_decl(mm);
 cdev_decl(openprom);
 
 /* open, close, ioctl */
-#define cdev_openprom_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), dev_init(c,n,read), \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) nullop, 0, \
-	(dev_type_mmap((*))) enodev }
+#define cdev_openprom_init(c, n)                                               \
+	{dev_init(c, n, open), dev_init(c, n, close), dev_init(c, n, read),    \
+	    (dev_type_write((*)))enodev, dev_init(c, n, ioctl),                \
+	    (dev_type_stop((*)))nullop, 0, (dev_type_mmap((*)))enodev}
 
 cdev_decl(uperf);
 
 /* open, close, ioctl */
-#define cdev_uperf_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) nullop, 0, \
-	(dev_type_mmap((*))) enodev }
+#define cdev_uperf_init(c, n)                                                  \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, (dev_type_write((*)))enodev,           \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))nullop, 0,              \
+	    (dev_type_mmap((*)))enodev}
 
 cdev_decl(vdsp);
 
 /* open, close, ioctl */
-#define cdev_vdsp_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	(dev_type_write((*))) enodev, dev_init(c,n,ioctl), \
-	(dev_type_stop((*))) nullop, 0, \
-	(dev_type_mmap((*))) enodev }
+#define cdev_vdsp_init(c, n)                                                   \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, (dev_type_write((*)))enodev,           \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))nullop, 0,              \
+	    (dev_type_mmap((*)))enodev}
 
-#define	cdev_gen_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), dev_init(c,n,read), \
-	dev_init(c,n,write), dev_init(c,n,ioctl), (dev_type_stop((*))) nullop, \
-	0, (dev_type_mmap((*))) enodev, \
-	0, 0, dev_init(c,n,kqfilter) }
+#define cdev_gen_init(c, n)                                                    \
+	{dev_init(c, n, open), dev_init(c, n, close), dev_init(c, n, read),    \
+	    dev_init(c, n, write), dev_init(c, n, ioctl),                      \
+	    (dev_type_stop((*)))nullop, 0, (dev_type_mmap((*)))enodev, 0, 0,   \
+	    dev_init(c, n, kqfilter)}
 
 cdev_decl(zs);
 
@@ -95,7 +94,8 @@ cdev_decl(stty);
 cdev_decl(sbpp);
 
 /* open, close, write, ioctl */
-#define	cdev_bpp_init(c,n) { \
-	dev_init(c,n,open), dev_init(c,n,close), (dev_type_read((*))) enodev, \
-	dev_init(c,n,write), dev_init(c,n,ioctl), (dev_type_stop((*))) nullop, \
-	0, (dev_type_mmap((*))) enodev, 0, 0, seltrue_kqfilter }
+#define cdev_bpp_init(c, n)                                                    \
+	{dev_init(c, n, open), dev_init(c, n, close),                          \
+	    (dev_type_read((*)))enodev, dev_init(c, n, write),                 \
+	    dev_init(c, n, ioctl), (dev_type_stop((*)))nullop, 0,              \
+	    (dev_type_mmap((*)))enodev, 0, 0, seltrue_kqfilter}

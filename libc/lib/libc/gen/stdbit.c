@@ -45,10 +45,10 @@ __stdc_lz(unsigned long long x, unsigned int w)
 	if (x == 0)
 		return w;
 	return (unsigned int)__builtin_clzll(x) -
-	       ((unsigned int)(sizeof(unsigned long long) * CHAR_BIT) - w);
+	    ((unsigned int)(sizeof(unsigned long long) * CHAR_BIT) - w);
 #else
 	unsigned long long m = (unsigned long long)1 << (w - 1);
-	unsigned int n = 0;
+	unsigned int	   n = 0;
 
 	while (n < w && (x & m) == 0) {
 		n++;
@@ -122,12 +122,12 @@ __stdc_co(unsigned long long x)
 	unsigned int stdc_count_zeros_##sfx(type x)                            \
 	{                                                                      \
 		return (unsigned int)(sizeof(type) * CHAR_BIT) -               \
-		       stdc_count_ones_##sfx(x);                               \
+		    stdc_count_ones_##sfx(x);                                  \
 	}                                                                      \
 	unsigned int stdc_bit_width_##sfx(type x)                              \
 	{                                                                      \
 		return (unsigned int)(sizeof(type) * CHAR_BIT) -               \
-		       stdc_leading_zeros_##sfx(x);                            \
+		    stdc_leading_zeros_##sfx(x);                               \
 	}                                                                      \
 	bool stdc_has_single_bit_##sfx(type x)                                 \
 	{                                                                      \
@@ -136,26 +136,26 @@ __stdc_co(unsigned long long x)
 	unsigned int stdc_first_leading_zero_##sfx(type x)                     \
 	{                                                                      \
 		unsigned int n = stdc_leading_ones_##sfx(x);                   \
-		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1     \
-		                                                   : 0;        \
+		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
+								     0;        \
 	}                                                                      \
 	unsigned int stdc_first_leading_one_##sfx(type x)                      \
 	{                                                                      \
 		unsigned int n = stdc_leading_zeros_##sfx(x);                  \
-		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1     \
-		                                                   : 0;        \
+		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
+								     0;        \
 	}                                                                      \
 	unsigned int stdc_first_trailing_zero_##sfx(type x)                    \
 	{                                                                      \
 		unsigned int n = stdc_trailing_ones_##sfx(x);                  \
-		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1     \
-		                                                   : 0;        \
+		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
+								     0;        \
 	}                                                                      \
 	unsigned int stdc_first_trailing_one_##sfx(type x)                     \
 	{                                                                      \
 		unsigned int n = stdc_trailing_zeros_##sfx(x);                 \
-		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1     \
-		                                                   : 0;        \
+		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
+								     0;        \
 	}                                                                      \
 	type stdc_bit_floor_##sfx(type x)                                      \
 	{                                                                      \
@@ -168,11 +168,11 @@ __stdc_co(unsigned long long x)
 		if (x <= 1)                                                    \
 			return 1;                                              \
 		return (type)((type)2                                          \
-		              << (stdc_bit_width_##sfx((type)(x - 1)) - 1));   \
+		    << (stdc_bit_width_##sfx((type)(x - 1)) - 1));             \
 	}
 
 __stdc_define(uc, unsigned char) __stdc_define(us, unsigned short)
     __stdc_define(ui, unsigned int) __stdc_define(ul, unsigned long)
-        __stdc_define(ull, unsigned long long)
+	__stdc_define(ull, unsigned long long)
 
 #undef __stdc_define

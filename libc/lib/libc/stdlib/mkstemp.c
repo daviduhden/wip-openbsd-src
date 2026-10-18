@@ -16,18 +16,19 @@
  */
 
 #include <sys/stat.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
-#define MKOSTEMP_FLAGS \
+#define MKOSTEMP_FLAGS                                                         \
 	(O_APPEND | O_CLOEXEC | O_CLOFORK | O_DSYNC | O_RSYNC | O_SYNC)
 
 static int
 mkstemp_cb(const char *path, int flags)
 {
 	flags |= O_CREAT | O_EXCL | O_RDWR;
-	return open(path, flags, S_IRUSR|S_IWUSR);
+	return open(path, flags, S_IRUSR | S_IWUSR);
 }
 
 int

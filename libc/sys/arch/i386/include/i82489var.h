@@ -1,5 +1,6 @@
 /*	$OpenBSD: i82489var.h,v 1.16 2024/07/07 03:03:09 jsg Exp $	*/
-/*	$NetBSD: i82489var.h,v 1.1.2.2 2000/02/21 18:46:14 sommerfeld Exp $	*/
+/*	$NetBSD: i82489var.h,v 1.1.2.2 2000/02/21 18:46:14 sommerfeld Exp $
+ */
 
 /*-
  * Copyright (c) 1998 The NetBSD Foundation, Inc.
@@ -34,7 +35,7 @@
 #define _MACHINE_I82489VAR_H_
 
 static __inline__ u_int32_t i82489_readreg(int);
-static __inline__ void i82489_writereg(int, u_int32_t);
+static __inline__ void	    i82489_writereg(int, u_int32_t);
 
 #ifdef _KERNEL
 extern volatile u_int32_t local_apic[];
@@ -43,8 +44,8 @@ extern volatile u_int32_t local_apic[];
 static __inline__ u_int32_t
 i82489_readreg(int reg)
 {
-	return *((volatile u_int32_t *)(((volatile u_int8_t *)local_apic)
-	    + reg));
+	return *(
+	    (volatile u_int32_t *)(((volatile u_int8_t *)local_apic) + reg));
 }
 
 static __inline__ void
@@ -69,37 +70,37 @@ i82489_writereg(int reg, u_int32_t val)
  * Low-order 4 bits must be all ones.
  */
 extern void Xintrspurious(void);
-#define LAPIC_SPURIOUS_VECTOR		0xef
+#define LAPIC_SPURIOUS_VECTOR 0xef
 
 /*
  * Vector used for inter-processor interrupts.
  */
 extern void Xintripi(void);
-#define LAPIC_IPI_VECTOR		IPL_IPI
+#define LAPIC_IPI_VECTOR IPL_IPI
 
 /*
  * Vector used for local apic timer interrupts.
  */
 
 extern void Xintrltimer(void);
-#define LAPIC_TIMER_VECTOR		IPL_CLOCK
+#define LAPIC_TIMER_VECTOR IPL_CLOCK
 
 /*
  * Vectors to be used for self-soft-interrupts.
  */
 
-#define LAPIC_SOFTCLOCK_VECTOR		IPL_SOFTCLOCK
-#define LAPIC_SOFTNET_VECTOR		IPL_SOFTNET
-#define LAPIC_SOFTTTY_VECTOR		IPL_SOFTTTY
+#define LAPIC_SOFTCLOCK_VECTOR IPL_SOFTCLOCK
+#define LAPIC_SOFTNET_VECTOR IPL_SOFTNET
+#define LAPIC_SOFTTTY_VECTOR IPL_SOFTTTY
 
 /*
  * Special IPI vectors. We can use IDT 0xf0 - 0xff for this.
  */
-#define LAPIC_IPI_OFFSET		0xf0
-#define LAPIC_IPI_INVLTLB		(LAPIC_IPI_OFFSET + 0)
-#define LAPIC_IPI_INVLPG		(LAPIC_IPI_OFFSET + 1)
-#define LAPIC_IPI_INVLRANGE		(LAPIC_IPI_OFFSET + 2)
-#define LAPIC_IPI_RELOADCR3		(LAPIC_IPI_OFFSET + 3)
+#define LAPIC_IPI_OFFSET 0xf0
+#define LAPIC_IPI_INVLTLB (LAPIC_IPI_OFFSET + 0)
+#define LAPIC_IPI_INVLPG (LAPIC_IPI_OFFSET + 1)
+#define LAPIC_IPI_INVLRANGE (LAPIC_IPI_OFFSET + 2)
+#define LAPIC_IPI_RELOADCR3 (LAPIC_IPI_OFFSET + 3)
 
 extern void Xintripi_invltlb(void);
 extern void Xintripi_invlpg(void);
@@ -123,6 +124,6 @@ extern void lapic_enable(void);
 extern void lapic_disable(void);
 extern void lapic_calibrate_timer(struct cpu_info *);
 
-#define lapic_cpu_number() 	(i82489_readreg(LAPIC_ID)>>LAPIC_ID_SHIFT)
+#define lapic_cpu_number() (i82489_readreg(LAPIC_ID) >> LAPIC_ID_SHIFT)
 
 #endif

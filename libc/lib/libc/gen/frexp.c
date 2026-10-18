@@ -29,21 +29,22 @@
  */
 
 #include <sys/types.h>
-#include <machine/ieee.h>
+
 #include <float.h>
+#include <machine/ieee.h>
 #include <math.h>
 
 double
 frexp(double v, int *ex)
 {
-	union  {
-		double v;
+	union {
+		double		   v;
 		struct ieee_double s;
 	} u;
 
 	u.v = v;
 	switch (u.s.dbl_exp) {
-	case 0:		/* 0 or subnormal */
+	case 0: /* 0 or subnormal */
 		if ((u.s.dbl_fracl | u.s.dbl_frach) == 0) {
 			*ex = 0;
 		} else {
@@ -56,9 +57,9 @@ frexp(double v, int *ex)
 			u.s.dbl_exp = DBL_EXP_BIAS - 1;
 		}
 		break;
-	case DBL_EXP_INFNAN:	/* Inf or NaN; value of *ex is unspecified */
+	case DBL_EXP_INFNAN: /* Inf or NaN; value of *ex is unspecified */
 		break;
-	default:	/* normal */
+	default: /* normal */
 		*ex = u.s.dbl_exp - (DBL_EXP_BIAS - 1);
 		u.s.dbl_exp = DBL_EXP_BIAS - 1;
 		break;
@@ -66,6 +67,6 @@ frexp(double v, int *ex)
 	return (u.v);
 }
 
-#if	LDBL_MANT_DIG == DBL_MANT_DIG
+#if LDBL_MANT_DIG == DBL_MANT_DIG
 __strong_alias(frexpl, frexp);
-#endif	/* LDBL_MANT_DIG == DBL_MANT_DIG */
+#endif /* LDBL_MANT_DIG == DBL_MANT_DIG */

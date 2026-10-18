@@ -88,71 +88,70 @@
  * The FPA also has two packed decimal formats, but we ignore them here.
  */
 
-#define	SNG_EXPBITS	8
-#define	SNG_FRACBITS	23
+#define SNG_EXPBITS 8
+#define SNG_FRACBITS 23
 
-#define	DBL_EXPBITS	11
-#define	DBL_FRACHBITS	20
-#define	DBL_FRACLBITS	32
-#define	DBL_FRACBITS	52
+#define DBL_EXPBITS 11
+#define DBL_FRACHBITS 20
+#define DBL_FRACLBITS 32
+#define DBL_FRACBITS 52
 
 #ifndef __VFP_FP__
-#define	E80_EXPBITS	15
-#define	E80_FRACHBITS	31
-#define	E80_FRACLBITS	32
-#define	E80_FRACBITS	64
+#define E80_EXPBITS 15
+#define E80_FRACHBITS 31
+#define E80_FRACLBITS 32
+#define E80_FRACBITS 64
 
-#define	EXT_EXPBITS	15
-#define	EXT_FRACHBITS	16
-#define	EXT_FRACHMBITS	32
-#define	EXT_FRACLMBITS	32
-#define	EXT_FRACLBITS	32
-#define	EXT_FRACBITS	112
+#define EXT_EXPBITS 15
+#define EXT_FRACHBITS 16
+#define EXT_FRACHMBITS 32
+#define EXT_FRACLMBITS 32
+#define EXT_FRACLBITS 32
+#define EXT_FRACBITS 112
 #endif
 
 struct ieee_single {
-	u_int	sng_frac:23;
-	u_int	sng_exp:8;
-	u_int	sng_sign:1;
+	u_int sng_frac:23;
+	u_int sng_exp:8;
+	u_int sng_sign:1;
 };
 
 #ifdef __VFP_FP__
 struct ieee_double {
-	u_int	dbl_fracl;
-	u_int	dbl_frach:20;
-	u_int	dbl_exp:11;
-	u_int	dbl_sign:1;
+	u_int dbl_fracl;
+	u_int dbl_frach:20;
+	u_int dbl_exp:11;
+	u_int dbl_sign:1;
 };
-#else /* !__VFP_FP__ */
+#else  /* !__VFP_FP__ */
 struct ieee_double {
-	u_int	dbl_frach:20;
-	u_int	dbl_exp:11;
-	u_int	dbl_sign:1;
-	u_int	dbl_fracl;
+	u_int dbl_frach:20;
+	u_int dbl_exp:11;
+	u_int dbl_sign:1;
+	u_int dbl_fracl;
 };
 
 union ieee_double_u {
-	double                  dblu_d;
-	struct ieee_double      dblu_dbl;
+	double		   dblu_d;
+	struct ieee_double dblu_dbl;
 };
 
-
 struct ieee_e80 {
-	u_int	e80_exp:15;
-	u_int	e80_zero:16;
-	u_int	e80_sign:1;
-	u_int	e80_frach:31;
-	u_int	e80_j:1;
-	u_int	e80_fracl;
+	u_int e80_exp:15;
+	u_int e80_zero:16;
+	u_int e80_sign:1;
+	u_int e80_frach:31;
+	u_int e80_j:1;
+	u_int e80_fracl;
 };
 
 struct ieee_ext {
-	u_int	ext_frach:16;
-	u_int	ext_exp:15;
-	u_int	ext_sign:1;
-	u_int	ext_frachm;
-	u_int	ext_fraclm;
-	u_int	ext_fracl;
+	u_int ext_frach:16;
+	u_int ext_exp:15;
+	u_int ext_sign:1;
+	u_int ext_frachm;
+	u_int ext_fraclm;
+	u_int ext_fracl;
 };
 #endif /* !__VFP_FP__ */
 
@@ -165,28 +164,28 @@ struct ieee_ext {
  * A NaN is a `signalling NaN' if its QUIETNAN bit is clear in its
  * high fraction; if the bit is set, it is a `quiet NaN'.
  */
-#define	SNG_EXP_INFNAN	255
-#define	DBL_EXP_INFNAN	2047
+#define SNG_EXP_INFNAN 255
+#define DBL_EXP_INFNAN 2047
 #ifndef __VFP_FP__
-#define	E80_EXP_INFNAN	32767
-#define	EXT_EXP_INFNAN	32767
+#define E80_EXP_INFNAN 32767
+#define EXT_EXP_INFNAN 32767
 #endif /* !__VFP_FP__ */
 
 #if 0
-#define	SNG_QUIETNAN	(1 << 22)
-#define	DBL_QUIETNAN	(1 << 19)
+#define SNG_QUIETNAN (1 << 22)
+#define DBL_QUIETNAN (1 << 19)
 #ifndef __VFP_FP__
-#define	E80_QUIETNAN	(1 << 15)
-#define	EXT_QUIETNAN	(1 << 15)
+#define E80_QUIETNAN (1 << 15)
+#define EXT_QUIETNAN (1 << 15)
 #endif /* !__VFP_FP__ */
 #endif
 
 /*
  * Exponent biases.
  */
-#define	SNG_EXP_BIAS	127
-#define	DBL_EXP_BIAS	1023
+#define SNG_EXP_BIAS 127
+#define DBL_EXP_BIAS 1023
 #ifndef __VFP_FP__
-#define	E80_EXP_BIAS	16383
-#define	EXT_EXP_BIAS	16383
+#define E80_EXP_BIAS 16383
+#define EXT_EXP_BIAS 16383
 #endif /* !__VFP_FP__ */

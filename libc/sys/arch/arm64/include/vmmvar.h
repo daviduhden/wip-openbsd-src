@@ -21,34 +21,34 @@
 #ifndef _MACHINE_VMMVAR_H_
 #define _MACHINE_VMMVAR_H_
 
-#define VMM_HV_SIGNATURE 	"OpenBSDVMM58"
+#define VMM_HV_SIGNATURE "OpenBSDVMM58"
 
 /* Exit Reasons */
-#define VM_EXIT_TERMINATED			0xFFFE
-#define VM_EXIT_NONE				0xFFFF
+#define VM_EXIT_TERMINATED 0xFFFE
+#define VM_EXIT_NONE 0xFFFF
 
 struct vmm_softc_md {
 	/* Capabilities */
-	uint32_t		nr_cpus;	/* [I] */
+	uint32_t nr_cpus; /* [I] */
 };
 
 /*
  * struct vcpu_inject_event	: describes an exception or interrupt to inject.
  */
 struct vcpu_inject_event {
-	uint8_t		vie_vector;	/* Exception or interrupt vector. */
-	uint32_t	vie_errorcode;	/* Optional error code. */
-	uint8_t		vie_type;
-#define VCPU_INJECT_NONE	0
-#define VCPU_INJECT_INTR	1	/* External hardware interrupt. */
-#define VCPU_INJECT_EX		2	/* HW or SW Exception */
-#define VCPU_INJECT_NMI		3	/* Non-maskable Interrupt */
+	uint8_t	 vie_vector;	/* Exception or interrupt vector. */
+	uint32_t vie_errorcode; /* Optional error code. */
+	uint8_t	 vie_type;
+#define VCPU_INJECT_NONE 0
+#define VCPU_INJECT_INTR 1 /* External hardware interrupt. */
+#define VCPU_INJECT_EX 2   /* HW or SW Exception */
+#define VCPU_INJECT_NMI 3  /* Non-maskable Interrupt */
 };
 
-#define VCPU_REGS_NGPRS		31
+#define VCPU_REGS_NGPRS 31
 
 struct vcpu_reg_state {
-	uint64_t			vrs_gprs[VCPU_REGS_NGPRS];
+	uint64_t vrs_gprs[VCPU_REGS_NGPRS];
 };
 
 /*
@@ -58,32 +58,29 @@ struct vcpu_reg_state {
  * gathered by vmm(4) from the CPU on each exit that requires help from vmd.
  */
 struct vm_exit {
-	struct vcpu_reg_state		vrs;
+	struct vcpu_reg_state vrs;
 };
 
 struct vm_intr_params {
 	/* Input parameters to VMM_IOC_INTR */
-	uint32_t		vip_vcpu_id;
-	uint16_t		vip_intr;
+	uint32_t vip_vcpu_id;
+	uint16_t vip_intr;
 };
 
-#define VM_RWREGS_GPRS	0x1	/* read/write GPRs */
-#define VM_RWREGS_ALL	(VM_RWREGS_GPRS)
+#define VM_RWREGS_GPRS 0x1 /* read/write GPRs */
+#define VM_RWREGS_ALL (VM_RWREGS_GPRS)
 
 struct vm_rwregs_params {
 	/*
 	 * Input/output parameters to VMM_IOC_READREGS /
 	 * VMM_IOC_WRITEREGS
 	 */
-	uint32_t		vrwp_vcpu_id;
-	uint64_t		vrwp_mask;
-	struct vcpu_reg_state	vrwp_regs;
+	uint32_t	      vrwp_vcpu_id;
+	uint64_t	      vrwp_mask;
+	struct vcpu_reg_state vrwp_regs;
 };
 
-enum {
-	VEI_DIR_OUT,
-	VEI_DIR_IN
-};
+enum { VEI_DIR_OUT, VEI_DIR_IN };
 
 /* IOCTL definitions */
 #define VMM_IOC_INTR _IOW('V', 6, struct vm_intr_params) /* Intr pending */

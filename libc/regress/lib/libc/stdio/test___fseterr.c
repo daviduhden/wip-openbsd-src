@@ -1,4 +1,5 @@
-/*	$OpenBSD: test___fseterr.c,v 1.1 2025/05/25 00:20:54 yasuoka Exp $	*/
+/*	$OpenBSD: test___fseterr.c,v 1.1 2025/05/25 00:20:54 yasuoka Exp $
+ */
 
 /*
  * Copyright (c) 2025 YASUOKA Masahiko <yasuoka@yasuoka.net>
@@ -22,17 +23,17 @@
 #include <stdlib.h>
 
 /* we use assert() */
-#undef	NDEBUG
+#undef NDEBUG
 
-#define	TMPFILENAME	"test___fseterr.tmp"
+#define TMPFILENAME "test___fseterr.tmp"
 
 void test___fseterr0(void);
 
 void
 test___fseterr0(void)
 {
-	FILE	*fp;
-	int	 r;
+	FILE *fp;
+	int   r;
 
 	fp = fopen(TMPFILENAME, "w+");
 	assert(fp != NULL);

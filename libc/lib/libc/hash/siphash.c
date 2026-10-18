@@ -44,12 +44,12 @@
  */
 
 #include <endian.h>
+#include <siphash.h>
 #include <stdint.h>
 #include <string.h>
-#include <siphash.h>
 
-static void	SipHash_CRounds(SIPHASH_CTX *, int);
-static void	SipHash_Rounds(SIPHASH_CTX *, int);
+static void SipHash_CRounds(SIPHASH_CTX *, int);
+static void SipHash_Rounds(SIPHASH_CTX *, int);
 
 void
 SipHash_Init(SIPHASH_CTX *ctx, const SIPHASH_KEY *key)
@@ -73,7 +73,7 @@ void
 SipHash_Update(SIPHASH_CTX *ctx, int rc, int rf, const void *src, size_t len)
 {
 	const uint8_t *ptr = src;
-	size_t left, used;
+	size_t	       left, used;
 
 	if (len == 0)
 		return;
@@ -121,7 +121,7 @@ uint64_t
 SipHash_End(SIPHASH_CTX *ctx, int rc, int rf)
 {
 	uint64_t r;
-	size_t left, used;
+	size_t	 left, used;
 
 	used = ctx->bytes % sizeof(ctx->buf);
 	left = sizeof(ctx->buf) - used;
@@ -149,7 +149,7 @@ SipHash(const SIPHASH_KEY *key, int rc, int rf, const void *src, size_t len)
 }
 DEF_WEAK(SipHash);
 
-#define SIP_ROTL(x, b) ((x) << (b)) | ( (x) >> (64 - (b)))
+#define SIP_ROTL(x, b) ((x) << (b)) | ((x) >> (64 - (b)))
 
 static void
 SipHash_Rounds(SIPHASH_CTX *ctx, int rounds)

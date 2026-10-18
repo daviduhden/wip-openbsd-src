@@ -37,25 +37,25 @@
  */
 
 typedef struct cpu_kcore_hdr {
-	int		cputype;	/* CPU type associated with this dump */
+	int cputype; /* CPU type associated with this dump */
 
-	int		nmemseg;	/* # of physical memory segments */
-	uint64_t	memsegoffset;	/* start of memseg array (relative */
-					/*  to the start of this header) */
+	int	 nmemseg;      /* # of physical memory segments */
+	uint64_t memsegoffset; /* start of memseg array (relative */
+			       /*  to the start of this header) */
 
-	int		nsegmap;	/* # of kernel segs */
-	uint64_t	segmapoffset;	/* start of segmap array (relative */
-					/*  to the start of this header) */
+	int	 nsegmap;      /* # of kernel segs */
+	uint64_t segmapoffset; /* start of segmap array (relative */
+			       /*  to the start of this header) */
 
-	uint64_t	kernbase;	/* copy of KERNBASE goes here */
-	uint64_t	cpubase;	/* Pointer to cpu_info structure */
+	uint64_t kernbase; /* copy of KERNBASE goes here */
+	uint64_t cpubase;  /* Pointer to cpu_info structure */
 
-	uint64_t	ktextbase;	/* Virtual start of text segment */
-	uint64_t	ktextp;		/* Physical address of 4MB locked TLB */
-	uint64_t	ktextsz;	/* Size of locked kernel text segment. */
+	uint64_t ktextbase; /* Virtual start of text segment */
+	uint64_t ktextp;    /* Physical address of 4MB locked TLB */
+	uint64_t ktextsz;   /* Size of locked kernel text segment. */
 
-	uint64_t	kdatabase;	/* Virtual start of data segment */
-	uint64_t	kdatap;		/* Physical address of 4MB locked TLB */
-	uint64_t	kdatasz;	/* Size of locked kernel data segment. */
+	uint64_t kdatabase; /* Virtual start of data segment */
+	uint64_t kdatap;    /* Physical address of 4MB locked TLB */
+	uint64_t kdatasz;   /* Size of locked kernel data segment. */
 
 } cpu_kcore_hdr_t;

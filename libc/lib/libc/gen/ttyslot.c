@@ -28,20 +28,20 @@
  * SUCH DAMAGE.
  */
 
-#include <ttyent.h>
 #include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ttyent.h>
+#include <unistd.h>
 
 int
 ttyslot(void)
 {
 	struct ttyent *ttyp;
-	int slot;
-	char *p;
-	int cnt;
-	char *name;
+	int	       slot;
+	char	      *p;
+	int	       cnt;
+	char	      *name;
 
 	setttyent();
 	for (cnt = 0; cnt < 3; ++cnt)
@@ -53,10 +53,10 @@ ttyslot(void)
 			for (slot = 1; (ttyp = getttyent()); ++slot)
 				if (!strcmp(ttyp->ty_name, p)) {
 					endttyent();
-					return(slot);
+					return (slot);
 				}
 			break;
 		}
 	endttyent();
-	return(0);
+	return (0);
 }

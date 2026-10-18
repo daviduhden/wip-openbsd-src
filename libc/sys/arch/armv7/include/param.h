@@ -32,16 +32,16 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_MACHINE_PARAM_H_
-#define	_MACHINE_PARAM_H_
+#ifndef _MACHINE_PARAM_H_
+#define _MACHINE_PARAM_H_
 
 #include <arm/param.h>
 
-#define	_MACHINE	armv7
-#define	MACHINE		"armv7"
+#define _MACHINE armv7
+#define MACHINE "armv7"
 
-#ifndef	MSGBUFSIZE
-#define	MSGBUFSIZE	(8 * PAGE_SIZE)
+#ifndef MSGBUFSIZE
+#define MSGBUFSIZE (8 * PAGE_SIZE)
 #endif
 
 #ifdef _KERNEL

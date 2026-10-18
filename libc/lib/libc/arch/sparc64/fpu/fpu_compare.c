@@ -60,20 +60,11 @@
 #include "fpu_emu.h"
 #include "fpu_extern.h"
 
-static u_long fcc_nmask[] = {
-	~FSR_FCC,
-	~FSR_FCC1,
-	~FSR_FCC2,
-	~FSR_FCC3
-};
+static u_long fcc_nmask[] = {~FSR_FCC, ~FSR_FCC1, ~FSR_FCC2, ~FSR_FCC3};
 
 /* XXX: we don't use the FSR_FCCx macros here; it's much easier this way. */
 static int fcc_shift[] = {
-	FSR_FCC_SHIFT,
-	FSR_FCC1_SHIFT,
-	FSR_FCC2_SHIFT,
-	FSR_FCC3_SHIFT
-};
+    FSR_FCC_SHIFT, FSR_FCC1_SHIFT, FSR_FCC2_SHIFT, FSR_FCC3_SHIFT};
 
 /*
  * Perform a compare instruction (with or without unordered exception).
@@ -94,7 +85,7 @@ void
 __fpu_compare(struct fpemu *fe, int cmpe, int fcc)
 {
 	struct fpn *a, *b;
-	int cc;
+	int	    cc;
 	FPU_DECL_CARRY
 
 	a = &fe->fe_f1;
@@ -120,13 +111,13 @@ __fpu_compare(struct fpemu *fe, int cmpe, int fcc)
 		cc = FSR_CC_EQ;
 		goto done;
 	}
-	if (a->fp_sign) {		/* a < 0 (or -0) */
-		if (!b->fp_sign) {	/* b >= 0 (or if a = -0, b > 0) */
+	if (a->fp_sign) {	   /* a < 0 (or -0) */
+		if (!b->fp_sign) { /* b >= 0 (or if a = -0, b > 0) */
 			cc = FSR_CC_LT;
 			goto done;
 		}
-	} else {			/* a > 0 (or +0) */
-		if (b->fp_sign) {	/* b <= -0 (or if a = +0, b < 0) */
+	} else {		  /* a > 0 (or +0) */
+		if (b->fp_sign) { /* b <= -0 (or if a = +0, b < 0) */
 			cc = FSR_CC_GT;
 			goto done;
 		}
@@ -148,17 +139,17 @@ __fpu_compare(struct fpemu *fe, int cmpe, int fcc)
 	 *	|a| > |b|, a,b < 0:  a < b => FSR_CC_LT
 	 */
 #define opposite_cc(cc) ((cc) == FSR_CC_LT ? FSR_CC_GT : FSR_CC_LT)
-#define	diff(magnitude) (a->fp_sign ? opposite_cc(magnitude) :  (magnitude))
-	if (a->fp_class < b->fp_class) {	/* |a| < |b| */
+#define diff(magnitude) (a->fp_sign ? opposite_cc(magnitude) : (magnitude))
+	if (a->fp_class < b->fp_class) { /* |a| < |b| */
 		cc = diff(FSR_CC_LT);
 		goto done;
 	}
-	if (a->fp_class > b->fp_class) {	/* |a| > |b| */
+	if (a->fp_class > b->fp_class) { /* |a| > |b| */
 		cc = diff(FSR_CC_GT);
 		goto done;
 	}
 	/* now none can be 0: only Inf and numbers remain */
-	if (ISINF(a)) {				/* |Inf| = |Inf| */
+	if (ISINF(a)) { /* |Inf| = |Inf| */
 		cc = FSR_CC_EQ;
 		goto done;
 	}
@@ -173,6 +164,6 @@ __fpu_compare(struct fpemu *fe, int cmpe, int fcc)
 		cc = diff(FSR_CC_GT);
 
 done:
-	fe->fe_fsr = (fe->fe_fsr & fcc_nmask[fcc]) |
-	    ((u_long)cc << fcc_shift[fcc]);
+	fe->fe_fsr =
+	    (fe->fe_fsr & fcc_nmask[fcc]) | ((u_long)cc << fcc_shift[fcc]);
 }

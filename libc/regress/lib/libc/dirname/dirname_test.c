@@ -4,28 +4,28 @@
  * Public domain.
  */
 
+#include <err.h>
+#include <errno.h>
 #include <libgen.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
-#include <errno.h>
-#include <err.h>
 
 int
 main(void)
 {
-	char path[2 * PATH_MAX];
-	char dname[128];
+	char	    path[2 * PATH_MAX];
+	char	    dname[128];
 	const char *dir = "junk";
 	const char *fname = "/file.name.ext";
-	char *str;
-	int i;
+	char	   *str;
+	int	    i;
 
 	/* Test normal functioning */
 	strlcpy(path, "/", sizeof(path));
 	strlcpy(dname, "/", sizeof(dname));
-	strlcat(path, dir, sizeof(path)); 
-	strlcat(dname, dir, sizeof(dname)); 
+	strlcat(path, dir, sizeof(path));
+	strlcat(dname, dir, sizeof(dname));
 	strlcat(path, fname, sizeof(path));
 	str = dirname(path);
 	if (strcmp(str, dname) != 0)
@@ -61,13 +61,13 @@ main(void)
 
 	/* Case 3 */
 	for (i = 0; i < PATH_MAX - 1; i++)
-		strlcat(path, "/", sizeof(path));	/* path cleared above */
+		strlcat(path, "/", sizeof(path)); /* path cleared above */
 	str = dirname(path);
 	if (strcmp(str, "/") != 0)
 		errx(1, "3: dirname(%s) = %s != /", path, str);
 
 	/* Case 4 */
-	strlcpy(path, "/", sizeof(path));		/* reset path */
+	strlcpy(path, "/", sizeof(path)); /* reset path */
 	for (i = 0; i <= PATH_MAX; i += strlen(dir))
 		strlcat(path, dir, sizeof(path));
 	strlcat(path, fname, sizeof(path));

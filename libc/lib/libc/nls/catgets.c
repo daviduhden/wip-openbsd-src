@@ -31,9 +31,9 @@
 #define _NLS_PRIVATE
 
 #include <errno.h>
+#include <nl_types.h>
 #include <stdlib.h>
 #include <string.h>
-#include <nl_types.h>
 
 char *
 catgets(nl_catd catd, int set_id, int msg_id, const char *s)
@@ -41,16 +41,16 @@ catgets(nl_catd catd, int set_id, int msg_id, const char *s)
 	struct _nls_cat_hdr *cat_hdr;
 	struct _nls_set_hdr *set_hdr;
 	struct _nls_msg_hdr *msg_hdr;
-	int l, u, i, r;
+	int		     l, u, i, r;
 
-	if (catd == (nl_catd) -1) {
+	if (catd == (nl_catd)-1) {
 		errno = EBADF;
-		return (char *) s;
+		return (char *)s;
 	}
 
-	cat_hdr = (struct _nls_cat_hdr *) catd->__data; 
-	set_hdr = (struct _nls_set_hdr *) ((char *)catd->__data
-		+ sizeof(struct _nls_cat_hdr));
+	cat_hdr = (struct _nls_cat_hdr *)catd->__data;
+	set_hdr = (struct _nls_set_hdr *)((char *)catd->__data +
+	    sizeof(struct _nls_cat_hdr));
 
 	/* binary search, see knuth algorithm b */
 	l = 0;
@@ -60,9 +60,9 @@ catgets(nl_catd catd, int set_id, int msg_id, const char *s)
 		r = set_id - ntohl(set_hdr[i].__setno);
 
 		if (r == 0) {
-			msg_hdr = (struct _nls_msg_hdr *) ((char *)catd->__data
-				+ sizeof(struct _nls_cat_hdr)
-				+ ntohl(cat_hdr->__msg_hdr_offset));
+			msg_hdr = (struct _nls_msg_hdr *)((char *)catd->__data +
+			    sizeof(struct _nls_cat_hdr) +
+			    ntohl(cat_hdr->__msg_hdr_offset));
 
 			l = ntohl(set_hdr[i].__index);
 			u = l + ntohl(set_hdr[i].__nmsgs) - 1;
@@ -70,10 +70,10 @@ catgets(nl_catd catd, int set_id, int msg_id, const char *s)
 				i = (l + u) / 2;
 				r = msg_id - ntohl(msg_hdr[i].__msgno);
 				if (r == 0) {
-					return (char *) catd->__data 
-					    + sizeof(struct _nls_cat_hdr)
-					    + ntohl(cat_hdr->__msg_txt_offset)
-					    + ntohl(msg_hdr[i].__offset);
+					return (char *)catd->__data +
+					    sizeof(struct _nls_cat_hdr) +
+					    ntohl(cat_hdr->__msg_txt_offset) +
+					    ntohl(msg_hdr[i].__offset);
 				} else if (r < 0) {
 					u = i - 1;
 				} else {
@@ -83,7 +83,7 @@ catgets(nl_catd catd, int set_id, int msg_id, const char *s)
 
 			/* not found */
 			errno = ENOMSG;
-			return (char *) s;
+			return (char *)s;
 
 		} else if (r < 0) {
 			u = i - 1;
@@ -94,6 +94,6 @@ catgets(nl_catd catd, int set_id, int msg_id, const char *s)
 
 	/* not found */
 	errno = ENOMSG;
-	return (char *) s;
+	return (char *)s;
 }
 DEF_WEAK(catgets);

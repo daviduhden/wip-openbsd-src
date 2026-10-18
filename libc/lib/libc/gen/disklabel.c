@@ -27,37 +27,36 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/param.h>	/* DEV_BSIZE */
+#include <sys/param.h> /* DEV_BSIZE */
 #include <sys/types.h>
 #define DKTYPENAMES
 #include <sys/disklabel.h>
-#include <ufs/ffs/fs.h>
 
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <string.h>
+#include <ufs/ffs/fs.h>
 #include <unistd.h>
 
-static u_int	gettype(char *, const char * const *);
+static u_int gettype(char *, const char *const *);
 
 struct disklabel *
 getdiskbyname(const char *name)
 {
-	static struct	disklabel disk;
-	struct	disklabel *dp = &disk;
-	struct partition *pp;
-	char	*buf;
-	char	*db_array[2] = { _PATH_DISKTAB, 0 };
-	char	*cp, *cq;
-	char	psize[3], pbsize[3],
-		pfsize[3], poffset[3], ptype[3];
-	int	partnum, maxpartnum = 0;
+	static struct disklabel disk;
+	struct disklabel       *dp = &disk;
+	struct partition       *pp;
+	char		       *buf;
+	char		       *db_array[2] = {_PATH_DISKTAB, 0};
+	char		       *cp, *cq;
+	char psize[3], pbsize[3], pfsize[3], poffset[3], ptype[3];
+	int  partnum, maxpartnum = 0;
 
-	if (cgetent(&buf, db_array, (char *) name) < 0)
+	if (cgetent(&buf, db_array, (char *)name) < 0)
 		return NULL;
 
 	bzero((char *)&disk, sizeof(disk));
@@ -71,10 +70,17 @@ getdiskbyname(const char *name)
 		cq++, cp++;
 	*cq = '\0';
 
-#define getnumdflt(field, dname, dflt) \
-	{ long f; (field) = (cgetnum(buf, dname, &f) == -1) ? (dflt) : f; }
-#define	getnum(field, dname) \
-	{ long f; cgetnum(buf, dname, &f); field = f; }
+#define getnumdflt(field, dname, dflt)                                         \
+	{                                                                      \
+		long f;                                                        \
+		(field) = (cgetnum(buf, dname, &f) == -1) ? (dflt) : f;        \
+	}
+#define getnum(field, dname)                                                   \
+	{                                                                      \
+		long f;                                                        \
+		cgetnum(buf, dname, &f);                                       \
+		field = f;                                                     \
+	}
 
 	getnumdflt(dp->d_secsize, "se", DEV_BSIZE);
 	getnum(dp->d_ntracks, "nt");
@@ -134,9 +140,9 @@ getdiskbyname(const char *name)
 }
 
 static u_int
-gettype(char *t, const char * const *names)
+gettype(char *t, const char *const *names)
 {
-	const char * const *nm;
+	const char *const *nm;
 
 	for (nm = names; *nm; nm++)
 		if (strcasecmp(t, *nm) == 0)

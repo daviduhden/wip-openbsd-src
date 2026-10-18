@@ -23,8 +23,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "rthread.h"
 #include "cancel.h"
+#include "rthread.h"
 #include "synch.h"
 
 /*
@@ -32,15 +32,17 @@
  */
 enum {
 	UNLOCKED = 0,
-	LOCKED = 1,	/* locked without waiter */
-	CONTENDED = 2,	/* threads waiting for this mutex */
+	LOCKED = 1,    /* locked without waiter */
+	CONTENDED = 2, /* threads waiting for this mutex */
 };
 
-#define SPIN_COUNT	128
+#define SPIN_COUNT 128
 #if defined(__i386__) || defined(__amd64__)
-#define SPIN_WAIT()	asm volatile("pause": : : "memory")
+#define SPIN_WAIT() asm volatile("pause" : : : "memory")
 #else
-#define SPIN_WAIT()	do { } while (0)
+#define SPIN_WAIT()                                                            \
+	do {                                                                   \
+	} while (0)
 #endif
 
 static struct __cmtx static_init_lock = __CMTX_INITIALIZER();
@@ -59,8 +61,10 @@ pthread_mutex_init(pthread_mutex_t *mutexp, const pthread_mutexattr_t *attr)
 		mutex->prioceiling = -1;
 	} else {
 		mutex->type = (*attr)->ma_type;
-		mutex->prioceiling = (*attr)->ma_protocol ==
-		    PTHREAD_PRIO_PROTECT ? (*attr)->ma_prioceiling : -1;
+		mutex->prioceiling =
+		    (*attr)->ma_protocol == PTHREAD_PRIO_PROTECT ?
+		    (*attr)->ma_prioceiling :
+		    -1;
 	}
 	*mutexp = mutex;
 
@@ -93,8 +97,8 @@ pthread_mutex_destroy(pthread_mutex_t *mutexp)
 DEF_STRONG(pthread_mutex_destroy);
 
 static int
-_rthread_mutex_trylock(pthread_mutex_t mutex, int trywait,
-    const struct timespec *abs)
+_rthread_mutex_trylock(
+    pthread_mutex_t mutex, int trywait, const struct timespec *abs)
 {
 	pthread_t self = pthread_self();
 
@@ -118,7 +122,7 @@ _rthread_mutex_trylock(pthread_mutex_t mutex, int trywait,
 
 			/* self-deadlock, possibly until timeout */
 			while (_twait(&mutex->type, type, CLOCK_REALTIME,
-			    abs) != ETIMEDOUT)
+				   abs) != ETIMEDOUT)
 				;
 			return (ETIMEDOUT);
 		} else {
@@ -133,13 +137,13 @@ _rthread_mutex_trylock(pthread_mutex_t mutex, int trywait,
 }
 
 static int
-_rthread_mutex_timedlock(pthread_mutex_t *mutexp, int trywait,
-    const struct timespec *abs, int timed)
+_rthread_mutex_timedlock(
+    pthread_mutex_t *mutexp, int trywait, const struct timespec *abs, int timed)
 {
-	pthread_t self = pthread_self();
+	pthread_t	self = pthread_self();
 	pthread_mutex_t mutex;
-	unsigned int i, lock;
-	int error = 0;
+	unsigned int	i, lock;
+	int		error = 0;
 
 	if (mutexp == NULL)
 		return (EINVAL);
@@ -226,7 +230,7 @@ DEF_STRONG(pthread_mutex_lock);
 int
 pthread_mutex_unlock(pthread_mutex_t *mutexp)
 {
-	pthread_t self = pthread_self();
+	pthread_t	self = pthread_self();
 	pthread_mutex_t mutex;
 
 	if (mutexp == NULL)
@@ -236,7 +240,7 @@ pthread_mutex_unlock(pthread_mutex_t *mutexp)
 #if PTHREAD_MUTEX_DEFAULT == PTHREAD_MUTEX_ERRORCHECK
 		return (EPERM);
 #elif PTHREAD_MUTEX_DEFAULT == PTHREAD_MUTEX_NORMAL
-		return(0);
+		return (0);
 #else
 		abort();
 #endif
@@ -246,8 +250,8 @@ pthread_mutex_unlock(pthread_mutex_t *mutexp)
 	    (void *)mutex->owner);
 
 	if (mutex->owner != self) {
-	_rthread_debug(5, "%p: different owner %p (%p)\n", self, (void *)mutex,
-	    (void *)mutex->owner);
+		_rthread_debug(5, "%p: different owner %p (%p)\n", self,
+		    (void *)mutex, (void *)mutex->owner);
 		if (mutex->type == PTHREAD_MUTEX_ERRORCHECK ||
 		    mutex->type == PTHREAD_MUTEX_RECURSIVE) {
 			return (EPERM);
@@ -263,7 +267,6 @@ pthread_mutex_unlock(pthread_mutex_t *mutexp)
 				return (0);
 			else
 				abort();
-
 		}
 	}
 

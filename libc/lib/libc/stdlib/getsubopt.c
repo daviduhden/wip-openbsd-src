@@ -29,9 +29,9 @@
  * SUCH DAMAGE.
  */
 
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /*
  * The SVID interface to getsubopt provides no way of figuring out which
@@ -42,27 +42,29 @@
 char *suboptarg;
 
 int
-getsubopt(char **optionp, char * const *tokens, char **valuep)
+getsubopt(char **optionp, char *const *tokens, char **valuep)
 {
-	int cnt;
+	int   cnt;
 	char *p;
 
 	suboptarg = *valuep = NULL;
 
 	if (!optionp || !*optionp)
-		return(-1);
+		return (-1);
 
 	/* skip leading white-space, commas */
-	for (p = *optionp; *p && (*p == ',' || *p == ' ' || *p == '\t'); ++p);
+	for (p = *optionp; *p && (*p == ',' || *p == ' ' || *p == '\t'); ++p)
+		;
 
 	if (!*p) {
 		*optionp = p;
-		return(-1);
+		return (-1);
 	}
 
 	/* save the start of the token, and skip the rest of the token. */
 	for (suboptarg = p;
-	    *++p && *p != ',' && *p != '=' && *p != ' ' && *p != '\t';);
+	    *++p && *p != ',' && *p != '=' && *p != ' ' && *p != '\t';)
+		;
 
 	if (*p) {
 		/*
@@ -73,13 +75,15 @@ getsubopt(char **optionp, char * const *tokens, char **valuep)
 		if (*p == '=') {
 			*p = '\0';
 			for (*valuep = ++p;
-			    *p && *p != ',' && *p != ' ' && *p != '\t'; ++p);
-			if (*p) 
+			    *p && *p != ',' && *p != ' ' && *p != '\t'; ++p)
+				;
+			if (*p)
 				*p++ = '\0';
 		} else
 			*p++ = '\0';
 		/* Skip any whitespace or commas after this token. */
-		for (; *p && (*p == ',' || *p == ' ' || *p == '\t'); ++p);
+		for (; *p && (*p == ',' || *p == ' ' || *p == '\t'); ++p)
+			;
 	}
 
 	/* set optionp for next round. */
@@ -87,6 +91,6 @@ getsubopt(char **optionp, char * const *tokens, char **valuep)
 
 	for (cnt = 0; *tokens; ++tokens, ++cnt)
 		if (!strcmp(suboptarg, *tokens))
-			return(cnt);
-	return(-1);
+			return (cnt);
+	return (-1);
 }

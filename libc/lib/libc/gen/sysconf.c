@@ -32,11 +32,11 @@
  */
 
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <sys/sem.h>
+#include <sys/socket.h>
 #include <sys/sysctl.h>
 #include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/socket.h>
 
 #include <errno.h>
 #include <grp.h>
@@ -61,14 +61,14 @@ long
 sysconf(int name)
 {
 	struct rlimit rl;
-	size_t len;
-	int mib[3], value, namelen, sverrno;
+	size_t	      len;
+	int	      mib[3], value, namelen, sverrno;
 
 	len = sizeof(value);
 	namelen = 2;
 
 	switch (name) {
-/* 1003.1 */
+		/* 1003.1 */
 	case _SC_ARG_MAX:
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_ARGMAX;
@@ -129,7 +129,7 @@ sysconf(int name)
 		mib[1] = KERN_POSIX1;
 		break;
 
-/* 1003.1b */
+		/* 1003.1b */
 	case _SC_PAGESIZE:
 		if (_pagesize != 0)
 			return (_pagesize);
@@ -139,7 +139,7 @@ sysconf(int name)
 	case _SC_FSYNC:
 		return (_POSIX_FSYNC);
 
-/* 1003.1c */
+		/* 1003.1c */
 	case _SC_LOGIN_NAME_MAX:
 		return (LOGIN_NAME_MAX);
 
@@ -152,7 +152,7 @@ sysconf(int name)
 	case _SC_GETPW_R_SIZE_MAX:
 		return (_PW_BUF_LEN);
 
-/* 1003.2 */
+		/* 1003.2 */
 	case _SC_BC_BASE_MAX:
 		return (BC_BASE_MAX);
 	case _SC_BC_DIM_MAX:
@@ -188,7 +188,7 @@ sysconf(int name)
 	case _SC_2_UPE:
 		return (_POSIX2_UPE);
 
-/* XPG 4.2 */
+		/* XPG 4.2 */
 	case _SC_XOPEN_SHM:
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_SYSVSHM;
@@ -203,9 +203,9 @@ sysconf(int name)
 	case _SC_SEM_VALUE_MAX:
 		return (SEM_VALUE_MAX);
 
-/* Unsorted */
+		/* Unsorted */
 	case _SC_HOST_NAME_MAX:
-		return (HOST_NAME_MAX);	/* does not include \0 */
+		return (HOST_NAME_MAX); /* does not include \0 */
 	case _SC_MONOTONIC_CLOCK:
 		return (_POSIX_MONOTONIC_CLOCK);
 	case _SC_2_PBS:
@@ -436,9 +436,8 @@ sysconf(int name)
 		return (_XOPEN_VERSION);
 #endif
 
-/* Extensions */
-	case _SC_PHYS_PAGES:
-	{
+		/* Extensions */
+	case _SC_PHYS_PAGES: {
 		int64_t physmem;
 
 		mib[0] = CTL_HW;
@@ -448,8 +447,7 @@ sysconf(int name)
 			return (-1);
 		return (physmem / getpagesize());
 	}
-	case _SC_AVPHYS_PAGES:
-	{
+	case _SC_AVPHYS_PAGES: {
 		struct uvmexp uvmexp;
 
 		mib[0] = CTL_VM;
@@ -473,6 +471,6 @@ sysconf(int name)
 		errno = EINVAL;
 		return (-1);
 	}
-	return (sysctl(mib, namelen, &value, &len, NULL, 0) == -1 ? -1 : value); 
+	return (sysctl(mib, namelen, &value, &len, NULL, 0) == -1 ? -1 : value);
 }
 DEF_WEAK(sysconf);

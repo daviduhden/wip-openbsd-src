@@ -33,12 +33,13 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 #include <machine/sysarch.h>
 
 fp_except
 fpsetsticky(sticky)
-	fp_except sticky;
+fp_except sticky;
 {
 	struct alpha_fp_except_args a;
 

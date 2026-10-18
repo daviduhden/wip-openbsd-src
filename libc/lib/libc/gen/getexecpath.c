@@ -19,8 +19,8 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 extern char *_execpath;
 
@@ -35,7 +35,7 @@ getexecpath(char *buf, size_t size)
 		errno = ERANGE;
 		return (-1);
 	}
-	(void) strlcpy(buf, _execpath, size);
+	(void)strlcpy(buf, _execpath, size);
 	return (0);
 }
 DEF_WEAK(getexecpath);

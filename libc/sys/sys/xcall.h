@@ -52,32 +52,32 @@
 #define _SYS_XCALL_H
 
 struct xcall {
-	void (*xc_func)(void *);
-	void		*xc_arg;
+	void  (*xc_func)(void *);
+	void *xc_arg;
 };
 
 /* MD code adds this to struct cpu_info as ci_xcall */
 struct xcall_cpu {
-	struct xcall	*xci_xcalls[4];
-	void		*xci_softintr;
+	struct xcall *xci_xcalls[4];
+	void	     *xci_softintr;
 };
 
 #ifdef _KERNEL
-#define XCALL_INITIALIZER(_f, _a) {				\
-	.xc_func = _f,						\
-	.xc_arg = _a,						\
-}
+#define XCALL_INITIALIZER(_f, _a)                                              \
+	{                                                                      \
+	    .xc_func = _f,                                                     \
+	    .xc_arg = _a,                                                      \
+	}
 
-void	cpu_xcall_set(struct xcall *, void (*)(void *), void *);
-void	cpu_xcall(struct cpu_info *, struct xcall *);
+void cpu_xcall_set(struct xcall *, void (*)(void *), void *);
+void cpu_xcall(struct cpu_info *, struct xcall *);
 
-void	cpu_xcall_sync(struct cpu_info *, void (*)(void *), void *,
-	    const char *);
+void cpu_xcall_sync(struct cpu_info *, void (*)(void *), void *, const char *);
 
 /* MD cpu setup calls this */
-void	cpu_xcall_establish(struct cpu_info *);
+void cpu_xcall_establish(struct cpu_info *);
 /* MD ipi handler calls this */
-void	cpu_xcall_dispatch(struct cpu_info *);
+void cpu_xcall_dispatch(struct cpu_info *);
 
 #endif /* _KERNEL */
 

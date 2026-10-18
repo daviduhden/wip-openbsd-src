@@ -37,19 +37,21 @@
  * Get client's IP address via ioctl.  This avoids using the yellowpages.
  */
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <sys/socket.h>
+
+#include <net/if.h>
+#include <netinet/in.h>
+
+#include <ifaddrs.h>
 #include <rpc/pmap_prot.h>
 #include <rpc/rpc.h>
-#include <sys/socket.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <net/if.h>
-#include <netinet/in.h>
-#include <ifaddrs.h>
 
-/* 
+/*
  * don't use gethostbyname, which would invoke yellow pages
  *
  * Avoid loopback interfaces.  We return information from a loopback
@@ -59,15 +61,14 @@ int
 get_myaddress(struct sockaddr_in *addr)
 {
 	struct ifaddrs *ifap, *ifa;
-	int loopback = 0, gotit = 0;
+	int		loopback = 0, gotit = 0;
 
 	if (getifaddrs(&ifap) != 0)
 		return (-1);
 
-  again:
+again:
 	for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-		if ((ifa->ifa_flags & IFF_UP) &&
-		    ifa->ifa_addr != NULL &&
+		if ((ifa->ifa_flags & IFF_UP) && ifa->ifa_addr != NULL &&
 		    ifa->ifa_addr->sa_family == AF_INET &&
 		    (loopback == 1 && (ifa->ifa_flags & IFF_LOOPBACK))) {
 			*addr = *((struct sockaddr_in *)ifa->ifa_addr);

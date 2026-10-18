@@ -1,4 +1,5 @@
-/*	$OpenBSD: bt_overflow.c,v 1.11 2015/01/16 16:48:51 deraadt Exp $	*/
+/*	$OpenBSD: bt_overflow.c,v 1.11 2015/01/16 16:48:51 deraadt Exp $
+ */
 
 /*-
  * Copyright (c) 1990, 1993, 1994
@@ -32,14 +33,14 @@
  * SUCH DAMAGE.
  */
 
+#include <db.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <db.h>
 #include "btree.h"
 
-#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 /*
  * Big key/data code.
@@ -73,11 +74,11 @@
 int
 __ovfl_get(BTREE *t, void *p, size_t *ssz, void **buf, size_t *bufsz)
 {
-	PAGE *h;
-	pgno_t pg;
-	size_t nb, plen;
+	PAGE	 *h;
+	pgno_t	  pg;
+	size_t	  nb, plen;
 	u_int32_t sz;
-	void *tp;
+	void	 *tp;
 
 	memmove(&pg, p, sizeof(pgno_t));
 	memmove(&sz, (char *)p + sizeof(pgno_t), sizeof(u_int32_t));
@@ -129,10 +130,10 @@ __ovfl_get(BTREE *t, void *p, size_t *ssz, void **buf, size_t *bufsz)
 int
 __ovfl_put(BTREE *t, const DBT *dbt, pgno_t *pg)
 {
-	PAGE *h, *last;
-	void *p;
-	pgno_t npg;
-	size_t nb, plen;
+	PAGE	 *h, *last;
+	void	 *p;
+	pgno_t	  npg;
+	size_t	  nb, plen;
 	u_int32_t sz;
 
 	/*
@@ -180,9 +181,9 @@ __ovfl_put(BTREE *t, const DBT *dbt, pgno_t *pg)
 int
 __ovfl_delete(BTREE *t, void *p)
 {
-	PAGE *h;
-	pgno_t pg;
-	size_t plen;
+	PAGE	 *h;
+	pgno_t	  pg;
+	size_t	  plen;
 	u_int32_t sz;
 
 	memmove(&pg, p, sizeof(pgno_t));

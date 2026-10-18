@@ -1,4 +1,5 @@
-/*	$OpenBSD: authenticate.c,v 1.30 2026/03/10 04:02:53 deraadt Exp $	*/
+/*	$OpenBSD: authenticate.c,v 1.30 2026/03/10 04:02:53 deraadt Exp $
+ */
 
 /*-
  * Copyright (c) 1997 Berkeley Software Design, Inc. All rights reserved.
@@ -36,6 +37,7 @@
 
 #include <sys/stat.h>
 
+#include <bsd_auth.h>
 #include <ctype.h>
 #include <err.h>
 #include <fcntl.h>
@@ -49,8 +51,6 @@
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
-
-#include <bsd_auth.h>
 
 static int _auth_checknologin(login_cap_t *, int);
 
@@ -91,7 +91,7 @@ auth_mkvalue(char *value)
 				*p++ = '\\';
 				*p++ = ((*value >> 6) & 0x3) + '0';
 				*p++ = ((*value >> 3) & 0x7) + '0';
-				*p++ = ((*value     ) & 0x7) + '0';
+				*p++ = ((*value) & 0x7) + '0';
 			} else
 				*p++ = *value;
 			break;
@@ -114,8 +114,8 @@ static int
 _auth_checknologin(login_cap_t *lc, int print)
 {
 	struct stat sb;
-	char *nologin;
-	int mustfree;
+	char	   *nologin;
+	int	    mustfree;
 
 	if (login_getcapbool(lc, "ignorenologin", 0))
 		return (0);
@@ -161,10 +161,10 @@ print_nologin:
 int
 auth_cat(char *file)
 {
-	int fd, nchars;
+	int  fd, nchars;
 	char tbuf[8192];
 
-	if ((fd = open(file, O_RDONLY|O_CLOEXEC)) == -1)
+	if ((fd = open(file, O_RDONLY | O_CLOEXEC)) == -1)
 		return (0);
 	while ((nchars = read(fd, tbuf, sizeof(tbuf))) > 0)
 		(void)write(fileno(stdout), tbuf, nchars);
@@ -187,9 +187,9 @@ _auth_validuser(const char *name)
 int
 auth_approval(auth_session_t *as, login_cap_t *lc, char *name, char *type)
 {
-	int close_on_exit, close_lc_on_exit, len;
+	int	      close_on_exit, close_lc_on_exit, len;
 	struct passwd pwstore, *pwd;
-	char *approve, *s, path[PATH_MAX], pwbuf[_PW_BUF_LEN];
+	char	     *approve, *s, path[PATH_MAX], pwbuf[_PW_BUF_LEN];
 
 	pwd = NULL;
 	close_on_exit = as == NULL;
@@ -209,8 +209,8 @@ auth_approval(auth_session_t *as, login_cap_t *lc, char *name, char *type)
 			}
 			getpwnam_r(name, &pwstore, pwbuf, sizeof(pwbuf), &pwd);
 		} else {
-			getpwuid_r(getuid(), &pwstore, pwbuf, sizeof(pwbuf),
-			    &pwd);
+			getpwuid_r(
+			    getuid(), &pwstore, pwbuf, sizeof(pwbuf), &pwd);
 			if (pwd == NULL) {
 				syslog(LOG_ERR, "no such user id %u", getuid());
 				warnx("cannot approve who we don't recognize");
@@ -225,8 +225,8 @@ auth_approval(auth_session_t *as, login_cap_t *lc, char *name, char *type)
 
 	if (lc == NULL) {
 		if (strlen(name) >= PATH_MAX) {
-			syslog(LOG_ERR, "username to login %.*s...",
-			    PATH_MAX, name);
+			syslog(LOG_ERR, "username to login %.*s...", PATH_MAX,
+			    name);
 			warnx("username too long");
 			return (0);
 		}
@@ -286,10 +286,10 @@ auth_approval(auth_session_t *as, login_cap_t *lc, char *name, char *type)
 		warn(NULL);
 		goto out;
 	}
-	if (auth_check_expire(as) < 0)	/* is this account expired */
+	if (auth_check_expire(as) < 0) /* is this account expired */
 		goto out;
-	if (_auth_checknologin(lc,
-	    auth_getitem(as, AUTHV_INTERACTIVE) != NULL)) {
+	if (_auth_checknologin(
+		lc, auth_getitem(as, AUTHV_INTERACTIVE) != NULL)) {
 		auth_setstate(as, (auth_getstate(as) & ~AUTH_ALLOW));
 		goto out;
 	}
@@ -299,7 +299,7 @@ auth_approval(auth_session_t *as, login_cap_t *lc, char *name, char *type)
 
 		if (stat(pwd->pw_dir, &sb) == -1 || !S_ISDIR(sb.st_mode) ||
 		    (pwd->pw_uid && sb.st_uid == pwd->pw_uid &&
-		    (sb.st_mode & S_IXUSR) == 0)) {
+			(sb.st_mode & S_IXUSR) == 0)) {
 			auth_setstate(as, (auth_getstate(as) & ~AUTH_ALLOW));
 			goto out;
 		}
@@ -322,12 +322,12 @@ DEF_WEAK(auth_approval);
 auth_session_t *
 auth_usercheck(char *name, char *style, char *type, char *password)
 {
-	char namebuf[LOGIN_NAME_MAX + 1 + NAME_MAX + 1];
-	char pwbuf[_PW_BUF_LEN];
+	char		namebuf[LOGIN_NAME_MAX + 1 + NAME_MAX + 1];
+	char		pwbuf[_PW_BUF_LEN];
 	auth_session_t *as;
-	login_cap_t *lc;
-	struct passwd pwstore, *pwd = NULL;
-	char *slash;
+	login_cap_t    *lc;
+	struct passwd	pwstore, *pwd = NULL;
+	char	       *slash;
 
 	if (!_auth_validuser(name))
 		return (NULL);
@@ -393,11 +393,11 @@ DEF_WEAK(auth_userokay);
 auth_session_t *
 auth_userchallenge(char *name, char *style, char *type, char **challengep)
 {
-	char namebuf[LOGIN_NAME_MAX + 1 + NAME_MAX + 1];
+	char		namebuf[LOGIN_NAME_MAX + 1 + NAME_MAX + 1];
 	auth_session_t *as;
-	login_cap_t *lc;
-	struct passwd pwstore, *pwd = NULL;
-	char *slash, pwbuf[_PW_BUF_LEN];
+	login_cap_t    *lc;
+	struct passwd	pwstore, *pwd = NULL;
+	char	       *slash, pwbuf[_PW_BUF_LEN];
 
 	if (!_auth_validuser(name))
 		return (NULL);
@@ -449,9 +449,9 @@ DEF_WEAK(auth_userchallenge);
 int
 auth_userresponse(auth_session_t *as, char *response, int more)
 {
-	char path[PATH_MAX];
+	char  path[PATH_MAX];
 	char *style, *name, *challenge, *class;
-	int len;
+	int   len;
 
 	if (as == NULL)
 		return (0);
@@ -463,7 +463,7 @@ auth_userresponse(auth_session_t *as, char *response, int more)
 	    !_auth_validuser(name)) {
 		if (more == 0)
 			return (auth_close(as));
-		return(0);
+		return (0);
 	}
 
 	len = snprintf(path, sizeof(path), _PATH_AUTHPROG "%s", style);
@@ -486,8 +486,8 @@ auth_userresponse(auth_session_t *as, char *response, int more)
 	} else
 		auth_setdata(as, "", 1);
 
-	auth_call(as, path, style, "-s", "response", "--", name,
-	    class, (char *)NULL);
+	auth_call(
+	    as, path, style, "-s", "response", "--", name, class, (char *)NULL);
 
 	/*
 	 * If they authenticated then make sure they did not expire
@@ -513,7 +513,7 @@ auth_session_t *
 auth_verify(auth_session_t *as, char *style, char *name, ...)
 {
 	va_list ap;
-	char path[PATH_MAX];
+	char	path[PATH_MAX];
 
 	if ((name == NULL || style == NULL) && as == NULL)
 		return (NULL);

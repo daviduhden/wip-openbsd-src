@@ -34,8 +34,8 @@ wint_t
 btowc(int c)
 {
 	mbstate_t mbs;
-	char cc;
-	wchar_t wc;
+	char	  cc;
+	wchar_t	  wc;
 
 	if (c == EOF)
 		return (WEOF);

@@ -33,5 +33,5 @@
 double
 atof(const char *ascii)
 {
-	return(strtod(ascii, (char **)NULL));
+	return (strtod(ascii, (char **)NULL));
 }

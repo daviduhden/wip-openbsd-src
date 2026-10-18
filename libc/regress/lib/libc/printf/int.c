@@ -25,23 +25,13 @@
 #include <string.h>
 #include <unistd.h>
 
-enum	int_size {
-	S_CHAR,
-	S_SHORT,
-	S_INT,
-	S_LONG,
-	S_LL,
-	S_MAX,
-	S_PTR,
-	S_SIZE
-};
+enum int_size { S_CHAR, S_SHORT, S_INT, S_LONG, S_LL, S_MAX, S_PTR, S_SIZE };
 
-void	 ti(const char *, enum int_size, long long, const char *);
-void	 tu(const char *, enum int_size, unsigned long long, const char *);
+void ti(const char *, enum int_size, long long, const char *);
+void tu(const char *, enum int_size, unsigned long long, const char *);
 
-static int	 badret, badlen, badout;	/* Error counters. */
-static int	 verbose;			/* For debugging. */
-
+static int badret, badlen, badout; /* Error counters. */
+static int verbose;		   /* For debugging. */
 
 /*
  * Print the signed integer i with the format fmt,
@@ -51,9 +41,9 @@ static int	 verbose;			/* For debugging. */
 void
 ti(const char *fmt, enum int_size sz, long long i, const char *want)
 {
-	char		 buf[32];
-	size_t		 len;
-	int		 irc, happy;
+	char   buf[32];
+	size_t len;
+	int    irc, happy;
 
 	happy = 1;
 	switch (sz) {
@@ -82,8 +72,7 @@ ti(const char *fmt, enum int_size sz, long long i, const char *want)
 		irc = snprintf(buf, sizeof(buf), fmt, (ssize_t)i);
 		break;
 	default:
-		warnx("printf(\"%s\", %lld) unknown size code %d",
-		    fmt, i, sz);
+		warnx("printf(\"%s\", %lld) unknown size code %d", fmt, i, sz);
 		badret++;
 		return;
 	}
@@ -94,8 +83,8 @@ ti(const char *fmt, enum int_size sz, long long i, const char *want)
 		return;
 	}
 	if ((unsigned long long)irc != len) {
-		warnx("printf(\"%s\", %lld) returned %d (expected %zu)",
-		    fmt, i, irc, len);
+		warnx("printf(\"%s\", %lld) returned %d (expected %zu)", fmt, i,
+		    irc, len);
 		badlen++;
 		happy = 0;
 	}
@@ -106,8 +95,8 @@ ti(const char *fmt, enum int_size sz, long long i, const char *want)
 		happy = 0;
 	}
 	if (verbose && happy)
-		warnx("printf(\"%s\", %lld) wrote \"%s\" length %d (OK)",
-		    fmt, i, buf, irc);
+		warnx("printf(\"%s\", %lld) wrote \"%s\" length %d (OK)", fmt,
+		    i, buf, irc);
 }
 
 /*
@@ -118,9 +107,9 @@ ti(const char *fmt, enum int_size sz, long long i, const char *want)
 void
 tu(const char *fmt, enum int_size sz, unsigned long long i, const char *want)
 {
-	char		 buf[32];
-	size_t		 len;
-	int		 irc, happy;
+	char   buf[32];
+	size_t len;
+	int    irc, happy;
 
 	happy = 1;
 	switch (sz) {
@@ -146,8 +135,7 @@ tu(const char *fmt, enum int_size sz, unsigned long long i, const char *want)
 		irc = snprintf(buf, sizeof(buf), fmt, (size_t)i);
 		break;
 	default:
-		warnx("printf(\"%s\", %llu) unknown size code %d",
-		    fmt, i, sz);
+		warnx("printf(\"%s\", %llu) unknown size code %d", fmt, i, sz);
 		badret++;
 		return;
 	}
@@ -158,8 +146,8 @@ tu(const char *fmt, enum int_size sz, unsigned long long i, const char *want)
 		return;
 	}
 	if ((unsigned long long)irc != len) {
-		warnx("printf(\"%s\", %llu) returned %d (expected %zu)",
-		    fmt, i, irc, len);
+		warnx("printf(\"%s\", %llu) returned %d (expected %zu)", fmt, i,
+		    irc, len);
 		badlen++;
 		happy = 0;
 	}
@@ -170,15 +158,15 @@ tu(const char *fmt, enum int_size sz, unsigned long long i, const char *want)
 		happy = 0;
 	}
 	if (verbose && happy)
-		warnx("printf(\"%s\", %llu) wrote \"%s\" length %d (OK)",
-		    fmt, i, buf, irc);
+		warnx("printf(\"%s\", %llu) wrote \"%s\" length %d (OK)", fmt,
+		    i, buf, irc);
 }
 
 int
 main(int argc, char *argv[])
 {
-	int		 badarg, picky;
-	int		 ch;
+	int badarg, picky;
+	int ch;
 
 	badarg = picky = 0;
 	while ((ch = getopt(argc, argv, "pv")) != -1) {

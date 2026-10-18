@@ -18,12 +18,14 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where
@@ -72,10 +74,10 @@ static const char *
 inet_ntop4(const u_char *src, char *dst, size_t size)
 {
 	char tmp[sizeof "255.255.255.255"];
-	int l;
+	int  l;
 
-	l = snprintf(tmp, sizeof(tmp), "%u.%u.%u.%u",
-	    src[0], src[1], src[2], src[3]);
+	l = snprintf(
+	    tmp, sizeof(tmp), "%u.%u.%u.%u", src[0], src[1], src[2], src[3]);
 	if (l <= 0 || l >= size) {
 		errno = ENOSPC;
 		return (NULL);
@@ -100,12 +102,14 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
 	 * Keep this in mind if you think this function should have been coded
 	 * to use pointer overlays.  All the world's not a VAX.
 	 */
-	char tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
+	char  tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	char *tp, *ep;
-	struct { int base, len; } best, cur;
+	struct {
+		int base, len;
+	} best, cur;
 	u_int words[IN6ADDRSZ / INT16SZ];
-	int i;
-	int advance;
+	int   i;
+	int   advance;
 
 	/*
 	 * Preprocess:
@@ -167,7 +171,7 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
 		/* Is this address an encapsulated IPv4? */
 		if (i == 6 && best.base == 0 &&
 		    (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
-			if (!inet_ntop4(src+12, tp, ep - tp))
+			if (!inet_ntop4(src + 12, tp, ep - tp))
 				return (NULL);
 			tp += strlen(tp);
 			break;
@@ -180,7 +184,8 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
 		tp += advance;
 	}
 	/* Was it a trailing run of 0x00's? */
-	if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ)) {
+	if (best.base != -1 &&
+	    (best.base + best.len) == (IN6ADDRSZ / INT16SZ)) {
 		if (tp + 1 >= ep) {
 			errno = ENOSPC;
 			return (NULL);

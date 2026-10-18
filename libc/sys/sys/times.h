@@ -37,27 +37,27 @@
  *	@(#)times.h	8.4 (Berkeley) 1/21/94
  */
 
-#ifndef	_SYS_TIMES_H_
-#define	_SYS_TIMES_H_
+#ifndef _SYS_TIMES_H_
+#define _SYS_TIMES_H_
 
-#include <sys/cdefs.h>
 #include <sys/_types.h>
+#include <sys/cdefs.h>
 
-#ifndef	_CLOCK_T_DEFINED_
-#define	_CLOCK_T_DEFINED_
-typedef	__clock_t	clock_t;
+#ifndef _CLOCK_T_DEFINED_
+#define _CLOCK_T_DEFINED_
+typedef __clock_t clock_t;
 #endif
 
 struct tms {
-	clock_t tms_utime;	/* User CPU time */
-	clock_t tms_stime;	/* System CPU time */
-	clock_t tms_cutime;	/* User CPU time of terminated child procs */
-	clock_t tms_cstime;	/* System CPU time of terminated child procs */
+	clock_t tms_utime;  /* User CPU time */
+	clock_t tms_stime;  /* System CPU time */
+	clock_t tms_cutime; /* User CPU time of terminated child procs */
+	clock_t tms_cstime; /* System CPU time of terminated child procs */
 };
 
 #ifndef _KERNEL
 __BEGIN_DECLS
-clock_t	times(struct tms *);
+clock_t times(struct tms *);
 __END_DECLS
 #endif
 #endif /* !_SYS_TIMES_H_ */

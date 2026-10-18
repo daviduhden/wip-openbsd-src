@@ -37,143 +37,149 @@
  *	$NetBSD: SYS.h,v 1.6 2001/07/23 07:26:50 thorpej Exp $
  */
 
-#include "DEFS.h"
 #include <sys/syscall.h>
+
 #include <machine/trap.h>
 
+#include "DEFS.h"
+
 /* offsetof(struct tib, tib_errno) - offsetof(struct tib, __tib_tcb) */
-#define	TCB_OFFSET_ERRNO	24
+#define TCB_OFFSET_ERRNO 24
 
-#define _CAT(x,y) x##y
+#define _CAT(x, y) x##y
 
-#define	__ENTRY(p,x)		ENTRY(_CAT(p,x)) ; .weak x; x = _CAT(p,x)
-#define	__ENTRY_HIDDEN(p,x)	ENTRY(_CAT(p,x))
+#define __ENTRY(p, x)                                                          \
+	ENTRY(_CAT(p, x));                                                     \
+	.weak x;                                                               \
+	x = _CAT(p, x)
+#define __ENTRY_HIDDEN(p, x) ENTRY(_CAT(p, x))
 
-#define __END_HIDDEN(p,x)	END(_CAT(p,x));			\
-				_HIDDEN_FALIAS(x, _CAT(p,x));	\
-				END(_HIDDEN(x))
-#define __END(p,x)		__END_HIDDEN(p,x); END(x)
+#define __END_HIDDEN(p, x)                                                     \
+	END(_CAT(p, x));                                                       \
+	_HIDDEN_FALIAS(x, _CAT(p, x));                                         \
+	END(_HIDDEN(x))
+#define __END(p, x)                                                            \
+	__END_HIDDEN(p, x);                                                    \
+	END(x)
 
 /*
  * ERROR sets the thread's errno and returns
  */
-#define	ERROR()							\
-	st	%o0, [%g7 + TCB_OFFSET_ERRNO];			\
-	retl;							\
-	 mov	-1, %o0
+#define ERROR()                                                                \
+	st % o0, [% g7 + TCB_OFFSET_ERRNO];                                    \
+	retl;                                                                  \
+	mov - 1, % o0
 
 /*
  * SYSCALL is used when further action must be taken before returning.
  * Note that it adds a `nop' over what we could do, if we only knew what
  * came at label 1....
  */
-#define	_SYSCALL(p,x,y)						\
-	__ENTRY(p,x);						\
-	mov _CAT(SYS_,y),%g1;					\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,y), 97b);				\
-	bcc 1f;							\
-	nop;							\
-	ERROR();						\
-1:
+#define _SYSCALL(p, x, y)                                                      \
+	__ENTRY(p, x);                                                         \
+	mov    _CAT(SYS_, y), % g1;                                            \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, y), 97b);                                        \
+	bcc 1f;                                                                \
+	nop;                                                                   \
+	ERROR();                                                               \
+	1:
 
-#define	_SYSCALL_HIDDEN(p,x,y)					\
-	__ENTRY_HIDDEN(p,x);					\
-	mov _CAT(SYS_,y),%g1;					\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,y), 97b);				\
-	bcc 1f;							\
-	nop;							\
-	ERROR();						\
-1:
+#define _SYSCALL_HIDDEN(p, x, y)                                               \
+	__ENTRY_HIDDEN(p, x);                                                  \
+	mov    _CAT(SYS_, y), % g1;                                            \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, y), 97b);                                        \
+	bcc 1f;                                                                \
+	nop;                                                                   \
+	ERROR();                                                               \
+	1:
 
-#define	__SYSCALL(p,x)						\
-	_SYSCALL(p,x,x)
+#define __SYSCALL(p, x) _SYSCALL(p, x, x)
 
-#define	__SYSCALL_HIDDEN(p,x)					\
-	_SYSCALL_HIDDEN(p,x,x)
+#define __SYSCALL_HIDDEN(p, x) _SYSCALL_HIDDEN(p, x, x)
 
 /*
  * RSYSCALL is used when the system call should just return.  Here
  * we use the SYSCALL_G2RFLAG to put the `success' return address in %g2
  * and avoid a branch.
  */
-#define	__RSYSCALL(p,x)						\
-	__ENTRY(p,x);						\
-	mov (_CAT(SYS_,x))|SYSCALL_G2RFLAG,%g1;			\
-	add %o7,8,%g2;						\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,x), 97b);				\
-	ERROR();						\
-	__END(p,x)
-#define	__RSYSCALL_HIDDEN(p,x)					\
-	__ENTRY_HIDDEN(p,x);					\
-	mov (_CAT(SYS_,x))|SYSCALL_G2RFLAG,%g1;			\
-	add %o7,8,%g2;						\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,x), 97b);				\
-	ERROR();						\
-	__END_HIDDEN(p,x)
+#define __RSYSCALL(p, x)                                                       \
+	__ENTRY(p, x);                                                         \
+	mov(_CAT(SYS_, x)) | SYSCALL_G2RFLAG, % g1;                            \
+	add % o7, 8, % g2;                                                     \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, x), 97b);                                        \
+	ERROR();                                                               \
+	__END(p, x)
+#define __RSYSCALL_HIDDEN(p, x)                                                \
+	__ENTRY_HIDDEN(p, x);                                                  \
+	mov(_CAT(SYS_, x)) | SYSCALL_G2RFLAG, % g1;                            \
+	add % o7, 8, % g2;                                                     \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, x), 97b);                                        \
+	ERROR();                                                               \
+	__END_HIDDEN(p, x)
 
 /*
  * PSEUDO(x,y) is like RSYSCALL(y) except that the name is x.
  */
-#define	__PSEUDO(p,x,y)						\
-	__ENTRY(p,x);						\
-	mov (_CAT(SYS_,y))|SYSCALL_G2RFLAG,%g1;			\
-	add %o7,8,%g2;						\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,y), 97b);				\
-	ERROR();						\
-	__END(p,x)
+#define __PSEUDO(p, x, y)                                                      \
+	__ENTRY(p, x);                                                         \
+	mov(_CAT(SYS_, y)) | SYSCALL_G2RFLAG, % g1;                            \
+	add % o7, 8, % g2;                                                     \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, y), 97b);                                        \
+	ERROR();                                                               \
+	__END(p, x)
 
 /*
- * SYSCALL_NOERROR is like SYSCALL, except it's used for syscalls 
+ * SYSCALL_NOERROR is like SYSCALL, except it's used for syscalls
  * that never fail.
  *
  * XXX - This should be optimized.
  */
-#define __SYSCALL_NOERROR(p,x)					\
-	__ENTRY(p,x);						\
-	mov _CAT(SYS_,x),%g1;					\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,x), 97b)
+#define __SYSCALL_NOERROR(p, x)                                                \
+	__ENTRY(p, x);                                                         \
+	mov    _CAT(SYS_, x), % g1;                                            \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, x), 97b)
 
 /*
- * RSYSCALL_NOERROR is like RSYSCALL, except it's used for syscalls 
+ * RSYSCALL_NOERROR is like RSYSCALL, except it's used for syscalls
  * that never fail.
  *
  * XXX - This should be optimized.
  */
-#define __RSYSCALL_NOERROR(p,x)					\
-	__ENTRY(p,x);						\
-	mov (_CAT(SYS_,x))|SYSCALL_G2RFLAG,%g1;			\
-	add %o7,8,%g2;						\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,x), 97b);				\
-	__END(p,x)
+#define __RSYSCALL_NOERROR(p, x)                                               \
+	__ENTRY(p, x);                                                         \
+	mov(_CAT(SYS_, x)) | SYSCALL_G2RFLAG, % g1;                            \
+	add % o7, 8, % g2;                                                     \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, x), 97b);                                        \
+	__END(p, x)
 
 /*
  * PSEUDO_NOERROR(x,y) is like RSYSCALL_NOERROR(y) except that the name is x.
  */
-#define __PSEUDO_NOERROR(p,x,y)					\
-	__ENTRY(p,x);						\
-	mov (_CAT(SYS_,y))|SYSCALL_G2RFLAG,%g1;			\
-	add %o7,8,%g2;						\
-97:	t ST_SYSCALL;						\
-	PINSYSCALL(_CAT(SYS_,y), 97b);				\
-	__END(p,x)
+#define __PSEUDO_NOERROR(p, x, y)                                              \
+	__ENTRY(p, x);                                                         \
+	mov(_CAT(SYS_, y)) | SYSCALL_G2RFLAG, % g1;                            \
+	add % o7, 8, % g2;                                                     \
+	97 : t ST_SYSCALL;                                                     \
+	PINSYSCALL(_CAT(SYS_, y), 97b);                                        \
+	__END(p, x)
 
 /*
  * SYSENTRY is for functions that pretend to be syscalls.
  */
-#define	SYSCALL(x)		__SYSCALL(_thread_sys_,x)
-#define	RSYSCALL(x)		__RSYSCALL(_thread_sys_,x)
-#define	RSYSCALL_HIDDEN(x)	__RSYSCALL_HIDDEN(_thread_sys_,x)
-#define	RSYSCALL_NOERROR(x,y)	__RSYSCALL_NOERROR(_thread_sys_,x,y)
-#define	PSEUDO(x,y)		__PSEUDO(_thread_sys_,x,y)
-#define	PSEUDO_NOERROR(x,y)	__PSEUDO_NOERROR(_thread_sys_,x,y)
-#define	SYSENTRY(x)		__ENTRY(_thread_sys_,x)
-#define	SYSENTRY_HIDDEN(x)	__ENTRY_HIDDEN(_thread_sys_,x)
-#define	SYSCALL_END(x)		__END(_thread_sys_,x)
-#define	SYSCALL_END_HIDDEN(x)	__END_HIDDEN(_thread_sys_,x)
+#define SYSCALL(x) __SYSCALL(_thread_sys_, x)
+#define RSYSCALL(x) __RSYSCALL(_thread_sys_, x)
+#define RSYSCALL_HIDDEN(x) __RSYSCALL_HIDDEN(_thread_sys_, x)
+#define RSYSCALL_NOERROR(x, y) __RSYSCALL_NOERROR(_thread_sys_, x, y)
+#define PSEUDO(x, y) __PSEUDO(_thread_sys_, x, y)
+#define PSEUDO_NOERROR(x, y) __PSEUDO_NOERROR(_thread_sys_, x, y)
+#define SYSENTRY(x) __ENTRY(_thread_sys_, x)
+#define SYSENTRY_HIDDEN(x) __ENTRY_HIDDEN(_thread_sys_, x)
+#define SYSCALL_END(x) __END(_thread_sys_, x)
+#define SYSCALL_END_HIDDEN(x) __END_HIDDEN(_thread_sys_, x)

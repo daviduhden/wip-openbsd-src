@@ -28,15 +28,15 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
 
 /*
  * Convert usec to clock ticks; could do (usec * CLOCKS_PER_SEC) / 1000000,
  * but this would overflow if we switch to nanosec.
  */
-#define	CONVTCK(r)	(r.tv_sec * CLOCKS_PER_SEC + \
-			 r.tv_usec / (1000000 / CLOCKS_PER_SEC))
+#define CONVTCK(r)                                                             \
+	(r.tv_sec * CLOCKS_PER_SEC + r.tv_usec / (1000000 / CLOCKS_PER_SEC))
 
 clock_t
 clock(void)
@@ -44,6 +44,6 @@ clock(void)
 	struct rusage ru;
 
 	if (getrusage(RUSAGE_SELF, &ru))
-		return ((clock_t) -1);
-	return((clock_t)((CONVTCK(ru.ru_utime) + CONVTCK(ru.ru_stime))));
+		return ((clock_t)-1);
+	return ((clock_t)((CONVTCK(ru.ru_utime) + CONVTCK(ru.ru_stime))));
 }

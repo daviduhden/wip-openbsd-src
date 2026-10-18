@@ -31,8 +31,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef	_MACHDEP_SIGNAL_H_
-#define	_MACHDEP_SIGNAL_H_
+#ifndef _MACHDEP_SIGNAL_H_
+#define _MACHDEP_SIGNAL_H_
 
 #include <sys/cdefs.h>
 
@@ -43,23 +43,23 @@ typedef int sig_atomic_t;
 #include <machine/_types.h>
 
 struct sigcontext {
-	long		sc_cookie;
-	int		sc_mask;	/* saved signal mask */
-	__register_t	sc_reg[32];	/* saved registers */
-	__register_t	sc_lr;
-	__register_t	sc_cr;
-	__register_t	sc_xer;
-	__register_t	sc_ctr;
-	__register_t	sc_pc;
-	__register_t	sc_ps;
-	__register_t	sc_vrsave;
-	__uint128_t	sc_vsx[64];
-	__uint64_t	sc_fpscr;
-	__uint64_t	sc_vscr;
+	long	     sc_cookie;
+	int	     sc_mask;	 /* saved signal mask */
+	__register_t sc_reg[32]; /* saved registers */
+	__register_t sc_lr;
+	__register_t sc_cr;
+	__register_t sc_xer;
+	__register_t sc_ctr;
+	__register_t sc_pc;
+	__register_t sc_ps;
+	__register_t sc_vrsave;
+	__uint128_t  sc_vsx[64];
+	__uint64_t   sc_fpscr;
+	__uint64_t   sc_vscr;
 };
 
-#define sc_sp	sc_reg[1]
+#define sc_sp sc_reg[1]
 
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */
 
-#endif	/* _MACHDEP_SIGNAL_H_ */
+#endif /* _MACHDEP_SIGNAL_H_ */

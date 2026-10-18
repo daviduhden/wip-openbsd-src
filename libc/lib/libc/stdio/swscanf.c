@@ -31,10 +31,10 @@
 #include <wchar.h>
 
 int
-swscanf(const wchar_t * __restrict str, const wchar_t * __restrict fmt, ...)
+swscanf(const wchar_t *__restrict str, const wchar_t *__restrict fmt, ...)
 {
 	va_list ap;
-	int r;
+	int	r;
 
 	va_start(ap, fmt);
 	r = vswscanf(str, fmt, ap);

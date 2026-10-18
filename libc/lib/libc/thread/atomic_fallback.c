@@ -109,7 +109,7 @@ __atomic_fallback_compare_exchange(size_t size, volatile void *obj,
     void *expected, const void *desired, int weak, int success, int failure)
 {
 	unsigned char *l = fallback_lock(obj);
-	int ret;
+	int	       ret;
 
 	(void)weak;
 	(void)success;
@@ -131,7 +131,7 @@ static void
 fallback_add(unsigned char *a, const unsigned char *b, size_t size, int sub)
 {
 	unsigned carry = sub ? 1 : 0;
-	size_t i;
+	size_t	 i;
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	for (i = 0; i < size; i++) {
@@ -179,10 +179,10 @@ static void
 fallback_fetch_bitwise(size_t size, volatile void *obj, const void *val,
     void *ret, int order, int op)
 {
-	unsigned char *l = fallback_lock(obj);
-	unsigned char *o = (unsigned char *)(void *)obj;
+	unsigned char	    *l = fallback_lock(obj);
+	unsigned char	    *o = (unsigned char *)(void *)obj;
 	const unsigned char *v = val;
-	size_t i;
+	size_t		     i;
 
 	(void)order;
 	fallback_acquire(l);

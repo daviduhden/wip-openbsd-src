@@ -21,31 +21,31 @@
 
 #ifdef _KERNEL
 
-void	*tcb_get(struct proc *_p);
-void	tcb_set(struct proc *_p, void *_newtcb);
+void *tcb_get(struct proc *_p);
+void  tcb_set(struct proc *_p, void *_newtcb);
 
-#define TCB_GET(p)		tcb_get(p)
-#define TCB_SET(p, addr)	tcb_set(p, addr)
+#define TCB_GET(p) tcb_get(p)
+#define TCB_SET(p, addr) tcb_set(p, addr)
 
 /* address must be in canonical form; requiring lower-half is okay */
-#define TCB_INVALID(addr)	((u_long)(addr) > 0x00007fffffffffff)
+#define TCB_INVALID(addr) ((u_long)(addr) > 0x00007fffffffffff)
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for big TCB, with static TLS data at negative offsets */
-#define TLS_VARIANT	2
+#define TLS_VARIANT 2
 
 /* Read a slot from the TCB */
 static inline void *
 __amd64_read_tcb(long offset)
 {
-	void	*val;
-	__asm__ ("movq %%fs:(%1),%0" : "=r" (val) : "r" (offset));
+	void *val;
+	__asm__("movq %%fs:(%1),%0" : "=r"(val) : "r"(offset));
 	return val;
 }
 
 /* Get a pointer to the TCB itself */
-#define TCB_GET()		__amd64_read_tcb(0)
+#define TCB_GET() __amd64_read_tcb(0)
 
 /* Setting the TCB pointer can only be done via syscall, so no TCB_SET() */
 

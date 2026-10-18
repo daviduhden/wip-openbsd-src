@@ -52,7 +52,7 @@ struct protoent *
 getprotobynumber(int num)
 {
 	extern struct protoent_data _protoent_data;
-	static struct protoent proto;
+	static struct protoent	    proto;
 
 	if (getprotobynumber_r(num, &proto, &_protoent_data) != 0)
 		return (NULL);

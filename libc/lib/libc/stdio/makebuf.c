@@ -33,9 +33,11 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 #include "local.h"
 
 /*
@@ -48,10 +50,10 @@
 void
 __smakebuf(FILE *fp)
 {
-	void *p;
-	int flags;
+	void  *p;
+	int    flags;
 	size_t size;
-	int couldbetty;
+	int    couldbetty;
 
 	if (fp->_flags & __SNBF) {
 		fp->_bf._base = fp->_p = fp->_nbuf;
@@ -102,5 +104,6 @@ __swhatbuf(FILE *fp, size_t *bufsize, int *couldbetty)
 	*bufsize = st.st_blksize;
 	fp->_blksize = st.st_blksize;
 	return ((st.st_mode & S_IFMT) == S_IFREG && fp->_seek == __sseek ?
-	    __SOPT : __SNPT);
+		__SOPT :
+		__SNPT);
 }

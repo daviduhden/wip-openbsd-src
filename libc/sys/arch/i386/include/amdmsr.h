@@ -20,15 +20,15 @@
 #define _MACHINE_AMDMSR_H_
 
 struct amdmsr_req {
-	u_int32_t addr;	/* 32-bit MSR address */
+	u_int32_t addr; /* 32-bit MSR address */
 	u_int64_t val;	/* 64-bit MSR value */
 };
 
-#define RDMSR	_IOWR('M', 0, struct amdmsr_req)
-#define WRMSR	_IOW('M', 1, struct amdmsr_req)
+#define RDMSR _IOWR('M', 0, struct amdmsr_req)
+#define WRMSR _IOW('M', 1, struct amdmsr_req)
 
 #ifdef _KERNEL
-int	amdmsr_probe(void);
+int amdmsr_probe(void);
 #endif
 
-#endif	/* !_MACHINE_AMDMSR_H_ */
+#endif /* !_MACHINE_AMDMSR_H_ */

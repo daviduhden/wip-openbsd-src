@@ -16,9 +16,10 @@
  */
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
 #include <err.h>
 #include <errno.h>
 #include <getopt.h>
@@ -31,7 +32,7 @@
 static void
 usage(void)
 {
-	extern const char * __progname;
+	extern const char *__progname;
 
 	fprintf(stderr, "usage: %s [-aen] [host...]\n", __progname);
 	exit(1);
@@ -40,12 +41,12 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-	int			 i, ch, nflag = 0;
-	struct netent		*n;
-	char			*host;
+	int	       i, ch, nflag = 0;
+	struct netent *n;
+	char	      *host;
 
-	while((ch = getopt(argc, argv, "R:en")) !=  -1) {
-		switch(ch) {
+	while ((ch = getopt(argc, argv, "R:en")) != -1) {
+		switch (ch) {
 		case 'R':
 			parseresopt(optarg);
 			break;
@@ -63,7 +64,7 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	for(i = 0; i < argc; i++) {
+	for (i = 0; i < argc; i++) {
 
 		if (i)
 			printf("\n");

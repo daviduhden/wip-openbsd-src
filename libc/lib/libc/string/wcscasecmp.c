@@ -27,6 +27,7 @@
 
 #include <wchar.h>
 #include <wctype.h>
+
 #include "locale/runetype.h"
 
 int

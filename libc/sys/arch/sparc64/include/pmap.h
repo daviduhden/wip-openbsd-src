@@ -32,11 +32,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef	_MACHINE_PMAP_H_
-#define	_MACHINE_PMAP_H_
+#ifndef _MACHINE_PMAP_H_
+#define _MACHINE_PMAP_H_
 
 #ifndef _LOCORE
-#ifdef	_KERNEL
+#ifdef _KERNEL
 #include <sys/queue.h>
 #endif
 #include <sys/mutex.h>
@@ -56,7 +56,7 @@
  * total:						32 bits
  *
  * In 64-bit mode the Spitfire and Blackbird CPUs support only
- * 44-bit virtual addresses.  All addresses between 
+ * 44-bit virtual addresses.  All addresses between
  * 0x0000 07ff ffff ffff and 0xffff f800 0000 0000 are in the
  * "VA hole" and trap, so we don't have to track them.  However,
  * we do need to keep them in mind during PT walking.  If they
@@ -75,27 +75,27 @@
  * for the page directory.  We still have need of one extra bit 8^(.
  */
 
-#define HOLESHIFT	(43)
+#define HOLESHIFT (43)
 
-#define PTSZ	(PAGE_SIZE/8)
-#define PDSZ	(PTSZ)
-#define STSZ	(PTSZ)
+#define PTSZ (PAGE_SIZE / 8)
+#define PDSZ (PTSZ)
+#define STSZ (PTSZ)
 
-#define PTSHIFT		(13)
-#define	PDSHIFT		(10+PTSHIFT)
-#define STSHIFT		(10+PDSHIFT)
+#define PTSHIFT (13)
+#define PDSHIFT (10 + PTSHIFT)
+#define STSHIFT (10 + PDSHIFT)
 
-#define PTMASK		(PTSZ-1)
-#define PDMASK		(PDSZ-1)
-#define STMASK		(STSZ-1)
+#define PTMASK (PTSZ - 1)
+#define PDMASK (PDSZ - 1)
+#define STMASK (STSZ - 1)
 
 #ifndef _LOCORE
 
-#define va_to_seg(v)	(int)((((paddr_t)(v))>>STSHIFT)&STMASK)
-#define va_to_dir(v)	(int)((((paddr_t)(v))>>PDSHIFT)&PDMASK)
-#define va_to_pte(v)	(int)((((paddr_t)(v))>>PTSHIFT)&PTMASK)
+#define va_to_seg(v) (int)((((paddr_t)(v)) >> STSHIFT) & STMASK)
+#define va_to_dir(v) (int)((((paddr_t)(v)) >> PDSHIFT) & PDMASK)
+#define va_to_pte(v) (int)((((paddr_t)(v)) >> PTSHIFT) & PTMASK)
 
-#ifdef	_KERNEL
+#ifdef _KERNEL
 
 /*
  * Support for big page sizes.  This maps the page size to the
@@ -112,16 +112,16 @@ extern const struct page_size_map page_size_map[];
 
 struct pmap {
 	struct mutex pm_mtx;
-	int pm_ctx;		/* Current context */
-	int pm_refs;		/* ref count */
-	/* 
-	 * This contains 64-bit pointers to pages that contain 
+	int	     pm_ctx;  /* Current context */
+	int	     pm_refs; /* ref count */
+	/*
+	 * This contains 64-bit pointers to pages that contain
 	 * 1024 64-bit pointers to page tables.  All addresses
-	 * are physical.  
+	 * are physical.
 	 *
 	 * !!! Only touch this through pseg_get() and pseg_set() !!!
 	 */
-	paddr_t pm_physaddr;	/* physical address of pm_segs */
+	paddr_t	 pm_physaddr; /* physical address of pm_segs */
 	int64_t *pm_segs;
 
 	struct pmap_statistics pm_stats;
@@ -131,84 +131,89 @@ struct pmap {
  * This comes from the PROM and is used to map prom entries.
  */
 struct prom_map {
-	u_int64_t	vstart;
-	u_int64_t	vsize;
-	u_int64_t	tte;
+	u_int64_t vstart;
+	u_int64_t vsize;
+	u_int64_t tte;
 };
 
-#define PMAP_NC		0x001	/* Set the E bit in the page */
-#define PMAP_NVC	0x002	/* Don't enable the virtual cache */
-#define PMAP_NOCACHE	PMAP_NC
-#define PMAP_LITTLE	0x004	/* Map in little endian mode */
-/* Large page size hints -- we really should use another param to pmap_enter() */
-#define PMAP_8K		0x000
-#define PMAP_64K	0x008	/* Use 64K page */
-#define PMAP_512K	0x010
-#define PMAP_4M		0x018
-#define PMAP_SZ_TO_TTE(x)	(((x)&0x018)<<58)
-/* If these bits are different in va's to the same PA then there is an aliasing in the d$ */
-#define VA_ALIAS_ALIGN	(1<<14)
-#define VA_ALIAS_MASK	(VA_ALIAS_ALIGN - 1)
+#define PMAP_NC 0x001  /* Set the E bit in the page */
+#define PMAP_NVC 0x002 /* Don't enable the virtual cache */
+#define PMAP_NOCACHE PMAP_NC
+#define PMAP_LITTLE 0x004 /* Map in little endian mode */
+/* Large page size hints -- we really should use another param to pmap_enter()
+ */
+#define PMAP_8K 0x000
+#define PMAP_64K 0x008 /* Use 64K page */
+#define PMAP_512K 0x010
+#define PMAP_4M 0x018
+#define PMAP_SZ_TO_TTE(x) (((x) & 0x018) << 58)
+/* If these bits are different in va's to the same PA then there is an aliasing
+ * in the d$ */
+#define VA_ALIAS_ALIGN (1 << 14)
+#define VA_ALIAS_MASK (VA_ALIAS_ALIGN - 1)
 
-typedef	struct pmap *pmap_t;
+typedef struct pmap *pmap_t;
 
 extern struct pmap kernel_pmap_;
-#define	pmap_kernel()	(&kernel_pmap_)
+#define pmap_kernel() (&kernel_pmap_)
 
 /* int pmap_change_wiring(pmap_t pm, vaddr_t va, boolean_t wired); */
-#define	pmap_resident_count(pm)		((pm)->pm_stats.resident_count)
-#define	pmap_update(pm)			/* nothing (yet) */
+#define pmap_resident_count(pm) ((pm)->pm_stats.resident_count)
+#define pmap_update(pm) /* nothing (yet) */
 
-#define pmap_proc_iflush(p,va,len)	/* nothing */
-#define pmap_init_percpu()		do { /* nothing */ } while (0)
+#define pmap_proc_iflush(p, va, len) /* nothing */
+#define pmap_init_percpu()                                                     \
+	do { /* nothing */                                                     \
+	} while (0)
 
-void	pmap_bootstrap(u_long, u_long, u_int, u_int);
-int	pmap_copyinsn(pmap_t, vaddr_t, uint32_t *);
+void pmap_bootstrap(u_long, u_long, u_int, u_int);
+int  pmap_copyinsn(pmap_t, vaddr_t, uint32_t *);
 
 /* make sure all page mappings are modulo 16K to prevent d$ aliasing */
 #define PMAP_PREFER
 /* pmap prefer alignment */
-#define PMAP_PREFER_ALIGN()	(VA_ALIAS_ALIGN)
+#define PMAP_PREFER_ALIGN() (VA_ALIAS_ALIGN)
 /* pmap prefer offset in alignment */
-#define PMAP_PREFER_OFFSET(of)	((of) & VA_ALIAS_MASK)
+#define PMAP_PREFER_OFFSET(of) ((of) & VA_ALIAS_MASK)
 
-#define PMAP_CHECK_COPYIN	CPU_ISSUN4V
+#define PMAP_CHECK_COPYIN CPU_ISSUN4V
 
-#define PMAP_GROWKERNEL         /* turn on pmap_growkernel interface */
+#define PMAP_GROWKERNEL /* turn on pmap_growkernel interface */
 
 /* SPARC specific? */
-int	pmap_dumpsize(void);
-int	pmap_dumpmmu(int (*)(dev_t, daddr_t, caddr_t, size_t), daddr_t);
-int	pmap_pa_exists(paddr_t);
+int pmap_dumpsize(void);
+int pmap_dumpmmu(int (*)(dev_t, daddr_t, caddr_t, size_t), daddr_t);
+int pmap_pa_exists(paddr_t);
 
 /* SPARC64 specific */
-int	ctx_alloc(struct pmap*);
-void	ctx_free(struct pmap*);
+int  ctx_alloc(struct pmap *);
+void ctx_free(struct pmap *);
 
-#endif	/* _KERNEL */
+#endif /* _KERNEL */
 
 /*
  * For each struct vm_page, there is a list of all currently valid virtual
  * mappings of that page.
  */
 typedef struct pv_entry {
-	struct pv_entry	*pv_next;	/* next pv_entry */
-	struct pmap	*pv_pmap;	/* pmap where mapping lies */
-	vaddr_t		 pv_va;		/* virtual address for mapping */
+	struct pv_entry *pv_next; /* next pv_entry */
+	struct pmap	*pv_pmap; /* pmap where mapping lies */
+	vaddr_t		 pv_va;	  /* virtual address for mapping */
 } *pv_entry_t;
 /* PV flags encoded in the low bits of the VA of the first pv_entry */
 
 struct vm_page_md {
-	struct mutex pvmtx;
+	struct mutex	pvmtx;
 	struct pv_entry pvent;
 };
 
-#define VM_MDPAGE_INIT(pg) do {			\
-	mtx_init(&(pg)->mdpage.pvmtx, IPL_VM);	\
-	(pg)->mdpage.pvent.pv_next = NULL;	\
-	(pg)->mdpage.pvent.pv_pmap = NULL;	\
-	(pg)->mdpage.pvent.pv_va = 0;		\
-} while (0)
+#define VM_MDPAGE_INIT(pg)                                                     \
+	do {                                                                   \
+		mtx_init(&(pg)->mdpage.pvmtx, IPL_VM);                         \
+		(pg)->mdpage.pvent.pv_next = NULL;                             \
+		(pg)->mdpage.pvent.pv_pmap = NULL;                             \
+		(pg)->mdpage.pvent.pv_va = 0;                                  \
+	} while (0)
 
-#endif	/* _LOCORE */
-#endif	/* _MACHINE_PMAP_H_ */
+#endif /* _LOCORE */
+#endif /* _MACHINE_PMAP_H_ */

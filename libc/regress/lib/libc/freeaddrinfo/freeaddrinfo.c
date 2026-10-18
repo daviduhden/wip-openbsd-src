@@ -6,7 +6,6 @@
 #include <sys/socket.h>
 
 #include <netdb.h>
-
 #include <stddef.h>
 
 int

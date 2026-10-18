@@ -31,26 +31,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <string.h>
-#include <rpc/rpc.h>
 #include <sys/socket.h>
+
+#include <errno.h>
 #include <netdb.h>
+#include <rpc/rpc.h>
+#include <string.h>
 
 /*
  * Generic client creation: takes (hostname, program-number, protocol) and
- * returns client handle. Default options are set, which the user can 
+ * returns client handle. Default options are set, which the user can
  * change using the rpc equivalent of ioctl()'s.
  */
 CLIENT *
 clnt_create(char *hostname, u_long prog, u_long vers, char *proto)
 {
-	struct hostent *h;
-	struct protoent *p;
+	struct hostent	  *h;
+	struct protoent	  *p;
 	struct sockaddr_in sin;
-	int sock;
-	struct timeval tv;
-	CLIENT *client;
+	int		   sock;
+	struct timeval	   tv;
+	CLIENT		  *client;
 
 	h = gethostbyname(hostname);
 	if (h == NULL) {
@@ -62,18 +63,18 @@ clnt_create(char *hostname, u_long prog, u_long vers, char *proto)
 		 * Only support INET for now
 		 */
 		rpc_createerr.cf_stat = RPC_SYSTEMERROR;
-		rpc_createerr.cf_error.re_errno = EAFNOSUPPORT; 
+		rpc_createerr.cf_error.re_errno = EAFNOSUPPORT;
 		return (NULL);
 	}
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_len = sizeof(struct sockaddr_in);
 	sin.sin_family = h->h_addrtype;
 	sin.sin_port = 0;
-	memcpy((char*)&sin.sin_addr, h->h_addr, h->h_length);
+	memcpy((char *)&sin.sin_addr, h->h_addr, h->h_length);
 	p = getprotobyname(proto);
 	if (p == NULL) {
 		rpc_createerr.cf_stat = RPC_UNKNOWNPROTO;
-		rpc_createerr.cf_error.re_errno = EPFNOSUPPORT; 
+		rpc_createerr.cf_error.re_errno = EPFNOSUPPORT;
 		return (NULL);
 	}
 	sock = RPC_ANYSOCK;
@@ -94,7 +95,7 @@ clnt_create(char *hostname, u_long prog, u_long vers, char *proto)
 		break;
 	default:
 		rpc_createerr.cf_stat = RPC_SYSTEMERROR;
-		rpc_createerr.cf_error.re_errno = EPFNOSUPPORT; 
+		rpc_createerr.cf_error.re_errno = EPFNOSUPPORT;
 		return (NULL);
 	}
 	return (client);

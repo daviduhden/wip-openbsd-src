@@ -59,33 +59,36 @@
 #endif
 
 #include <db.h>
+
+#include "extern.h"
 #include "hash.h"
 #include "page.h"
-#include "extern.h"
 
-#define MAXIMUM(a, b)	(((a) > (b)) ? (a) : (b))
+#define MAXIMUM(a, b) (((a) > (b)) ? (a) : (b))
 
 static BUFHEAD *newbuf(HTAB *, u_int32_t, BUFHEAD *);
 
 /* Unlink B from its place in the lru */
-#define BUF_REMOVE(B) { \
-	(B)->prev->next = (B)->next; \
-	(B)->next->prev = (B)->prev; \
-}
+#define BUF_REMOVE(B)                                                          \
+	{                                                                      \
+		(B)->prev->next = (B)->next;                                   \
+		(B)->next->prev = (B)->prev;                                   \
+	}
 
 /* Insert B after P */
-#define BUF_INSERT(B, P) { \
-	(B)->next = (P)->next; \
-	(B)->prev = (P); \
-	(P)->next = (B); \
-	(B)->next->prev = (B); \
-}
+#define BUF_INSERT(B, P)                                                       \
+	{                                                                      \
+		(B)->next = (P)->next;                                         \
+		(B)->prev = (P);                                               \
+		(P)->next = (B);                                               \
+		(B)->next->prev = (B);                                         \
+	}
 
-#define	MRU	hashp->bufhead.next
-#define	LRU	hashp->bufhead.prev
+#define MRU hashp->bufhead.next
+#define LRU hashp->bufhead.prev
 
-#define MRU_INSERT(B)	BUF_INSERT((B), &hashp->bufhead)
-#define LRU_INSERT(B)	BUF_INSERT((B), LRU)
+#define MRU_INSERT(B) BUF_INSERT((B), &hashp->bufhead)
+#define LRU_INSERT(B) BUF_INSERT((B), LRU)
 
 /*
  * We are looking for a buffer with address "addr".  If prev_bp is NULL, then
@@ -98,13 +101,13 @@ static BUFHEAD *newbuf(HTAB *, u_int32_t, BUFHEAD *);
  */
 BUFHEAD *
 __get_buf(HTAB *hashp, u_int32_t addr,
-    BUFHEAD *prev_bp,	/* If prev_bp set, indicates a new overflow page. */
-    int newpage)
+    BUFHEAD *prev_bp, /* If prev_bp set, indicates a new overflow page. */
+    int	     newpage)
 {
-	BUFHEAD *bp;
+	BUFHEAD	 *bp;
 	u_int32_t is_disk_mask;
-	int is_disk, segment_ndx;
-	SEGMENT segp;
+	int	  is_disk, segment_ndx;
+	SEGMENT	  segp;
 
 	is_disk = 0;
 	is_disk_mask = 0;
@@ -152,28 +155,28 @@ __get_buf(HTAB *hashp, u_int32_t addr,
 static BUFHEAD *
 newbuf(HTAB *hashp, u_int32_t addr, BUFHEAD *prev_bp)
 {
-	BUFHEAD *bp;		/* The buffer we're going to use */
-	BUFHEAD *xbp;		/* Temp pointer */
-	BUFHEAD *next_xbp;
-	SEGMENT segp;
-	int segment_ndx;
+	BUFHEAD	 *bp;  /* The buffer we're going to use */
+	BUFHEAD	 *xbp; /* Temp pointer */
+	BUFHEAD	 *next_xbp;
+	SEGMENT	  segp;
+	int	  segment_ndx;
 	u_int16_t oaddr, *shortp;
 
 	oaddr = 0;
 	bp = LRU;
 
-        /* It is bad to overwrite the page under the cursor. */
-        if (bp == hashp->cpage) {
-                BUF_REMOVE(bp);
-                MRU_INSERT(bp);
-                bp = LRU;
-        }
+	/* It is bad to overwrite the page under the cursor. */
+	if (bp == hashp->cpage) {
+		BUF_REMOVE(bp);
+		MRU_INSERT(bp);
+		bp = LRU;
+	}
 
 	/* If prev_bp is part of bp overflow, create a new buffer. */
 	if (hashp->nbufs == 0 && prev_bp && bp->ovfl) {
 		BUFHEAD *ovfl;
 
-		for (ovfl = bp->ovfl; ovfl ; ovfl = ovfl->ovfl) {
+		for (ovfl = bp->ovfl; ovfl; ovfl = ovfl->ovfl) {
 			if (ovfl == prev_bp) {
 				hashp->nbufs++;
 				break;
@@ -212,8 +215,9 @@ newbuf(HTAB *hashp, u_int32_t addr, BUFHEAD *prev_bp)
 			shortp = (u_int16_t *)bp->page;
 			if (shortp[0])
 				oaddr = shortp[shortp[0] - 1];
-			if ((bp->flags & BUF_MOD) && __put_page(hashp, bp->page,
-			    bp->addr, (int)IS_BUCKET(bp->flags), 0))
+			if ((bp->flags & BUF_MOD) &&
+			    __put_page(hashp, bp->page, bp->addr,
+				(int)IS_BUCKET(bp->flags), 0))
 				return (NULL);
 			/*
 			 * Update the pointer to this page (i.e. invalidate it).
@@ -232,7 +236,7 @@ newbuf(HTAB *hashp, u_int32_t addr, BUFHEAD *prev_bp)
 
 				if (hashp->new_file &&
 				    ((bp->flags & BUF_MOD) ||
-				    ISDISK(segp[segment_ndx])))
+					ISDISK(segp[segment_ndx])))
 					segp[segment_ndx] = (BUFHEAD *)BUF_DISK;
 				else
 					segp[segment_ndx] = NULL;
@@ -256,8 +260,9 @@ newbuf(HTAB *hashp, u_int32_t addr, BUFHEAD *prev_bp)
 				if (shortp[0])
 					/* set before __put_page */
 					oaddr = shortp[shortp[0] - 1];
-				if ((xbp->flags & BUF_MOD) && __put_page(hashp,
-				    xbp->page, xbp->addr, 0, 0))
+				if ((xbp->flags & BUF_MOD) &&
+				    __put_page(
+					hashp, xbp->page, xbp->addr, 0, 0))
 					return (NULL);
 				xbp->addr = 0;
 				xbp->flags = 0;
@@ -270,8 +275,8 @@ newbuf(HTAB *hashp, u_int32_t addr, BUFHEAD *prev_bp)
 	/* Now assign this buffer */
 	bp->addr = addr;
 #ifdef DEBUG1
-	(void)fprintf(stderr, "NEWBUF1: %d->ovfl was %d is now %d\n",
-	    bp->addr, (bp->ovfl ? bp->ovfl->addr : 0), 0);
+	(void)fprintf(stderr, "NEWBUF1: %d->ovfl was %d is now %d\n", bp->addr,
+	    (bp->ovfl ? bp->ovfl->addr : 0), 0);
 #endif
 	bp->ovfl = NULL;
 	if (prev_bp) {
@@ -296,7 +301,7 @@ void
 __buf_init(HTAB *hashp, int nbytes)
 {
 	BUFHEAD *bfp;
-	int npages;
+	int	 npages;
 
 	bfp = &(hashp->bufhead);
 	npages = (nbytes + hashp->BSIZE - 1) >> hashp->BSHIFT;
@@ -327,8 +332,8 @@ __buf_free(HTAB *hashp, int do_free, int to_disk)
 		/* Check that the buffer is valid */
 		if (bp->addr || IS_BUCKET(bp->flags)) {
 			if (to_disk && (bp->flags & BUF_MOD) &&
-			    __put_page(hashp, bp->page,
-			    bp->addr, IS_BUCKET(bp->flags), 0))
+			    __put_page(hashp, bp->page, bp->addr,
+				IS_BUCKET(bp->flags), 0))
 				return (-1);
 		}
 		/* Check if we are freeing stuff */

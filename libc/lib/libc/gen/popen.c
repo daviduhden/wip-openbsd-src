@@ -33,21 +33,22 @@
 
 #include <sys/wait.h>
 
-#include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <paths.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <paths.h>
+#include <unistd.h>
 #include <wchar.h>
+
 #include "thread_private.h"
 
 static struct pid {
 	struct pid *next;
-	FILE *fp;
-	pid_t pid;
+	FILE	   *fp;
+	pid_t	    pid;
 } *pidlist;
 
 static void *pidlist_lock = NULL;
@@ -55,10 +56,10 @@ static void *pidlist_lock = NULL;
 FILE *
 popen(const char *program, const char *type)
 {
-	struct pid * volatile cur;
+	struct pid *volatile cur;
 	FILE *iop;
-	int pdes[2];
-	int target;
+	int   pdes[2];
+	int   target;
 	pid_t pid;
 
 	if ((*type != 'r' && *type != 'w') ||
@@ -77,15 +78,15 @@ popen(const char *program, const char *type)
 
 	_MUTEX_LOCK(&pidlist_lock);
 	switch (pid = vfork()) {
-	case -1:			/* Error. */
+	case -1: /* Error. */
 		_MUTEX_UNLOCK(&pidlist_lock);
 		(void)close(pdes[0]);
 		(void)close(pdes[1]);
 		free(cur);
 		return (NULL);
 		/* NOTREACHED */
-	case 0:				/* Child. */
-	    {
+	case 0: /* Child. */
+	{
 		struct pid *pcur;
 
 		/*
@@ -101,16 +102,17 @@ popen(const char *program, const char *type)
 				_exit(127);
 		} else {
 			int flags = fcntl(pdes[target], F_GETFD);
-			if (flags == -1 || ((flags & FD_CLOEXEC) &&
-			    fcntl(pdes[target], F_SETFD, flags & ~FD_CLOEXEC)
-			    == -1))
+			if (flags == -1 ||
+			    ((flags & FD_CLOEXEC) &&
+				fcntl(pdes[target], F_SETFD,
+				    flags & ~FD_CLOEXEC) == -1))
 				_exit(127);
 		}
 
 		execl(_PATH_BSHELL, "sh", "-c", program, (char *)NULL);
 		_exit(127);
 		/* NOTREACHED */
-	    }
+	}
 	}
 	_MUTEX_UNLOCK(&pidlist_lock);
 
@@ -122,7 +124,7 @@ popen(const char *program, const char *type)
 
 	/* Link into list of file descriptors. */
 	cur->fp = iop;
-	cur->pid =  pid;
+	cur->pid = pid;
 	_MUTEX_LOCK(&pidlist_lock);
 	cur->next = pidlist;
 	pidlist = cur;
@@ -148,8 +150,8 @@ int
 pclose(FILE *iop)
 {
 	struct pid *cur, *last;
-	int pstat;
-	pid_t pid;
+	int	    pstat;
+	pid_t	    pid;
 
 	/* Find the appropriate file pointer. */
 	_MUTEX_LOCK(&pidlist_lock);

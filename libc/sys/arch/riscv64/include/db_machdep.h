@@ -37,57 +37,57 @@
  * $FreeBSD$
  */
 
-#ifndef	_MACHINE_DB_MACHDEP_H_
-#define	_MACHINE_DB_MACHDEP_H_
+#ifndef _MACHINE_DB_MACHDEP_H_
+#define _MACHINE_DB_MACHDEP_H_
 
 #include <sys/param.h>
-#include <uvm/uvm_extern.h>
-#include <machine/riscvreg.h>
+
 #include <machine/frame.h>
+#include <machine/riscvreg.h>
 #include <machine/trap.h>
+#include <uvm/uvm_extern.h>
 
-#define	T_BREAKPOINT	(EXCP_BREAKPOINT)
-#define	T_WATCHPOINT	(0)
+#define T_BREAKPOINT (EXCP_BREAKPOINT)
+#define T_WATCHPOINT (0)
 
-typedef long		db_expr_t;
+typedef long db_expr_t;
 
-typedef trapframe_t	db_regs_t;
+typedef trapframe_t db_regs_t;
 
-extern db_regs_t	ddb_regs;
-#define DDB_REGS	(&ddb_regs)
+extern db_regs_t ddb_regs;
+#define DDB_REGS (&ddb_regs)
 
-#define	PC_REGS(regs)			((vaddr_t)(regs)->tf_ra)
-#define	SET_PC_REGS(regs, value)	(regs)->tf_ra = (register_t)(value)
+#define PC_REGS(regs) ((vaddr_t)(regs)->tf_ra)
+#define SET_PC_REGS(regs, value) (regs)->tf_ra = (register_t)(value)
 
-#define	BKPT_INST	(KERNEL_BREAKPOINT)
-#define	BKPT_SIZE	(INSN_SIZE)
-#define	BKPT_SET(inst)	(BKPT_INST)
+#define BKPT_INST (KERNEL_BREAKPOINT)
+#define BKPT_SIZE (INSN_SIZE)
+#define BKPT_SET(inst) (BKPT_INST)
 
-#define	IS_BREAKPOINT_TRAP(type, code)	((type) == T_BREAKPOINT)
-#define	IS_WATCHPOINT_TRAP(type, code)	((type) == T_WATCHPOINT)
+#define IS_BREAKPOINT_TRAP(type, code) ((type) == T_BREAKPOINT)
+#define IS_WATCHPOINT_TRAP(type, code) ((type) == T_WATCHPOINT)
 
-#define	inst_trap_return(ins)	(ins == 0x10000073)	/* eret */
-#define	inst_return(ins)	(ins == 0x00008067)	/* ret */
-#define	inst_call(ins)		(((ins) & 0x7f) == 0x6f || \
-				 ((ins) & 0x7f) == 0x67)	/* jal, jalr */
-#define	inst_branch(ins)	(((ins) & 0x7f) == 0x63)	/* branch */
+#define inst_trap_return(ins) (ins == 0x10000073) /* eret */
+#define inst_return(ins) (ins == 0x00008067)	  /* ret */
+#define inst_call(ins)                                                         \
+	(((ins) & 0x7f) == 0x6f || ((ins) & 0x7f) == 0x67) /* jal, jalr */
+#define inst_branch(ins) (((ins) & 0x7f) == 0x63)	   /* branch */
 
-#define	next_instr_address(pc, bd)	((bd) ? (pc) : ((pc) + INSN_SIZE))
+#define next_instr_address(pc, bd) ((bd) ? (pc) : ((pc) + INSN_SIZE))
 
 #define DB_MACHINE_COMMANDS
 
 #define SOFTWARE_SSTEP
 
-int db_trapper(vaddr_t, u_int, trapframe_t *, int);
-void db_machine_init (void);
+int	db_trapper(vaddr_t, u_int, trapframe_t *, int);
+void	db_machine_init(void);
 vaddr_t db_branch_taken(u_int inst, vaddr_t pc, db_regs_t *regs);
 
-#define branch_taken(ins, pc, fun, regs) \
-	db_branch_taken((ins), (pc), (regs))
+#define branch_taken(ins, pc, fun, regs) db_branch_taken((ins), (pc), (regs))
 
 /* For ddb_state */
-#define DDB_STATE_NOT_RUNNING	0
-#define DDB_STATE_RUNNING	1
-#define DDB_STATE_EXITING	2
+#define DDB_STATE_NOT_RUNNING 0
+#define DDB_STATE_RUNNING 1
+#define DDB_STATE_EXITING 2
 
 #endif /* !_MACHINE_DB_MACHDEP_H_ */

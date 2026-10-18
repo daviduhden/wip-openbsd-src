@@ -1,4 +1,5 @@
-/*	$OpenBSD: fpgetsticky.c,v 1.2 2014/04/18 15:09:52 guenther Exp $	*/
+/*	$OpenBSD: fpgetsticky.c,v 1.2 2014/04/18 15:09:52 guenther Exp $
+ */
 /*
  * Copyright (c) 2006 Miodrag Vallat.
  *
@@ -17,6 +18,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_except
@@ -24,6 +26,6 @@ fpgetsticky()
 {
 	register_t fpscr;
 
-	__asm__ volatile ("sts fpscr, %0" : "=r" (fpscr));
+	__asm__ volatile("sts fpscr, %0" : "=r"(fpscr));
 	return ((fpscr >> 2) & 0x1f);
 }

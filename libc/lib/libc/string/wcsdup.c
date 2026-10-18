@@ -19,7 +19,7 @@ wchar_t *
 wcsdup(const wchar_t *str)
 {
 	wchar_t *copy;
-	size_t len;
+	size_t	 len;
 
 	len = wcslen(str) + 1;
 	copy = reallocarray(NULL, len, sizeof(wchar_t));

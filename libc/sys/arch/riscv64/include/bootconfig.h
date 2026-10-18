@@ -35,13 +35,13 @@
  */
 
 #ifndef _MACHINE_BOOTCONFIG_H_
-#define	_MACHINE_BOOTCONFIG_H_
+#define _MACHINE_BOOTCONFIG_H_
 
 struct riscv_bootparams {
-	vaddr_t		kern_l1pt;	/* L1 page table for the kernel */
-	paddr_t		kern_phys;
-	vaddr_t		kern_stack;
-	paddr_t		dtbp_phys;	/* Device tree blob physical addr */
+	vaddr_t kern_l1pt; /* L1 page table for the kernel */
+	paddr_t kern_phys;
+	vaddr_t kern_stack;
+	paddr_t dtbp_phys; /* Device tree blob physical addr */
 };
 
 #endif /* _MACHINE_BOOTCONFIG_H_ */

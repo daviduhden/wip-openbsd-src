@@ -30,9 +30,9 @@ _atomic_lock(volatile _atomic_lock_t *lock)
 		"   stwcx. %2,0,%1 \n"
 		"   bne- 1b        \n"
 		"   mr %0, 0	   \n"
-		: "=r" (old), "=r" (lock)
-		: "r" (_ATOMIC_LOCK_LOCKED), "1" (lock) : "0"
-	);
+	    : "=r"(old), "=r"(lock)
+	    : "r"(_ATOMIC_LOCK_LOCKED), "1"(lock)
+	    : "0");
 
 	return (old != _ATOMIC_LOCK_UNLOCKED);
 

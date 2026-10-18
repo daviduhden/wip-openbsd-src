@@ -21,6 +21,7 @@
  */
 
 #include <sys/types.h>
+
 #include <machine/sysarch.h>
 
 int

@@ -30,25 +30,27 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
+
 #include <db.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <paths.h>
 #include <string.h>
 #include <unistd.h>
-#include <paths.h>
-#include <limits.h>
-#include <errno.h>
+
 #include "thread_private.h"
 
 static char buf[TTY_NAME_MAX];
-static int oldttyname(struct stat *, char *, size_t);
+static int  oldttyname(struct stat *, char *, size_t);
 
 char *
 ttyname(int fd)
 {
 	_THREAD_PRIVATE_KEY(ttyname);
-	char *bufp = (char *) _THREAD_PRIVATE(ttyname, buf, NULL);
-	int err;
+	char *bufp = (char *)_THREAD_PRIVATE(ttyname, buf, NULL);
+	int   err;
 
 	if (bufp == NULL)
 		return NULL;
@@ -67,11 +69,11 @@ int
 ttyname_r(int fd, char *buf, size_t len)
 {
 	struct stat sb;
-	DB *db;
-	DBT data, key;
+	DB	   *db;
+	DBT	    data, key;
 	struct {
 		mode_t type;
-		dev_t dev;
+		dev_t  dev;
 	} bkey;
 
 	/* Must be a terminal. */
@@ -98,8 +100,8 @@ ttyname_r(int fd, char *buf, size_t len)
 				(void)(db->close)(db);
 				return (ERANGE);
 			}
-			memcpy(buf + sizeof(_PATH_DEV) - 1, data.data,
-			    data.size);
+			memcpy(
+			    buf + sizeof(_PATH_DEV) - 1, data.data, data.size);
 			(void)(db->close)(db);
 			return (0);
 		}
@@ -113,9 +115,9 @@ static int
 oldttyname(struct stat *sb, char *buf, size_t len)
 {
 	struct dirent *dirp;
-	DIR *dp;
-	struct stat dsb;
-	int error = ENOTTY;
+	DIR	      *dp;
+	struct stat    dsb;
+	int	       error = ENOTTY;
 
 	if ((dp = opendir(_PATH_DEV)) == NULL)
 		return (errno);
@@ -123,8 +125,9 @@ oldttyname(struct stat *sb, char *buf, size_t len)
 	while ((dirp = readdir(dp))) {
 		if (dirp->d_type != DT_CHR && dirp->d_type != DT_UNKNOWN)
 			continue;
-		if (fstatat(dirfd(dp), dirp->d_name, &dsb, AT_SYMLINK_NOFOLLOW)
-		    || !S_ISCHR(dsb.st_mode) || sb->st_rdev != dsb.st_rdev)
+		if (fstatat(
+			dirfd(dp), dirp->d_name, &dsb, AT_SYMLINK_NOFOLLOW) ||
+		    !S_ISCHR(dsb.st_mode) || sb->st_rdev != dsb.st_rdev)
 			continue;
 		if (dirp->d_namlen > len - sizeof(_PATH_DEV)) {
 			error = ERANGE;

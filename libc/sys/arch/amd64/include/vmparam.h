@@ -50,65 +50,65 @@
  * Immediately after the user structure is the page table map, and then
  * kernel address space.
  */
-#define	USRSTACK	VM_MAXUSER_ADDRESS
+#define USRSTACK VM_MAXUSER_ADDRESS
 
 /*
  * Virtual memory related constants, all in bytes
  */
-#define	MAXTSIZ		((paddr_t)512*1024*1024)	/* max text size */
+#define MAXTSIZ ((paddr_t)512 * 1024 * 1024) /* max text size */
 #ifndef DFLDSIZ
-#define	DFLDSIZ		((paddr_t)128*1024*1024)	/* initial data size limit */
+#define DFLDSIZ ((paddr_t)128 * 1024 * 1024) /* initial data size limit */
 #endif
 #ifndef MAXDSIZ
-#define	MAXDSIZ		((paddr_t)128*1024*1024*1024)	/* max data size */
+#define MAXDSIZ ((paddr_t)128 * 1024 * 1024 * 1024) /* max data size */
 #endif
 #ifndef BRKSIZ
-#define	BRKSIZ		((paddr_t)8*1024*1024*1024)	/* heap gap size */
+#define BRKSIZ ((paddr_t)8 * 1024 * 1024 * 1024) /* heap gap size */
 #endif
-#ifndef	DFLSSIZ
-#define	DFLSSIZ		((paddr_t)2*1024*1024)		/* initial stack size limit */
+#ifndef DFLSSIZ
+#define DFLSSIZ ((paddr_t)2 * 1024 * 1024) /* initial stack size limit */
 #endif
-#ifndef	MAXSSIZ
-#define	MAXSSIZ		((paddr_t)32*1024*1024)		/* max stack size */
+#ifndef MAXSSIZ
+#define MAXSSIZ ((paddr_t)32 * 1024 * 1024) /* max stack size */
 #endif
 
-#define STACKGAP_RANDOM	256*1024
+#define STACKGAP_RANDOM 256 * 1024
 
 /*
  * Size of shared memory map
  */
 #ifndef SHMMAXPGS
-#define SHMMAXPGS	8192
+#define SHMMAXPGS 8192
 #endif
 
 /*
  * Size of User Raw I/O map
  */
-#define	USRIOSIZE 	300
+#define USRIOSIZE 300
 
 /*
  * Mach derived constants
  */
 
 /* user/kernel map constants */
-#define VM_MIN_ADDRESS		PAGE_SIZE
-#define VM_MAXUSER_ADDRESS	0x00007f7fffffc000
-#define VM_MAX_ADDRESS		0x00007fbfdfeff000
+#define VM_MIN_ADDRESS PAGE_SIZE
+#define VM_MAXUSER_ADDRESS 0x00007f7fffffc000
+#define VM_MAX_ADDRESS 0x00007fbfdfeff000
 #ifdef _KERNEL
-#define VM_MIN_STACK_ADDRESS	0x0000600000000000
+#define VM_MIN_STACK_ADDRESS 0x0000600000000000
 #endif
-#define VM_MIN_KERNEL_ADDRESS	0xffff800000000000
-#define VM_MAX_KERNEL_ADDRESS	0xffff808000000000
+#define VM_MIN_KERNEL_ADDRESS 0xffff800000000000
+#define VM_MAX_KERNEL_ADDRESS 0xffff808000000000
 
 /* map PIE into approximately the first quarter of user va space */
-#define VM_PIE_MIN_ADDR		VM_MIN_ADDRESS
-#define VM_PIE_MAX_ADDR		0x200000000000
+#define VM_PIE_MIN_ADDR VM_MIN_ADDRESS
+#define VM_PIE_MAX_ADDR 0x200000000000
 
 /* virtual sizes (bytes) for various kernel submaps */
-#define VM_PHYS_SIZE		(USRIOSIZE*PAGE_SIZE)
+#define VM_PHYS_SIZE (USRIOSIZE * PAGE_SIZE)
 
-#define VM_PHYSSEG_MAX		16	/* actually we could have this many segments */
-#define VM_PHYSSEG_STRAT	VM_PSTRAT_BIGFIRST
-#define VM_PHYSSEG_NOADD		/* can't add RAM after vm_mem_init */
+#define VM_PHYSSEG_MAX 16 /* actually we could have this many segments */
+#define VM_PHYSSEG_STRAT VM_PSTRAT_BIGFIRST
+#define VM_PHYSSEG_NOADD /* can't add RAM after vm_mem_init */
 
 #endif /* _MACHINE_VMPARAM_H_ */

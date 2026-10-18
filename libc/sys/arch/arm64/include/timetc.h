@@ -18,7 +18,7 @@
 #ifndef _MACHINE_TIMETC_H_
 #define _MACHINE_TIMETC_H_
 
-#define TC_AGTIMER		1
-#define TC_AGTIMER_SUN50I	2
+#define TC_AGTIMER 1
+#define TC_AGTIMER_SUN50I 2
 
-#endif	/* _MACHINE_TIMETC_H_ */
+#endif /* _MACHINE_TIMETC_H_ */

@@ -19,21 +19,22 @@
 #ifdef SOFTFLOAT_FOR_GCC
 #include "softfloat-for-gcc.h"
 #endif
-#include "milieu.h"
 #include <softfloat.h>
 #include <stdint.h>
 
-__weak_alias(_fpsetround,fpsetround);
+#include "milieu.h"
+
+__weak_alias(_fpsetround, fpsetround);
 
 fp_rnd
 fpsetround(fp_rnd rnd_dir)
 {
 	uint32_t old, new;
 
-	__asm volatile("vmrs %0, fpscr" : "=r" (old));
+	__asm volatile("vmrs %0, fpscr" : "=r"(old));
 	new = old & ~(3 << 22);
 	new |= (rnd_dir & 3) << 22;
-	__asm volatile("vmsr fpscr, %0" :: "r" (new));
+	__asm volatile("vmsr fpscr, %0" ::"r"(new));
 
 	float_rounding_mode = rnd_dir;
 

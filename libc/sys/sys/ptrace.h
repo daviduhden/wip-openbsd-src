@@ -32,65 +32,65 @@
  *	@(#)ptrace.h	8.2 (Berkeley) 1/4/94
  */
 
-#ifndef	_SYS_PTRACE_H_
-#define	_SYS_PTRACE_H_
+#ifndef _SYS_PTRACE_H_
+#define _SYS_PTRACE_H_
 
-#define	PT_TRACE_ME	0	/* child declares it's being traced */
-#define	PT_READ_I	1	/* read word in child's I space */
-#define	PT_READ_D	2	/* read word in child's D space */
-#define	PT_WRITE_I	4	/* write word in child's I space */
-#define	PT_WRITE_D	5	/* write word in child's D space */
-#define	PT_CONTINUE	7	/* continue the child */
-#define	PT_KILL		8	/* kill the child process */
-#define	PT_ATTACH	9	/* attach to running process */
-#define	PT_DETACH	10	/* detach from running process */
-#define PT_IO		11	/* do I/O to/from the stopped process. */
+#define PT_TRACE_ME 0 /* child declares it's being traced */
+#define PT_READ_I 1   /* read word in child's I space */
+#define PT_READ_D 2   /* read word in child's D space */
+#define PT_WRITE_I 4  /* write word in child's I space */
+#define PT_WRITE_D 5  /* write word in child's D space */
+#define PT_CONTINUE 7 /* continue the child */
+#define PT_KILL 8     /* kill the child process */
+#define PT_ATTACH 9   /* attach to running process */
+#define PT_DETACH 10  /* detach from running process */
+#define PT_IO 11      /* do I/O to/from the stopped process. */
 
 struct ptrace_io_desc {
-	int	piod_op;	/* I/O operation */
-	void	*piod_offs;	/* child offset */
-	void	*piod_addr;	/* parent offset */
-	size_t	piod_len;	/* request length */
+	int    piod_op;	  /* I/O operation */
+	void  *piod_offs; /* child offset */
+	void  *piod_addr; /* parent offset */
+	size_t piod_len;  /* request length */
 };
 
 /*
  * Operations in piod_op.
  */
-#define PIOD_READ_D	1	/* Read from D space */
-#define PIOD_WRITE_D	2	/* Write to D space */
-#define PIOD_READ_I	3	/* Read from I space */
-#define PIOD_WRITE_I	4	/* Write to I space */
-#define PIOD_READ_AUXV	5	/* Read from aux array */
+#define PIOD_READ_D 1	 /* Read from D space */
+#define PIOD_WRITE_D 2	 /* Write to D space */
+#define PIOD_READ_I 3	 /* Read from I space */
+#define PIOD_WRITE_I 4	 /* Write to I space */
+#define PIOD_READ_AUXV 5 /* Read from aux array */
 
-#define PT_SET_EVENT_MASK	12
-#define PT_GET_EVENT_MASK	13
+#define PT_SET_EVENT_MASK 12
+#define PT_GET_EVENT_MASK 13
 
 typedef struct ptrace_event {
-	int	pe_set_event;
+	int pe_set_event;
 } ptrace_event_t;
 
-#define PTRACE_FORK	0x0002	/* Report forks */
+#define PTRACE_FORK 0x0002 /* Report forks */
 
-#define PT_GET_PROCESS_STATE	14
+#define PT_GET_PROCESS_STATE 14
 
 typedef struct ptrace_state {
-	int	pe_report_event;
-	pid_t	pe_other_pid;
-	pid_t	pe_tid;
+	int   pe_report_event;
+	pid_t pe_other_pid;
+	pid_t pe_tid;
 } ptrace_state_t;
 
-#define PT_GET_THREAD_FIRST	15
-#define PT_GET_THREAD_NEXT	16
+#define PT_GET_THREAD_FIRST 15
+#define PT_GET_THREAD_NEXT 16
 
-#define PT_PTS_NAMELEN	32
+#define PT_PTS_NAMELEN 32
 
 struct ptrace_thread_state {
-	pid_t	pts_tid;
-	char	pts_name[PT_PTS_NAMELEN];
+	pid_t pts_tid;
+	char  pts_name[PT_PTS_NAMELEN];
 };
 
-#define	PT_FIRSTMACH	32	/* for machine-specific requests */
-#include <machine/ptrace.h>	/* machine-specific requests, if any */
+#define PT_FIRSTMACH 32	    /* for machine-specific requests */
+#include <machine/ptrace.h> /* machine-specific requests, if any */
 
 #ifdef _KERNEL
 
@@ -107,21 +107,21 @@ struct reg;
 struct fpreg;
 #endif
 
-void	process_reparent(struct process *_child, struct process *_newparent);
-void	process_untrace(struct process *_tr);
+void process_reparent(struct process *_child, struct process *_newparent);
+void process_untrace(struct process *_tr);
 #ifdef PT_GETFPREGS
-int	process_read_fpregs(struct proc *_t, struct fpreg *);
+int process_read_fpregs(struct proc *_t, struct fpreg *);
 #endif
-int	process_read_regs(struct proc *_t, struct reg *);
-int	process_set_pc(struct proc *_t, caddr_t _addr);
-int	process_sstep(struct proc *_t, int _sstep);
+int process_read_regs(struct proc *_t, struct reg *);
+int process_set_pc(struct proc *_t, caddr_t _addr);
+int process_sstep(struct proc *_t, int _sstep);
 #ifdef PT_SETFPREGS
-int	process_write_fpregs(struct proc *_t, struct fpreg *);
+int process_write_fpregs(struct proc *_t, struct fpreg *);
 #endif
-int	process_write_regs(struct proc *_t, struct reg *);
-int	process_checkioperm(struct proc *_curp, struct process *_tr);
-int	process_domem(struct proc *_curp, struct process *_tr, struct uio *,
-	    int _req);
+int process_write_regs(struct proc *_t, struct reg *);
+int process_checkioperm(struct proc *_curp, struct process *_tr);
+int process_domem(
+    struct proc *_curp, struct process *_tr, struct uio *, int _req);
 
 #ifndef FIX_SSTEP
 #define FIX_SSTEP(p)
@@ -132,9 +132,9 @@ int	process_domem(struct proc *_curp, struct process *_tr, struct uio *,
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
-int	ptrace(int _request, pid_t _pid, caddr_t _addr, int _data);
+int ptrace(int _request, pid_t _pid, caddr_t _addr, int _data);
 __END_DECLS
 
 #endif /* !_KERNEL */
 
-#endif	/* !_SYS_PTRACE_H_ */
+#endif /* !_SYS_PTRACE_H_ */

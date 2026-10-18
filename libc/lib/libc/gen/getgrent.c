@@ -30,61 +30,63 @@
  */
 
 #include <sys/types.h>
+
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <errno.h>
 #ifdef YP
 #include <rpc/rpc.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
-#include "ypinternal.h"
+
 #include "ypexclude.h"
+#include "ypinternal.h"
 #endif
 #include "thread_private.h"
 
 /* This global storage is locked for the non-rentrant functions */
 _THREAD_PRIVATE_KEY(gr_storage);
 static struct group_storage {
-#define	MAXGRP		200
+#define MAXGRP 200
 	char *members[MAXGRP];
-#define	MAXLINELENGTH	1024
+#define MAXLINELENGTH 1024
 	char line[MAXLINELENGTH];
 } gr_storage;
-#define GETGR_R_SIZE_MAX	_GR_BUF_LEN
+#define GETGR_R_SIZE_MAX _GR_BUF_LEN
 
 /* File pointers are locked with the 'gr' mutex */
 _THREAD_PRIVATE_KEY(gr);
-static FILE *_gr_fp;
+static FILE	   *_gr_fp;
 static struct group _gr_group;
-static int _gr_stayopen;
-static int grscan(int, gid_t, const char *, struct group *, struct group_storage *,
-	int *);
-static int start_gr(void);
+static int	    _gr_stayopen;
+static int	    grscan(
+    int, gid_t, const char *, struct group *, struct group_storage *, int *);
+static int  start_gr(void);
 static void endgrent_basic(void);
 
-static struct group *getgrnam_gs(const char *, struct group *,
-	struct group_storage *);
-static struct group *getgrgid_gs(gid_t, struct group *,
-	struct group_storage *);
+static struct group *getgrnam_gs(
+    const char *, struct group *, struct group_storage *);
+static struct group *getgrgid_gs(gid_t, struct group *, struct group_storage *);
 
 #ifdef YP
 static struct _ypexclude *__ypexhead = NULL;
-static int	__ypmode = 0;
-static char	*__ypcurrent, *__ypdomain;
-static int	__ypcurrentlen;
+static int		  __ypmode = 0;
+static char		 *__ypcurrent, *__ypdomain;
+static int		  __ypcurrentlen;
 #endif
 
 struct group *
 _getgrent_yp(int *foundyp)
 {
-	struct group *p_gr = (struct group*)_THREAD_PRIVATE(gr, _gr_group, NULL);
-	struct group_storage *gs = (struct group_storage *)_THREAD_PRIVATE(gr_storage,
-	    gr_storage, NULL);
+	struct group *p_gr =
+	    (struct group *)_THREAD_PRIVATE(gr, _gr_group, NULL);
+	struct group_storage *gs = (struct group_storage *)_THREAD_PRIVATE(
+	    gr_storage, gr_storage, NULL);
 
 	_THREAD_PRIVATE_MUTEX_LOCK(gr);
 	if ((!_gr_fp && !start_gr()) || !grscan(0, 0, NULL, p_gr, gs, foundyp))
@@ -113,22 +115,23 @@ getgrnam_gs(const char *name, struct group *p_gr, struct group_storage *gs)
 			endgrent_basic();
 	}
 	_THREAD_PRIVATE_MUTEX_UNLOCK(gr);
-	return(rval ? p_gr : NULL);
+	return (rval ? p_gr : NULL);
 }
 
 struct group *
 getgrnam(const char *name)
 {
-	struct group *p_gr = (struct group*)_THREAD_PRIVATE(gr,_gr_group,NULL);
-	struct group_storage *gs = (struct group_storage *)_THREAD_PRIVATE(gr_storage,
-	    gr_storage, NULL);
+	struct group *p_gr =
+	    (struct group *)_THREAD_PRIVATE(gr, _gr_group, NULL);
+	struct group_storage *gs = (struct group_storage *)_THREAD_PRIVATE(
+	    gr_storage, gr_storage, NULL);
 
 	return getgrnam_gs(name, p_gr, gs);
 }
 
 int
-getgrnam_r(const char *name, struct group *grp, char *buffer,
-	size_t bufsize, struct group **result)
+getgrnam_r(const char *name, struct group *grp, char *buffer, size_t bufsize,
+    struct group **result)
 {
 	int errnosave;
 	int ret;
@@ -161,22 +164,23 @@ getgrgid_gs(gid_t gid, struct group *p_gr, struct group_storage *gs)
 			endgrent_basic();
 	}
 	_THREAD_PRIVATE_MUTEX_UNLOCK(gr);
-	return(rval ? p_gr : NULL);
+	return (rval ? p_gr : NULL);
 }
 
 struct group *
 getgrgid(gid_t gid)
 {
-	struct group *p_gr = (struct group*)_THREAD_PRIVATE(gr, _gr_group, NULL);
-	struct group_storage *gs = (struct group_storage *)_THREAD_PRIVATE(gr_storage,
-	    gr_storage, NULL);
+	struct group *p_gr =
+	    (struct group *)_THREAD_PRIVATE(gr, _gr_group, NULL);
+	struct group_storage *gs = (struct group_storage *)_THREAD_PRIVATE(
+	    gr_storage, gr_storage, NULL);
 
 	return getgrgid_gs(gid, p_gr, gs);
 }
 
 int
 getgrgid_r(gid_t gid, struct group *grp, char *buffer, size_t bufsize,
-	struct group **result)
+    struct group **result)
 {
 	int errnosave;
 	int ret;
@@ -210,15 +214,15 @@ start_gr(void)
 			__ypexclude_free(&__ypexhead);
 		__ypexhead = NULL;
 #endif
-		return(1);
+		return (1);
 	}
 
-	fd = __pledge_open(_PATH_GROUP, O_RDONLY|O_CLOEXEC);
+	fd = __pledge_open(_PATH_GROUP, O_RDONLY | O_CLOEXEC);
 	if (fd == -1)
 		return 0;
 	if ((_gr_fp = fdopen(fd, "r")) == NULL)
 		close(fd);
-	return (_gr_fp  ? 1 : 0);
+	return (_gr_fp ? 1 : 0);
 }
 
 void
@@ -249,8 +253,7 @@ setgroupent(int stayopen)
 }
 DEF_WEAK(setgroupent);
 
-static
-void
+static void
 endgrent_basic(void)
 {
 	int saved_errno;
@@ -284,17 +287,17 @@ static int
 grscan(int search, gid_t gid, const char *name, struct group *p_gr,
     struct group_storage *gs, int *foundyp)
 {
-	char *cp, **m;
-	char *bp, *endp;
+	char  *cp, **m;
+	char  *bp, *endp;
 	u_long ul;
 #ifdef YP
 	char *key, *data;
-	int keylen, datalen;
-	int r;
+	int   keylen, datalen;
+	int   r;
 #endif
 	char **members;
-	char *line;
-	int saved_errno;
+	char  *line;
+	int    saved_errno;
 
 	if (gs == NULL)
 		return 0;
@@ -307,15 +310,15 @@ grscan(int search, gid_t gid, const char *name, struct group *p_gr,
 		if (__ypmode) {
 			if (__ypcurrent) {
 				r = yp_next(__ypdomain, "group.byname",
-				    __ypcurrent, __ypcurrentlen,
-				    &key, &keylen, &data, &datalen);
+				    __ypcurrent, __ypcurrentlen, &key, &keylen,
+				    &data, &datalen);
 				free(__ypcurrent);
 				__ypcurrent = key;
 				__ypcurrentlen = keylen;
 			} else {
 				r = yp_first(__ypdomain, "group.byname",
-				    &__ypcurrent, &__ypcurrentlen,
-				    &data, &datalen);
+				    &__ypcurrent, &__ypcurrentlen, &data,
+				    &datalen);
 			}
 			if (r) {
 				__ypmode = 0;
@@ -346,8 +349,8 @@ grscan(int search, gid_t gid, const char *name, struct group *p_gr,
 		if (!strchr(line, '\n')) {
 			int ch;
 
-			while ((ch = getc_unlocked(_gr_fp)) != '\n' &&
-			    ch != EOF)
+			while (
+			    (ch = getc_unlocked(_gr_fp)) != '\n' && ch != EOF)
 				;
 			continue;
 		}
@@ -371,9 +374,9 @@ grscan(int search, gid_t gid, const char *name, struct group *p_gr,
 					continue;
 				}
 				if (name) {
-					r = yp_match(__ypdomain,
-					    "group.byname", name, strlen(name),
-					    &data, &datalen);
+					r = yp_match(__ypdomain, "group.byname",
+					    name, strlen(name), &data,
+					    &datalen);
 				} else {
 					char buf[20];
 					snprintf(buf, sizeof buf, "%u", gid);
@@ -416,8 +419,8 @@ grscan(int search, gid_t gid, const char *name, struct group *p_gr,
 				if ((search && name && strcmp(bp, name)) ||
 				    __ypexclude_is(&__ypexhead, bp))
 					continue;
-				r = yp_match(__ypdomain, "group.byname",
-				    bp, strlen(bp), &data, &datalen);
+				r = yp_match(__ypdomain, "group.byname", bp,
+				    strlen(bp), &data, &datalen);
 				switch (r) {
 				case 0:
 					break;
@@ -436,8 +439,8 @@ grscan(int search, gid_t gid, const char *name, struct group *p_gr,
 				bp = line;
 			}
 		} else if (line[0] == '-') {
-			if (__ypexclude_add(&__ypexhead,
-			    strsep(&line, ":\n") + 1))
+			if (__ypexclude_add(
+				&__ypexhead, strsep(&line, ":\n") + 1))
 				return 0;
 			if (foundyp) {
 				*foundyp = -1;
@@ -446,7 +449,7 @@ grscan(int search, gid_t gid, const char *name, struct group *p_gr,
 			}
 			continue;
 		}
-parse:
+	parse:
 #endif
 		p_gr->gr_name = strsep(&bp, ":\n");
 		if (search && name && strcmp(p_gr->gr_name, name))

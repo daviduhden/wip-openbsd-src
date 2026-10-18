@@ -38,19 +38,19 @@
 #ifndef _MACHINE_ASM_H_
 #define _MACHINE_ASM_H_
 
-#define _C_LABEL(x)	x
-#define _ASM_LABEL(x)	x
+#define _C_LABEL(x) x
+#define _ASM_LABEL(x) x
 
 #ifdef __STDC__
-# define __CONCAT(x,y)	x ## y
-# define __STRING(x)	#x
+#define __CONCAT(x, y) x##y
+#define __STRING(x) #x
 #else
-# define __CONCAT(x,y)	x/**/y
-# define __STRING(x)	"x"
+#define __CONCAT(x, y) x /**/ y
+#define __STRING(x) "x"
 #endif
 
 #ifndef _ALIGN_TEXT
-# define _ALIGN_TEXT .align 0
+#define _ALIGN_TEXT .align 0
 #endif
 
 /*
@@ -59,92 +59,109 @@
  * We define a couple of macros so that assembly code will not be dependant
  * on one or the other.
  */
-#define _ASM_TYPE_FUNCTION	#function
-#define _ASM_TYPE_OBJECT	#object
+#define _ASM_TYPE_FUNCTION #function
+#define _ASM_TYPE_OBJECT #object
 /* NB == No Binding: use .globl or .weak as necessary */
-#define _ENTRY_NB(x) \
-	.text; _ALIGN_TEXT; .type x,_ASM_TYPE_FUNCTION; x:
-#define _ENTRY(x)	.globl x; _ENTRY_NB(x)
+#define _ENTRY_NB(x)                                                           \
+	.text;                                                                 \
+	_ALIGN_TEXT;                                                           \
+	.type x, _ASM_TYPE_FUNCTION;                                           \
+	x:
+#define _ENTRY(x)                                                              \
+	.globl x;                                                              \
+	_ENTRY_NB(x)
 
 #if defined(PROF) || defined(GPROF)
-#  define _PROF_PROLOGUE	\
-	stp	x29, x30, [sp, #-16]!; \
-	mov fp, sp;		\
-	bl __mcount; 		\
-	ldp	x29, x30, [sp], #16;
+#define _PROF_PROLOGUE                                                         \
+	stp x29, x30, [ sp, # - 16 ] !;                                        \
+	mov fp, sp;                                                            \
+	bl  __mcount;                                                          \
+	ldp x29, x30, [sp], #16;
 #else
-# define _PROF_PROLOGUE
+#define _PROF_PROLOGUE
 #endif
 
 #if defined(_RET_PROTECTOR)
-# define RETGUARD_CALC_COOKIE(reg) \
-	eor     reg, reg, x30
+#define RETGUARD_CALC_COOKIE(reg) eor reg, reg, x30
 
-# define RETGUARD_LOAD_RANDOM(x, reg) \
-	adrp    reg, __CONCAT(__retguard_, x); \
-	ldr     reg, [reg, :lo12:__CONCAT(__retguard_, x)]
+#define RETGUARD_LOAD_RANDOM(x, reg)                                           \
+	adrp reg, __CONCAT(__retguard_, x);                                    \
+	ldr  reg, [ reg, :lo12:__CONCAT(__retguard_, x) ]
 
-# define RETGUARD_SETUP(x, reg) \
-	RETGUARD_SYMBOL(x); \
-	RETGUARD_LOAD_RANDOM(x, reg); \
+#define RETGUARD_SETUP(x, reg)                                                 \
+	RETGUARD_SYMBOL(x);                                                    \
+	RETGUARD_LOAD_RANDOM(x, reg);                                          \
 	RETGUARD_CALC_COOKIE(reg)
 
-# define RETGUARD_CHECK(x, reg) \
-	RETGUARD_CALC_COOKIE(reg); \
-	RETGUARD_LOAD_RANDOM(x, x9); \
-	subs    reg, reg, x9; \
-	cbz     reg, 66f; \
-	brk     #0x1; \
-66:
+#define RETGUARD_CHECK(x, reg)                                                 \
+	RETGUARD_CALC_COOKIE(reg);                                             \
+	RETGUARD_LOAD_RANDOM(x, x9);                                           \
+	subs reg, reg, x9;                                                     \
+	cbz  reg, 66f;                                                         \
+	brk #0x1;                                                              \
+	66:
 
-# define RETGUARD_PUSH(reg) \
-	str     reg, [sp, #-16]!
+#define RETGUARD_PUSH(reg) str reg, [ sp, # - 16 ] !
 
-# define RETGUARD_POP(reg) \
-	ldr     reg, [sp, #16]!
+#define RETGUARD_POP(reg) ldr reg, [ sp, #16 ] !
 
-# define RETGUARD_SYMBOL(x) \
-	.ifndef __CONCAT(__retguard_, x); \
-	.hidden __CONCAT(__retguard_, x); \
-	.type   __CONCAT(__retguard_, x),@object; \
-	.pushsection .openbsd.randomdata.retguard,"aw",@progbits; \
-	.weak   __CONCAT(__retguard_, x); \
-	.p2align 3; \
-	__CONCAT(__retguard_, x): ; \
-	.xword 0; \
-	.size __CONCAT(__retguard_, x), 8; \
-	.popsection; \
+#define RETGUARD_SYMBOL(x)                                                     \
+	.ifndef __CONCAT(__retguard_, x);                                      \
+	.hidden __CONCAT(__retguard_, x);                                      \
+	.type	__CONCAT(__retguard_, x), @object;                             \
+	.pushsection.openbsd.randomdata.retguard, "aw", @progbits;             \
+	.weak __CONCAT(__retguard_, x);                                        \
+	.p2align 3;                                                            \
+	__CONCAT(__retguard_, x) :;                                            \
+	.xword 0;                                                              \
+	.size __CONCAT(__retguard_, x), 8;                                     \
+	.popsection;                                                           \
 	.endif
 #else
-# define RETGUARD_CALC_COOKIE(reg)
-# define RETGUARD_LOAD_RANDOM(x, reg)
-# define RETGUARD_SETUP(x, reg)
-# define RETGUARD_CHECK(x, reg)
-# define RETGUARD_PUSH(reg)
-# define RETGUARD_POP(reg)
-# define RETGUARD_SYMBOL(x)
+#define RETGUARD_CALC_COOKIE(reg)
+#define RETGUARD_LOAD_RANDOM(x, reg)
+#define RETGUARD_SETUP(x, reg)
+#define RETGUARD_CHECK(x, reg)
+#define RETGUARD_PUSH(reg)
+#define RETGUARD_POP(reg)
+#define RETGUARD_SYMBOL(x)
 #endif
 
-#define	ENTRY(y)	_ENTRY(y); bti c; _PROF_PROLOGUE
-#define	ENTRY_NP(y)	_ENTRY(y); bti c
-#define	ENTRY_NB(y)	_ENTRY_NB(y); bti c; _PROF_PROLOGUE
-#define	ASENTRY(y)	_ENTRY(y); bti c; _PROF_PROLOGUE
-#define	ASENTRY_NP(y)	_ENTRY(y); bti c
-#define	END(y)		.size y, . - y
-#define EENTRY(sym)	 .globl  sym; sym:
+#define ENTRY(y)                                                               \
+	_ENTRY(y);                                                             \
+	bti c;                                                                 \
+	_PROF_PROLOGUE
+#define ENTRY_NP(y)                                                            \
+	_ENTRY(y);                                                             \
+	bti c
+#define ENTRY_NB(y)                                                            \
+	_ENTRY_NB(y);                                                          \
+	bti c;                                                                 \
+	_PROF_PROLOGUE
+#define ASENTRY(y)                                                             \
+	_ENTRY(y);                                                             \
+	bti c;                                                                 \
+	_PROF_PROLOGUE
+#define ASENTRY_NP(y)                                                          \
+	_ENTRY(y);                                                             \
+	bti c
+#define END(y) .size y, .- y
+#define EENTRY(sym)                                                            \
+	.globl sym;                                                            \
+	sym:
 #define EEND(sym)
 
 #ifdef __PIC__
-#define	PIC_SYM(x,y)	x(y)
+#define PIC_SYM(x, y) x(y)
 #else
-#define	PIC_SYM(x,y)	x
+#define PIC_SYM(x, y) x
 #endif
 
-#define	STRONG_ALIAS(alias,sym)						\
-	.global alias;							\
+#define STRONG_ALIAS(alias, sym)                                               \
+	.global alias;                                                         \
 	alias = sym
-#define	WEAK_ALIAS(alias,sym)						\
-	.weak alias;							\
+#define WEAK_ALIAS(alias, sym)                                                 \
+	.weak alias;                                                           \
 	alias = sym
 
 #endif /* !_MACHINE_ASM_H_ */

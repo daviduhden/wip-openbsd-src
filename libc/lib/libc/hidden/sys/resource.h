@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_SYS_RESOURCE_H_
-#define	_LIBC_SYS_RESOURCE_H_
+#define _LIBC_SYS_RESOURCE_H_
 
 #include_next <sys/resource.h>
 
@@ -26,4 +26,4 @@ PROTO_NORMAL(getrusage);
 PROTO_NORMAL(setpriority);
 PROTO_NORMAL(setrlimit);
 
-#endif	/* !_LIBC_SYS_RESOURCE_H_ */
+#endif /* !_LIBC_SYS_RESOURCE_H_ */

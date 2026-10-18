@@ -17,11 +17,12 @@
 
 #include <sys/resource.h>
 #include <sys/wait.h>
+
 #include <err.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 /* Test erroneous use of API and heap that malloc should catch */
@@ -29,7 +30,7 @@
 void
 clearq(void *p)
 {
-	int i;
+	int   i;
 	void *q;
 
 	/* Clear delayed free queue */
@@ -64,7 +65,7 @@ void
 t2(void)
 {
 	void *p, *q;
-	int i;
+	int   i;
 
 	p = malloc(100);
 	free(p);
@@ -85,14 +86,14 @@ t3(void)
 void
 t4(void)
 {
-	free((void*)1);
+	free((void *)1);
 }
 
 /* realloc of bogus pointer */
 void
 t5(void)
 {
-	realloc((void*)1, 10);
+	realloc((void *)1, 10);
 }
 
 /* write after free for chunk */
@@ -110,7 +111,7 @@ void
 t7(void)
 {
 	char *p, *q;
-	int i;
+	int   i;
 
 	p = malloc(10000);
 	free(p);
@@ -222,8 +223,8 @@ t19(void)
 void
 t20(void)
 {
-	char *p = malloc(2*getpagesize() - 100);
-	p[2*getpagesize() - 100] = 0;
+	char *p = malloc(2 * getpagesize() - 100);
+	p[2 * getpagesize() - 100] = 0;
 	free(p);
 }
 
@@ -231,7 +232,7 @@ t20(void)
 void
 t22(void)
 {
-	int i, j;
+	int	       i, j;
 	unsigned char *p;
 	while (1) {
 		uintptr_t address;
@@ -248,46 +249,47 @@ t22(void)
 }
 
 struct test {
-	void (*test)(void);
+	void	    (*test)(void);
 	const char *flags;
 };
 
 struct test tests[] = {
-	{ t0, "" },
-	{ t1, "" },
-	{ t2, "" },
-	{ t3, "F" },
-	{ t4, "" },
-	{ t5, "" },
-	{ t6, "J" },
-	{ t7, "JJ" },
-	{ t8, "FJ" },
-	{ t9, "C" },
-	{ t9, "JC" }, /* t10 re-uses code from t9 */
-	{ t11, "" },
-	{ t12, "" },
-	{ t13, "" },
-	{ t14, "C" },
-	{ t15, "" },
-	{ t16, "" },
-	{ t17, "C" },
-	{ t18, "" },
-	{ t19, "" },
-	{ t20, "C" },
-	{ t8, "FJD" }, /* t21 re-uses code from t8 */
-	{ t22, "J" },
-	{ t22, "JD" }, /* t23 re-uses code from t22 */
+    {t0, ""},
+    {t1, ""},
+    {t2, ""},
+    {t3, "F"},
+    {t4, ""},
+    {t5, ""},
+    {t6, "J"},
+    {t7, "JJ"},
+    {t8, "FJ"},
+    {t9, "C"},
+    {t9, "JC"}, /* t10 re-uses code from t9 */
+    {t11, ""},
+    {t12, ""},
+    {t13, ""},
+    {t14, "C"},
+    {t15, ""},
+    {t16, ""},
+    {t17, "C"},
+    {t18, ""},
+    {t19, ""},
+    {t20, "C"},
+    {t8, "FJD"}, /* t21 re-uses code from t8 */
+    {t22, "J"},
+    {t22, "JD"}, /* t23 re-uses code from t22 */
 };
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
 
 	const struct rlimit lim = {0, 0};
-	int i, status;
-	pid_t pid;
-	char num[10];
-	char options[40];
-	char const *env[2];
+	int		    i, status;
+	pid_t		    pid;
+	char		    num[10];
+	char		    options[40];
+	char const	   *env[2];
 
 	if (argc == 2) {
 		/* prevent coredumps */
@@ -302,25 +304,24 @@ int main(int argc, char *argv[])
 		pid = fork();
 		switch (pid) {
 		case 0:
-			snprintf(options, sizeof(options), "MALLOC_OPTIONS=us%s", tests[i].flags);
+			snprintf(options, sizeof(options),
+			    "MALLOC_OPTIONS=us%s", tests[i].flags);
 			snprintf(num, sizeof(num), "%d", i);
 			env[0] = options;
 			env[1] = NULL;
 			execle(argv[0], argv[0], num, NULL, env);
 			err(1, "exec");
-		break;
+			break;
 		case -1:
 			err(1, "fork");
-		break;
-		default: 
+			break;
+		default:
 			if (waitpid(pid, &status, 0) == -1)
 				err(1, "wait");
-			if (!WIFSIGNALED(status) || 
-			    WTERMSIG(status) != SIGABRT)
-			errx(1, "Test %d did not abort", i);
-		break;
+			if (!WIFSIGNALED(status) || WTERMSIG(status) != SIGABRT)
+				errx(1, "Test %d did not abort", i);
+			break;
 		}
 	}
 	return 0;
 }
-

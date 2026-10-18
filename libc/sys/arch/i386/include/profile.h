@@ -32,45 +32,48 @@
  *	@(#)profile.h	8.1 (Berkeley) 6/11/93
  */
 
-#define	_MCOUNT_DECL static __inline void _mcount
+#define _MCOUNT_DECL static __inline void _mcount
 
-#define	MCOUNT \
-extern void mcount(void) __asm("__mcount");				\
-__weak_alias(mcount,__mcount);						\
-void									\
-mcount(void)								\
-{									\
-	int selfpc, frompcindex;					\
-	int eax, ecx, edx;						\
-									\
-	__asm volatile("movl %%eax,%0" : "=g" (eax));			\
-	__asm volatile("movl %%ecx,%0" : "=g" (ecx));			\
-	__asm volatile("movl %%edx,%0" : "=g" (edx));			\
-	/*								\
-	 * find the return address for mcount,				\
-	 * and the return address for mcount's caller.			\
-	 *								\
-	 * selfpc = pc pushed by mcount call				\
-	 */								\
-	__asm volatile ("movl 4(%%ebp),%0" : "=r" (selfpc));		\
-	/*								\
-	 * frompcindex = pc pushed by call into self.			\
-	 */								\
-	__asm volatile ("movl (%%ebp),%0;movl 4(%0),%0" :		\
-	    "+r" (frompcindex));					\
-	_mcount(frompcindex, selfpc);					\
-									\
-	__asm volatile("movl %0,%%edx" : : "g" (edx));			\
-	__asm volatile("movl %0,%%ecx" : : "g" (ecx));			\
-	__asm volatile("movl %0,%%eax" : : "g" (eax));			\
-}
+#define MCOUNT                                                                 \
+	extern void mcount(void) __asm("__mcount");                            \
+	__weak_alias(mcount, __mcount);                                        \
+	void mcount(void)                                                      \
+	{                                                                      \
+		int selfpc, frompcindex;                                       \
+		int eax, ecx, edx;                                             \
+                                                                               \
+		__asm volatile("movl %%eax,%0" : "=g"(eax));                   \
+		__asm volatile("movl %%ecx,%0" : "=g"(ecx));                   \
+		__asm volatile("movl %%edx,%0" : "=g"(edx));                   \
+		/*                                                             \
+		 * find the return address for mcount,                         \
+		 * and the return address for mcount's caller.                 \
+		 *                                                             \
+		 * selfpc = pc pushed by mcount call                           \
+		 */                                                            \
+		__asm volatile("movl 4(%%ebp),%0" : "=r"(selfpc));             \
+		/*                                                             \
+		 * frompcindex = pc pushed by call into self.                  \
+		 */                                                            \
+		__asm volatile("movl (%%ebp),%0;movl 4(%0),%0"                 \
+		    : "+r"(frompcindex));                                      \
+		_mcount(frompcindex, selfpc);                                  \
+                                                                               \
+		__asm volatile("movl %0,%%edx" : : "g"(edx));                  \
+		__asm volatile("movl %0,%%ecx" : : "g"(ecx));                  \
+		__asm volatile("movl %0,%%eax" : : "g"(eax));                  \
+	}
 
 #ifdef _KERNEL
 /*
  * We inline the code that splhigh and splx would do here as otherwise we would
- * call recursively into mcount() as machdep.c is compiled with -pg on a 
+ * call recursively into mcount() as machdep.c is compiled with -pg on a
  * profiling build.
  */
-#define	MCOUNT_ENTER	_SPLRAISE(s, IPL_HIGH); __splbarrier()
-#define	MCOUNT_EXIT	__splbarrier(); _SPLX(s)
+#define MCOUNT_ENTER                                                           \
+	_SPLRAISE(s, IPL_HIGH);                                                \
+	__splbarrier()
+#define MCOUNT_EXIT                                                            \
+	__splbarrier();                                                        \
+	_SPLX(s)
 #endif /* _KERNEL */

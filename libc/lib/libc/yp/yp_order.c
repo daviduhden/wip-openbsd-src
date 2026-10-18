@@ -26,12 +26,14 @@
  */
 
 #include <sys/types.h>
-#include <string.h>
+
 #include <limits.h>
 #include <rpc/rpc.h>
 #include <rpc/xdr.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
+#include <string.h>
+
 #include "ypinternal.h"
 
 int
@@ -39,13 +41,13 @@ yp_order(const char *indomain, const char *inmap, int *outorder)
 {
 	struct dom_binding *ysd;
 	struct ypresp_order ypro;
-	struct ypreq_nokey yprnk;
-	struct timeval  tv;
-	int             r = 0;
+	struct ypreq_nokey  yprnk;
+	struct timeval	    tv;
+	int		    r = 0;
 
 	if (indomain == NULL || *indomain == '\0' ||
-	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL ||
-	    *inmap == '\0' || strlen(inmap) > YPMAXMAP || outorder == NULL)
+	    strlen(indomain) > YPMAXDOMAIN || inmap == NULL || *inmap == '\0' ||
+	    strlen(inmap) > YPMAXMAP || outorder == NULL)
 		return YPERR_BADARGS;
 
 again:
@@ -60,8 +62,8 @@ again:
 
 	(void)memset(&ypro, 0, sizeof ypro);
 
-	r = clnt_call(ysd->dom_client, YPPROC_ORDER,
-	    xdr_ypreq_nokey, &yprnk, xdr_ypresp_order, &ypro, tv);
+	r = clnt_call(ysd->dom_client, YPPROC_ORDER, xdr_ypreq_nokey, &yprnk,
+	    xdr_ypresp_order, &ypro, tv);
 	/*
 	 * XXX
 	 * NIS+ YP emulation package does not implement YPPROC_ORDER
@@ -76,7 +78,7 @@ again:
 		goto again;
 	}
 	*outorder = ypro.ordernum;
-	xdr_free(xdr_ypresp_order, (char *) &ypro);
+	xdr_free(xdr_ypresp_order, (char *)&ypro);
 	r = ypprot_err(ypro.stat);
 bail:
 	_yp_unbind(ysd);

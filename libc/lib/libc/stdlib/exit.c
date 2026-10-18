@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+
 #include "atexit.h"
 
 /*
@@ -39,7 +40,7 @@
  * thread-safe, but without a (significant) penalty to non-threaded
  * processes.
  */
-int     __isthreaded    = 0;
+int __isthreaded = 0;
 
 /*
  * Exit, flushing stdio buffers if necessary.

@@ -37,24 +37,25 @@
  * remote call and broadcast service
  */
 
-#include <rpc/rpc.h>
-#include <rpc/pmap_prot.h>
-#include <rpc/pmap_clnt.h>
-#include <rpc/pmap_rmt.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
+
+#include <net/if.h>
+
+#include <arpa/inet.h>
+#include <errno.h>
+#include <ifaddrs.h>
+#include <rpc/pmap_clnt.h>
+#include <rpc/pmap_prot.h>
+#include <rpc/pmap_rmt.h>
+#include <rpc/rpc.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
 #include <string.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
-#include <arpa/inet.h>
-#include <ifaddrs.h>
+#include <unistd.h>
 #define MAX_BROADCAST_SIZE 1400
 
-static struct timeval timeout = { 3, 0 };
-
+static struct timeval timeout = {3, 0};
 
 /*
  * pmapper remote-call-service interface.
@@ -62,17 +63,17 @@ static struct timeval timeout = { 3, 0 };
  * which will look up a service program in the port maps, and then
  * remotely call that routine with the given parameters.  This allows
  * programs to do a lookup and call in one step.
-*/
+ */
 enum clnt_stat
 pmap_rmtcall(struct sockaddr_in *addr, u_long prog, u_long vers, u_long proc,
     xdrproc_t xdrargs, caddr_t argsp, xdrproc_t xdrres, caddr_t resp,
     struct timeval tout, u_long *port_ptr)
 {
-	int sock = -1;
-	CLIENT *client;
+	int		   sock = -1;
+	CLIENT		  *client;
 	struct rmtcallargs a;
-	struct rmtcallres r;
-	enum clnt_stat stat;
+	struct rmtcallres  r;
+	enum clnt_stat	   stat;
 
 	addr->sin_port = htons(PMAPPORT);
 	client = clntudp_create(addr, PMAPPROG, PMAPVERS, timeout, &sock);
@@ -95,7 +96,6 @@ pmap_rmtcall(struct sockaddr_in *addr, u_long prog, u_long vers, u_long proc,
 	return (stat);
 }
 
-
 /*
  * XDR remote call arguments
  * written for XDR_ENCODE direction only
@@ -105,20 +105,19 @@ xdr_rmtcall_args(XDR *xdrs, struct rmtcallargs *cap)
 {
 	u_int lenposition, argposition, position;
 
-	if (xdr_u_long(xdrs, &(cap->prog)) &&
-	    xdr_u_long(xdrs, &(cap->vers)) &&
+	if (xdr_u_long(xdrs, &(cap->prog)) && xdr_u_long(xdrs, &(cap->vers)) &&
 	    xdr_u_long(xdrs, &(cap->proc))) {
 		lenposition = XDR_GETPOS(xdrs);
-		if (! xdr_u_long(xdrs, &(cap->arglen)))
-		    return (FALSE);
+		if (!xdr_u_long(xdrs, &(cap->arglen)))
+			return (FALSE);
 		argposition = XDR_GETPOS(xdrs);
-		if (! (*(cap->xdr_args))(xdrs, cap->args_ptr))
-		    return (FALSE);
+		if (!(*(cap->xdr_args))(xdrs, cap->args_ptr))
+			return (FALSE);
 		position = XDR_GETPOS(xdrs);
 		cap->arglen = (u_long)position - (u_long)argposition;
 		XDR_SETPOS(xdrs, lenposition);
-		if (! xdr_u_long(xdrs, &(cap->arglen)))
-		    return (FALSE);
+		if (!xdr_u_long(xdrs, &(cap->arglen)))
+			return (FALSE);
 		XDR_SETPOS(xdrs, position);
 		return (TRUE);
 	}
@@ -136,8 +135,8 @@ xdr_rmtcallres(XDR *xdrs, struct rmtcallres *crp)
 	caddr_t port_ptr;
 
 	port_ptr = (caddr_t)crp->port_ptr;
-	if (xdr_reference(xdrs, &port_ptr, sizeof (u_long),
-	    xdr_u_long) && xdr_u_long(xdrs, &crp->resultslen)) {
+	if (xdr_reference(xdrs, &port_ptr, sizeof(u_long), xdr_u_long) &&
+	    xdr_u_long(xdrs, &crp->resultslen)) {
 		crp->port_ptr = (u_long *)port_ptr;
 		return ((*(crp->xdr_results))(xdrs, crp->results_ptr));
 	}
@@ -145,19 +144,18 @@ xdr_rmtcallres(XDR *xdrs, struct rmtcallres *crp)
 }
 DEF_WEAK(xdr_rmtcallres);
 
-
 /*
  * The following is kludged-up support for simple rpc broadcasts.
- * Someday a large, complicated system will replace these trivial 
+ * Someday a large, complicated system will replace these trivial
  * routines which only support udp/ip .
  */
 static int
 newgetbroadcastnets(struct in_addr **addrsp)
 {
-	struct ifaddrs *ifap, *ifa;
+	struct ifaddrs	   *ifap, *ifa;
 	struct sockaddr_in *sin;
-	struct in_addr *addrs;
-	int i = 0, n = 0;
+	struct in_addr	   *addrs;
+	int		    i = 0, n = 0;
 
 	if (getifaddrs(&ifap) != 0)
 		return 0;
@@ -167,8 +165,7 @@ newgetbroadcastnets(struct in_addr **addrsp)
 		    ifa->ifa_addr->sa_family != AF_INET)
 			continue;
 		if ((ifa->ifa_flags & IFF_BROADCAST) &&
-		    (ifa->ifa_flags & IFF_UP) &&
-		    ifa->ifa_broadaddr &&
+		    (ifa->ifa_flags & IFF_UP) && ifa->ifa_broadaddr &&
 		    ifa->ifa_broadaddr->sa_family == AF_INET) {
 			n++;
 		}
@@ -185,8 +182,7 @@ newgetbroadcastnets(struct in_addr **addrsp)
 		    ifa->ifa_addr->sa_family != AF_INET)
 			continue;
 		if ((ifa->ifa_flags & IFF_BROADCAST) &&
-		    (ifa->ifa_flags & IFF_UP) &&
-		    ifa->ifa_broadaddr &&
+		    (ifa->ifa_flags & IFF_UP) && ifa->ifa_broadaddr &&
 		    ifa->ifa_broadaddr->sa_family == AF_INET) {
 			sin = (struct sockaddr_in *)ifa->ifa_broadaddr;
 			addrs[i++] = sin->sin_addr;
@@ -200,36 +196,36 @@ newgetbroadcastnets(struct in_addr **addrsp)
 
 typedef bool_t (*resultproc_t)(caddr_t, struct sockaddr_in *);
 
-enum clnt_stat 
-clnt_broadcast(u_long prog,	/* program number */
-    u_long vers,		/* version number */
-    u_long proc,		/* procedure number */
-    xdrproc_t xargs,		/* xdr routine for args */
-    caddr_t argsp,		/* pointer to args */
-    xdrproc_t xresults,		/* xdr routine for results */
-    caddr_t resultsp,		/* pointer to results */
-    resultproc_t eachresult)	/* call with each result obtained */
+enum clnt_stat
+clnt_broadcast(u_long prog,	  /* program number */
+    u_long	      vers,	  /* version number */
+    u_long	      proc,	  /* procedure number */
+    xdrproc_t	      xargs,	  /* xdr routine for args */
+    caddr_t	      argsp,	  /* pointer to args */
+    xdrproc_t	      xresults,	  /* xdr routine for results */
+    caddr_t	      resultsp,	  /* pointer to results */
+    resultproc_t      eachresult) /* call with each result obtained */
 {
-	enum clnt_stat stat;
-	AUTH *unix_auth;
-	XDR xdr_stream;
-	XDR *xdrs = &xdr_stream;
-	int outlen, inlen, nets;
-	socklen_t fromlen;
-	int sock = -1;
-	int on = 1;
-	struct pollfd pfd[1];
-	int i;
-	int timo;
-	bool_t done = FALSE;
-	u_long xid;
-	u_long port;
-	struct in_addr *addrs = NULL;
+	enum clnt_stat	   stat;
+	AUTH		  *unix_auth;
+	XDR		   xdr_stream;
+	XDR		  *xdrs = &xdr_stream;
+	int		   outlen, inlen, nets;
+	socklen_t	   fromlen;
+	int		   sock = -1;
+	int		   on = 1;
+	struct pollfd	   pfd[1];
+	int		   i;
+	int		   timo;
+	bool_t		   done = FALSE;
+	u_long		   xid;
+	u_long		   port;
+	struct in_addr	  *addrs = NULL;
 	struct sockaddr_in baddr, raddr; /* broadcast and response addresses */
 	struct rmtcallargs a;
-	struct rmtcallres r;
-	struct rpc_msg msg;
-	char outbuf[MAX_BROADCAST_SIZE], inbuf[UDPMSGSIZE];
+	struct rmtcallres  r;
+	struct rpc_msg	   msg;
+	char		   outbuf[MAX_BROADCAST_SIZE], inbuf[UDPMSGSIZE];
 
 	if ((unix_auth = authunix_create_default()) == NULL) {
 		stat = RPC_AUTHERROR;
@@ -245,7 +241,7 @@ clnt_broadcast(u_long prog,	/* program number */
 		goto done_broad;
 	}
 #ifdef SO_BROADCAST
-	if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &on, sizeof (on)) == -1) {
+	if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) == -1) {
 		stat = RPC_CANTSEND;
 		goto done_broad;
 	}
@@ -260,7 +256,7 @@ clnt_broadcast(u_long prog,	/* program number */
 		goto done_broad;
 	}
 
-	memset(&baddr, 0, sizeof (baddr));
+	memset(&baddr, 0, sizeof(baddr));
 	baddr.sin_len = sizeof(struct sockaddr_in);
 	baddr.sin_family = AF_INET;
 	baddr.sin_port = htons(PMAPPORT);
@@ -303,8 +299,8 @@ clnt_broadcast(u_long prog,	/* program number */
 		for (i = 0; i < nets; i++) {
 			baddr.sin_addr = addrs[i];
 			if (sendto(sock, outbuf, outlen, 0,
-			    (struct sockaddr *)&baddr,
-			    sizeof (struct sockaddr)) != outlen) {
+				(struct sockaddr *)&baddr,
+				sizeof(struct sockaddr)) != outlen) {
 				stat = RPC_CANTSEND;
 				goto done_broad;
 			}
@@ -319,7 +315,7 @@ clnt_broadcast(u_long prog,	/* program number */
 		msg.acpted_rply.ar_results.proc = xdr_rmtcallres;
 
 		switch (poll(pfd, 1, timo)) {
-		case 0:  /* timed out */
+		case 0: /* timed out */
 			stat = RPC_TIMEDOUT;
 			continue;
 		case 1:
@@ -330,7 +326,7 @@ clnt_broadcast(u_long prog,	/* program number */
 			else
 				break;
 			/* FALLTHROUGH */
-		case -1:  /* some kind of error */
+		case -1: /* some kind of error */
 			if (errno == EINTR)
 				goto recv_again;
 			stat = RPC_CANTRECV;

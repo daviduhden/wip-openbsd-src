@@ -31,30 +31,30 @@
  */
 
 struct atexit {
-	struct atexit *next;		/* next in list */
-	int ind;			/* next index in this table */
-	int max;			/* max entries >= ATEXIT_SIZE */
+	struct atexit *next; /* next in list */
+	int	       ind;  /* next index in this table */
+	int	       max;  /* max entries >= ATEXIT_SIZE */
 	struct atexit_fn {
-		void (*fn_ptr)(void *);
-		void *fn_arg;		/* argument for CXA callback */
-		void *fn_dso;		/* shared module handle */
-	} fns[1];			/* the table itself */
+		void  (*fn_ptr)(void *);
+		void *fn_arg; /* argument for CXA callback */
+		void *fn_dso; /* shared module handle */
+	} fns[1];	      /* the table itself */
 };
 
 /* a chain of these are hung off each thread's TIB's tib_atexit member */
 struct thread_atexit_fn {
-	void (*func)(void *);
-	void *arg;
+	void			 (*func)(void *);
+	void			*arg;
 	struct thread_atexit_fn *next;
 };
 
 __BEGIN_HIDDEN_DECLS
-extern struct atexit *__atexit;		/* points to head of LIFO stack */
+extern struct atexit *__atexit; /* points to head of LIFO stack */
 __END_HIDDEN_DECLS
 
-int	__cxa_atexit(void (*)(void *), void *, void *);
-int	__cxa_thread_atexit(void (*)(void *), void *, void *);
-void	__cxa_finalize(void *);
+int  __cxa_atexit(void (*)(void *), void *, void *);
+int  __cxa_thread_atexit(void (*)(void *), void *, void *);
+void __cxa_finalize(void *);
 
 PROTO_NORMAL(__cxa_atexit);
 PROTO_STD_DEPRECATED(__cxa_thread_atexit);

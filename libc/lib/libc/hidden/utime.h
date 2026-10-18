@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_LIBC_UTIME_H_
-#define	_LIBC_UTIME_H_
+#ifndef _LIBC_UTIME_H_
+#define _LIBC_UTIME_H_
 
 #include_next <utime.h>
 

@@ -28,12 +28,12 @@
  * SUCH DAMAGE.
  */
 
-#include <ttyent.h>
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
+#include <ttyent.h>
 
-static char zapchar;
+static char  zapchar;
 static FILE *tf;
 
 static char *skip(char *);
@@ -56,9 +56,9 @@ struct ttyent *
 getttyent(void)
 {
 	static struct ttyent tty;
-	int c;
-	char *p;
-#define	MAXLINELENGTH	200
+	int		     c;
+	char		    *p;
+#define MAXLINELENGTH 200
 	static char line[MAXLINELENGTH];
 
 	if (!tf && !setttyent())
@@ -93,9 +93,10 @@ getttyent(void)
 	tty.ty_status = 0;
 	tty.ty_window = NULL;
 
-#define	scmp(e)	!strncmp(p, e, sizeof(e) - 1) && \
-		isspace((unsigned char)p[sizeof(e) - 1])
-#define	vcmp(e)	!strncmp(p, e, sizeof(e) - 1) && p[sizeof(e) - 1] == '='
+#define scmp(e)                                                                \
+	!strncmp(p, e, sizeof(e) - 1) &&                                       \
+	    isspace((unsigned char)p[sizeof(e) - 1])
+#define vcmp(e) !strncmp(p, e, sizeof(e) - 1) && p[sizeof(e) - 1] == '='
 	for (; *p; p = skip(p)) {
 		if (scmp(_TTYS_OFF))
 			tty.ty_status &= ~TTY_ON;
@@ -129,7 +130,7 @@ getttyent(void)
 }
 DEF_WEAK(getttyent);
 
-#define	QUOTED	1
+#define QUOTED 1
 
 /*
  * Skip over the current field, removing quotes, and return a pointer to
@@ -139,14 +140,14 @@ static char *
 skip(char *p)
 {
 	char *t;
-	int c, q;
+	int   c, q;
 
 	for (q = 0, t = p; (c = *p) != '\0'; p++) {
 		if (c == '"') {
-			q ^= QUOTED;	/* obscure, but nice */
+			q ^= QUOTED; /* obscure, but nice */
 			continue;
 		}
-		if (q == QUOTED && *p == '\\' && *(p+1) == '"')
+		if (q == QUOTED && *p == '\\' && *(p + 1) == '"')
 			p++;
 		*t++ = *p;
 		if (q == QUOTED)

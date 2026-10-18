@@ -20,7 +20,7 @@
 #define _MACHINE_ENDIAN_H_
 
 #define _BYTE_ORDER _LITTLE_ENDIAN
-#define	__STRICT_ALIGNMENT
+#define __STRICT_ALIGNMENT
 
 #ifndef __FROM_SYS__ENDIAN
 #include <sys/endian.h>

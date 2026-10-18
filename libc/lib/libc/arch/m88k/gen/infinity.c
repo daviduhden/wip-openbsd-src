@@ -5,5 +5,5 @@
 #include <math.h>
 
 /* bytes for +Infinity on m88k */
-char __infinity[] __attribute__((__aligned__(sizeof(double)))) =
-    { 0x7f, 0xf0, 0, 0, 0, 0, 0, 0 };
+char __infinity[] __attribute__((__aligned__(sizeof(double)))) = {
+    0x7f, 0xf0, 0, 0, 0, 0, 0, 0};

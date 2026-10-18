@@ -13,11 +13,11 @@
 int
 main(int argc, char **argv)
 {
-	FILE *fp = stdin;
-	char pattern[1024], string[1024];
-	char *line;
+	FILE	  *fp = stdin;
+	char	   pattern[1024], string[1024];
+	char	  *line;
 	const char delim[3] = {'\0', '\0', '#'};
-	int errors = 0, flags, got, want;
+	int	   errors = 0, flags, got, want;
 
 	if (argc > 1) {
 		if ((fp = fopen(argv[1], "r")) == NULL)
@@ -35,8 +35,8 @@ main(int argc, char **argv)
 		line = fparseln(fp, NULL, NULL, delim, 0);
 		if (!line)
 			break;
-		got = sscanf(line, "%s %s 0x%x %d", pattern, string, &flags,
-		    &want);
+		got = sscanf(
+		    line, "%s %s 0x%x %d", pattern, string, &flags, &want);
 		if (got == EOF) {
 			free(line);
 			break;

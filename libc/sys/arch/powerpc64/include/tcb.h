@@ -21,22 +21,20 @@
 
 #ifdef _KERNEL
 
-#define TCB_GET(p)		\
-	((void *)(p)->p_md.md_regs->fixreg[13])
-#define TCB_SET(p, addr)	\
-	((p)->p_md.md_regs->fixreg[13] = (__register_t)(addr))
+#define TCB_GET(p) ((void *)(p)->p_md.md_regs->fixreg[13])
+#define TCB_SET(p, addr) ((p)->p_md.md_regs->fixreg[13] = (__register_t)(addr))
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for small TCB, with static TLS data after it */
-#define TLS_VARIANT	1
+#define TLS_VARIANT 1
 
 /* powerpc offsets the TCB pointer 0x7000 bytes after the data */
-#define TCB_OFFSET	0x7008
+#define TCB_OFFSET 0x7008
 
-register void *__tcb __asm__ ("r13");
-#define TCB_GET()		(__tcb)
-#define TCB_SET(tcb)		((__tcb) = (tcb))
+register void *__tcb __asm__("r13");
+#define TCB_GET() (__tcb)
+#define TCB_SET(tcb) ((__tcb) = (tcb))
 
 #endif /* _KERNEL */
 #endif /* _MACHINE_TCB_H_ */

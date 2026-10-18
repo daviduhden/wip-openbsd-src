@@ -36,10 +36,10 @@
  * XDR for UNIX style authentication parameters for RPC
  */
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 #include <rpc/auth.h>
 #include <rpc/auth_unix.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 
 /*
  * XDR for unix authentication parameters.
@@ -48,15 +48,13 @@ bool_t
 xdr_authunix_parms(XDR *xdrs, struct authunix_parms *p)
 {
 
-	if (xdr_u_long(xdrs, &(p->aup_time))
-	    && xdr_string(xdrs, &(p->aup_machname), MAX_MACHINE_NAME)
-	    && xdr_int(xdrs, &(p->aup_uid))
-	    && xdr_int(xdrs, &(p->aup_gid))
-	    && xdr_array(xdrs, (caddr_t *)&(p->aup_gids),
-		    &(p->aup_len), NGRPS, sizeof(int), xdr_int) ) {
+	if (xdr_u_long(xdrs, &(p->aup_time)) &&
+	    xdr_string(xdrs, &(p->aup_machname), MAX_MACHINE_NAME) &&
+	    xdr_int(xdrs, &(p->aup_uid)) && xdr_int(xdrs, &(p->aup_gid)) &&
+	    xdr_array(xdrs, (caddr_t *)&(p->aup_gids), &(p->aup_len), NGRPS,
+		sizeof(int), xdr_int)) {
 		return (TRUE);
 	}
 	return (FALSE);
 }
 DEF_WEAK(xdr_authunix_parms);
-

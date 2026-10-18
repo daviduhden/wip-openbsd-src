@@ -33,13 +33,13 @@
 #include <err.h>
 #include <float.h>
 #include <math.h>
-#include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define	testfmt(result, fmt, ...)	\
+#define testfmt(result, fmt, ...)                                              \
 	_testfmt((result), __LINE__, #__VA_ARGS__, fmt, __VA_ARGS__)
 void _testfmt(const char *, int, const char *, const char *, ...);
 void smash_stack(void);
@@ -187,10 +187,10 @@ main(int argc, char *argv[])
 
 #if LDBL_MANT_DIG == 113
 	testfmt("-0x1.e7d7c7b7a7978777675747372717p-14344", "%La",
-			-0x1.e7d7c7b7a7978777675747372717p-14344L);
+	    -0x1.e7d7c7b7a7978777675747372717p-14344L);
 #elif LDBL_MANT_DIG == 64
-	testfmt("-0x8.777675747372717p-16248", "%La",
-			-0x8.777675747372717p-16248L);
+	testfmt(
+	    "-0x8.777675747372717p-16248", "%La", -0x8.777675747372717p-16248L);
 #endif
 
 	return (0);
@@ -200,17 +200,17 @@ void
 smash_stack(void)
 {
 	static uint32_t junk = 0xdeadbeef;
-	uint32_t buf[512];
-	int i;
+	uint32_t	buf[512];
+	int		i;
 
 	for (i = 0; i < sizeof(buf) / sizeof(buf[0]); i++)
 		buf[i] = junk;
 }
 
 void
-_testfmt(const char *result, int line, const char *argstr, const char *fmt,...)
+_testfmt(const char *result, int line, const char *argstr, const char *fmt, ...)
 {
-	char s[100];
+	char	s[100];
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -218,8 +218,8 @@ _testfmt(const char *result, int line, const char *argstr, const char *fmt,...)
 	vsnprintf(s, sizeof(s), fmt, ap);
 	if (strcmp(result, s) != 0) {
 		fprintf(stderr,
-		    "%d: printf(\"%s\", %s) ==> [%s], expected [%s]\n",
-		    line, fmt, argstr, s, result);
+		    "%d: printf(\"%s\", %s) ==> [%s], expected [%s]\n", line,
+		    fmt, argstr, s, result);
 		abort();
 	}
 }

@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "local.h"
 
 /*
@@ -46,7 +47,8 @@ __slbexpand(FILE *fp, size_t newsize)
 
 	if (fp->_lb._size >= newsize)
 		return (0);
-	if ((p = recallocarray(fp->_lb._base, fp->_lb._size, newsize, 1)) == NULL)
+	if ((p = recallocarray(fp->_lb._base, fp->_lb._size, newsize, 1)) ==
+	    NULL)
 		return (-1);
 	fp->_lb._base = p;
 	fp->_lb._size = newsize;
@@ -64,9 +66,9 @@ char *
 fgetln(FILE *fp, size_t *lenp)
 {
 	unsigned char *p;
-	char *ret;
-	size_t len;
-	size_t off;
+	char	      *ret;
+	size_t	       len;
+	size_t	       off;
 
 	FLOCKFILE(fp);
 	_SET_ORIENTATION(fp, -1);
@@ -82,7 +84,7 @@ fgetln(FILE *fp, size_t *lenp)
 		 * `optimising' a backward seek, in case the user stomps on
 		 * the text.
 		 */
-		p++;		/* advance over it */
+		p++; /* advance over it */
 		ret = (char *)fp->_p;
 		*lenp = len = p - fp->_p;
 		fp->_flags |= __SMOD;

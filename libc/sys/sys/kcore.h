@@ -26,35 +26,35 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef _SYS_KCORE_H_
-#define	_SYS_KCORE_H_
+#define _SYS_KCORE_H_
 
 /*
  * Definitions for the kernel crash-dump format. The structure of
  * the files and headers is borrowed from the 'regular' core files
  * as described in <sys/core.h>.
  */
-#define	KCORE_MAGIC	0x8fca
-#define	KCORESEG_MAGIC	0x8fac
+#define KCORE_MAGIC 0x8fca
+#define KCORESEG_MAGIC 0x8fac
 
 /*
  * Description of a memory segment. To make this suitable for sharing
  * between all architectures, u_quad_t seems to be the necessary type...
  */
 typedef struct {
-	u_quad_t	start;		/* Physical start address	*/
-	u_quad_t	size;		/* Size in bytes		*/
+	u_quad_t start; /* Physical start address	*/
+	u_quad_t size;	/* Size in bytes		*/
 } phys_ram_seg_t;
 
 typedef struct kcore_hdr {
-	u_int32_t	c_midmag;	/* Magic, id, flags		*/
-	u_int16_t	c_hdrsize;	/* Aligned header size		*/
-	u_int16_t	c_seghdrsize;	/* Aligned seg-header size	*/
-	u_int32_t	c_nseg;		/* Number of segments		*/
+	u_int32_t c_midmag;	/* Magic, id, flags		*/
+	u_int16_t c_hdrsize;	/* Aligned header size		*/
+	u_int16_t c_seghdrsize; /* Aligned seg-header size	*/
+	u_int32_t c_nseg;	/* Number of segments		*/
 } kcore_hdr_t;
 
 typedef struct kcore_seg {
-	u_int32_t	c_midmag;	/* Magic, id, flags		*/
-	u_int32_t	c_size;		/* Sizeof this segment		*/
+	u_int32_t c_midmag; /* Magic, id, flags		*/
+	u_int32_t c_size;   /* Sizeof this segment		*/
 } kcore_seg_t;
 
 #endif /* _SYS_KCORE_H_ */

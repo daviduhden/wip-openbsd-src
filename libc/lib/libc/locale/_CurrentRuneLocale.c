@@ -1,4 +1,5 @@
-/*	$OpenBSD: _CurrentRuneLocale.c,v 1.1 2017/09/05 03:16:13 schwarze Exp $ */
+/*	$OpenBSD: _CurrentRuneLocale.c,v 1.1 2017/09/05 03:16:13 schwarze Exp $
+ */
 /*
  * Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -19,15 +20,14 @@
 
 #include "rune.h"
 
-_RuneLocale	*_Utf8RuneLocale = NULL;
-_RuneLocale	*_GlobalRuneLocale = &_DefaultRuneLocale;
+_RuneLocale *_Utf8RuneLocale = NULL;
+_RuneLocale *_GlobalRuneLocale = &_DefaultRuneLocale;
 
 _RuneLocale *
 _CurrentRuneLocale(void)
 {
-	struct tib	*tib;
+	struct tib *tib;
 
 	tib = TIB_GET();
-	return tib->tib_locale == NULL ? _GlobalRuneLocale :
-	    tib->tib_locale;
+	return tib->tib_locale == NULL ? _GlobalRuneLocale : tib->tib_locale;
 }

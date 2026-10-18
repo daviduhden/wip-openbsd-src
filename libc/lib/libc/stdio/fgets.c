@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "local.h"
 
 /*
@@ -45,11 +46,11 @@
 char *
 fgets(char *buf, int n, FILE *fp)
 {
-	size_t len;
-	char *s;
+	size_t	       len;
+	char	      *s;
 	unsigned char *p, *t;
 
-	if (n <= 0) {		/* sanity check */
+	if (n <= 0) { /* sanity check */
 		errno = EINVAL;
 		return (NULL);
 	}
@@ -57,7 +58,7 @@ fgets(char *buf, int n, FILE *fp)
 	FLOCKFILE(fp);
 	_SET_ORIENTATION(fp, -1);
 	s = buf;
-	n--;			/* leave space for NUL */
+	n--; /* leave space for NUL */
 	while (n != 0) {
 		/*
 		 * If the buffer is empty, refill it.

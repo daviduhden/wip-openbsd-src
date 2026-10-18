@@ -33,8 +33,8 @@
 #include <string.h>
 
 int
-getservbyport_r(int port, const char *proto, struct servent *se,
-    struct servent_data *sd)
+getservbyport_r(
+    int port, const char *proto, struct servent *se, struct servent_data *sd)
 {
 	int error;
 
@@ -57,7 +57,7 @@ struct servent *
 getservbyport(int port, const char *proto)
 {
 	extern struct servent_data _servent_data;
-	static struct servent serv;
+	static struct servent	   serv;
 
 	if (getservbyport_r(port, proto, &serv, &_servent_data) != 0)
 		return (NULL);

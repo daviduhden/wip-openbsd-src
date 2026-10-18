@@ -19,18 +19,18 @@
 #define _MACHINE_REG_H_
 
 struct reg {
-	uint64_t	r_reg[30];
-	uint64_t	r_lr;
-	uint64_t	r_sp;
-	uint64_t	r_pc;
-	uint64_t	r_spsr;
-	uint64_t	r_tpidr;
+	uint64_t r_reg[30];
+	uint64_t r_lr;
+	uint64_t r_sp;
+	uint64_t r_pc;
+	uint64_t r_spsr;
+	uint64_t r_tpidr;
 };
 
 struct fpreg {
-	__uint128_t	fp_reg[32];
-	uint32_t	fp_sr;
-	uint32_t	fp_cr;
+	__uint128_t fp_reg[32];
+	uint32_t    fp_sr;
+	uint32_t    fp_cr;
 };
 
 #endif /* !_MACHINE_REG_H_ */

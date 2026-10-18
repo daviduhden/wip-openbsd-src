@@ -38,7 +38,7 @@ int
 lockf(int filedes, int function, off_t size)
 {
 	struct flock fl;
-	int cmd;
+	int	     cmd;
 
 	fl.l_start = 0;
 	fl.l_len = size;

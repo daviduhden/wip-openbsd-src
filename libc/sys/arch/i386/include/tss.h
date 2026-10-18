@@ -43,32 +43,32 @@
  */
 
 struct i386tss {
-	int	__tss_link;
-	int	tss_esp0; 	/* kernel stack pointer at privilege level 0 */
-	int	tss_ss0;	/* kernel stack segment at privilege level 0 */
-	int	__tss_esp1;
-	int	__tss_ss1;
-	int	__tss_esp2;
-	int	__tss_ss2;
-	int	tss_cr3;
-	int	tss_eip;
-	int	tss_eflags;
-	int	tss_eax;
-	int	tss_ecx;
-	int	tss_edx;
-	int	tss_ebx;
-	int	tss_esp;
-	int	tss_ebp;
-	int	tss_esi;
-	int	tss_edi;
-	int	tss_es;
-	int	tss_cs;
-	int	tss_ss;
-	int	tss_ds;
-	int	tss_fs;
-	int	tss_gs;
-	int	tss_ldt;
-	int	tss_ioopt;	/* options and I/O permission map offset */
+	int __tss_link;
+	int tss_esp0; /* kernel stack pointer at privilege level 0 */
+	int tss_ss0;  /* kernel stack segment at privilege level 0 */
+	int __tss_esp1;
+	int __tss_ss1;
+	int __tss_esp2;
+	int __tss_ss2;
+	int tss_cr3;
+	int tss_eip;
+	int tss_eflags;
+	int tss_eax;
+	int tss_ecx;
+	int tss_edx;
+	int tss_ebx;
+	int tss_esp;
+	int tss_ebp;
+	int tss_esi;
+	int tss_edi;
+	int tss_es;
+	int tss_cs;
+	int tss_ss;
+	int tss_ds;
+	int tss_fs;
+	int tss_gs;
+	int tss_ldt;
+	int tss_ioopt; /* options and I/O permission map offset */
 };
 
 #endif /* _MACHINE_TSS_H_ */

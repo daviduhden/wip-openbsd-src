@@ -45,34 +45,34 @@
 
 #include <sys/signal.h>
 
-#include <machine/segments.h>
 #include <machine/npx.h>
+#include <machine/segments.h>
 #include <machine/sysarch.h>
 
 /*
  * Please note that pcb_savefpu must be aligned to 16 bytes.
  */
 struct pcb {
-	union	savefpu pcb_savefpu;	/* floating point state for FPU */
-	int	pcb_cr3;
-	int	pcb_esp;
-	int	pcb_ebp;
-	int	pcb_kstack;		/* kernel stack address */
-	int	pcb_cr0;		/* saved image of CR0 */
-	caddr_t	pcb_onfault;		/* copyin/out fault recovery */
-	struct	segment_descriptor pcb_threadsegs[2];
-					/* per-thread descriptors */
-	int	vm86_eflags;		/* virtual eflags for vm86 mode */
-	int	vm86_flagmask;		/* flag mask for vm86 mode */
-	void	*vm86_userp;		/* XXX performance hack */
-	struct  pmap *pcb_pmap;         /* back pointer to our pmap */
-	struct	cpu_info *pcb_fpcpu;	/* cpu holding our fpu state */
-	int	pcb_flags;
-#define PCB_SAVECTX	0x00000001
+	union savefpu pcb_savefpu; /* floating point state for FPU */
+	int	      pcb_cr3;
+	int	      pcb_esp;
+	int	      pcb_ebp;
+	int	      pcb_kstack;  /* kernel stack address */
+	int	      pcb_cr0;	   /* saved image of CR0 */
+	caddr_t	      pcb_onfault; /* copyin/out fault recovery */
+	struct segment_descriptor pcb_threadsegs[2];
+	/* per-thread descriptors */
+	int		 vm86_eflags;	/* virtual eflags for vm86 mode */
+	int		 vm86_flagmask; /* flag mask for vm86 mode */
+	void		*vm86_userp;	/* XXX performance hack */
+	struct pmap	*pcb_pmap;	/* back pointer to our pmap */
+	struct cpu_info *pcb_fpcpu;	/* cpu holding our fpu state */
+	int		 pcb_flags;
+#define PCB_SAVECTX 0x00000001
 };
 
 /* the indexes of the %fs/%gs segments in pcb_threadsegs */
-#define	TSEG_FS		0
-#define	TSEG_GS		1
+#define TSEG_FS 0
+#define TSEG_GS 1
 
 #endif /* _MACHINE_PCB_H_ */

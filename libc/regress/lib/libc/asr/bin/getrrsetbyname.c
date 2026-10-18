@@ -18,8 +18,8 @@
 #include <sys/types.h>
 
 #include <netinet/in.h>
-#include <arpa/nameser.h>
 
+#include <arpa/nameser.h>
 #include <err.h>
 #include <errno.h>
 #include <getopt.h>
@@ -33,23 +33,22 @@
 static void
 usage(void)
 {
-	extern const char * __progname;
+	extern const char *__progname;
 
-	fprintf(stderr, "usage: %s [-e] [-t type] [host...]\n",
-	    __progname);
+	fprintf(stderr, "usage: %s [-e] [-t type] [host...]\n", __progname);
 	exit(1);
 }
 
 int
 main(int argc, char *argv[])
 {
-	int			ch, i;
-	uint16_t		type = T_A;
-	char			*host;
-	struct rrsetinfo	*rrset;
+	int		  ch, i;
+	uint16_t	  type = T_A;
+	char		 *host;
+	struct rrsetinfo *rrset;
 
-	while((ch = getopt(argc, argv, "R:et:")) !=  -1) {
-		switch(ch) {
+	while ((ch = getopt(argc, argv, "R:et:")) != -1) {
+		switch (ch) {
 		case 'R':
 			parseresopt(optarg);
 			break;
@@ -74,18 +73,18 @@ main(int argc, char *argv[])
 			printf("\n");
 		printf("===> \"%s\"\n", argv[i]);
 		host = gethostarg(argv[i]);
-		
+
 		errno = 0;
 		h_errno = 0;
 		gai_errno = 0;
 		rrset_errno = 0;
-		
+
 		rrset_errno = getrrsetbyname(host, C_IN, type, 0, &rrset);
 
 		if (rrset_errno == 0)
 			print_rrsetinfo(rrset);
 		print_errors();
 	}
-	
+
 	return (0);
 }

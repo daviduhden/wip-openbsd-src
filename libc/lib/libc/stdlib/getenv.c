@@ -31,7 +31,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /*
  * __findenv --
  *	Returns pointer to value associated with name, if any, else NULL.
@@ -43,9 +42,9 @@
 char *
 __findenv(const char *name, int len, int *offset)
 {
-	int i;
+	int	    i;
 	const char *np;
-	char **p, *cp;
+	char	  **p, *cp;
 
 	if (name == NULL || environ == NULL)
 		return (NULL);
@@ -68,7 +67,7 @@ __findenv(const char *name, int len, int *offset)
 char *
 getenv(const char *name)
 {
-	int offset = 0;
+	int	    offset = 0;
 	const char *np;
 
 	for (np = name; *np && *np != '='; ++np)

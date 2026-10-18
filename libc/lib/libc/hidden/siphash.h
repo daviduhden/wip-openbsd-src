@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_SIPHASH
-#define	_LIBC_SIPHASH
+#define _LIBC_SIPHASH
 
 #include_next <siphash.h>
 

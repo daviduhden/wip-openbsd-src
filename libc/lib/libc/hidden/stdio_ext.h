@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_LIBC_STDIO_EXT_H_
-#define	_LIBC_STDIO_EXT_H_
+#ifndef _LIBC_STDIO_EXT_H_
+#define _LIBC_STDIO_EXT_H_
 
 #include_next <stdio_ext.h>
 

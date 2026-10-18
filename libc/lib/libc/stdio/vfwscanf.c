@@ -40,101 +40,103 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wctype.h>
+
 #include "local.h"
 
 #ifdef FLOATING_POINT
 #include <float.h>
+
 #include "floatio.h"
 #endif
 
-#define	BUF		513	/* Maximum length of numeric string. */
+#define BUF 513 /* Maximum length of numeric string. */
 
 /*
  * Flags used during conversion.
  */
-#define	LONG		0x00001	/* l: long or double */
-#define	LONGDBL		0x00002	/* L: long double */
-#define	SHORT		0x00004	/* h: short */
-#define	SHORTSHORT	0x00008	/* hh: 8 bit integer */
-#define LLONG		0x00010	/* ll: long long (+ deprecated q: quad) */
-#define	POINTER		0x00020	/* p: void * (as hex) */
-#define	SIZEINT		0x00040	/* z: (signed) size_t */
-#define	MAXINT		0x00080	/* j: intmax_t */
-#define	PTRINT		0x00100	/* t: ptrdiff_t */
-#define	NOSKIP		0x00200	/* [ or c: do not skip blanks */
-#define	SUPPRESS	0x00400	/* *: suppress assignment */
-#define	UNSIGNED	0x00800	/* %[oupxX] conversions */
+#define LONG 0x00001	   /* l: long or double */
+#define LONGDBL 0x00002	   /* L: long double */
+#define SHORT 0x00004	   /* h: short */
+#define SHORTSHORT 0x00008 /* hh: 8 bit integer */
+#define LLONG 0x00010	   /* ll: long long (+ deprecated q: quad) */
+#define POINTER 0x00020	   /* p: void * (as hex) */
+#define SIZEINT 0x00040	   /* z: (signed) size_t */
+#define MAXINT 0x00080	   /* j: intmax_t */
+#define PTRINT 0x00100	   /* t: ptrdiff_t */
+#define NOSKIP 0x00200	   /* [ or c: do not skip blanks */
+#define SUPPRESS 0x00400   /* *: suppress assignment */
+#define UNSIGNED 0x00800   /* %[oupxX] conversions */
 
 /*
  * The following are used in numeric conversions only:
  * SIGNOK, HAVESIGN, NDIGITS, DPTOK, and EXPOK are for floating point;
  * SIGNOK, HAVESIGN, NDIGITS, PFXOK, and NZDIGITS are for integral.
  */
-#define	SIGNOK		0x01000	/* +/- is (still) legal */
-#define	HAVESIGN	0x02000	/* sign detected */
-#define	NDIGITS		0x04000	/* no digits detected */
+#define SIGNOK 0x01000	 /* +/- is (still) legal */
+#define HAVESIGN 0x02000 /* sign detected */
+#define NDIGITS 0x04000	 /* no digits detected */
 
-#define	DPTOK		0x08000	/* (float) decimal point is still legal */
-#define	EXPOK		0x10000	/* (float) exponent (e+3, etc) still legal */
+#define DPTOK 0x08000 /* (float) decimal point is still legal */
+#define EXPOK 0x10000 /* (float) exponent (e+3, etc) still legal */
 
-#define	PFXOK		0x08000	/* 0x prefix is (still) legal */
-#define	NZDIGITS	0x10000	/* no zero digits detected */
+#define PFXOK 0x08000	 /* 0x prefix is (still) legal */
+#define NZDIGITS 0x10000 /* no zero digits detected */
 
 /*
  * Conversion types.
  */
-#define	CT_CHAR		0	/* %c conversion */
-#define	CT_CCL		1	/* %[...] conversion */
-#define	CT_STRING	2	/* %s conversion */
-#define	CT_INT		3	/* integer, i.e., strtoimax or strtoumax */
-#define	CT_FLOAT	4	/* floating, i.e., strtod */
+#define CT_CHAR 0   /* %c conversion */
+#define CT_CCL 1    /* %[...] conversion */
+#define CT_STRING 2 /* %s conversion */
+#define CT_INT 3    /* integer, i.e., strtoimax or strtoumax */
+#define CT_FLOAT 4  /* floating, i.e., strtod */
 
 #define u_char unsigned char
 #define u_long unsigned long
 
-#define	INCCL(_c)	\
-	(cclcompl ? (wmemchr(ccls, (_c), ccle - ccls) == NULL) : \
-	(wmemchr(ccls, (_c), ccle - ccls) != NULL))
+#define INCCL(_c)                                                              \
+	(cclcompl ? (wmemchr(ccls, (_c), ccle - ccls) == NULL) :               \
+		    (wmemchr(ccls, (_c), ccle - ccls) != NULL))
 
 /*
  * vfwscanf
  */
 int
-__vfwscanf(FILE * __restrict fp, const wchar_t * __restrict fmt, __va_list ap)
+__vfwscanf(FILE *__restrict fp, const wchar_t *__restrict fmt, __va_list ap)
 {
-	wint_t c;	/* character from format, or conversion */
-	size_t width;	/* field width, or 0 */
-	wchar_t *p;	/* points into all kinds of strings */
-	int n;		/* handy integer */
-	int flags;	/* flags as defined above */
-	wchar_t *p0;	/* saves original value of p when necessary */
-	int nassigned;		/* number of fields assigned */
-	int nconversions;	/* number of conversions */
-	int nread;		/* number of characters consumed from fp */
-	int base;		/* base argument to strtoimax/strtouimax */
-	wchar_t buf[BUF];	/* buffer for numeric conversions */
-	const wchar_t *ccls;	/* character class start */
-	const wchar_t *ccle;	/* character class end */
-	int cclcompl;		/* ccl is complemented? */
-	wint_t wi;		/* handy wint_t */
-	char *mbp;		/* multibyte string pointer for %c %s %[ */
-	size_t nconv;		/* number of bytes in mb. conversion */
-	char mbbuf[MB_LEN_MAX];	/* temporary mb. character buffer */
- 	mbstate_t mbs;
+	wint_t	       c;	  /* character from format, or conversion */
+	size_t	       width;	  /* field width, or 0 */
+	wchar_t	      *p;	  /* points into all kinds of strings */
+	int	       n;	  /* handy integer */
+	int	       flags;	  /* flags as defined above */
+	wchar_t	      *p0;	  /* saves original value of p when necessary */
+	int	       nassigned; /* number of fields assigned */
+	int	       nconversions; /* number of conversions */
+	int	       nread;	     /* number of characters consumed from fp */
+	int	       base;	     /* base argument to strtoimax/strtouimax */
+	wchar_t	       buf[BUF];     /* buffer for numeric conversions */
+	const wchar_t *ccls;	     /* character class start */
+	const wchar_t *ccle;	     /* character class end */
+	int	       cclcompl;     /* ccl is complemented? */
+	wint_t	       wi;	     /* handy wint_t */
+	char	      *mbp;	     /* multibyte string pointer for %c %s %[ */
+	size_t	       nconv;	     /* number of bytes in mb. conversion */
+	char	       mbbuf[MB_LEN_MAX]; /* temporary mb. character buffer */
+	mbstate_t      mbs;
 #ifdef FLOATING_POINT
 	wchar_t decimal_point = 0;
 #endif
 
 	/* `basefix' is used to avoid `if' tests in the integer scanner */
-	static short basefix[17] =
-		{ 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+	static short basefix[17] = {
+	    10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
 	_SET_ORIENTATION(fp, 1);
 
 	nassigned = 0;
 	nconversions = 0;
 	nread = 0;
-	base = 0;		/* XXX just to keep gcc happy */
+	base = 0; /* XXX just to keep gcc happy */
 	ccls = ccle = NULL;
 	for (;;) {
 		c = *fmt++;
@@ -142,8 +144,7 @@ __vfwscanf(FILE * __restrict fp, const wchar_t * __restrict fmt, __va_list ap)
 			return (nassigned);
 		}
 		if (iswspace(c)) {
-			while ((c = __fgetwc_unlock(fp)) != WEOF &&
-			    iswspace(c))
+			while ((c = __fgetwc_unlock(fp)) != WEOF && iswspace(c))
 				;
 			if (c != WEOF)
 				__ungetwc(c, fp);
@@ -157,10 +158,11 @@ __vfwscanf(FILE * __restrict fp, const wchar_t * __restrict fmt, __va_list ap)
 		 * switch on the format.  continue if done;
 		 * break once format type is derived.
 		 */
-again:		c = *fmt++;
+	again:
+		c = *fmt++;
 		switch (c) {
 		case '%':
-literal:
+		literal:
 			if ((wi = __fgetwc_unlock(fp)) == WEOF)
 				goto input_failure;
 			if (wi != c) {
@@ -196,7 +198,7 @@ literal:
 			}
 			goto again;
 		case 'q':
-			flags |= LLONG;		/* deprecated */
+			flags |= LLONG; /* deprecated */
 			goto again;
 		case 't':
 			flags |= PTRINT;
@@ -205,8 +207,16 @@ literal:
 			flags |= SIZEINT;
 			goto again;
 
-		case '0': case '1': case '2': case '3': case '4':
-		case '5': case '6': case '7': case '8': case '9':
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
 			width = width * 10 + c - '0';
 			goto again;
 
@@ -217,7 +227,7 @@ literal:
 		 * (According to ANSI, E and X formats are supposed
 		 * to the same as e and x.  Sorry about that.)
 		 */
-		case 'D':	/* compat */
+		case 'D': /* compat */
 			flags |= LONG;
 			/* FALLTHROUGH */
 		case 'd':
@@ -230,7 +240,7 @@ literal:
 			base = 0;
 			break;
 
-		case 'O':	/* compat */
+		case 'O': /* compat */
 			flags |= LONG;
 			/* FALLTHROUGH */
 		case 'o':
@@ -247,17 +257,21 @@ literal:
 
 		case 'X':
 		case 'x':
-			flags |= PFXOK;	/* enable 0x prefixing */
+			flags |= PFXOK; /* enable 0x prefixing */
 			c = CT_INT;
 			flags |= UNSIGNED;
 			base = 16;
 			break;
 
 #ifdef FLOATING_POINT
-		case 'e': case 'E':
-		case 'f': case 'F':
-		case 'g': case 'G':
-		case 'a': case 'A':
+		case 'e':
+		case 'E':
+		case 'f':
+		case 'F':
+		case 'g':
+		case 'G':
+		case 'a':
+		case 'A':
 			c = CT_FLOAT;
 			break;
 #endif
@@ -288,7 +302,7 @@ literal:
 			c = CT_CHAR;
 			break;
 
-		case 'p':	/* pointer format is like hex */
+		case 'p': /* pointer format is like hex */
 			flags |= POINTER | PFXOK;
 			c = CT_INT;
 			flags |= UNSIGNED;
@@ -320,10 +334,10 @@ literal:
 		/*
 		 * Disgusting backwards compatibility hacks.	XXX
 		 */
-		case '\0':	/* compat */
+		case '\0': /* compat */
 			return (EOF);
 
-		default:	/* compat */
+		default: /* compat */
 			if (iswupper(c))
 				flags |= LONG;
 			c = CT_INT;
@@ -336,8 +350,8 @@ literal:
 		 * that suppress this.
 		 */
 		if ((flags & NOSKIP) == 0) {
-			while ((wi = __fgetwc_unlock(fp)) != WEOF &&
-			    iswspace(wi))
+			while (
+			    (wi = __fgetwc_unlock(fp)) != WEOF && iswspace(wi))
 				nread++;
 			if (wi == WEOF)
 				goto input_failure;
@@ -353,7 +367,7 @@ literal:
 			/* scan arbitrary characters (sets NOSKIP) */
 			if (width == 0)
 				width = 1;
- 			if (flags & LONG) {
+			if (flags & LONG) {
 				if (!(flags & SUPPRESS))
 					p = va_arg(ap, wchar_t *);
 				n = 0;
@@ -366,8 +380,8 @@ literal:
 				if (n == 0)
 					goto input_failure;
 				nread += n;
- 				if (!(flags & SUPPRESS))
- 					nassigned++;
+				if (!(flags & SUPPRESS))
+					nassigned++;
 			} else {
 				if (!(flags & SUPPRESS))
 					mbp = va_arg(ap, char *);
@@ -381,25 +395,25 @@ literal:
 						if (nconv == (size_t)-1)
 							goto input_failure;
 					} else {
-						nconv = wcrtomb(mbbuf, wi,
-						    &mbs);
+						nconv =
+						    wcrtomb(mbbuf, wi, &mbs);
 						if (nconv == (size_t)-1)
 							goto input_failure;
 						if (nconv > width) {
 							__ungetwc(wi, fp);
- 							break;
- 						}
+							break;
+						}
 						if (!(flags & SUPPRESS))
-							memcpy(mbp, mbbuf,
-							    nconv);
- 					}
+							memcpy(
+							    mbp, mbbuf, nconv);
+					}
 					if (!(flags & SUPPRESS))
 						mbp += nconv;
 					width -= nconv;
 					n++;
- 				}
+				}
 				if (n == 0)
- 					goto input_failure;
+					goto input_failure;
 				nread += n;
 				if (!(flags & SUPPRESS))
 					nassigned++;
@@ -410,7 +424,7 @@ literal:
 		case CT_CCL:
 			/* scan a (nonempty) character class (sets NOSKIP) */
 			if (width == 0)
-				width = (size_t)~0;	/* `infinity' */
+				width = (size_t)~0; /* `infinity' */
 			/* take only those things in the class */
 			if ((flags & SUPPRESS) && (flags & LONG)) {
 				n = 0;
@@ -441,20 +455,20 @@ literal:
 				while ((wi = __fgetwc_unlock(fp)) != WEOF &&
 				    width != 0 && INCCL(wi)) {
 					if (width >= MB_CUR_MAX &&
-					   !(flags & SUPPRESS)) {
+					    !(flags & SUPPRESS)) {
 						nconv = wcrtomb(mbp, wi, &mbs);
 						if (nconv == (size_t)-1)
 							goto input_failure;
 					} else {
-						nconv = wcrtomb(mbbuf, wi,
-						    &mbs);
+						nconv =
+						    wcrtomb(mbbuf, wi, &mbs);
 						if (nconv == (size_t)-1)
 							goto input_failure;
 						if (nconv > width)
 							break;
 						if (!(flags & SUPPRESS))
-							memcpy(mbp, mbbuf,
-							    nconv);
+							memcpy(
+							    mbp, mbbuf, nconv);
 					}
 					if (!(flags & SUPPRESS))
 						mbp += nconv;
@@ -467,7 +481,7 @@ literal:
 					*mbp = 0;
 					nassigned++;
 				}
- 			}
+			}
 			nread += n;
 			nconversions++;
 			break;
@@ -478,16 +492,14 @@ literal:
 				width = (size_t)~0;
 			if ((flags & SUPPRESS) && (flags & LONG)) {
 				while ((wi = __fgetwc_unlock(fp)) != WEOF &&
-				    width-- != 0 &&
-				    !iswspace(wi))
+				    width-- != 0 && !iswspace(wi))
 					nread++;
 				if (wi != WEOF)
 					__ungetwc(wi, fp);
 			} else if (flags & LONG) {
 				p0 = p = va_arg(ap, wchar_t *);
 				while ((wi = __fgetwc_unlock(fp)) != WEOF &&
-				    width-- != 0 &&
-				    !iswspace(wi)) {
+				    width-- != 0 && !iswspace(wi)) {
 					*p++ = (wchar_t)wi;
 					nread++;
 				}
@@ -500,23 +512,22 @@ literal:
 					mbp = va_arg(ap, char *);
 				bzero(&mbs, sizeof(mbs));
 				while ((wi = __fgetwc_unlock(fp)) != WEOF &&
-				    width != 0 &&
-				    !iswspace(wi)) {
+				    width != 0 && !iswspace(wi)) {
 					if (width >= MB_CUR_MAX &&
 					    !(flags & SUPPRESS)) {
 						nconv = wcrtomb(mbp, wi, &mbs);
 						if (nconv == (size_t)-1)
 							goto input_failure;
 					} else {
-						nconv = wcrtomb(mbbuf, wi,
-						    &mbs);
+						nconv =
+						    wcrtomb(mbbuf, wi, &mbs);
 						if (nconv == (size_t)-1)
 							goto input_failure;
 						if (nconv > width)
 							break;
 						if (!(flags & SUPPRESS))
-							memcpy(mbp, mbbuf,
-							    nconv);
+							memcpy(
+							    mbp, mbbuf, nconv);
 					}
 					if (!(flags & SUPPRESS))
 						mbp += nconv;
@@ -527,16 +538,16 @@ literal:
 					__ungetwc(wi, fp);
 				if (!(flags & SUPPRESS)) {
 					*mbp = 0;
- 					nassigned++;
- 				}
+					nassigned++;
+				}
 			}
 			nconversions++;
 			continue;
 
 		case CT_INT:
 			/* scan an integer as if by strtoimax/strtoumax */
-			if (width == 0 || width > sizeof(buf) /
-			    sizeof(*buf) - 1)
+			if (width == 0 ||
+			    width > sizeof(buf) / sizeof(*buf) - 1)
 				width = sizeof(buf) / sizeof(*buf) - 1;
 			flags |= SIGNOK | NDIGITS | NZDIGITS;
 			for (p = buf; width; width--) {
@@ -565,39 +576,56 @@ literal:
 						flags |= PFXOK;
 					}
 					if (flags & NZDIGITS)
-					    flags &= ~(SIGNOK|NZDIGITS|NDIGITS);
+						flags &= ~(SIGNOK | NZDIGITS |
+						    NDIGITS);
 					else
-					    flags &= ~(SIGNOK|PFXOK|NDIGITS);
+						flags &=
+						    ~(SIGNOK | PFXOK | NDIGITS);
 					goto ok;
 
 				/* 1 through 7 always legal */
-				case '1': case '2': case '3':
-				case '4': case '5': case '6': case '7':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
 					base = basefix[base];
 					flags &= ~(SIGNOK | PFXOK | NDIGITS);
 					goto ok;
 
 				/* digits 8 and 9 ok iff decimal or hex */
-				case '8': case '9':
+				case '8':
+				case '9':
 					base = basefix[base];
 					if (base <= 8)
-						break;	/* not legal here */
+						break; /* not legal here */
 					flags &= ~(SIGNOK | PFXOK | NDIGITS);
 					goto ok;
 
 				/* letters ok iff hex */
-				case 'A': case 'B': case 'C':
-				case 'D': case 'E': case 'F':
-				case 'a': case 'b': case 'c':
-				case 'd': case 'e': case 'f':
+				case 'A':
+				case 'B':
+				case 'C':
+				case 'D':
+				case 'E':
+				case 'F':
+				case 'a':
+				case 'b':
+				case 'c':
+				case 'd':
+				case 'e':
+				case 'f':
 					/* no need to fix base here */
 					if (base <= 10)
-						break;	/* not legal here */
+						break; /* not legal here */
 					flags &= ~(SIGNOK | PFXOK | NDIGITS);
 					goto ok;
 
 				/* sign ok only as first character */
-				case '+': case '-':
+				case '+':
+				case '-':
 					if (flags & SIGNOK) {
 						flags &= ~SIGNOK;
 						flags |= HAVESIGN;
@@ -609,10 +637,13 @@ literal:
 				 * x ok iff flag still set and 2nd char (or
 				 * 3rd char if we have a sign).
 				 */
-				case 'x': case 'X':
-					if ((flags & PFXOK) && p ==
-					    buf + 1 + !!(flags & HAVESIGN)) {
-						base = 16;	/* if %i */
+				case 'x':
+				case 'X':
+					if ((flags & PFXOK) &&
+					    p ==
+						buf + 1 +
+						    !!(flags & HAVESIGN)) {
+						base = 16; /* if %i */
 						flags &= ~PFXOK;
 						goto ok;
 					}
@@ -626,7 +657,7 @@ literal:
 				if (c != WEOF)
 					__ungetwc(c, fp);
 				break;
-		ok:
+			ok:
 				/*
 				 * c is legal: store it and look at the next.
 				 */
@@ -684,8 +715,8 @@ literal:
 #ifdef FLOATING_POINT
 		case CT_FLOAT:
 			/* scan a floating point number as if by strtod */
-			if (width == 0 || width > sizeof(buf) /
-			    sizeof(*buf) - 1)
+			if (width == 0 ||
+			    width > sizeof(buf) / sizeof(*buf) - 1)
 				width = sizeof(buf) / sizeof(*buf) - 1;
 			flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
 			for (p = buf; width; width--) {
@@ -696,23 +727,33 @@ literal:
 				 */
 				switch (c) {
 
-				case '0': case '1': case '2': case '3':
-				case '4': case '5': case '6': case '7':
-				case '8': case '9':
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
 					flags &= ~(SIGNOK | NDIGITS);
 					goto fok;
 
-				case '+': case '-':
+				case '+':
+				case '-':
 					if (flags & SIGNOK) {
 						flags &= ~SIGNOK;
 						goto fok;
 					}
 					break;
-				case 'e': case 'E':
+				case 'e':
+				case 'E':
 					/* no exponent without some digits */
-					if ((flags&(NDIGITS|EXPOK)) == EXPOK) {
+					if ((flags & (NDIGITS | EXPOK)) ==
+					    EXPOK) {
 						flags =
-						    (flags & ~(EXPOK|DPTOK)) |
+						    (flags & ~(EXPOK | DPTOK)) |
 						    SIGNOK | NDIGITS;
 						goto fok;
 					}
@@ -722,7 +763,7 @@ literal:
 						bzero(&mbs, sizeof(mbs));
 						nconv = mbrtowc(&decimal_point,
 						    localeconv()->decimal_point,
-					    	    MB_CUR_MAX, &mbs);
+						    MB_CUR_MAX, &mbs);
 						if (nconv == 0 ||
 						    nconv == (size_t)-1 ||
 						    nconv == (size_t)-2)
@@ -738,7 +779,7 @@ literal:
 				if (c != WEOF)
 					__ungetwc(c, fp);
 				break;
-		fok:
+			fok:
 				*p++ = c;
 			}
 			/*
@@ -756,7 +797,7 @@ literal:
 				/* just a bad exponent (e and maybe sign) */
 				c = *--p;
 				if (c != 'e' && c != 'E') {
-					__ungetwc(c, fp);/* sign */
+					__ungetwc(c, fp); /* sign */
 					c = *--p;
 				}
 				__ungetwc(c, fp);
@@ -788,7 +829,7 @@ match_failure:
 }
 
 int
-vfwscanf(FILE * __restrict fp, const wchar_t * __restrict fmt, __va_list ap)
+vfwscanf(FILE *__restrict fp, const wchar_t *__restrict fmt, __va_list ap)
 {
 	int r;
 

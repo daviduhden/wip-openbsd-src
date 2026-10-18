@@ -26,32 +26,31 @@
 static inline void
 __arm_set_tcb(void *tcb)
 {
-	__asm volatile("mcr p15, 0, %0, c13, c0, 3\n" : : "r" (tcb));
+	__asm volatile("mcr p15, 0, %0, c13, c0, 3\n" : : "r"(tcb));
 }
 
-#define TCB_GET(p)		\
-	((struct pcb *)(p)->p_addr)->pcb_tcb
+#define TCB_GET(p) ((struct pcb *)(p)->p_addr)->pcb_tcb
 
-#define TCB_SET(p, addr)	\
-	do {							\
-		((struct pcb *)(p)->p_addr)->pcb_tcb = (addr);	\
-		__arm_set_tcb(addr);				\
+#define TCB_SET(p, addr)                                                       \
+	do {                                                                   \
+		((struct pcb *)(p)->p_addr)->pcb_tcb = (addr);                 \
+		__arm_set_tcb(addr);                                           \
 	} while (0)
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for small TCB, with static TLS data after it */
-#define TLS_VARIANT	1
+#define TLS_VARIANT 1
 
 static inline void *
 __arm_read_tcb(void)
 {
 	void *tcb;
-	__asm volatile("mrc p15, 0, %0, c13, c0, 3\n" : "=r" (tcb));
+	__asm volatile("mrc p15, 0, %0, c13, c0, 3\n" : "=r"(tcb));
 	return tcb;
 }
 
-#define TCB_GET()		__arm_read_tcb()
+#define TCB_GET() __arm_read_tcb()
 
 #endif /* _KERNEL */
 

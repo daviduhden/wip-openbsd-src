@@ -16,32 +16,32 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef	_SYS_STATVFS_H_
-#define	_SYS_STATVFS_H_
+#ifndef _SYS_STATVFS_H_
+#define _SYS_STATVFS_H_
 
 #include <sys/types.h>
 
 struct statvfs {
-	unsigned long	f_bsize;	/* file system block size */
-	unsigned long	f_frsize;	/* fundamental file system block size */
-	fsblkcnt_t	f_blocks;	/* number of blocks (unit f_frsize) */
-	fsblkcnt_t	f_bfree;	/* free blocks in file system */
-	fsblkcnt_t	f_bavail;	/* free blocks for non-root */
-	fsfilcnt_t	f_files;	/* total file inodes */
-	fsfilcnt_t	f_ffree;	/* free file inodes */
-	fsfilcnt_t	f_favail;	/* free file inodes for non-root */
-	unsigned long	f_fsid;		/* file system id */
-	unsigned long	f_flag;		/* bit mask of f_flag values */
-	unsigned long	f_namemax;	/* maximum filename length */
+	unsigned long f_bsize;	 /* file system block size */
+	unsigned long f_frsize;	 /* fundamental file system block size */
+	fsblkcnt_t    f_blocks;	 /* number of blocks (unit f_frsize) */
+	fsblkcnt_t    f_bfree;	 /* free blocks in file system */
+	fsblkcnt_t    f_bavail;	 /* free blocks for non-root */
+	fsfilcnt_t    f_files;	 /* total file inodes */
+	fsfilcnt_t    f_ffree;	 /* free file inodes */
+	fsfilcnt_t    f_favail;	 /* free file inodes for non-root */
+	unsigned long f_fsid;	 /* file system id */
+	unsigned long f_flag;	 /* bit mask of f_flag values */
+	unsigned long f_namemax; /* maximum filename length */
 };
 
-#define ST_RDONLY	0x0001UL	/* read-only filesystem */
-#define	ST_NOSUID	0x0002UL	/* nosuid flag set */
+#define ST_RDONLY 0x0001UL /* read-only filesystem */
+#define ST_NOSUID 0x0002UL /* nosuid flag set */
 
 #ifndef _KERNEL
 __BEGIN_DECLS
-int	fstatvfs(int, struct statvfs *);
-int	statvfs(const char *, struct statvfs *);
+int fstatvfs(int, struct statvfs *);
+int statvfs(const char *, struct statvfs *);
 __END_DECLS
 #endif /* !_KERNEL */
 

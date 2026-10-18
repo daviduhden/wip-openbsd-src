@@ -43,7 +43,4 @@ Include common integer types and flags.
 Symbolic Boolean literals.
 -------------------------------------------------------------------------------
 */
-enum {
-    FALSE = 0,
-    TRUE  = 1
-};
+enum { FALSE = 0, TRUE = 1 };

@@ -63,7 +63,7 @@
 static int fpround(struct fpemu *, struct fpn *);
 static int toinf(struct fpemu *, int);
 
-#define	FSR_GET_RD(fsr)		(((fsr) >> FSR_RD_SHIFT) & FSR_RD_MASK)
+#define FSR_GET_RD(fsr) (((fsr) >> FSR_RD_SHIFT) & FSR_RD_MASK)
 
 /*
  * Round a number (algorithm from Motorola MC68882 manual, modified for
@@ -81,7 +81,7 @@ static int
 fpround(struct fpemu *fe, struct fpn *fp)
 {
 	u_int m0, m1, m2, m3;
-	int gr, s;
+	int   gr, s;
 
 	m0 = fp->fp_mant[0];
 	m1 = fp->fp_mant[1];
@@ -96,10 +96,10 @@ fpround(struct fpemu *fe, struct fpn *fp)
 	m1 = (m1 >> FP_NG) | (m0 << (32 - FP_NG));
 	m0 >>= FP_NG;
 
-	if ((gr | s) == 0)	/* result is exact: no rounding needed */
+	if ((gr | s) == 0) /* result is exact: no rounding needed */
 		goto rounddown;
 
-	fe->fe_cx |= FSR_NX;	/* inexact */
+	fe->fe_cx |= FSR_NX; /* inexact */
 
 	/* Go to rounddown to round down; break to round up. */
 	switch (FSR_GET_RD(fe->fe_fsr)) {
@@ -165,19 +165,19 @@ toinf(struct fpemu *fe, int sign)
 	/* look at rounding direction */
 	switch (FSR_GET_RD(fe->fe_fsr)) {
 	default:
-	case FSR_RD_RN:		/* the nearest value is always Inf */
+	case FSR_RD_RN: /* the nearest value is always Inf */
 		inf = 1;
 		break;
 
-	case FSR_RD_RZ:		/* toward 0 => never towards Inf */
+	case FSR_RD_RZ: /* toward 0 => never towards Inf */
 		inf = 0;
 		break;
 
-	case FSR_RD_RP:	/* toward +Inf iff positive */
+	case FSR_RD_RP: /* toward +Inf iff positive */
 		inf = sign == 0;
 		break;
 
-	case FSR_RD_RM:	/* toward -Inf iff negative */
+	case FSR_RD_RM: /* toward -Inf iff negative */
 		inf = sign;
 		break;
 	}
@@ -194,7 +194,7 @@ u_int
 __fpu_ftoi(struct fpemu *fe, struct fpn *fp)
 {
 	u_int i;
-	int sign, exp;
+	int   sign, exp;
 
 	sign = fp->fp_sign;
 	switch (fp->fp_class) {
@@ -223,7 +223,7 @@ __fpu_ftoi(struct fpemu *fe, struct fpn *fp)
 			break;
 		return (sign ? -i : i);
 
-	default:		/* Inf, qNaN, sNaN */
+	default: /* Inf, qNaN, sNaN */
 		break;
 	}
 	/* overflow: replace any inexact exception with invalid */
@@ -241,7 +241,7 @@ u_int
 __fpu_ftox(struct fpemu *fe, struct fpn *fp, u_int *res)
 {
 	u_int64_t i;
-	int sign, exp;
+	int	  sign, exp;
 
 	sign = fp->fp_sign;
 	switch (fp->fp_class) {
@@ -266,7 +266,7 @@ __fpu_ftox(struct fpemu *fe, struct fpn *fp, u_int *res)
 		/* NB: the following includes exp < 0 cases */
 		if (__fpu_shr(fp, FP_NMANT - 1 - exp) != 0)
 			fe->fe_cx |= FSR_NX;
-		i = ((u_int64_t)fp->fp_mant[2]<<32)|fp->fp_mant[3];
+		i = ((u_int64_t)fp->fp_mant[2] << 32) | fp->fp_mant[3];
 		if (i >= ((u_int64_t)0x8000000000000000LL + sign))
 			break;
 		if (sign)
@@ -274,7 +274,7 @@ __fpu_ftox(struct fpemu *fe, struct fpn *fp, u_int *res)
 		res[1] = (int)i;
 		return (i >> 32);
 
-	default:		/* Inf, qNaN, sNaN */
+	default: /* Inf, qNaN, sNaN */
 		break;
 	}
 	/* overflow: replace any inexact exception with invalid */
@@ -290,10 +290,10 @@ u_int
 __fpu_ftos(struct fpemu *fe, struct fpn *fp)
 {
 	u_int sign = fp->fp_sign << 31;
-	int exp;
+	int   exp;
 
-#define	SNG_EXP(e)	((e) << SNG_FRACBITS)	/* makes e an exponent */
-#define	SNG_MASK	(SNG_EXP(1) - 1)	/* mask for fraction */
+#define SNG_EXP(e) ((e) << SNG_FRACBITS) /* makes e an exponent */
+#define SNG_MASK (SNG_EXP(1) - 1)	 /* mask for fraction */
 
 	/* Take care of non-numbers first. */
 	if (ISNAN(fp)) {
@@ -302,7 +302,7 @@ __fpu_ftos(struct fpemu *fe, struct fpn *fp)
 		 * Note that fp->fp_mant[0] has the quiet bit set,
 		 * even if it is classified as a signalling NaN.
 		 */
-		(void) __fpu_shr(fp, FP_NMANT - 1 - SNG_FRACBITS);
+		(void)__fpu_shr(fp, FP_NMANT - 1 - SNG_FRACBITS);
 		exp = SNG_EXP_INFNAN;
 		goto done;
 	}
@@ -332,9 +332,9 @@ __fpu_ftos(struct fpemu *fe, struct fpn *fp)
 	 * Note that the guard and round bits vanish from the number after
 	 * rounding.
 	 */
-	if ((exp = fp->fp_exp + SNG_EXP_BIAS) <= 0) {	/* subnormal */
+	if ((exp = fp->fp_exp + SNG_EXP_BIAS) <= 0) { /* subnormal */
 		/* -NG for g,r; -SNG_FRACBITS-exp for fraction */
-		(void) __fpu_shr(fp, FP_NMANT - FP_NG - SNG_FRACBITS - exp);
+		(void)__fpu_shr(fp, FP_NMANT - FP_NG - SNG_FRACBITS - exp);
 		if (fpround(fe, fp) && fp->fp_mant[3] == SNG_EXP(1))
 			return (sign | SNG_EXP(1) | 0);
 		if ((fe->fe_cx & FSR_NX) ||
@@ -343,7 +343,7 @@ __fpu_ftos(struct fpemu *fe, struct fpn *fp)
 		return (sign | SNG_EXP(0) | fp->fp_mant[3]);
 	}
 	/* -FP_NG for g,r; -1 for implied 1; -SNG_FRACBITS for fraction */
-	(void) __fpu_shr(fp, FP_NMANT - FP_NG - 1 - SNG_FRACBITS);
+	(void)__fpu_shr(fp, FP_NMANT - FP_NG - 1 - SNG_FRACBITS);
 #ifdef DIAGNOSTIC
 	if ((fp->fp_mant[3] & SNG_EXP(1 << FP_NG)) == 0)
 		__utrap_panic("fpu_ftos");
@@ -372,13 +372,13 @@ u_int
 __fpu_ftod(struct fpemu *fe, struct fpn *fp, u_int *res)
 {
 	u_int sign = fp->fp_sign << 31;
-	int exp;
+	int   exp;
 
-#define	DBL_EXP(e)	((e) << (DBL_FRACBITS & 31))
-#define	DBL_MASK	(DBL_EXP(1) - 1)
+#define DBL_EXP(e) ((e) << (DBL_FRACBITS & 31))
+#define DBL_MASK (DBL_EXP(1) - 1)
 
 	if (ISNAN(fp)) {
-		(void) __fpu_shr(fp, FP_NMANT - 1 - DBL_FRACBITS);
+		(void)__fpu_shr(fp, FP_NMANT - 1 - DBL_FRACBITS);
 		exp = DBL_EXP_INFNAN;
 		goto done;
 	}
@@ -387,12 +387,13 @@ __fpu_ftod(struct fpemu *fe, struct fpn *fp, u_int *res)
 		goto zero;
 	}
 	if (ISZERO(fp)) {
-zero:		res[1] = 0;
+	zero:
+		res[1] = 0;
 		return (sign);
 	}
 
 	if ((exp = fp->fp_exp + DBL_EXP_BIAS) <= 0) {
-		(void) __fpu_shr(fp, FP_NMANT - FP_NG - DBL_FRACBITS - exp);
+		(void)__fpu_shr(fp, FP_NMANT - FP_NG - DBL_FRACBITS - exp);
 		if (fpround(fe, fp) && fp->fp_mant[2] == DBL_EXP(1)) {
 			res[1] = 0;
 			return (sign | DBL_EXP(1) | 0);
@@ -403,7 +404,7 @@ zero:		res[1] = 0;
 		exp = 0;
 		goto done;
 	}
-	(void) __fpu_shr(fp, FP_NMANT - FP_NG - 1 - DBL_FRACBITS);
+	(void)__fpu_shr(fp, FP_NMANT - FP_NG - 1 - DBL_FRACBITS);
 	if (fpround(fe, fp) && fp->fp_mant[2] == DBL_EXP(2))
 		exp++;
 	if (exp >= DBL_EXP_INFNAN) {
@@ -430,13 +431,13 @@ u_int
 __fpu_ftoq(struct fpemu *fe, struct fpn *fp, u_int *res)
 {
 	u_int sign = fp->fp_sign << 31;
-	int exp;
+	int   exp;
 
-#define	EXT_EXP(e)	((e) << (EXT_FRACBITS & 31))
-#define	EXT_MASK	(EXT_EXP(1) - 1)
+#define EXT_EXP(e) ((e) << (EXT_FRACBITS & 31))
+#define EXT_MASK (EXT_EXP(1) - 1)
 
 	if (ISNAN(fp)) {
-		(void) __fpu_shr(fp, 2);	/* since we are not rounding */
+		(void)__fpu_shr(fp, 2); /* since we are not rounding */
 		exp = EXT_EXP_INFNAN;
 		goto done;
 	}
@@ -445,12 +446,13 @@ __fpu_ftoq(struct fpemu *fe, struct fpn *fp, u_int *res)
 		goto zero;
 	}
 	if (ISZERO(fp)) {
-zero:		res[1] = res[2] = res[3] = 0;
+	zero:
+		res[1] = res[2] = res[3] = 0;
 		return (sign);
 	}
 
 	if ((exp = fp->fp_exp + EXT_EXP_BIAS) <= 0) {
-		(void) __fpu_shr(fp, FP_NMANT - FP_NG - EXT_FRACBITS - exp);
+		(void)__fpu_shr(fp, FP_NMANT - FP_NG - EXT_FRACBITS - exp);
 		if (fpround(fe, fp) && fp->fp_mant[0] == EXT_EXP(1)) {
 			res[1] = res[2] = res[3] = 0;
 			return (sign | EXT_EXP(1) | 0);
@@ -515,6 +517,7 @@ __fpu_implode(struct fpemu *fe, struct fpn *fp, int type, u_int *space)
 		__utrap_panic("fpu_implode");
 #endif
 	}
-	DPRINTF(FPE_REG, ("fpu_implode: %x %x %x %x\n",
-		space[0], space[1], space[2], space[3]));
+	DPRINTF(FPE_REG,
+	    ("fpu_implode: %x %x %x %x\n", space[0], space[1], space[2],
+		space[3]));
 }

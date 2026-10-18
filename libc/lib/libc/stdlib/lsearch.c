@@ -33,14 +33,15 @@
  */
 
 #include <sys/types.h>
-#include <string.h>
+
 #include <search.h>
+#include <string.h>
 
 typedef int (*cmp_fn_t)(const void *, const void *);
 
 void *
-lsearch(const void *key, void *base, size_t *nelp, size_t width,
-    	cmp_fn_t compar)
+lsearch(
+    const void *key, void *base, size_t *nelp, size_t width, cmp_fn_t compar)
 {
 	void *element = lfind(key, base, nelp, width, compar);
 
@@ -57,14 +58,14 @@ lsearch(const void *key, void *base, size_t *nelp, size_t width,
 
 void *
 lfind(const void *key, const void *base, size_t *nelp, size_t width,
-	cmp_fn_t compar)
+    cmp_fn_t compar)
 {
 	const char *element, *end;
 
 	end = (const char *)base + *nelp * width;
 	for (element = base; element < end; element += width)
-		if (!compar(key, element))		/* key found */
-			return((void *)element);
+		if (!compar(key, element)) /* key found */
+			return ((void *)element);
 	return NULL;
 }
 DEF_WEAK(lfind);

@@ -27,13 +27,14 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 #ifdef __weak_alias
-__weak_alias(_fpsetsticky,fpsetsticky);
+__weak_alias(_fpsetsticky, fpsetsticky);
 #endif
 
-#define FP_X_MASK	(FP_X_INV | FP_X_DZ | FP_X_OFL | FP_X_UFL | FP_X_IMP)
+#define FP_X_MASK (FP_X_INV | FP_X_DZ | FP_X_OFL | FP_X_UFL | FP_X_IMP)
 
 fp_except
 fpsetsticky(fp_except except)

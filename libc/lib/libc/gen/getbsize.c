@@ -37,13 +37,13 @@ char *
 getbsize(int *headerlenp, long *blocksizep)
 {
 	static char header[20];
-	long n, max, mul, blocksize;
-	char *ep, *p, *form;
+	long	    n, max, mul, blocksize;
+	char	   *ep, *p, *form;
 
-#define	KB	(1024)
-#define	MB	(1024 * 1024)
-#define	GB	(1024 * 1024 * 1024)
-#define	MAXB	GB		/* No tera, peta, nor exa. */
+#define KB (1024)
+#define MB (1024 * 1024)
+#define GB (1024 * 1024 * 1024)
+#define MAXB GB /* No tera, peta, nor exa. */
 	form = "";
 	if ((p = getenv("BLOCKSIZE")) != NULL && *p != '\0') {
 		if ((n = strtol(p, &ep, 10)) < 0)
@@ -53,17 +53,20 @@ getbsize(int *headerlenp, long *blocksizep)
 		if (*ep && ep[1])
 			goto fmterr;
 		switch (*ep) {
-		case 'G': case 'g':
+		case 'G':
+		case 'g':
 			form = "G";
 			max = MAXB / GB;
 			mul = GB;
 			break;
-		case 'K': case 'k':
+		case 'K':
+		case 'k':
 			form = "K";
 			max = MAXB / KB;
 			mul = KB;
 			break;
-		case 'M': case 'm':
+		case 'M':
+		case 'm':
 			form = "M";
 			max = MAXB / MB;
 			mul = MB;
@@ -73,7 +76,8 @@ getbsize(int *headerlenp, long *blocksizep)
 			mul = 1;
 			break;
 		default:
-fmterr:			warnx("%s: unknown blocksize", p);
+		fmterr:
+			warnx("%s: unknown blocksize", p);
 			n = 512;
 			max = MAXB;
 			mul = 1;
@@ -84,7 +88,8 @@ fmterr:			warnx("%s: unknown blocksize", p);
 			n = max;
 		}
 		if ((blocksize = n * mul) < 512) {
-underflow:		warnx("%s: minimum blocksize is 512", p);
+		underflow:
+			warnx("%s: minimum blocksize is 512", p);
 			form = "";
 			blocksize = n = 512;
 		}

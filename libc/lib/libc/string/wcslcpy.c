@@ -17,6 +17,7 @@
  */
 
 #include <sys/types.h>
+
 #include <wchar.h>
 
 /*
@@ -28,7 +29,7 @@ size_t
 wcslcpy(wchar_t *dst, const wchar_t *src, size_t dsize)
 {
 	const wchar_t *osrc = src;
-	size_t nleft = dsize;
+	size_t	       nleft = dsize;
 
 	/* Copy as many bytes as will fit. */
 	if (nleft != 0) {
@@ -41,11 +42,11 @@ wcslcpy(wchar_t *dst, const wchar_t *src, size_t dsize)
 	/* Not enough room in dst, add NUL and traverse rest of src. */
 	if (nleft == 0) {
 		if (dsize != 0)
-			*dst = L'\0';		/* NUL-terminate dst */
+			*dst = L'\0'; /* NUL-terminate dst */
 		while (*src++)
 			;
 	}
 
-	return(src - osrc - 1);	/* count does not include NUL */
+	return (src - osrc - 1); /* count does not include NUL */
 }
 DEF_WEAK(wcslcpy);

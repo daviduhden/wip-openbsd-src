@@ -31,14 +31,15 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/utsname.h>
-#include <stdio.h>		/* for NULL */
+
+#include <stdio.h> /* for NULL */
 
 /* A slightly modified copy of this file exists in libexec/ld.so */
 
 int
 uname(struct utsname *name)
 {
-	int mib[2], rval;
+	int    mib[2], rval;
 	size_t len;
 
 	rval = 0;

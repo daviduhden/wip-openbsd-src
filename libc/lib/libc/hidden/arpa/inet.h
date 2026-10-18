@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_INET_H_
-#define	_LIBC_INET_H_
+#define _LIBC_INET_H_
 
 #include_next <arpa/inet.h>
 

@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_FTW_H_
-#define	_LIBC_FTW_H_
+#define _LIBC_FTW_H_
 
 #include_next <ftw.h>
 

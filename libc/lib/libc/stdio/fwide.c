@@ -31,17 +31,19 @@
 
 #include <stdio.h>
 #include <wchar.h>
+
 #include "local.h"
 
 int
 fwide(FILE *fp, int mode)
 {
 	FLOCKFILE(fp);
-	if ((fp->_flags & (__SONW|__SOWD)) == 0 && mode != 0)
+	if ((fp->_flags & (__SONW | __SOWD)) == 0 && mode != 0)
 		fp->_flags |= (mode > 0 ? __SOWD : __SONW);
 	else
-		mode = (fp->_flags & __SOWD) ?  1 :
-		       (fp->_flags & __SONW) ? -1 : 0;
+		mode = (fp->_flags & __SOWD) ? 1 :
+		    (fp->_flags & __SONW)    ? -1 :
+					       0;
 	FUNLOCKFILE(fp);
 
 	return mode;

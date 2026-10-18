@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char **lastenv;				/* last value of environ */
+static char **lastenv; /* last value of environ */
 
 /*
  * putenv --
@@ -44,7 +44,7 @@ putenv(char *str)
 {
 	char **P, *cp;
 	size_t cnt = 0;
-	int offset = 0;
+	int    offset = 0;
 
 	for (cp = str; *cp && *cp != '='; ++cp)
 		;
@@ -91,9 +91,9 @@ DEF_WEAK(putenv);
 int
 setenv(const char *name, const char *value, int rewrite)
 {
-	char *C, **P;
+	char	   *C, **P;
 	const char *np;
-	int l_value, offset = 0;
+	int	    l_value, offset = 0;
 
 	if (!name || !*name) {
 		errno = EINVAL;
@@ -103,7 +103,7 @@ setenv(const char *name, const char *value, int rewrite)
 		;
 	if (*np) {
 		errno = EINVAL;
-		return (-1);			/* has `=' in name */
+		return (-1); /* has `=' in name */
 	}
 
 	l_value = strlen(value);
@@ -124,7 +124,7 @@ setenv(const char *name, const char *value, int rewrite)
 				if (!(*P = *(P + 1)))
 					break;
 		}
-	} else {					/* create new slot */
+	} else { /* create new slot */
 		size_t cnt = 0;
 
 		if (environ != NULL) {
@@ -141,12 +141,12 @@ setenv(const char *name, const char *value, int rewrite)
 		offset = cnt;
 		environ[cnt + 1] = NULL;
 	}
-	if (!(environ[offset] =			/* name + `=' + value */
-	    malloc((int)(np - name) + l_value + 2)))
+	if (!(environ[offset] = /* name + `=' + value */
+		malloc((int)(np - name) + l_value + 2)))
 		return (-1);
 	for (C = environ[offset]; (*C = *name++) && *C != '='; ++C)
 		;
-	for (*C++ = '='; (*C++ = *value++); )
+	for (*C++ = '='; (*C++ = *value++);)
 		;
 	return (0);
 }
@@ -159,9 +159,9 @@ DEF_WEAK(setenv);
 int
 unsetenv(const char *name)
 {
-	char **P;
+	char	  **P;
 	const char *np;
-	int offset = 0;
+	int	    offset = 0;
 
 	if (!name || !*name) {
 		errno = EINVAL;
@@ -171,7 +171,7 @@ unsetenv(const char *name)
 		;
 	if (*np) {
 		errno = EINVAL;
-		return (-1);			/* has `=' in name */
+		return (-1); /* has `=' in name */
 	}
 
 	/* could be set multiple times */

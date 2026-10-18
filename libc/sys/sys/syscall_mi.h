@@ -32,11 +32,12 @@
  */
 
 #include <sys/param.h>
-#include <sys/pledge.h>
 #include <sys/acct.h>
-#include <sys/tracepoint.h>
-#include <sys/syscall.h>
+#include <sys/pledge.h>
 #include <sys/signalvar.h>
+#include <sys/syscall.h>
+#include <sys/tracepoint.h>
+
 #include <uvm/uvm_extern.h>
 
 #ifdef KTRACE
@@ -54,11 +55,11 @@
 static inline int
 pin_check(struct proc *p, register_t code)
 {
-	extern char sigcodecall[], sigcoderet[], sigcodecall[];
+	extern char	   sigcodecall[], sigcoderet[], sigcodecall[];
 	struct pinsyscall *pin = NULL, *ppin, *plibcpin;
-	struct process *pr = p->p_p;
-	vaddr_t addr;
-	int error = 0;
+	struct process	  *pr = p->p_p;
+	vaddr_t		   addr;
+	int		   error = 0;
 
 	/* point at start of syscall instruction */
 	addr = (vaddr_t)PROC_PC(p) - (vaddr_t)(sigcoderet - sigcodecall);
@@ -73,11 +74,10 @@ pin_check(struct proc *p, register_t code)
 	 * 2b) dynamic binary: syscalls in ld.so (in the ps_pin region)
 	 * 3) sigtramp, containing only sigreturn(2)
 	 */
-	if (plibcpin->pn_pins &&
-	    addr >= plibcpin->pn_start && addr < plibcpin->pn_end)
+	if (plibcpin->pn_pins && addr >= plibcpin->pn_start &&
+	    addr < plibcpin->pn_end)
 		pin = plibcpin;
-	else if (ppin->pn_pins &&
-	    addr >= ppin->pn_start && addr < ppin->pn_end)
+	else if (ppin->pn_pins && addr >= ppin->pn_start && addr < ppin->pn_end)
 		pin = ppin;
 	else if (PROC_PC(p) == pr->ps_sigcoderet) {
 		if (code == SYS_sigreturn)
@@ -104,17 +104,18 @@ die:
 		ktrpinsyscall(p, error, code, addr);
 #endif
 	KERNEL_LOCK();
-	/* XXX remove or simplify this uprintf() call after OpenBSD 7.5 release */
+	/* XXX remove or simplify this uprintf() call after OpenBSD 7.5 release
+	 */
 	uprintf("%s[%d]: pinsyscalls addr %lx code %ld, pinoff 0x%x "
-	    "(pin%s %d %lx-%lx %lx) (libcpin%s %d %lx-%lx %lx) error %d\n",
+		"(pin%s %d %lx-%lx %lx) (libcpin%s %d %lx-%lx %lx) error %d\n",
 	    p->p_p->ps_comm, p->p_p->ps_pid, addr, code,
 	    (pin && code < pin->pn_npins) ? pin->pn_pins[code] : -1,
-	    pin == ppin ? "(Y)" : "", ppin->pn_npins,
-	    ppin->pn_start, ppin->pn_end, ppin->pn_end - ppin->pn_start,
+	    pin == ppin ? "(Y)" : "", ppin->pn_npins, ppin->pn_start,
+	    ppin->pn_end, ppin->pn_end - ppin->pn_start,
 	    pin == plibcpin ? "(Y)" : "", plibcpin->pn_npins,
-	    plibcpin->pn_start, plibcpin->pn_end, plibcpin->pn_end - plibcpin->pn_start,
-	    error);
-        p->p_p->ps_acflag |= APINSYS;
+	    plibcpin->pn_start, plibcpin->pn_end,
+	    plibcpin->pn_end - plibcpin->pn_start, error);
+	p->p_p->ps_acflag |= APINSYS;
 
 	/* Try to stop threads immediately, because this process is suspect */
 	if (P_HASSIBLING(p))
@@ -133,8 +134,8 @@ mi_syscall(struct proc *p, register_t code, const struct sysent *callp,
     register_t *argp, register_t retval[2])
 {
 	uint64_t tval;
-	int lock = !(callp->sy_flags & SY_NOLOCK);
-	int error, pledged;
+	int	 lock = !(callp->sy_flags & SY_NOLOCK);
+	int	 error, pledged;
 
 	/* refresh the thread's cache of the process's creds */
 	refreshcreds(p);
@@ -157,8 +158,8 @@ mi_syscall(struct proc *p, register_t code, const struct sysent *callp,
 
 	/* SP must be within MAP_STACK space */
 	if (!uvm_map_inentry(p, &p->p_spinentry, PROC_STACK(p),
-	    "[%s]%d/%d sp=%lx inside %lx-%lx: not MAP_STACK\n",
-	    uvm_map_inentry_sp, p->p_vmspace->vm_map.sserial))
+		"[%s]%d/%d sp=%lx inside %lx-%lx: not MAP_STACK\n",
+		uvm_map_inentry_sp, p->p_vmspace->vm_map.sserial))
 		return (EPERM);
 
 	if ((error = pin_check(p, code)))
@@ -184,8 +185,8 @@ mi_syscall(struct proc *p, register_t code, const struct sysent *callp,
  * Finish MI stuff on return, after the registers have been set
  */
 static inline void
-mi_syscall_return(struct proc *p, register_t code, int error,
-    const register_t retval[2])
+mi_syscall_return(
+    struct proc *p, register_t code, int error, const register_t retval[2])
 {
 #ifdef SYSCALL_DEBUG
 	KERNEL_LOCK();
@@ -212,9 +213,10 @@ static inline void
 mi_child_return(struct proc *p)
 {
 #if defined(SYSCALL_DEBUG) || defined(KTRACE) || NDT > 0
-	int code = (p->p_flag & P_THREAD) ? SYS___tfork :
-	    (p->p_p->ps_flags & PS_PPWAIT) ? SYS_vfork : SYS_fork;
-	const register_t child_retval[2] = { 0, 1 };
+	int		 code = (p->p_flag & P_THREAD)	? SYS___tfork :
+			 (p->p_p->ps_flags & PS_PPWAIT) ? SYS_vfork :
+							  SYS_fork;
+	const register_t child_retval[2] = {0, 1};
 #endif
 
 	TRACEPOINT(sched, on__cpu, NULL);
@@ -237,7 +239,7 @@ mi_child_return(struct proc *p)
 #endif
 }
 
-/* 
+/*
  * Do the specific processing necessary for an AST
  */
 static inline void

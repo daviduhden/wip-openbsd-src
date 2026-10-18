@@ -38,13 +38,14 @@ static char **
 dupgl(char **oldgl)
 {
 	char **newgl;
-	int ic;
+	int    ic;
 
-	if ((newgl = calloc(_LC_LAST, sizeof(*newgl))) == NULL)	
+	if ((newgl = calloc(_LC_LAST, sizeof(*newgl))) == NULL)
 		return NULL;
 	for (ic = LC_ALL; ic < _LC_LAST; ic++) {
 		if ((newgl[ic] = strdup(ic == LC_ALL ? "" :
-		    oldgl == NULL ? "C" : oldgl[ic])) == NULL) {
+			     oldgl == NULL	     ? "C" :
+						       oldgl[ic])) == NULL) {
 			freegl(newgl);
 			return NULL;
 		}
@@ -75,11 +76,11 @@ setlocale(int category, const char *locname)
 	 * locale, such that third-party software can access it,
 	 * both via setlocale(3) and via locale(1).
 	 */
-	static char	  global_locname[256];
-	static char	**global_locale;
+	static char   global_locname[256];
+	static char **global_locale;
 
 	char **newgl, *firstname, *nextname;
-	int ic;
+	int    ic;
 
 	if (category < LC_ALL || category >= _LC_LAST)
 		return NULL;
@@ -99,8 +100,9 @@ setlocale(int category, const char *locname)
 			}
 			nextname = firstname;
 			for (ic = 1; ic < _LC_LAST; ic++)
-				if (nextname == NULL || changegl(ic,
-				    strsep(&nextname, "/"), newgl) == -1)
+				if (nextname == NULL ||
+				    changegl(ic, strsep(&nextname, "/"),
+					newgl) == -1)
 					break;
 			free(firstname);
 			if (ic < _LC_LAST || nextname != NULL) {
@@ -118,8 +120,8 @@ setlocale(int category, const char *locname)
 			/* One common value for all categories. */
 			if (category == LC_ALL) {
 				for (ic = 1; ic < _LC_LAST; ic++) {
-					if (changegl(ic, locname,
-					    newgl) == -1) {
+					if (changegl(ic, locname, newgl) ==
+					    -1) {
 						freegl(newgl);
 						return NULL;
 					}
@@ -142,7 +144,7 @@ setlocale(int category, const char *locname)
 	/* Individual category, or LC_ALL uniformly set. */
 	if (category > LC_ALL || newgl[LC_ALL][0] != '\0') {
 		if (strlcpy(global_locname, newgl[category],
-		    sizeof(global_locname)) >= sizeof(global_locname))
+			sizeof(global_locname)) >= sizeof(global_locname))
 			global_locname[0] = '\0';
 		goto done;
 	}
@@ -156,13 +158,13 @@ setlocale(int category, const char *locname)
 		if (strcmp(newgl[ic], newgl[1]) != 0)
 			break;
 	if (ic == _LC_LAST) {
-		if (strlcpy(global_locname, newgl[1],
-		    sizeof(global_locname)) >= sizeof(global_locname))
+		if (strlcpy(global_locname, newgl[1], sizeof(global_locname)) >=
+		    sizeof(global_locname))
 			global_locname[0] = '\0';
 	} else {
 		ic = snprintf(global_locname, sizeof(global_locname),
-		    "%s/%s/%s/%s/%s/%s", newgl[1], newgl[2], newgl[3],
-		    newgl[4], newgl[5], newgl[6]);
+		    "%s/%s/%s/%s/%s/%s", newgl[1], newgl[2], newgl[3], newgl[4],
+		    newgl[5], newgl[6]);
 		if (ic < 0 || ic >= sizeof(global_locname))
 			global_locname[0] = '\0';
 	}
@@ -180,7 +182,8 @@ done:
 			if (category == LC_ALL || category == LC_CTYPE)
 				_GlobalRuneLocale =
 				    strchr(newgl[LC_CTYPE], '.') == NULL ?
-				    &_DefaultRuneLocale : _Utf8RuneLocale;
+				    &_DefaultRuneLocale :
+				    _Utf8RuneLocale;
 		} else {
 			freegl(newgl);
 			return NULL;

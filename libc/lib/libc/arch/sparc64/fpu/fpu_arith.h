@@ -43,7 +43,8 @@
  *
  *	@(#)fpu_arith.h	8.1 (Berkeley) 6/11/93
  *	$NetBSD: fpu_arith.h,v 1.3 2000/07/24 04:11:03 mycroft Exp $
- * $FreeBSD: src/lib/libc/sparc64/fpu/fpu_arith.h,v 1.2 2002/03/22 23:41:59 obrien Exp $
+ * $FreeBSD: src/lib/libc/sparc64/fpu/fpu_arith.h,v 1.2 2002/03/22 23:41:59
+ * obrien Exp $
  */
 
 /*
@@ -61,7 +62,7 @@
  */
 
 /* set up for extended-precision arithmetic */
-#define	FPU_DECL_CARRY
+#define FPU_DECL_CARRY
 
 /*
  * We have three kinds of add:
@@ -79,20 +80,20 @@
  * or set it from a value.  SET_CARRY turns 0 into no-carry, nonzero
  * into carry; GET_CARRY sets its argument to 0 or 1.
  */
-#define	FPU_ADDC(r, x, y) \
+#define FPU_ADDC(r, x, y)                                                      \
 	__asm volatile("addx %1,%2,%0" : "=r"(r) : "r"(x), "r"(y))
-#define	FPU_ADDS(r, x, y) \
+#define FPU_ADDS(r, x, y)                                                      \
 	__asm volatile("addcc %1,%2,%0" : "=r"(r) : "r"(x), "r"(y))
-#define	FPU_ADDCS(r, x, y) \
+#define FPU_ADDCS(r, x, y)                                                     \
 	__asm volatile("addxcc %1,%2,%0" : "=r"(r) : "r"(x), "r"(y))
-#define	FPU_SUBC(r, x, y) \
+#define FPU_SUBC(r, x, y)                                                      \
 	__asm volatile("subx %1,%2,%0" : "=r"(r) : "r"(x), "r"(y))
-#define	FPU_SUBS(r, x, y) \
+#define FPU_SUBS(r, x, y)                                                      \
 	__asm volatile("subcc %1,%2,%0" : "=r"(r) : "r"(x), "r"(y))
-#define	FPU_SUBCS(r, x, y) \
+#define FPU_SUBCS(r, x, y)                                                     \
 	__asm volatile("subxcc %1,%2,%0" : "=r"(r) : "r"(x), "r"(y))
 
-#define	FPU_GET_CARRY(r) __asm volatile("addx %%g0,%%g0,%0" : "=r"(r))
-#define	FPU_SET_CARRY(v) __asm volatile("addcc %0,-1,%%g0" : : "r"(v))
+#define FPU_GET_CARRY(r) __asm volatile("addx %%g0,%%g0,%0" : "=r"(r))
+#define FPU_SET_CARRY(v) __asm volatile("addcc %0,-1,%%g0" : : "r"(v))
 
-#define	FPU_SHL1_BY_ADD	/* shift left 1 faster by ADDC than (a<<1)|(b>>31) */
+#define FPU_SHL1_BY_ADD /* shift left 1 faster by ADDC than (a<<1)|(b>>31) */

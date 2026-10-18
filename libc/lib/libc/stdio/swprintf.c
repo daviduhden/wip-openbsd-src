@@ -32,9 +32,9 @@
 #include <wchar.h>
 
 int
-swprintf(wchar_t * __restrict s, size_t n, const wchar_t * __restrict fmt, ...)
+swprintf(wchar_t *__restrict s, size_t n, const wchar_t *__restrict fmt, ...)
 {
-	int ret;
+	int	ret;
 	va_list ap;
 
 	va_start(ap, fmt);

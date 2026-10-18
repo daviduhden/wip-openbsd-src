@@ -34,23 +34,23 @@
 /*
  * i386-dependent ptrace definitions
  */
-#define	PT_STEP		(PT_FIRSTMACH + 0)
-#define	PT_GETREGS	(PT_FIRSTMACH + 1)
-#define	PT_SETREGS	(PT_FIRSTMACH + 2)
-#define	PT_GETFPREGS	(PT_FIRSTMACH + 3)
-#define	PT_SETFPREGS	(PT_FIRSTMACH + 4)
+#define PT_STEP (PT_FIRSTMACH + 0)
+#define PT_GETREGS (PT_FIRSTMACH + 1)
+#define PT_SETREGS (PT_FIRSTMACH + 2)
+#define PT_GETFPREGS (PT_FIRSTMACH + 3)
+#define PT_SETFPREGS (PT_FIRSTMACH + 4)
 
-#define	PT_GETXSTATE_INFO	(PT_FIRSTMACH + 5)
-#define	PT_GETXSTATE		(PT_FIRSTMACH + 6)
-#define	PT_SETXSTATE		(PT_FIRSTMACH + 7)
+#define PT_GETXSTATE_INFO (PT_FIRSTMACH + 5)
+#define PT_GETXSTATE (PT_FIRSTMACH + 6)
+#define PT_SETXSTATE (PT_FIRSTMACH + 7)
 
 struct ptrace_xstate_info {
-	uint64_t	xsave_mask;
-	uint32_t	xsave_len;
+	uint64_t xsave_mask;
+	uint32_t xsave_len;
 };
 
 #ifdef _KERNEL
-int	process_read_xstate_info(struct proc *, void *);
-int	process_read_xstate(struct proc *, void *);
-int	process_write_xstate(struct proc *, void *);
+int process_read_xstate_info(struct proc *, void *);
+int process_read_xstate(struct proc *, void *);
+int process_write_xstate(struct proc *, void *);
 #endif

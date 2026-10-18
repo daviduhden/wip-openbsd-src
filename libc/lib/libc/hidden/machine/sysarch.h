@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_MACHINE_SYSARCH_H_
-#define	_LIBC_MACHINE_SYSARCH_H_
+#define _LIBC_MACHINE_SYSARCH_H_
 
 #include_next <machine/sysarch.h>
 

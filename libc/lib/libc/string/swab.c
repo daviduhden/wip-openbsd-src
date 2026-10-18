@@ -20,8 +20,8 @@ void
 swab(const void *__restrict from, void *__restrict to, ssize_t len)
 {
 	const unsigned char *src = from;
-	unsigned char *dst = to;
-	unsigned char t0, t1;
+	unsigned char	    *dst = to;
+	unsigned char	     t0, t1;
 
 	while (len > 1) {
 		t0 = src[0];

@@ -35,17 +35,17 @@
  *	@(#)icu.h	5.6 (Berkeley) 5/9/91
  */
 
-#ifndef	_MACHINE_I8259_H_
-#define	_MACHINE_I8259_H_
+#ifndef _MACHINE_I8259_H_
+#define _MACHINE_I8259_H_
 
 #include <dev/isa/isareg.h>
 
-#ifndef	_LOCORE
+#ifndef _LOCORE
 
 /*
  * Interrupt "level" mechanism variables, masks, and macros
  */
-extern	unsigned i8259_imen;		/* interrupt mask enable */
+extern unsigned i8259_imen; /* interrupt mask enable */
 
 extern void i8259_default_setup(void);
 
@@ -54,39 +54,38 @@ extern void i8259_default_setup(void);
 /*
  * Interrupt enable bits -- in order of priority
  */
-#define	IRQ_SLAVE	2
+#define IRQ_SLAVE 2
 
 /*
  * Interrupt Control offset into Interrupt descriptor table (IDT)
  */
-#define	ICU_OFFSET	32		/* 0-31 are processor exceptions */
-#define	ICU_LEN		16		/* 32-47 are ISA interrupts */
+#define ICU_OFFSET 32 /* 0-31 are processor exceptions */
+#define ICU_LEN 16    /* 32-47 are ISA interrupts */
 
-
-#define	IRQ_BIT(num)	(1 << ((num) % 8))
-#define	IRQ_BYTE(num)	((num) >> 3)
+#define IRQ_BIT(num) (1 << ((num) % 8))
+#define IRQ_BYTE(num) ((num) >> 3)
 
 #define i8259_late_ack(num)
 
-#define	i8259_asm_ack1(num) \
-	movb	$(0x60|(num%8)),%al	/* specific EOI */		;\
-	outb	%al,$IO_ICU1
+#define i8259_asm_ack1(num)                                                    \
+	movb $(0x60 | (num % 8)), % al /* specific EOI */;                     \
+	outb % al, $IO_ICU1
 
-#define	i8259_asm_ack2(num) \
-	movb	$(0x60|(num%8)),%al	/* specific EOI */		;\
-	outb	%al,$IO_ICU2		/* do the second ICU first */	;\
-	movb	$(0x60|IRQ_SLAVE),%al	/* specific EOI for IRQ2 */	;\
-	outb	%al,$IO_ICU1
+#define i8259_asm_ack2(num)                                                    \
+	movb $(0x60 | (num % 8)), % al /* specific EOI */;                     \
+	outb % al, $IO_ICU2 /* do the second ICU first */;                     \
+	movb $(0x60 | IRQ_SLAVE), % al /* specific EOI for IRQ2 */;            \
+	outb % al, $IO_ICU1
 
-#define	i8259_asm_mask(num) \
-	movb	CVAROFF(i8259_imen, IRQ_BYTE(num)),%al			;\
-	orb	$IRQ_BIT(num),%al					;\
-	movb	%al,CVAROFF(i8259_imen, IRQ_BYTE(num))			;\
-	outb	%al,$(ICUADDR+1)
-#define	i8259_asm_unmask(num) \
-	movb	CVAROFF(i8259_imen, IRQ_BYTE(num)),%al			;\
-	andb	$~IRQ_BIT(num),%al					;\
-	movb	%al,CVAROFF(i8259_imen, IRQ_BYTE(num))			;\
-	outb	%al,$(ICUADDR+1)
+#define i8259_asm_mask(num)                                                    \
+	movb CVAROFF(i8259_imen, IRQ_BYTE(num)), % al;                         \
+	orb  $IRQ_BIT(num), % al;                                              \
+	movb % al, CVAROFF(i8259_imen, IRQ_BYTE(num));                         \
+	outb % al, $(ICUADDR + 1)
+#define i8259_asm_unmask(num)                                                  \
+	movb CVAROFF(i8259_imen, IRQ_BYTE(num)), % al;                         \
+	andb $ ~IRQ_BIT(num), % al;                                            \
+	movb % al, CVAROFF(i8259_imen, IRQ_BYTE(num));                         \
+	outb % al, $(ICUADDR + 1)
 
 #endif /* !_MACHINE_I8259_H_ */

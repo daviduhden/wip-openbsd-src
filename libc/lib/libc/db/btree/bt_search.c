@@ -34,9 +34,9 @@
 
 #include <sys/types.h>
 
+#include <db.h>
 #include <stdio.h>
 
-#include <db.h>
 #include "btree.h"
 
 static int __bt_snext(BTREE *, PAGE *, const DBT *, int *);
@@ -59,10 +59,10 @@ static int __bt_sprev(BTREE *, PAGE *, const DBT *, int *);
 EPG *
 __bt_search(BTREE *t, const DBT *key, int *exactp)
 {
-	PAGE *h;
+	PAGE  *h;
 	indx_t base, idx, lim;
 	pgno_t pg;
-	int cmp;
+	int    cmp;
 
 	BT_CLR(t);
 	for (pg = P_ROOT;;) {
@@ -96,8 +96,7 @@ __bt_search(BTREE *t, const DBT *key, int *exactp)
 		 */
 		if (h->flags & P_BLEAF) {
 			if (!F_ISSET(t, B_NODUPS)) {
-				if (base == 0 &&
-				    h->prevpg != P_INVALID &&
+				if (base == 0 && h->prevpg != P_INVALID &&
 				    __bt_sprev(t, h, key, exactp))
 					return (&t->bt_cur);
 				if (base == NEXTINDEX(h) &&
@@ -119,7 +118,8 @@ __bt_search(BTREE *t, const DBT *key, int *exactp)
 		 */
 		idx = base ? base - 1 : base;
 
-next:		BT_PUSH(t, h->pgno, idx);
+	next:
+		BT_PUSH(t, h->pgno, idx);
 		pg = GETBINTERNAL(h, idx)->pgno;
 		mpool_put(t->bt_mp, h, 0);
 	}

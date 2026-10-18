@@ -4,7 +4,7 @@
 /*
  * Copyright (c) 2001 Christopher G. Demetriou
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -20,7 +20,7 @@
  *          information about NetBSD.
  * 4. The name of the author may not be used to endorse or promote products
  *    derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -31,7 +31,7 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * <<Id: LICENSE,v 1.2 2000/06/14 15:57:33 cgd Exp>>
  */
 
@@ -40,18 +40,18 @@
  */
 
 #include <search.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define	TEST(e)	((e) ? (void)0 : testfail(__FILE__, __LINE__, #e))
+#define TEST(e) ((e) ? (void)0 : testfail(__FILE__, __LINE__, #e))
 
 static void
 testfail(const char *file, unsigned long line, const char *expression)
 {
 
-	fprintf(stderr, "TEST FAILED: %s: file %s, line %ld\n",
-	    expression, file, line);
+	fprintf(stderr, "TEST FAILED: %s: file %s, line %ld\n", expression,
+	    file, line);
 	exit(1);
 }
 
@@ -59,20 +59,20 @@ int
 main(int argc, char *argv[])
 {
 	ENTRY e, *ep, *ep2;
-	int created_ok;
-	char ch[2];
-	int i;
+	int   created_ok;
+	char  ch[2];
+	int   i;
 
 	created_ok = hcreate(16);
 	TEST(created_ok);
 
 	/* ch[1] should be constant from here on down. */
 	ch[1] = '\0';
-	
+
 	/* Basic insertions.  Check enough that there'll be collisions. */
 	for (i = 0; i < 26; i++) {
 		ch[0] = 'a' + i;
-		e.key = strdup(ch);	/* ptr to provided key is kept! */
+		e.key = strdup(ch); /* ptr to provided key is kept! */
 		TEST(e.key != NULL);
 		e.data = (void *)(long)i;
 		ep = hsearch(e, ENTER);

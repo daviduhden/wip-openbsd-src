@@ -34,18 +34,19 @@
  */
 #include <sys/types.h>
 #include <sys/uio.h>
+
+#include <limits.h>
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
-#include <limits.h>
 
 void
 psignal(int sig, const char *s)
 {
-	static char buf[NL_TEXTMAX];
-	const char *c;
+	static char  buf[NL_TEXTMAX];
+	const char  *c;
 	struct iovec iov[4];
-	int niov = 0;
+	int	     niov = 0;
 
 	c = __strsignal(sig, buf);
 	if (s && *s) {
@@ -57,7 +58,7 @@ psignal(int sig, const char *s)
 	}
 	iov[niov].iov_base = (void *)c;
 	iov[niov].iov_len = strlen(c);
-	iov[niov+1].iov_base = "\n";
-	iov[niov+1].iov_len = 1;
-	(void)writev(STDERR_FILENO, iov, niov+2);
+	iov[niov + 1].iov_base = "\n";
+	iov[niov + 1].iov_len = 1;
+	(void)writev(STDERR_FILENO, iov, niov + 2);
 }

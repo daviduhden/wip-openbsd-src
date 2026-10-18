@@ -36,31 +36,32 @@
 #define _SYS_GMON_H_
 
 #include <sys/queue.h>
+
 #include <machine/profile.h>
 
 /*
  * Structure prepended to gmon.out profiling data file.
  */
 struct gmonhdr {
-	u_long	lpc;		/* base pc address of sample buffer */
-	u_long	hpc;		/* max pc address of sampled buffer */
-	int	ncnt;		/* size of sample buffer (plus this header) */
-	int	version;	/* version number */
-	int	profrate;	/* profiling clock rate */
-	int	totarc;		/* space used by arcs */
-	int	spare[2];	/* reserved */
+	u_long lpc;	 /* base pc address of sample buffer */
+	u_long hpc;	 /* max pc address of sampled buffer */
+	int    ncnt;	 /* size of sample buffer (plus this header) */
+	int    version;	 /* version number */
+	int    profrate; /* profiling clock rate */
+	int    totarc;	 /* space used by arcs */
+	int    spare[2]; /* reserved */
 };
-#define GMONVERSION	0x00051879
+#define GMONVERSION 0x00051879
 
 /*
  * histogram counters are unsigned shorts (according to the kernel).
  */
-#define	HISTCOUNTER	unsigned short
+#define HISTCOUNTER unsigned short
 
 /*
  * fraction of text space to allocate for histogram counters here, 1/2
  */
-#define	HISTFRACTION	2
+#define HISTFRACTION 2
 
 /*
  * Fraction of text space to allocate for from hash buckets.
@@ -90,19 +91,19 @@ struct gmonhdr {
  * profiling data structures without (in practice) sacrificing
  * any granularity.
  */
-#define	HASHFRACTION	2
+#define HASHFRACTION 2
 
 /*
  * percent of text space to allocate for tostructs with a minimum.
  */
-#define ARCDENSITY	2
-#define MINARCS		50
-#define MAXARCS		((1 << (8 * sizeof(HISTCOUNTER))) - 2)
+#define ARCDENSITY 2
+#define MINARCS 50
+#define MAXARCS ((1 << (8 * sizeof(HISTCOUNTER))) - 2)
 
 struct tostruct {
 	u_long	selfpc;
 	long	count;
-	u_short	link;
+	u_short link;
 	u_short pad;
 };
 
@@ -111,59 +112,59 @@ struct tostruct {
  * the called site and a count.
  */
 struct rawarc {
-	u_long	raw_frompc;
-	u_long	raw_selfpc;
-	long	raw_count;
+	u_long raw_frompc;
+	u_long raw_selfpc;
+	long   raw_count;
 };
 
 /*
  * general rounding functions.
  */
-#define ROUNDDOWN(x,y)	(((x)/(y))*(y))
-#define ROUNDUP(x,y)	((((x)+(y)-1)/(y))*(y))
+#define ROUNDDOWN(x, y) (((x) / (y)) * (y))
+#define ROUNDUP(x, y) ((((x) + (y) - 1) / (y)) * (y))
 
 /*
  * The profiling data structures are housed in this structure.
  */
 struct gmonparam {
-	int		state;
+	int		 state;
 	u_short		*kcount;
-	u_long		kcountsize;
+	u_long		 kcountsize;
 	u_short		*froms;
-	u_long		fromssize;
-	struct tostruct	*tos;
-	u_long		tossize;
-	long		tolimit;
-	u_long		lowpc;
-	u_long		highpc;
-	u_long		textsize;
-	u_long		hashfraction;
+	u_long		 fromssize;
+	struct tostruct *tos;
+	u_long		 tossize;
+	long		 tolimit;
+	u_long		 lowpc;
+	u_long		 highpc;
+	u_long		 textsize;
+	u_long		 hashfraction;
 	void		*outbuf;
-	size_t		outbuflen;
+	size_t		 outbuflen;
 	void		*rawarcs;
-	int		dirfd;
-	SLIST_ENTRY(gmonparam)	list;
+	int		 dirfd;
+	SLIST_ENTRY(gmonparam) list;
 };
 
 /*
  * Possible states of profiling.
  */
-#define	GMON_PROF_ON	0
-#define	GMON_PROF_BUSY	1
-#define	GMON_PROF_ERROR	2
-#define	GMON_PROF_OFF	3
+#define GMON_PROF_ON 0
+#define GMON_PROF_BUSY 1
+#define GMON_PROF_ERROR 2
+#define GMON_PROF_OFF 3
 
 /*
  * Sysctl definitions for extracting profiling information from the kernel.
  */
-#define	GPROF_STATE	0	/* int: profiling enabling variable */
-#define	GPROF_COUNT	1	/* struct: profile tick count buffer */
-#define	GPROF_FROMS	2	/* struct: from location hash bucket */
-#define	GPROF_TOS	3	/* struct: destination/count structure */
-#define	GPROF_GMONPARAM	4	/* struct: profiling parameters (see above) */
+#define GPROF_STATE 0	  /* int: profiling enabling variable */
+#define GPROF_COUNT 1	  /* struct: profile tick count buffer */
+#define GPROF_FROMS 2	  /* struct: from location hash bucket */
+#define GPROF_TOS 3	  /* struct: destination/count structure */
+#define GPROF_GMONPARAM 4 /* struct: profiling parameters (see above) */
 
 #ifdef _KERNEL
-extern int gmoninit;		/* Is the kernel ready for being profiled? */
+extern int gmoninit; /* Is the kernel ready for being profiled? */
 
 #else /* !_KERNEL */
 
@@ -171,10 +172,10 @@ extern int gmoninit;		/* Is the kernel ready for being profiled? */
 
 __BEGIN_DECLS
 extern struct gmonparam _gmonparam;
-void	_mcleanup(void);
-void	_monstartup(u_long, u_long);
-void	moncontrol(int);
-struct gmonparam *_gmon_alloc(void);
+void			_mcleanup(void);
+void			_monstartup(u_long, u_long);
+void			moncontrol(int);
+struct gmonparam       *_gmon_alloc(void);
 __END_DECLS
 
 #endif /* !_KERNEL */

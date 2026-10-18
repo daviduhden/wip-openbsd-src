@@ -32,16 +32,16 @@
 #endif
 
 struct cpumem {
-	void		*mem;
+	void *mem;
 };
 
 struct cpumem_iter {
-	unsigned int	cpu;
+	unsigned int cpu;
 } __upunused;
 
 struct counters_ref {
-	uint64_t	 g;
-	uint64_t	*c;
+	uint64_t  g;
+	uint64_t *c;
 };
 
 #ifdef _KERNEL
@@ -50,15 +50,15 @@ struct counters_ref {
 
 struct pool;
 
-struct cpumem	*cpumem_get(struct pool *);
-void		 cpumem_put(struct pool *, struct cpumem *);
+struct cpumem *cpumem_get(struct pool *);
+void	       cpumem_put(struct pool *, struct cpumem *);
 
-struct cpumem	*cpumem_malloc(size_t, int);
-struct cpumem	*cpumem_malloc_ncpus(struct cpumem *, size_t, int);
-void		 cpumem_free(struct cpumem *, int, size_t);
+struct cpumem *cpumem_malloc(size_t, int);
+struct cpumem *cpumem_malloc_ncpus(struct cpumem *, size_t, int);
+void	       cpumem_free(struct cpumem *, int, size_t);
 
-void		*cpumem_first(struct cpumem_iter *, struct cpumem *);
-void		*cpumem_next(struct cpumem_iter *, struct cpumem *);
+void *cpumem_first(struct cpumem_iter *, struct cpumem *);
+void *cpumem_next(struct cpumem_iter *, struct cpumem *);
 
 static inline void *
 cpumem_enter(struct cpumem *cm)
@@ -78,44 +78,40 @@ cpumem_leave(struct cpumem *cm, void *mem)
 
 #ifdef MULTIPROCESSOR
 
-#define CPUMEM_BOOT_MEMORY(_name, _sz)					\
-static struct {								\
-	unsigned char	mem[_sz];					\
-	struct cpumem	cpumem;						\
-} __aligned(CACHELINESIZE) _name##_boot_cpumem = {			\
-	.cpumem = { _name##_boot_cpumem.mem }				\
-}
+#define CPUMEM_BOOT_MEMORY(_name, _sz)                                         \
+	static struct {                                                        \
+		unsigned char mem[_sz];                                        \
+		struct cpumem cpumem;                                          \
+	} __aligned(CACHELINESIZE)                                             \
+	    _name##_boot_cpumem = {.cpumem = {_name##_boot_cpumem.mem}}
 
-#define CPUMEM_BOOT_INITIALIZER(_name)					\
-	{ &_name##_boot_cpumem.cpumem }
+#define CPUMEM_BOOT_INITIALIZER(_name) {&_name##_boot_cpumem.cpumem}
 
 #else /* MULTIPROCESSOR */
 
-#define CPUMEM_BOOT_MEMORY(_name, _sz)					\
-static struct {								\
-	unsigned char	mem[_sz];					\
-} __aligned(sizeof(uint64_t)) _name##_boot_cpumem
+#define CPUMEM_BOOT_MEMORY(_name, _sz)                                         \
+	static struct {                                                        \
+		unsigned char mem[_sz];                                        \
+	} __aligned(sizeof(uint64_t)) _name##_boot_cpumem
 
-#define CPUMEM_BOOT_INITIALIZER(_name)					\
-	{ (struct cpumem *)&_name##_boot_cpumem.mem }
+#define CPUMEM_BOOT_INITIALIZER(_name)                                         \
+	{(struct cpumem *)&_name##_boot_cpumem.mem}
 
 #endif /* MULTIPROCESSOR */
 
-#define CPUMEM_FOREACH(_var, _iter, _cpumem)				\
-	for ((_var) = cpumem_first((_iter), (_cpumem));			\
-	    (_var) != NULL;						\
+#define CPUMEM_FOREACH(_var, _iter, _cpumem)                                   \
+	for ((_var) = cpumem_first((_iter), (_cpumem)); (_var) != NULL;        \
 	    (_var) = cpumem_next((_iter), (_cpumem)))
 
 /*
  * per cpu counters
  */
 
-struct cpumem	*counters_alloc(unsigned int);
-struct cpumem	*counters_alloc_ncpus(struct cpumem *, unsigned int);
-void		 counters_free(struct cpumem *, unsigned int);
-void		 counters_read(struct cpumem *, uint64_t *, unsigned int,
-		     uint64_t *);
-void		 counters_zero(struct cpumem *, unsigned int);
+struct cpumem *counters_alloc(unsigned int);
+struct cpumem *counters_alloc_ncpus(struct cpumem *, unsigned int);
+void	       counters_free(struct cpumem *, unsigned int);
+void counters_read(struct cpumem *, uint64_t *, unsigned int, uint64_t *);
+void counters_zero(struct cpumem *, unsigned int);
 
 static inline uint64_t *
 counters_enter(struct counters_ref *ref, struct cpumem *cm)
@@ -144,7 +140,7 @@ static inline void
 counters_inc(struct cpumem *cm, unsigned int c)
 {
 	struct counters_ref ref;
-	uint64_t *counters;
+	uint64_t	   *counters;
 
 	counters = counters_enter(&ref, cm);
 	counters[c]++;
@@ -155,7 +151,7 @@ static inline void
 counters_dec(struct cpumem *cm, unsigned int c)
 {
 	struct counters_ref ref;
-	uint64_t *counters;
+	uint64_t	   *counters;
 
 	counters = counters_enter(&ref, cm);
 	counters[c]--;
@@ -166,7 +162,7 @@ static inline void
 counters_add(struct cpumem *cm, unsigned int c, uint64_t v)
 {
 	struct counters_ref ref;
-	uint64_t *counters;
+	uint64_t	   *counters;
 
 	counters = counters_enter(&ref, cm);
 	counters[c] += v;
@@ -177,7 +173,7 @@ static inline void
 counters_pkt(struct cpumem *cm, unsigned int c, unsigned int b, uint64_t v)
 {
 	struct counters_ref ref;
-	uint64_t *counters;
+	uint64_t	   *counters;
 
 	counters = counters_enter(&ref, cm);
 	counters[c]++;
@@ -186,14 +182,14 @@ counters_pkt(struct cpumem *cm, unsigned int c, unsigned int b, uint64_t v)
 }
 
 #ifdef MULTIPROCESSOR
-#define COUNTERS_BOOT_MEMORY(_name, _n)					\
+#define COUNTERS_BOOT_MEMORY(_name, _n)                                        \
 	CPUMEM_BOOT_MEMORY(_name, ((_n) + 1) * sizeof(uint64_t))
 #else
-#define COUNTERS_BOOT_MEMORY(_name, _n)					\
+#define COUNTERS_BOOT_MEMORY(_name, _n)                                        \
 	CPUMEM_BOOT_MEMORY(_name, (_n) * sizeof(uint64_t))
 #endif
 
-#define COUNTERS_BOOT_INITIALIZER(_name)	CPUMEM_BOOT_INITIALIZER(_name)
+#define COUNTERS_BOOT_INITIALIZER(_name) CPUMEM_BOOT_INITIALIZER(_name)
 
 #endif /* _KERNEL */
 #endif /* _SYS_PERCPU_H_ */

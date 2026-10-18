@@ -19,8 +19,8 @@
  * signals
  */
 
-#include <signal.h>
 #include <errno.h>
+#include <signal.h>
 
 int
 WRAP(sigaction)(int sig, const struct sigaction *act, struct sigaction *oact)

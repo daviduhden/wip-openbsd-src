@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_NETINET_IN_H_
-#define	_LIBC_NETINET_IN_H_
+#define _LIBC_NETINET_IN_H_
 
 #include_next <netinet/in.h>
 
@@ -43,4 +43,3 @@ PROTO_DEPRECATED(inet6_rth_segments);
 PROTO_NORMAL(inet6_rth_space);
 
 #endif /* _LIBC_NETINET_IN_H_ */
-

@@ -1,4 +1,5 @@
-/*	$OpenBSD: readpassphrase.c,v 1.32 2026/10/15 16:40:50 millert Exp $	*/
+/*	$OpenBSD: readpassphrase.c,v 1.32 2026/10/15 16:40:50 millert Exp $
+ */
 
 /*
  * Copyright (c) 2000-2002, 2007, 2010
@@ -26,11 +27,11 @@
 #include <fcntl.h>
 #include <paths.h>
 #include <pwd.h>
+#include <readpassphrase.h>
 #include <signal.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
-#include <readpassphrase.h>
 
 static volatile sig_atomic_t signo[_NSIG];
 
@@ -54,17 +55,17 @@ sigaction_except_ign(int signum, struct sigaction *act, struct sigaction *old)
 char *
 readpassphrase(const char *prompt, char *buf, size_t bufsiz, int flags)
 {
-	ssize_t nr;
-	int input, output, save_errno, i, need_restart;
-	char ch, *p, *end;
-	struct termios term, oterm;
+	ssize_t		 nr;
+	int		 input, output, save_errno, i, need_restart;
+	char		 ch, *p, *end;
+	struct termios	 term, oterm;
 	struct sigaction sa, savealrm, saveint, savehup, savequit, saveterm;
 	struct sigaction savetstp, savettin, savettou, savepipe;
 
 	/* I suppose we could alloc on demand in this case (XXX). */
 	if (bufsiz == 0) {
 		errno = EINVAL;
-		return(NULL);
+		return (NULL);
 	}
 
 restart:
@@ -78,10 +79,11 @@ restart:
 	 * stdin and write to stderr unless a tty is required.
 	 */
 	if ((flags & RPP_STDIN) ||
-	    (input = output = __pledge_open(_PATH_TTY, O_RDWR | O_CLOEXEC)) == -1) {
+	    (input = output = __pledge_open(_PATH_TTY, O_RDWR | O_CLOEXEC)) ==
+		-1) {
 		if (flags & RPP_REQUIRE_TTY) {
 			errno = ENOTTY;
-			return(NULL);
+			return (NULL);
 		}
 		input = STDIN_FILENO;
 		output = STDERR_FILENO;
@@ -98,7 +100,7 @@ restart:
 			term.c_lflag &= ~(ECHO | ECHONL);
 		if (term.c_cc[VSTATUS] != _POSIX_VDISABLE)
 			term.c_cc[VSTATUS] = _POSIX_VDISABLE;
-		(void)tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
+		(void)tcsetattr(input, TCSAFLUSH | TCSASOFT, &term);
 	} else {
 		memset(&term, 0, sizeof(term));
 		term.c_lflag |= ECHO;
@@ -112,7 +114,7 @@ restart:
 	 * things like SIGXCPU and SIGVTALRM for now.
 	 */
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;		/* don't restart system calls */
+	sa.sa_flags = 0; /* don't restart system calls */
 	sa.sa_handler = handler;
 	sigaction(SIGINT, &sa, &saveint);
 	sigaction(SIGQUIT, &sa, &savequit);
@@ -151,7 +153,7 @@ restart:
 		const int sigttou = signo[SIGTTOU];
 
 		/* Ignore SIGTTOU generated when we are not the fg pgrp. */
-		while (tcsetattr(input, TCSAFLUSH|TCSASOFT, &oterm) == -1 &&
+		while (tcsetattr(input, TCSAFLUSH | TCSASOFT, &oterm) == -1 &&
 		    errno == EINTR && !signo[SIGTTOU])
 			continue;
 		signo[SIGTTOU] = sigttou;
@@ -188,7 +190,7 @@ restart:
 
 	if (save_errno)
 		errno = save_errno;
-	return(nr == -1 ? NULL : buf);
+	return (nr == -1 ? NULL : buf);
 }
 DEF_WEAK(readpassphrase);
 
@@ -197,10 +199,11 @@ getpass(const char *prompt)
 {
 	static char buf[_PASSWORD_LEN + 1];
 
-	return(readpassphrase(prompt, buf, sizeof(buf), RPP_ECHO_OFF));
+	return (readpassphrase(prompt, buf, sizeof(buf), RPP_ECHO_OFF));
 }
 
-static void handler(int s)
+static void
+handler(int s)
 {
 
 	signo[s] = 1;

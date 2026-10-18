@@ -33,26 +33,28 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
-#include <errno.h>
 #include <unistd.h>
+
 #include "local.h"
 
 FILE *
 fopen(const char *file, const char *mode)
 {
 	FILE *fp;
-	int f;
-	int flags, oflags;
+	int   f;
+	int   flags, oflags;
 
 	if ((flags = __sflags(mode, &oflags)) == 0)
 		return (NULL);
 	if ((fp = __sfp()) == NULL)
 		return (NULL);
 	if ((f = open(file, oflags, DEFFILEMODE)) == -1) {
-		fp->_flags = 0;			/* release */
+		fp->_flags = 0; /* release */
 		return (NULL);
 	}
 
@@ -73,7 +75,7 @@ fopen(const char *file, const char *mode)
 	 * fseek and ftell.)
 	 */
 	if (oflags & O_APPEND)
-		(void) __sseek(fp, 0, SEEK_END);
+		(void)__sseek(fp, 0, SEEK_END);
 	return (fp);
 }
 DEF_STRONG(fopen);

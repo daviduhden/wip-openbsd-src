@@ -32,9 +32,10 @@
  *	@(#)user.h	8.2 (Berkeley) 9/23/93
  */
 
-#include <machine/pcb.h>
 #include <sys/resource.h>
 #include <sys/resourcevar.h>
+
+#include <machine/pcb.h>
 
 /*
  * Per process structure containing data that isn't needed in core
@@ -43,6 +44,6 @@
  * in all processes.
  */
 
-struct	user {
-	struct	pcb u_pcb;
+struct user {
+	struct pcb u_pcb;
 };

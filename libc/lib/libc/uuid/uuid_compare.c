@@ -1,4 +1,5 @@
-/*	$OpenBSD: uuid_compare.c,v 1.3 2015/09/10 18:13:46 guenther Exp $	*/
+/*	$OpenBSD: uuid_compare.c,v 1.3 2015/09/10 18:13:46 guenther Exp $
+ */
 /*	$NetBSD: uuid_compare.c,v 1.2 2008/04/23 07:52:32 plunky Exp $	*/
 
 /*-
@@ -27,17 +28,19 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libc/uuid/uuid_compare.c,v 1.6 2007/04/05 02:07:33 delphij Exp $
+ * $FreeBSD: src/lib/libc/uuid/uuid_compare.c,v 1.6 2007/04/05 02:07:33 delphij
+ * Exp $
  */
 
 #include <string.h>
 #include <uuid.h>
 
 /* A macro used to improve the readability of uuid_compare(). */
-#define DIFF_RETURN(a, b, field)	do {			\
-	if ((a)->field != (b)->field)				\
-		return (((a)->field < (b)->field) ? -1 : 1);	\
-} while (0)
+#define DIFF_RETURN(a, b, field)                                               \
+	do {                                                                   \
+		if ((a)->field != (b)->field)                                  \
+			return (((a)->field < (b)->field) ? -1 : 1);           \
+	} while (0)
 
 /*
  * uuid_compare() - compare two UUIDs.

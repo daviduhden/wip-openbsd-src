@@ -51,30 +51,30 @@ typedef int sig_atomic_t;
  * to the handler to allow it to restore state properly if
  * a non-standard exit is performed.
  */
-struct	sigcontext {
-	int	sc_gs;
-	int	sc_fs;
-	int	sc_es;
-	int	sc_ds;
-	int	sc_edi;
-	int	sc_esi;
-	int	sc_ebp;
-	int	sc_ebx;
-	int	sc_edx;
-	int	sc_ecx;
-	int	sc_eax;
+struct sigcontext {
+	int sc_gs;
+	int sc_fs;
+	int sc_es;
+	int sc_ds;
+	int sc_edi;
+	int sc_esi;
+	int sc_ebp;
+	int sc_ebx;
+	int sc_edx;
+	int sc_ecx;
+	int sc_eax;
 	/* XXX */
-	int	sc_eip;
-	int	sc_cs;
-	int	sc_eflags;
-	int	sc_esp;
-	int	sc_ss;
+	int sc_eip;
+	int sc_cs;
+	int sc_eflags;
+	int sc_esp;
+	int sc_ss;
 
-	long	sc_cookie;
-	int	sc_mask;		/* signal mask to restore */
+	long sc_cookie;
+	int  sc_mask; /* signal mask to restore */
 
-	int	sc_trapno;		/* XXX should be above */
-	int	sc_err;
+	int sc_trapno; /* XXX should be above */
+	int sc_err;
 
 	union savefpu *sc_fpstate;
 };
@@ -85,4 +85,4 @@ struct	sigcontext {
 #define sc_ps sc_eflags
 
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE >= 420 */
-#endif	/* !_MACHINE_SIGNAL_H_ */
+#endif /* !_MACHINE_SIGNAL_H_ */

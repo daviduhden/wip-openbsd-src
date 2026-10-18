@@ -1,4 +1,5 @@
-/*	$OpenBSD: fpclassifyl.c,v 1.2 2015/10/27 05:54:49 guenther Exp $	*/
+/*	$OpenBSD: fpclassifyl.c,v 1.2 2015/10/27 05:54:49 guenther Exp $
+ */
 /*
  * Copyright (c) 2008 Martynas Venckus <martynas@openbsd.org>
  *
@@ -16,6 +17,7 @@
  */
 
 #include <sys/types.h>
+
 #include <machine/ieee.h>
 #include <math.h>
 
@@ -31,7 +33,7 @@ __fpclassifyl(long double e)
 			return FP_SUBNORMAL;
 	}
 
-	p->ext_frach &= ~0x80000000;	/* clear normalization bit */
+	p->ext_frach &= ~0x80000000; /* clear normalization bit */
 
 	if (p->ext_exp == EXT_EXP_INFNAN) {
 		if (p->ext_frach == 0 && p->ext_fracl == 0)

@@ -42,7 +42,7 @@
  */
 
 #ifndef _MACHINE_REG_H_
-#define	_MACHINE_REG_H_
+#define _MACHINE_REG_H_
 
 /*
  * The v9 register window.  Each stack pointer (%o6 aka %sp) in each window
@@ -53,19 +53,19 @@
  * but with a hefty performance penalty).
  */
 struct rwindow {
-	int64_t	rw_local[8];		/* %l0..%l7 */
-	int64_t	rw_in[8];		/* %i0..%i7 */
+	int64_t rw_local[8]; /* %l0..%l7 */
+	int64_t rw_in[8];    /* %i0..%i7 */
 };
 
 struct reg {
-	int64_t	r_tstate;	/* tstate register */
-	int64_t	r_pc;		/* return pc */
-	int64_t	r_npc;		/* return npc */
-	int	r_y;		/* %y register -- 32-bits */
-	int64_t	r_global[8];	/* %g* registers in trap's caller */
-	int64_t	r_out[8];	/* %o* registers in trap's caller */
-	int64_t r_local[8];	/* %l* registers in trap's caller */
-	int64_t r_in[8];	/* %i* registers in trap's caller */
+	int64_t r_tstate;    /* tstate register */
+	int64_t r_pc;	     /* return pc */
+	int64_t r_npc;	     /* return npc */
+	int	r_y;	     /* %y register -- 32-bits */
+	int64_t r_global[8]; /* %g* registers in trap's caller */
+	int64_t r_out[8];    /* %o* registers in trap's caller */
+	int64_t r_local[8];  /* %l* registers in trap's caller */
+	int64_t r_in[8];     /* %i* registers in trap's caller */
 };
 
 /*
@@ -73,9 +73,9 @@ struct reg {
  */
 
 struct fpstate {
-	u_int	fs_regs[64];		/* our view is 64 32-bit registers */
-	int64_t	fs_fsr;			/* %fsr */
-	int	fs_gsr;			/* graphics state reg */
+	u_int	fs_regs[64]; /* our view is 64 32-bit registers */
+	int64_t fs_fsr;	     /* %fsr */
+	int	fs_gsr;	     /* graphics state reg */
 };
 
 /*
@@ -84,9 +84,9 @@ struct fpstate {
  * fact that `fpreg' is a prefix of `fpstate'.
  */
 struct fpreg {
-	u_int	fr_regs[64];		/* our view is 64 32-bit registers */
-	int64_t	fr_fsr;			/* %fsr */
-	int	fr_gsr;			/* graphics state reg */
+	u_int	fr_regs[64]; /* our view is 64 32-bit registers */
+	int64_t fr_fsr;	     /* %fsr */
+	int	fr_gsr;	     /* graphics state reg */
 };
 
 #endif /* _MACHINE_REG_H_ */

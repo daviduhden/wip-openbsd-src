@@ -30,15 +30,15 @@
  */
 
 #include <sys/types.h>
-#include <sys/uio.h>
 #include <sys/mman.h>
+#include <sys/uio.h>
 
+#include <db.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 
-#include <db.h>
 #include "recno.h"
 
 /*
@@ -54,7 +54,7 @@ int
 __rec_close(DB *dbp)
 {
 	BTREE *t;
-	int status;
+	int    status;
 
 	t = dbp->internal;
 
@@ -99,11 +99,11 @@ int
 __rec_sync(const DB *dbp, u_int flags)
 {
 	struct iovec iov[2];
-	BTREE *t;
-	DBT data, key;
-	off_t off;
-	recno_t scursor, trec;
-	int status;
+	BTREE	    *t;
+	DBT	     data, key;
+	off_t	     off;
+	recno_t	     scursor, trec;
+	int	     status;
 
 	t = dbp->internal;
 

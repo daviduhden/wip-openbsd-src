@@ -33,16 +33,17 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_rnd
 fpgetround(void)
 {
-	double fpcrval;
+	double	  fpcrval;
 	u_int64_t old;
 
 	__asm__("trapb");
-	__asm__("mf_fpcr %0" : "=f" (fpcrval));
+	__asm__("mf_fpcr %0" : "=f"(fpcrval));
 	__asm__("trapb");
 	old = *(u_int64_t *)&fpcrval;
 

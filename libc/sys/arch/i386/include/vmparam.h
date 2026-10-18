@@ -41,32 +41,32 @@
  * Machine dependent constants for 386.
  */
 
-#define	USRSTACK	VM_MAXUSER_ADDRESS
+#define USRSTACK VM_MAXUSER_ADDRESS
 
 /*
  * Virtual memory related constants, all in bytes
  */
-#define	MAXTSIZ		(256*1024*1024)		/* max text size */
+#define MAXTSIZ (256 * 1024 * 1024) /* max text size */
 #ifndef DFLDSIZ
-#define	DFLDSIZ		(64*1024*1024)		/* initial data size limit */
+#define DFLDSIZ (64 * 1024 * 1024) /* initial data size limit */
 #endif
 #ifndef MAXDSIZ
-#define	MAXDSIZ		(3UL*1024*1024*1024)	/* max data size */
+#define MAXDSIZ (3UL * 1024 * 1024 * 1024) /* max data size */
 #endif
 #ifndef BRKSIZ
-#define	BRKSIZ		(128*1024*1024)		/* heap gap size */
+#define BRKSIZ (128 * 1024 * 1024) /* heap gap size */
 #endif
-#ifndef	DFLSSIZ
-#define	DFLSSIZ		(4*1024*1024)		/* initial stack size limit */
+#ifndef DFLSSIZ
+#define DFLSSIZ (4 * 1024 * 1024) /* initial stack size limit */
 #endif
-#ifndef	MAXSSIZ
-#define	MAXSSIZ		(32*1024*1024)		/* max stack size */
+#ifndef MAXSSIZ
+#define MAXSSIZ (32 * 1024 * 1024) /* max stack size */
 #endif
 
-#define STACKGAP_RANDOM	256*1024
+#define STACKGAP_RANDOM 256 * 1024
 
 /* I386 has a line where all code is executable: 0 - I386_MAX_EXE_ADDR */
-#define I386_MAX_EXE_ADDR 0x20000000		/* exec line */
+#define I386_MAX_EXE_ADDR 0x20000000 /* exec line */
 
 /* map PIE into 320MB - 448MB address range */
 #define VM_PIE_MIN_ADDR 0x14000000
@@ -76,33 +76,34 @@
  * Size of shared memory map
  */
 #ifndef SHMMAXPGS
-#define SHMMAXPGS	8192
+#define SHMMAXPGS 8192
 #endif
 
 /*
  * Size of User Raw I/O map
  */
-#define	USRIOSIZE 	300
+#define USRIOSIZE 300
 
 /*
  * Specific addresses being unmapped and used as fillers for free memory.
  */
-#define	DEADBEEF0	0xefffeecc	/* malloc's filler */
-#define	DEADBEEF1	0xefffaabb	/* pool's filler */
+#define DEADBEEF0 0xefffeecc /* malloc's filler */
+#define DEADBEEF1 0xefffaabb /* pool's filler */
 
 /* user/kernel map constants */
-#define VM_MIN_ADDRESS		((vaddr_t)PAGE_SIZE)
-#define VM_MAXUSER_ADDRESS	((vaddr_t)((PDSLOT_PTE<<PDSHIFT) - (2 * PAGE_SIZE)))
-#define VM_MAX_ADDRESS		((vaddr_t)((PDSLOT_PTE<<PDSHIFT) + \
-				    (PDSLOT_PTE<<PAGE_SHIFT)))
-#define VM_MIN_KERNEL_ADDRESS	((vaddr_t)KERNBASE)
-#define VM_MAX_KERNEL_ADDRESS	((vaddr_t)(PDSLOT_APTE<<PDSHIFT))
+#define VM_MIN_ADDRESS ((vaddr_t)PAGE_SIZE)
+#define VM_MAXUSER_ADDRESS                                                     \
+	((vaddr_t)((PDSLOT_PTE << PDSHIFT) - (2 * PAGE_SIZE)))
+#define VM_MAX_ADDRESS                                                         \
+	((vaddr_t)((PDSLOT_PTE << PDSHIFT) + (PDSLOT_PTE << PAGE_SHIFT)))
+#define VM_MIN_KERNEL_ADDRESS ((vaddr_t)KERNBASE)
+#define VM_MAX_KERNEL_ADDRESS ((vaddr_t)(PDSLOT_APTE << PDSHIFT))
 
 /* virtual sizes (bytes) for various kernel submaps */
-#define VM_PHYS_SIZE		(USRIOSIZE*PAGE_SIZE)
+#define VM_PHYS_SIZE (USRIOSIZE * PAGE_SIZE)
 
-#define	VM_PHYSSEG_MAX	16	/* actually we could have this many segments */
-#define	VM_PHYSSEG_STRAT	VM_PSTRAT_BSEARCH
-#define	VM_PHYSSEG_NOADD	/* can't add RAM after vm_mem_init */
+#define VM_PHYSSEG_MAX 16 /* actually we could have this many segments */
+#define VM_PHYSSEG_STRAT VM_PSTRAT_BSEARCH
+#define VM_PHYSSEG_NOADD /* can't add RAM after vm_mem_init */
 
 #endif /* _MACHINE_VMPARAM_H_ */

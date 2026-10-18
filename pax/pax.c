@@ -378,7 +378,8 @@ main(int argc, char **argv)
 	 * append-mode trailer rewriting (ar_rev).
 	 */
 	/* Compressed multi-volume operations can execute another compressor
-	 * later. Keep those parents unpledged; their unveil view stays locked. */
+	 * later. Keep those parents unpledged; their unveil view stays locked.
+	 */
 	if (gzip_program == nullptr || act == COPY || act == APPND) {
 		const char *promises;
 
@@ -387,7 +388,8 @@ main(int argc, char **argv)
 		else if (act == APPND)
 			promises = "stdio rpath wpath getpw tape";
 		else
-			promises = "stdio rpath wpath cpath fattr dpath getpw tape";
+			promises =
+			    "stdio rpath wpath cpath fattr dpath getpw tape";
 		if (pledge(promises, nullptr) == -1)
 			err(1, "pledge");
 	}

@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef  _LIBC_RMD160_H
-#define  _LIBC_RMD160_H
+#ifndef _LIBC_RMD160_H
+#define _LIBC_RMD160_H
 
 #include_next <rmd160.h>
 
@@ -27,4 +27,4 @@ PROTO_NORMAL(RMD160Final);
 PROTO_NORMAL(RMD160Init);
 PROTO_NORMAL(RMD160Update);
 
-#endif  /* _LIBC_RMD160_H */
+#endif /* _LIBC_RMD160_H */

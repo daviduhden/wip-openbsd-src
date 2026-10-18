@@ -35,25 +35,25 @@
  * SUCH DAMAGE.
  */
 
+#include <string.h>
 #include <wchar.h>
 #include <wctype.h>
-#include <string.h>
+
 #include "runetype.h"
 
-static struct _WCTypeEntry wctype_entries[_WCTYPE_NINDEXES] =
-{
-	{ "alnum", _RUNETYPE_A|_RUNETYPE_D },
-	{ "alpha", _RUNETYPE_A },
-	{ "blank", _RUNETYPE_B },
-	{ "cntrl", _RUNETYPE_C },
-	{ "digit", _RUNETYPE_D },
-	{ "graph", _RUNETYPE_G },
-	{ "lower", _RUNETYPE_L },
-	{ "print", _RUNETYPE_R },
-	{ "punct", _RUNETYPE_P },
-	{ "space", _RUNETYPE_S },
-	{ "upper", _RUNETYPE_U },
-	{ "xdigit", _RUNETYPE_X },
+static struct _WCTypeEntry wctype_entries[_WCTYPE_NINDEXES] = {
+    {"alnum", _RUNETYPE_A | _RUNETYPE_D},
+    {"alpha", _RUNETYPE_A},
+    {"blank", _RUNETYPE_B},
+    {"cntrl", _RUNETYPE_C},
+    {"digit", _RUNETYPE_D},
+    {"graph", _RUNETYPE_G},
+    {"lower", _RUNETYPE_L},
+    {"print", _RUNETYPE_R},
+    {"punct", _RUNETYPE_P},
+    {"space", _RUNETYPE_S},
+    {"upper", _RUNETYPE_U},
+    {"xdigit", _RUNETYPE_X},
 };
 
 wctype_t

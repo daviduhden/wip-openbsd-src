@@ -10,8 +10,8 @@
 
 #include "wctoint.h"
 
-#define	FUNCNAME	wcstoull
+#define FUNCNAME wcstoull
 typedef unsigned long long int uint_type;
-#define	MAX_VALUE	ULLONG_MAX
+#define MAX_VALUE ULLONG_MAX
 
 #include "_wcstoul.h"

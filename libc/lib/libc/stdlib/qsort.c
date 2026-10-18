@@ -29,12 +29,14 @@
  */
 
 #include <sys/types.h>
+
 #include <stdlib.h>
 
-static __inline char	*med3(char *, char *, char *, int (*)(const void *, const void *));
-static __inline void	 swapfunc(char *, char *, size_t, int);
+static __inline char *med3(
+    char *, char *, char *, int (*)(const void *, const void *));
+static __inline void swapfunc(char *, char *, size_t, int);
 
-#define min(a, b)	(a) < (b) ? a : b
+#define min(a, b) (a) < (b) ? a : b
 
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
@@ -54,25 +56,26 @@ static __inline void	 swapfunc(char *, char *, size_t, int);
  *   4. Tail recursion is eliminated when sorting the larger of two
  *	subpartitions to save stack space.
  */
-#define SWAPTYPE_BYTEV	1
-#define SWAPTYPE_INTV	2
-#define SWAPTYPE_LONGV	3
-#define SWAPTYPE_INT	4
-#define SWAPTYPE_LONG	5
+#define SWAPTYPE_BYTEV 1
+#define SWAPTYPE_INTV 2
+#define SWAPTYPE_LONGV 3
+#define SWAPTYPE_INT 4
+#define SWAPTYPE_LONG 5
 
-#define TYPE_ALIGNED(TYPE, a, es)			\
+#define TYPE_ALIGNED(TYPE, a, es)                                              \
 	(((char *)a - (char *)0) % sizeof(TYPE) == 0 && es % sizeof(TYPE) == 0)
 
-#define swapcode(TYPE, parmi, parmj, n) { 		\
-	size_t i = (n) / sizeof (TYPE); 		\
-	TYPE *pi = (TYPE *) (parmi); 			\
-	TYPE *pj = (TYPE *) (parmj); 			\
-	do { 						\
-		TYPE	t = *pi;			\
-		*pi++ = *pj;				\
-		*pj++ = t;				\
-        } while (--i > 0);				\
-}
+#define swapcode(TYPE, parmi, parmj, n)                                        \
+	{                                                                      \
+		size_t i = (n) / sizeof(TYPE);                                 \
+		TYPE  *pi = (TYPE *)(parmi);                                   \
+		TYPE  *pj = (TYPE *)(parmj);                                   \
+		do {                                                           \
+			TYPE t = *pi;                                          \
+			*pi++ = *pj;                                           \
+			*pj++ = t;                                             \
+		} while (--i > 0);                                             \
+	}
 
 static __inline void
 swapfunc(char *a, char *b, size_t n, int swaptype)
@@ -92,47 +95,49 @@ swapfunc(char *a, char *b, size_t n, int swaptype)
 	}
 }
 
-#define swap(a, b)	do {				\
-	switch (swaptype) {				\
-	case SWAPTYPE_INT: {				\
-		int t = *(int *)(a);			\
-		*(int *)(a) = *(int *)(b);		\
-		*(int *)(b) = t;			\
-		break;					\
-	    }						\
-	case SWAPTYPE_LONG: {				\
-		long t = *(long *)(a);			\
-		*(long *)(a) = *(long *)(b);		\
-		*(long *)(b) = t;			\
-		break;					\
-	    }						\
-	default:					\
-		swapfunc(a, b, es, swaptype);		\
-	}						\
-} while (0)
+#define swap(a, b)                                                             \
+	do {                                                                   \
+		switch (swaptype) {                                            \
+		case SWAPTYPE_INT: {                                           \
+			int t = *(int *)(a);                                   \
+			*(int *)(a) = *(int *)(b);                             \
+			*(int *)(b) = t;                                       \
+			break;                                                 \
+		}                                                              \
+		case SWAPTYPE_LONG: {                                          \
+			long t = *(long *)(a);                                 \
+			*(long *)(a) = *(long *)(b);                           \
+			*(long *)(b) = t;                                      \
+			break;                                                 \
+		}                                                              \
+		default:                                                       \
+			swapfunc(a, b, es, swaptype);                          \
+		}                                                              \
+	} while (0)
 
-#define vecswap(a, b, n) 	if ((n) > 0) swapfunc(a, b, n, swaptype)
+#define vecswap(a, b, n)                                                       \
+	if ((n) > 0)                                                           \
+	swapfunc(a, b, n, swaptype)
 
 static __inline char *
 med3(char *a, char *b, char *c, int (*cmp)(const void *, const void *))
 {
-	return cmp(a, b) < 0 ?
-	       (cmp(b, c) < 0 ? b : (cmp(a, c) < 0 ? c : a ))
-              :(cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
+	return cmp(a, b) < 0 ? (cmp(b, c) < 0 ? b : (cmp(a, c) < 0 ? c : a)) :
+			       (cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c));
 }
 
 static void
 introsort(char *a, size_t n, size_t es, size_t maxdepth, int swaptype,
     int (*cmp)(const void *, const void *))
 {
-	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
-	int cmp_result;
+	char  *pa, *pb, *pc, *pd, *pl, *pm, *pn;
+	int    cmp_result;
 	size_t r, s;
 
-loop:	if (n < 7) {
+loop:
+	if (n < 7) {
 		for (pm = a + es; pm < a + n * es; pm += es)
-			for (pl = pm; pl > a && cmp(pl - es, pl) > 0;
-			     pl -= es)
+			for (pl = pm; pl > a && cmp(pl - es, pl) > 0; pl -= es)
 				swap(pl, pl - es);
 		return;
 	}
@@ -193,8 +198,8 @@ loop:	if (n < 7) {
 		/* Recurse for 1st side, iterate for 2nd side. */
 		if (s > es) {
 			if (r > es) {
-				introsort(a, r / es, es, maxdepth,
-				    swaptype, cmp);
+				introsort(
+				    a, r / es, es, maxdepth, swaptype, cmp);
 			}
 			a = pn - s;
 			n = s / es;
@@ -217,7 +222,7 @@ void
 qsort(void *a, size_t n, size_t es, int (*cmp)(const void *, const void *))
 {
 	size_t i, maxdepth = 0;
-	int swaptype;
+	int    swaptype;
 
 	/* Approximate 2*ceil(lg(n + 1)) */
 	for (i = n; i > 0; i >>= 1)
@@ -232,7 +237,6 @@ qsort(void *a, size_t n, size_t es, int (*cmp)(const void *, const void *))
 		swaptype = SWAPTYPE_BYTEV;
 
 	introsort(a, n, es, maxdepth, swaptype, cmp);
-
 }
 
 DEF_STRONG(qsort);

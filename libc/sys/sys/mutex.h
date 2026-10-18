@@ -41,8 +41,7 @@
  * interrupts that grab the kernel lock.
  */
 #ifdef MULTIPROCESSOR
-#define __MUTEX_IPL(ipl) \
-	(((ipl) < IPL_MPFLOOR) ? IPL_MPFLOOR : (ipl))
+#define __MUTEX_IPL(ipl) (((ipl) < IPL_MPFLOOR) ? IPL_MPFLOOR : (ipl))
 #else
 #define __MUTEX_IPL(ipl) (ipl)
 #endif
@@ -55,19 +54,19 @@
 
 struct mutex {
 	volatile unsigned long mtx_owner;
-	int mtx_wantipl;
-	int mtx_oldipl;
+	int		       mtx_wantipl;
+	int		       mtx_oldipl;
 #ifdef WITNESS
 	struct lock_object mtx_lock_obj;
 #endif
 };
 
 #ifdef WITNESS
-#define MUTEX_INITIALIZER_FLAGS(ipl, name, flags) \
-	{ 0, __MUTEX_IPL((ipl)), IPL_NONE, MTX_LO_INITIALIZER(name, flags) }
+#define MUTEX_INITIALIZER_FLAGS(ipl, name, flags)                              \
+	{0, __MUTEX_IPL((ipl)), IPL_NONE, MTX_LO_INITIALIZER(name, flags)}
 #else
-#define MUTEX_INITIALIZER_FLAGS(ipl, name, flags) \
-	{ 0, __MUTEX_IPL((ipl)), IPL_NONE }
+#define MUTEX_INITIALIZER_FLAGS(ipl, name, flags)                              \
+	{0, __MUTEX_IPL((ipl)), IPL_NONE}
 #endif
 
 void __mtx_init(struct mutex *, int);
@@ -77,45 +76,53 @@ void __mtx_init(struct mutex *, int);
 #define mtx_owner(mtx) ((mtx)->mtx_owner & ~1UL)
 
 #ifdef DIAGNOSTIC
-#define MUTEX_ASSERT_LOCKED(mtx) do {					\
-	if (mtx_owner(mtx) != mtx_curcpu() && !(panicstr || db_active))	\
-		panic("mutex %p not held in %s", (mtx), __func__);	\
-} while (0)
+#define MUTEX_ASSERT_LOCKED(mtx)                                               \
+	do {                                                                   \
+		if (mtx_owner(mtx) != mtx_curcpu() &&                          \
+		    !(panicstr || db_active))                                  \
+			panic("mutex %p not held in %s", (mtx), __func__);     \
+	} while (0)
 
-#define MUTEX_ASSERT_UNLOCKED(mtx) do {					\
-	if (mtx_owner(mtx) == mtx_curcpu() && !(panicstr || db_active))	\
-		panic("mutex %p held in %s", (mtx), __func__);		\
-} while (0)
+#define MUTEX_ASSERT_UNLOCKED(mtx)                                             \
+	do {                                                                   \
+		if (mtx_owner(mtx) == mtx_curcpu() &&                          \
+		    !(panicstr || db_active))                                  \
+			panic("mutex %p held in %s", (mtx), __func__);         \
+	} while (0)
 #else
-#define MUTEX_ASSERT_LOCKED(mtx) do { (void)(mtx); } while (0)
-#define MUTEX_ASSERT_UNLOCKED(mtx) do { (void)(mtx); } while (0)
+#define MUTEX_ASSERT_LOCKED(mtx)                                               \
+	do {                                                                   \
+		(void)(mtx);                                                   \
+	} while (0)
+#define MUTEX_ASSERT_UNLOCKED(mtx)                                             \
+	do {                                                                   \
+		(void)(mtx);                                                   \
+	} while (0)
 #endif
 
-#define MUTEX_LOCK_OBJECT(mtx)	(&(mtx)->mtx_lock_obj)
-#define MUTEX_OLDIPL(mtx)	(mtx)->mtx_oldipl
+#define MUTEX_LOCK_OBJECT(mtx) (&(mtx)->mtx_lock_obj)
+#define MUTEX_OLDIPL(mtx) (mtx)->mtx_oldipl
 
-#endif	/* __USE_MI_MUTEX */
+#endif /* __USE_MI_MUTEX */
 
-
-#define MTX_LO_FLAGS(flags) \
-	((!((flags) & MTX_NOWITNESS) ? LO_WITNESS : 0) | \
-	 ((flags) & MTX_DUPOK ? LO_DUPOK : 0) | \
-	 LO_INITIALIZED | (LO_CLASS_MUTEX << LO_CLASSSHIFT))
+#define MTX_LO_FLAGS(flags)                                                    \
+	((!((flags) & MTX_NOWITNESS) ? LO_WITNESS : 0) |                       \
+	    ((flags) & MTX_DUPOK ? LO_DUPOK : 0) | LO_INITIALIZED |            \
+	    (LO_CLASS_MUTEX << LO_CLASSSHIFT))
 
 #define __MTX_STRING(x) #x
 #define __MTX_S(x) __MTX_STRING(x)
 #define __MTX_NAME __FILE__ ":" __MTX_S(__LINE__)
 
-#define MTX_LO_INITIALIZER(name, flags) \
-	{ .lo_type = &(const struct lock_type){ .lt_name = __MTX_NAME }, \
-	  .lo_name = (name), \
-	  .lo_flags = MTX_LO_FLAGS(flags) }
+#define MTX_LO_INITIALIZER(name, flags)                                        \
+	{.lo_type = &(const struct lock_type){.lt_name = __MTX_NAME},          \
+	    .lo_name = (name),                                                 \
+	    .lo_flags = MTX_LO_FLAGS(flags)}
 
-#define MTX_NOWITNESS	0x01
-#define MTX_DUPOK	0x02
+#define MTX_NOWITNESS 0x01
+#define MTX_DUPOK 0x02
 
-#define MUTEX_INITIALIZER(ipl) \
-	MUTEX_INITIALIZER_FLAGS(ipl, __MTX_NAME, 0)
+#define MUTEX_INITIALIZER(ipl) MUTEX_INITIALIZER_FLAGS(ipl, __MTX_NAME, 0)
 
 /*
  * Some architectures need to do magic for the ipl, so they need a macro.
@@ -124,47 +131,50 @@ void __mtx_init(struct mutex *, int);
 void _mtx_init(struct mutex *, int);
 #endif
 
-void	mtx_enter(struct mutex *);
-int	mtx_enter_try(struct mutex *);
-void	mtx_leave(struct mutex *);
+void mtx_enter(struct mutex *);
+int  mtx_enter_try(struct mutex *);
+void mtx_leave(struct mutex *);
 
-#define mtx_init(m, ipl)	mtx_init_flags(m, ipl, NULL, 0)
+#define mtx_init(m, ipl) mtx_init_flags(m, ipl, NULL, 0)
 
-#define mtx_owned(mtx) \
+#define mtx_owned(mtx)                                                         \
 	((mtx_owner(mtx) == mtx_curcpu()) || panicstr || db_active)
 
 #ifdef WITNESS
 
-void	_mtx_init_flags(struct mutex *, int, const char *, int,
-	    const struct lock_type *);
+void _mtx_init_flags(
+    struct mutex *, int, const char *, int, const struct lock_type *);
 
-#define mtx_init_flags(m, ipl, name, flags) do {			\
-	static const struct lock_type __lock_type = { .lt_name = #m };	\
-	_mtx_init_flags(m, ipl, name, flags, &__lock_type);		\
-} while (0)
+#define mtx_init_flags(m, ipl, name, flags)                                    \
+	do {                                                                   \
+		static const struct lock_type __lock_type = {.lt_name = #m};   \
+		_mtx_init_flags(m, ipl, name, flags, &__lock_type);            \
+	} while (0)
 
 #else /* WITNESS */
 
-#define mtx_init_flags(m, ipl, name, flags) do {			\
-	(void)(name); (void)(flags);					\
-	_mtx_init(m, ipl);						\
-} while (0)
+#define mtx_init_flags(m, ipl, name, flags)                                    \
+	do {                                                                   \
+		(void)(name);                                                  \
+		(void)(flags);                                                 \
+		_mtx_init(m, ipl);                                             \
+	} while (0)
 
-#define _mtx_init_flags(m,i,n,f,t)	_mtx_init(m,i)
+#define _mtx_init_flags(m, i, n, f, t) _mtx_init(m, i)
 
 #endif /* WITNESS */
 
 #if defined(_KERNEL) && defined(DDB)
 
 struct db_mutex {
-	struct cpu_info	*volatile mtx_owner;
-	unsigned long	 mtx_intr_state;
+	struct cpu_info *volatile mtx_owner;
+	unsigned long mtx_intr_state;
 };
 
-#define DB_MUTEX_INITIALIZER	{ NULL, 0 }
+#define DB_MUTEX_INITIALIZER {NULL, 0}
 
-void	db_mtx_enter(struct db_mutex *);
-void	db_mtx_leave(struct db_mutex *);
+void db_mtx_enter(struct db_mutex *);
+void db_mtx_leave(struct db_mutex *);
 
 #endif /* _KERNEL && DDB */
 

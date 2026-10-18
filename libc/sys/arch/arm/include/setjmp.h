@@ -5,7 +5,7 @@
  * machine/setjmp.h: machine dependent setjmp-related information.
  */
 
-#define	_JBLEN	64		/* size, in longs, of a jmp_buf */
+#define _JBLEN 64 /* size, in longs, of a jmp_buf */
 
 /*
  * Description of the setjmp buffer
@@ -47,21 +47,21 @@
  * mysteriously.
  */
 
-#define _JB_MAGIC__SETJMP	0x4278f500
-#define _JB_MAGIC_SETJMP	0x4278f501
+#define _JB_MAGIC__SETJMP 0x4278f500
+#define _JB_MAGIC_SETJMP 0x4278f501
 
 /* Valid for all jmp_buf's */
 
-#define _JB_MAGIC		 0
-#define _JB_REG_R4		20
-#define _JB_REG_R5		21
-#define _JB_REG_R6		22
-#define _JB_REG_R7		23
-#define _JB_REG_R8		24
-#define _JB_REG_R9		25
-#define _JB_REG_R10		26
-#define _JB_REG_R11		27
+#define _JB_MAGIC 0
+#define _JB_REG_R4 20
+#define _JB_REG_R5 21
+#define _JB_REG_R6 22
+#define _JB_REG_R7 23
+#define _JB_REG_R8 24
+#define _JB_REG_R9 25
+#define _JB_REG_R10 26
+#define _JB_REG_R11 27
 
 /* Only valid with the _JB_MAGIC_SETJMP magic */
 
-#define _JB_SIGMASK		29
+#define _JB_SIGMASK 29

@@ -24,28 +24,27 @@
 
 #include <machine/pcb.h>
 
-#define TCB_GET(p)		\
-	((void *)(((struct pcb *)(p)->p_addr)->pcb_tf->tf_tp))
+#define TCB_GET(p) ((void *)(((struct pcb *)(p)->p_addr)->pcb_tf->tf_tp))
 
-#define TCB_SET(p, addr)						\
-	do {								\
-		((struct pcb *)(p)->p_addr)->pcb_tf->tf_tp = (long)(addr); \
+#define TCB_SET(p, addr)                                                       \
+	do {                                                                   \
+		((struct pcb *)(p)->p_addr)->pcb_tf->tf_tp = (long)(addr);     \
 	} while (0)
 
 #else /* _KERNEL */
 
 /* ELF TLS ABI calls for small TCB, with static TLS data after it */
-#define TLS_VARIANT	1
+#define TLS_VARIANT 1
 
 static inline void *
 __riscv64_read_tcb(void)
 {
 	void *tcb;
-	__asm volatile("mv %0, tp": "=r" (tcb));
+	__asm volatile("mv %0, tp" : "=r"(tcb));
 	return tcb;
 }
 
-#define TCB_GET()		__riscv64_read_tcb()
+#define TCB_GET() __riscv64_read_tcb()
 
 #endif /* _KERNEL */
 

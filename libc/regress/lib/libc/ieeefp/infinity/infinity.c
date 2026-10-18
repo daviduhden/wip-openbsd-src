@@ -18,10 +18,10 @@ sigfpe(int signum)
 int
 main(int argc, char *argv[])
 {
-	int opt;
+	int    opt;
 	double d, two;
-	int i;
-	char method = 'a';
+	int    i;
+	char   method = 'a';
 
 	while ((opt = getopt(argc, argv, "amnp")) != -1)
 		method = (char)opt;

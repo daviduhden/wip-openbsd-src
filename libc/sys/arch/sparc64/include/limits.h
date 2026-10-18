@@ -32,24 +32,24 @@
  *	@(#)limits.h	8.3 (Berkeley) 1/4/94
  */
 
-#ifndef	_MACHINE_LIMITS_H_
-#define	_MACHINE_LIMITS_H_
+#ifndef _MACHINE_LIMITS_H_
+#define _MACHINE_LIMITS_H_
 
 #include <sys/cdefs.h>
 
 #if __POSIX_VISIBLE || __XPG_VISIBLE
-#define	SSIZE_MAX	LONG_MAX	/* max value for a ssize_t */
+#define SSIZE_MAX LONG_MAX /* max value for a ssize_t */
 #endif
 
 #if __BSD_VISIBLE
-#define	SIZE_T_MAX	ULONG_MAX	/* max value for a size_t (historic) */
+#define SIZE_T_MAX ULONG_MAX /* max value for a size_t (historic) */
 
 /* GCC requires that quad constants be written as expressions. */
-#define	UQUAD_MAX	((u_quad_t)0-1)	/* max value for a uquad_t */
-					/* max value for a quad_t */
-#define	QUAD_MAX	((quad_t)(UQUAD_MAX >> 1))
-#define	QUAD_MIN	(-QUAD_MAX-1)	/* min value for a quad_t */
+#define UQUAD_MAX ((u_quad_t)0 - 1) /* max value for a uquad_t */
+				    /* max value for a quad_t */
+#define QUAD_MAX ((quad_t)(UQUAD_MAX >> 1))
+#define QUAD_MIN (-QUAD_MAX - 1) /* min value for a quad_t */
 
 #endif /* __BSD_VISIBLE */
 
-#endif	/* _MACHINE_LIMITS_H_ */
+#endif /* _MACHINE_LIMITS_H_ */

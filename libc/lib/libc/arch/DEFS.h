@@ -19,11 +19,11 @@
 
 /* ARM just had to be different... */
 #ifndef __arm__
-# define _FUNC_TYPE	@function
-# define _PROGBITS	@progbits
+#define _FUNC_TYPE @function
+#define _PROGBITS @progbits
 #else
-# define _FUNC_TYPE	#function
-# define _PROGBITS	%progbits
+#define _FUNC_TYPE #function
+#define _PROGBITS % progbits
 #endif
 
 /*
@@ -32,13 +32,13 @@
  * parts of libc prevent overriding by the application and avoid unnecessary
  * relocations.
  */
-#define _HIDDEN(x)		_libc_##x
-#define _HIDDEN_ALIAS(x,y)			\
-	STRONG_ALIAS(_HIDDEN(x),y);		\
+#define _HIDDEN(x) _libc_##x
+#define _HIDDEN_ALIAS(x, y)                                                    \
+	STRONG_ALIAS(_HIDDEN(x), y);                                           \
 	.hidden _HIDDEN(x)
-#define _HIDDEN_FALIAS(x,y)			\
-	_HIDDEN_ALIAS(x,y);			\
-	.type _HIDDEN(x),_FUNC_TYPE
+#define _HIDDEN_FALIAS(x, y)                                                   \
+	_HIDDEN_ALIAS(x, y);                                                   \
+	.type _HIDDEN(x), _FUNC_TYPE
 
 /*
  * For functions implemented in ASM that aren't syscalls.
@@ -57,22 +57,29 @@
  *			mips64, END() generates .end which requires a
  *			matching .ent from ENTRY())
  */
-#define	END_STRONG(x)	END(x); _HIDDEN_FALIAS(x,x); _END(_HIDDEN(x))
-#define	END_WEAK(x)	END_STRONG(x); .weak x
+#define END_STRONG(x)                                                          \
+	END(x);                                                                \
+	_HIDDEN_FALIAS(x, x);                                                  \
+	_END(_HIDDEN(x))
+#define END_WEAK(x)                                                            \
+	END_STRONG(x);                                                         \
+	.weak x
 
 #ifdef __clang__
-#define	END_BUILTIN(x)	END(x); .protected x
-#define	_BUILTIN(x)	x
+#define END_BUILTIN(x)                                                         \
+	END(x);                                                                \
+	.protected x
+#define _BUILTIN(x) x
 #else
-#define	END_BUILTIN(x)	END_STRONG(x)
-#define	_BUILTIN(x)	_HIDDEN(x)
+#define END_BUILTIN(x) END_STRONG(x)
+#define _BUILTIN(x) _HIDDEN(x)
 #endif
 
-#define _END(x)		.size x, . - x
+#define _END(x) .size x, .- x
 
-#define PINSYSCALL(sysno, label)					\
-	.pushsection .openbsd.syscalls,"",_PROGBITS;			\
-	.p2align 2;							\
-	.long label;							\
-	.long sysno;							\
+#define PINSYSCALL(sysno, label)                                               \
+	.pushsection.openbsd.syscalls, "", _PROGBITS;                          \
+	.p2align 2;                                                            \
+	.long label;                                                           \
+	.long sysno;                                                           \
 	.popsection;

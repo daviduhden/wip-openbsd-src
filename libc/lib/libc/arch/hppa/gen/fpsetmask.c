@@ -5,11 +5,12 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_except
 fpsetmask(mask)
-	fp_except mask;
+fp_except mask;
 {
 	u_int64_t fpsr;
 	fp_except old;

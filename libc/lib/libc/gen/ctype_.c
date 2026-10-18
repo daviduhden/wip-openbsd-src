@@ -34,53 +34,46 @@
  */
 
 #include <ctype.h>
+
 #include "ctype_private.h"
 
 /* Shorter names for the defines provided by <ctype.h> */
-#define	_U	_CTYPE_U
-#define	_L	_CTYPE_L
-#define	_N	_CTYPE_N
-#define	_S	_CTYPE_S
-#define	_P	_CTYPE_P
-#define	_C	_CTYPE_C
-#define	_X	_CTYPE_X
-#define	_B	_CTYPE_B
+#define _U _CTYPE_U
+#define _L _CTYPE_L
+#define _N _CTYPE_N
+#define _S _CTYPE_S
+#define _P _CTYPE_P
+#define _C _CTYPE_C
+#define _X _CTYPE_X
+#define _B _CTYPE_B
 
 const char _C_ctype_[1 + CTYPE_NUM_CHARS] = {
-	0,
-	_C,	_C,	_C,	_C,	_C,	_C,	_C,	_C,
-	_C,	_C|_S,	_C|_S,	_C|_S,	_C|_S,	_C|_S,	_C,	_C,
-	_C,	_C,	_C,	_C,	_C,	_C,	_C,	_C,
-	_C,	_C,	_C,	_C,	_C,	_C,	_C,	_C,
-   _S|(char)_B,	_P,	_P,	_P,	_P,	_P,	_P,	_P,
-	_P,	_P,	_P,	_P,	_P,	_P,	_P,	_P,
-	_N,	_N,	_N,	_N,	_N,	_N,	_N,	_N,
-	_N,	_N,	_P,	_P,	_P,	_P,	_P,	_P,
-	_P,	_U|_X,	_U|_X,	_U|_X,	_U|_X,	_U|_X,	_U|_X,	_U,
-	_U,	_U,	_U,	_U,	_U,	_U,	_U,	_U,
-	_U,	_U,	_U,	_U,	_U,	_U,	_U,	_U,
-	_U,	_U,	_U,	_P,	_P,	_P,	_P,	_P,
-	_P,	_L|_X,	_L|_X,	_L|_X,	_L|_X,	_L|_X,	_L|_X,	_L,
-	_L,	_L,	_L,	_L,	_L,	_L,	_L,	_L,
-	_L,	_L,	_L,	_L,	_L,	_L,	_L,	_L,
-	_L,	_L,	_L,	_P,	_P,	_P,	_P,	_C,
+    0, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C | _S, _C | _S, _C | _S, _C | _S,
+    _C | _S, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C, _C,
+    _C, _S | (char)_B, _P, _P, _P, _P, _P, _P, _P, _P, _P, _P, _P, _P, _P, _P,
+    _P, _N, _N, _N, _N, _N, _N, _N, _N, _N, _N, _P, _P, _P, _P, _P, _P, _P,
+    _U | _X, _U | _X, _U | _X, _U | _X, _U | _X, _U | _X, _U, _U, _U, _U, _U,
+    _U, _U, _U, _U, _U, _U, _U, _U, _U, _U, _U, _U, _U, _U, _U, _P, _P, _P, _P,
+    _P, _P, _L | _X, _L | _X, _L | _X, _L | _X, _L | _X, _L | _X, _L, _L, _L,
+    _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _L, _P, _P,
+    _P, _P, _C,
 
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* 80 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* 88 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* 90 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* 98 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* A0 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* A8 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* B0 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* B8 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* C0 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* C8 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* D0 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* D8 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* E0 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* E8 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0, /* F0 */
-	 0,	 0,	 0,	 0,	 0,	 0,	 0,	 0  /* F8 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* 80 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* 88 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* 90 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* 98 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* A0 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* A8 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* B0 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* B8 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* C0 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* C8 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* D0 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* D8 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* E0 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* E8 */
+    0, 0, 0, 0, 0, 0, 0, 0, /* F0 */
+    0, 0, 0, 0, 0, 0, 0, 0  /* F8 */
 };
 
 const char *_ctype_ = _C_ctype_;

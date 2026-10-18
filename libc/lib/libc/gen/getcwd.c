@@ -31,8 +31,7 @@ getcwd(char *buf, size_t size)
 		return (NULL);
 	}
 
-	if (buf == NULL &&
-	    (allocated = buf = malloc(size = PATH_MAX)) == NULL)
+	if (buf == NULL && (allocated = buf = malloc(size = PATH_MAX)) == NULL)
 		return (NULL);
 
 	if (__getcwd(buf, size) == -1) {

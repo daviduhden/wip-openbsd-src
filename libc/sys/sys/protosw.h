@@ -66,73 +66,73 @@ struct ifnet;
 struct netstack;
 
 struct pr_usrreqs {
-	int	(*pru_attach)(struct socket *, int, int);
-	int	(*pru_detach)(struct socket *);
-	int	(*pru_bind)(struct socket *, struct mbuf *, struct proc *);
-	int	(*pru_listen)(struct socket *);
-	int	(*pru_connect)(struct socket *, struct mbuf *);
-	int	(*pru_accept)(struct socket *, struct mbuf *);
-	int	(*pru_disconnect)(struct socket *);
-	int	(*pru_shutdown)(struct socket *);
-	void	(*pru_rcvd)(struct socket *);
-	int	(*pru_send)(struct socket *, struct mbuf *, struct mbuf *,
-		    struct mbuf *);
-	void	(*pru_abort)(struct socket *);
-	int	(*pru_control)(struct socket *, u_long, caddr_t,
-		    struct ifnet *);
-	int	(*pru_sense)(struct socket *, struct stat *);
-	int	(*pru_rcvoob)(struct socket *, struct mbuf *, int);
-	int	(*pru_sendoob)(struct socket *, struct mbuf *, struct mbuf *,
-		    struct mbuf *);
-	int	(*pru_sockaddr)(struct socket *, struct mbuf *);
-	int	(*pru_peeraddr)(struct socket *, struct mbuf *);
-	int	(*pru_flowid)(struct socket *);
-	int	(*pru_connect2)(struct socket *, struct socket *);
+	int  (*pru_attach)(struct socket *, int, int);
+	int  (*pru_detach)(struct socket *);
+	int  (*pru_bind)(struct socket *, struct mbuf *, struct proc *);
+	int  (*pru_listen)(struct socket *);
+	int  (*pru_connect)(struct socket *, struct mbuf *);
+	int  (*pru_accept)(struct socket *, struct mbuf *);
+	int  (*pru_disconnect)(struct socket *);
+	int  (*pru_shutdown)(struct socket *);
+	void (*pru_rcvd)(struct socket *);
+	int  (*pru_send)(
+	    struct socket *, struct mbuf *, struct mbuf *, struct mbuf *);
+	void (*pru_abort)(struct socket *);
+	int  (*pru_control)(struct socket *, u_long, caddr_t, struct ifnet *);
+	int  (*pru_sense)(struct socket *, struct stat *);
+	int  (*pru_rcvoob)(struct socket *, struct mbuf *, int);
+	int  (*pru_sendoob)(
+	    struct socket *, struct mbuf *, struct mbuf *, struct mbuf *);
+	int (*pru_sockaddr)(struct socket *, struct mbuf *);
+	int (*pru_peeraddr)(struct socket *, struct mbuf *);
+	int (*pru_flowid)(struct socket *);
+	int (*pru_connect2)(struct socket *, struct socket *);
 };
 
 struct protosw {
-	short	pr_type;		/* socket type used for */
-	const	struct domain *pr_domain; /* domain protocol a member of */
-	short	pr_protocol;		/* protocol number */
-	short	pr_flags;		/* see below */
+	short		     pr_type;	  /* socket type used for */
+	const struct domain *pr_domain;	  /* domain protocol a member of */
+	short		     pr_protocol; /* protocol number */
+	short		     pr_flags;	  /* see below */
 
-/* protocol-protocol hooks */
-					/* input to protocol (from below) */
-	int	(*pr_input)(struct mbuf **, int *, int, int, struct netstack *);
-					/* control input (from below) */
-	void	(*pr_ctlinput)(int, struct sockaddr *, u_int, void *);
-					/* control output (from above) */
-	int	(*pr_ctloutput)(int, struct socket *, int, int, struct mbuf *);
+	/* protocol-protocol hooks */
+	/* input to protocol (from below) */
+	int (*pr_input)(struct mbuf **, int *, int, int, struct netstack *);
+	/* control input (from below) */
+	void (*pr_ctlinput)(int, struct sockaddr *, u_int, void *);
+	/* control output (from above) */
+	int (*pr_ctloutput)(int, struct socket *, int, int, struct mbuf *);
 
-/* user-protocol hooks */
-	const	struct pr_usrreqs *pr_usrreqs;
-	
-/* utility hooks */
-	void	(*pr_init)(void);	/* initialization hook */
-	void	(*pr_fasttimo)(void);	/* fast timeout (200ms) */
-	void	(*pr_slowtimo)(void);	/* slow timeout (500ms) */
-					/* sysctl for protocol */
-	int	(*pr_sysctl)(int *, u_int, void *, size_t *, void *, size_t);
+	/* user-protocol hooks */
+	const struct pr_usrreqs *pr_usrreqs;
+
+	/* utility hooks */
+	void (*pr_init)(void);	   /* initialization hook */
+	void (*pr_fasttimo)(void); /* fast timeout (200ms) */
+	void (*pr_slowtimo)(void); /* slow timeout (500ms) */
+				   /* sysctl for protocol */
+	int (*pr_sysctl)(int *, u_int, void *, size_t *, void *, size_t);
 };
 
-#define PR_SLOWHZ	2		/* 2 slow timeouts per second */
-#define PR_FASTHZ	5		/* 5 fast timeouts per second */
+#define PR_SLOWHZ 2 /* 2 slow timeouts per second */
+#define PR_FASTHZ 5 /* 5 fast timeouts per second */
 
 /*
  * Values for pr_flags.
  * PR_ADDR requires PR_ATOMIC;
  * PR_ADDR and PR_CONNREQUIRED are mutually exclusive.
  */
-#define PR_ATOMIC	0x0001		/* exchange atomic messages only */
-#define PR_ADDR		0x0002		/* addresses given with messages */
-#define PR_CONNREQUIRED	0x0004		/* connection required by protocol */
-#define PR_WANTRCVD	0x0008		/* want PRU_RCVD calls */
-#define PR_RIGHTS	0x0010		/* passes capabilities */
-#define PR_ABRTACPTDIS	0x0020		/* abort on accept(2) to disconnected
-					   socket */
-#define PR_SPLICE	0x0040		/* socket splicing is possible */
-#define PR_MPINPUT	0x0080		/* input runs with shared netlock */
-#define PR_MPSYSCTL	0x0200		/* mp-safe sysctl(2) handler */
+#define PR_ATOMIC 0x0001       /* exchange atomic messages only */
+#define PR_ADDR 0x0002	       /* addresses given with messages */
+#define PR_CONNREQUIRED 0x0004 /* connection required by protocol */
+#define PR_WANTRCVD 0x0008     /* want PRU_RCVD calls */
+#define PR_RIGHTS 0x0010       /* passes capabilities */
+#define PR_ABRTACPTDIS                                                         \
+	0x0020		   /* abort on accept(2) to disconnected               \
+			      socket */
+#define PR_SPLICE 0x0040   /* socket splicing is possible */
+#define PR_MPINPUT 0x0080  /* input runs with shared netlock */
+#define PR_MPSYSCTL 0x0200 /* mp-safe sysctl(2) handler */
 
 /*
  * The arguments to usrreq are:
@@ -146,40 +146,56 @@ struct protosw {
  * A non-zero return from usrreq gives an
  * UNIX error number which should be passed to higher level software.
  */
-#define	PRU_ATTACH		0	/* attach protocol to up */
-#define	PRU_DETACH		1	/* detach protocol from up */
-#define	PRU_BIND		2	/* bind socket to address */
-#define	PRU_LISTEN		3	/* listen for connection */
-#define	PRU_CONNECT		4	/* establish connection to peer */
-#define	PRU_ACCEPT		5	/* accept connection from peer */
-#define	PRU_DISCONNECT		6	/* disconnect from peer */
-#define	PRU_SHUTDOWN		7	/* won't send any more data */
-#define	PRU_RCVD		8	/* have taken data; more room now */
-#define	PRU_SEND		9	/* send this data */
-#define	PRU_ABORT		10	/* abort (fast DISCONNECT, DETACH) */
-#define	PRU_CONTROL		11	/* control operations on protocol */
-#define	PRU_SENSE		12	/* return status into m */
-#define	PRU_RCVOOB		13	/* retrieve out of band data */
-#define	PRU_SENDOOB		14	/* send out of band data */
-#define	PRU_SOCKADDR		15	/* fetch socket's address */
-#define	PRU_PEERADDR		16	/* fetch peer's address */
-#define	PRU_CONNECT2		17	/* connect two sockets */
+#define PRU_ATTACH 0	 /* attach protocol to up */
+#define PRU_DETACH 1	 /* detach protocol from up */
+#define PRU_BIND 2	 /* bind socket to address */
+#define PRU_LISTEN 3	 /* listen for connection */
+#define PRU_CONNECT 4	 /* establish connection to peer */
+#define PRU_ACCEPT 5	 /* accept connection from peer */
+#define PRU_DISCONNECT 6 /* disconnect from peer */
+#define PRU_SHUTDOWN 7	 /* won't send any more data */
+#define PRU_RCVD 8	 /* have taken data; more room now */
+#define PRU_SEND 9	 /* send this data */
+#define PRU_ABORT 10	 /* abort (fast DISCONNECT, DETACH) */
+#define PRU_CONTROL 11	 /* control operations on protocol */
+#define PRU_SENSE 12	 /* return status into m */
+#define PRU_RCVOOB 13	 /* retrieve out of band data */
+#define PRU_SENDOOB 14	 /* send out of band data */
+#define PRU_SOCKADDR 15	 /* fetch socket's address */
+#define PRU_PEERADDR 16	 /* fetch peer's address */
+#define PRU_CONNECT2 17	 /* connect two sockets */
 /* begin for protocols internal use */
-#define	PRU_FASTTIMO		18	/* 200ms timeout */
-#define	PRU_SLOWTIMO		19	/* 500ms timeout */
-#define	PRU_PROTORCV		20	/* receive from below */
-#define	PRU_PROTOSEND		21	/* send to below */
+#define PRU_FASTTIMO 18	 /* 200ms timeout */
+#define PRU_SLOWTIMO 19	 /* 500ms timeout */
+#define PRU_PROTORCV 20	 /* receive from below */
+#define PRU_PROTOSEND 21 /* send to below */
 
-#define	PRU_NREQ		22
+#define PRU_NREQ 22
 
 #ifdef PRUREQUESTS
 const char *prurequests[] = {
-	"ATTACH",	"DETACH",	"BIND",		"LISTEN",
-	"CONNECT",	"ACCEPT",	"DISCONNECT",	"SHUTDOWN",
-	"RCVD",		"SEND",		"ABORT",	"CONTROL",
-	"SENSE",	"RCVOOB",	"SENDOOB",	"SOCKADDR",
-	"PEERADDR",	"CONNECT2",	"FASTTIMO",	"SLOWTIMO",
-	"PROTORCV",	"PROTOSEND",
+    "ATTACH",
+    "DETACH",
+    "BIND",
+    "LISTEN",
+    "CONNECT",
+    "ACCEPT",
+    "DISCONNECT",
+    "SHUTDOWN",
+    "RCVD",
+    "SEND",
+    "ABORT",
+    "CONTROL",
+    "SENSE",
+    "RCVOOB",
+    "SENDOOB",
+    "SOCKADDR",
+    "PEERADDR",
+    "CONNECT2",
+    "FASTTIMO",
+    "SLOWTIMO",
+    "PROTORCV",
+    "PROTOSEND",
 };
 #endif
 
@@ -189,42 +205,39 @@ const char *prurequests[] = {
  * where cmd is one of the commands below, sa is a pointer to a sockaddr,
  * and arg is an optional caddr_t argument used within a protocol family.
  */
-#define	PRC_IFDOWN		0	/* interface transition */
-#define	PRC_ROUTEDEAD		1	/* select new route if possible ??? */
-#define	PRC_MTUINC		2	/* increase in mtu to host */
-#define	PRC_QUENCH2		3	/* DEC congestion bit says slow down */
-#define	PRC_QUENCH		4	/* some one said to slow down */
-#define	PRC_MSGSIZE		5	/* message size forced drop */
-#define	PRC_HOSTDEAD		6	/* host appears to be down */
-#define	PRC_HOSTUNREACH		7	/* deprecated (use PRC_UNREACH_HOST) */
-#define	PRC_UNREACH_NET		8	/* no route to network */
-#define	PRC_UNREACH_HOST	9	/* no route to host */
-#define	PRC_UNREACH_PROTOCOL	10	/* dst says bad protocol */
-#define	PRC_UNREACH_PORT	11	/* bad port # */
+#define PRC_IFDOWN 0		/* interface transition */
+#define PRC_ROUTEDEAD 1		/* select new route if possible ??? */
+#define PRC_MTUINC 2		/* increase in mtu to host */
+#define PRC_QUENCH2 3		/* DEC congestion bit says slow down */
+#define PRC_QUENCH 4		/* some one said to slow down */
+#define PRC_MSGSIZE 5		/* message size forced drop */
+#define PRC_HOSTDEAD 6		/* host appears to be down */
+#define PRC_HOSTUNREACH 7	/* deprecated (use PRC_UNREACH_HOST) */
+#define PRC_UNREACH_NET 8	/* no route to network */
+#define PRC_UNREACH_HOST 9	/* no route to host */
+#define PRC_UNREACH_PROTOCOL 10 /* dst says bad protocol */
+#define PRC_UNREACH_PORT 11	/* bad port # */
 /* was	PRC_UNREACH_NEEDFRAG	12	   (use PRC_MSGSIZE) */
-#define	PRC_UNREACH_SRCFAIL	13	/* source route failed */
-#define	PRC_REDIRECT_NET	14	/* net routing redirect */
-#define	PRC_REDIRECT_HOST	15	/* host routing redirect */
-#define	PRC_REDIRECT_TOSNET	16	/* redirect for type of service & net */
-#define	PRC_REDIRECT_TOSHOST	17	/* redirect for tos & host */
-#define	PRC_TIMXCEED_INTRANS	18	/* packet lifetime expired in transit */
-#define	PRC_TIMXCEED_REASS	19	/* lifetime expired on reass q */
-#define	PRC_PARAMPROB		20	/* header incorrect */
+#define PRC_UNREACH_SRCFAIL 13	/* source route failed */
+#define PRC_REDIRECT_NET 14	/* net routing redirect */
+#define PRC_REDIRECT_HOST 15	/* host routing redirect */
+#define PRC_REDIRECT_TOSNET 16	/* redirect for type of service & net */
+#define PRC_REDIRECT_TOSHOST 17 /* redirect for tos & host */
+#define PRC_TIMXCEED_INTRANS 18 /* packet lifetime expired in transit */
+#define PRC_TIMXCEED_REASS 19	/* lifetime expired on reass q */
+#define PRC_PARAMPROB 20	/* header incorrect */
 
-#define	PRC_NCMDS		21
+#define PRC_NCMDS 21
 
-#define	PRC_IS_REDIRECT(cmd)	\
+#define PRC_IS_REDIRECT(cmd)                                                   \
 	((cmd) >= PRC_REDIRECT_NET && (cmd) <= PRC_REDIRECT_TOSHOST)
 
 #ifdef PRCREQUESTS
-char	*prcrequests[] = {
-	"IFDOWN", "ROUTEDEAD", "MTUINC", "DEC-BIT-QUENCH2",
-	"QUENCH", "MSGSIZE", "HOSTDEAD", "#7",
-	"NET-UNREACH", "HOST-UNREACH", "PROTO-UNREACH", "PORT-UNREACH",
-	"#12", "SRCFAIL-UNREACH", "NET-REDIRECT", "HOST-REDIRECT",
-	"TOSNET-REDIRECT", "TOSHOST-REDIRECT", "TX-INTRANS", "TX-REASS",
-	"PARAMPROB"
-};
+char *prcrequests[] = {"IFDOWN", "ROUTEDEAD", "MTUINC", "DEC-BIT-QUENCH2",
+    "QUENCH", "MSGSIZE", "HOSTDEAD", "#7", "NET-UNREACH", "HOST-UNREACH",
+    "PROTO-UNREACH", "PORT-UNREACH", "#12", "SRCFAIL-UNREACH", "NET-REDIRECT",
+    "HOST-REDIRECT", "TOSNET-REDIRECT", "TOSHOST-REDIRECT", "TX-INTRANS",
+    "TX-REASS", "PARAMPROB"};
 #endif
 
 /*
@@ -240,14 +253,15 @@ char	*prcrequests[] = {
  * A non-zero return from usrreq gives an
  * UNIX error number which should be passed to higher level software.
  */
-#define	PRCO_GETOPT	0
-#define	PRCO_SETOPT	1
+#define PRCO_GETOPT 0
+#define PRCO_SETOPT 1
 
-#define	PRCO_NCMDS	2
+#define PRCO_NCMDS 2
 
 #ifdef PRCOREQUESTS
-char	*prcorequests[] = {
-	"GETOPT", "SETOPT",
+char *prcorequests[] = {
+    "GETOPT",
+    "SETOPT",
 };
 #endif
 
@@ -258,14 +272,14 @@ char	*prcorequests[] = {
 
 const struct protosw *pffindproto(int, int, int);
 const struct protosw *pffindtype(int, int);
-const struct domain *pffinddomain(int);
-void pfctlinput(int, struct sockaddr *);
+const struct domain  *pffinddomain(int);
+void		      pfctlinput(int, struct sockaddr *);
 
-extern u_char ip_protox[];
+extern u_char		    ip_protox[];
 extern const struct protosw inetsw[];
 
 #ifdef INET6
-extern u_char ip6_protox[];
+extern u_char		    ip6_protox[];
 extern const struct protosw inet6sw[];
 #endif /* INET6 */
 
@@ -350,8 +364,8 @@ static inline int
 pru_control(struct socket *so, u_long cmd, caddr_t data, struct ifnet *ifp)
 {
 	if (so->so_proto->pr_usrreqs->pru_control)
-		return (*so->so_proto->pr_usrreqs->pru_control)(so,
-		    cmd, data, ifp);
+		return (*so->so_proto->pr_usrreqs->pru_control)(
+		    so, cmd, data, ifp);
 	return (EOPNOTSUPP);
 }
 
@@ -376,8 +390,8 @@ pru_sendoob(struct socket *so, struct mbuf *top, struct mbuf *addr,
     struct mbuf *control)
 {
 	if (so->so_proto->pr_usrreqs->pru_sendoob)
-		return (*so->so_proto->pr_usrreqs->pru_sendoob)(so,
-		    top, addr, control);
+		return (*so->so_proto->pr_usrreqs->pru_sendoob)(
+		    so, top, addr, control);
 	m_freem(top);
 	m_freem(control);
 	return (EOPNOTSUPP);

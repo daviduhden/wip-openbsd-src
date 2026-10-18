@@ -31,7 +31,7 @@
  */
 
 #ifndef _MACHINE_CPUFUNC_H_
-#define	_MACHINE_CPUFUNC_H_
+#define _MACHINE_CPUFUNC_H_
 
 /*
  * Functions to provide access to i386-specific instructions.
@@ -41,61 +41,61 @@
 
 #include <machine/specialreg.h>
 
-#if defined(_KERNEL) && !defined (_STANDALONE)
+#if defined(_KERNEL) && !defined(_STANDALONE)
 
-static __inline void 
+static __inline void
 invlpg(u_int64_t addr)
-{ 
-        __asm volatile("invlpg (%0)" : : "r" (addr) : "memory");
-}  
+{
+	__asm volatile("invlpg (%0)" : : "r"(addr) : "memory");
+}
 
 static __inline void
 sidt(void *p)
 {
-	__asm volatile("sidt (%0)" : : "r" (p) : "memory");
+	__asm volatile("sidt (%0)" : : "r"(p) : "memory");
 }
 
 static __inline void
 lidt(void *p)
 {
-	__asm volatile("lidt (%0)" : : "r" (p) : "memory");
+	__asm volatile("lidt (%0)" : : "r"(p) : "memory");
 }
 
 static __inline void
 sgdt(void *p)
 {
-	__asm volatile("sgdt (%0)" : : "r" (p) : "memory");
+	__asm volatile("sgdt (%0)" : : "r"(p) : "memory");
 }
 
 static __inline void
 bare_lgdt(struct region_descriptor *p)
 {
-	__asm volatile("lgdt (%0)" : : "r" (p) : "memory");
+	__asm volatile("lgdt (%0)" : : "r"(p) : "memory");
 }
 
 static __inline void
 sldt(u_short *sel)
 {
-	__asm volatile("sldt (%0)" : : "r" (sel) : "memory");
+	__asm volatile("sldt (%0)" : : "r"(sel) : "memory");
 }
 
 static __inline void
 lldt(u_short sel)
 {
-	__asm volatile("lldt %0" : : "r" (sel));
+	__asm volatile("lldt %0" : : "r"(sel));
 }
 
 static __inline void
 ltr(u_short sel)
 {
-	__asm volatile("ltr %0" : : "r" (sel));
+	__asm volatile("ltr %0" : : "r"(sel));
 }
 
 static __inline void
 lcr8(u_int val)
 {
 	u_int64_t val64 = val;
-	__asm volatile("movq %0,%%cr8" : : "r" (val64));
+	__asm volatile("movq %0,%%cr8" : : "r"(val64));
 }
 
 /*
@@ -105,15 +105,15 @@ static __inline void
 lcr0(u_int val)
 {
 	u_int64_t val64 = val;
-	__asm volatile("movq %0,%%cr0" : : "r" (val64));
+	__asm volatile("movq %0,%%cr0" : : "r"(val64));
 }
 
 static __inline u_int
 rcr0(void)
 {
 	u_int64_t val64;
-	u_int val;
-	__asm volatile("movq %%cr0,%0" : "=r" (val64));
+	u_int	  val;
+	__asm volatile("movq %%cr0,%0" : "=r"(val64));
 	val = val64;
 	return val;
 }
@@ -122,21 +122,21 @@ static __inline u_int64_t
 rcr2(void)
 {
 	u_int64_t val;
-	__asm volatile("movq %%cr2,%0" : "=r" (val));
+	__asm volatile("movq %%cr2,%0" : "=r"(val));
 	return val;
 }
 
 static __inline void
 lcr3(u_int64_t val)
 {
-	__asm volatile("movq %0,%%cr3" : : "r" (val));
+	__asm volatile("movq %0,%%cr3" : : "r"(val));
 }
 
 static __inline u_int64_t
 rcr3(void)
 {
 	u_int64_t val;
-	__asm volatile("movq %%cr3,%0" : "=r" (val));
+	__asm volatile("movq %%cr3,%0" : "=r"(val));
 	return val;
 }
 
@@ -148,15 +148,15 @@ lcr4(u_int val)
 {
 	u_int64_t val64 = val;
 
-	__asm volatile("movq %0,%%cr4" : : "r" (val64));
+	__asm volatile("movq %0,%%cr4" : : "r"(val64));
 }
 
 static __inline u_int
 rcr4(void)
 {
 	u_int64_t val64;
-	__asm volatile("movq %%cr4,%0" : "=r" (val64));
-	return (u_int) val64;
+	__asm volatile("movq %%cr4,%0" : "=r"(val64));
+	return (u_int)val64;
 }
 
 /*
@@ -166,7 +166,7 @@ static inline uint64_t
 rdr6(void)
 {
 	u_int64_t val;
-	__asm volatile("movq %%dr6,%0" : "=r" (val));
+	__asm volatile("movq %%dr6,%0" : "=r"(val));
 	return val;
 }
 
@@ -174,7 +174,7 @@ static inline uint64_t
 rdr7(void)
 {
 	u_int64_t val;
-	__asm volatile("movq %%dr7,%0" : "=r" (val));
+	__asm volatile("movq %%dr7,%0" : "=r"(val));
 	return val;
 }
 
@@ -182,41 +182,40 @@ static __inline void
 tlbflush(void)
 {
 	u_int64_t val;
-	__asm volatile("movq %%cr3,%0" : "=r" (val));
-	__asm volatile("movq %0,%%cr3" : : "r" (val));
+	__asm volatile("movq %%cr3,%0" : "=r"(val));
+	__asm volatile("movq %0,%%cr3" : : "r"(val));
 }
 
 static inline void
 invpcid(uint64_t type, paddr_t pcid, paddr_t addr)
 {
-	uint64_t desc[2] = { pcid, addr };
+	uint64_t desc[2] = {pcid, addr};
 	asm volatile("invpcid %0,%1" : : "m"(desc[0]), "r"(type));
 }
-#define INVPCID_ADDR		0
-#define INVPCID_PCID		1
-#define INVPCID_ALL		2
-#define INVPCID_NON_GLOBAL	3
+#define INVPCID_ADDR 0
+#define INVPCID_PCID 1
+#define INVPCID_ALL 2
+#define INVPCID_NON_GLOBAL 3
 
 #ifdef notyet
-void	setidt(int idx, /*XXX*/caddr_t func, int typ, int dpl);
+void setidt(int idx, /*XXX*/ caddr_t func, int typ, int dpl);
 #endif
-
 
 /* XXXX ought to be in psl.h with spl() functions */
 
 static __inline u_long
 read_rflags(void)
 {
-	u_long	ef;
+	u_long ef;
 
-	__asm volatile("pushfq; popq %0" : "=r" (ef));
+	__asm volatile("pushfq; popq %0" : "=r"(ef));
 	return (ef);
 }
 
 static __inline void
 write_rflags(u_long ef)
 {
-	__asm volatile("pushq %0; popfq" : : "r" (ef));
+	__asm volatile("pushq %0; popfq" : : "r"(ef));
 }
 
 static __inline void
@@ -245,15 +244,15 @@ static __inline u_int64_t
 rdmsr(u_int msr)
 {
 	uint32_t hi, lo;
-	__asm volatile("rdmsr" : "=d" (hi), "=a" (lo) : "c" (msr));
-	return (((uint64_t)hi << 32) | (uint64_t) lo);
+	__asm volatile("rdmsr" : "=d"(hi), "=a"(lo) : "c"(msr));
+	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }
 
 static __inline uint32_t
 rdpkru(u_int ecx)
 {
 	uint32_t edx, pkru;
-	asm volatile("rdpkru " : "=a" (pkru), "=d" (edx) : "c" (ecx));
+	asm volatile("rdpkru " : "=a"(pkru), "=d"(edx) : "c"(ecx));
 	return pkru;
 }
 
@@ -261,39 +260,39 @@ static __inline void
 wrpkru(u_int ecx, uint32_t pkru)
 {
 	uint32_t edx = 0;
-	asm volatile("wrpkru" : : "a" (pkru), "c" (ecx), "d" (edx));
+	asm volatile("wrpkru" : : "a"(pkru), "c"(ecx), "d"(edx));
 }
 
 static __inline void
 wrmsr(u_int msr, u_int64_t newval)
 {
-	__asm volatile("wrmsr" :
-	    : "a" (newval & 0xffffffff), "d" (newval >> 32), "c" (msr));
+	__asm volatile("wrmsr"
+	    :
+	    : "a"(newval & 0xffffffff), "d"(newval >> 32), "c"(msr));
 }
 
-/* 
+/*
  * Some of the undocumented AMD64 MSRs need a 'passcode' to access.
  *
  * See LinuxBIOSv2: src/cpu/amd/model_fxx/model_fxx_init.c
  */
 
-#define	OPTERON_MSR_PASSCODE	0x9c5a203a
- 
+#define OPTERON_MSR_PASSCODE 0x9c5a203a
+
 static __inline u_int64_t
 rdmsr_locked(u_int msr, u_int code)
 {
 	uint32_t hi, lo;
-	__asm volatile("rdmsr"
-	    : "=d" (hi), "=a" (lo)
-	    : "c" (msr), "D" (code));
-	return (((uint64_t)hi << 32) | (uint64_t) lo);
+	__asm volatile("rdmsr" : "=d"(hi), "=a"(lo) : "c"(msr), "D"(code));
+	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }
 
 static __inline void
 wrmsr_locked(u_int msr, u_int code, u_int64_t newval)
 {
-	__asm volatile("wrmsr" :
-	    : "a" (newval & 0xffffffff), "d" (newval >> 32), "c" (msr), "D" (code));
+	__asm volatile("wrmsr"
+	    :
+	    : "a"(newval & 0xffffffff), "d"(newval >> 32), "c"(msr), "D"(code));
 }
 
 static __inline void
@@ -316,7 +315,7 @@ wbinvd_on_all_cpus(void)
 static __inline void
 clflush(u_int64_t addr)
 {
-	__asm volatile("clflush %0" : "+m" (*(volatile char *)addr));
+	__asm volatile("clflush %0" : "+m"(*(volatile char *)addr));
 }
 
 static __inline void
@@ -330,8 +329,8 @@ rdtsc(void)
 {
 	uint32_t hi, lo;
 
-	__asm volatile("rdtsc" : "=d" (hi), "=a" (lo));
-	return (((uint64_t)hi << 32) | (uint64_t) lo);
+	__asm volatile("rdtsc" : "=d"(hi), "=a"(lo));
+	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }
 
 static __inline u_int64_t
@@ -339,8 +338,8 @@ rdtscp(void)
 {
 	uint32_t hi, lo;
 
-	__asm volatile("rdtscp" : "=d" (hi), "=a" (lo) : : "ecx");
-	return (((uint64_t)hi << 32) | (uint64_t) lo);
+	__asm volatile("rdtscp" : "=d"(hi), "=a"(lo) : : "ecx");
+	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }
 
 static __inline u_int64_t
@@ -348,8 +347,8 @@ rdtsc_lfence(void)
 {
 	uint32_t hi, lo;
 
-	__asm volatile("lfence; rdtsc" : "=d" (hi), "=a" (lo));
-	return (((uint64_t)hi << 32) | (uint64_t) lo);
+	__asm volatile("lfence; rdtsc" : "=d"(hi), "=a"(lo));
+	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }
 
 static __inline u_int64_t
@@ -357,39 +356,38 @@ rdpmc(u_int pmc)
 {
 	uint32_t hi, lo;
 
-	__asm volatile("rdpmc" : "=d" (hi), "=a" (lo) : "c" (pmc));
-	return (((uint64_t)hi << 32) | (uint64_t) lo);
+	__asm volatile("rdpmc" : "=d"(hi), "=a"(lo) : "c"(pmc));
+	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }
 
 static __inline void
 monitor(const volatile void *addr, u_long extensions, u_int hints)
 {
 
-	__asm volatile("monitor"
-	    : : "a" (addr), "c" (extensions), "d" (hints));
+	__asm volatile("monitor" : : "a"(addr), "c"(extensions), "d"(hints));
 }
 
 static __inline void
 mwait(u_long extensions, u_int hints)
 {
 
-	__asm volatile(
-		"	mwait			;"
-		"	mov	$8,%%rcx	;"
-		"	.align	16,0x90		;"
-		"3:	call	5f		;"
-		"4:	pause			;"
-		"	lfence			;"
-		"	call	4b		;"
-		"	.align	16,0xcc		;"
-		"5:	call	7f		;"
-		"6:	pause			;"
-		"	lfence			;"
-		"	call	6b		;"
-		"	.align	16,0xcc		;"
-		"7:	loop	3b		;"
-		"	add	$(16*8),%%rsp"
-	    : "+c" (extensions) : "a" (hints));
+	__asm volatile("	mwait			;"
+		       "	mov	$8,%%rcx	;"
+		       "	.align	16,0x90		;"
+		       "3:	call	5f		;"
+		       "4:	pause			;"
+		       "	lfence			;"
+		       "	call	4b		;"
+		       "	.align	16,0xcc		;"
+		       "5:	call	7f		;"
+		       "6:	pause			;"
+		       "	lfence			;"
+		       "	call	6b		;"
+		       "	.align	16,0xcc		;"
+		       "7:	loop	3b		;"
+		       "	add	$(16*8),%%rsp"
+	    : "+c"(extensions)
+	    : "a"(hints));
 }
 
 static __inline void
@@ -399,7 +397,7 @@ xsetbv(uint32_t reg, uint64_t mask)
 
 	lo = mask;
 	hi = mask >> 32;
-	__asm volatile("xsetbv" :: "c" (reg), "a" (lo), "d" (hi) : "memory");
+	__asm volatile("xsetbv" ::"c"(reg), "a"(lo), "d"(hi) : "memory");
 }
 
 static __inline uint64_t
@@ -407,7 +405,7 @@ xgetbv(uint32_t reg)
 {
 	uint32_t lo, hi;
 
-	__asm volatile("xgetbv" : "=a" (lo), "=d" (hi) : "c" (reg));
+	__asm volatile("xgetbv" : "=a"(lo), "=d"(hi) : "c"(reg));
 
 	return (((uint64_t)hi << 32) | (uint64_t)lo);
 }

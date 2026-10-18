@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_NETGROUP_H_
-#define	_LIBC_NETGROUP_H_
+#define _LIBC_NETGROUP_H_
 
 #include_next <netgroup.h>
 

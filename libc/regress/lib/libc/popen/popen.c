@@ -19,7 +19,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE NETBSD FOUNDATION, INC. AND CONTRIBUTORS
  * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR CONTRIBUTORS 
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR CONTRIBUTORS
  * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -29,69 +29,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <err.h>
 #include <errno.h>
+#include <limits.h>
 #include <paths.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <time.h>
 #include <unistd.h>
 
-#define _PATH_CAT	"/bin/cat"
-#define BUFSIZE		(640*1024)
-			/* 640KB ought to be enough for everyone. */
-#define DATAFILE	"popen.data"
+#define _PATH_CAT "/bin/cat"
+#define BUFSIZE (640 * 1024)
+/* 640KB ought to be enough for everyone. */
+#define DATAFILE "popen.data"
 
 int
 main(int argc, char **argv)
 {
 	char *buffer, command[PATH_MAX];
-	int index, in;
+	int   index, in;
 	FILE *pipe;
 
-	if ((buffer = malloc(BUFSIZE*sizeof(char))) == NULL)
-	    err(1, NULL);
+	if ((buffer = malloc(BUFSIZE * sizeof(char))) == NULL)
+		err(1, NULL);
 
-	for (index=0; index<BUFSIZE; index++)
-	    buffer[index]=arc4random();
+	for (index = 0; index < BUFSIZE; index++)
+		buffer[index] = arc4random();
 
-	(void)snprintf(command, sizeof(command), "%s >%s",
-	               _PATH_CAT, DATAFILE);
+	(void)snprintf(command, sizeof(command), "%s >%s", _PATH_CAT, DATAFILE);
 	if ((pipe = popen(command, "w")) == NULL)
-	    err(1, "popen write");
+		err(1, "popen write");
 
 	if (fwrite(buffer, sizeof(char), BUFSIZE, pipe) != BUFSIZE)
-	    err(1, "write");
+		err(1, "write");
 
 	if (pclose(pipe) == -1)
-	    err(1, "pclose");
+		err(1, "pclose");
 
-	(void)snprintf(command, sizeof(command), "%s %s",
-	               _PATH_CAT, DATAFILE);
+	(void)snprintf(command, sizeof(command), "%s %s", _PATH_CAT, DATAFILE);
 	if ((pipe = popen(command, "r")) == NULL)
-	    err(1, "popen read");
+		err(1, "popen read");
 
 	index = 0;
 	while ((in = fgetc(pipe)) != EOF)
-	    if (index == BUFSIZE) {
-		errno = EFBIG;
-		err(1, "read");
-	    }
-	    else
-		if ((char)in != buffer[index++]) {
-	    	    errno = EINVAL;
-		    err(1, "read");
+		if (index == BUFSIZE) {
+			errno = EFBIG;
+			err(1, "read");
+		} else if ((char)in != buffer[index++]) {
+			errno = EINVAL;
+			err(1, "read");
 		}
 
 	if (index < BUFSIZE) {
-	    errno = EIO;
-	    err(1, "read");
+		errno = EIO;
+		err(1, "read");
 	}
 
 	if (pclose(pipe) == -1)
-	    err(1, "pclose");
+		err(1, "pclose");
 
 	(void)unlink(DATAFILE);
 	return 0;

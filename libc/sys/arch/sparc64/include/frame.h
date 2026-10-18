@@ -48,13 +48,13 @@
  * CC64FSZ (C Compiler 64-bit Frame SiZe) is the size of a stack frame used
  * by the compiler in 64-bit mode.  It is (16)*8; space for 8 ins, 8 outs.
  */
-#define CC64FSZ		176
+#define CC64FSZ 176
 
 /*
  * v9 stacks all have a bias of 2047 added to the %sp and %fp, so you can easily
  * detect it by testing the register for an odd value.  Why 2K-1 I don't know.
  */
-#define BIAS	(2048-1)
+#define BIAS (2048 - 1)
 
 #if defined(_KERNEL) && !defined(_LOCORE)
 
@@ -70,36 +70,36 @@
  * a v8 frame by testing the stack pointer's lsb.
  */
 struct frame {
-	int64_t	fr_local[8];	/* space to save locals (%l0..%l7) */
-	int64_t	fr_arg[6];	/* space to save arguments (%i0..%i5) */
-	u_int64_t	fr_fp;		/* space to save frame pointer (%i6) */
-	u_int64_t	fr_pc;		/* space to save return pc (%i7) */
+	int64_t	  fr_local[8]; /* space to save locals (%l0..%l7) */
+	int64_t	  fr_arg[6];   /* space to save arguments (%i0..%i5) */
+	u_int64_t fr_fp;       /* space to save frame pointer (%i6) */
+	u_int64_t fr_pc;       /* space to save return pc (%i7) */
 	/*
 	 * SVR4 reserves a bunch of extra stuff.
 	 */
-	int64_t fr_argd[6];	/* `register save area' (lunacy) */
-	int64_t	fr_argx[0];	/* arg extension (args 7..n; variable size) */
+	int64_t fr_argd[6]; /* `register save area' (lunacy) */
+	int64_t fr_argx[0]; /* arg extension (args 7..n; variable size) */
 };
 
-#define v9next_frame(f)		((struct frame*)(f->fr_fp+BIAS))
+#define v9next_frame(f) ((struct frame *)(f->fr_fp + BIAS))
 
 /*
  * The v9 trapframe.
  */
 struct trapframe {
-	int64_t		tf_tstate;	/* tstate register */
-	int64_t		tf_pc;		/* return pc */
-	int64_t		tf_npc;		/* return npc */
-	int		tf_y;		/* %y register -- 32-bits */
-	short		tf_tt;		/* What type of trap this was */
-	char		tf_pil;		/* What IRQ we're handling */
-	char		tf_oldpil;	/* What our old SPL was */
-	int64_t		tf_global[8];	/* global registers in trap's caller */
-	int64_t		tf_out[8];	/* output registers in trap's caller */
-	int64_t		tf_local[8];	/* local registers in trap's caller */
-	int64_t		tf_in[8];	/* in registers in trap's caller (for debug) */
+	int64_t tf_tstate;    /* tstate register */
+	int64_t tf_pc;	      /* return pc */
+	int64_t tf_npc;	      /* return npc */
+	int	tf_y;	      /* %y register -- 32-bits */
+	short	tf_tt;	      /* What type of trap this was */
+	char	tf_pil;	      /* What IRQ we're handling */
+	char	tf_oldpil;    /* What our old SPL was */
+	int64_t tf_global[8]; /* global registers in trap's caller */
+	int64_t tf_out[8];    /* output registers in trap's caller */
+	int64_t tf_local[8];  /* local registers in trap's caller */
+	int64_t tf_in[8];     /* in registers in trap's caller (for debug) */
 };
 
-#endif	/* _KERNEL && !_LOCORE */
+#endif /* _KERNEL && !_LOCORE */
 
 #endif /* _MACHINE_FRAME_H_ */

@@ -36,39 +36,44 @@
  */
 
 #ifndef _MACHINE_ASM_H_
-#define	_MACHINE_ASM_H_
+#define _MACHINE_ASM_H_
 
-#define _C_LABEL(x)	x
-#define _ASM_LABEL(x)	x
+#define _C_LABEL(x) x
+#define _ASM_LABEL(x) x
 
 #ifdef __STDC__
-# define __CONCAT(x,y)	x ## y
-# define __STRING(x)	#x
+#define __CONCAT(x, y) x##y
+#define __STRING(x) #x
 #else
-# define __CONCAT(x,y)	x/**/y
-# define __STRING(x)	"x"
+#define __CONCAT(x, y) x /**/ y
+#define __STRING(x) "x"
 #endif
 
 #ifndef _ALIGN_TEXT
-# define _ALIGN_TEXT .align 0
+#define _ALIGN_TEXT .align 0
 #endif
 
 /* NB == No Binding: use .globl or .weak as necessary */
-#define _ENTRY_NB(x) \
-	.text; .p2align 1; .type x,@function; x:
-#define _ENTRY(x)	.globl x; _ENTRY_NB(x)
+#define _ENTRY_NB(x)                                                           \
+	.text;                                                                 \
+	.p2align 1;                                                            \
+	.type x, @function;                                                    \
+	x:
+#define _ENTRY(x)                                                              \
+	.globl x;                                                              \
+	_ENTRY_NB(x)
 
 #if defined(PROF) || defined(GPROF)
 // XXX Profiler Support
-#define _PROF_PROLOGUE			\
-	addi	sp, sp, -16;		\
-	sd	ra, 8(sp);		\
-	sd	fp, 0(sp);		\
-	mv	fp, sp;			\
-	call	__mcount;		\
-	ld	ra, 8(sp);		\
-	ld	fp, 0(sp);		\
-	add	sp, sp, 16;
+#define _PROF_PROLOGUE                                                         \
+	addi sp, sp, -16;                                                      \
+	sd   ra, 8(sp);                                                        \
+	sd   fp, 0(sp);                                                        \
+	mv   fp, sp;                                                           \
+	call __mcount;                                                         \
+	ld   ra, 8(sp);                                                        \
+	ld   fp, 0(sp);                                                        \
+	add  sp, sp, 16;
 #else
 #define _PROF_PROLOGUE
 #endif
@@ -86,44 +91,52 @@
 #define RETGUARD_SYMBOL(x)
 #endif
 
-#define	ENTRY(y)	_ENTRY(y); _PROF_PROLOGUE
-#define	ENTRY_NP(y)	_ENTRY(y)
-#define	ENTRY_NB(y)	_ENTRY_NB(y); _PROF_PROLOGUE
-#define	ASENTRY(y)	_ENTRY(y); _PROF_PROLOGUE
-#define	ASENTRY_NP(y)	_ENTRY(y)
-#define	END(y)		.size y, . - y
-#define EENTRY(sym)	 .globl  sym; sym:
+#define ENTRY(y)                                                               \
+	_ENTRY(y);                                                             \
+	_PROF_PROLOGUE
+#define ENTRY_NP(y) _ENTRY(y)
+#define ENTRY_NB(y)                                                            \
+	_ENTRY_NB(y);                                                          \
+	_PROF_PROLOGUE
+#define ASENTRY(y)                                                             \
+	_ENTRY(y);                                                             \
+	_PROF_PROLOGUE
+#define ASENTRY_NP(y) _ENTRY(y)
+#define END(y) .size y, .- y
+#define EENTRY(sym)                                                            \
+	.globl sym;                                                            \
+	sym:
 #define EEND(sym)
 
 #ifdef __PIC__
-#define	PIC_SYM(x,y)	x(y)
+#define PIC_SYM(x, y) x(y)
 #else
-#define	PIC_SYM(x,y)	x
+#define PIC_SYM(x, y) x
 #endif
 
-#define	STRONG_ALIAS(alias,sym)						\
-	.global alias;							\
+#define STRONG_ALIAS(alias, sym)                                               \
+	.global alias;                                                         \
 	alias = sym
-#define	WEAK_ALIAS(alias,sym)						\
-	.weak alias;							\
+#define WEAK_ALIAS(alias, sym)                                                 \
+	.weak alias;                                                           \
 	alias = sym
 
-#define	SWAP_FAULT_HANDLER(handler, tmp0, tmp1)			\
-	ld	tmp0, CI_CURPCB(tp);		/* Load the pcb */	\
-	ld	tmp1, PCB_ONFAULT(tmp0);	/* Save old handler */	\
-	sd	handler, PCB_ONFAULT(tmp0);	/* Set the handler */	\
-	mv	handler, tmp1
+#define SWAP_FAULT_HANDLER(handler, tmp0, tmp1)                                \
+	ld tmp0, CI_CURPCB(tp);	       /* Load the pcb */                      \
+	ld tmp1, PCB_ONFAULT(tmp0);    /* Save old handler */                  \
+	sd handler, PCB_ONFAULT(tmp0); /* Set the handler */                   \
+	mv handler, tmp1
 
-#define	SET_FAULT_HANDLER(handler, pcb)					\
-	ld	pcb, CI_CURPCB(tp);		/* Load the pcb */	\
-	sd	handler, PCB_ONFAULT(pcb)	/* Set the handler */
+#define SET_FAULT_HANDLER(handler, pcb)                                        \
+	ld pcb, CI_CURPCB(tp);	     /* Load the pcb */                        \
+	sd handler, PCB_ONFAULT(pcb) /* Set the handler */
 
-#define	ENTER_USER_ACCESS(tmp)						\
-	li	tmp, SSTATUS_SUM;					\
-	csrs	sstatus, tmp
+#define ENTER_USER_ACCESS(tmp)                                                 \
+	li   tmp, SSTATUS_SUM;                                                 \
+	csrs sstatus, tmp
 
-#define	EXIT_USER_ACCESS(tmp)						\
-	li	tmp, SSTATUS_SUM;					\
-	csrc	sstatus, tmp
+#define EXIT_USER_ACCESS(tmp)                                                  \
+	li   tmp, SSTATUS_SUM;                                                 \
+	csrc sstatus, tmp
 
 #endif /* _MACHINE_ASM_H_ */

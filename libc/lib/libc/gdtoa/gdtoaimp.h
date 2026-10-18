@@ -178,15 +178,19 @@ THIS SOFTWARE.
 
 #ifndef GDTOAIMP_H_INCLUDED
 #define GDTOAIMP_H_INCLUDED
-#include "gdtoa.h"
 #include "gd_qnan.h"
+#include "gdtoa.h"
 #ifdef Honor_FLT_ROUNDS
 #include <fenv.h>
 #endif
 
 #ifdef DEBUG
 #include "stdio.h"
-#define Bug(x) {fprintf(stderr, "%s\n", x); exit(1);}
+#define Bug(x)                                                                 \
+	{                                                                      \
+		fprintf(stderr, "%s\n", x);                                    \
+		exit(1);                                                       \
+	}
 #endif
 
 #include "stdlib.h"
@@ -271,10 +275,14 @@ extern "C" {
 #endif
 
 #if defined(IEEE_8087) + defined(IEEE_MC68k) + defined(VAX) + defined(IBM) != 1
-Exactly one of IEEE_8087, IEEE_MC68k, VAX, or IBM should be defined.
+Exactly one of	  IEEE_8087, IEEE_MC68k, VAX, or
+    IBM should be defined.
 #endif
 
-typedef union { double d; ULong L[2]; } U;
+    typedef union {
+	double d;
+	ULong  L[2];
+} U;
 
 #ifdef IEEE_8087
 #define word0(x) (x)->L[1]
@@ -290,11 +298,13 @@ typedef union { double d; ULong L[2]; } U;
  * #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
  */
 #if defined(IEEE_8087) + defined(VAX)
-#define Storeinc(a,b,c) (((unsigned short *)a)[1] = (unsigned short)b, \
-((unsigned short *)a)[0] = (unsigned short)c, a++)
+#define Storeinc(a, b, c)                                                      \
+	(((unsigned short *)a)[1] = (unsigned short)b,                         \
+	    ((unsigned short *)a)[0] = (unsigned short)c, a++)
 #else
-#define Storeinc(a,b,c) (((unsigned short *)a)[0] = (unsigned short)b, \
-((unsigned short *)a)[1] = (unsigned short)c, a++)
+#define Storeinc(a, b, c)                                                      \
+	(((unsigned short *)a)[0] = (unsigned short)b,                         \
+	    ((unsigned short *)a)[1] = (unsigned short)c, a++)
 #endif
 
 /* #define P DBL_MANT_DIG */
@@ -304,22 +314,22 @@ typedef union { double d; ULong L[2]; } U;
 /* Int_max = floor(P*log(FLT_RADIX)/log(10) - 1) */
 
 #ifdef IEEE_Arith
-#define Exp_shift  20
+#define Exp_shift 20
 #define Exp_shift1 20
-#define Exp_msk1    0x100000
-#define Exp_msk11   0x100000
-#define Exp_mask  0x7ff00000
+#define Exp_msk1 0x100000
+#define Exp_msk11 0x100000
+#define Exp_mask 0x7ff00000
 #define P 53
 #define Bias 1023
 #define Emin (-1022)
-#define Exp_1  0x3ff00000
+#define Exp_1 0x3ff00000
 #define Exp_11 0x3ff00000
 #define Ebits 11
-#define Frac_mask  0xfffff
+#define Frac_mask 0xfffff
 #define Frac_mask1 0xfffff
 #define Ten_pmax 22
 #define Bletch 0x10
-#define Bndry_mask  0xfffff
+#define Bndry_mask 0xfffff
 #define Bndry_mask1 0xfffff
 #define LSB 1
 #define Sign_bit 0x80000000
@@ -338,26 +348,26 @@ typedef union { double d; ULong L[2]; } U;
 #endif /*Flt_Rounds*/
 
 #else /* ifndef IEEE_Arith */
-#undef  Sudden_Underflow
+#undef Sudden_Underflow
 #define Sudden_Underflow
 #ifdef IBM
 #undef Flt_Rounds
 #define Flt_Rounds 0
-#define Exp_shift  24
+#define Exp_shift 24
 #define Exp_shift1 24
-#define Exp_msk1   0x1000000
-#define Exp_msk11  0x1000000
-#define Exp_mask  0x7f000000
+#define Exp_msk1 0x1000000
+#define Exp_msk11 0x1000000
+#define Exp_mask 0x7f000000
 #define P 14
 #define Bias 65
-#define Exp_1  0x41000000
+#define Exp_1 0x41000000
 #define Exp_11 0x41000000
-#define Ebits 8	/* exponent has 7 bits, but 8 is the right value in b2d */
-#define Frac_mask  0xffffff
+#define Ebits 8 /* exponent has 7 bits, but 8 is the right value in b2d */
+#define Frac_mask 0xffffff
 #define Frac_mask1 0xffffff
 #define Bletch 4
 #define Ten_pmax 22
-#define Bndry_mask  0xefffff
+#define Bndry_mask 0xefffff
 #define Bndry_mask1 0xffffff
 #define LSB 1
 #define Sign_bit 0x80000000
@@ -369,22 +379,22 @@ typedef union { double d; ULong L[2]; } U;
 #else /* VAX */
 #undef Flt_Rounds
 #define Flt_Rounds 1
-#define Exp_shift  23
+#define Exp_shift 23
 #define Exp_shift1 7
-#define Exp_msk1    0x80
-#define Exp_msk11   0x800000
-#define Exp_mask  0x7f80
+#define Exp_msk1 0x80
+#define Exp_msk11 0x800000
+#define Exp_mask 0x7f80
 #define P 56
 #define Bias 129
 #define Emin (-127)
-#define Exp_1  0x40800000
+#define Exp_1 0x40800000
 #define Exp_11 0x4080
 #define Ebits 8
-#define Frac_mask  0x7fffff
+#define Frac_mask 0x7fffff
 #define Frac_mask1 0xffff007f
 #define Ten_pmax 24
 #define Bletch 2
-#define Bndry_mask  0xffff007f
+#define Bndry_mask 0xffff007f
 #define Bndry_mask1 0xffff007f
 #define LSB 0x10000
 #define Sign_bit 0x8000
@@ -400,28 +410,28 @@ typedef union { double d; ULong L[2]; } U;
 #define ROUND_BIASED
 #else
 #ifdef ROUND_BIASED_without_Round_Up
-#undef  ROUND_BIASED
+#undef ROUND_BIASED
 #define ROUND_BIASED
 #endif
 #endif
 
 #ifdef RND_PRODQUOT
-#define rounded_product(a,b) a = rnd_prod(a, b)
-#define rounded_quotient(a,b) a = rnd_quot(a, b)
+#define rounded_product(a, b) a = rnd_prod(a, b)
+#define rounded_quotient(a, b) a = rnd_quot(a, b)
 #ifdef KR_headers
 extern double rnd_prod(), rnd_quot();
 #else
 extern double rnd_prod(double, double), rnd_quot(double, double);
 #endif
 #else
-#define rounded_product(a,b) a *= b
-#define rounded_quotient(a,b) a /= b
+#define rounded_product(a, b) a *= b
+#define rounded_quotient(a, b) a /= b
 #endif
 
-#define Big0 (Frac_mask1 | Exp_msk1*(DBL_MAX_EXP+Bias-1))
+#define Big0 (Frac_mask1 | Exp_msk1 * (DBL_MAX_EXP + Bias - 1))
 #define Big1 0xffffffff
 
-#undef  Pack_16
+#undef Pack_16
 #ifndef Pack_32
 #define Pack_32
 #endif
@@ -437,7 +447,7 @@ extern double rnd_prod(double, double), rnd_quot(double, double);
  * slower.  Hence the default is now to store 32 bits per Long.
  */
 #endif
-#else	/* long long available */
+#else /* long long available */
 #ifndef Llong
 #define Llong long long
 #endif
@@ -459,33 +469,34 @@ extern double rnd_prod(double, double), rnd_quot(double, double);
 #endif
 
 #ifndef MULTIPLE_THREADS
-#define ACQUIRE_DTOA_LOCK(n)	/*nothing*/
-#define FREE_DTOA_LOCK(n)	/*nothing*/
+#define ACQUIRE_DTOA_LOCK(n) /*nothing*/
+#define FREE_DTOA_LOCK(n)    /*nothing*/
 #else
 #include "thread_private.h"
-#define ACQUIRE_DTOA_LOCK(n)	_MUTEX_LOCK(&__dtoa_locks[n])
-#define FREE_DTOA_LOCK(n)	_MUTEX_UNLOCK(&__dtoa_locks[n])
+#define ACQUIRE_DTOA_LOCK(n) _MUTEX_LOCK(&__dtoa_locks[n])
+#define FREE_DTOA_LOCK(n) _MUTEX_UNLOCK(&__dtoa_locks[n])
 #endif
 
 #define Kmax 9
 
- struct
-Bigint {
+struct Bigint {
 	struct Bigint *next;
-	int k, maxwds, sign, wds;
-	ULong x[1];
-	};
+	int	       k, maxwds, sign, wds;
+	ULong	       x[1];
+};
 
- typedef struct Bigint Bigint;
+typedef struct Bigint Bigint;
 
 #ifdef NO_STRING_H
 #ifdef DECLARE_SIZE_T
 typedef unsigned int size_t;
 #endif
-extern void memcpy_D2A ANSI((void*, const void*, size_t));
-#define Bcopy(x,y) memcpy_D2A(&x->sign,&y->sign,y->wds*sizeof(ULong) + 2*sizeof(int))
+extern void memcpy_D2A ANSI((void *, const void *, size_t));
+#define Bcopy(x, y)                                                            \
+	memcpy_D2A(&x->sign, &y->sign, y->wds * sizeof(ULong) + 2 * sizeof(int))
 #else /* !NO_STRING_H */
-#define Bcopy(x,y) memcpy(&x->sign,&y->sign,y->wds*sizeof(ULong) + 2*sizeof(int))
+#define Bcopy(x, y)                                                            \
+	memcpy(&x->sign, &y->sign, y->wds * sizeof(ULong) + 2 * sizeof(int))
 #endif /* NO_STRING_H */
 
 #define dtoa __dtoa
@@ -567,50 +578,51 @@ extern void memcpy_D2A ANSI((void*, const void*, size_t));
 #define ulp __ulp_D2A
 
 __BEGIN_HIDDEN_DECLS
- extern char *dtoa_result;
- extern CONST double bigtens[], tens[], tinytens[];
- extern unsigned char hexdig[];
+extern char	    *dtoa_result;
+extern CONST double  bigtens[], tens[], tinytens[];
+extern unsigned char hexdig[];
 
- extern Bigint *Balloc ANSI((int));
- extern void Bfree ANSI((Bigint*));
- extern void ULtof ANSI((ULong*, ULong*, Long, int));
- extern void ULtod ANSI((ULong*, ULong*, Long, int));
- extern void ULtodd ANSI((ULong*, ULong*, Long, int));
- extern void ULtoQ ANSI((ULong*, ULong*, Long, int));
- extern void ULtox ANSI((UShort*, ULong*, Long, int));
- extern void ULtoxL ANSI((ULong*, ULong*, Long, int));
- extern ULong any_on ANSI((Bigint*, int));
- extern double b2d ANSI((Bigint*, int*));
- extern int cmp ANSI((Bigint*, Bigint*));
- extern void copybits ANSI((ULong*, int, Bigint*));
- extern Bigint *d2b ANSI((double, int*, int*));
- extern void decrement ANSI((Bigint*));
- extern Bigint *diff ANSI((Bigint*, Bigint*));
- extern char *g__fmt ANSI((char*, char*, char*, int, ULong, size_t));
- extern int gethex ANSI((CONST char**, FPI*, Long*, Bigint**, int));
- extern void __hexdig_init_D2A(Void);
- extern int hexnan ANSI((CONST char**, FPI*, ULong*));
- extern int hi0bits_D2A ANSI((ULong));
- extern Bigint *i2b ANSI((int));
- extern Bigint *increment ANSI((Bigint*));
- extern int lo0bits ANSI((ULong*));
- extern Bigint *lshift ANSI((Bigint*, int));
- extern int match ANSI((CONST char**, char*));
- extern Bigint *mult ANSI((Bigint*, Bigint*));
- extern Bigint *multadd ANSI((Bigint*, int, int));
- extern char *nrv_alloc ANSI((char*, char **, int));
- extern Bigint *pow5mult ANSI((Bigint*, int));
- extern int quorem ANSI((Bigint*, Bigint*));
- extern double ratio ANSI((Bigint*, Bigint*));
- extern void rshift ANSI((Bigint*, int));
- extern char *rv_alloc ANSI((int));
- extern Bigint *s2b ANSI((CONST char*, int, int, ULong, int));
- extern Bigint *set_ones ANSI((Bigint*, int));
- extern char *strcp ANSI((char*, const char*));
- extern int strtoIg ANSI((CONST char*, char**, FPI*, Long*, Bigint**, int*));
- extern Bigint *sum ANSI((Bigint*, Bigint*));
- extern int trailz ANSI((Bigint*));
- extern double ulp ANSI((U*));
+extern Bigint *Balloc	 ANSI((int));
+extern void Bfree	 ANSI((Bigint *));
+extern void ULtof	 ANSI((ULong *, ULong *, Long, int));
+extern void ULtod	 ANSI((ULong *, ULong *, Long, int));
+extern void ULtodd	 ANSI((ULong *, ULong *, Long, int));
+extern void ULtoQ	 ANSI((ULong *, ULong *, Long, int));
+extern void ULtox	 ANSI((UShort *, ULong *, Long, int));
+extern void ULtoxL	 ANSI((ULong *, ULong *, Long, int));
+extern ULong any_on	 ANSI((Bigint *, int));
+extern double b2d	 ANSI((Bigint *, int *));
+extern int cmp		 ANSI((Bigint *, Bigint *));
+extern void copybits	 ANSI((ULong *, int, Bigint *));
+extern Bigint *d2b	 ANSI((double, int *, int *));
+extern void decrement	 ANSI((Bigint *));
+extern Bigint *diff	 ANSI((Bigint *, Bigint *));
+extern char *g__fmt	 ANSI((char *, char *, char *, int, ULong, size_t));
+extern int gethex	 ANSI((CONST char **, FPI *, Long *, Bigint **, int));
+extern void		 __hexdig_init_D2A(Void);
+extern int hexnan	 ANSI((CONST char **, FPI *, ULong *));
+extern int hi0bits_D2A	 ANSI((ULong));
+extern Bigint *i2b	 ANSI((int));
+extern Bigint *increment ANSI((Bigint *));
+extern int lo0bits	 ANSI((ULong *));
+extern Bigint *lshift	 ANSI((Bigint *, int));
+extern int match	 ANSI((CONST char **, char *));
+extern Bigint *mult	 ANSI((Bigint *, Bigint *));
+extern Bigint *multadd	 ANSI((Bigint *, int, int));
+extern char *nrv_alloc	 ANSI((char *, char **, int));
+extern Bigint *pow5mult	 ANSI((Bigint *, int));
+extern int quorem	 ANSI((Bigint *, Bigint *));
+extern double ratio	 ANSI((Bigint *, Bigint *));
+extern void rshift	 ANSI((Bigint *, int));
+extern char *rv_alloc	 ANSI((int));
+extern Bigint *s2b	 ANSI((CONST char *, int, int, ULong, int));
+extern Bigint *set_ones	 ANSI((Bigint *, int));
+extern char *strcp	 ANSI((char *, const char *));
+extern int strtoIg	 ANSI(
+    (CONST char *, char **, FPI *, Long *, Bigint **, int *));
+extern Bigint *sum ANSI((Bigint *, Bigint *));
+extern int trailz  ANSI((Bigint *));
+extern double ulp  ANSI((U *));
 __END_HIDDEN_DECLS
 
 #ifdef __cplusplus

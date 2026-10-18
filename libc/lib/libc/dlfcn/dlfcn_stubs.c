@@ -2,7 +2,7 @@
 
 /*
  * Copyright (c) 1998 Per Fogelstrom, Opsycon AB
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -27,10 +27,11 @@
  */
 
 #include <sys/types.h>
+
+#include <dlfcn.h>
+#include <link.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <link.h>
-#include <dlfcn.h>
 #include <tib.h>
 
 #include "init.h"
@@ -81,21 +82,21 @@ dlerror(void)
 	if (dlerror_ret) {
 		dlerror_ret = 0;
 		return _dl_cb == NULL ? "No dynamic linker" :
-		    "Incompatible dynamic linker";
+					"Incompatible dynamic linker";
 	}
 	return NULL;
 }
 
 int
-dl_iterate_phdr(int (*callback)(struct dl_phdr_info *, size_t, void *),
-	void *data)
+dl_iterate_phdr(
+    int (*callback)(struct dl_phdr_info *, size_t, void *), void *data)
 {
 	if (_dl_cb != NULL && _dl_cb->dl_iterate_phdr != NULL)
 		return _dl_cb->dl_iterate_phdr(callback, data);
 #ifndef PIC
 	if (_static_phdr_info.dlpi_phdr != NULL)
-		return callback(&_static_phdr_info, sizeof(_static_phdr_info),
-		    data);
+		return callback(
+		    &_static_phdr_info, sizeof(_static_phdr_info), data);
 #endif /* !PIC */
 	return -1;
 }

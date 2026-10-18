@@ -26,33 +26,33 @@
  */
 
 struct refcnt {
-	unsigned int	r_refs;		/* [a] reference counter */
-	int		r_traceidx;	/* [I] index for dt(4) tracing  */
+	unsigned int r_refs;	 /* [a] reference counter */
+	int	     r_traceidx; /* [I] index for dt(4) tracing  */
 };
 
-#define REFCNT_INITIALIZER()		{ .r_refs = 1, .r_traceidx = 0 }
+#define REFCNT_INITIALIZER() {.r_refs = 1, .r_traceidx = 0}
 
 #ifdef _KERNEL
 
-void	refcnt_init(struct refcnt *);
-void	refcnt_init_trace(struct refcnt *, int);
-void	refcnt_take(struct refcnt *);
-int	refcnt_rele(struct refcnt *);
-void	refcnt_rele_wake(struct refcnt *);
-void	refcnt_finalize(struct refcnt *, const char *);
-unsigned int	refcnt_read(const struct refcnt *);
+void	     refcnt_init(struct refcnt *);
+void	     refcnt_init_trace(struct refcnt *, int);
+void	     refcnt_take(struct refcnt *);
+int	     refcnt_rele(struct refcnt *);
+void	     refcnt_rele_wake(struct refcnt *);
+void	     refcnt_finalize(struct refcnt *, const char *);
+unsigned int refcnt_read(const struct refcnt *);
 
 #define refcnt_shared(_r) (refcnt_read((_r)) > 1)
 
 /* sorted alphabetically, keep in sync with dev/dt/dt_prov_static.c */
-#define DT_REFCNT_IDX_ETHMULTI	1
-#define DT_REFCNT_IDX_IFADDR	2
-#define DT_REFCNT_IDX_IFMADDR	3
-#define DT_REFCNT_IDX_INPCB	4
-#define DT_REFCNT_IDX_RTENTRY	5
-#define DT_REFCNT_IDX_SOCKET	6
-#define DT_REFCNT_IDX_SYNCACHE	7
-#define DT_REFCNT_IDX_TDB	8
+#define DT_REFCNT_IDX_ETHMULTI 1
+#define DT_REFCNT_IDX_IFADDR 2
+#define DT_REFCNT_IDX_IFMADDR 3
+#define DT_REFCNT_IDX_INPCB 4
+#define DT_REFCNT_IDX_RTENTRY 5
+#define DT_REFCNT_IDX_SOCKET 6
+#define DT_REFCNT_IDX_SYNCACHE 7
+#define DT_REFCNT_IDX_TDB 8
 
 #endif /* _KERNEL */
 

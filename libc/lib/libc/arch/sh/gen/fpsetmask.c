@@ -17,6 +17,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_except
@@ -29,8 +30,8 @@ fpsetmask(fp_except mask)
 	__fpscr_values[0] = (__fpscr_values[0] & ~(0x1f << 7)) | (mask << 7);
 	__fpscr_values[1] = (__fpscr_values[1] & ~(0x1f << 7)) | (mask << 7);
 #endif
-	__asm__ volatile ("sts fpscr, %0" : "=r" (fpscr));
+	__asm__ volatile("sts fpscr, %0" : "=r"(fpscr));
 	nfpscr = (fpscr & ~(0x1f << 7)) | (mask << 7);
-	__asm__ volatile ("lds %0, fpscr" : : "r" (nfpscr));
+	__asm__ volatile("lds %0, fpscr" : : "r"(nfpscr));
 	return ((fpscr >> 7) & 0x1f);
 }

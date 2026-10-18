@@ -31,7 +31,8 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/param.h>	/* ALIGN ALIGNBYTES */
+#include <sys/param.h> /* ALIGN ALIGNBYTES */
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -39,44 +40,48 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "local.h"
 #include "glue.h"
+#include "local.h"
 #include "thread_private.h"
 
-int	__sdidinit;
+int __sdidinit;
 
-#define	NDYNAMIC 10		/* add ten more whenever necessary */
+#define NDYNAMIC 10 /* add ten more whenever necessary */
 
+#define std(flags, file, cookie)                                               \
+	{._flags = (flags),                                                    \
+	    ._file = (file),                                                   \
+	    ._cookie = (cookie),                                               \
+	    ._close = __sclose,                                                \
+	    ._read = __sread,                                                  \
+	    ._seek = __sseek,                                                  \
+	    ._write = __swrite,                                                \
+	    ._lock = __RCMTX_INITIALIZER()}
 
-#define	std(flags, file, cookie) \
-	{ ._flags = (flags), ._file = (file), ._cookie = (cookie), \
-	  ._close = __sclose, ._read = __sread, ._seek = __sseek, \
-	  ._write = __swrite, ._lock = __RCMTX_INITIALIZER() }
-
-				/* the usual - (stdin + stdout + stderr) */
-static FILE usual[FOPEN_MAX - 3];
-static struct glue uglue = { 0, FOPEN_MAX - 3, usual };
+/* the usual - (stdin + stdout + stderr) */
+static FILE	    usual[FOPEN_MAX - 3];
+static struct glue  uglue = {0, FOPEN_MAX - 3, usual};
 static struct glue *lastglue = &uglue;
-static void *sfp_mutex;
+static void	   *sfp_mutex;
 
 /*
  * These are separate variables because they may end up copied
  * into program images via COPY relocations, so their addresses
  * won't be related.  That also means they need separate glue :(
  */
-FILE __stdin[1]  = { std(__SRD,         STDIN_FILENO, __stdin) };
-FILE __stdout[1] = { std(__SWR,        STDOUT_FILENO, __stdout) };
-FILE __stderr[1] = { std(__SWR|__SNBF, STDERR_FILENO, __stderr) };
+FILE __stdin[1] = {std(__SRD, STDIN_FILENO, __stdin)};
+FILE __stdout[1] = {std(__SWR, STDOUT_FILENO, __stdout)};
+FILE __stderr[1] = {std(__SWR | __SNBF, STDERR_FILENO, __stderr)};
 
-static struct glue sglue2 = { &uglue, 1, __stderr };
-static struct glue sglue1 = { &sglue2, 1, __stdout };
-struct glue __sglue = { &sglue1, 1, __stdin };
+static struct glue sglue2 = {&uglue, 1, __stderr};
+static struct glue sglue1 = {&sglue2, 1, __stdout};
+struct glue	   __sglue = {&sglue1, 1, __stdin};
 
 static struct glue *
 moreglue(int n)
 {
 	struct glue *g;
-	char *data;
+	char	    *data;
 
 	data = calloc(1, sizeof(*g) + ALIGNBYTES + n * sizeof(FILE));
 	if (data == NULL)
@@ -94,8 +99,8 @@ moreglue(int n)
 FILE *
 __sfp(void)
 {
-	FILE *fp;
-	int n;
+	FILE	    *fp;
+	int	     n;
 	struct glue *g;
 
 	if (!__sdidinit)
@@ -117,16 +122,16 @@ __sfp(void)
 	lastglue = g;
 	fp = g->iobs;
 found:
-	fp->_flags = 1;		/* reserve this slot; caller sets real flags */
+	fp->_flags = 1; /* reserve this slot; caller sets real flags */
 	_MUTEX_UNLOCK(&sfp_mutex);
 
 	/* make sure this next memset covers everything but _flags */
-	extern char _ctassert[(offsetof(FILE, _flags) == 0) ? 1 : -1 ]
+	extern char _ctassert[(offsetof(FILE, _flags) == 0) ? 1 : -1]
 	    __attribute__((__unused__));
 
-	memset((char *)fp + sizeof fp->_flags, 0, sizeof *fp -
-	    sizeof fp->_flags);
-	fp->_file = -1;		/* no file */
+	memset(
+	    (char *)fp + sizeof fp->_flags, 0, sizeof *fp - sizeof fp->_flags);
+	fp->_file = -1; /* no file */
 	__rcmtx_init(&fp->_lock);
 
 	return (fp);
@@ -144,7 +149,7 @@ void
 _cleanup(void)
 {
 	/* (void) _fwalk(fclose); */
-	(void) _fwalk(__sflush);		/* `cheating' */
+	(void)_fwalk(__sflush); /* `cheating' */
 }
 
 /*
@@ -157,11 +162,11 @@ __sinit(void)
 
 	_MUTEX_LOCK(&sinit_mutex);
 	if (__sdidinit)
-		goto out;	/* bail out if caller lost the race */
+		goto out; /* bail out if caller lost the race */
 
 	/* make sure we clean up on exit */
 	__atexit_register_cleanup(_cleanup); /* conservative */
 	__sdidinit = 1;
-out: 
+out:
 	_MUTEX_UNLOCK(&sinit_mutex);
 }

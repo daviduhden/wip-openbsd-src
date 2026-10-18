@@ -32,13 +32,14 @@
 #include <errno.h>
 #include <stdio.h>
 #include <wchar.h>
+
 #include "local.h"
 
 wint_t
 __fgetwc_unlock(FILE *fp)
 {
 	wchar_t wc;
-	size_t size;
+	size_t	size;
 
 	_SET_ORIENTATION(fp, 1);
 
@@ -51,7 +52,7 @@ __fgetwc_unlock(FILE *fp)
 
 	do {
 		char c;
-		int ch = __sgetc(fp);
+		int  ch = __sgetc(fp);
 
 		if (ch == EOF) {
 			return WEOF;

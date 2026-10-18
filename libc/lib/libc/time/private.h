@@ -9,9 +9,9 @@
 */
 
 /* OpenBSD defaults */
-#define PCTS			1
-#define ALL_STATE		1
-#define STD_INSPIRED		1
+#define PCTS 1
+#define ALL_STATE 1
+#define STD_INSPIRED 1
 
 /*
 ** This header is for use ONLY with the time conversion code.
@@ -21,13 +21,13 @@
 ** Thank you!
 */
 
-#define GRANDPARENTED	"Local time zone must be set--see zic manual page"
+#define GRANDPARENTED "Local time zone must be set--see zic manual page"
 
 /*
 ** Nested includes
 */
 
-#include <limits.h>	/* for CHAR_BIT et al. */
+#include <limits.h> /* for CHAR_BIT et al. */
 #include <time.h>
 
 /*
@@ -35,19 +35,19 @@
 */
 
 #ifndef TRUE
-#define TRUE	1
+#define TRUE 1
 #endif /* !defined TRUE */
 
 #ifndef FALSE
-#define FALSE	0
+#define FALSE 0
 #endif /* !defined FALSE */
 
 #ifndef TYPE_BIT
-#define TYPE_BIT(type)	(sizeof (type) * CHAR_BIT)
+#define TYPE_BIT(type) (sizeof(type) * CHAR_BIT)
 #endif /* !defined TYPE_BIT */
 
 #ifndef TYPE_SIGNED
-#define TYPE_SIGNED(type) (((type) -1) < 0)
+#define TYPE_SIGNED(type) (((type) - 1) < 0)
 #endif /* !defined TYPE_SIGNED */
 
 #ifndef INT_STRLEN_MAXIMUM
@@ -57,9 +57,9 @@
 ** add one for integer division truncation;
 ** add one more for a minus sign if the type is signed.
 */
-#define INT_STRLEN_MAXIMUM(type) \
-	((TYPE_BIT(type) - TYPE_SIGNED(type)) * 302 / 1000 + \
-	1 + TYPE_SIGNED(type))
+#define INT_STRLEN_MAXIMUM(type)                                               \
+	((TYPE_BIT(type) - TYPE_SIGNED(type)) * 302 / 1000 + 1 +               \
+	    TYPE_SIGNED(type))
 #endif /* !defined INT_STRLEN_MAXIMUM */
 
 #define _(msgid) msgid
@@ -69,23 +69,24 @@
 #endif /* !defined TZ_DOMAIN */
 
 #ifndef YEARSPERREPEAT
-#define YEARSPERREPEAT		400	/* years before a Gregorian repeat */
-#endif /* !defined YEARSPERREPEAT */
+#define YEARSPERREPEAT 400 /* years before a Gregorian repeat */
+#endif			   /* !defined YEARSPERREPEAT */
 
 /*
 ** The Gregorian year averages 365.2425 days, which is 31556952 seconds.
 */
 
 #ifndef AVGSECSPERYEAR
-#define AVGSECSPERYEAR		31556952L
+#define AVGSECSPERYEAR 31556952L
 #endif /* !defined AVGSECSPERYEAR */
 
 #ifndef SECSPERREPEAT
-#define SECSPERREPEAT		((int_fast64_t) YEARSPERREPEAT * (int_fast64_t) AVGSECSPERYEAR)
+#define SECSPERREPEAT                                                          \
+	((int_fast64_t)YEARSPERREPEAT * (int_fast64_t)AVGSECSPERYEAR)
 #endif /* !defined SECSPERREPEAT */
 
 #ifndef SECSPERREPEAT_BITS
-#define SECSPERREPEAT_BITS	34	/* ceil(log2(SECSPERREPEAT)) */
-#endif /* !defined SECSPERREPEAT_BITS */
+#define SECSPERREPEAT_BITS 34 /* ceil(log2(SECSPERREPEAT)) */
+#endif			      /* !defined SECSPERREPEAT_BITS */
 
 #endif /* !defined PRIVATE_H */

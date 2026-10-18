@@ -9,17 +9,17 @@
 
 struct cpu_info;
 
-/* 
+/*
  * Structure common to all PIC softcs
  */
 struct pic {
 	struct device pic_dev;
-        int pic_type;
+	int	      pic_type;
 #ifdef MULTIPROCESSOR
 	struct mutex pic_mutex;
 #endif
-        void (*pic_hwmask)(struct pic *, int);
-        void (*pic_hwunmask)(struct pic *, int);
+	void (*pic_hwmask)(struct pic *, int);
+	void (*pic_hwunmask)(struct pic *, int);
 	void (*pic_addroute)(struct pic *, struct cpu_info *, int, int, int);
 	void (*pic_delroute)(struct pic *, struct cpu_info *, int, int, int);
 	struct intrstub *pic_level_stubs;
@@ -31,10 +31,10 @@ struct pic {
 /*
  * PIC types.
  */
-#define PIC_I8259	0
-#define PIC_IOAPIC	1
-#define PIC_LAPIC	2
-#define PIC_SOFT	3
+#define PIC_I8259 0
+#define PIC_IOAPIC 1
+#define PIC_LAPIC 2
+#define PIC_SOFT 3
 
 extern struct pic i8259_pic;
 extern struct pic local_pic;

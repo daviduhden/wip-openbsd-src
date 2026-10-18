@@ -14,20 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/resource.h>
+
 #include <err.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/resource.h>
 
-pthread_cond_t cond;
+pthread_cond_t	cond;
 pthread_mutex_t mutex;
 
 void *p;
 
-void *m(void *arg)
+void *
+m(void *arg)
 {
 	p = malloc(100000);
 	if (p == NULL)
@@ -35,7 +37,8 @@ void *m(void *arg)
 	return NULL;
 }
 
-void *f(void *arg)
+void *
+f(void *arg)
 {
 	free(p);
 	free(p);
@@ -52,7 +55,7 @@ int
 main(void)
 {
 	const struct rlimit lim = {0, 0};
-	pthread_t t1, t2;
+	pthread_t	    t1, t2;
 
 	/* prevent coredumps */
 	setrlimit(RLIMIT_CORE, &lim);

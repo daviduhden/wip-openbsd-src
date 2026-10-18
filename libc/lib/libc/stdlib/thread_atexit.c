@@ -27,7 +27,7 @@ int
 __cxa_thread_atexit_impl(void (*func)(void *), void *arg, void *dso)
 {
 	struct thread_atexit_fn *fnp;
-	struct tib *tib = TIB_GET();
+	struct tib		*tib = TIB_GET();
 
 	fnp = calloc(1, sizeof(struct thread_atexit_fn));
 	if (fnp == NULL)

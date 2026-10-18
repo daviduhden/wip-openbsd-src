@@ -28,6 +28,7 @@
  */
 
 #include <sys/types.h>
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <wchar.h>
@@ -68,8 +69,8 @@ mbsrtowcs(wchar_t *dst, const char **src, size_t len, mbstate_t *ps)
 DEF_STRONG(mbsrtowcs);
 
 size_t
-mbsnrtowcs(wchar_t *dst, const char **src, size_t nmc, size_t len,
-    mbstate_t *ps)
+mbsnrtowcs(
+    wchar_t *dst, const char **src, size_t nmc, size_t len, mbstate_t *ps)
 {
 	static mbstate_t mbs;
 
@@ -106,8 +107,8 @@ wcsrtombs(char *dst, const wchar_t **src, size_t len, mbstate_t *ps)
 DEF_STRONG(wcsrtombs);
 
 size_t
-wcsnrtombs(char *dst, const wchar_t **src, size_t nwc, size_t len,
-    mbstate_t *ps)
+wcsnrtombs(
+    char *dst, const wchar_t **src, size_t nwc, size_t len, mbstate_t *ps)
 {
 	static mbstate_t mbs;
 

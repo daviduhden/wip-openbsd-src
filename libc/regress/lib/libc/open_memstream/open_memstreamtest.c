@@ -30,11 +30,11 @@ const char hello[] = "hello";
 int
 main(void)
 {
-	FILE	*fp;
-	char	*buf = (char *)0xff;
-	size_t	 size = 0;
-	off_t	 off;
-	int	 i, failures = 0;
+	FILE  *fp;
+	char  *buf = (char *)0xff;
+	size_t size = 0;
+	off_t  off;
+	int    i, failures = 0;
 
 	if ((fp = open_memstream(&buf, &size)) == NULL) {
 		warn("open_memstream failed");
@@ -77,9 +77,9 @@ main(void)
 		failures++;
 	}
 
-	if (size != OFFSET + sizeof(hello)-1) {
-		warnx("failed, size %zu should be %zu. (8)",
-		    size, OFFSET + sizeof(hello)-1);
+	if (size != OFFSET + sizeof(hello) - 1) {
+		warnx("failed, size %zu should be %zu. (8)", size,
+		    OFFSET + sizeof(hello) - 1);
 		failures++;
 	}
 
@@ -98,25 +98,25 @@ main(void)
 		failures++;
 	}
 
-	if (size != sizeof(start)-1) {
-		warnx("failed, size %zu should be %zu. (12)",
-		    size, sizeof(start)-1);
+	if (size != sizeof(start) - 1) {
+		warnx("failed, size %zu should be %zu. (12)", size,
+		    sizeof(start) - 1);
 		failures++;
 	}
 
 	/* Needed for sparse files */
-	if (strncmp(buf, start, sizeof(start)-1) != 0) {
+	if (strncmp(buf, start, sizeof(start) - 1) != 0) {
 		warnx("failed, buffer didn't start with '%s'. (13)", start);
 		failures++;
 	}
-	for (i = sizeof(start)-1; i < OFFSET; i++)
+	for (i = sizeof(start) - 1; i < OFFSET; i++)
 		if (buf[i] != '\0') {
 			warnx("failed, buffer non zero (offset %d). (14)", i);
 			failures++;
 			break;
 		}
 
-	if (memcmp(buf + OFFSET, hello, sizeof(hello)-1) != 0) {
+	if (memcmp(buf + OFFSET, hello, sizeof(hello) - 1) != 0) {
 		warnx("written string incorrect. (15)");
 		failures++;
 	}
@@ -132,9 +132,9 @@ main(void)
 		failures++;
 	}
 
-	if (size != OFFSET + sizeof(hello)-1) {
-		warnx("failed, size %zu should be %zu. (18)",
-		    size, OFFSET + sizeof(hello)-1);
+	if (size != OFFSET + sizeof(hello) - 1) {
+		warnx("failed, size %zu should be %zu. (18)", size,
+		    OFFSET + sizeof(hello) - 1);
 		failures++;
 	}
 
@@ -175,8 +175,7 @@ main(void)
 	}
 
 	if (size != 12) {
-		warnx("failed, size %zu should be %u.  (26)",
-		    size, 12);
+		warnx("failed, size %zu should be %u.  (26)", size, 12);
 		failures++;
 	}
 

@@ -16,8 +16,9 @@
  */
 
 #include <sys/types.h>
-#include <machine/ieee.h>
+
 #include <float.h>
+#include <machine/ieee.h>
 #include <math.h>
 
 int
@@ -33,13 +34,13 @@ int
 __isnanf(float f)
 {
 	struct ieee_single *p = (struct ieee_single *)&f;
- 
+
 	return (p->sng_exp == SNG_EXP_INFNAN && p->sng_frac != 0);
 }
 
-#if	LDBL_MANT_DIG == DBL_MANT_DIG
+#if LDBL_MANT_DIG == DBL_MANT_DIG
 __strong_alias(__isnanl, __isnan);
-#endif	/* LDBL_MANT_DIG == DBL_MANT_DIG */
+#endif /* LDBL_MANT_DIG == DBL_MANT_DIG */
 
 /*
  * 3BSD compatibility aliases.

@@ -35,10 +35,10 @@
 /*
  * powerpc64-dependent ptrace definitions
  */
-#define	PT_STEP		(PT_FIRSTMACH + 0)
-#define	PT_GETREGS	(PT_FIRSTMACH + 1)
-#define	PT_SETREGS	(PT_FIRSTMACH + 2)
-#define	PT_GETFPREGS	(PT_FIRSTMACH + 3)
-#define	PT_SETFPREGS	(PT_FIRSTMACH + 4)
+#define PT_STEP (PT_FIRSTMACH + 0)
+#define PT_GETREGS (PT_FIRSTMACH + 1)
+#define PT_SETREGS (PT_FIRSTMACH + 2)
+#define PT_GETFPREGS (PT_FIRSTMACH + 3)
+#define PT_SETFPREGS (PT_FIRSTMACH + 4)
 
 #endif /* !_POWERPC_PTRACE_H_ */

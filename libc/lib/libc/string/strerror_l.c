@@ -28,6 +28,6 @@ strerror_l(int errnum, locale_t locale)
 	char *p = _THREAD_PRIVATE(strerror_l, sel_buf, NULL);
 
 	return p == NULL ? "no buffer available in strerror_l" :
-	    strerror_r(errnum, p, sizeof(sel_buf)) ?
-	    "strerror_r failure" : p;
+	    strerror_r(errnum, p, sizeof(sel_buf)) ? "strerror_r failure" :
+						     p;
 }

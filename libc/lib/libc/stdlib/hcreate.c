@@ -4,7 +4,7 @@
 /*
  * Copyright (c) 2001 Christopher G. Demetriou
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -20,7 +20,7 @@
  *          information about NetBSD.
  * 4. The name of the author may not be used to endorse or promote products
  *    derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -31,7 +31,7 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * <<Id: LICENSE,v 1.2 2000/06/14 15:57:33 cgd Exp>>
  */
 
@@ -47,15 +47,15 @@
  * nobody had a copy in the office, so...
  */
 
-#include <assert.h>
-#include <errno.h>
-#include <stdint.h>
-#include <search.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/queue.h>
 
-#include <db.h>		/* for __default_hash */
+#include <assert.h>
+#include <db.h> /* for __default_hash */
+#include <errno.h>
+#include <search.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef _DIAGASSERT
 #define _DIAGASSERT(x)
@@ -71,23 +71,23 @@ struct internal_entry {
 };
 SLIST_HEAD(internal_head, internal_entry);
 
-#define	MIN_BUCKETS_LG2	4
-#define	MIN_BUCKETS	(1 << MIN_BUCKETS_LG2)
+#define MIN_BUCKETS_LG2 4
+#define MIN_BUCKETS (1 << MIN_BUCKETS_LG2)
 
 /*
  * max * sizeof internal_entry must fit into size_t.
  * assumes internal_entry is <= 32 (2^5) bytes.
  */
-#define	MAX_BUCKETS_LG2	(sizeof (size_t) * 8 - 1 - 5)
-#define	MAX_BUCKETS	((size_t)1 << MAX_BUCKETS_LG2)
+#define MAX_BUCKETS_LG2 (sizeof(size_t) * 8 - 1 - 5)
+#define MAX_BUCKETS ((size_t)1 << MAX_BUCKETS_LG2)
 
 static struct internal_head *htable;
-static size_t htablesize;
+static size_t		     htablesize;
 
 int
 hcreate(size_t nel)
 {
-	size_t idx;
+	size_t	     idx;
 	unsigned int p2;
 
 	/* Make sure this isn't called when a table already exists. */
@@ -112,7 +112,7 @@ hcreate(size_t nel)
 		_DIAGASSERT(p2 <= MAX_BUCKETS_LG2);
 		nel = 1 << p2;
 	}
-	
+
 	/* Allocate the table. */
 	htablesize = nel;
 	htable = calloc(htablesize, sizeof htable[0]);
@@ -132,7 +132,7 @@ void
 hdestroy(void)
 {
 	struct internal_entry *ie;
-	size_t idx;
+	size_t		       idx;
 
 	_DIAGASSERT(htable != NULL);
 	if (htable == NULL)
@@ -152,10 +152,10 @@ hdestroy(void)
 ENTRY *
 hsearch(ENTRY item, ACTION action)
 {
-	struct internal_head *head;
+	struct internal_head  *head;
 	struct internal_entry *ie;
-	uint32_t hashval;
-	size_t len;
+	uint32_t	       hashval;
+	size_t		       len;
 
 	_DIAGASSERT(htable != NULL);
 	_DIAGASSERT(item.key != NULL);

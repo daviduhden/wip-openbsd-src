@@ -33,5 +33,5 @@ extern PROTO_NORMAL(optreset);
 PROTO_DEPRECATED(getopt);
 PROTO_DEPRECATED(getopt_long);
 PROTO_DEPRECATED(getopt_long_only);
- 
+
 #endif /* !_LIBC_GETOPT_H_ */

@@ -31,37 +31,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* 
+/*
  * Private data kept per client handle
  */
 struct cu_data {
 	int		   cu_sock;
 	bool_t		   cu_closeit;
 	struct sockaddr_in cu_raddr;
-	int		   cu_connected;	/* use send() instead */
+	int		   cu_connected; /* use send() instead */
 	int		   cu_rlen;
 	struct timeval	   cu_wait;
-	struct timeval     cu_total;
+	struct timeval	   cu_total;
 	struct rpc_err	   cu_error;
 	XDR		   cu_outxdrs;
 	u_int		   cu_xdrpos;
 	u_int		   cu_sendsz;
-	char		   *cu_outbuf;
+	char		  *cu_outbuf;
 	u_int		   cu_recvsz;
 	char		   cu_inbuf[1];
 };
 
 struct clntudp_bufcreate_args {
 	struct sockaddr_in *raddr;
-	u_long program;
-	u_long version;
-	struct timeval wait;
-	int *sockp;
-	u_int sendsz;
-	u_int recvsz;
-	CLIENT *cl;
-	struct cu_data *cu;
-	struct rpc_msg call_msg;
+	u_long		    program;
+	u_long		    version;
+	struct timeval	    wait;
+	int		   *sockp;
+	u_int		    sendsz;
+	u_int		    recvsz;
+	CLIENT		   *cl;
+	struct cu_data	   *cu;
+	struct rpc_msg	    call_msg;
 };
 
 __BEGIN_HIDDEN_DECLS

@@ -38,8 +38,7 @@
 #ifdef _KERNEL
 struct lockf_state;
 
-void	 lf_init(void);
-int	 lf_advlock(struct lockf_state **,
-	    off_t, caddr_t, int, struct flock *, int);
-void	 lf_purgelocks(struct lockf_state **);
+void lf_init(void);
+int lf_advlock(struct lockf_state **, off_t, caddr_t, int, struct flock *, int);
+void lf_purgelocks(struct lockf_state **);
 #endif /* _KERNEL */

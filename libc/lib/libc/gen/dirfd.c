@@ -4,6 +4,7 @@
  */
 
 #include <dirent.h>
+
 #include "telldir.h"
 
 int

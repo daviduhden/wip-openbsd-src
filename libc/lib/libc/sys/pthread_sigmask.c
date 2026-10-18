@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <signal.h>
 #include <errno.h>
+#include <signal.h>
 
 int
 pthread_sigmask(int how, const sigset_t *set, sigset_t *oset)

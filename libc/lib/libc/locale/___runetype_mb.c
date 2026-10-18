@@ -1,5 +1,6 @@
 /*	$OpenBSD: ___runetype_mb.c,v 1.4 2024/08/18 02:22:29 guenther Exp $ */
-/*	$NetBSD: ___runetype_mb.c,v 1.10 2005/02/10 19:19:57 tnozaki Exp $	*/
+/*	$NetBSD: ___runetype_mb.c,v 1.10 2005/02/10 19:19:57 tnozaki Exp $
+ */
 
 /*-
  * Copyright (c) 1993
@@ -34,14 +35,15 @@
  */
 
 #include <wctype.h>
-#include "runetype.h"
+
 #include "rune_local.h"
+#include "runetype.h"
 
 _RuneType
 ___runetype_mb(wint_t c, _RuneLocale *rl)
 {
-	rune_t c0;
-	uint32_t x;
+	rune_t	    c0;
+	uint32_t    x;
 	_RuneRange *rr;
 	_RuneEntry *base, *re;
 

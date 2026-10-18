@@ -1,4 +1,5 @@
-/*	$OpenBSD: getnetnamadr.c,v 1.9 2015/01/16 16:48:51 deraadt Exp $	*/
+/*	$OpenBSD: getnetnamadr.c,v 1.9 2015/01/16 16:48:51 deraadt Exp $
+ */
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -15,32 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/param.h>	/* ALIGN */
+#include <sys/param.h> /* ALIGN */
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
-#include <netdb.h>
 
 #include <asr.h>
 #include <errno.h>
+#include <netdb.h>
 #include <resolv.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void _fillnetent(const struct netent *, struct netent *, char *buf,
-    size_t);
+static void _fillnetent(
+    const struct netent *, struct netent *, char *buf, size_t);
 
-static struct netent	 _netent;
-static char		 _entbuf[4096];
+static struct netent _netent;
+static char	     _entbuf[4096];
 
-static char *_empty[] = { NULL, };
+static char *_empty[] = {
+    NULL,
+};
 
 static void
 _fillnetent(const struct netent *e, struct netent *r, char *buf, size_t len)
 {
-	char	**ptr, *end, *pos;
-	size_t	n, i;
-	int	naliases;
+	char **ptr, *end, *pos;
+	size_t n, i;
+	int    naliases;
 
 	bzero(buf, len);
 	bzero(r, sizeof(*r));

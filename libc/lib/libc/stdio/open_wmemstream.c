@@ -1,4 +1,5 @@
-/*	$OpenBSD: open_wmemstream.c,v 1.12 2026/05/08 14:30:57 millert Exp $	*/
+/*	$OpenBSD: open_wmemstream.c,v 1.12 2026/05/08 14:30:57 millert Exp $
+ */
 
 /*
  * Copyright (c) 2011 Martin Pieuchot <mpi@openbsd.org>
@@ -18,37 +19,38 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+
 #include "local.h"
 
-#define	MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 
 struct state {
-	wchar_t		 *string;	/* actual stream */
-	wchar_t		**pbuf;		/* point to the stream */
-	size_t		 *psize;	/* point to min(pos, len) */
-	size_t		  pos;		/* current position */
-	size_t		  size;		/* number of allocated wchar_t */
-	size_t		  len;		/* length of the data */
-	mbstate_t	  mbs;		/* conversion state of the stream */
+	wchar_t	 *string; /* actual stream */
+	wchar_t **pbuf;	  /* point to the stream */
+	size_t	 *psize;  /* point to min(pos, len) */
+	size_t	  pos;	  /* current position */
+	size_t	  size;	  /* number of allocated wchar_t */
+	size_t	  len;	  /* length of the data */
+	mbstate_t mbs;	  /* conversion state of the stream */
 };
 
 static int
 wmemstream_write(void *v, const char *b, int l)
 {
-	struct state	*st = v;
-	wchar_t		*p;
-	size_t		 nmc, len, end;
+	struct state *st = v;
+	wchar_t	     *p;
+	size_t	      nmc, len, end;
 
 	end = (st->pos + l);
 
 	if (end >= st->size) {
 		/* 1.6 is (very) close to the golden ratio. */
-		size_t	sz = st->size * 8 / 5;
+		size_t sz = st->size * 8 / 5;
 
 		if (sz < end + 1)
 			sz = end + 1;
@@ -78,8 +80,8 @@ wmemstream_write(void *v, const char *b, int l)
 static fpos_t
 wmemstream_seek(void *v, fpos_t off, int whence)
 {
-	struct state	*st = v;
-	size_t		 base = 0;
+	struct state *st = v;
+	size_t	      base = 0;
 
 	switch (whence) {
 	case SEEK_SET:
@@ -113,7 +115,7 @@ wmemstream_seek(void *v, fpos_t off, int whence)
 static int
 wmemstream_close(void *v)
 {
-	struct state	*st = v;
+	struct state *st = v;
 
 	free(st);
 
@@ -123,8 +125,8 @@ wmemstream_close(void *v)
 FILE *
 open_wmemstream(wchar_t **pbuf, size_t *psize)
 {
-	struct state	*st;
-	FILE		*fp;
+	struct state *st;
+	FILE	     *fp;
 
 	if (pbuf == NULL || psize == NULL) {
 		errno = EINVAL;

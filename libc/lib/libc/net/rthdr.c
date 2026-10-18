@@ -4,7 +4,7 @@
 /*
  * Copyright (C) 1995, 1996, 1997, and 1998 WIDE Project.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  * 3. Neither the name of the project nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,8 +36,8 @@
 #include <netinet/in.h>
 #include <netinet/ip6.h>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
  * RFC3542 (2292bis) API
@@ -50,7 +50,7 @@ inet6_rth_space(int type, int segments)
 	case IPV6_RTHDR_TYPE_0:
 		return (((segments * 2) + 1) << 3);
 	default:
-		return (0);	/* type not supported */
+		return (0); /* type not supported */
 	}
 }
 DEF_WEAK(inet6_rth_space);
@@ -58,7 +58,7 @@ DEF_WEAK(inet6_rth_space);
 void *
 inet6_rth_init(void *bp, socklen_t bp_len, int type, int segments)
 {
-	struct ip6_rthdr *rth = (struct ip6_rthdr *)bp;
+	struct ip6_rthdr  *rth = (struct ip6_rthdr *)bp;
 	struct ip6_rthdr0 *rth0;
 
 	switch (type) {
@@ -75,7 +75,7 @@ inet6_rth_init(void *bp, socklen_t bp_len, int type, int segments)
 		rth0->ip6r0_reserved = 0;
 		break;
 	default:
-		return (NULL);	/* type not supported */
+		return (NULL); /* type not supported */
 	}
 
 	return (bp);
@@ -84,9 +84,9 @@ inet6_rth_init(void *bp, socklen_t bp_len, int type, int segments)
 int
 inet6_rth_add(void *bp, const struct in6_addr *addr)
 {
-	struct ip6_rthdr *rth = (struct ip6_rthdr *)bp;
+	struct ip6_rthdr  *rth = (struct ip6_rthdr *)bp;
 	struct ip6_rthdr0 *rth0;
-	struct in6_addr *nextaddr;
+	struct in6_addr	  *nextaddr;
 
 	switch (rth->ip6r_type) {
 	case IPV6_RTHDR_TYPE_0:
@@ -96,7 +96,7 @@ inet6_rth_add(void *bp, const struct in6_addr *addr)
 		rth0->ip6r0_segleft++;
 		break;
 	default:
-		return (-1);	/* type not supported */
+		return (-1); /* type not supported */
 	}
 
 	return (0);
@@ -105,9 +105,9 @@ inet6_rth_add(void *bp, const struct in6_addr *addr)
 int
 inet6_rth_reverse(const void *in, void *out)
 {
-	struct ip6_rthdr *rth_in = (struct ip6_rthdr *)in;
+	struct ip6_rthdr  *rth_in = (struct ip6_rthdr *)in;
 	struct ip6_rthdr0 *rth0_in, *rth0_out;
-	int i, segments;
+	int		   i, segments;
 
 	switch (rth_in->ip6r_type) {
 	case IPV6_RTHDR_TYPE_0:
@@ -134,10 +134,10 @@ inet6_rth_reverse(const void *in, void *out)
 			*addr1 = *addr2;
 			*addr2 = addr_tmp;
 		}
-		
+
 		break;
 	default:
-		return (-1);	/* type not supported */
+		return (-1); /* type not supported */
 	}
 
 	return (0);
@@ -146,9 +146,9 @@ inet6_rth_reverse(const void *in, void *out)
 int
 inet6_rth_segments(const void *bp)
 {
-	struct ip6_rthdr *rh = (struct ip6_rthdr *)bp;
+	struct ip6_rthdr  *rh = (struct ip6_rthdr *)bp;
 	struct ip6_rthdr0 *rh0;
-	int addrs;
+	int		   addrs;
 
 	switch (rh->ip6r_type) {
 	case IPV6_RTHDR_TYPE_0:
@@ -164,21 +164,21 @@ inet6_rth_segments(const void *bp)
 
 		return (addrs);
 	default:
-		return (-1);	/* unknown type */
+		return (-1); /* unknown type */
 	}
 }
 
 struct in6_addr *
 inet6_rth_getaddr(const void *bp, int idx)
 {
-	struct ip6_rthdr *rh = (struct ip6_rthdr *)bp;
+	struct ip6_rthdr  *rh = (struct ip6_rthdr *)bp;
 	struct ip6_rthdr0 *rh0;
-	int addrs;
+	int		   addrs;
 
 	switch (rh->ip6r_type) {
 	case IPV6_RTHDR_TYPE_0:
-		 rh0 = (struct ip6_rthdr0 *)bp;
-		 
+		rh0 = (struct ip6_rthdr0 *)bp;
+
 		/*
 		 * Validation for a type-0 routing header.
 		 * Is this too strict?
@@ -192,7 +192,7 @@ inet6_rth_getaddr(const void *bp, int idx)
 
 		return (((struct in6_addr *)(rh0 + 1)) + idx);
 	default:
-		return (NULL);	/* unknown type */
+		return (NULL); /* unknown type */
 		break;
 	}
 }

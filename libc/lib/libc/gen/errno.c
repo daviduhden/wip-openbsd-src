@@ -1,11 +1,11 @@
 /*	$OpenBSD: errno.c,v 1.6 2016/05/07 19:05:22 guenther Exp $ */
 /* PUBLIC DOMAIN: No Rights Reserved.   Marco S Hyman <marc@snafu.org> */
 
-#include <tib.h>
 #include <errno.h>
+#include <tib.h>
 #include <unistd.h>
-#include "thread_private.h"
 
+#include "thread_private.h"
 
 #ifdef TCB_HAVE_MD_GET
 /*
@@ -34,7 +34,7 @@ DEF_STRONG(__errno);
  */
 
 /* cached pointer to the TCB of the only thread in single-threaded programs */
-void	*_libc_single_tcb = NULL;
+void *_libc_single_tcb = NULL;
 
 static inline void *
 single_threaded_tcb(void)
@@ -62,11 +62,9 @@ DEF_STRONG(__errno);
 
 #endif /* !TCB_HAVE_MD_GET */
 
-
-struct thread_callbacks _thread_cb =
-{
-#ifndef	TCB_HAVE_MD_GET
-	.tc_errnoptr	= &single_threaded_errnoptr,
-	.tc_tcb		= &single_threaded_tcb,
+struct thread_callbacks _thread_cb = {
+#ifndef TCB_HAVE_MD_GET
+    .tc_errnoptr = &single_threaded_errnoptr,
+    .tc_tcb = &single_threaded_tcb,
 #endif
 };

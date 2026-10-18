@@ -28,8 +28,8 @@ duplocale(locale_t oldloc)
 	if (oldloc == _LOCALE_C)
 		return _LOCALE_C;
 	if (oldloc == LC_GLOBAL_LOCALE)
-		return _GlobalRuneLocale == _Utf8RuneLocale ?
-		    _LOCALE_UTF8 : _LOCALE_C;
+		return _GlobalRuneLocale == _Utf8RuneLocale ? _LOCALE_UTF8 :
+							      _LOCALE_C;
 
 	/* POSIX says: invalid input -> undefined behaviour. */
 	errno = EINVAL;

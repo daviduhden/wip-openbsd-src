@@ -39,27 +39,27 @@
 
 /* All cells are 8 byte slots */
 typedef u_int64_t cell_t;
-#define HDL2CELL(x)	(cell_t)(u_int)(int)(x)
-#define ADR2CELL(x)	(cell_t)(x)
+#define HDL2CELL(x) (cell_t)(u_int)(int)(x)
+#define ADR2CELL(x) (cell_t)(x)
 
-#define HDQ2CELL_HI(x)	(cell_t)(0)
-#define HDQ2CELL_LO(x)	(cell_t)(x)
+#define HDQ2CELL_HI(x) (cell_t)(0)
+#define HDQ2CELL_LO(x) (cell_t)(x)
 
-#define CELL2HDQ(hi, lo)	(lo)
+#define CELL2HDQ(hi, lo) (lo)
 
 int OF_test(char *service);
 int OF_test_method(int handle, char *method);
 
-int OF_stdin(void);
-int OF_stdout(void);
+int  OF_stdin(void);
+int  OF_stdout(void);
 void OF_set_symbol_lookup(void (*s2v)(void *), void (*v2s)(void *));
 void OF_poweroff(void);
 void OF_sym2val(void *);
 void OF_val2sym(void *);
-int OF_milliseconds(void);
-int OF_searchprop(int node, char *prop, void *buf, int buflen);
-int OF_mapintr(int node, int *interrupt, int validlen, int buflen);
-int OF_instance_to_path(int ihandle, char *buf, int buflen);
-int OF_package_to_path(int phandle, char *buf, int buflen);
+int  OF_milliseconds(void);
+int  OF_searchprop(int node, char *prop, void *buf, int buflen);
+int  OF_mapintr(int node, int *interrupt, int validlen, int buflen);
+int  OF_instance_to_path(int ihandle, char *buf, int buflen);
+int  OF_package_to_path(int phandle, char *buf, int buflen);
 
 void (*OF_set_callback(void (*)(void *)))(void *);

@@ -38,13 +38,13 @@
 #include_next <stdlib.h>
 
 __BEGIN_HIDDEN_DECLS
-int	__mktemp4(char *, int, int, int (*)(const char *, int));
-char	*__findenv(const char *, int, int *);
-void	__atexit_register_cleanup(void (*)(void));
+int   __mktemp4(char *, int, int, int (*)(const char *, int));
+char *__findenv(const char *, int, int *);
+void  __atexit_register_cleanup(void (*)(void));
 __END_HIDDEN_DECLS
 
 extern char **environ;
-extern char *__progname;
+extern char  *__progname;
 
 int __realpath(const char *pathname, char *resolved);
 

@@ -12,6 +12,6 @@ fpgetmask()
 {
 	int x;
 
-	__asm__("st %%fsr,%0" : "=m" (*&x));
+	__asm__("st %%fsr,%0" : "=m"(*&x));
 	return (x >> 23) & 0x1f;
 }

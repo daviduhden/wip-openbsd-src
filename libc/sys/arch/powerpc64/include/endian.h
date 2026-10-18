@@ -27,7 +27,7 @@
 #ifndef _MACHINE_ENDIAN_H_
 #define _MACHINE_ENDIAN_H_
 
-#undef _BIG_ENDIAN	/* XXX - gcc may define _BIG_ENDIAN too */
+#undef _BIG_ENDIAN /* XXX - gcc may define _BIG_ENDIAN too */
 #define _BYTE_ORDER _BIG_ENDIAN
 
 #ifndef __FROM_SYS__ENDIAN

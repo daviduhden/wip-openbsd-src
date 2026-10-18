@@ -27,8 +27,8 @@
  * $FreeBSD: head/sys/cpu/include/cpufunc.h 299683 2016-05-13 16:03:50Z andrew $
  */
 
-#ifndef	_MACHINE_CPUFUNC_H_
-#define	_MACHINE_CPUFUNC_H_
+#ifndef _MACHINE_CPUFUNC_H_
+#define _MACHINE_CPUFUNC_H_
 
 #ifdef _KERNEL
 
@@ -52,5 +52,5 @@ void cpu_dcache_wb_range(vaddr_t, vsize_t);
 
 register_t smc_call(register_t, register_t, register_t, register_t);
 
-#endif	/* _KERNEL */
-#endif	/* _MACHINE_CPUFUNC_H_ */
+#endif /* _KERNEL */
+#endif /* _MACHINE_CPUFUNC_H_ */

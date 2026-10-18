@@ -32,7 +32,7 @@
 
 #include <wchar.h>
 
-size_t 
+size_t
 wcsxfrm(wchar_t *dest, const wchar_t *src, size_t n)
 {
 	if (n == 0)

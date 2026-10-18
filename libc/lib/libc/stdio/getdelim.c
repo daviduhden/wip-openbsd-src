@@ -40,15 +40,15 @@
 /* Minimum buffer size we create.
  * This should allow config files to fit into our power of 2 buffer growth
  * without the need for a realloc. */
-#define MINBUF	128
+#define MINBUF 128
 
 ssize_t
-getdelim(char **__restrict buf, size_t *__restrict buflen,
-    int sep, FILE *__restrict fp)
+getdelim(char **__restrict buf, size_t *__restrict buflen, int sep,
+    FILE *__restrict fp)
 {
 	unsigned char *p;
-	size_t len, newlen, off;
-	char *newb;
+	size_t	       len, newlen, off;
+	char	      *newb;
 
 	FLOCKFILE(fp);
 
@@ -88,7 +88,7 @@ getdelim(char **__restrict buf, size_t *__restrict buflen,
 		if (newlen > *buflen) {
 			if (newlen < MINBUF)
 				newlen = MINBUF;
-#define powerof2(x) ((((x)-1)&(x))==0)
+#define powerof2(x) ((((x) - 1) & (x)) == 0)
 			if (!powerof2(newlen)) {
 				/* Grow the buffer to the next power of 2 */
 				newlen--;

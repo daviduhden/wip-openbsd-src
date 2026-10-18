@@ -16,10 +16,10 @@
  */
 
 #ifndef _LIBC_SYS_SYSCTL_H_
-#define	_LIBC_SYS_SYSCTL_H_
+#define _LIBC_SYS_SYSCTL_H_
 
 #include_next <sys/sysctl.h>
 
 PROTO_NORMAL(sysctl);
 
-#endif	/* !_LIBC_SYS_SYSCTL_H_ */
+#endif /* !_LIBC_SYS_SYSCTL_H_ */

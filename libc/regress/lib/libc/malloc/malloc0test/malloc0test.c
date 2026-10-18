@@ -4,15 +4,16 @@
  */
 #include <sys/types.h>
 #include <sys/signal.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <setjmp.h>
-#include <limits.h>
+
 #include <errno.h>
+#include <limits.h>
+#include <setjmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 volatile sig_atomic_t got;
-jmp_buf jmp;
+jmp_buf		      jmp;
 
 static void
 catch(int signo)
@@ -29,17 +30,13 @@ test(char *p, int size)
 	if (setjmp(jmp) == 0)
 		*p = 0;
 	if (setjmp(jmp) == 0)
-		*(p+size-1) = 0;
+		*(p + size - 1) = 0;
 	return (got);
 }
 
-char *prot_table[] = {
-	"unprotected",
-	"fuckup",
-	"protected"
-};
+char *prot_table[] = {"unprotected", "fuckup", "protected"};
 
-#define SIZE	10
+#define SIZE 10
 
 /*
  * Do random memory allocations.
@@ -58,13 +55,13 @@ char *prot_table[] = {
 int
 main(int argc, char *argv[])
 {
-	caddr_t blob;
-	int size, tsize;
-	int prot;
-	int rval = 0, fuckup = 0;
-	long limit = 200000, count;
-	int ch, silent = 0;
-	char *ep;
+	caddr_t	     blob;
+	int	     size, tsize;
+	int	     prot;
+	int	     rval = 0, fuckup = 0;
+	long	     limit = 200000, count;
+	int	     ch, silent = 0;
+	char	    *ep;
 	extern char *__progname;
 
 	while ((ch = getopt(argc, argv, "sn:")) != -1) {
@@ -77,13 +74,13 @@ main(int argc, char *argv[])
 			limit = strtol(optarg, &ep, 10);
 			if (optarg[0] == '\0' || *ep != '\0' ||
 			    (errno == ERANGE &&
-			     (limit == LONG_MAX || limit == LONG_MIN)))
+				(limit == LONG_MAX || limit == LONG_MIN)))
 				goto usage;
 			break;
 		default:
-usage:
-			fprintf(stderr, "Usage: %s [-s][-n <count>]\n",
-			    __progname);
+		usage:
+			fprintf(
+			    stderr, "Usage: %s [-s][-n <count>]\n", __progname);
 			exit(1);
 		}
 	}

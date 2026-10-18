@@ -1,5 +1,6 @@
 /*	$OpenBSD: vdprintf.c,v 1.4 2025/08/08 15:58:53 yasuoka Exp $	*/
-/*	$FreeBSD: src/lib/libc/stdio/vdprintf.c,v 1.4 2012/11/17 01:49:40 svnexp Exp $ */
+/*	$FreeBSD: src/lib/libc/stdio/vdprintf.c,v 1.4 2012/11/17 01:49:40 svnexp
+ * Exp $ */
 
 /*-
  * Copyright (c) 2009 David Schultz <das@FreeBSD.org>
@@ -48,11 +49,11 @@ __dwrite(void *cookie, const char *buf, int n)
 }
 
 int
-vdprintf(int fd, const char * __restrict fmt, va_list ap)
+vdprintf(int fd, const char *__restrict fmt, va_list ap)
 {
-	FILE f = FILEINIT(__SWR);
+	FILE	      f = FILEINIT(__SWR);
 	unsigned char buf[BUFSIZ];
-	int ret;
+	int	      ret;
 
 	f._p = buf;
 	f._w = sizeof(buf);

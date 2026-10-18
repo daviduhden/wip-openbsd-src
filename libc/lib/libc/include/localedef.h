@@ -36,17 +36,14 @@
 
 #include <sys/types.h>
 
-typedef struct
-{
+typedef struct {
 	char *yesexpr;
 	char *noexpr;
 	char *yesstr;
 	char *nostr;
 } _MessagesLocale;
 
-
-typedef struct
-{
+typedef struct {
 	char *int_curr_symbol;
 	char *currency_symbol;
 	char *mon_decimal_point;
@@ -54,30 +51,27 @@ typedef struct
 	char *mon_grouping;
 	char *positive_sign;
 	char *negative_sign;
-	char int_frac_digits;
-	char frac_digits;
-	char p_cs_precedes;
-	char p_sep_by_space;
-	char n_cs_precedes;
-	char n_sep_by_space;
-	char p_sign_posn;
-	char n_sign_posn;
-	char int_p_cs_precedes;
-	char int_p_sep_by_space;
-	char int_n_cs_precedes;
-	char int_n_sep_by_space;
-	char int_p_sign_posn;
-	char int_n_sign_posn;
+	char  int_frac_digits;
+	char  frac_digits;
+	char  p_cs_precedes;
+	char  p_sep_by_space;
+	char  n_cs_precedes;
+	char  n_sep_by_space;
+	char  p_sign_posn;
+	char  n_sign_posn;
+	char  int_p_cs_precedes;
+	char  int_p_sep_by_space;
+	char  int_n_cs_precedes;
+	char  int_n_sep_by_space;
+	char  int_p_sign_posn;
+	char  int_n_sign_posn;
 } _MonetaryLocale;
 
-
-typedef struct
-{
+typedef struct {
 	const char *decimal_point;
 	const char *thousands_sep;
 	const char *grouping;
 } _NumericLocale;
-
 
 typedef struct {
 	const char *abday[7];
@@ -91,16 +85,15 @@ typedef struct {
 	const char *t_fmt_ampm;
 } _TimeLocale;
 
-
 __BEGIN_HIDDEN_DECLS
 extern const _MessagesLocale *_CurrentMessagesLocale;
 extern const _MessagesLocale  _DefaultMessagesLocale;
 extern const _MonetaryLocale *_CurrentMonetaryLocale;
 extern const _MonetaryLocale  _DefaultMonetaryLocale;
-extern const _NumericLocale *_CurrentNumericLocale;
-extern const _NumericLocale  _DefaultNumericLocale;
-extern const _TimeLocale *_CurrentTimeLocale;
-extern const _TimeLocale  _DefaultTimeLocale;
+extern const _NumericLocale  *_CurrentNumericLocale;
+extern const _NumericLocale   _DefaultNumericLocale;
+extern const _TimeLocale     *_CurrentTimeLocale;
+extern const _TimeLocale      _DefaultTimeLocale;
 __END_HIDDEN_DECLS
 
 #endif /* !_LOCALEDEF_H_ */

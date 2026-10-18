@@ -36,39 +36,39 @@
  * Structure per communications domain.
  */
 
-#ifndef	_SOCKLEN_T_DEFINED_
-#define	_SOCKLEN_T_DEFINED_
-typedef	__socklen_t	socklen_t;	/* length type for network syscalls */
+#ifndef _SOCKLEN_T_DEFINED_
+#define _SOCKLEN_T_DEFINED_
+typedef __socklen_t socklen_t; /* length type for network syscalls */
 #endif
 
 /*
  * Forward structure declarations for function prototypes [sic].
  */
-struct	mbuf;
+struct mbuf;
 
 struct domain {
-	int	dom_family;		/* AF_xxx */
-	const	char *dom_name;
-	void	(*dom_init)(void);	/* initialize domain data structures */
-					/* externalize access rights */
-	int	(*dom_externalize)(struct mbuf *, socklen_t, int);
-					/* dispose of internalized rights */
-	void	(*dom_dispose)(struct mbuf *);
-	const struct	protosw *dom_protosw, *dom_protoswNPROTOSW;
-					/* initialize routing table */
-	unsigned int	dom_sasize;	/* size of sockaddr structure */
-	unsigned int	dom_rtoffset;	/* offset of the key, in bytes */
-	unsigned int	dom_maxplen;	/* maximum prefix length, in bits */
+	int	    dom_family; /* AF_xxx */
+	const char *dom_name;
+	void	    (*dom_init)(void); /* initialize domain data structures */
+				       /* externalize access rights */
+	int (*dom_externalize)(struct mbuf *, socklen_t, int);
+	/* dispose of internalized rights */
+	void		      (*dom_dispose)(struct mbuf *);
+	const struct protosw *dom_protosw, *dom_protoswNPROTOSW;
+	/* initialize routing table */
+	unsigned int dom_sasize;   /* size of sockaddr structure */
+	unsigned int dom_rtoffset; /* offset of the key, in bytes */
+	unsigned int dom_maxplen;  /* maximum prefix length, in bits */
 };
 
 #ifdef _KERNEL
 void domaininit(void);
 
 extern const struct domain *const domains[];
-extern const struct domain inet6domain;
-extern const struct domain inetdomain;
-extern const struct domain mplsdomain;
-extern const struct domain pfkeydomain;
-extern const struct domain routedomain;
-extern const struct domain unixdomain;
+extern const struct domain	  inet6domain;
+extern const struct domain	  inetdomain;
+extern const struct domain	  mplsdomain;
+extern const struct domain	  pfkeydomain;
+extern const struct domain	  routedomain;
+extern const struct domain	  unixdomain;
 #endif /* _KERNEL */

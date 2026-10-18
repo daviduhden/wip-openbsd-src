@@ -22,7 +22,7 @@ static u_int
 mftbl(void)
 {
 	uint64_t value;
-	__asm volatile ("mftb %0" : "=r"(value));
+	__asm volatile("mftb %0" : "=r"(value));
 	return value;
 }
 

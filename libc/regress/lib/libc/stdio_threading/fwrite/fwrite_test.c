@@ -20,7 +20,7 @@ void
 fwrite_thread(void *v)
 {
 	FILE *file = v;
-	int i;
+	int   i;
 
 	for (i = 0; i < 4096; i++) {
 		if (fwrite(TEXT, sizeof(char), strlen(TEXT), file) == 0) {
@@ -38,14 +38,13 @@ fwrite_thread(void *v)
 int
 main(void)
 {
-	char sfn[24];
-	char buf[sizeof(TEXT)];
+	char  sfn[24];
+	char  buf[sizeof(TEXT)];
 	FILE *sfp;
-	int fd;
+	int   fd;
 
 	strlcpy(sfn, "/tmp/barnacles.XXXXXXXX", sizeof(sfn));
-	if ((fd = mkstemp(sfn)) == -1 ||
-	    (sfp = fdopen(fd, "w+")) == NULL) {
+	if ((fd = mkstemp(sfn)) == -1 || (sfp = fdopen(fd, "w+")) == NULL) {
 		int saved_errno = errno;
 		if (fd != -1) {
 			unlink(sfn);
@@ -56,7 +55,7 @@ main(void)
 
 	run_threads(fwrite_thread, sfp);
 
-	while (fread(buf, sizeof(char), strlen(TEXT), sfp))	/* verify */
+	while (fread(buf, sizeof(char), strlen(TEXT), sfp)) /* verify */
 		if (strncmp(buf, TEXT, sizeof(TEXT)))
 			err(1, "Thread writes were not atomic!!!");
 

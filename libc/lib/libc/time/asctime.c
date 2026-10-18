@@ -13,9 +13,10 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "private.h"
-#include "tzfile.h"
 #include "thread_private.h"
+#include "tzfile.h"
 
 /*
 ** Some systems only handle "%.2d"; others only handle "%02d";
@@ -35,7 +36,7 @@
 ** The ISO C 1999 and POSIX 1003.1-2004 standards prohibit padding the year,
 ** but many implementations pad anyway; most likely the standards are buggy.
 */
-#define ASCTIME_FMT	"%.3s %.3s%3d %2.2d:%2.2d:%2.2d %-4s\n"
+#define ASCTIME_FMT "%.3s %.3s%3d %2.2d:%2.2d:%2.2d %-4s\n"
 
 /*
 ** For years that are more than four digits we put extra spaces before the year
@@ -43,9 +44,9 @@
 ** a digit within a year and truncating the year (operating on the assumption
 ** that no output is better than wrong output).
 */
-#define ASCTIME_FMT_B	"%.3s %.3s%3d %2.2d:%2.2d:%2.2d     %s\n"
+#define ASCTIME_FMT_B "%.3s %.3s%3d %2.2d:%2.2d:%2.2d     %s\n"
 
-#define STD_ASCTIME_BUF_SIZE	26
+#define STD_ASCTIME_BUF_SIZE 26
 /*
 ** Big enough for something such as
 ** ??? ???-2147483648 -2147483648:-2147483648:-2147483648     -2147483648\n
@@ -56,22 +57,20 @@
 ** as an example; the define below calculates the maximum for the system at
 ** hand.
 */
-#define MAX_ASCTIME_BUF_SIZE	(2*3+5*INT_STRLEN_MAXIMUM(int)+7+2+1+1)
+#define MAX_ASCTIME_BUF_SIZE                                                   \
+	(2 * 3 + 5 * INT_STRLEN_MAXIMUM(int) + 7 + 2 + 1 + 1)
 
 static char *
 asctime3(const struct tm *timeptr, char *buf, int bufsize)
 {
-	static const char	wday_name[][4] = {
-		"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-	};
-	static const char	mon_name[][4] = {
-		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-	};
-	const char *	wn;
-	const char *	mn;
-	char		year[INT_STRLEN_MAXIMUM(int) + 2];
-	int		len;
+	static const char wday_name[][4] = {
+	    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const char mon_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May",
+	    "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	const char	 *wn;
+	const char	 *mn;
+	char		  year[INT_STRLEN_MAXIMUM(int) + 2];
+	int		  len;
 
 	if (timeptr == NULL) {
 		errno = EINVAL;
@@ -92,13 +91,11 @@ asctime3(const struct tm *timeptr, char *buf, int bufsize)
 	** Assume that strftime is unaffected by other out-of-range members
 	** (e.g., timeptr->tm_mday) when processing "%Y".
 	*/
-	(void) strftime(year, sizeof year, "%Y", timeptr);
+	(void)strftime(year, sizeof year, "%Y", timeptr);
 	len = snprintf(buf, bufsize,
-	    ((strlen(year) <= 4) ? ASCTIME_FMT : ASCTIME_FMT_B),
-	    wn, mn,
-	    timeptr->tm_mday, timeptr->tm_hour,
-	    timeptr->tm_min, timeptr->tm_sec,
-	    year);
+	    ((strlen(year) <= 4) ? ASCTIME_FMT : ASCTIME_FMT_B), wn, mn,
+	    timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min,
+	    timeptr->tm_sec, year);
 	if (len >= 0 && len < bufsize) {
 		return buf;
 	} else {

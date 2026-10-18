@@ -17,7 +17,7 @@
 
 #include <ieeefp.h>
 
-__weak_alias(_fpsetmask,fpsetmask);
+__weak_alias(_fpsetmask, fpsetmask);
 
 fp_except
 fpsetmask(fp_except mask)

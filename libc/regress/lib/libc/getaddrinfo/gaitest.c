@@ -2,8 +2,8 @@
 /*	$NetBSD: gaitest.c,v 1.3 2002/07/05 15:47:43 itojun Exp $	*/
 
 /*
- * Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, and 2002 WIDE Project.
- * All rights reserved.
+ * Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, and 2002 WIDE
+ * Project. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,9 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -51,7 +53,7 @@ struct addrinfo ai;
 
 char host[NI_MAXHOST];
 char serv[NI_MAXSERV];
-int vflag = 0;
+int  vflag = 0;
 
 static void usage(void);
 static void print1(const char *, const struct addrinfo *, char *, char *);
@@ -59,20 +61,21 @@ static void print1(const char *, const struct addrinfo *, char *, char *);
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: test [-f family] [-s socktype] [-p proto] [-DPRSv46] host serv\n");
+	fprintf(stderr,
+	    "usage: test [-f family] [-s socktype] [-p proto] [-DPRSv46] host "
+	    "serv\n");
 }
 
 static void
 print1(const char *title, const struct addrinfo *res, char *h, char *s)
 {
-	char *start, *end;
-	int error;
+	char	 *start, *end;
+	int	  error;
 	const int niflag = NI_NUMERICHOST | NI_NUMERICSERV;
 
 	if (res->ai_addr) {
-		error = getnameinfo(res->ai_addr, res->ai_addr->sa_len,
-				    host, sizeof(host), serv, sizeof(serv),
-				    niflag);
+		error = getnameinfo(res->ai_addr, res->ai_addr->sa_len, host,
+		    sizeof(host), serv, sizeof(serv), niflag);
 		h = host;
 		s = serv;
 	} else
@@ -103,17 +106,16 @@ print1(const char *title, const struct addrinfo *res, char *h, char *s)
 #endif
 	if (!vflag)
 		printf("\n");
-
 }
 
 int
 main(int argc, char *argv[])
 {
 	struct addrinfo *res;
-	int error, i;
-	char *p, *q;
-	int c;
-	char nbuf[10];
+	int		 error, i;
+	char		*p, *q;
+	int		 c;
+	char		 nbuf[10];
 
 	memset(&ai, 0, sizeof(ai));
 	ai.ai_family = PF_UNSPEC;
@@ -158,7 +160,7 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (argc != 2){
+	if (argc != 2) {
 		usage();
 		exit(1);
 	}

@@ -23,7 +23,7 @@ tick_get_timecount(struct timecounter *tc)
 {
 	u_int64_t tick;
 
-	__asm volatile("rd %%tick, %0" : "=r" (tick));
+	__asm volatile("rd %%tick, %0" : "=r"(tick));
 
 	return (tick & ~0u);
 }
@@ -33,7 +33,7 @@ sys_tick_get_timecount(struct timecounter *tc)
 {
 	u_int64_t tick;
 
-	__asm volatile("rd %%sys_tick, %0" : "=r" (tick));
+	__asm volatile("rd %%sys_tick, %0" : "=r"(tick));
 
 	return (tick & ~0u);
 }

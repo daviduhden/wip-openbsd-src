@@ -39,12 +39,12 @@ char *
 strdup(const char *str)
 {
 	size_t siz;
-	char *copy;
+	char  *copy;
 
 	siz = strlen(str) + 1;
 	if ((copy = malloc(siz)) == NULL)
-		return(NULL);
+		return (NULL);
 	(void)memcpy(copy, str, siz);
-	return(copy);
+	return (copy);
 }
 DEF_WEAK(strdup);

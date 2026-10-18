@@ -13,14 +13,10 @@
 int
 ffs(int mask)
 {
-	int bit;
-	unsigned int r = mask;
+	int			 bit;
+	unsigned int		 r = mask;
 	static const signed char t[16] = {
-		-28, 1, 2, 1,
-		  3, 1, 2, 1,
-		  4, 1, 2, 1,
-		  3, 1, 2, 1
-	};
+	    -28, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1};
 
 	bit = 0;
 	if (!(r & 0xffff)) {
@@ -36,5 +32,5 @@ ffs(int mask)
 		r >>= 4;
 	}
 
-	return (bit + t[ r & 0xf ]);
+	return (bit + t[r & 0xf]);
 }

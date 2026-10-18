@@ -39,14 +39,14 @@
 
 struct apic_attach_args {
 	const char *aaa_name;
-	int apic_id;
-	int apic_version;
-	int flags;
-#define IOAPIC_PICMODE		0x01
-#define IOAPIC_VWIRE		0x02
+	int	    apic_id;
+	int	    apic_version;
+	int	    flags;
+#define IOAPIC_PICMODE 0x01
+#define IOAPIC_VWIRE 0x02
 	bus_space_tag_t apic_memt;
-	bus_addr_t apic_address;
-	int apic_vecbase;
+	bus_addr_t	apic_address;
+	int		apic_vecbase;
 };
 
 void apic_format_redir(char *, char *, int, u_int32_t, u_int32_t);

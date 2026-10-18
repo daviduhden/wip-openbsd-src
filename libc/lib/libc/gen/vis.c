@@ -29,11 +29,12 @@
  */
 
 #include <sys/types.h>
-#include <errno.h>
+
 #include <ctype.h>
+#include <errno.h>
 #include <limits.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vis.h>
 
 static int
@@ -47,17 +48,18 @@ isoctal(int c)
 static int
 isvisible(int c, int flag)
 {
-	int vis_sp = flag & VIS_SP;
-	int vis_tab = flag & VIS_TAB;
-	int vis_nl = flag & VIS_NL;
-	int vis_safe = flag & VIS_SAFE;
-	int vis_glob = flag & VIS_GLOB;
-	int vis_all = flag & VIS_ALL;
+	int    vis_sp = flag & VIS_SP;
+	int    vis_tab = flag & VIS_TAB;
+	int    vis_nl = flag & VIS_NL;
+	int    vis_safe = flag & VIS_SAFE;
+	int    vis_glob = flag & VIS_GLOB;
+	int    vis_all = flag & VIS_ALL;
 	u_char uc = c;
 
 	if (c == '\\' || !vis_all) {
 		if ((u_int)c <= UCHAR_MAX && isascii(uc) &&
-		    ((c != '*' && c != '?' && c != '[' && c != '#') || !vis_glob) &&
+		    ((c != '*' && c != '?' && c != '[' && c != '#') ||
+			!vis_glob) &&
 		    isgraph(uc))
 			return 1;
 		if (!vis_sp && c == ' ')
@@ -66,7 +68,8 @@ isvisible(int c, int flag)
 			return 1;
 		if (!vis_nl && c == '\n')
 			return 1;
-		if (vis_safe && (c == '\b' || c == '\007' || c == '\r' || isgraph(uc)))
+		if (vis_safe &&
+		    (c == '\b' || c == '\007' || c == '\r' || isgraph(uc)))
 			return 1;
 	}
 	return 0;
@@ -85,8 +88,7 @@ vis(char *dst, int c, int flag, int nextc)
 	int vis_glob = flag & VIS_GLOB;
 
 	if (isvisible(c, flag)) {
-		if ((c == '"' && vis_dq) ||
-		    (c == '\\' && !vis_noslash))
+		if ((c == '"' && vis_dq) || (c == '\\' && !vis_noslash))
 			*dst++ = '\\';
 		*dst++ = c;
 		*dst = '\0';
@@ -169,10 +171,10 @@ DEF_WEAK(vis);
 
 /*
  * strvis, strnvis, strvisx - visually encode characters from src into dst
- *	
+ *
  *	Dst must be 4 times the size of src to account for possible
  *	expansion.  The length of dst, not including the trailing NULL,
- *	is returned. 
+ *	is returned.
  *
  *	Strnvis will write no more than siz-1 bytes (and will NULL terminate).
  *	The number of bytes needed to fully encode the string is returned.
@@ -183,7 +185,7 @@ DEF_WEAK(vis);
 int
 strvis(char *dst, const char *src, int flag)
 {
-	char c;
+	char  c;
 	char *start;
 
 	for (start = dst; (c = *src);)
@@ -196,14 +198,14 @@ DEF_WEAK(strvis);
 int
 strnvis(char *dst, const char *src, size_t siz, int flag)
 {
-	int vis_dq = flag & VIS_DQ;
-	int vis_noslash = flag & VIS_NOSLASH;
+	int   vis_dq = flag & VIS_DQ;
+	int   vis_noslash = flag & VIS_NOSLASH;
 	char *start, *end;
-	char tbuf[5];
-	int c, i;
+	char  tbuf[5];
+	int   c, i;
 
 	i = 0;
-	for (start = dst, end = start + siz - 1; (c = *src) && dst < end; ) {
+	for (start = dst, end = start + siz - 1; (c = *src) && dst < end;) {
 		if (isvisible(c, flag)) {
 			if ((c == '"' && vis_dq) ||
 			    (c == '\\' && !vis_noslash)) {
@@ -242,7 +244,7 @@ int
 stravis(char **outp, const char *src, int flag)
 {
 	char *buf;
-	int len, serrno;
+	int   len, serrno;
 
 	buf = reallocarray(NULL, 4, strlen(src) + 1);
 	if (buf == NULL)
@@ -260,7 +262,7 @@ stravis(char **outp, const char *src, int flag)
 int
 strvisx(char *dst, const char *src, size_t len, int flag)
 {
-	char c;
+	char  c;
 	char *start;
 
 	for (start = dst; len > 1; len--) {

@@ -17,14 +17,15 @@
 
 #include <poll.h>
 #include <signal.h>
+
 #include "cancel.h"
 
 int
-ppoll(struct pollfd *fds, nfds_t nfds,
-    const struct timespec *timeout, const sigset_t *sigmask)
+ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
+    const sigset_t *sigmask)
 {
 	sigset_t set;
-	int ret;
+	int	 ret;
 
 	if (sigmask != NULL && sigismember(sigmask, SIGTHR)) {
 		set = *sigmask;

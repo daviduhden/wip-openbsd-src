@@ -41,20 +41,20 @@
  *	@(#)zsvar.h	8.1 (Berkeley) 6/11/93
  */
 
-#include <machine/bus.h>
 #include <dev/ic/z8530sc.h>
+#include <machine/bus.h>
 
 struct zsc_softc {
-	struct device		zsc_dev;	/* base device */
-	bus_space_tag_t		zsc_bustag;	/* bus space/dma tags */
-	bus_dma_tag_t		zsc_dmatag;
-	struct zs_chanstate	*zsc_cs[2];	/* channel A and B soft state */
+	struct device	     zsc_dev;	 /* base device */
+	bus_space_tag_t	     zsc_bustag; /* bus space/dma tags */
+	bus_dma_tag_t	     zsc_dmatag;
+	struct zs_chanstate *zsc_cs[2]; /* channel A and B soft state */
 
 	/* Machine-dependent part follows... */
-	void			*zsc_softintr;
-	int			zsc_promunit;	/* PROM's view of zs devices */
-	int			zsc_node;	/* PROM node, if any */
-	struct zs_chanstate	zsc_cs_store[2];
+	void		   *zsc_softintr;
+	int		    zsc_promunit; /* PROM's view of zs devices */
+	int		    zsc_node;	  /* PROM node, if any */
+	struct zs_chanstate zsc_cs_store[2];
 };
 
 /*
@@ -67,9 +67,9 @@ u_char zs_read_reg(struct zs_chanstate *cs, u_char reg);
 u_char zs_read_csr(struct zs_chanstate *cs);
 u_char zs_read_data(struct zs_chanstate *cs);
 
-void  zs_write_reg(struct zs_chanstate *cs, u_char reg, u_char val);
-void  zs_write_csr(struct zs_chanstate *cs, u_char val);
-void  zs_write_data(struct zs_chanstate *cs, u_char val);
+void zs_write_reg(struct zs_chanstate *cs, u_char reg, u_char val);
+void zs_write_csr(struct zs_chanstate *cs, u_char val);
+void zs_write_data(struct zs_chanstate *cs, u_char val);
 
 /* The sparc has splzs() in psl.h */
 

@@ -14,16 +14,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include <pthread.h>
+#include <stdio.h>
+
 #include "local.h"
 
 void
 fread_thread(void *v)
 {
-	char buf[sizeof(TEXT)];
+	char  buf[sizeof(TEXT)];
 	FILE *file = v;
-	int i;
+	int   i;
 
 	for (i = 0; i < 4096; i++) {
 		if (fread(buf, sizeof(char), strlen(TEXT), file) == 0) {
@@ -43,13 +44,12 @@ fread_thread(void *v)
 int
 main(void)
 {
-	char sfn[24];
+	char  sfn[24];
 	FILE *sfp;
-	int fd, i;
+	int   fd, i;
 
 	strlcpy(sfn, "/tmp/barnacles.XXXXXXXX", sizeof(sfn));
-	if ((fd = mkstemp(sfn)) == -1 ||
-	    (sfp = fdopen(fd, "w+")) == NULL) {
+	if ((fd = mkstemp(sfn)) == -1 || (sfp = fdopen(fd, "w+")) == NULL) {
 		int saved_errno = errno;
 		if (fd != -1) {
 			unlink(sfn);

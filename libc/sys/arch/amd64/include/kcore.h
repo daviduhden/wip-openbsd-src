@@ -40,8 +40,8 @@
 #define _MACHINE_KCORE_H_
 
 typedef struct cpu_kcore_hdr {
-	u_int64_t	ptdpaddr;		/* PA of PML4 */
-	u_int64_t	nmemsegs;		/* Number of RAM segments */
+	u_int64_t ptdpaddr; /* PA of PML4 */
+	u_int64_t nmemsegs; /* Number of RAM segments */
 } cpu_kcore_hdr_t;
 
 #endif /* _MACHINE_KCORE_H_ */

@@ -28,20 +28,21 @@
  * SUCH DAMAGE.
  */
 
-#ifndef	_SYS_AUXV_H_
-#define	_SYS_AUXV_H_
+#ifndef _SYS_AUXV_H_
+#define _SYS_AUXV_H_
 
 #include <sys/types.h>
+
 #include <machine/elf.h>
 
 /* Values for a_type. */
-#define	AT_NULL		0	/* Terminates the vector. */
-#define	AT_IGNORE	1	/* Ignored entry. */
-#define	AT_PAGESZ	6	/* Page size in bytes. */
-#define	AT_HWCAP	25	/* CPU feature flags. */
-#define	AT_HWCAP2	26	/* CPU feature flags 2. */
+#define AT_NULL 0    /* Terminates the vector. */
+#define AT_IGNORE 1  /* Ignored entry. */
+#define AT_PAGESZ 6  /* Page size in bytes. */
+#define AT_HWCAP 25  /* CPU feature flags. */
+#define AT_HWCAP2 26 /* CPU feature flags 2. */
 
-#define	AT_COUNT	27	/* Count of defined aux entry types. */
+#define AT_COUNT 27 /* Count of defined aux entry types. */
 
 __BEGIN_DECLS
 int elf_aux_info(int aux, void *buf, int buflen);

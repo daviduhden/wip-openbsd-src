@@ -29,9 +29,10 @@
  */
 
 #include <sys/types.h>
+
 #include <stdlib.h>
 
-static int rand_deterministic;
+static int   rand_deterministic;
 static u_int next = 1;
 
 int
@@ -43,8 +44,7 @@ rand_r(u_int *seed)
 DEF_WEAK(rand_r);
 
 #if defined(APIWARN)
-__warn_references(rand_r,
-    "rand_r() is not random, it is deterministic.");
+__warn_references(rand_r, "rand_r() is not random, it is deterministic.");
 #endif
 
 int
@@ -56,8 +56,8 @@ rand(void)
 }
 
 #if defined(APIWARN)
-__warn_references(rand,
-    "rand() may return deterministic values, is that what you want?");
+__warn_references(
+    rand, "rand() may return deterministic values, is that what you want?");
 #endif
 
 void

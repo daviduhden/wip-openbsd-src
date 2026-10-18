@@ -32,9 +32,9 @@
  * SUCH DAMAGE.
  */
 
+#include <db.h>
 #include <stdio.h>
 
-#include <db.h>
 #include "btree.h"
 
 static void mswap(PAGE *);
@@ -52,10 +52,10 @@ static void mswap(PAGE *);
 void
 __bt_pgin(void *t, pgno_t pg, void *pp)
 {
-	PAGE *h;
+	PAGE  *h;
 	indx_t i, top;
 	u_char flags;
-	char *p;
+	char  *p;
 
 	if (!F_ISSET(((BTREE *)t), B_NEEDSWAP))
 		return;
@@ -117,10 +117,10 @@ __bt_pgin(void *t, pgno_t pg, void *pp)
 void
 __bt_pgout(void *t, pgno_t pg, void *pp)
 {
-	PAGE *h;
+	PAGE  *h;
 	indx_t i, top;
 	u_char flags;
-	char *p;
+	char  *p;
 
 	if (!F_ISSET(((BTREE *)t), B_NEEDSWAP))
 		return;
@@ -191,16 +191,16 @@ mswap(PAGE *pg)
 	char *p;
 
 	p = (char *)pg;
-	P_32_SWAP(p);		/* magic */
+	P_32_SWAP(p); /* magic */
 	p += sizeof(u_int32_t);
-	P_32_SWAP(p);		/* version */
+	P_32_SWAP(p); /* version */
 	p += sizeof(u_int32_t);
-	P_32_SWAP(p);		/* psize */
+	P_32_SWAP(p); /* psize */
 	p += sizeof(u_int32_t);
-	P_32_SWAP(p);		/* free */
+	P_32_SWAP(p); /* free */
 	p += sizeof(u_int32_t);
-	P_32_SWAP(p);		/* nrecs */
+	P_32_SWAP(p); /* nrecs */
 	p += sizeof(u_int32_t);
-	P_32_SWAP(p);		/* flags */
+	P_32_SWAP(p); /* flags */
 	p += sizeof(u_int32_t);
 }

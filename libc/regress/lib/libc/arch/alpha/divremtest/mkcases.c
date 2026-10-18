@@ -32,7 +32,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-char *tab[4] = { "u_int", "int", "u_long", "long" };
+char *tab[4] = {"u_int", "int", "u_long", "long"};
 
 int
 main()
@@ -41,23 +41,14 @@ main()
 
 	for (i = 0; i < 64; i++) {
 		printf(
-"		case 0x%d%d%d%d%d%d:	/* %s <= %s op %s */\n",
-			(i >> 5) & 1,
-			(i >> 4) & 1,
-			(i >> 3) & 1,
-			(i >> 2) & 1,
-			(i >> 1) & 1,
-			(i >> 0) & 1,
-			tab[(i >> 4) & 0x3],
-			tab[(i >> 2) & 0x3],
-			tab[(i >> 0) & 0x3]);
-		printf(
-"			TRY_IT(op_%s, op_%s, op_%s);\n",
-			tab[(i >> 4) & 0x3],
-			tab[(i >> 2) & 0x3],
-			tab[(i >> 0) & 0x3]);
-		printf(
-"			break;\n\n");
+		    "		case 0x%d%d%d%d%d%d:	/* %s <= %s op %s */\n",
+		    (i >> 5) & 1, (i >> 4) & 1, (i >> 3) & 1, (i >> 2) & 1,
+		    (i >> 1) & 1, (i >> 0) & 1, tab[(i >> 4) & 0x3],
+		    tab[(i >> 2) & 0x3], tab[(i >> 0) & 0x3]);
+		printf("			TRY_IT(op_%s, op_%s, op_%s);\n",
+		    tab[(i >> 4) & 0x3], tab[(i >> 2) & 0x3],
+		    tab[(i >> 0) & 0x3]);
+		printf("			break;\n\n");
 	}
 
 	exit(0);

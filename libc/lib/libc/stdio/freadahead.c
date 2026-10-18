@@ -16,12 +16,13 @@
  */
 
 #include <stdio_ext.h>
+
 #include "local.h"
 
 size_t
 __freadahead(FILE *fp)
 {
-	size_t	r = 0;
+	size_t r = 0;
 
 	if (fp->_flags & __SRD) {
 		r = fp->_r;

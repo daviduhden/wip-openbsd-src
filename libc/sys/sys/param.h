@@ -35,14 +35,14 @@
  */
 
 #ifndef _SYS_PARAM_H_
-#define	_SYS_PARAM_H_
+#define _SYS_PARAM_H_
 
-#define	BSD	199306		/* System version (year & month). */
-#define BSD4_3	1
-#define BSD4_4	1
+#define BSD 199306 /* System version (year & month). */
+#define BSD4_3 1
+#define BSD4_4 1
 
-#define OpenBSD	202610		/* OpenBSD version (year & month). */
-#define OpenBSD8_0 1		/* OpenBSD 8.0 */
+#define OpenBSD 202610 /* OpenBSD version (year & month). */
+#define OpenBSD8_0 1   /* OpenBSD 8.0 */
 
 #include <sys/_null.h>
 
@@ -59,25 +59,26 @@
  */
 #include <sys/syslimits.h>
 
-#define	MAXCOMLEN	_MAXCOMLEN-1	/* max command name remembered, without NUL */
-#define	MAXINTERP	128		/* max interpreter file name length */
-#define	MAXLOGNAME	LOGIN_NAME_MAX	/* max login name length w/ NUL */
-#define	MAXUPRC		CHILD_MAX	/* max simultaneous processes */
-#define	NCARGS		ARG_MAX		/* max bytes for an exec function */
-#define	NGROUPS		NGROUPS_MAX	/* max number groups */
-#define	NOFILE		OPEN_MAX	/* max open files per process (soft) */
-#define	NOFILE_MAX	1024		/* max open files per process (hard) */
-#define	NOGROUP		65535		/* marker for empty group set member */
-#define MAXHOSTNAMELEN	256		/* max hostname length w/ NUL */
+#define MAXCOMLEN _MAXCOMLEN - 1  /* max command name remembered, without NUL  \
+				   */
+#define MAXINTERP 128		  /* max interpreter file name length */
+#define MAXLOGNAME LOGIN_NAME_MAX /* max login name length w/ NUL */
+#define MAXUPRC CHILD_MAX	  /* max simultaneous processes */
+#define NCARGS ARG_MAX		  /* max bytes for an exec function */
+#define NGROUPS NGROUPS_MAX	  /* max number groups */
+#define NOFILE OPEN_MAX		  /* max open files per process (soft) */
+#define NOFILE_MAX 1024		  /* max open files per process (hard) */
+#define NOGROUP 65535		  /* marker for empty group set member */
+#define MAXHOSTNAMELEN 256	  /* max hostname length w/ NUL */
 
 /* More types and definitions used throughout the kernel. */
 #ifdef _KERNEL
 #include <sys/errno.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/srp.h>
+#include <sys/time.h>
 #include <sys/ucred.h>
 #include <sys/uio.h>
-#include <sys/srp.h>
 #endif
 
 /* Signals. */
@@ -85,6 +86,7 @@
 
 /* Machine type dependent parameters. */
 #include <sys/limits.h>
+
 #include <machine/param.h>
 
 #ifdef _KERNEL
@@ -92,32 +94,33 @@
  * Priorities.  Note that with 32 run queues, differences less than 4 are
  * insignificant.
  */
-#define	PSWP	0
-#define	PVM	4
-#define	PINOD	8
-#define	PRIBIO	16
-#define	PVFS	20
-#endif /* _KERNEL */
-#define	PZERO	22		/* No longer magic, shouldn't be here.  XXX */
+#define PSWP 0
+#define PVM 4
+#define PINOD 8
+#define PRIBIO 16
+#define PVFS 20
+#endif		 /* _KERNEL */
+#define PZERO 22 /* No longer magic, shouldn't be here.  XXX */
 #ifdef _KERNEL
-#define	PSOCK	24
-#define	PWAIT	32
-#define	PLOCK	36
-#define	PPAUSE	40
-#define	PUSER	50
-#define	MAXPRI	127		/* Priorities range from 0 through MAXPRI. */
+#define PSOCK 24
+#define PWAIT 32
+#define PLOCK 36
+#define PPAUSE 40
+#define PUSER 50
+#define MAXPRI 127 /* Priorities range from 0 through MAXPRI. */
 
-#define	PRIMASK		0x0ff
-#define	PCATCH		0x100	/* OR'd with pri for tsleep to check signals */
-#define PNORELOCK	0x200	/* OR'd with pri for msleep to not reacquire
-				   the mutex */
-#endif /* _KERNEL */
+#define PRIMASK 0x0ff
+#define PCATCH 0x100 /* OR'd with pri for tsleep to check signals */
+#define PNORELOCK                                                              \
+	0x200 /* OR'd with pri for msleep to not reacquire                     \
+		 the mutex */
+#endif	      /* _KERNEL */
 
-#define	NODEV	(dev_t)(-1)	/* non-existent device */
+#define NODEV (dev_t)(-1) /* non-existent device */
 
-#define	ALIGNBYTES		_ALIGNBYTES
-#define	ALIGN(p)		_ALIGN(p)
-#define	ALIGNED_POINTER(p,t)	_ALIGNED_POINTER(p,t)
+#define ALIGNBYTES _ALIGNBYTES
+#define ALIGN(p) _ALIGN(p)
+#define ALIGNED_POINTER(p, t) _ALIGNED_POINTER(p, t)
 
 /*
  * File system parameters and macros.
@@ -129,31 +132,31 @@
  * it smaller makes some file systems unmountable.
  */
 #ifdef _KERNEL
-#define MAXPHYS		(64 * 1024)	/* max raw I/O transfer size */
-#endif /* _KERNEL */
-#define	MAXBSIZE	(64 * 1024)
+#define MAXPHYS (64 * 1024) /* max raw I/O transfer size */
+#endif			    /* _KERNEL */
+#define MAXBSIZE (64 * 1024)
 
-#define	_DEV_BSHIFT	9		/* log2(DEV_BSIZE) */
-#define	DEV_BSIZE	(1 << _DEV_BSHIFT)
+#define _DEV_BSHIFT 9 /* log2(DEV_BSIZE) */
+#define DEV_BSIZE (1 << _DEV_BSHIFT)
 #ifdef _KERNEL
-#define	DEV_BSHIFT	_DEV_BSHIFT
-#define	BLKDEV_IOSIZE	PAGE_SIZE
+#define DEV_BSHIFT _DEV_BSHIFT
+#define BLKDEV_IOSIZE PAGE_SIZE
 #endif /* _KERNEL */
 
 /* pages to disk blocks */
 #ifndef ctod
-#define ctod(x)         ((x) << (PAGE_SHIFT - _DEV_BSHIFT))
+#define ctod(x) ((x) << (PAGE_SHIFT - _DEV_BSHIFT))
 #endif
 #ifndef dtoc
-#define dtoc(x)         ((x) >> (PAGE_SHIFT - _DEV_BSHIFT))
+#define dtoc(x) ((x) >> (PAGE_SHIFT - _DEV_BSHIFT))
 #endif
 
 /* bytes to disk blocks */
 #ifndef btodb
-#define btodb(x)        ((x) >> _DEV_BSHIFT)
+#define btodb(x) ((x) >> _DEV_BSHIFT)
 #endif
 #ifndef dbtob
-#define dbtob(x)        ((x) << _DEV_BSHIFT)
+#define dbtob(x) ((x) << _DEV_BSHIFT)
 #endif
 
 /*
@@ -165,32 +168,32 @@
  * It should be set high enough to allow all legitimate uses, but halt
  * infinite loops reasonably quickly.
  */
-#define	MAXPATHLEN	PATH_MAX
-#define MAXSYMLINKS	SYMLOOP_MAX
+#define MAXPATHLEN PATH_MAX
+#define MAXSYMLINKS SYMLOOP_MAX
 
 /* Macros to set/clear/test flags. */
 #ifdef _KERNEL
-#define SET(t, f)	((t) |= (f))
-#define CLR(t, f)	((t) &= ~(f))
-#define ISSET(t, f)	((t) & (f))
+#define SET(t, f) ((t) |= (f))
+#define CLR(t, f) ((t) &= ~(f))
+#define ISSET(t, f) ((t) & (f))
 #endif /* _KERNEL */
 
 /* Bit map related macros. */
-#define	setbit(a,i)	((a)[(i)>>3] |= 1<<((i)&(NBBY-1)))
-#define	clrbit(a,i)	((a)[(i)>>3] &= ~(1<<((i)&(NBBY-1))))
-#define	isset(a,i)	((a)[(i)>>3] & (1<<((i)&(NBBY-1))))
-#define	isclr(a,i)	(((a)[(i)>>3] & (1<<((i)&(NBBY-1)))) == 0)
+#define setbit(a, i) ((a)[(i) >> 3] |= 1 << ((i) & (NBBY - 1)))
+#define clrbit(a, i) ((a)[(i) >> 3] &= ~(1 << ((i) & (NBBY - 1))))
+#define isset(a, i) ((a)[(i) >> 3] & (1 << ((i) & (NBBY - 1))))
+#define isclr(a, i) (((a)[(i) >> 3] & (1 << ((i) & (NBBY - 1)))) == 0)
 
 /* Macros for counting and rounding. */
 #ifndef howmany
-#define	howmany(x, y)	(((x)+((y)-1))/(y))
+#define howmany(x, y) (((x) + ((y) - 1)) / (y))
 #endif
-#define	roundup(x, y)	((((x)+((y)-1))/(y))*(y))
-#define powerof2(x)	((((x)-1)&(x))==0)
+#define roundup(x, y) ((((x) + ((y) - 1)) / (y)) * (y))
+#define powerof2(x) ((((x) - 1) & (x)) == 0)
 
 /* Macros for min/max. */
-#define	MIN(a,b) (((a)<(b))?(a):(b))
-#define	MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 /* Macros for calculating the offset of a field */
 #if !defined(offsetof) && defined(_KERNEL)
@@ -201,7 +204,7 @@
 #endif
 #endif /* !defined(offsetof) && defined(_KERNEL) */
 
-#define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
+#define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 
 /*
  * Scale factor for scaled integers used to count %cpu time and load avgs.
@@ -214,10 +217,10 @@
  * For the scheduler to maintain a 1:1 mapping of CPU `tick' to `%age',
  * FSHIFT must be at least 11; this gives us a maximum load avg of ~1024.
  */
-#define	_FSHIFT	11		/* bits to right of fixed binary point */
+#define _FSHIFT 11 /* bits to right of fixed binary point */
 #ifdef _KERNEL
-#define	FSHIFT	_FSHIFT	
+#define FSHIFT _FSHIFT
 #endif
-#define FSCALE	(1<<_FSHIFT)
+#define FSCALE (1 << _FSHIFT)
 
 #endif /* !_SYS_PARAM_H_ */

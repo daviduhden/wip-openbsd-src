@@ -19,9 +19,9 @@
 void
 fgets_thread(void *v)
 {
-	char buf[sizeof(TEXT_N) + 1];
+	char  buf[sizeof(TEXT_N) + 1];
 	FILE *file = v;
-	int i;
+	int   i;
 
 	for (i = 0; i < 4096; i++) {
 		if (fgets(buf, sizeof(buf), file) == NULL) {
@@ -41,13 +41,12 @@ fgets_thread(void *v)
 int
 main(void)
 {
-	char sfn[24];
+	char  sfn[24];
 	FILE *sfp;
-	int fd, i;
+	int   fd, i;
 
 	strlcpy(sfn, "/tmp/barnacles.XXXXXXXX", sizeof(sfn));
-	if ((fd = mkstemp(sfn)) == -1 ||
-	    (sfp = fdopen(fd, "w+")) == NULL) {
+	if ((fd = mkstemp(sfn)) == -1 || (sfp = fdopen(fd, "w+")) == NULL) {
 		int saved_errno = errno;
 		if (fd != -1) {
 			unlink(sfn);

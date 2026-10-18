@@ -33,16 +33,18 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 #include "local.h"
 
-/* 
- * Re-direct an existing, open (probably) file to some other file. 
+/*
+ * Re-direct an existing, open (probably) file to some other file.
  * ANSI is written such that the original file gets closed if at
  * all possible, no matter what.
  */
@@ -53,7 +55,7 @@ freopen(const char *file, const char *mode, FILE *fp)
 	int flags, isopen, oflags, sverrno, wantfd;
 
 	if ((flags = __sflags(mode, &oflags)) == 0) {
-		(void) fclose(fp);
+		(void)fclose(fp);
 		return (NULL);
 	}
 
@@ -71,16 +73,16 @@ freopen(const char *file, const char *mode, FILE *fp)
 	 * should work.  This is unnecessary if it was not a Unix file.
 	 */
 	if (fp->_flags == 0) {
-		fp->_flags = __SEOF;	/* hold on to it */
+		fp->_flags = __SEOF; /* hold on to it */
 		isopen = 0;
 		wantfd = -1;
 	} else {
 		/* flush the stream; POSIX, not ANSI, requires this. */
-		(void) __sflush(fp);
+		(void)__sflush(fp);
 		/* if close is NULL, closing is a no-op, hence pointless */
 		isopen = fp->_close != NULL;
 		if ((wantfd = fp->_file) < 0 && isopen) {
-			(void) (*fp->_close)(fp->_cookie);
+			(void)(*fp->_close)(fp->_cookie);
 			isopen = 0;
 		}
 	}
@@ -90,7 +92,7 @@ freopen(const char *file, const char *mode, FILE *fp)
 	if (f == -1 && isopen) {
 		/* If out of fd's close the old one and try again. */
 		if (errno == ENFILE || errno == EMFILE) {
-			(void) (*fp->_close)(fp->_cookie);
+			(void)(*fp->_close)(fp->_cookie);
 			isopen = 0;
 			f = open(file, oflags, DEFFILEMODE);
 		}
@@ -103,7 +105,7 @@ freopen(const char *file, const char *mode, FILE *fp)
 	 * of any setbuffer calls, but stdio has always done this before.
 	 */
 	if (isopen && f != wantfd)
-		(void) (*fp->_close)(fp->_cookie);
+		(void)(*fp->_close)(fp->_cookie);
 	if (fp->_flags & __SMBF)
 		free((char *)fp->_bf._base);
 	fp->_w = 0;
@@ -120,10 +122,10 @@ freopen(const char *file, const char *mode, FILE *fp)
 		FREELB(fp);
 	fp->_lb._size = 0;
 
-	if (f == -1) {			/* did not get it after all */
-		fp->_flags = 0;		/* set it free */
+	if (f == -1) {		/* did not get it after all */
+		fp->_flags = 0; /* set it free */
 		FUNLOCKFILE(fp);
-		errno = sverrno;	/* restore in case _close clobbered */
+		errno = sverrno; /* restore in case _close clobbered */
 		return (NULL);
 	}
 
@@ -134,7 +136,7 @@ freopen(const char *file, const char *mode, FILE *fp)
 	 */
 	if (wantfd >= 0 && f != wantfd) {
 		if (dup3(f, wantfd, oflags & O_CLOEXEC) >= 0) {
-			(void) close(f);
+			(void)close(f);
 			f = wantfd;
 		}
 	}
@@ -156,7 +158,7 @@ freopen(const char *file, const char *mode, FILE *fp)
 	 * fseek and ftell.)
 	 */
 	if (oflags & O_APPEND)
-		(void) __sseek(fp, 0, SEEK_END);
+		(void)__sseek(fp, 0, SEEK_END);
 	FUNLOCKFILE(fp);
 	return (fp);
 }

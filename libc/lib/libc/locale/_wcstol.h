@@ -32,7 +32,8 @@
  * Original version ID:
  * @(#)strtol.c	8.1 (Berkeley) 6/4/93
  * NetBSD: wcstol.c,v 1.1 2001/09/27 16:30:36 yamt Exp
- * Citrus: xpg4dl/FreeBSD/lib/libc/locale/wcstol.c,v 1.2 2001/09/21 16:11:41 yamt Exp
+ * Citrus: xpg4dl/FreeBSD/lib/libc/locale/wcstol.c,v 1.2 2001/09/21 16:11:41
+ * yamt Exp
  */
 
 /*
@@ -49,10 +50,10 @@ int_type
 FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 {
 	const wchar_t *s;
-	int_type acc, cutoff;
-	wint_t wc;
-	int i;
-	int neg, any, cutlim;
+	int_type       acc, cutoff;
+	wint_t	       wc;
+	int	       i;
+	int	       neg, any, cutlim;
 
 	/* check base value */
 	if (base && (base < 2 || base > 36)) {
@@ -67,7 +68,7 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 	 */
 	s = nptr;
 	do {
-		wc = (wchar_t) *s++;
+		wc = (wchar_t)*s++;
 	} while (iswspace(wc));
 	if (wc == L'-') {
 		neg = 1;
@@ -77,8 +78,8 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 		if (wc == L'+')
 			wc = *s++;
 	}
-	if ((base == 0 || base == 16) &&
-	    wc == L'0' && (*s == L'x' || *s == L'X')) {
+	if ((base == 0 || base == 16) && wc == L'0' &&
+	    (*s == L'x' || *s == L'X')) {
 		wc = s[1];
 		s += 2;
 		base = 16;
@@ -99,7 +100,7 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr, int base)
 		}
 		cutlim = -cutlim;
 	}
-	for (acc = 0, any = 0;; wc = (wchar_t) *s++) {
+	for (acc = 0, any = 0;; wc = (wchar_t)*s++) {
 		i = wctoint(wc);
 		if (i == -1)
 			break;

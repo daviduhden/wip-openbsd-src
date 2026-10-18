@@ -28,8 +28,8 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
 #include <paths.h>
+#include <stdio.h>
 #include <string.h>
 
 char *
@@ -39,8 +39,8 @@ ctermid(char *s)
 
 	if (s) {
 		bcopy(def, s, sizeof(_PATH_TTY));
-		return(s);
+		return (s);
 	}
-	return(def);
+	return (def);
 }
 DEF_WEAK(ctermid);

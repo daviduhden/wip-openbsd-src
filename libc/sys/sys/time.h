@@ -44,8 +44,8 @@
  * and used in other calls.
  */
 struct timeval {
-	time_t		tv_sec;		/* seconds */
-	suseconds_t	tv_usec;	/* and microseconds */
+	time_t	    tv_sec;  /* seconds */
+	suseconds_t tv_usec; /* and microseconds */
 };
 #endif
 
@@ -55,99 +55,100 @@ struct timeval {
  * Structure defined by POSIX.1b to be like a timeval.
  */
 struct timespec {
-	time_t	tv_sec;		/* seconds */
-	long	tv_nsec;	/* and nanoseconds */
+	time_t tv_sec;	/* seconds */
+	long   tv_nsec; /* and nanoseconds */
 };
 #endif
 
-#define	TIMEVAL_TO_TIMESPEC(tv, ts) do {				\
-	(ts)->tv_sec = (tv)->tv_sec;					\
-	(ts)->tv_nsec = (tv)->tv_usec * 1000;				\
-} while (0)
-#define	TIMESPEC_TO_TIMEVAL(tv, ts) do {				\
-	(tv)->tv_sec = (ts)->tv_sec;					\
-	(tv)->tv_usec = (ts)->tv_nsec / 1000;				\
-} while (0)
+#define TIMEVAL_TO_TIMESPEC(tv, ts)                                            \
+	do {                                                                   \
+		(ts)->tv_sec = (tv)->tv_sec;                                   \
+		(ts)->tv_nsec = (tv)->tv_usec * 1000;                          \
+	} while (0)
+#define TIMESPEC_TO_TIMEVAL(tv, ts)                                            \
+	do {                                                                   \
+		(tv)->tv_sec = (ts)->tv_sec;                                   \
+		(tv)->tv_usec = (ts)->tv_nsec / 1000;                          \
+	} while (0)
 
 struct timezone {
-	int	tz_minuteswest;	/* minutes west of Greenwich */
-	int	tz_dsttime;	/* type of dst correction */
+	int tz_minuteswest; /* minutes west of Greenwich */
+	int tz_dsttime;	    /* type of dst correction */
 };
-#define	DST_NONE	0	/* not on dst */
-#define	DST_USA		1	/* USA style dst */
-#define	DST_AUST	2	/* Australian style dst */
-#define	DST_WET		3	/* Western European dst */
-#define	DST_MET		4	/* Middle European dst */
-#define	DST_EET		5	/* Eastern European dst */
-#define	DST_CAN		6	/* Canada */
+#define DST_NONE 0 /* not on dst */
+#define DST_USA 1  /* USA style dst */
+#define DST_AUST 2 /* Australian style dst */
+#define DST_WET 3  /* Western European dst */
+#define DST_MET 4  /* Middle European dst */
+#define DST_EET 5  /* Eastern European dst */
+#define DST_CAN 6  /* Canada */
 
 /* Operations on timevals. */
-#define	timerclear(tvp)		(tvp)->tv_sec = (tvp)->tv_usec = 0
-#define	timerisset(tvp)		((tvp)->tv_sec || (tvp)->tv_usec)
-#define	timerisvalid(tvp)						\
-	((tvp)->tv_usec >= 0 && (tvp)->tv_usec < 1000000)
-#define	timercmp(tvp, uvp, cmp)						\
-	(((tvp)->tv_sec == (uvp)->tv_sec) ?				\
-	    ((tvp)->tv_usec cmp (uvp)->tv_usec) :			\
-	    ((tvp)->tv_sec cmp (uvp)->tv_sec))
-#define	timeradd(tvp, uvp, vvp)						\
-	do {								\
-		(vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;		\
-		(vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;	\
-		if ((vvp)->tv_usec >= 1000000) {			\
-			(vvp)->tv_sec++;				\
-			(vvp)->tv_usec -= 1000000;			\
-		}							\
+#define timerclear(tvp) (tvp)->tv_sec = (tvp)->tv_usec = 0
+#define timerisset(tvp) ((tvp)->tv_sec || (tvp)->tv_usec)
+#define timerisvalid(tvp) ((tvp)->tv_usec >= 0 && (tvp)->tv_usec < 1000000)
+#define timercmp(tvp, uvp, cmp)                                                \
+	(((tvp)->tv_sec == (uvp)->tv_sec) ?                                    \
+		((tvp)->tv_usec cmp(uvp)->tv_usec) :                           \
+		((tvp)->tv_sec cmp(uvp)->tv_sec))
+#define timeradd(tvp, uvp, vvp)                                                \
+	do {                                                                   \
+		(vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;                 \
+		(vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;              \
+		if ((vvp)->tv_usec >= 1000000) {                               \
+			(vvp)->tv_sec++;                                       \
+			(vvp)->tv_usec -= 1000000;                             \
+		}                                                              \
 	} while (0)
-#define	timersub(tvp, uvp, vvp)						\
-	do {								\
-		(vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec;		\
-		(vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec;	\
-		if ((vvp)->tv_usec < 0) {				\
-			(vvp)->tv_sec--;				\
-			(vvp)->tv_usec += 1000000;			\
-		}							\
+#define timersub(tvp, uvp, vvp)                                                \
+	do {                                                                   \
+		(vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec;                 \
+		(vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec;              \
+		if ((vvp)->tv_usec < 0) {                                      \
+			(vvp)->tv_sec--;                                       \
+			(vvp)->tv_usec += 1000000;                             \
+		}                                                              \
 	} while (0)
 
 /* Operations on timespecs. */
-#define	timespecclear(tsp)		(tsp)->tv_sec = (tsp)->tv_nsec = 0
-#define	timespecisset(tsp)		((tsp)->tv_sec || (tsp)->tv_nsec)
-#define	timespecisvalid(tsp)						\
+#define timespecclear(tsp) (tsp)->tv_sec = (tsp)->tv_nsec = 0
+#define timespecisset(tsp) ((tsp)->tv_sec || (tsp)->tv_nsec)
+#define timespecisvalid(tsp)                                                   \
 	((tsp)->tv_nsec >= 0 && (tsp)->tv_nsec < 1000000000L)
-#define	timespeccmp(tsp, usp, cmp)					\
-	(((tsp)->tv_sec == (usp)->tv_sec) ?				\
-	    ((tsp)->tv_nsec cmp (usp)->tv_nsec) :			\
-	    ((tsp)->tv_sec cmp (usp)->tv_sec))
-#define	timespecadd(tsp, usp, vsp)					\
-	do {								\
-		(vsp)->tv_sec = (tsp)->tv_sec + (usp)->tv_sec;		\
-		(vsp)->tv_nsec = (tsp)->tv_nsec + (usp)->tv_nsec;	\
-		if ((vsp)->tv_nsec >= 1000000000L) {			\
-			(vsp)->tv_sec++;				\
-			(vsp)->tv_nsec -= 1000000000L;			\
-		}							\
+#define timespeccmp(tsp, usp, cmp)                                             \
+	(((tsp)->tv_sec == (usp)->tv_sec) ?                                    \
+		((tsp)->tv_nsec cmp(usp)->tv_nsec) :                           \
+		((tsp)->tv_sec cmp(usp)->tv_sec))
+#define timespecadd(tsp, usp, vsp)                                             \
+	do {                                                                   \
+		(vsp)->tv_sec = (tsp)->tv_sec + (usp)->tv_sec;                 \
+		(vsp)->tv_nsec = (tsp)->tv_nsec + (usp)->tv_nsec;              \
+		if ((vsp)->tv_nsec >= 1000000000L) {                           \
+			(vsp)->tv_sec++;                                       \
+			(vsp)->tv_nsec -= 1000000000L;                         \
+		}                                                              \
 	} while (0)
-#define	timespecsub(tsp, usp, vsp)					\
-	do {								\
-		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		\
-		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	\
-		if ((vsp)->tv_nsec < 0) {				\
-			(vsp)->tv_sec--;				\
-			(vsp)->tv_nsec += 1000000000L;			\
-		}							\
+#define timespecsub(tsp, usp, vsp)                                             \
+	do {                                                                   \
+		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;                 \
+		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;              \
+		if ((vsp)->tv_nsec < 0) {                                      \
+			(vsp)->tv_sec--;                                       \
+			(vsp)->tv_nsec += 1000000000L;                         \
+		}                                                              \
 	} while (0)
 
 /*
  * Names of the interval timers, and structure
  * defining a timer setting.
  */
-#define	ITIMER_REAL	0
-#define	ITIMER_VIRTUAL	1
-#define	ITIMER_PROF	2
+#define ITIMER_REAL 0
+#define ITIMER_VIRTUAL 1
+#define ITIMER_PROF 2
 
-struct	itimerval {
-	struct	timeval it_interval;	/* timer interval */
-	struct	timeval it_value;	/* current value */
+struct itimerval {
+	struct timeval it_interval; /* timer interval */
+	struct timeval it_value;    /* current value */
 };
 
 #if __BSD_VISIBLE
@@ -155,29 +156,28 @@ struct	itimerval {
  * clock information structure for sysctl({CTL_KERN, KERN_CLOCKRATE})
  */
 struct clockinfo {
-	int	hz;		/* clock frequency */
-	int	tick;		/* micro-seconds per hz tick */
-	int	stathz;		/* statistics clock frequency */
-	int	profhz;		/* profiling clock frequency */
+	int hz;	    /* clock frequency */
+	int tick;   /* micro-seconds per hz tick */
+	int stathz; /* statistics clock frequency */
+	int profhz; /* profiling clock frequency */
 };
 #endif /* __BSD_VISIBLE */
 
-#if defined(_KERNEL) || defined(_STANDALONE) || defined (_LIBC)
+#if defined(_KERNEL) || defined(_STANDALONE) || defined(_LIBC)
 #include <sys/_time.h>
 
 /* Time expressed as seconds and fractions of a second + operations on it. */
 struct bintime {
-	time_t	sec;
+	time_t	 sec;
 	uint64_t frac;
 };
 #endif
 
-#if defined(_KERNEL) || defined(_STANDALONE) || defined (_LIBC)
+#if defined(_KERNEL) || defined(_STANDALONE) || defined(_LIBC)
 
-#define bintimecmp(btp, ctp, cmp)					\
-	((btp)->sec == (ctp)->sec ?					\
-	    (btp)->frac cmp (ctp)->frac :				\
-	    (btp)->sec cmp (ctp)->sec)
+#define bintimecmp(btp, ctp, cmp)                                              \
+	((btp)->sec == (ctp)->sec ? (btp)->frac cmp(ctp)->frac :               \
+				    (btp)->sec	cmp(ctp)->sec)
 
 static inline void
 bintimeaddfrac(const struct bintime *bt, uint64_t x, struct bintime *ct)
@@ -189,8 +189,8 @@ bintimeaddfrac(const struct bintime *bt, uint64_t x, struct bintime *ct)
 }
 
 static inline void
-bintimeadd(const struct bintime *bt, const struct bintime *ct,
-    struct bintime *dt)
+bintimeadd(
+    const struct bintime *bt, const struct bintime *ct, struct bintime *dt)
 {
 	dt->sec = bt->sec + ct->sec;
 	if (bt->frac > bt->frac + ct->frac)
@@ -199,8 +199,8 @@ bintimeadd(const struct bintime *bt, const struct bintime *ct,
 }
 
 static inline void
-bintimesub(const struct bintime *bt, const struct bintime *ct,
-    struct bintime *dt)
+bintimesub(
+    const struct bintime *bt, const struct bintime *ct, struct bintime *dt)
 {
 	dt->sec = bt->sec - ct->sec;
 	if (bt->frac < bt->frac - ct->frac)
@@ -251,14 +251,15 @@ TIMESPEC_TO_BINTIME(const struct timespec *ts, struct bintime *bt)
 {
 	bt->sec = ts->tv_sec;
 	/* 18446744073 = int(2^64 / 1000000000) */
-	bt->frac = (uint64_t)ts->tv_nsec * (uint64_t)18446744073ULL; 
+	bt->frac = (uint64_t)ts->tv_nsec * (uint64_t)18446744073ULL;
 }
 
 static inline void
 BINTIME_TO_TIMEVAL(const struct bintime *bt, struct timeval *tv)
 {
 	tv->tv_sec = bt->sec;
-	tv->tv_usec = (long)(((uint64_t)1000000 * (uint32_t)(bt->frac >> 32)) >> 32);
+	tv->tv_usec =
+	    (long)(((uint64_t)1000000 * (uint32_t)(bt->frac >> 32)) >> 32);
 }
 
 static inline void
@@ -281,7 +282,7 @@ TIMEVAL_TO_BINTIME(const struct timeval *tv, struct bintime *bt)
  * "bin"   == struct bintime  == seconds + 64 bit fraction of seconds.
  * "nano"  == struct timespec == seconds + nanoseconds.
  * "micro" == struct timeval  == seconds + microseconds.
- *              
+ *
  * Functions containing "up" returns time relative to boot and
  * should be used for calculating time intervals.
  *
@@ -293,75 +294,75 @@ TIMEVAL_TO_BINTIME(const struct timeval *tv, struct bintime *bt)
  * Functions with the "get" prefix returns a less precise result
  * much faster than the functions without "get" prefix and should
  * be used where a precision of 10 msec is acceptable or where
- * performance is priority. (NB: "precision", _not_ "resolution" !) 
+ * performance is priority. (NB: "precision", _not_ "resolution" !)
  */
 
-void	bintime(struct bintime *);
-void	nanotime(struct timespec *);
-void	microtime(struct timeval *);
+void bintime(struct bintime *);
+void nanotime(struct timespec *);
+void microtime(struct timeval *);
 
-void	getnanotime(struct timespec *);
-void	getmicrotime(struct timeval *);
+void getnanotime(struct timespec *);
+void getmicrotime(struct timeval *);
 
-void	binuptime(struct bintime *);
-void	nanouptime(struct timespec *);
-void	microuptime(struct timeval *);
+void binuptime(struct bintime *);
+void nanouptime(struct timespec *);
+void microuptime(struct timeval *);
 
-void	getbinuptime(struct bintime *);
-void	getnanouptime(struct timespec *);
-void	getmicrouptime(struct timeval *);
+void getbinuptime(struct bintime *);
+void getnanouptime(struct timespec *);
+void getmicrouptime(struct timeval *);
 
-void	binboottime(struct bintime *);
-void	microboottime(struct timeval *);
-void	nanoboottime(struct timespec *);
+void binboottime(struct bintime *);
+void microboottime(struct timeval *);
+void nanoboottime(struct timespec *);
 
-void	binruntime(struct bintime *);
-void	nanoruntime(struct timespec *);
+void binruntime(struct bintime *);
+void nanoruntime(struct timespec *);
 
-void getbinruntime(struct bintime *);
+void	 getbinruntime(struct bintime *);
 uint64_t getnsecruntime(void);
 
-time_t	gettime(void);
-time_t	getuptime(void);
+time_t gettime(void);
+time_t getuptime(void);
 
-uint64_t	nsecuptime(void);
-uint64_t	getnsecuptime(void);
+uint64_t nsecuptime(void);
+uint64_t getnsecuptime(void);
 
 struct proc;
-int	clock_gettime(struct proc *, clockid_t, struct timespec *);
+int clock_gettime(struct proc *, clockid_t, struct timespec *);
 
 struct clockrequest;
 void itimer_update(struct clockrequest *, void *, void *);
 
-void	cancel_all_itimers(void);
-int	settime(const struct timespec *);
-int	ratecheck(struct timeval *, const struct timeval *);
-int	ppsratecheck(struct timeval *, int *, int);
+void cancel_all_itimers(void);
+int  settime(const struct timespec *);
+int  ratecheck(struct timeval *, const struct timeval *);
+int  ppsratecheck(struct timeval *, int *, int);
 
 /*
  * "POSIX time" to/from "YY/MM/DD/hh/mm/ss"
  */
 struct clock_ymdhms {
-        u_short dt_year;
-        u_char dt_mon;
-        u_char dt_day;
-        u_char dt_wday; /* Day of week */
-        u_char dt_hour;
-        u_char dt_min;
-        u_char dt_sec;
+	u_short dt_year;
+	u_char	dt_mon;
+	u_char	dt_day;
+	u_char	dt_wday; /* Day of week */
+	u_char	dt_hour;
+	u_char	dt_min;
+	u_char	dt_sec;
 };
 
 time_t clock_ymdhms_to_secs(struct clock_ymdhms *);
-void clock_secs_to_ymdhms(time_t, struct clock_ymdhms *);
+void   clock_secs_to_ymdhms(time_t, struct clock_ymdhms *);
 /*
  * BCD to decimal and decimal to BCD.
  */
-#define FROMBCD(x)      (((x) >> 4) * 10 + ((x) & 0xf))
-#define TOBCD(x)        (((x) / 10 * 16) + ((x) % 10))
+#define FROMBCD(x) (((x) >> 4) * 10 + ((x) & 0xf))
+#define TOBCD(x) (((x) / 10 * 16) + ((x) % 10))
 
 /* Some handy constants. */
-#define SECDAY          86400L
-#define SECYR           (SECDAY * 365)
+#define SECDAY 86400L
+#define SECYR (SECDAY * 365)
 
 /* Traditional POSIX base year */
 #define POSIX_BASE_YEAR 1970
@@ -454,16 +455,16 @@ TICKS_TO_NSEC(uint64_t ticks)
 #if __BSD_VISIBLE || __XPG_VISIBLE
 __BEGIN_DECLS
 #if __BSD_VISIBLE
-int	adjtime(const struct timeval *, struct timeval *);
-int	adjfreq(const int64_t *, int64_t *);
+int adjtime(const struct timeval *, struct timeval *);
+int adjfreq(const int64_t *, int64_t *);
 #endif
 #if __XPG_VISIBLE
-int	futimes(int, const struct timeval *);
-int	getitimer(int, struct itimerval *);
-int	gettimeofday(struct timeval *, struct timezone *);
-int	setitimer(int, const struct itimerval *, struct itimerval *);
-int	settimeofday(const struct timeval *, const struct timezone *);
-int	utimes(const char *, const struct timeval *);
+int futimes(int, const struct timeval *);
+int getitimer(int, struct itimerval *);
+int gettimeofday(struct timeval *, struct timezone *);
+int setitimer(int, const struct itimerval *, struct itimerval *);
+int settimeofday(const struct timeval *, const struct timezone *);
+int utimes(const char *, const struct timeval *);
 #endif /* __XPG_VISIBLE */
 __END_DECLS
 #endif /* __BSD_VISIBLE || __XPG_VISIBLE */

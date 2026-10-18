@@ -42,6 +42,7 @@
 
 #include <sys/stat.h>
 
+#include <db.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -51,12 +52,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <db.h>
 #include "btree.h"
 
 #ifdef DEBUG
-#undef	MINPSIZE
-#define	MINPSIZE	128
+#undef MINPSIZE
+#define MINPSIZE 128
 #endif
 
 static int byteorder(void);
@@ -80,17 +80,17 @@ static int tmp(void);
  *
  */
 DB *
-__bt_open(const char *fname, int fd, int flags, int mode, const BTREEINFO *openinfo,
-    int dflags)
+__bt_open(const char *fname, int fd, int flags, int mode,
+    const BTREEINFO *openinfo, int dflags)
 {
 	struct stat sb;
-	BTMETA m;
-	BTREE *t;
-	BTREEINFO b;
-	DB *dbp;
-	pgno_t ncache;
-	ssize_t nr;
-	int machine_lorder, saved_errno;
+	BTMETA	    m;
+	BTREE	   *t;
+	BTREEINFO   b;
+	DB	   *dbp;
+	pgno_t	    ncache;
+	ssize_t	    nr;
+	int	    machine_lorder, saved_errno;
 
 	t = NULL;
 
@@ -116,7 +116,7 @@ __bt_open(const char *fname, int fd, int flags, int mode, const BTREEINFO *openi
 		 */
 		if (b.psize &&
 		    (b.psize < MINPSIZE || b.psize > MAX_PAGE_OFFSET + 1 ||
-		    b.psize & (sizeof(indx_t) - 1)))
+			b.psize & (sizeof(indx_t) - 1)))
 			goto einval;
 
 		/* Minimum number of keys per page; absolute minimum is 2. */
@@ -152,7 +152,7 @@ __bt_open(const char *fname, int fd, int flags, int mode, const BTREEINFO *openi
 	/* Allocate and initialize DB and BTREE structures. */
 	if ((t = calloc(1, sizeof(BTREE))) == NULL)
 		goto err;
-	t->bt_fd = -1;			/* Don't close unopened fd on error. */
+	t->bt_fd = -1; /* Don't close unopened fd on error. */
 	t->bt_lorder = b.lorder;
 	t->bt_order = NOT;
 	t->bt_cmp = b.compare;
@@ -189,7 +189,7 @@ __bt_open(const char *fname, int fd, int flags, int mode, const BTREEINFO *openi
 		default:
 			goto einval;
 		}
-		
+
 		if ((t->bt_fd = open(fname, flags | O_CLOEXEC, mode)) < 0)
 			goto err;
 
@@ -302,8 +302,8 @@ __bt_open(const char *fname, int fd, int flags, int mode, const BTREEINFO *openi
 		    NBLEAFDBT(NOVFLSIZE, NOVFLSIZE) + sizeof(indx_t);
 
 	/* Initialize the buffer pool. */
-	if ((t->bt_mp =
-	    mpool_open(NULL, t->bt_fd, t->bt_psize, ncache)) == NULL)
+	if ((t->bt_mp = mpool_open(NULL, t->bt_fd, t->bt_psize, ncache)) ==
+	    NULL)
 		goto err;
 	if (!F_ISSET(t, B_INMEM))
 		mpool_filter(t->bt_mp, __bt_pgin, __bt_pgout, t);
@@ -322,13 +322,16 @@ __bt_open(const char *fname, int fd, int flags, int mode, const BTREEINFO *openi
 
 	return (dbp);
 
-einval:	errno = EINVAL;
+einval:
+	errno = EINVAL;
 	goto err;
 
-eftype:	errno = EFTYPE;
+eftype:
+	errno = EFTYPE;
 	goto err;
 
-err:	saved_errno = errno;
+err:
+	saved_errno = errno;
 	if (t) {
 		free(t->bt_dbp);
 		if (t->bt_fd != -1)
@@ -351,13 +354,11 @@ err:	saved_errno = errno;
 static int
 nroot(BTREE *t)
 {
-	PAGE *meta, *root;
+	PAGE  *meta, *root;
 	pgno_t npg;
 
 	if ((root = mpool_get(t->bt_mp, 1, 0)) != NULL) {
-		if (root->lower == 0 &&
-		    root->pgno == 0 &&
-		    root->linp[0] == 0) {
+		if (root->lower == 0 && root->pgno == 0 && root->linp[0] == 0) {
 			mpool_delete(t->bt_mp, root);
 			errno = EINVAL;
 		} else {
@@ -365,7 +366,7 @@ nroot(BTREE *t)
 			return (RET_SUCCESS);
 		}
 	}
-	if (errno != EINVAL)		/* It's OK to not exist. */
+	if (errno != EINVAL) /* It's OK to not exist. */
 		return (RET_ERROR);
 	errno = 0;
 
@@ -392,17 +393,17 @@ static int
 tmp(void)
 {
 	sigset_t set, oset;
-	int fd, len;
-	char *envtmp = NULL;
-	char path[PATH_MAX];
+	int	 fd, len;
+	char	*envtmp = NULL;
+	char	 path[PATH_MAX];
 
 	if (issetugid() == 0)
 		envtmp = getenv("TMPDIR");
-	len = snprintf(path,
-	    sizeof(path), "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
+	len = snprintf(
+	    path, sizeof(path), "%s/bt.XXXXXX", envtmp ? envtmp : "/tmp");
 	if (len < 0 || len >= sizeof(path)) {
 		errno = ENAMETOOLONG;
-		return(-1);
+		return (-1);
 	}
 
 	(void)sigfillset(&set);
@@ -410,14 +411,14 @@ tmp(void)
 	if ((fd = mkostemp(path, O_CLOEXEC)) != -1)
 		(void)unlink(path);
 	(void)sigprocmask(SIG_SETMASK, &oset, NULL);
-	return(fd);
+	return (fd);
 }
 
 static int
 byteorder(void)
 {
 	u_int32_t x;
-	u_char *p;
+	u_char	 *p;
 
 	x = 0x01020304;
 	p = (u_char *)&x;

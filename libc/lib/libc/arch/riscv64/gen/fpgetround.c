@@ -16,6 +16,7 @@
  */
 
 #include <sys/types.h>
+
 #include <ieeefp.h>
 
 fp_rnd
@@ -23,7 +24,7 @@ fpgetround(void)
 {
 	uint32_t frm;
 
-	__asm volatile ("frrm %0" : "=r"(frm));
+	__asm volatile("frrm %0" : "=r"(frm));
 	return frm & 0x3;
 }
 DEF_WEAK(fpgetround);

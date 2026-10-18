@@ -49,16 +49,16 @@
 
 struct _thrd_start {
 	thrd_start_t ts_func;
-	void *ts_arg;
+	void	    *ts_arg;
 };
 
 static void *
 _thrd_trampoline(void *p)
 {
 	struct _thrd_start *start = p;
-	thrd_start_t func = start->ts_func;
-	void *arg = start->ts_arg;
-	int result;
+	thrd_start_t	    func = start->ts_func;
+	void		   *arg = start->ts_arg;
+	int		    result;
 
 	free(start);
 	result = func(arg);
@@ -80,8 +80,8 @@ int
 thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
 {
 	struct _thrd_start *start;
-	pthread_t thread;
-	int error;
+	pthread_t	    thread;
+	int		    error;
 
 	if ((start = malloc(sizeof(*start))) == NULL)
 		return thrd_nomem;
@@ -158,12 +158,12 @@ int
 mtx_init(mtx_t *mtx, int type)
 {
 	pthread_mutexattr_t attr;
-	int error, ptype;
+	int		    error, ptype;
 
 	if ((type & ~(mtx_recursive | mtx_timed)) != 0)
 		return thrd_error;
-	ptype = (type & mtx_recursive) ? PTHREAD_MUTEX_RECURSIVE
-	                               : PTHREAD_MUTEX_NORMAL;
+	ptype = (type & mtx_recursive) ? PTHREAD_MUTEX_RECURSIVE :
+					 PTHREAD_MUTEX_NORMAL;
 	if (pthread_mutexattr_init(&attr) != 0)
 		return thrd_error;
 	error = pthread_mutexattr_settype(&attr, ptype);

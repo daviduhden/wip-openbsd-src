@@ -1,5 +1,7 @@
-/*	$OpenBSD: timespec_get.c,v 1.2 2020/07/06 13:33:06 pirofti Exp $	*/
-/*	$NetBSD: timespec_get.c,v 1.2 2016/10/04 12:48:15 christos Exp $	*/
+/*	$OpenBSD: timespec_get.c,v 1.2 2020/07/06 13:33:06 pirofti Exp $
+ */
+/*	$NetBSD: timespec_get.c,v 1.2 2016/10/04 12:48:15 christos Exp $
+ */
 
 /*-
  * Copyright (c) 2016 The NetBSD Foundation, Inc.

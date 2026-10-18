@@ -35,18 +35,18 @@
 #include "citrus_ctype.h"
 
 struct _utf8_state {
-	wchar_t	ch;
+	wchar_t ch;
 	int	want;
-	wchar_t	lbound;
+	wchar_t lbound;
 };
 
 size_t
-_citrus_utf8_ctype_mbrtowc(wchar_t * __restrict pwc,
-    const char * __restrict s, size_t n, mbstate_t * __restrict ps)
+_citrus_utf8_ctype_mbrtowc(wchar_t *__restrict pwc, const char *__restrict s,
+    size_t n, mbstate_t *__restrict ps)
 {
 	struct _utf8_state *us;
-	int ch, i, mask, want;
-	wchar_t lbound, wch;
+	int		    ch, i, mask, want;
+	wchar_t		    lbound, wch;
 
 	us = (struct _utf8_state *)ps;
 
@@ -169,18 +169,18 @@ _citrus_utf8_ctype_mbrtowc(wchar_t * __restrict pwc,
 }
 
 int
-_citrus_utf8_ctype_mbsinit(const mbstate_t * __restrict ps)
+_citrus_utf8_ctype_mbsinit(const mbstate_t *__restrict ps)
 {
 	return ((const struct _utf8_state *)ps)->want == 0;
 }
 
 size_t
-_citrus_utf8_ctype_mbsnrtowcs(wchar_t * __restrict dst,
-    const char ** __restrict src, size_t nmc, size_t len,
-    mbstate_t * __restrict ps)
+_citrus_utf8_ctype_mbsnrtowcs(wchar_t *__restrict dst,
+    const char **__restrict src, size_t nmc, size_t len,
+    mbstate_t *__restrict ps)
 {
 	struct _utf8_state *us;
-	size_t i, o, r;
+	size_t		    i, o, r;
 
 	us = (struct _utf8_state *)ps;
 
@@ -190,7 +190,8 @@ _citrus_utf8_ctype_mbsnrtowcs(wchar_t * __restrict dst,
 		 * character appears as anything but the first byte of a
 		 * multibyte sequence. Check now to avoid doing it in the loop.
 		 */
-		if (nmc > 0 && us->want > 0 && (unsigned char)(*src)[0] < 0x80) {
+		if (nmc > 0 && us->want > 0 &&
+		    (unsigned char)(*src)[0] < 0x80) {
 			errno = EILSEQ;
 			return -1;
 		}
@@ -201,8 +202,8 @@ _citrus_utf8_ctype_mbsnrtowcs(wchar_t * __restrict dst,
 					return o;
 				r = 1;
 			} else {
-				r = _citrus_utf8_ctype_mbrtowc(NULL, *src + i,
-				    nmc - i, ps);
+				r = _citrus_utf8_ctype_mbrtowc(
+				    NULL, *src + i, nmc - i, ps);
 				if (r == (size_t)-1)
 					return r;
 				if (r == (size_t)-2)
@@ -234,8 +235,8 @@ _citrus_utf8_ctype_mbsnrtowcs(wchar_t * __restrict dst,
 			}
 			r = 1;
 		} else {
-			r = _citrus_utf8_ctype_mbrtowc(dst + o, *src + i,
-			    nmc - i, ps);
+			r = _citrus_utf8_ctype_mbrtowc(
+			    dst + o, *src + i, nmc - i, ps);
 			if (r == (size_t)-1) {
 				*src += i;
 				return r;
@@ -255,12 +256,12 @@ _citrus_utf8_ctype_mbsnrtowcs(wchar_t * __restrict dst,
 }
 
 size_t
-_citrus_utf8_ctype_wcrtomb(char * __restrict s, wchar_t wc,
-    mbstate_t * __restrict ps)
+_citrus_utf8_ctype_wcrtomb(
+    char *__restrict s, wchar_t wc, mbstate_t *__restrict ps)
 {
 	struct _utf8_state *us;
-	unsigned char lead;
-	int i, len;
+	unsigned char	    lead;
+	int		    i, len;
 
 	us = (struct _utf8_state *)ps;
 
@@ -314,13 +315,13 @@ _citrus_utf8_ctype_wcrtomb(char * __restrict s, wchar_t wc,
 }
 
 size_t
-_citrus_utf8_ctype_wcsnrtombs(char * __restrict dst,
-    const wchar_t ** __restrict src, size_t nwc, size_t len,
-    mbstate_t * __restrict ps)
+_citrus_utf8_ctype_wcsnrtombs(char *__restrict dst,
+    const wchar_t **__restrict src, size_t nwc, size_t len,
+    mbstate_t *__restrict ps)
 {
 	struct _utf8_state *us;
-	char buf[_CITRUS_UTF8_MB_CUR_MAX];
-	size_t i, o, r;
+	char		    buf[_CITRUS_UTF8_MB_CUR_MAX];
+	size_t		    i, o, r;
 
 	us = (struct _utf8_state *)ps;
 

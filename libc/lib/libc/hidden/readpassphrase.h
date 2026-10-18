@@ -1,4 +1,5 @@
-/*	$OpenBSD: readpassphrase.h,v 1.1 2015/09/14 10:45:27 guenther Exp $	*/
+/*	$OpenBSD: readpassphrase.h,v 1.1 2015/09/14 10:45:27 guenther Exp $
+ */
 /*
  * Copyright (c) 2015 Philip Guenther <guenther@openbsd.org>
  *

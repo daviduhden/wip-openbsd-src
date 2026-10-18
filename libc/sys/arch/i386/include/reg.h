@@ -47,21 +47,21 @@
 
 /* When referenced during a trap/exception, registers are at these offsets */
 
-#define	tES	(0)
-#define	tDS	(1)
-#define	tEDI	(2)
-#define	tESI	(3)
-#define	tEBP	(4)
-#define	tEBX	(5)
-#define	tEDX	(6)
-#define	tECX	(7)
-#define	tEAX	(8)
+#define tES (0)
+#define tDS (1)
+#define tEDI (2)
+#define tESI (3)
+#define tEBP (4)
+#define tEBX (5)
+#define tEDX (6)
+#define tECX (7)
+#define tEAX (8)
 
-#define	tEIP	(11)
-#define	tCS	(12)
-#define	tEFLAGS	(13)
-#define	tESP	(14)
-#define	tSS	(15)
+#define tEIP (11)
+#define tCS (12)
+#define tEFLAGS (13)
+#define tESP (14)
+#define tSS (15)
 
 /*
  * Registers accessible to ptrace(2) syscall for debugger
@@ -70,22 +70,22 @@
  * is all invisible to the user.
  */
 struct reg {
-	int	r_eax;
-	int	r_ecx;
-	int	r_edx;
-	int	r_ebx;
-	int	r_esp;
-	int	r_ebp;
-	int	r_esi;
-	int	r_edi;
-	int	r_eip;
-	int	r_eflags;
-	int	r_cs;
-	int	r_ss;
-	int	r_ds;
-	int	r_es;
-	int	r_fs;
-	int	r_gs;
+	int r_eax;
+	int r_ecx;
+	int r_edx;
+	int r_ebx;
+	int r_esp;
+	int r_ebp;
+	int r_esi;
+	int r_edi;
+	int r_eip;
+	int r_eflags;
+	int r_cs;
+	int r_ss;
+	int r_ds;
+	int r_es;
+	int r_fs;
+	int r_gs;
 };
 
 struct fpreg {
@@ -93,11 +93,11 @@ struct fpreg {
 	 * XXX
 	 * Fill this in with real info.
 	 */
-	char	__data[116];
+	char __data[116];
 };
 
 struct xmmregs {
-	char	__data[512];
+	char __data[512];
 };
 
 #endif /* !_MACHINE_REG_H_ */

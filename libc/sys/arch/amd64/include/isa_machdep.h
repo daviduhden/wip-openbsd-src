@@ -70,16 +70,16 @@
  * or in spite of using isavar.h, and should be fixed.
  */
 
-#ifndef _I386_ISA_MACHDEP_H_			/* XXX */
-#define _I386_ISA_MACHDEP_H_			/* XXX */
+#ifndef _I386_ISA_MACHDEP_H_ /* XXX */
+#define _I386_ISA_MACHDEP_H_ /* XXX */
 
-#include <machine/bus.h>
 #include <dev/isa/isadmavar.h>
+#include <machine/bus.h>
 
 /*
  * ISA can only DMA to 0-16M.
  */
-#define	ISA_DMA_BOUNCE_THRESHOLD	0x00ffffff
+#define ISA_DMA_BOUNCE_THRESHOLD 0x00ffffff
 
 /*
  * XXX THIS FILE IS A MESS.  copyright: berkeley's probably.
@@ -95,18 +95,18 @@
 
 typedef void *isa_chipset_tag_t;
 
-struct device;			/* XXX */
-struct isabus_attach_args;	/* XXX */
+struct device;		   /* XXX */
+struct isabus_attach_args; /* XXX */
 
 /*
  * Functions provided to machine-independent ISA code.
  */
-void	isa_attach_hook(struct device *, struct device *,
-	    struct isabus_attach_args *);
-int	isa_intr_alloc(isa_chipset_tag_t, int, int, int *);
-void	*isa_intr_establish(isa_chipset_tag_t ic, int irq, int type,
-	    int level, int (*ih_fun)(void *), void *ih_arg, char *);
-void	isa_intr_disestablish(isa_chipset_tag_t ic, void *handler);
+void isa_attach_hook(
+    struct device *, struct device *, struct isabus_attach_args *);
+int   isa_intr_alloc(isa_chipset_tag_t, int, int, int *);
+void *isa_intr_establish(isa_chipset_tag_t ic, int irq, int type, int level,
+    int (*ih_fun)(void *), void *ih_arg, char *);
+void  isa_intr_disestablish(isa_chipset_tag_t ic, void *handler);
 
 int isa_intr_check(isa_chipset_tag_t, int, int);
 
@@ -122,23 +122,23 @@ extern struct bus_dma_tag isa_bus_dma_tag;
  * the DMA map.
  */
 struct isa_dma_cookie {
-	int	id_flags;		/* flags; see below */
+	int id_flags; /* flags; see below */
 
-	void	*id_origbuf;		/* pointer to orig buffer if
-					   bouncing */
-	bus_size_t id_origbuflen;	/* ...and size */
+	void *id_origbuf;	  /* pointer to orig buffer if
+				     bouncing */
+	bus_size_t id_origbuflen; /* ...and size */
 
-	void	*id_bouncebuf;		/* pointer to the bounce buffer */
-	bus_size_t id_bouncebuflen;	/* ...and size */
-	int	id_nbouncesegs;		/* number of valid bounce segs */
+	void		 *id_bouncebuf;	    /* pointer to the bounce buffer */
+	bus_size_t	  id_bouncebuflen;  /* ...and size */
+	int		  id_nbouncesegs;   /* number of valid bounce segs */
 	bus_dma_segment_t id_bouncesegs[0]; /* array of bounce buffer
 					       physical memory segments */
 };
 
 /* id_flags */
-#define	ID_MIGHT_NEED_BOUNCE	0x01	/* map could need bounce buffers */
-#define	ID_HAS_BOUNCE		0x02	/* map currently has bounce buffers */
-#define	ID_IS_BOUNCING		0x04	/* map is bouncing current xfer */
+#define ID_MIGHT_NEED_BOUNCE 0x01 /* map could need bounce buffers */
+#define ID_HAS_BOUNCE 0x02	  /* map currently has bounce buffers */
+#define ID_IS_BOUNCING 0x04	  /* map is bouncing current xfer */
 
 /*
  * Variables and macros to deal with the ISA I/O hole.
@@ -146,18 +146,18 @@ struct isa_dma_cookie {
  * function definitions, invoked through the softc.
  */
 
-extern u_long atdevbase;           /* kernel virtual address of "hole" */
+extern u_long atdevbase; /* kernel virtual address of "hole" */
 
 /*
  * Given a kernel virtual address for some location
  * in the "hole" I/O space, return a physical address.
  */
-#define ISA_PHYSADDR(v) ((void *) ((u_long)(v) - atdevbase + IOM_BEGIN))
+#define ISA_PHYSADDR(v) ((void *)((u_long)(v) - atdevbase + IOM_BEGIN))
 
 /*
  * Given a physical address in the "hole",
  * return a kernel virtual address.
  */
-#define ISA_HOLE_VADDR(p)  ((void *) ((u_long)(p) - IOM_BEGIN + atdevbase))
+#define ISA_HOLE_VADDR(p) ((void *)((u_long)(p) - IOM_BEGIN + atdevbase))
 
 #endif /* _I386_ISA_MACHDEP_H_ XXX */

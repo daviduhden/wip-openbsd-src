@@ -27,7 +27,7 @@ char *
 dirname(char *path)
 {
 	static char dname[PATH_MAX];
-	size_t len;
+	size_t	    len;
 	const char *endp;
 
 	/* Empty or NULL string gets treated as "." */

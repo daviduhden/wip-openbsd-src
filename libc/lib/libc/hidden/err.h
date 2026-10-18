@@ -16,7 +16,7 @@
  */
 
 #ifndef _LIBC_ERR_H_
-#define	_LIBC_ERR_H_
+#define _LIBC_ERR_H_
 
 #include_next <err.h>
 

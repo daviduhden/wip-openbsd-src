@@ -32,8 +32,8 @@
  * SUCH DAMAGE.
  */
 
-#include <stdlib.h>
 #include <netdb.h>
+#include <stdlib.h>
 
 void
 freeaddrinfo(struct addrinfo *ai)

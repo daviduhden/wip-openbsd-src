@@ -40,21 +40,21 @@ SLIST_HEAD(vnodechain, vnode);
  * in vgone.
  */
 struct specinfo {
-	struct	vnodechain *si_hashchain;
+	struct vnodechain *si_hashchain;
 	SLIST_ENTRY(vnode) si_specnext;
-	struct  mount *si_mountpoint;
-	dev_t	si_rdev;
-	struct	lockf_state *si_lockf;
-	daddr_t si_lastr;
+	struct mount	   *si_mountpoint;
+	dev_t		    si_rdev;
+	struct lockf_state *si_lockf;
+	daddr_t		    si_lastr;
 	union {
 		struct vnode *ci_parent; /* pointer back to parent device */
-		u_int8_t *ci_bitmap; /* bitmap of devices cloned off us */
+		u_int8_t     *ci_bitmap; /* bitmap of devices cloned off us */
 	} si_ci;
 };
 
 struct cloneinfo {
-	struct vnode *ci_vp; /* cloned vnode */
-	void *ci_data; /* original vnode's v_data */
+	struct vnode *ci_vp;   /* cloned vnode */
+	void	     *ci_data; /* original vnode's v_data */
 };
 
 /*
@@ -72,40 +72,40 @@ struct cloneinfo {
  * We use the upper 16 bits of the minor to record the clone instance.
  * This gives us 8 bits for encoding the real minor number.
  */
-#define CLONE_SHIFT	8
-#define CLONE_MAPSZ	128
+#define CLONE_SHIFT 8
+#define CLONE_MAPSZ 128
 
 /*
  * Special device management
  */
-#define	SPECHSZ	64
-#if	((SPECHSZ&(SPECHSZ-1)) == 0)
-#define	SPECHASH(rdev)	(((rdev>>5)+(rdev))&(SPECHSZ-1))
+#define SPECHSZ 64
+#if ((SPECHSZ & (SPECHSZ - 1)) == 0)
+#define SPECHASH(rdev) (((rdev >> 5) + (rdev)) & (SPECHSZ - 1))
 #else
-#define	SPECHASH(rdev)	(((unsigned)((rdev>>5)+(rdev)))%SPECHSZ)
+#define SPECHASH(rdev) (((unsigned)((rdev >> 5) + (rdev))) % SPECHSZ)
 #endif
 
-#ifdef	_KERNEL
+#ifdef _KERNEL
 
 extern struct vnodechain speclisth[SPECHSZ];
 
 /*
  * Prototypes for special file operations on vnodes.
  */
-int	spec_getattr(void *);
-int	spec_setattr(void *);
-int	spec_access(void *);
-int	spec_open(void *);
-int	spec_close(void *);
-int	spec_read(void *);
-int	spec_write(void *);
-int	spec_ioctl(void *);
-int	spec_kqfilter(void *);
-int	spec_fsync(void *);
-int	spec_inactive(void *);
-int	spec_strategy(void *);
-int	spec_print(void *);
-int	spec_pathconf(void *);
-int	spec_advlock(void *);
+int spec_getattr(void *);
+int spec_setattr(void *);
+int spec_access(void *);
+int spec_open(void *);
+int spec_close(void *);
+int spec_read(void *);
+int spec_write(void *);
+int spec_ioctl(void *);
+int spec_kqfilter(void *);
+int spec_fsync(void *);
+int spec_inactive(void *);
+int spec_strategy(void *);
+int spec_print(void *);
+int spec_pathconf(void *);
+int spec_advlock(void *);
 
-#endif	/* _KERNEL */
+#endif /* _KERNEL */

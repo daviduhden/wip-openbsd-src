@@ -32,20 +32,20 @@
  */
 
 #ifndef _SYS_SELINFO_H_
-#define	_SYS_SELINFO_H_
+#define _SYS_SELINFO_H_
 
-#include <sys/event.h>			/* for struct klist */
+#include <sys/event.h> /* for struct klist */
 
 /*
  * Used to maintain information about processes that wish to be
  * notified when I/O becomes possible.
  */
 struct selinfo {
-	struct	klist si_note;	/* kernel note list */
+	struct klist si_note; /* kernel note list */
 };
 
 #ifdef _KERNEL
-void	selwakeup(struct selinfo *);
+void selwakeup(struct selinfo *);
 #endif
 
 #endif /* !_SYS_SELINFO_H_ */

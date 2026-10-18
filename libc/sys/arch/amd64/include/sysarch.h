@@ -7,7 +7,7 @@
 /*
  * Architecture specific syscalls (amd64)
  */
-#define	AMD64_IOPL		2
+#define AMD64_IOPL 2
 
 struct amd64_iopl_args {
 	int iopl;

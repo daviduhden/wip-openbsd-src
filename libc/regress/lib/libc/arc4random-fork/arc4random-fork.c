@@ -16,14 +16,15 @@
 
 #include <sys/mman.h>
 #include <sys/wait.h>
+
 #include <assert.h>
 #include <err.h>
 #include <errno.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdint.h>
 
 #define CHECK(x) assert(x)
 #define CHECK_EQ(a, b) assert((a) == (b))
@@ -37,9 +38,7 @@ static int flagbuf;
 /* Initialize arc4random(3) before forking. */
 static int flagprefork;
 
-enum {
-	N = 4096
-};
+enum { N = 4096 };
 
 typedef struct {
 	uint32_t x[N];
@@ -86,14 +85,14 @@ safewaitpid(pid_t pid, int *status, int options)
 int
 main(int argc, char *argv[])
 {
-	int opt, status;
-	Buf *bufparent, *bufchildone, *bufchildtwo;
-	pid_t pidone, pidtwo;
+	int    opt, status;
+	Buf   *bufparent, *bufchildone, *bufchildtwo;
+	pid_t  pidone, pidtwo;
 	size_t i, countone = 0, counttwo = 0, countkids = 0;
 
 	/* Ensure SIGCHLD isn't set to SIG_IGN. */
 	const struct sigaction sa = {
-		.sa_handler = SIG_DFL,
+	    .sa_handler = SIG_DFL,
 	};
 	CHECK_EQ(0, sigaction(SIGCHLD, &sa, NULL));
 
@@ -113,16 +112,16 @@ main(int argc, char *argv[])
 	if (flagprefork)
 		(void)arc4random();
 
-	bufparent = mmap(NULL, sizeof(Buf), PROT_READ|PROT_WRITE,
-	    MAP_ANON|MAP_PRIVATE, -1, 0);
+	bufparent = mmap(NULL, sizeof(Buf), PROT_READ | PROT_WRITE,
+	    MAP_ANON | MAP_PRIVATE, -1, 0);
 	CHECK_NE(MAP_FAILED, bufparent);
 
-	bufchildone = mmap(NULL, sizeof(Buf), PROT_READ|PROT_WRITE,
-	    MAP_ANON|MAP_SHARED, -1, 0);
+	bufchildone = mmap(NULL, sizeof(Buf), PROT_READ | PROT_WRITE,
+	    MAP_ANON | MAP_SHARED, -1, 0);
 	CHECK_NE(MAP_FAILED, bufchildone);
 
-	bufchildtwo = mmap(NULL, sizeof(Buf), PROT_READ|PROT_WRITE,
-	    MAP_ANON|MAP_SHARED, -1, 0);
+	bufchildtwo = mmap(NULL, sizeof(Buf), PROT_READ | PROT_WRITE,
+	    MAP_ANON | MAP_SHARED, -1, 0);
 	CHECK_NE(MAP_FAILED, bufchildtwo);
 
 	pidone = fork();
