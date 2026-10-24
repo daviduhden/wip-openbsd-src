@@ -43,13 +43,14 @@ main(int argc, char **argv)
 		fprintf(stderr, "Try Again\n");
 		exit(1);
 	}
-	sandbox_xpmroot("xpmroot");
 	dpy = XOpenDisplay(display_name);
 	if (!dpy) {
 		fprintf(stderr, "Xpmroot:  unable to open display '%s'\n",
 		    XDisplayName(display_name));
 		exit(2);
 	}
+	/* Pledge only after Xlib has opened the local socket. */
+	sandbox_xpmroot("xpmroot");
 	screen = DefaultScreen(dpy);
 	root = RootWindow(dpy, screen);
 	XGetWindowAttributes(dpy, root, &root_attr);

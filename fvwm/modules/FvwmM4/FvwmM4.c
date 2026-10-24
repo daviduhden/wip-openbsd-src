@@ -191,6 +191,24 @@ main(int argc, char **argv)
 	return 0;
 }
 
+/*
+ * The temporary path is interpolated into a shell command for popen(3)
+ * and into an "exec rm" configuration command.  Reject characters that
+ * would require shell quoting instead of trying to quote them.
+ */
+static int
+shell_safe_path(const char *path)
+{
+	const unsigned char *p = (const unsigned char *)path;
+
+	if (*p == '\0')
+		return 0;
+	for (; *p != '\0'; p++)
+		if (!isalnum(*p) && strchr("_./-+", *p) == nullptr)
+			return 0;
+	return 1;
+}
+
 static char *
 m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 {
@@ -231,6 +249,13 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 			exit(0377);
 		}
 		close(fd);
+	}
+
+	if (!shell_safe_path(tmp_name)) {
+		fprintf(stderr,
+		    "FvwmM4: unsafe character in temporary path: %s\n",
+		    tmp_name);
+		exit(0377);
 	}
 
 	/*

@@ -15,6 +15,10 @@
 # TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 # PERFORMANCE OF THIS SOFTWARE.
 
+# Privileged commands must not be resolved through an untrusted PATH.
+PATH=/usr/bin:/bin:/usr/sbin:/sbin
+export PATH
+
 log() {
 	print "$(date '+%Y-%m-%d %H:%M:%S')" \
 		"[INFO] $*" >&2
@@ -38,16 +42,35 @@ check_root() {
 
 # Function to remove the src content
 remove_src_content() {
+	if [ -L /usr/src ]; then
+		error "Refusing to clear symlinked /usr/src"
+		return 1
+	fi
 	rm -rf /usr/src/*
 }
 
 # Function to remove the xenocara content
 remove_xenocara_content() {
+	if [ -L /usr/xenocara ]; then
+		error "Refusing to clear symlinked /usr/xenocara"
+		return 1
+	fi
 	rm -rf /usr/xenocara/*
+}
+
+check_openbsd() {
+	if [ "$(uname -s)" != "OpenBSD" ]; then
+		error "This mode is supported only on OpenBSD."
+		exit 1
+	fi
 }
 
 # Set CVSROOT in .profile if not already configured
 set_cvsroot() {
+	if [ -z "${HOME:-}" ]; then
+		warn "HOME is unset; not updating .profile"
+		return 1
+	fi
 	if [ ! -f "$HOME/.profile" ] ||
 		! grep -Fq "export CVSROOT=anoncvs@anoncvs.eu.openbsd.org:/cvs" \
 			"$HOME/.profile"; then
@@ -78,14 +101,25 @@ checkout_selected_repository() {
 	cd /usr || exit 1
 	case "$SELECTED_REPO" in
 	src)
-		remove_src_content
+		remove_src_content || return 1
 		log "Checking out src from anoncvs..."
-		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs checkout -P src
+		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs checkout -P src ||
+			{
+				error "cvs checkout of src failed;" \
+					"/usr/src is incomplete"
+				return 1
+			}
 		;;
 	xenocara)
-		remove_xenocara_content
+		remove_xenocara_content || return 1
 		log "Checking out xenocara from anoncvs..."
-		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs checkout -P xenocara
+		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs \
+			checkout -P xenocara ||
+			{
+				error "cvs checkout of xenocara failed;" \
+					"/usr/xenocara is incomplete"
+				return 1
+			}
 		;;
 	*)
 		error "Unknown repository: $SELECTED_REPO"
@@ -199,7 +233,7 @@ resolve_local_src_dir() {
 	dir=$(find /home /usr /root -maxdepth 5 \
 		-type d -name "wip-openbsd-src" \
 		-exec test -d '{}/.git' ';' \
-		-print -quit 2>/dev/null)
+		-print 2>/dev/null | sed -n '1p')
 	if [ -n "$dir" ]; then
 		log "Found wip-openbsd-src at $dir"
 		print "$dir"
@@ -342,7 +376,8 @@ flatten_path() {
 list_component_files() {
 	(
 		cd "$1" || exit 1
-		find . -type d -name CVS -prune -o -type f -print
+		find . -type d -name CVS -prune -o \
+			\( -type f -o -type l \) -print
 	) | sed -e 's|^\./||' -e '/^$/d' | LC_ALL=C sort
 }
 
@@ -437,11 +472,21 @@ copy_directory() {
 		log "Previous $COMPONENT_PATH saved in $backup/component"
 	fi
 	if ! mv "$stage/component" "$target"; then
-		[ -z "$backup" ] || mv "$backup/component" "$target"
+		if [ -n "$backup" ]; then
+			if mv "$backup/component" "$target"; then
+				warn "Restored previous $COMPONENT_PATH" \
+					"from $backup/component"
+			else
+				error "Rollback failed; previous" \
+					"$COMPONENT_PATH is in" \
+					"$backup/component"
+			fi
+		fi
 		error "Copy failed; staging directory: $stage"
 		return 1
 	fi
-	rmdir "$stage" || return 1
+	rmdir "$stage" ||
+		warn "Could not remove staging directory: $stage"
 	log "$COMPONENT_DIR copied to $target"
 }
 
@@ -468,22 +513,71 @@ create_user_with_random_password() {
 	USER_TO_CREATE="user"
 
 	# Generate a random password
-	PASSWORD=$(openssl rand -base64 12)
+	PASSWORD=$(openssl rand -base64 12) || {
+		error "Could not generate a password"
+		return 1
+	}
+	[ -n "$PASSWORD" ] || {
+		error "Generated password is empty"
+		return 1
+	}
 
 	# Create the user with a home directory and set the shell to /bin/ksh
-	useradd -m -s /bin/ksh "$USER_TO_CREATE"
+	useradd -m -s /bin/ksh "$USER_TO_CREATE" || {
+		error "Could not create user '$USER_TO_CREATE'"
+		return 1
+	}
 
 	# Encrypt the password and set it using usermod
-	ENCRYPTED_PASSWORD=$(openssl passwd -1 "$PASSWORD")
-	usermod -p "$ENCRYPTED_PASSWORD" "$USER_TO_CREATE"
+	ENCRYPTED_PASSWORD=$(openssl passwd -6 "$PASSWORD") || {
+		error "Could not encrypt the password"
+		return 1
+	}
+	usermod -p "$ENCRYPTED_PASSWORD" "$USER_TO_CREATE" || {
+		error "Could not set the password for '$USER_TO_CREATE'"
+		return 1
+	}
 
-	log "User 'user' created with password: $PASSWORD"
+	# Do not print the password to the terminal or a log.  Store it
+	# root-readable in the account's home directory instead.
+	if [ -z "${HOME:-}" ]; then
+		error "HOME is unset; cannot store the generated password"
+		return 1
+	fi
+	PASSWORD_FILE="$HOME/.wip-openbsd-src-user-password"
+	(umask 077 && print -r -- "$PASSWORD" >"$PASSWORD_FILE") || {
+		error "Could not write $PASSWORD_FILE"
+		return 1
+	}
+	chmod 600 "$PASSWORD_FILE" || {
+		error "Could not restrict permissions on $PASSWORD_FILE"
+		return 1
+	}
+	log "User '$USER_TO_CREATE' created; password in $PASSWORD_FILE"
 }
 
 # Function to configure doas
 configure_doas() {
-	cp /etc/examples/doas.conf /etc/doas.conf
-	print "permit keepenv persist user" >>/etc/doas.conf
+	if [ -f /etc/doas.conf ]; then
+		if grep -Fq "permit keepenv persist user" /etc/doas.conf; then
+			log "doas is already configured for user."
+			return 0
+		fi
+		cp -p /etc/doas.conf \
+			"/etc/doas.conf.wip.$(date '+%Y%m%d%H%M%S')" || {
+			error "Could not back up /etc/doas.conf"
+			return 1
+		}
+	else
+		cp /etc/examples/doas.conf /etc/doas.conf || {
+			error "Could not install /etc/doas.conf"
+			return 1
+		}
+	fi
+	print "permit keepenv persist user" >>/etc/doas.conf || {
+		error "Could not update /etc/doas.conf"
+		return 1
+	}
 	log "doas configured successfully. /etc/doas.conf updated."
 }
 
@@ -509,6 +603,10 @@ main() {
 	NO_PROVISION=0
 	case "${1:-}" in
 	--list)
+		[ "$#" -eq 1 ] || {
+			error "Usage: $0 --list"
+			return 1
+		}
 		move_to_wip_openbsd_src
 		list_all_directories
 		return $?
@@ -516,6 +614,10 @@ main() {
 	--copy-only)
 		[ "$#" -ge 2 ] || {
 			error "Usage: $0 --copy-only TREE [component ...]"
+			return 1
+		}
+		[ -d "$2" ] || {
+			error "Not a directory: $2"
 			return 1
 		}
 		TARGET_TREE=$(canonical_target_tree "$2") || return 1
@@ -547,10 +649,11 @@ main() {
 		return 1
 		;;
 	esac
+	check_openbsd
 	check_root
-	set_cvsroot
+	set_cvsroot || warn "Continuing without updating ~/.profile"
 	select_repository_to_checkout
-	checkout_selected_repository
+	checkout_selected_repository || return 1
 	ask_copy_from_wip
 	if [ "${DO_COPY:-0}" -eq 1 ]; then
 		move_to_wip_openbsd_src
@@ -572,8 +675,8 @@ main() {
 	if [ "$NO_PROVISION" -eq 1 ]; then
 		log "Skipping user creation and doas configuration."
 	else
-		create_user_with_random_password
-		configure_doas
+		create_user_with_random_password || return 1
+		configure_doas || return 1
 	fi
 }
 

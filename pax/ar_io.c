@@ -388,7 +388,8 @@ ar_close(int in_sig)
 	 */
 	if (frmt == nullptr) {
 		(void)dprintf(listfd,
-		    "%s: unknown format, %llu bytes skipped.\n", argv0, rdcnt);
+		    "%s: unknown format, %lld bytes skipped.\n", argv0,
+		    (long long)rdcnt);
 		flcnt = 0;
 		return;
 	}
@@ -397,12 +398,13 @@ ar_close(int in_sig)
 		if (op_mode == OP_PAX)
 			(void)dprintf(listfd,
 			    "%s: %s vol %d, %lu files,"
-			    " %llu bytes read, %llu bytes written.\n",
-			    argv0, frmt->name, arvol - 1, flcnt, rdcnt, wrcnt);
+			    " %lld bytes read, %lld bytes written.\n",
+			    argv0, frmt->name, arvol - 1, flcnt,
+			    (long long)rdcnt, (long long)wrcnt);
 #ifndef NOCPIO
 		else if (op_mode == OP_CPIO)
-			(void)dprintf(listfd, "%llu blocks\n",
-			    (rdcnt ? rdcnt : wrcnt) / 5120);
+			(void)dprintf(listfd, "%lld blocks\n",
+			    (long long)((rdcnt ? rdcnt : wrcnt) / 5120));
 #endif /* !NOCPIO */
 	}
 	flcnt = 0;
@@ -1253,7 +1255,7 @@ ar_next(void)
  * starts the gzip compression/decompression process as a child, using magic
  * to keep the fd the same in the calling function (parent).
  */
-void
+static void
 ar_start_gzip(int fd, const char *path, int wr)
 {
 	int	    fds[2];

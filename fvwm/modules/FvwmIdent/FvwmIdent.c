@@ -189,7 +189,6 @@ Loop(int *fd)
 	unsigned long header[4], *body;
 
 	sandbox_x11_only("FvwmIdent");
-	sandbox_x11_only("FvwmIdent");
 
 	while (1) {
 		if (ReadFvwmPacket(fd[1], header, &body) > 0) {

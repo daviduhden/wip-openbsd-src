@@ -604,7 +604,7 @@ unlnk_exist(char *name, int type)
  *	0 otherwise
  */
 
-int
+static int
 chk_path(char *name, uid_t st_uid, gid_t st_gid, int ign)
 {
 	char	   *spt = name;
@@ -781,7 +781,7 @@ set_ids(char *fnm, uid_t uid, gid_t gid)
 	return (0);
 }
 
-int
+static int
 fset_ids(char *fnm, int fd, uid_t uid, gid_t gid)
 {
 	if (fchown(fd, uid, gid) == -1) {

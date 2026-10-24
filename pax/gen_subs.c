@@ -470,7 +470,7 @@ ls_list(ARCHD *arcn, time_t now, FILE *fp)
 		    (unsigned long)MAJOR(sbp->st_rdev),
 		    (unsigned long)MINOR(sbp->st_rdev));
 	else {
-		(void)fprintf(fp, "%9llu ", sbp->st_size);
+		(void)fprintf(fp, "%9lld ", (long long)sbp->st_size);
 	}
 
 	/*

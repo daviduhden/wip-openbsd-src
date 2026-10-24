@@ -97,7 +97,7 @@ list(void)
 	 */
 	while (next_head(arcn) == 0) {
 		/* Skip archive members rejected by invalid= policy. */
-		if (arcn->invalid == PAX_INVALID_SKIP) {
+		if (arcn->invalid == PAX_ENTRY_SKIP) {
 			if (flcnt > 0)
 				--flcnt;
 			if (rd_skip(arcn->skip + arcn->pad) == 1)
@@ -257,7 +257,7 @@ extract(void)
 	while (next_head(arcn) == 0) {
 		/* Honor invalid=bypass by skipping unwanted members outright.
 		 */
-		if (arcn->invalid == PAX_INVALID_SKIP) {
+		if (arcn->invalid == PAX_ENTRY_SKIP) {
 			if (flcnt > 0)
 				--flcnt;
 			if (rd_skip(arcn->skip + arcn->pad) == 1)
@@ -707,7 +707,7 @@ append(void)
 	while (next_head(arcn) == 0) {
 		/* Entries flagged for bypass are consumed without further work.
 		 */
-		if (arcn->invalid == PAX_INVALID_SKIP) {
+		if (arcn->invalid == PAX_ENTRY_SKIP) {
 			if (flcnt > 0)
 				--flcnt;
 			if (rd_skip(arcn->skip + arcn->pad) == 1)
@@ -1064,7 +1064,7 @@ next_head(ARCHD *arcn)
 	 */
 	pax_kv_free(&arcn->xattr);
 	arcn->gattr = nullptr;
-	arcn->invalid = PAX_INVALID_NONE;
+	arcn->invalid = PAX_ENTRY_NONE;
 
 	/*
 	 * set up initial conditions, we want a whole frmt->hsz block as we

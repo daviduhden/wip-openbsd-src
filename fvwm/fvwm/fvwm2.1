@@ -1,6 +1,7 @@
-.Dd $Mdocdate$
+.\" $OpenBSD$
+.Dd October 24, 2026
 .Dt FVWM2 1
-.Os OpenBSD
+.Os
 .Sh NAME
 .Nm fvwm2
 .Nd F Virtual Window Manager for X11
@@ -238,6 +239,66 @@ System-wide configuration file.
 .It Pa /usr/X11R6/lib/X11/fvwm/
 System module and resource directory.
 .El
+.Sh COMPATIBILITY
+.Nm
+is compatible with FVWM 2.2.5 configuration syntax.
+Existing
+.Pa .fvwm2rc
+files should work without modification.
+.Pp
+Module IPC protocol semantics are preserved from FVWM 2.2.5.
+The binary packet format and message type numbering are unchanged.
+Module descriptor conventions are unchanged.
+.Sh SEE ALSO
+.Xr fvwm_exec 1 ,
+.Xr FvwmAuto 1 ,
+.Xr FvwmBacker 1 ,
+.Xr FvwmBanner 1 ,
+.Xr FvwmButtons 1 ,
+.Xr FvwmCpp 1 ,
+.Xr FvwmForm 1 ,
+.Xr FvwmIconBox 1 ,
+.Xr FvwmIconMan 1 ,
+.Xr FvwmIdent 1 ,
+.Xr FvwmM4 1 ,
+.Xr FvwmPager 1 ,
+.Xr FvwmRearrange 1 ,
+.Xr FvwmSave 1 ,
+.Xr FvwmSaveDesk 1 ,
+.Xr FvwmScroll 1 ,
+.Xr FvwmTalk 1 ,
+.Xr FvwmWinList 1 ,
+.Xr xpmroot 1 ,
+.Xr pledge 2 ,
+.Xr unveil 2
+.Sh HISTORY
+.Nm
+was originally written by Robert Nation in 1993.
+This is the
+.Ox
+fork of FVWM 2.2.5.
+.Sh AUTHORS
+.An Robert Nation
+and many contributors.
+.Ox
+fork maintained by the
+.Ox
+project.
+.Sh CAVEATS
+Privilege separation,
+.Xr pledge 2 ,
+and
+.Xr unveil 2
+policies in this version have not been verified through runtime testing
+on a live X11 session.
+.Pp
+The imsg payload decoding, the
+.Ic PipeRead
+line assembly, and the integer configuration parsing are covered by
+host-side unit tests, but the execution helper and the imsg IPC have
+not been exercised against real X11 workloads.
+Module protocol compatibility has been preserved through static
+inspection of message layouts but has not been empirically verified.
 .Sh SECURITY CONSIDERATIONS
 .Nm
 runs with privilege separation:
@@ -343,62 +404,5 @@ process via Unix pipes, and applies its own
 policy via
 .Pa fvwm_sandbox.h .
 FvwmCpp and FvwmM4 install the parent policy after creating their
-preprocessor child. Executed modules do not inherit the unveil view.
-.Sh SEE ALSO
-.Xr fvwm_exec 1 ,
-.Xr FvwmAuto 1 ,
-.Xr FvwmBacker 1 ,
-.Xr FvwmBanner 1 ,
-.Xr FvwmButtons 1 ,
-.Xr FvwmCpp 1 ,
-.Xr FvwmForm 1 ,
-.Xr FvwmIconBox 1 ,
-.Xr FvwmIconMan 1 ,
-.Xr FvwmIdent 1 ,
-.Xr FvwmM4 1 ,
-.Xr FvwmPager 1 ,
-.Xr FvwmRearrange 1 ,
-.Xr FvwmSave 1 ,
-.Xr FvwmSaveDesk 1 ,
-.Xr FvwmScroll 1 ,
-.Xr FvwmTalk 1 ,
-.Xr FvwmWinList 1 ,
-.Xr xpmroot 1 ,
-.Xr pledge 2 ,
-.Xr unveil 2
-.Sh COMPATIBILITY
-.Nm
-is compatible with FVWM 2.2.5 configuration syntax.
-Existing
-.Pa .fvwm2rc
-files should work without modification.
-.Pp
-Module IPC protocol semantics are preserved from FVWM 2.2.5.
-The binary packet format and message type numbering are unchanged.
-Module descriptor conventions are unchanged.
-.Sh HISTORY
-.Nm
-was originally written by Robert Nation in 1993.
-This is the OpenBSD fork of FVWM 2.2.5.
-.Sh AUTHORS
-.An Robert Nation
-and many contributors.
-.Ox
-fork maintained by the
-.Ox
-project.
-.Sh CAVEATS
-Privilege separation,
-.Xr pledge 2 ,
-and
-.Xr unveil 2
-policies in this version have not been verified through runtime testing
-on a live X11 session.
-.Pp
-The imsg payload decoding, the
-.Ic PipeRead
-line assembly, and the integer configuration parsing are covered by
-host-side unit tests, but the execution helper and the imsg IPC have
-not been exercised against real X11 workloads.
-Module protocol compatibility has been preserved through static
-inspection of message layouts but has not been empirically verified.
+preprocessor child.
+Executed modules do not inherit the unveil view.

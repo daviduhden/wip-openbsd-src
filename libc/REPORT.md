@@ -296,8 +296,9 @@ existing symbol changed type or semantics):
   `tss_set`, `call_once`.
 * `stdbit.h`: the 70 `stdc_*_{uc,us,ui,ul,ull}` typed functions.
 
-All additions are ABI-compatible; the base system should bump the
-`lib/libc/shlib_version` minor by the usual release process.
+All additions are ABI-compatible.  This tree bumps
+`lib/libc/shlib_version` from `minor=0` to `minor=1` so that a libc
+containing the new symbols is distinguishable from the upstream build.
 
 ## 13. Pending limitations
 

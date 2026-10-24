@@ -71,6 +71,11 @@ Verification
 
   Every file under libc/ other than the ones listed in this project's
   own README (the six headers, the new libc sources, the hidden headers,
-  the manual pages and the regress tests) is byte-for-byte upstream.  A
-  patch against the upstream revision can be produced at any time with
-  `diff -ruN` between the upstream checkout and this component.
+  the manual pages and the regress tests) was imported unmodified from
+  the upstream revision above.  The repository's clang-format pass later
+  reflowed comments and include blocks in many imported files; it did
+  not change code or `$OpenBSD` revision tags, so provenance is intact
+  even though those files are no longer byte-for-byte identical to the
+  upstream checkout.  A patch against the upstream revision can still be
+  produced with `diff -ruN` and reviewed with whitespace-insensitive
+  options.

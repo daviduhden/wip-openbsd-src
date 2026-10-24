@@ -117,7 +117,7 @@ main(int argc, char **argv)
 	    (unsigned long)(M_FOCUS_CHANGE));
 	SendInfo(fd, mask_mesg, 0);
 
-	sandbox_x11_only("FvwmAuto");
+	sandbox_stdio("FvwmAuto");
 
 	while (1) {
 		FD_ZERO(&in_fdset);

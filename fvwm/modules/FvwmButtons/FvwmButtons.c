@@ -721,7 +721,6 @@ Loop(void)
 #endif
 
 	sandbox_x11_config("FvwmButtons");
-	sandbox_x11_config("FvwmButtons");
 
 	while (!isTerminated) {
 		if (My_XNextEvent(Dpy, &Event)) {

@@ -133,9 +133,16 @@ enum pax_invalid_action {
 	PAX_INVALID_BINARY
 };
 
-#define PAX_INVALID_NONE 0
-constexpr int PAX_INVALID_SKIP = 1;
-#define PAX_INVALID_RENAME 2
+/*
+ * Per-entry state stored in ARCHD.invalid.  These are deliberately
+ * separate from enum pax_invalid_action, which describes the -o
+ * invalid= option.
+ */
+enum pax_entry_action {
+	PAX_ENTRY_NONE = 0,
+	PAX_ENTRY_SKIP,
+	PAX_ENTRY_RENAME
+};
 
 typedef struct {
 	int	    nlen;		     /* file name length */

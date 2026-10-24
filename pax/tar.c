@@ -1741,7 +1741,7 @@ pax_handle_invalid_path(ARCHD *arcn, const char *keyword, const char *value)
 	case PAX_INVALID_RENAME:
 		paxwarn(
 		    0, "Invalid %s \"%s\"; requesting rename", keyword, value);
-		arcn->invalid = PAX_INVALID_RENAME;
+		arcn->invalid = PAX_ENTRY_RENAME;
 		return 0;
 	}
 	return 0;
@@ -1777,7 +1777,7 @@ void
 pax_mark_skip(ARCHD *arcn)
 {
 	if (arcn != nullptr)
-		arcn->invalid = PAX_INVALID_SKIP;
+		arcn->invalid = PAX_ENTRY_SKIP;
 }
 
 static int

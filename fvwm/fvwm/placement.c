@@ -519,7 +519,9 @@ PlaceWindow(
 			True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
 			&bytes_remain, &prop)) == Success) {
 			if (prop != nullptr) {
-				tmp_win->Desk = *(unsigned long *)prop;
+				if (aformat == 32 && nitems >= 1)
+					tmp_win->Desk =
+					    *(unsigned long *)prop;
 				XFree(prop);
 			}
 		}

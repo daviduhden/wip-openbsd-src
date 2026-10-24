@@ -283,58 +283,66 @@ termination is handled, and unknown types are rejected.
 5.  PLEDGE(2) AND UNVEIL(2) POLICIES
 ========================================================================
 
-Every process has an individually designed, staged pledge/unveil
-policy.  Policies are implemented via shared inline helpers in
-fvwm/fvwm/fvwm_sandbox.h; no module inherits another's privileges.
+The controller and fvwm_exec are intentionally unpledged.  Modules and
+xpmroot apply their own pledge policy through the inline helpers in
+fvwm/fvwm/fvwm_sandbox.h.  execve(2) clears an inherited unveil view, so
+each executed module receives a fresh filesystem view rather than the
+controller's rules.  fvwm_exec is a same-UID execution helper, not a
+privilege boundary.
 
 5.1 fvwm (main)
 
-  unveil:  /usr/X11R6/lib/X11/fvwm/ (rx)
-           /etc/X11/fvwm/              (r)
-           /tmp/                       (rwc)
-  pledge:  stdio rpath proc exec
+  unveil:  ${FVWMLIBDIR} (rx), /etc/X11/fvwm (r), /tmp (rwc),
+           $HOME (rwc), /etc (r), /usr/bin, /usr/local/bin,
+           /usr/X11R6/bin, /bin, /sbin, /usr/sbin (rx),
+           /dev/null and /dev/console (w), directory of execpath (rx)
+  pledge:  none (must launch modules and restart)
 
 5.2 fvwm_exec (helper)
 
-  pledge:  stdio proc exec
+  pledge:  none
+  unveil:  none
 
-  Child processes (after fork, before exec):
-  pledge:  stdio exec
+  closefrom(3) is called before execve(2).  The helper validates imsg
+  payloads but deliberately applies no sandbox.
 
-5.3 Modules -- no filesystem, no network, no fork
+5.3 Pipe-only module
 
-  FvwmAuto, FvwmBacker, FvwmBanner, FvwmIdent, FvwmIconBox,
-  FvwmPager, FvwmScroll, FvwmTalk, FvwmWinList:
+  FvwmAuto:
 
     pledge:  stdio
-    unveil:  none
+    unveil:  none (no X11 connection, no file access)
 
-5.4 Modules -- read-only config access
+5.4 X11 modules
 
-  FvwmButtons, FvwmForm, FvwmIconMan, FvwmRearrange:
+  FvwmBacker, FvwmBanner, FvwmButtons, FvwmForm,
+  FvwmIconBox, FvwmIconMan, FvwmIdent, FvwmPager, FvwmRearrange,
+  FvwmScroll, FvwmTalk, FvwmWinList:
 
-    pledge:  stdio rpath
-    unveil:  none (config is read from fvwm pipe, not from disk)
+    pledge:  stdio rpath inet dns
+    unveil:  none (fresh view after execve)
 
 5.5 Modules -- state file writers
 
   FvwmSave, FvwmSaveDesk:
 
-    unveil:  $HOME (rwc)
-    pledge:  stdio rpath wpath cpath
+    pledge:  stdio rpath wpath cpath inet dns
+    unveil:  $HOME (rwc), then lock
 
 5.6 Modules -- process launchers
 
   FvwmCpp, FvwmM4:
 
-    unveil:  $TMPDIR (rwc), $HOME (r)
-    pledge:  stdio rpath wpath cpath proc exec dns getpw
+    pledge:  stdio rpath wpath cpath proc dns getpw inet
+             (parent only, after creating the preprocessor child)
+    unveil:  $TMPDIR (rwc), $HOME (r), /usr/bin, /bin,
+             /usr/libexec/ld.so
 
 5.7 Utility
 
   xpmroot:
 
-    pledge:  stdio
+    pledge:  stdio rpath inet dns (after XOpenDisplay)
     unveil:  none
 
 ========================================================================

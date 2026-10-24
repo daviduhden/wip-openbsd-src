@@ -46,6 +46,9 @@
 #include "pax.h"
 // clang-format on
 
+#ifndef _PAX_TAR_H_
+#define _PAX_TAR_H_
+
 #define CHK_LEN 8 /* length of checksum field */
 #define TNMSZ 100 /* size of name field */
 #ifdef _PAX_
@@ -190,3 +193,5 @@ static_assert(offsetof(HD_USTAR, chksum) == (size_t)CHK_OFFSET,
 static_assert(BLNKSUM == (long)CHK_LEN * ' ',
     "tar checksum blank sum must equal CHK_LEN spaces");
 #endif /* _PAX_ */
+
+#endif /* _PAX_TAR_H_ */

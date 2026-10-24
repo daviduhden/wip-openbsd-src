@@ -75,7 +75,7 @@ check_openbsd() {
 
 check_deps() {
 	missing=""
-	for dep in cc "$MAKE" install; do
+	for dep in clang "$MAKE" install; do
 		if ! command -v "$dep" >/dev/null 2>&1; then
 			missing="$missing $dep"
 		fi
@@ -106,12 +106,24 @@ build_fvwm() {
 	log "fvwm built successfully."
 }
 
+add_component() {
+	case " ${INSTALL_COMPONENTS:-} " in
+	*" $1 "*) ;;
+	*) INSTALL_COMPONENTS="${INSTALL_COMPONENTS:-} $1" ;;
+	esac
+}
+
 do_install() {
 	if [ "$(id -u)" -ne 0 ] && [ -z "${DESTDIR:-}" ]; then
 		warn "Installing to system paths needs root; use doas or DESTDIR."
 	fi
-	log "Installing pax and fvwm..."
-	run_make -C "$SCRIPT_DIR" install
+	if [ -z "${INSTALL_COMPONENTS:-}" ]; then
+		INSTALL_COMPONENTS="pax fvwm"
+	fi
+	for component in $INSTALL_COMPONENTS; do
+		log "Installing $component..."
+		run_make -C "$SCRIPT_DIR" "install-$component"
+	done
 	log "Install complete."
 }
 
@@ -138,17 +150,22 @@ main() {
 	check_openbsd
 	check_deps
 
+	INSTALL_COMPONENTS=""
 	while [ $# -gt 0 ]; do
 		case "$1" in
 		all)
 			build_pax
 			build_fvwm
+			add_component pax
+			add_component fvwm
 			;;
 		pax)
 			build_pax
+			add_component pax
 			;;
 		fvwm)
 			build_fvwm
+			add_component fvwm
 			;;
 		install)
 			do_install

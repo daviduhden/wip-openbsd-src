@@ -1,6 +1,7 @@
-.Dd $Mdocdate$
+.\" $OpenBSD$
+.Dd October 24, 2026
 .Dt FVWM_EXEC 1
-.Os OpenBSD
+.Os
 .Sh NAME
 .Nm fvwm_exec
 .Nd privilege-separated execution helper for
@@ -59,13 +60,15 @@ descriptor hygiene; it never inherits the X11 connection.
 .Sh SEE ALSO
 .Xr fvwm 1 ,
 .Xr execve 2 ,
-.Xr closefrom 3 ,
-.Xr imsg_init 3 ,
 .Xr pledge 2 ,
-.Xr unveil 2
+.Xr unveil 2 ,
+.Xr closefrom 3 ,
+.Xr imsg_init 3
 .Sh HISTORY
 .Nm
-first appeared as part of the OpenBSD fork of FVWM 2.2.5.
+first appeared as part of the
+.Ox
+fork of FVWM 2.2.5.
 .Sh CAVEATS
 .Nm
 should only be started by

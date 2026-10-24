@@ -18,6 +18,11 @@
 #include <sys/vnode.h>
 // clang-format on
 
+#ifndef _EXT4FS_EXTERN_H_
+#define _EXT4FS_EXTERN_H_
+
 extern const struct vops ext4fs_vops;
 
 #define IS_EXT4_VNODE(vp) ((vp)->v_tag == VT_EXT4FS)
+
+#endif /* _EXT4FS_EXTERN_H_ */

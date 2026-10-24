@@ -738,7 +738,7 @@ mod_name(ARCHD *arcn)
 	 * Either the user requested interactive renames (-i) or the invalid=
 	 * policy requires us to question for a replacement name.
 	 */
-	if (iflag || arcn->invalid == PAX_INVALID_RENAME) {
+	if (iflag || arcn->invalid == PAX_ENTRY_RENAME) {
 		/*
 		 * perform interactive file rename, then map the link if any
 		 */
@@ -747,7 +747,7 @@ mod_name(ARCHD *arcn)
 		if (PAX_IS_LINK(arcn->type))
 			sub_name(arcn->ln_name, &(arcn->ln_nlen),
 			    sizeof(arcn->ln_name));
-		arcn->invalid = PAX_INVALID_NONE;
+		arcn->invalid = PAX_ENTRY_NONE;
 	}
 	return (res);
 }

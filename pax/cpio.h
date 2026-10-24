@@ -41,6 +41,9 @@
 #include "pax.h"
 // clang-format on
 
+#ifndef _PAX_CPIO_H_
+#define _PAX_CPIO_H_
+
 /*
  * Defines common to all versions of cpio
  */
@@ -154,3 +157,5 @@ typedef struct {
 #define VCPIO_PAD(x) ((4 - ((x) & 3)) & 3) /* pad to next 4 byte word */
 #define VCPIO_MASK 0xffffffff		   /* mask for dev/ino fields */
 #endif					   /* _PAX_ */
+
+#endif /* _PAX_CPIO_H_ */

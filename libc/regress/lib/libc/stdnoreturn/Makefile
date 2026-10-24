@@ -1,4 +1,4 @@
-/*	$OpenBSD$	*/
+#	$OpenBSD$
 
 # Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
 #

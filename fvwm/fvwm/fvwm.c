@@ -698,7 +698,9 @@ CaptureAllWindows(void)
 					_XA_WM_STATE, &atype, &aformat, &nitems,
 					&bytes_remain, &prop) == Success) {
 					if (prop != nullptr) {
-						isIconicState = *(long *)prop;
+						if (aformat == 32 && nitems >= 1)
+							isIconicState =
+							    *(long *)prop;
 						XFree(prop);
 					}
 				}
@@ -1403,8 +1405,12 @@ InitVariables(void)
 			True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
 			&bytes_remain, &prop)) == Success) {
 			if (prop != nullptr) {
-				Restarting = True;
-				Scr.CurrentDesk = *(unsigned long *)prop;
+				if (aformat == 32 && nitems >= 1) {
+					Restarting = True;
+					Scr.CurrentDesk =
+					    *(unsigned long *)prop;
+				}
+				XFree(prop);
 			}
 		}
 	}

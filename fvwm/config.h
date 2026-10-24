@@ -26,8 +26,8 @@
 #define HAVE_SIGACTION 1
 #define HAVE_SIGINTERRUPT 1
 #define HAVE_SYS_SELECT_H 1
-constexpr int HAVE_SYS_WAIT_H = 1;
-constexpr int HAVE_WAITPID = 1;
+#define HAVE_SYS_WAIT_H 1
+#define HAVE_WAITPID 1
 
 // clang-format off
 #include <sys/types.h>

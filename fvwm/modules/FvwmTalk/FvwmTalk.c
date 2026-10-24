@@ -232,7 +232,6 @@ Loop(int *fd)
 	Text[0] = 0;
 
 	sandbox_x11_only("FvwmTalk");
-	sandbox_x11_only("FvwmTalk");
 
 	while (1) {
 		if (My_XNextEvent(dpy, &event)) {
@@ -424,7 +423,7 @@ paste_primary(Window window, Atom property, Bool Delete)
 			&nitems, &bytes_after,
 			(unsigned char **)&data) != Success)
 			return;
-		if (actual_type != XA_STRING) {
+		if (actual_type != XA_STRING || actual_format != 8) {
 			XFree(data);
 			return;
 		}

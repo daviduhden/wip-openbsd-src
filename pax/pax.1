@@ -35,7 +35,7 @@
 .\"
 .\"	@(#)pax.1	8.4 (Berkeley) 4/18/94
 .\"
-.Dd $Mdocdate$
+.Dd October 24, 2026
 .Dt PAX 1
 .Os
 .Sh NAME
@@ -1251,3 +1251,27 @@ utility appeared in
 .Sh AUTHORS
 .An Keith Muller
 at the University of California, San Diego.
+.Sh CAVEATS
+Compressed operation is not restricted with
+.Xr pledge 2
+because a later archive volume may require executing another compressor.
+The uncompressed modes are pledged after the filesystem view is locked with
+.Xr unveil 2 .
+.Pp
+When the sandbox is active, a new volume must be reachable through a path
+that was unveiled before the lock; a volume outside that view cannot be
+opened.
+.Pp
+By default,
+.Nm
+removes leading
+.Sq /
+and leading
+.Sq ..
+components from member names.
+The
+.Fl P
+option disables this for
+.Nm ;
+.Xr tar 1
+uses the same letter with different semantics.

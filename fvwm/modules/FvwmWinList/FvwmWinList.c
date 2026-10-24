@@ -241,7 +241,6 @@ MainEventLoop(void)
 	fd_set readset;
 
 	sandbox_x11_only("FvwmWinList");
-	sandbox_x11_only("FvwmWinList");
 
 	while (!isTerminated) {
 		FD_ZERO(&readset);

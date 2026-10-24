@@ -8,9 +8,12 @@
 # headers installed (X11 headers are needed for type definitions
 # only).
 #
+# These Makefiles use BSD make syntax.  Run them with OpenBSD make(1)
+# or, on other hosts, bmake; GNU make is not supported.
+#
 # Run with:
-#   make            # build the test binaries
-#   make run        # build and run them (ASan+UBSan, or ubsan_minimal on OpenBSD)
+#   bmake           # build the test binaries
+#   bmake run       # build and run them (ASan+UBSan, or ubsan_minimal on OpenBSD)
 #   make debug      # clean, rebuild one test as <test>_debug with
 #                   # -O0 -g and debug it (TEST=..., default
 #                   # fvwm-parse-tests)
@@ -36,8 +39,8 @@ X11INCS ?=	-I/usr/X11R6/include -I/usr/local/include
 
 # On OpenBSD ASan is unsupported and only the ubsan_minimal runtime is
 # shipped (clang-local(1)); elsewhere use the ASan+UBSan runtimes.
-SANITIZE != if [ "`uname -s`" = OpenBSD ]; then echo "-fsanitize=undefined -fsanitize-minimal-runtime -Wl,--no-execute-only"; else echo "-fsanitize=address,undefined"; fi
-SANITIZE ?=	-fsanitize=address,undefined
+SANITIZE_DEFAULT != if [ "`uname -s`" = OpenBSD ]; then echo "-fsanitize=undefined -fsanitize-minimal-runtime -Wl,--no-execute-only"; else echo "-fsanitize=address,undefined"; fi
+SANITIZE ?=	${SANITIZE_DEFAULT}
 
 TESTS =		stdckdint-tests fvwm-parse-tests fvwm-exec-tests \
 		fvwm-pipebuf-tests ext4fs-jbd2-tests ext4fs-inode-tests
@@ -79,7 +82,7 @@ ext4fs-inode-tests: ext4fs-inode-tests.c $(EXT4SRC)/ext4fs_crc32c.c $(EXT4SRC)/e
 
 run: $(TESTS)
 	ASAN_OPTIONS=detect_leaks=0 ./stdckdint-tests
-	CC="$(CC)" CFLAGS="$(CFLAGS)" sh $(.CURDIR)/stdckdint-compile-fail.sh
+	CC="$(CC)" CFLAGS="$(CFLAGS)" sh ./stdckdint-compile-fail.sh
 	ASAN_OPTIONS=detect_leaks=0 ./fvwm-parse-tests
 	ASAN_OPTIONS=detect_leaks=0 ./fvwm-exec-tests
 	ASAN_OPTIONS=detect_leaks=0 ./fvwm-pipebuf-tests

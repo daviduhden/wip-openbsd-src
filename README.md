@@ -46,7 +46,8 @@ recovery, extents, metadata checksums) and mount_ext4fs(8).
 Not built here; the component stores the new files at
 OpenBSD-relative paths plus the original patch and the hunks
 for modified tree files, for copying into an OpenBSD checkout
-(see FETCHING.md).
+(see [FETCHING.md](FETCHING.md) and
+[ext4fs/README.md](ext4fs/README.md)).
 
 Journal recovery verifies every descriptor tag before replay:
 per-tag checksums are supported for jbd2 checksum v2 (16-bit,
@@ -215,10 +216,11 @@ checksum verification (csum v2/v3, truncation, corruption), and
 the ext4 inode checksum across inode sizes (128-4096 bytes),
 including superblock inode-size validation.  They run under
 ASan/UBSan.  They need clang and X11 headers on the host and are
-not part of the OpenBSD build:
+not part of the OpenBSD build.  The test Makefiles use BSD make
+syntax, so use bmake on non-OpenBSD hosts:
 
 ```
-$ make -C tests CC=clang run
+$ bmake -C tests CC=clang run      # make(1) on OpenBSD
 ```
 
 Set `X11INCS` to the directory holding the X11 headers when they
@@ -229,7 +231,7 @@ runs the ISO C headers and the C11 threads wrapper against the host C
 library:
 
 ```
-$ make -C libc/tests CC=clang run
+$ bmake -C libc/tests CC=clang run    # make(1) on OpenBSD
 ```
 
 ## Security

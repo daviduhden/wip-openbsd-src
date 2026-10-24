@@ -32,12 +32,12 @@
  * Modified for ext4fs by kmx.io.
  */
 
+#ifndef _EXT4FS_DINODE_H_
+#define _EXT4FS_DINODE_H_
+
 // clang-format off
 #include <sys/stat.h>
 // clang-format on
-
-#ifndef _EXT4FS_DINODE_H_
-#define _EXT4FS_DINODE_H_
 
 #define EXT4FS_EXTENT_HEADER_MAGIC 0xF30A
 

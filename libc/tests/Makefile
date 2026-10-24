@@ -13,16 +13,19 @@
 # header selected is the one under libc/include and not a compiler or host
 # copy.
 #
+# This Makefile uses BSD make syntax.  Run it with OpenBSD make(1) or,
+# on other hosts, bmake; GNU make is not supported.
+#
 # Run with:
-#   make            # build the tests
-#   make run        # build, run and run the compile matrix
-#   make test       # alias for run
-#   make clean
+#   bmake           # build the tests
+#   bmake run       # build, run and run the compile matrix
+#   bmake test      # alias for run
+#   bmake clean
 #
 # Overrides:
 #   CC=...          # C compiler (default clang)
 
-CC ?=		clang
+CC =		clang
 CFLAGS =	-O2 -std=c23 -Wall -Wextra -Werror -Wpedantic
 SAN ?=
 

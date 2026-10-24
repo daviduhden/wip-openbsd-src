@@ -337,7 +337,10 @@ main(int argc, char **argv)
 
 		if (tmpcopy != nullptr) {
 			slash = strrchr(tmpcopy, '/');
-			if (slash != nullptr) {
+			if (slash == tmpcopy) {
+				/* TMPDIR is "/": unveil the root itself. */
+				(void)unveil("/", "rwc");
+			} else if (slash != nullptr) {
 				*slash = '\0';
 				(void)unveil(tmpcopy, "rwc");
 			}
@@ -386,7 +389,7 @@ main(int argc, char **argv)
 		if (act == LIST)
 			promises = "stdio rpath getpw tape";
 		else if (act == APPND)
-			promises = "stdio rpath wpath getpw tape";
+			promises = "stdio rpath wpath cpath getpw tape";
 		else
 			promises =
 			    "stdio rpath wpath cpath fattr dpath getpw tape";

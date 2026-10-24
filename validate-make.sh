@@ -11,9 +11,9 @@
 #
 # Modes:
 #   check    (default) validate without modifying anything
-#   format   show what mbake would rewrite (diff-oriented; applies
-#            nothing -- the Makefiles are OpenBSD-native and mbake is
-#            a GNU-style formatter that would change the dialect)
+#   format   report mbake's advisory opinion only; never rewrites and
+#            never emits a diff -- the Makefiles are OpenBSD-native and
+#            mbake is a GNU-style formatter that would change the dialect
 #
 # Usage: ./validate-make.sh [check|format] [ROOT]
 #
@@ -111,7 +111,7 @@ fi
 #   openbsd-native  fvwm hierarchy: OpenBSD make + /usr/share/mk
 #   source-tree     ext4fs: belongs in an OpenBSD source checkout
 rel() {
-	printf '%s' "$1" | sed "s|^$ROOT/||"
+	printf '%s' "${1#"$ROOT"/}"
 }
 context() {
 	case "$1" in
@@ -144,7 +144,9 @@ build_stubdir() {
 	done
 	# Any additional system includes referenced by the Makefiles.
 	printf '%s\n' "$FILES" |
-		grep -h '^[^#]*\.include *<' 2>/dev/null |
+		while IFS= read -r f; do
+			grep -h '^[^#]*\.include *<' "$f" 2>/dev/null || true
+		done |
 		sed -n 's/.*\.include *<\([^>]*\)>.*/\1/p' |
 		while IFS= read -r name; do
 			[ -n "$name" ] || continue
@@ -158,14 +160,17 @@ build_stubdir() {
 syntax_check() {
 	file=$1
 	dir=$(dirname "$file")
+	fname=$(basename "$file")
 	bmk=$(command -v bmake || true)
 	[ -n "${bmk:-}" ] || {
 		skip "$(rel "$file"): bmake syntax check: bmake not installed"
 		return
 	}
 	# bmake resolves quoted includes relative to the working
-	# directory, so run from the Makefile's own directory.
-	output=$(cd "$dir" && "$bmk" -m "$STUBDIR" -f Makefile -V .CURDIR \
+	# directory, so run from the Makefile's own directory.  Parse the
+	# file itself, not the sibling Makefile, so Makefile.inc and *.mk
+	# fragments are actually checked.
+	output=$(cd "$dir" && "$bmk" -m "$STUBDIR" -f "$fname" -V .CURDIR \
 		2>&1 >/dev/null)
 	rc=$?
 	if [ $rc -eq 0 ]; then
@@ -185,13 +190,21 @@ syntax_check() {
 raw_bmake() {
 	file=$1
 	dir=$(dirname "$file")
-	ctx=$(context "$(rel "$file")")
+	relf=$(rel "$file")
+	fname=$(basename "$file")
+	ctx=$(context "$relf")
+	case "$relf" in
+	*Makefile.inc | *.mk)
+		skip "$relf: raw bmake dry-run: Makefile fragment (no default target)"
+		return
+		;;
+	esac
 	bmk=$(command -v bmake || true)
 	[ -n "${bmk:-}" ] || {
-		skip "$(rel "$file"): raw bmake dry-run: bmake not installed"
+		skip "$relf: raw bmake dry-run: bmake not installed"
 		return
 	}
-	output=$(cd "$dir" && "$bmk" -n -f Makefile 2>&1 >/dev/null)
+	output=$(cd "$dir" && "$bmk" -n -f "$fname" 2>&1 >/dev/null)
 	rc=$?
 	case "$output" in
 	*"Could not find bsd"*)
@@ -442,14 +455,15 @@ if command -v bmake >/dev/null 2>&1; then
 	build_stubdir
 fi
 
-for file in $FILES; do
+printf '%s\n' "$FILES" >"$LOG_FILE/files"
+while IFS= read -r file; do
 	relf=$(rel "$file")
 	ctx=$(context "$relf")
 	CHECKED=$((CHECKED + 1))
 	log "--- $relf [$ctx]"
 
 	if [ "$MODE" = "format" ]; then
-		# Diff-oriented: never rewrite; show what mbake would do.
+		# Advisory only: never rewrite; report what mbake thinks.
 		mbake_check "$file"
 		continue
 	fi
@@ -461,7 +475,7 @@ for file in $FILES; do
 	checkmake_check "$file"
 	mbake_check "$file"
 	semantic_check "$file"
-done
+done <"$LOG_FILE/files"
 
 log ""
 log "[INFO] Summary: $CHECKED file(s) checked, $FAILS fail(s), $WARNS warn(s), $SKIPS skip(s)"
