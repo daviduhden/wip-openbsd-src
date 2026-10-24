@@ -91,8 +91,10 @@ Apply `style(9)`/KNF to new and modified code:
 - `return (value);` in imported/KNF code; do not mass-convert existing files.
 - Use `NULL` in imported OpenBSD code and `nullptr` only where the local file
   already uses C23. Do not mix styles gratuitously.
-- Use `__dead`, `__packed`, `__unused`, `__printflike`, and `__nonnull` from
-  `<sys/cdefs.h>` instead of raw `__attribute__` in OpenBSD code.
+- Use `__dead`, `__packed`, and `__unused` from `<sys/cdefs.h>` where they
+  apply.  OpenBSD does not provide `__printflike` or `__nonnull`; write
+  `__attribute__((nonnull(...), format(printf, ...)))` as the surrounding
+  headers do.
 
 The repository's `.clang-format` is an approximation, not an authority. Never
 reformat a whole file or tree to satisfy it. Existing style wins, and

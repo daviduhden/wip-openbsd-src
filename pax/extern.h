@@ -38,8 +38,6 @@
  */
 
 // clang-format off
-#include <sys/cdefs.h>
-
 #include "pax.h"
 // clang-format on
 
@@ -326,9 +324,12 @@ int	     pax_wr(ARCHD *);
  * tty_subs.c
  */
 int  tty_init(void);
-void tty_prnt(const char *, ...) __printflike(1, 2);
+void tty_prnt(const char *, ...)
+    __attribute__((nonnull(1), format(printf, 1, 2)));
 int  tty_read(char *, int);
-void paxwarn(int, const char *, ...) __printflike(2, 3);
-void syswarn(int, int, const char *, ...) __printflike(3, 4);
+void paxwarn(int, const char *, ...)
+    __attribute__((nonnull(2), format(printf, 2, 3)));
+void syswarn(int, int, const char *, ...)
+    __attribute__((nonnull(3), format(printf, 3, 4)));
 
 #endif /* _PAX_EXTERN_H_ */
