@@ -160,6 +160,7 @@ mtx_init(mtx_t *mtx, int type)
 	pthread_mutexattr_t attr;
 	int		    error, ptype;
 
+	/* mtx_timed is accepted as a capability flag; pthreads needs no setup. */
 	if ((type & ~(mtx_recursive | mtx_timed)) != 0)
 		return thrd_error;
 	ptype = (type & mtx_recursive) ? PTHREAD_MUTEX_RECURSIVE :

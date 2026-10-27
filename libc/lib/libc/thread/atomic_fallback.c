@@ -51,6 +51,7 @@ fallback_lock(const volatile void *obj)
 {
 	unsigned long v = (unsigned long)obj;
 
+	/* Hash object addresses to a fixed table; collisions only serialize work. */
 	return &fallback_locks[(v >> 4) & (FALLBACK_NLOCKS - 1)];
 }
 
