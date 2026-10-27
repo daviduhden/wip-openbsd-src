@@ -263,7 +263,7 @@ jbd2_tag_bytes(const struct jbd2_replay_ctx *ctx)
  * commit journals (whose on-disk ordering differs from the simple
  * descriptor/data/commit layout assumed by the three passes) are
  * rejected: replaying them without understanding the format would
- * write attacker-controlled data into the filesystem.
+ * misinterpret journal data and could write it to the filesystem.
  */
 static int
 jbd2_feature_check(struct jbd2_replay_ctx *ctx)
@@ -490,7 +490,9 @@ jbd2_parse_tag(struct jbd2_replay_ctx *ctx, const char *buf, u_int32_t bufsize,
 }
 
 /*
- * Add a block to the revocation table.
+ * Add a block to the revocation table, retaining its newest revoke
+ * sequence. The second comparison handles a small sequence value
+ * following a stored value near the 32-bit wraparound.
  */
 static void
 jbd2_revoke_add(

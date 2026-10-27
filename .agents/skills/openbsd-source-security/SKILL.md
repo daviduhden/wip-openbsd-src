@@ -94,6 +94,9 @@ state precisely what was verified statically versus at runtime on OpenBSD.
 - All on-disk counts (`eh_entries`, `eh_max`, `reclen`, `namlen`, inode size)
   must be validated against block/inode capacity before indexing.
 - Journal replay must validate descriptor tags before use.
+- The revoke table keeps the newest sequence for a repeated block; its
+  wraparound comparison handles a low sequence after a stored value near
+  `UINT32_MAX`. Preserve coverage for both ordinary ordering and that boundary.
 - Widen shifts through `u_int64_t` where the on-disk field is unsigned.
 
 ## Verification on OpenBSD
@@ -140,3 +143,19 @@ limitation explicitly.
 - `style(9)`: <https://man.openbsd.org/style.9>
 - OpenBSD security: <https://www.openbsd.org/security.html>
 - `ktrace(1)`, `kdump(1)`, `lastcomm(1)`
+
+## Maintenance & Continuous Learning
+
+Whenever this skill is used to change the repository, review this skill after
+the implementation. Correct procedures that proved wrong, update commands,
+paths, configuration and examples, incorporate reusable findings, and remove
+outdated assumptions. Review the applicable root and nested `AGENTS.md` files,
+specialized agents and related skills; update only the knowledge affected by
+the work. Validate local references and run
+`python3 scripts/validate-agent-knowledge.py --scope worktree` plus the
+applicable project checks. For pull request comparisons, use the documented
+`--scope range --base BASE_REF --head HEAD_REF` command. The canonical validator
+is read-only and is required even when a task restricts execution of project
+scripts; this does not authorize running installers or changing the host.
+Report checks actually performed. A structural pass does not prove semantic
+relevance, and a task is incomplete until synchronization is validated.
