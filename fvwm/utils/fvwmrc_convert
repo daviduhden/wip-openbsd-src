@@ -40,21 +40,21 @@
 echo "fvwmrc-to-fvwm2rc" >&2
 
 # gawk has IGNORECASE, so we use it if possible.
-if [ -n `command -v gawk 2>/dev/null` ]
+if command -v gawk >/dev/null 2>&1
 then
-   AWK=`command -v gawk`
+	AWK=$(command -v gawk)
 elif [ -x /usr/bin/gawk ]
 then
    AWK=/usr/bin/gawk
-elif [ -n `command -v awk 2>/dev/null` ]
+elif command -v awk >/dev/null 2>&1
 then
-   AWK=`command -v awk`
+	AWK=$(command -v awk)
 elif [ -x /usr/bin/awk ]
 then
    AWK=/usr/bin/awk
 fi
 
-if [ ! -x $AWK ];then
+if [ -z "$AWK" ] || [ ! -x "$AWK" ]; then
    echo "Can't find any awk, cannot run!" >&2
    exit 1
 fi
@@ -86,7 +86,7 @@ if [ ! -w "$TTY" ] ;then
 	TTY=/dev/null
 fi
 
-cat $source | $AWK '
+cat "$source" | "$AWK" '
 BEGIN   {
         printf ("# Trying to compile an old .fvwrc to the new fvwm-2.xx Format\n");
 	TRUE=1; FALSE=0;
