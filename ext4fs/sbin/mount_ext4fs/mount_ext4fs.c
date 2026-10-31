@@ -51,6 +51,7 @@ static const struct mntopt mopts[] = {MOPT_STDOPTS, MOPT_UPDATE, {NULL}};
 int
 main(int argc, char *argv[])
 {
+	/* ext4fs_mount() reads the device path from this shared UFS argument. */
 	struct ufs_args args; /* XXX ffs_args */
 	int		ch, mntflags;
 	char		fs_name[PATH_MAX], *errcause;

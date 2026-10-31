@@ -1,5 +1,4 @@
 diff --git a/sys/conf/GENERIC b/sys/conf/GENERIC
-index f9f615912..86e3e597c 100644
 --- a/sys/conf/GENERIC
 +++ b/sys/conf/GENERIC
 @@ -32,6 +32,7 @@ option		FFS2		# UFS2
@@ -11,7 +10,6 @@ index f9f615912..86e3e597c 100644
  option		NFSCLIENT	# Network File System client
  option		NFSSERVER	# Network File System server
 diff --git a/sys/conf/files b/sys/conf/files
-index e5e66dca6..873653e75 100644
 --- a/sys/conf/files
 +++ b/sys/conf/files
 @@ -994,15 +994,15 @@ file ufs/ffs/ffs_vfsops.c		ffs | mfs
@@ -21,11 +19,11 @@ index e5e66dca6..873653e75 100644
 -file ufs/ufs/ufs_bmap.c			ffs | mfs | ext2fs
 +file ufs/ufs/ufs_bmap.c			ffs | mfs | ext2fs | ext4fs
  file ufs/ufs/ufs_dirhash.c		ufs_dirhash & (ffs | mfs)
--file ufs/ufs/ufs_ihash.c		ffs | mfs | ext2fs | fuse
+-file ufs/ufs/ufs_ihash.c		ffs | mfs | ext2fs
 -file ufs/ufs/ufs_inode.c		ffs | mfs | ext2fs
 -file ufs/ufs/ufs_lookup.c		ffs | mfs | ext2fs
 -file ufs/ufs/ufs_quota.c		quota & ( ffs | mfs | ext2fs )
-+file ufs/ufs/ufs_ihash.c		ffs | mfs | ext2fs | ext4fs | fuse
++file ufs/ufs/ufs_ihash.c		ffs | mfs | ext2fs | ext4fs
 +file ufs/ufs/ufs_inode.c		ffs | mfs | ext2fs | ext4fs
 +file ufs/ufs/ufs_lookup.c		ffs | mfs | ext2fs | ext4fs
 +file ufs/ufs/ufs_quota.c		quota & ( ffs | mfs | ext2fs | ext4fs )
@@ -37,7 +35,7 @@ index e5e66dca6..873653e75 100644
  file ufs/ext2fs/ext2fs_alloc.c		ext2fs
  file ufs/ext2fs/ext2fs_balloc.c		ext2fs
  file ufs/ext2fs/ext2fs_bmap.c		ext2fs
-@@ -1014,6 +1014,10 @@ file ufs/ext2fs/ext2fs_readwrite.c	ext2fs
+@@ -1014,6 +1014,10 @@ file ufs/ext2fs/ext2fs_readwrite.c	ext2f
  file ufs/ext2fs/ext2fs_subr.c		ext2fs
  file ufs/ext2fs/ext2fs_vfsops.c		ext2fs
  file ufs/ext2fs/ext2fs_vnops.c		ext2fs
@@ -49,7 +47,6 @@ index e5e66dca6..873653e75 100644
  file uvm/uvm_amap.c
  file uvm/uvm_anon.c
 diff --git a/sys/kern/vfs_init.c b/sys/kern/vfs_init.c
-index 8d31047ac..4045a0bd5 100644
 --- a/sys/kern/vfs_init.c
 +++ b/sys/kern/vfs_init.c
 @@ -100,6 +100,11 @@ static struct vfsconf vfsconflist[] = {
@@ -65,10 +62,9 @@ index 8d31047ac..4045a0bd5 100644
  
  
 diff --git a/sys/sys/disklabel.h b/sys/sys/disklabel.h
-index 3d938666e..86a0fb267 100644
 --- a/sys/sys/disklabel.h
 +++ b/sys/sys/disklabel.h
-@@ -275,6 +275,7 @@ static const char * const dktypenames[] = {
+@@ -275,6 +275,7 @@ static const char * const dktypenames[]
  #define FS_RAID		19		/* RAIDframe or softraid */
  #define FS_NTFS		20		/* Windows/NT file system */
  #define FS_UDF		21		/* UDF (DVD) filesystem */
@@ -76,7 +72,7 @@ index 3d938666e..86a0fb267 100644
  
  #ifdef DKTYPENAMES
  static const char * const fstypenames[] = {
-@@ -300,6 +301,7 @@ static const char * const fstypenames[] = {
+@@ -300,6 +301,7 @@ static const char * const fstypenames[]
  	"RAID",
  	"NTFS",
  	"UDF",
@@ -93,7 +89,6 @@ index 3d938666e..86a0fb267 100644
  };
  
 diff --git a/sys/sys/mount.h b/sys/sys/mount.h
-index a0010c55f..9cbe4607e 100644
 --- a/sys/sys/mount.h
 +++ b/sys/sys/mount.h
 @@ -320,6 +320,7 @@ struct statfs {
@@ -104,7 +99,7 @@ index a0010c55f..9cbe4607e 100644
  #define	MOUNT_NCPFS	"ncpfs"		/* NetWare Network File System */
  #define	MOUNT_NTFS	"ntfs"		/* NTFS */
  #define	MOUNT_UDF	"udf"		/* UDF */
-@@ -556,6 +557,7 @@ extern	const struct vfsops msdosfs_vfsops;
+@@ -547,6 +548,7 @@ extern	const struct vfsops msdosfs_vfsop
  extern	const struct vfsops nfs_vfsops;
  extern	const struct vfsops cd9660_vfsops;
  extern	const struct vfsops ext2fs_vfsops;
@@ -113,7 +108,6 @@ index a0010c55f..9cbe4607e 100644
  extern	const struct vfsops udf_vfsops;
  extern	const struct vfsops fusefs_vfsops;
 diff --git a/sys/sys/vnode.h b/sys/sys/vnode.h
-index 6f1664ce1..c9970f6a9 100644
 --- a/sys/sys/vnode.h
 +++ b/sys/sys/vnode.h
 @@ -67,12 +67,14 @@ enum vtagtype	{
@@ -133,7 +127,6 @@ index 6f1664ce1..c9970f6a9 100644
  /*
   * Each underlying filesystem allocates its own private area and hangs
 diff --git a/sys/ufs/ufs/inode.h b/sys/ufs/ufs/inode.h
-index 16aaac8b7..2d9224f0f 100644
 --- a/sys/ufs/ufs/inode.h
 +++ b/sys/ufs/ufs/inode.h
 @@ -43,6 +43,7 @@
@@ -189,60 +182,31 @@ index 16aaac8b7..2d9224f0f 100644
  #define i_e2fs_size		i_e2din->e2di_size
  #define i_e2fs_atime		i_e2din->e2di_atime
 diff --git a/sys/ufs/ufs/ufs_ihash.c b/sys/ufs/ufs/ufs_ihash.c
-index f470326e5..a192c9a0b 100644
 --- a/sys/ufs/ufs/ufs_ihash.c
 +++ b/sys/ufs/ufs/ufs_ihash.c
-@@ -43,6 +43,7 @@
- #include <ufs/ufs/ufs_extern.h>
- #include <ufs/ufs/ufsmount.h>
- #include <ufs/ext2fs/ext2fs_extern.h>
+@@ -45,0 +46 @@
 +#include <ufs/ext4fs/ext4fs_extern.h>
- 
- #include <crypto/siphash.h>
- 
-@@ -119,6 +120,11 @@ loop:
- 			     */
- 			    IS_EXT2_VNODE(vp) ? ip->i_e2fs_nlink <= 0 :
- #endif
+@@ -118,0 +120,5 @@ loop:
 +			    /*
 +			     * XXX DIP does not cover ext4fs either;
 +			     * use i_e4din directly like ext2fs uses i_e2din.
 +			     */
 +			    vp->v_tag == VT_EXT4FS ? ip->i_e4fs_nlink <= 0 :
- 			    DIP(ip, nlink) <= 0) &&
- 			     (vp->v_mount->mnt_flag & MNT_RDONLY) == 0)) {
- 				/*
 diff --git a/sys/ufs/ufs/ufs_vnops.c b/sys/ufs/ufs/ufs_vnops.c
-index 80f403861..8c2345021 100644
 --- a/sys/ufs/ufs/ufs_vnops.c
 +++ b/sys/ufs/ufs/ufs_vnops.c
-@@ -68,6 +68,9 @@
- #include <ufs/ufs/dirhash.h>
- #endif
- #include <ufs/ext2fs/ext2fs_extern.h>
+@@ -70,0 +71,3 @@
 +#ifdef EXT4FS
 +#include <ufs/ext4fs/ext4fs.h>
 +#endif
- 
- #include <uvm/uvm_extern.h>
- 
-@@ -108,6 +111,12 @@ ufs_itimes(struct vnode *vp)
- 		goto out;
- 	}
- #endif
+@@ -110,0 +114,6 @@ ufs_itimes(struct vnode *vp)
 +#ifdef EXT4FS
 +	if (vp->v_tag == VT_EXT4FS) {
 +		EXT4FS_ITIMES(ip);
 +		goto out;
 +	}
 +#endif
- 
- 	if ((vp->v_type == VBLK || vp->v_type == VCHR))
- 		ip->i_flag |= IN_LAZYMOD;
-@@ -1864,6 +1873,14 @@ filt_ufsread(struct knote *kn, long hint)
- 	if (IS_EXT2_VNODE(ip->i_vnode))
- 		kn->kn_data = ext2fs_size(ip) - foffset(kn->kn_fp);
- 	else
+@@ -1893,0 +1903,8 @@ filt_ufsread(struct knote *kn, long hint
 +#endif
 +#ifdef EXT4FS
 +	if (ip->i_vnode->v_tag == VT_EXT4FS) {
@@ -251,11 +215,7 @@ index 80f403861..8c2345021 100644
 +		    ((off_t)letoh32(din->i_size_hi) << 32)) -
 +		    foffset(kn->kn_fp);
 +	} else
- #endif
- 		kn->kn_data = DIP(ip, size) - foffset(kn->kn_fp);
- 	if (kn->kn_data == 0 && kn->kn_sfflags & NOTE_EOF) {
 diff --git a/sys/ufs/ufs/ufsmount.h b/sys/ufs/ufs/ufsmount.h
-index 3ad8938e4..40ea54993 100644
 --- a/sys/ufs/ufs/ufsmount.h
 +++ b/sys/ufs/ufs/ufsmount.h
 @@ -51,10 +51,13 @@ struct ufsmount {

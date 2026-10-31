@@ -17,6 +17,11 @@ stored at OpenBSD source-tree-relative paths and is copied into a full
 `sys/conf/GENERIC`, `sys/kern/vfs_init.c`, `sys/sys/{disklabel,mount,vnode}.h`
 and the shared UFS code under `sys/ufs/ufs/`.
 
+The patch is based on OpenBSD `src` revision
+`484ecc5061dce11274ca0829ca8933cd67f5642e` (2026-10-31). Apply it from the
+root of that source revision; regenerate it after changing the target
+revision or any shared UFS integration.
+
 ## Integration
 
 ```sh
