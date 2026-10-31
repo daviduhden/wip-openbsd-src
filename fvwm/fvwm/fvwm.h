@@ -134,8 +134,11 @@ typedef struct icon_boxes_struct {
 #define ICONFILLHRZ (1 << 2)
 } icon_boxes;
 
-/* for each window that is on the display, one of these structures
- * is allocated and linked into a list
+/*
+ * One structure represents each managed client. The next/prev links form a
+ * null-terminated management list; stack_next/stack_prev form a separate
+ * circular ring anchored at Scr.FvwmRoot for stacking order. Keep both
+ * structures consistent when adding or removing a window.
  */
 typedef struct FvwmWindow {
 	struct FvwmWindow *next;       /* next fvwm window */

@@ -146,6 +146,11 @@ GetPicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
 	return p;
 }
 
+/*
+ * Return a cached picture with one reference acquired. Call DestroyPicture()
+ * once for every non-null result; the X pixmaps and allocated colors remain
+ * shared until the final reference is released.
+ */
 FvwmPicture *
 CachePicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
     char *name, int color_limit)

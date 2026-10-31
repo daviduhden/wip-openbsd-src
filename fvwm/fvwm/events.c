@@ -149,6 +149,11 @@ DispatchEvent(void)
 
 	DBUG("DispatchEvent", "Routine Entered");
 
+	/*
+	 * Handlers share Event and Tmp_win as their dispatch context. Resolve
+	 * the event window through FvwmContext to seed handler context; events
+	 * for unmanaged or unregistered windows enter with Tmp_win unset.
+	 */
 	StashEventTime(&Event);
 
 	if (XFindContext(dpy, w, FvwmContext, (caddr_t *)&Tmp_win) == XCNOENT)
@@ -1502,6 +1507,11 @@ My_XNextEvent(Display *dpy, XEvent *event)
 		}
 	}
 
+	/*
+	 * This wait services X events and module/helper traffic together. Return
+	 * an X event only on the next loop iteration; module data and queued
+	 * writes are handled here so their pipes do not stall the window manager.
+	 */
 	DBUG("My_XNextEvent", "waiting for module input/output");
 	XFlush(dpy);
 	if (select(fd_width, &in_fdset, &out_fdset, nullptr, nullptr) > 0) {

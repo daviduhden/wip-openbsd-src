@@ -30,6 +30,12 @@
  *
  * Sets the input focus to the indicated window.
  *
+ * The managed-window list also tracks focus recency for click-to-focus
+ * policies. A requested client must be on the current desk and page before
+ * it can receive focus; WM_HINTS may still decline input focus, and
+ * WM_TAKE_FOCUS is sent separately for clients that request that protocol.
+ * This routine also updates passive button grabs used to detect focus clicks.
+ *
  **********************************************************************/
 
 void
