@@ -305,7 +305,9 @@ main(int argc, char **argv)
 				snprintf(message + strlen(message),
 				    sizeof(message) - strlen(message), ".%d",
 				    myscreen);
-				dpy = XOpenDisplay(message);
+				if ((dpy = XOpenDisplay(message)) == nullptr)
+					errx(1, "can't open display %s",
+					    XDisplayName(message));
 				Scr.screen = myscreen;
 				Scr.NumberOfScreens = ScreenCount(dpy);
 

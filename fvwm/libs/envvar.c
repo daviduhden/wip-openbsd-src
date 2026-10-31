@@ -290,7 +290,7 @@ envExpand(char *s, int maxstrlen)
 char *
 envDupExpand(const char *s, int extra)
 {
-	char	   *var, *ret, save;
+	char	   *var, *ret, *scan, save;
 	const char *env, *s2;
 	int	    len, slen, elen, bufflen;
 
@@ -300,11 +300,13 @@ envDupExpand(const char *s, int extra)
 	 */
 	if (extra < 0)
 		extra = 0;
+	if ((scan = strdup(s)) == nullptr)
+		return nullptr;
 
 	/*
 	 *  calculate length needed.
 	 */
-	s2 = s;
+	s2 = scan;
 	slen = strlen(s);
 	bufflen = slen + 1 + extra;
 	while ((var = findEnvVar(s2, &len)) != nullptr) {
@@ -318,6 +320,7 @@ envDupExpand(const char *s, int extra)
 		bufflen += len > elen ? len : elen;
 		s2 = var + len;
 	}
+	free(scan);
 	if (bufflen < slen + 1)
 		bufflen = slen + 1;
 
