@@ -276,7 +276,9 @@ HandleModuleInput(Window w, int channel)
 	if (size > (int)(sizeof(text) - 1)) {
 		fvwm_msg(ERR, "HandleModuleInput",
 		    "Module command is too big (%d)", size);
-		size = (int)(sizeof(text) - 1);
+		/* The rest of this frame cannot be parsed as a command safely. */
+		KillModule(channel, 5);
+		return 0;
 	}
 
 	pipeOn[channel] = 1;

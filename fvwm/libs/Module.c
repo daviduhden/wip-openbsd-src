@@ -6,11 +6,56 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "../fvwm/module.h"
 #include "config.h"
 #include "fvwmlib.h"
 // clang-format on
+
+extern void DeadPipe(int);
+
+static int
+read_full(int fd, void *buf, size_t len)
+{
+	size_t done = 0;
+
+	while (done < len) {
+		ssize_t n = read(fd, (char *)buf + done, len - done);
+
+		if (n > 0) {
+			done += (size_t)n;
+			continue;
+		}
+		if (n == -1 && errno == EINTR)
+			continue;
+		if (n == 0)
+			errno = EPIPE;
+		return -1;
+	}
+	return 0;
+}
+
+static int
+write_full(int fd, const void *buf, size_t len)
+{
+	size_t done = 0;
+
+	while (done < len) {
+		ssize_t n = write(fd, (const char *)buf + done, len - done);
+
+		if (n > 0) {
+			done += (size_t)n;
+			continue;
+		}
+		if (n == -1 && errno == EINTR)
+			continue;
+		if (n == 0)
+			errno = EIO;
+		return -1;
+	}
+	return 0;
+}
 
 /************************************************************************
  *
@@ -32,28 +77,22 @@
 int
 ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 {
-	int	    count, total, count2, body_length;
+	int	    count, body_length;
 	char	   *cbody;
-	extern void DeadPipe(int);
 
 	errno = 0;
+	*body = nullptr;
 
 	/*
 	 * A pipe read may return less than the whole header.  Acting on a
 	 * partially filled header would leave header[2] undetermined and
 	 * turn body_length into garbage, so read the header in full first.
 	 */
-	total = 0;
-	while (total < (int)(HEADER_SIZE * sizeof(unsigned long))) {
-		errno = 0;
-		if ((count = read(fd, (char *)header + total,
-			 HEADER_SIZE * sizeof(unsigned long) - total)) > 0)
-			total += count;
-		else {
-			DeadPipe(errno);
-			return -1;
-		}
+	if (read_full(fd, header, HEADER_SIZE * sizeof(unsigned long)) == -1) {
+		DeadPipe(errno);
+		return -1;
 	}
+	count = HEADER_SIZE * sizeof(unsigned long);
 
 	if (header[0] == START_FLAG) {
 		if (header[2] < HEADER_SIZE ||
@@ -63,21 +102,13 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 		*body = (unsigned long *)xmalloc(
 		    body_length * sizeof(unsigned long));
 		cbody = (char *)(*body);
-		total = 0;
-		while (total < (int)(body_length * sizeof(unsigned long))) {
-			errno = 0;
-			if ((count2 = read(fd, &cbody[total],
-				 body_length * sizeof(unsigned long) - total)) >
-			    0) {
-				total += count2;
-			} else {
-				/* EOF or read error: the pipe is gone.
-				 * Report a dead pipe instead of
-				 * spinning on a closed connection. */
-				free(*body);
-				*body = nullptr;
-				return -1;
-			}
+		if (body_length > 0 && read_full(fd, cbody,
+			body_length * sizeof(unsigned long)) == -1) {
+			/* The packet is incomplete; discard its partial body. */
+			free(*body);
+			*body = nullptr;
+			DeadPipe(errno);
+			return -1;
 		}
 	} else
 		count = 0;
@@ -98,16 +129,24 @@ SendText(int *fd, char *message, unsigned long window)
 	int w;
 
 	if (message != nullptr) {
-		write(fd[0], &window, sizeof(unsigned long));
+		if (write_full(fd[0], &window, sizeof(window)) == -1) {
+			DeadPipe(errno);
+			return;
+		}
 
 		w = strlen(message);
-		write(fd[0], &w, sizeof(int));
-		if (w)
-			write(fd[0], message, w);
+		if (write_full(fd[0], &w, sizeof(w)) == -1 ||
+		    (w && write_full(fd[0], message, (size_t)w) == -1)) {
+			DeadPipe(errno);
+			return;
+		}
 
 		/* keep going */
 		w = 1;
-		write(fd[0], &w, sizeof(int));
+		if (write_full(fd[0], &w, sizeof(w)) == -1) {
+			DeadPipe(errno);
+			return;
+		}
 	}
 }
 
@@ -128,6 +167,9 @@ SetMessageMask(int *fd, unsigned long mask)
 /***************************************************************************
  * Gets a module configuration line from fvwm. Returns nullptr if there are
  * no more lines to be had. "line" is a pointer to a char *.
+ *
+ * The returned text points into static packet storage. It remains valid only
+ * until the next GetConfigLine() call, which frees that packet buffer.
  *
  * Changed 10/19/98 by Dan Espen:
  *

@@ -87,6 +87,12 @@ constexpr unsigned int START_FLAG = 0xffffffffu;
  * send a copy of the command in an M_CONFIG_INFO command.
  */
 
+/*
+ * Module packets are native unsigned-long words, not a portable wire format.
+ * The header is [start flag, message type, total word count including the
+ * header, timestamp], followed by the body. Keep these limits in sync with
+ * the reader in libs/Module.c and the writer in fvwm/module.c.
+ */
 #define HEADER_SIZE 4
 #define MAX_BODY_SIZE (24)
 #define MAX_PACKET_SIZE (HEADER_SIZE + MAX_BODY_SIZE)

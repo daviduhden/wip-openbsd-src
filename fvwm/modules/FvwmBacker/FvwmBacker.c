@@ -29,7 +29,9 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 
+#include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -186,7 +188,7 @@ ReadFvwmPipe(void)
 
 	body = nullptr;
 	if ((count = ReadFvwmPacket(Fvwm_fd[1], header, &body)) > 0) {
-		ProcessMessage(header[1], body);
+		ProcessMessage(header[1], body, header[2] - HEADER_SIZE);
 		free(body);
 	}
 }
@@ -197,10 +199,13 @@ ReadFvwmPipe(void)
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
 ******************************************************************************/
 void
-ProcessMessage(unsigned long type, unsigned long *body)
+ProcessMessage(unsigned long type, unsigned long *body,
+    unsigned long body_words)
 {
 	if (type == M_NEW_DESK) {
-		if ((int)body[0] > DeskCount || commands[body[0]].type == -1) {
+		if (body == nullptr || body_words < 1 || commands == nullptr ||
+		    DeskCount <= 0 || body[0] >= (unsigned long)DeskCount ||
+		    commands[body[0]].type == -1) {
 			return;
 		}
 #ifdef LOGFILE
@@ -251,29 +256,20 @@ ProcessMessage(unsigned long type, unsigned long *body)
 void
 SendFvwmPipe(char *message, unsigned long window)
 {
-	int   w;
 	char *hold, *temp, *temp_msg;
 	hold = message;
 
 	while (1) {
 		temp = strchr(hold, ',');
 		if (temp != nullptr) {
-			temp_msg = malloc(temp - hold + 1);
+			temp_msg = xmalloc((size_t)(temp - hold) + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
 			hold = temp + 1;
 		} else
 			temp_msg = hold;
 
-		write(Fvwm_fd[0], &window, sizeof(unsigned long));
-
-		w = strlen(temp_msg);
-		write(Fvwm_fd[0], &w, sizeof(int));
-		write(Fvwm_fd[0], temp_msg, w);
-
-		/* keep going */
-		w = 1;
-		write(Fvwm_fd[0], &w, sizeof(int));
+		SendText(Fvwm_fd, temp_msg, window);
 
 		if (temp_msg != hold)
 			free(temp_msg);
@@ -326,22 +322,33 @@ AddCommand(char *string)
 {
 	char *temp;
 	int   num;
+	int   parse_errno;
+
 	temp = string;
 	while (isspace((unsigned char)*temp))
 		temp++;
+	errno = 0;
 	num = FvwmParseInteger(temp);
+	parse_errno = errno;
+	if (parse_errno == EINVAL || parse_errno == ERANGE || num < 0 ||
+	    num == INT_MAX) {
+		fprintf(stderr, "%s: invalid desk number in configuration\n",
+		    Module);
+		return;
+	}
 	while (*temp && !isspace((unsigned char)*temp))
 		temp++;
 	while (isspace((unsigned char)*temp))
 		temp++;
 	if (DeskCount < 1) {
-		commands = (Command *)xmalloc((num + 1) * sizeof(Command));
+		commands = (Command *)xreallocarray(
+		    nullptr, (size_t)num + 1, sizeof(*commands));
 		while (DeskCount < num + 1)
 			commands[DeskCount++].type = -1;
 	} else {
 		if (num + 1 > DeskCount) {
-			commands = (Command *)xrealloc(
-			    (char *)commands, (num + 1) * sizeof(Command));
+			commands = (Command *)xreallocarray(
+			    commands, (size_t)num + 1, sizeof(*commands));
 			while (DeskCount < num + 1)
 				commands[DeskCount++].type = -1;
 		}
