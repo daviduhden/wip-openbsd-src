@@ -65,7 +65,10 @@
 static char  *listopt_format;
 static size_t listopt_len;
 
-/* Scratch context tracking dynamically duplicated strings. */
+/*
+ * Scratch strings returned by basename(3) and dirname(3) are copied here so
+ * they remain valid until the current custom listing line has been emitted.
+ */
 struct listopt_ctx {
 	char **allocated;
 	size_t count;
@@ -131,7 +134,12 @@ listopt_store(struct listopt_ctx *ctx, const char *str)
 	return dup;
 }
 
-/* Break down a single % conversion, recording printf modifiers and keyword. */
+/*
+ * Parse one custom % conversion. A parenthesized keyword precedes the
+ * conversion character; for %T, keyword=value separates the time format from
+ * the keyword. Return 0 for a non-conversion, -1 for an incomplete one, and 1
+ * when endp can advance past a parsed conversion.
+ */
 static int
 listopt_parse_spec(
     const char *fmt, struct listopt_spec *spec, const char **endp)

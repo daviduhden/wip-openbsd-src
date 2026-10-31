@@ -528,6 +528,7 @@ fn_match(char *pattern, char *string, char **pend)
 			break;
 		case '*':
 			c = *pattern;
+			/* Recursion retries the pattern at each suffix position. */
 			/*
 			 * Collapse multiple *'s.
 			 */
@@ -637,6 +638,7 @@ mod_name(ARCHD *arcn)
 {
 	int res = 0;
 
+	/* Apply archive path policy before user-requested name changes. */
 	/*
 	 * Strip off leading '/' if appropriate.
 	 * Currently, this option is only set for the tar format.

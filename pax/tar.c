@@ -1278,6 +1278,7 @@ pax_store_kv(PAXKEY **head, const char *keyword, const char *value)
 			break;
 	}
 
+	/* An empty value removes the keyword from the selected attribute set. */
 	if (value[0] == '\0') {
 		if (kv != nullptr) {
 			*curp = kv->next;
@@ -2401,6 +2402,12 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 	/*
 	 * The pax format supposedly supports arbitrarily sized extended
 	 * record headers, this implementation doesn't.
+	 *
+	 * Parse the payload incrementally in a fixed-size buffer. A global
+	 * header updates persistent attributes; a per-file header updates the
+	 * current archive entry. In either case, the remaining payload and its
+	 * block padding must be drained before returning so the next archive
+	 * header remains aligned.
 	 */
 	char  buf[sizeof("30xx linkpath=") - 1 + PAXPATHLEN + sizeof("\n")];
 	long  len;

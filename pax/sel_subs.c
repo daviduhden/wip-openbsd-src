@@ -555,7 +555,8 @@ trng_match(ARCHD *arcn)
 /*
  * str_sec()
  *	Convert a time string in the format of [[[[[cc]yy]mm]dd]HH]MM[.SS] to
- *	seconds UTC. Tval already has current time loaded into it at entry.
+ *	time_t. Tval already has the current time loaded into it at entry, so
+ *	omitted leading fields retain their current local-time values.
  * Return:
  *	0 if converted ok, -1 otherwise
  */
@@ -635,7 +636,7 @@ str_sec(const char *p, time_t *tval)
 		return (-1);
 	}
 
-	/* convert broken-down time to UTC clock time seconds */
+	/* mktime() interprets the completed broken-down time in the local zone. */
 	if ((*tval = mktime(lt)) == -1)
 		return (-1);
 	return (0);

@@ -176,6 +176,7 @@ typedef struct {
 	int	      invalid; /* invalid handling state */
 } ARCHD;
 
+/* These predicates expect a side-effect-free type expression. */
 #define PAX_IS_REG(type) ((type) == PAX_REG || (type) == PAX_CTG)
 #define PAX_IS_HARDLINK(type) ((type) == PAX_HLK || (type) == PAX_HRG)
 #define PAX_IS_LINK(type) ((type) == PAX_SLK || PAX_IS_HARDLINK(type))
@@ -217,7 +218,7 @@ typedef struct {
 			       /* if not, trailers are assumed to be found */
 			       /* in invalid headers (i.e like tar) */
 	int (*id)(char *,      /* checks if a buffer is a valid header */
-	    int);	       /* returns 1 if it is, o.w. returns a 0 */
+	    int);	       /* returns 0 if valid, -1 otherwise */
 	int (*st_rd)(void);    /* initialize routine for read. so format */
 			       /* can set up tables etc before it starts */
 			       /* reading an archive */
@@ -297,6 +298,7 @@ constexpr int OPT_ASSIGN_COLON = 2;
 /*
  * General Macros
  */
+/* MINIMUM may evaluate its selected argument more than once. */
 #define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
 #define MAJOR(x) major(x)
 #define MINOR(x) minor(x)

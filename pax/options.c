@@ -1559,6 +1559,7 @@ opt_parse_value(const char **srcp, int consume_rest)
 	if ((buf = malloc(cap)) == nullptr)
 		return nullptr;
 
+	/* Backslash quotes the next byte; otherwise commas end a value. */
 	while (*src != '\0') {
 		if (*src == '\\' && src[1] != '\0') {
 			src++;
@@ -1728,7 +1729,10 @@ opt_common(void)
 		while (optail->fow != nullptr)
 			optail = optail->fow;
 	}
-	/* Global keyword state is per-invocation, reset before parsing formats.
+	/*
+	 * listopt is consumed here because it configures listing output rather
+	 * than an archive format. Reset keyword state before format handlers
+	 * consume the remaining options for this invocation.
 	 */
 	pax_option_reset_session();
 }
@@ -1840,6 +1844,7 @@ get_line(FILE *f)
 	size_t	size = 0;
 	ssize_t len;
 
+	/* Ignore empty lines; EOF frees any buffer allocated by getline(). */
 	do {
 		len = getline(&str, &size, f);
 		if (len == -1) {
