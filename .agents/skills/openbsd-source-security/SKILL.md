@@ -94,6 +94,16 @@ state precisely what was verified statically versus at runtime on OpenBSD.
 - All on-disk counts (`eh_entries`, `eh_max`, `reclen`, `namlen`, inode size)
   must be validated against block/inode capacity before indexing.
 - Journal replay must validate descriptor tags before use.
+- Journal scan, journal-data reads, target-block reads, and target writes must
+  fail the replay on I/O errors. Treating an I/O failure as end-of-log or
+  skipping the block can cause the caller to clear `RECOVER` and discard an
+  incomplete committed transaction.
+- Before indexing a group descriptor for the resize inode, validate that the
+  filesystem geometry contains that inode group. Failure to read the resize
+  inode metadata or its indirect block must not permit reconstruction of a
+  `BLOCK_UNINIT` bitmap that omits reserved blocks.
+- Derive block-group counts in a wide type and reject values that cannot fit
+  the in-memory count and allocation size before narrowing or allocating.
 - The revoke table keeps the newest sequence for a repeated block; its
   wraparound comparison handles a low sequence after a stored value near
   `UINT32_MAX`. Preserve coverage for both ordinary ordering and that boundary.

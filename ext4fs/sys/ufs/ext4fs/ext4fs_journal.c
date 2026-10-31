@@ -654,7 +654,7 @@ jbd2_pass_scan(struct jbd2_replay_ctx *ctx)
 			       "block %u\n",
 			    block);
 			brelse(bp);
-			break;
+			return (error);
 		}
 
 		hdr = (struct jbd2_header *)bp->b_data;
@@ -985,9 +985,8 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
 					       "target block %llu out of "
 					       "range\n",
 					    (unsigned long long)target);
-					if (flags & JBD2_FLAG_LAST_TAG)
-						break;
-					continue;
+					brelse(bp);
+					return (EIO);
 				}
 
 				/* Skip if revoked */
@@ -1003,9 +1002,9 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
 					printf("ext4fs: journal replay: "
 					       "read error block %u\n",
 					    block);
-					if (flags & JBD2_FLAG_LAST_TAG)
-						break;
-					continue;
+					brelse(dbp);
+					brelse(bp);
+					return (error);
 				}
 
 				/*
@@ -1039,9 +1038,9 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
 					printf("ext4fs: journal replay: "
 					       "can't read target %llu\n",
 					    (unsigned long long)target);
-					if (flags & JBD2_FLAG_LAST_TAG)
-						break;
-					continue;
+					brelse(wbp);
+					brelse(bp);
+					return (error);
 				}
 
 				/* Copy data */
@@ -1061,9 +1060,10 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
 					printf("ext4fs: journal replay: "
 					       "write error target %llu\n",
 					    (unsigned long long)target);
-				} else {
-					replayed++;
+					brelse(bp);
+					return (error);
 				}
+				replayed++;
 
 				if (flags & JBD2_FLAG_LAST_TAG)
 					break;
@@ -1107,7 +1107,9 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
  *
  * Called during mount when the RECOVER incompat flag is set.
  * Reads the journal superblock backup from sb_jnl_blocks,
- * runs the three-pass replay, then clears the journal.
+ * runs the three-pass replay, then clears the journal and its recovery flag.
+ * Replay writes committed, non-revoked journal blocks to the filesystem;
+ * mount code temporarily opens a read-only device read-write when needed.
  */
 int
 ext4fs_journal_replay(struct vnode *devvp, struct m_ext4fs *fs)

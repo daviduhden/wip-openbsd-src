@@ -220,7 +220,11 @@ success:
 }
 
 /*
- * Common code for mount and mountroot
+ * Common mount path for mount and mountroot. The device is opened and
+ * the superblock and group descriptors are validated before mnt_data is
+ * published. If recovery is required, journal replay may write the device
+ * even for a requested read-only mount; that mount is restored to read-only
+ * access before normal operation begins.
  */
 int
 ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
@@ -533,14 +537,27 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	struct ext4fs_dinode *rdp;
 	struct buf	     *bp;
 	daddr_t		      dblk;
-	u_int64_t	      ritb, rblk;
+	u_int64_t	      block_count, group_count, ritb, rblk;
 	u_int32_t	      rgroup, rindex, roff;
 	size_t		      gd_size;
 	int		      error, i;
 
-	mfs->m_block_group_count =
-	    howmany(mfs->m_blocks_count - mfs->m_first_data_block,
-		mfs->m_blocks_per_group);
+	if (mfs->m_blocks_count <= mfs->m_first_data_block ||
+	    mfs->m_inodes_count < 7) {
+		printf("ext4fs_sbfill: invalid filesystem geometry\n");
+		return (EIO);
+	}
+	block_count = mfs->m_blocks_count - mfs->m_first_data_block;
+	group_count = block_count / mfs->m_blocks_per_group;
+	if (block_count % mfs->m_blocks_per_group != 0)
+		group_count++;
+	if (group_count > UINT32_MAX ||
+	    group_count > SIZE_MAX /
+		sizeof(struct ext4fs_block_group_descriptor)) {
+		printf("ext4fs_sbfill: block group count too large\n");
+		return (EIO);
+	}
+	mfs->m_block_group_count = (u_int32_t)group_count;
 
 	mfs->m_block_size_shift =
 	    EXT4FS_LOG_MIN_BLOCK_SIZE + mfs->m_log_block_size;
@@ -561,16 +578,6 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 
 	gd_size = mfs->m_block_group_count *
 	    sizeof(struct ext4fs_block_group_descriptor);
-	/*
-	 * Reject descriptor tables that cannot be represented: the
-	 * count comes from on-disk fields and the multiplication
-	 * must not wrap the address space before allocation.
-	 */
-	if (mfs->m_block_group_count >
-	    SIZE_MAX / sizeof(struct ext4fs_block_group_descriptor)) {
-		printf("ext4fs_sbfill: block group count too large\n");
-		return (EIO);
-	}
 	mfs->m_gd = malloc(gd_size, M_UFSMNT, M_WAITOK);
 
 	dblk = (mfs->m_first_data_block + 1) << mfs->m_fs_block_to_disk_block;
@@ -617,6 +624,10 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	mfs->m_resize_dind_block = 0;
 	rgroup = (7 - 1) / mfs->m_inodes_per_group;
 	rindex = (7 - 1) % mfs->m_inodes_per_group;
+	if (rgroup >= mfs->m_block_group_count) {
+		printf("ext4fs_sbfill: resize inode group out of range\n");
+		return (EIO);
+	}
 	ritb = letoh32(mfs->m_gd[rgroup].bgd_inode_table_block_lo);
 	if (mfs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_64BIT)
 		ritb |= (u_int64_t)letoh32(
@@ -634,6 +645,7 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	    devvp, (daddr_t)EXT4FS_FSBTODB(mfs, rblk), mfs->m_block_size, &bp);
 	if (error) {
 		brelse(bp);
+		return (error);
 	} else {
 		rdp = (struct ext4fs_dinode *)((char *)bp->b_data + roff);
 		mfs->m_resize_dind_block = letoh32(rdp->i_block[13]);
@@ -643,6 +655,11 @@ ext4fs_sbfill(struct vnode *devvp, struct m_ext4fs *mfs)
 	return (0);
 }
 
+/*
+ * Preserve the disk representation while deriving host-order values used
+ * by VFS and block-address calculations. The 64-bit high fields are valid
+ * only when the filesystem advertises the 64-bit incompat feature.
+ */
 void
 ext4fs_sbload(struct ext4fs *sble, struct m_ext4fs *dest)
 {

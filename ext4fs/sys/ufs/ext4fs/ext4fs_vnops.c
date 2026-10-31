@@ -493,6 +493,8 @@ ext4fs_blkalloc(struct inode *ip, u_int64_t goal, u_int32_t count,
 					brelse(dbp);
 				} else {
 					brelse(dbp);
+					brelse(bp);
+					return (error);
 				}
 			}
 			gd->bgd_flags = htole16(letoh16(gd->bgd_flags) &
