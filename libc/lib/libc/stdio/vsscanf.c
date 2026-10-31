@@ -33,7 +33,6 @@
 
 #include <stdio.h>
 #include <string.h>
-
 #include "local.h"
 
 static int

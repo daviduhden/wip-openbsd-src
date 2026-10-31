@@ -34,7 +34,6 @@
 
 #include <errno.h>
 #include <stdio.h>
-
 #include "local.h"
 
 int
@@ -45,7 +44,7 @@ fdclose(FILE *fp, int *fdp)
 	if (fdp != NULL)
 		*fdp = -1;
 
-	if (fp->_flags == 0) { /* not open! */
+	if (fp->_flags == 0) {	/* not open! */
 		errno = EBADF;
 		return EOF;
 	}

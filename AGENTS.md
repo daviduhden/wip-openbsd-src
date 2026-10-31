@@ -107,6 +107,13 @@ reformat a whole file or tree to satisfy it. Existing style wins, and
   the OpenBSD kernel build does not select C23.
 - `libc` additions must remain usable by the C11/C17/C23 header matrix and by
   the OpenBSD libc build.
+- When synchronizing `libc/` with OpenBSD `-current`, use the exact revision
+  in `libc/UPSTREAM` as BASE and perform a three-way merge against the new
+  upstream revision. Preserve local ISO C headers, implementations, tests,
+  ABI entries, and documentation unless upstream supplies equivalent
+  behavior; verify equivalence before removing local code. Regenerate and
+  validate `libc/patch` against the new upstream snapshot before advancing
+  `libc/UPSTREAM`.
 - Do not introduce compiler extensions unless the surrounding file already
   uses them and OpenBSD's clang supports them.
 - When preparing an upstream patch, do not assume upstream accepts C23.

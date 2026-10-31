@@ -30,15 +30,14 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
-
 #include <unistd.h>
 
 long
 gethostid(void)
 {
-	const int mib[2] = {CTL_KERN, KERN_HOSTID};
-	size_t	  size;
-	long	  value;
+	const int mib[2] = { CTL_KERN, KERN_HOSTID };
+	size_t size;
+	long value;
 
 	size = sizeof value;
 	if (sysctl(mib, 2, &value, &size, NULL, 0) == -1)

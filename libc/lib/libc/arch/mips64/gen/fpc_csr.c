@@ -21,7 +21,6 @@
  */
 
 #include <sys/types.h>
-
 #include <machine/fpu.h>
 
 int
@@ -29,7 +28,7 @@ get_fpc_csr()
 {
 	int32_t csr;
 
-	__asm__("cfc1 %0,$31" : "=r"(csr));
+	__asm__("cfc1 %0,$31" : "=r" (csr));
 	return csr;
 }
 
@@ -38,8 +37,8 @@ set_fpc_csr(int csr)
 {
 	int32_t oldcsr;
 
-	__asm__("cfc1 %0,$31" : "=r"(oldcsr));
-	__asm__("ctc1 %0,$31" ::"r"(csr));
+	__asm__("cfc1 %0,$31" : "=r" (oldcsr));
+	__asm__("ctc1 %0,$31" :: "r" (csr));
 
 	return oldcsr;
 }

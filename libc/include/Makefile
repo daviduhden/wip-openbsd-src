@@ -132,7 +132,7 @@ copies:
 	if test ${MACHINE} != ${MACHINE_CPU} -a \
 	    -d ../sys/arch/${MACHINE_CPU}/include; then \
 		${INSTALL} -d -o ${BINOWN} -g ${BINGRP} -m 755 \
-	    	    ${DESTDIR}/usr/include/${MACHINE_CPU}; \
+		    ${DESTDIR}/usr/include/${MACHINE_CPU}; \
 		pax -rw -pa -s "|\.\./sys/arch/${MACHINE_CPU}/include||" \
 		    ../sys/arch/${MACHINE_CPU}/include/*.h \
 		    ${DESTDIR}/usr/include/${MACHINE_CPU}; \

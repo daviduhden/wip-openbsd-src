@@ -33,12 +33,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <wchar.h>
-
-#include "fvwrite.h"
 #include "local.h"
+#include "fvwrite.h"
 
 int
-fputws(const wchar_t *__restrict ws, FILE *__restrict fp)
+fputws(const wchar_t * __restrict ws, FILE * __restrict fp)
 {
 	FLOCKFILE(fp);
 	_SET_ORIENTATION(fp, 1);

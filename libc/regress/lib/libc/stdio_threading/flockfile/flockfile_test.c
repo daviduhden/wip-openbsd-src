@@ -1,5 +1,4 @@
-/*	$OpenBSD: flockfile_test.c,v 1.1 2026/01/19 23:01:00 guenther Exp $
- */
+/*	$OpenBSD: flockfile_test.c,v 1.1 2026/01/19 23:01:00 guenther Exp $	*/
 /*
  * Copyright (c) 2026 Philip Guenther <guenther@openbsd.org>
  *
@@ -16,14 +15,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <pthread.h>
 #include <stdio.h>
-
+#include <pthread.h>
 #include "local.h"
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t	cond = PTHREAD_COND_INITIALIZER;
-int		did_test1 = 0;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+int did_test1 = 0;
 
 static void *
 test1(void *v)
@@ -49,7 +47,7 @@ test1(void *v)
 int
 main(void)
 {
-	int	  fd, r;
+	int fd, r;
 	pthread_t thr;
 
 	/*

@@ -15,7 +15,6 @@
  */
 
 #include <stdlib.h>
-
 #include "cancel.h"
 
 void

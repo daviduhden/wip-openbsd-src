@@ -4,7 +4,6 @@
  */
 
 #include <sys/types.h>
-
 #include <endian.h>
 
 #undef htons

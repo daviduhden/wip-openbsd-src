@@ -29,7 +29,6 @@
  */
 
 #include <sys/time.h>
-
 #include <unistd.h>
 
 unsigned int
@@ -43,5 +42,5 @@ sleep(unsigned int seconds)
 	if (nanosleep(&rqt, &rmt) == 0)
 		rmt.tv_sec = 0;
 
-	return (rmt.tv_sec);
+	return(rmt.tv_sec);
 }

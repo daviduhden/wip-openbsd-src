@@ -28,9 +28,8 @@
  */
 
 #include <sys/types.h>
-
-#include <errno.h>
 #include <signal.h>
+#include <errno.h>
 
 /*
  * Backwards-compatible killpg().

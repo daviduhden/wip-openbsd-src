@@ -32,7 +32,6 @@
  */
 
 #include <stdio.h>
-
 #include "local.h"
 
 /*
@@ -43,7 +42,7 @@
 int
 fileno(FILE *fp)
 {
-	int ret;
+	int     ret;
 
 	FLOCKFILE(fp);
 	ret = __sfileno(fp);

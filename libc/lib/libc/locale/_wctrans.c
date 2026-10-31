@@ -59,12 +59,11 @@
  * SUCH DAMAGE.
  */
 
+#include <wctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wctype.h>
-
-#include "_wctrans_local.h"
 #include "runetype.h"
+#include "_wctrans_local.h"
 
 /*
  * _wctrans_init:
@@ -88,8 +87,8 @@ _wctrans_init(_RuneLocale *rl)
 wint_t
 _towctrans_ext(wint_t c, struct _WCTransEntry *te)
 {
-	rune_t	    c0;
-	uint32_t    x;
+	rune_t c0;
+	uint32_t x;
 	_RuneRange *rr;
 	_RuneEntry *base, *re;
 

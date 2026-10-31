@@ -36,7 +36,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#include <db.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -44,18 +43,19 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <db.h>
 #include "recno.h"
 
 DB *
-__rec_open(const char *fname, int fd, int flags, int mode,
-    const RECNOINFO *openinfo, int dflags)
+__rec_open(const char *fname, int fd, int flags, int mode, const RECNOINFO *openinfo,
+    int dflags)
 {
-	BTREE	   *t;
-	BTREEINFO   btopeninfo;
-	DB	   *dbp;
-	PAGE	   *h;
+	BTREE *t;
+	BTREEINFO btopeninfo;
+	DB *dbp;
+	PAGE *h;
 	struct stat sb;
-	int	    rfd, sverrno;
+	int rfd, sverrno;
 
 	/* Open the user's file -- if this fails, we're done. */
 	if (fname != NULL) {
@@ -78,11 +78,10 @@ __rec_open(const char *fname, int fd, int flags, int mode,
 		btopeninfo.compare = NULL;
 		btopeninfo.prefix = NULL;
 		btopeninfo.lorder = openinfo->lorder;
-		dbp = __bt_open(openinfo->bfname, -1, O_RDWR, S_IRUSR | S_IWUSR,
-		    &btopeninfo, dflags);
+		dbp = __bt_open(openinfo->bfname, -1,
+		    O_RDWR, S_IRUSR | S_IWUSR, &btopeninfo, dflags);
 	} else
-		dbp = __bt_open(
-		    NULL, -1, O_RDWR, S_IRUSR | S_IWUSR, NULL, dflags);
+		dbp = __bt_open(NULL, -1, O_RDWR, S_IRUSR | S_IWUSR, NULL, dflags);
 	if (dbp == NULL)
 		goto err;
 
@@ -125,8 +124,7 @@ __rec_open(const char *fname, int fd, int flags, int mode,
 			default:
 				goto einval;
 			}
-		slow:
-			if ((t->bt_rfp = fdopen(rfd, "r")) == NULL)
+slow:			if ((t->bt_rfp = fdopen(rfd, "r")) == NULL)
 				goto err;
 			F_SET(t, R_CLOSEFP);
 			t->bt_irec =
@@ -178,10 +176,8 @@ __rec_open(const char *fname, int fd, int flags, int mode,
 		goto err;
 	return (dbp);
 
-einval:
-	errno = EINVAL;
-err:
-	sverrno = errno;
+einval:	errno = EINVAL;
+err:	sverrno = errno;
 	if (dbp != NULL)
 		(void)__bt_close(dbp);
 	if (fname != NULL)

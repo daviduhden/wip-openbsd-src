@@ -29,7 +29,6 @@
  */
 
 #include <sys/types.h>
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +36,8 @@
 void
 __assert(const char *file, int line, const char *failedexpr)
 {
-	(void)fprintf(stderr, "assertion \"%s\" failed: file \"%s\", line %d\n",
+	(void)fprintf(stderr,
+	    "assertion \"%s\" failed: file \"%s\", line %d\n",
 	    failedexpr, file, line);
 	abort();
 	/* NOTREACHED */

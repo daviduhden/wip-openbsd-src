@@ -16,7 +16,6 @@
  */
 
 #include <time.h>
-
 #include "cancel.h"
 
 int

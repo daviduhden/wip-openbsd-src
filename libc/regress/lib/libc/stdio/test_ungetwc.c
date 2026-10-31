@@ -1,5 +1,4 @@
-/*	$OpenBSD: test_ungetwc.c,v 1.1 2025/05/25 05:32:45 yasuoka Exp $
- */
+/*	$OpenBSD: test_ungetwc.c,v 1.1 2025/05/25 05:32:45 yasuoka Exp $	*/
 
 /*
  * Copyright (c) 2025 YASUOKA Masahiko <yasuoka@yasuoka.net>
@@ -18,17 +17,17 @@
  */
 
 #include <assert.h>
-#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <locale.h>
 #include <wchar.h>
 
 /* we use assert() */
-#undef NDEBUG
+#undef	NDEBUG
 
-#define TMPFILENAME "test_ungetwc.tmp"
+#define	TMPFILENAME	"test_ungetwc.tmp"
 
 void setupw(void);
 void test_fflush_ungetwc0(void);
@@ -36,7 +35,7 @@ void test_fflush_ungetwc0(void);
 void
 setupw(void)
 {
-	FILE *fp;
+	FILE	*fp;
 
 	/* common setup */
 	unlink(TMPFILENAME);
@@ -51,20 +50,20 @@ setupw(void)
 void
 test_fflush_ungetwc0(void)
 {
-	int	r;
-	wchar_t buf[80];
-	FILE   *fp;
+	int	 r;
+	wchar_t	 buf[80];
+	FILE	*fp;
 
 	setupw();
 
 	fp = fopen(TMPFILENAME, "r");
 
 	assert(fp != NULL);
-	assert(fgetwc(fp) == L'\u3053'); /* Ko */
-	assert(fgetwc(fp) == L'\u3093'); /* N  */
-	assert(fgetwc(fp) == L'\u306b'); /* Ni */
-	assert(fgetwc(fp) == L'\u3061'); /* Ti */
-	assert(fgetwc(fp) == L'\u308f'); /* Wa */
+	assert(fgetwc(fp) == L'\u3053');	/* Ko */
+	assert(fgetwc(fp) == L'\u3093');	/* N  */
+	assert(fgetwc(fp) == L'\u306b');	/* Ni */
+	assert(fgetwc(fp) == L'\u3061');	/* Ti */
+	assert(fgetwc(fp) == L'\u308f');	/* Wa */
 
 	/* push 263A(smile) back */
 	assert(ungetwc(L'\u263a', fp));

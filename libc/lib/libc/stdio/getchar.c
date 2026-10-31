@@ -45,6 +45,7 @@ getchar_unlocked(void)
 }
 DEF_WEAK(getchar_unlocked);
 
+
 /*
  * A subroutine version of the macro getchar.
  */

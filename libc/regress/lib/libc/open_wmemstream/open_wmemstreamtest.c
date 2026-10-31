@@ -1,5 +1,4 @@
-/*	$OpenBSD: open_wmemstreamtest.c,v 1.1 2026/05/08 14:37:16 millert Exp $
- */
+/*	$OpenBSD: open_wmemstreamtest.c,v 1.1 2026/05/08 14:37:16 millert Exp $ */
 
 /*
  * Copyright (c) 2011 Martin Pieuchot <mpi@openbsd.org>
@@ -21,19 +20,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <wchar.h>
+#include <unistd.h>
 
 #define OFFSET 16384
 
-const wchar_t start[] = {'s', 't', 'a', 'r', 't', 0};
-const wchar_t hello[] = {'h', 'e', 'l', 'l', 'o', 0};
+const wchar_t start[] = { 's', 't', 'a', 'r', 't', 0 };
+const wchar_t hello[] = { 'h', 'e', 'l', 'l', 'o', 0 };
 
 int
 main(void)
 {
 	FILE	*fp;
-	wchar_t *buf = (wchar_t *)0xff;
+	wchar_t	*buf = (wchar_t *)0xff;
 	size_t	 size = 0;
 	off_t	 off;
 	int	 i, failures = 0;
@@ -80,8 +79,8 @@ main(void)
 	}
 
 	if (size != OFFSET + wcslen(hello)) {
-		warnx("failed, size %zu should be %zu. (8)", size,
-		    OFFSET + wcslen(hello));
+		warnx("failed, size %zu should be %zu. (8)",
+		    size, OFFSET + wcslen(hello));
 		failures++;
 	}
 
@@ -101,8 +100,8 @@ main(void)
 	}
 
 	if (size != wcslen(start)) {
-		warnx("failed, size %zu should be %zu. (12)", size,
-		    wcslen(start));
+		warnx("failed, size %zu should be %zu. (12)",
+		    size, wcslen(start));
 		failures++;
 	}
 
@@ -137,8 +136,8 @@ main(void)
 	}
 
 	if (size != OFFSET + wcslen(hello)) {
-		warnx("failed, size %zu should be %zu. (18)", size,
-		    OFFSET + wcslen(hello));
+		warnx("failed, size %zu should be %zu. (18)",
+		    size, OFFSET + wcslen(hello));
 		failures++;
 	}
 
@@ -179,7 +178,8 @@ main(void)
 	}
 
 	if (size != 12) {
-		warnx("failed, size %zu should be %u.  (26)", size, 12);
+		warnx("failed, size %zu should be %u.  (26)",
+		    size, 12);
 		failures++;
 	}
 

@@ -1,5 +1,4 @@
-/*	$OpenBSD: res_send_async.c,v 1.45 2026/07/21 09:50:31 florian Exp $
- */
+/*	$OpenBSD: res_send_async.c,v 1.45 2026/07/21 09:50:31 florian Exp $	*/
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -19,14 +18,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
-
 #include <netinet/in.h>
-
 #include <arpa/nameser.h>
+#include <netdb.h>
+
 #include <asr.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <netdb.h>
 #include <poll.h>
 #include <resolv.h> /* for res_random */
 #include <stdlib.h>
@@ -35,31 +33,31 @@
 
 #include "asr_private.h"
 
-#define OP_QUERY (0)
+#define OP_QUERY    (0)
 
-static int  res_send_async_run(struct asr_query *, struct asr_result *);
-static int  sockaddr_connect(const struct sockaddr *, int);
-static int  udp_send(struct asr_query *);
-static int  udp_recv(struct asr_query *);
-static int  tcp_write(struct asr_query *);
-static int  tcp_read(struct asr_query *);
-static int  validate_packet(struct asr_query *);
+static int res_send_async_run(struct asr_query *, struct asr_result *);
+static int sockaddr_connect(const struct sockaddr *, int);
+static int udp_send(struct asr_query *);
+static int udp_recv(struct asr_query *);
+static int tcp_write(struct asr_query *);
+static int tcp_read(struct asr_query *);
+static int validate_packet(struct asr_query *);
 static void clear_ad(struct asr_result *);
-static int  setup_query(
-    struct asr_query *, const char *, const char *, int, int);
+static int setup_query(struct asr_query *, const char *, const char *, int, int);
 static int ensure_ibuf(struct asr_query *, size_t);
 static int iter_ns(struct asr_query *);
 
 #define AS_NS_SA(p) ((p)->as_ctx->ac_ns[(p)->as.dns.nsidx - 1])
 
+
 struct asr_query *
 res_send_async(const unsigned char *buf, int buflen, void *asr)
 {
-	struct asr_ctx	     *ac;
-	struct asr_query     *as;
-	struct asr_unpack     p;
-	struct asr_dns_header h;
-	struct asr_dns_query  q;
+	struct asr_ctx		*ac;
+	struct asr_query	*as;
+	struct asr_unpack	 p;
+	struct asr_dns_header	 h;
+	struct asr_dns_query	 q;
 
 	DPRINT_PACKET("asr: res_send_async()", buf, buflen);
 
@@ -93,7 +91,7 @@ res_send_async(const unsigned char *buf, int buflen, void *asr)
 
 	_asr_ctx_unref(ac);
 	return (as);
-err:
+    err:
 	if (as)
 		_asr_async_free(as);
 	_asr_ctx_unref(ac);
@@ -123,10 +121,9 @@ res_query_async(const char *name, int class, int type, void *asr)
 DEF_WEAK(res_query_async);
 
 struct asr_query *
-_res_query_async_ctx(
-    const char *name, int class, int type, struct asr_ctx *a_ctx)
+_res_query_async_ctx(const char *name, int class, int type, struct asr_ctx *a_ctx)
 {
-	struct asr_query *as;
+	struct asr_query	*as;
 
 	DPRINT("asr: res_query_async_ctx(\"%s\", %i, %i)\n", name, class, type);
 
@@ -142,7 +139,7 @@ _res_query_async_ctx(
 
 	return (as);
 
-err:
+    err:
 	if (as)
 		_asr_async_free(as);
 
@@ -152,7 +149,7 @@ err:
 static int
 res_send_async_run(struct asr_query *as, struct asr_result *ar)
 {
-next:
+    next:
 	switch (as->as_state) {
 
 	case ASR_STATE_INIT:
@@ -313,7 +310,7 @@ sockaddr_connect(const struct sockaddr *sa, int socktype)
 	int errno_save, sock;
 
 	if ((sock = socket(sa->sa_family,
-		 socktype | SOCK_NONBLOCK | SOCK_DNS | SOCK_CLOEXEC, 0)) == -1)
+	    socktype | SOCK_NONBLOCK | SOCK_DNS | SOCK_CLOEXEC, 0)) == -1)
 		goto fail;
 
 	if (connect(sock, sa, sa->sa_len) == -1) {
@@ -329,7 +326,7 @@ sockaddr_connect(const struct sockaddr *sa, int socktype)
 
 	return (sock);
 
-fail:
+    fail:
 
 	if (sock != -1) {
 		errno_save = errno;
@@ -346,13 +343,13 @@ fail:
  * Return 0 on success, set errno and return -1 on error.
  */
 static int
-setup_query(struct asr_query *as, const char *name, const char *dom, int class,
-    int type)
+setup_query(struct asr_query *as, const char *name, const char *dom,
+	int class, int type)
 {
-	struct asr_pack	      p;
-	struct asr_dns_header h;
-	char		      fqdn[MAXDNAME];
-	char		      dname[MAXDNAME];
+	struct asr_pack		p;
+	struct asr_dns_header	h;
+	char			fqdn[MAXDNAME];
+	char			dname[MAXDNAME];
 
 	if (as->as_flags & ASYNC_EXTOBUF) {
 		errno = EINVAL;
@@ -397,8 +394,8 @@ setup_query(struct asr_query *as, const char *name, const char *dom, int class,
 	_asr_pack_header(&p, &h);
 	_asr_pack_query(&p, type, class, dname);
 	if (as->as_ctx->ac_options & (RES_USE_EDNS0 | RES_USE_DNSSEC))
-		_asr_pack_edns0(
-		    &p, MAXPACKETSZ, as->as_ctx->ac_options & RES_USE_DNSSEC);
+		_asr_pack_edns0(&p, MAXPACKETSZ,
+		    as->as_ctx->ac_options & RES_USE_DNSSEC);
 	if (p.err) {
 		DPRINT("error packing query");
 		errno = EINVAL;
@@ -431,10 +428,10 @@ setup_query(struct asr_query *as, const char *name, const char *dom, int class,
 static int
 udp_send(struct asr_query *as)
 {
-	ssize_t n;
+	ssize_t	n;
 	int	save_errno;
 #ifdef DEBUG
-	char buf[256];
+	char		buf[256];
 #endif
 
 	DPRINT("asr: [%p] connecting to %s UDP\n", as,
@@ -464,8 +461,8 @@ udp_send(struct asr_query *as)
 static int
 udp_recv(struct asr_query *as)
 {
-	ssize_t n;
-	int	save_errno;
+	ssize_t		 n;
+	int		 save_errno;
 
 	if (ensure_ibuf(as, MAXPACKETSZ) == -1) {
 		save_errno = errno;
@@ -502,14 +499,14 @@ udp_recv(struct asr_query *as)
 static int
 tcp_write(struct asr_query *as)
 {
-	struct msghdr msg;
-	struct iovec  iov[2];
-	uint16_t      len;
-	ssize_t	      n;
-	size_t	      offset;
-	int	      i;
+	struct msghdr	msg;
+	struct iovec	iov[2];
+	uint16_t	len;
+	ssize_t		n;
+	size_t		offset;
+	int		i;
 #ifdef DEBUG
-	char buf[256];
+	char		buf[256];
 #endif
 
 	/* First try to connect if not already */
@@ -518,7 +515,7 @@ tcp_write(struct asr_query *as)
 		    _asr_print_sockaddr(AS_NS_SA(as), buf, sizeof buf));
 		as->as_fd = sockaddr_connect(AS_NS_SA(as), SOCK_STREAM);
 		if (as->as_fd == -1)
-			return (-1);	/* errno set */
+			return (-1); /* errno set */
 		as->as.dns.datalen = 0; /* bytes sent */
 		return (1);
 	}
@@ -543,7 +540,7 @@ tcp_write(struct asr_query *as)
 	msg.msg_iov = iov;
 	msg.msg_iovlen = i;
 
-send_again:
+    send_again:
 	n = sendmsg(as->as_fd, &msg, MSG_NOSIGNAL);
 	if (n == -1) {
 		if (errno == EINTR)
@@ -577,11 +574,11 @@ close:
 static int
 tcp_read(struct asr_query *as)
 {
-	ssize_t	      n;
-	size_t	      offset, len;
-	char	     *pos;
-	int	      save_errno, nfds;
-	struct pollfd pfd;
+	ssize_t		 n;
+	size_t		 offset, len;
+	char		*pos;
+	int		 save_errno, nfds;
+	struct pollfd	 pfd;
 
 	/* We must read the packet len first */
 	if (as->as.dns.datalen < sizeof(as->as.dns.pktlen)) {
@@ -589,7 +586,7 @@ tcp_read(struct asr_query *as)
 		pos = (char *)(&as->as.dns.pktlen) + as->as.dns.datalen;
 		len = sizeof(as->as.dns.pktlen) - as->as.dns.datalen;
 
-	read_again0:
+    read_again0:
 		n = read(as->as_fd, pos, len);
 		if (n == -1) {
 			if (errno == EINTR)
@@ -610,7 +607,7 @@ tcp_read(struct asr_query *as)
 
 		pfd.fd = as->as_fd;
 		pfd.events = POLLIN;
-	poll_again:
+	    poll_again:
 		nfds = poll(&pfd, 1, 0);
 		if (nfds == -1) {
 			if (errno == EINTR)
@@ -623,9 +620,9 @@ tcp_read(struct asr_query *as)
 
 	offset = as->as.dns.datalen - sizeof(as->as.dns.pktlen);
 	pos = as->as.dns.ibuf + offset;
-	len = as->as.dns.ibuflen - offset;
+	len =  as->as.dns.ibuflen - offset;
 
-read_again:
+    read_again:
 	n = read(as->as_fd, pos, len);
 	if (n == -1) {
 		if (errno == EINTR)
@@ -639,8 +636,7 @@ read_again:
 	as->as.dns.datalen += n;
 
 	/* See if we got all the advertised bytes. */
-	if (as->as.dns.datalen !=
-	    as->as.dns.ibuflen + sizeof(as->as.dns.pktlen))
+	if (as->as.dns.datalen != as->as.dns.ibuflen + sizeof(as->as.dns.pktlen))
 		return (1);
 
 	DPRINT_PACKET("asr_tcp_read()", as->as.dns.ibuf, as->as.dns.ibuflen);
@@ -664,7 +660,7 @@ close:
 static int
 ensure_ibuf(struct asr_query *as, size_t n)
 {
-	char *t;
+	char	*t;
 
 	if (as->as.dns.ibufsize >= n)
 		return (0);
@@ -685,12 +681,12 @@ ensure_ibuf(struct asr_query *as, size_t n)
 static int
 validate_packet(struct asr_query *as)
 {
-	struct asr_unpack     p;
-	struct asr_dns_header h;
-	struct asr_dns_query  q;
-	struct asr_dns_rr     rr;
-	int		      r;
-	char		      q_dname[MAXDNAME], as_dname[MAXDNAME];
+	struct asr_unpack	 p;
+	struct asr_dns_header	 h;
+	struct asr_dns_query	 q;
+	struct asr_dns_rr	 rr;
+	int			 r;
+	char			 q_dname[MAXDNAME], as_dname[MAXDNAME];
 
 	_asr_unpack_init(&p, as->as.dns.ibuf, as->as.dns.ibuflen);
 
@@ -722,10 +718,11 @@ validate_packet(struct asr_query *as)
 	_asr_strdname(q.q_dname, q_dname, sizeof(q_dname));
 	_asr_strdname(as->as.dns.dname, as_dname, sizeof(as_dname));
 
-	if (q.q_type != as->as.dns.type || q.q_class != as->as.dns.class ||
+	if (q.q_type != as->as.dns.type ||
+	    q.q_class != as->as.dns.class ||
 	    strcasecmp(q_dname, as_dname)) {
-		DPRINT("incorrect type/class/dname '%s' != '%s'\n", q_dname,
-		    as_dname);
+		DPRINT("incorrect type/class/dname '%s' != '%s'\n",
+		    q_dname, as_dname);
 		goto inval;
 	}
 
@@ -754,7 +751,7 @@ validate_packet(struct asr_query *as)
 
 	return (0);
 
-inval:
+    inval:
 	errno = EINVAL;
 	return (-1);
 }
@@ -765,8 +762,8 @@ inval:
 static void
 clear_ad(struct asr_result *ar)
 {
-	struct asr_dns_header *h;
-	uint16_t	       flags;
+	struct asr_dns_header	*h;
+	uint16_t		 flags;
 
 	h = (struct asr_dns_header *)ar->ar_data;
 	flags = ntohs(h->flags);

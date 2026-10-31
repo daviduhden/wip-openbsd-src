@@ -33,10 +33,8 @@
 
 #include <sys/types.h>
 #include <sys/file.h>
-
-#include <errno.h>
 #include <stdio.h>
-
+#include <errno.h>
 #include "local.h"
 
 /*
@@ -51,30 +49,30 @@ __sflags(const char *mode, int *optr)
 
 	switch (*mode++) {
 
-	case 'r': /* open for reading */
+	case 'r':	/* open for reading */
 		ret = __SRD;
 		m = O_RDONLY;
 		o = 0;
 		break;
 
-	case 'w': /* open for writing */
+	case 'w':	/* open for writing */
 		ret = __SWR;
 		m = O_WRONLY;
 		o = O_CREAT | O_TRUNC;
 		break;
 
-	case 'a': /* open for appending */
+	case 'a':	/* open for appending */
 		ret = __SWR;
 		m = O_WRONLY;
 		o = O_CREAT | O_APPEND;
 		break;
 
-	default: /* illegal mode */
+	default:	/* illegal mode */
 		errno = EINVAL;
 		return (0);
 	}
 
-	while (*mode != '\0')
+	while (*mode != '\0') 
 		switch (*mode++) {
 		case 'b':
 			break;
@@ -90,10 +88,10 @@ __sflags(const char *mode, int *optr)
 				o |= O_EXCL;
 			break;
 		default:
-		/*
-		 * Lots of software passes other extension mode
-		 * letters, like Window's 't'
-		 */
+			/*
+			 * Lots of software passes other extension mode
+			 * letters, like Window's 't'
+			 */
 #if 0
 			errno = EINVAL;
 			return (0);

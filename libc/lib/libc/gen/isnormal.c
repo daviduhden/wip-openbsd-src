@@ -16,9 +16,8 @@
  */
 
 #include <sys/types.h>
-
-#include <float.h>
 #include <machine/ieee.h>
+#include <float.h>
 #include <math.h>
 
 int
@@ -37,6 +36,6 @@ __isnormalf(float f)
 	return (p->sng_exp != 0 && p->sng_exp != SNG_EXP_INFNAN);
 }
 
-#if LDBL_MANT_DIG == DBL_MANT_DIG
+#if	LDBL_MANT_DIG == DBL_MANT_DIG
 __strong_alias(__isnormall, __isnormal);
-#endif /* LDBL_MANT_DIG == DBL_MANT_DIG */
+#endif	/* LDBL_MANT_DIG == DBL_MANT_DIG */

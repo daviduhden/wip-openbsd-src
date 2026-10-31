@@ -16,10 +16,18 @@ pthread implementation:
 
 C17 introduced no new headers.
 
-The upstream revision, import method and the files that were copied
-unchanged are recorded in [UPSTREAM](UPSTREAM).  The directory holds the
-whole change: there is no separate patch file.  The detailed audit,
-conformance matrix and test results are in [REPORT.md](REPORT.md).
+The upstream revision and import method are recorded in [UPSTREAM](UPSTREAM).
+The source-relative delta against that exact revision is maintained in
+[patch](patch), which excludes host-only tests and project reports.  The
+detailed audit, conformance matrix and test results are in
+[REPORT.md](REPORT.md).
+
+When synchronizing with a later `-current`, use the recorded revision as the
+three-way merge base.  Update upstream files first, then reapply and verify
+the local ISO C interfaces, implementations, tests, ABI entries, and manual
+pages.  Do not remove a local interface until equivalent upstream behavior
+has been confirmed.  Regenerate and apply-check `patch` against the new
+revision before updating `UPSTREAM`.
 
 ## Layout
 

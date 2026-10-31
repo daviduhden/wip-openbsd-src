@@ -1,0 +1,4550 @@
+Index: include/Makefile
+===================================================================
+--- include/Makefile
++++ include/Makefile
+@@ -24,9 +24,10 @@ FILES=	a.out.h ar.h asr.h assert.h \
+ 	paths.h poll.h pthread.h pthread_np.h pwd.h \
+ 	ranlib.h readpassphrase.h regex.h resolv.h rmd160.h \
+ 	sched.h search.h setjmp.h semaphore.h sha1.h sha2.h \
+-	signal.h siphash.h sndio.h spawn.h stdbool.h stddef.h \
++	signal.h siphash.h sndio.h spawn.h stdalign.h stdatomic.h stdbit.h \
++	stdbool.h stdckdint.h stddef.h stdnoreturn.h \
+ 	stdio.h stdio_ext.h stdlib.h string.h strings.h sysexits.h \
+-	tar.h tgmath.h tib.h time.h ttyent.h \
++	tar.h tgmath.h threads.h tib.h time.h ttyent.h \
+ 	uchar.h unistd.h utime.h utmp.h uuid.h \
+ 	vis.h  \
+ 	wchar.h wctype.h
+@@ -131,7 +132,7 @@ copies:
+ 	if test ${MACHINE} != ${MACHINE_CPU} -a \
+ 	    -d ../sys/arch/${MACHINE_CPU}/include; then \
+ 		${INSTALL} -d -o ${BINOWN} -g ${BINGRP} -m 755 \
+-	    	    ${DESTDIR}/usr/include/${MACHINE_CPU}; \
++		    ${DESTDIR}/usr/include/${MACHINE_CPU}; \
+ 		pax -rw -pa -s "|\.\./sys/arch/${MACHINE_CPU}/include||" \
+ 		    ../sys/arch/${MACHINE_CPU}/include/*.h \
+ 		    ${DESTDIR}/usr/include/${MACHINE_CPU}; \
+Index: include/stdalign.h
+===================================================================
+--- /dev/null
++++ include/stdalign.h
+@@ -0,0 +1,53 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.15: alignment <stdalign.h>.
++ *
++ * C11 provides the macros alignas and alignof, which expand to the
++ * language keywords _Alignas and _Alignof, and the macros
++ * __alignas_is_defined and __alignof_is_defined, which expand to 1.
++ *
++ * ISO/IEC 9899:2024 (C23) turned alignas and alignof into real keywords
++ * and removed all four macros from the header.  The header is therefore
++ * empty in C23, and nothing in it may shadow the keywords.  In C++ the
++ * spelling alignas/alignof is a keyword as well (C++11 and later), so the
++ * two function-like names are never defined there; the historical
++ * __alignas_is_defined/__alignof_is_defined markers are retained for
++ * source compatibility with the pre-C23 header.
++ *
++ * This header is self-contained: it depends on no other header and
++ * defines no symbol.
++ */
++
++#ifndef _STDALIGN_H_
++#define _STDALIGN_H_
++
++#if !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L)
++
++#ifndef __cplusplus
++#define alignas _Alignas
++#define alignof _Alignof
++#endif
++
++#define __alignas_is_defined 1
++#define __alignof_is_defined 1
++
++#endif /* !C23 */
++
++#endif /* !_STDALIGN_H_ */
+Index: include/stdatomic.h
+===================================================================
+--- /dev/null
++++ include/stdatomic.h
+@@ -0,0 +1,536 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.17: Atomics <stdatomic.h>,
++ * carried forward through C17 and C23.
++ *
++ * The interface is built on the compiler's atomic builtins.  Those are
++ * language-level primitives: they are the only way to obtain real atomic
++ * instructions, and using them is explicitly permitted.  The
++ * compiler-supplied <stdatomic.h> is never included; this header is the
++ * implementation.
++ *
++ * clang exposes the __c11_atomic_* builtins, which take a pointer to an
++ * atomic object and (for loads and read-modify-write operations) return the
++ * value directly, aggregates included.  GCC exposes the __atomic_* builtins,
++ * which instead take the address of a result object; those are wrapped in
++ * GNU statement expressions whose temporaries are ordinary, non-atomic
++ * objects, computed with __typeof__((void)0, *p).  Each variant evaluates
++ * every argument exactly once and every statement expression is wrapped in
++ * __extension__ so that it does not trip -Wpedantic.
++ *
++ * A type whose size is not lock-free cannot be handled by a single
++ * instruction.  The compiler would normally emit a call to its atomic
++ * runtime (libatomic), which the base system does not provide.  Instead,
++ * every operation first tests __atomic_always_lock_free() (a compile-time
++ * constant) and, when it is false, calls a small lock-based fallback in
++ * libc (__atomic_fallback_*); the constant test is folded away so the
++ * compiler's runtime is never referenced.  The fallback acquires a
++ * per-address spinlock with sequential-consistency ordering, which is
++ * stronger than any memory order the standard asks for, so the requested
++ * order is always satisfied.  This makes the whole interface, including
++ * non-lock-free types, self-contained.
++ *
++ * atomic_is_lock_free() is answered with __atomic_always_lock_free(), which
++ * is a compile-time constant.  The ATOMIC_*_LOCK_FREE constants come from
++ * the compiler's own __GCC_ATOMIC_*_LOCK_FREE macros.
++ *
++ * This is a C header.  It also builds as C++ when the implementation of
++ * _Atomic(T) is available (clang); the C++ front end of GCC has no _Atomic
++ * and is diagnosed below.
++ */
++
++#ifndef _STDATOMIC_H_
++#define _STDATOMIC_H_
++
++#include <sys/cdefs.h>
++
++#if defined(__cplusplus) && !defined(__clang__)
++#error "<stdatomic.h> in C++ requires a compiler that implements _Atomic(T)"
++#endif
++
++#if defined(__STDC_NO_ATOMICS__)
++#error "<stdatomic.h> is not available: __STDC_NO_ATOMICS__ is defined"
++#endif
++
++#if defined(__has_builtin)
++#if !__has_builtin(__atomic_thread_fence) ||                                   \
++    !__has_builtin(__atomic_signal_fence) ||                                   \
++    !__has_builtin(__atomic_always_lock_free) ||                               \
++    !__has_builtin(__atomic_test_and_set)
++#error "<stdatomic.h> requires the compiler atomic builtins"
++#endif
++#endif
++
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++#define __STDC_VERSION_STDATOMIC_H__ 202311L
++#endif
++
++/*
++ * The boolean type of the atomic_bool alias and of the compare-exchange
++ * results: _Bool is a C keyword, bool is a C++ keyword.
++ */
++#ifdef __cplusplus
++#define __stdc_atomic_bool bool
++#else
++#define __stdc_atomic_bool _Bool
++#endif
++
++/*
++ * 7.17.1: lock-free property of the standard atomic types.
++ */
++#ifndef __GCC_ATOMIC_BOOL_LOCK_FREE
++#error "<stdatomic.h> requires the compiler __GCC_ATOMIC_*_LOCK_FREE macros"
++#endif
++#define ATOMIC_BOOL_LOCK_FREE __GCC_ATOMIC_BOOL_LOCK_FREE
++#define ATOMIC_CHAR_LOCK_FREE __GCC_ATOMIC_CHAR_LOCK_FREE
++#define ATOMIC_CHAR16_T_LOCK_FREE __GCC_ATOMIC_CHAR16_T_LOCK_FREE
++#define ATOMIC_CHAR32_T_LOCK_FREE __GCC_ATOMIC_CHAR32_T_LOCK_FREE
++#define ATOMIC_WCHAR_T_LOCK_FREE __GCC_ATOMIC_WCHAR_T_LOCK_FREE
++#define ATOMIC_SHORT_LOCK_FREE __GCC_ATOMIC_SHORT_LOCK_FREE
++#define ATOMIC_INT_LOCK_FREE __GCC_ATOMIC_INT_LOCK_FREE
++#define ATOMIC_LONG_LOCK_FREE __GCC_ATOMIC_LONG_LOCK_FREE
++#define ATOMIC_LLONG_LOCK_FREE __GCC_ATOMIC_LLONG_LOCK_FREE
++#define ATOMIC_POINTER_LOCK_FREE __GCC_ATOMIC_POINTER_LOCK_FREE
++#if defined(__GCC_ATOMIC_CHAR8_T_LOCK_FREE)
++#define ATOMIC_CHAR8_T_LOCK_FREE __GCC_ATOMIC_CHAR8_T_LOCK_FREE
++#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++/* char8_t is unsigned char; use its property if the compiler is silent. */
++#define ATOMIC_CHAR8_T_LOCK_FREE ATOMIC_CHAR_LOCK_FREE
++#endif
++
++/*
++ * 7.17.2: initialization.
++ *
++ * ATOMIC_VAR_INIT() was deprecated in C17 and removed in C23; it is kept
++ * for C17 and earlier (and for C++, where it still exists).
++ */
++#if !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L) ||             \
++    defined(__cplusplus)
++#define ATOMIC_VAR_INIT(value) (value)
++#endif
++
++/*
++ * 7.17.3: order and consistency.
++ *
++ * The values are the compiler's own memory order constants, so that they
++ * can be passed straight to the builtins.
++ */
++typedef enum {
++	memory_order_relaxed = __ATOMIC_RELAXED,
++	memory_order_consume = __ATOMIC_CONSUME,
++	memory_order_acquire = __ATOMIC_ACQUIRE,
++	memory_order_release = __ATOMIC_RELEASE,
++	memory_order_acq_rel = __ATOMIC_ACQ_REL,
++	memory_order_seq_cst = __ATOMIC_SEQ_CST
++} memory_order;
++
++/*
++ * kill_dependency() is not required to perform any operation; it exists to
++ * document that the returned value carries no dependency for
++ * memory_order_consume.  clang and GCC do not track such dependencies, so
++ * returning the argument unchanged is exact.
++ */
++#define kill_dependency(y) (y)
++
++/*
++ * 7.17.5: lock-free property.
++ *
++ * sizeof() does not evaluate its operand, and the pointer argument of
++ * __atomic_always_lock_free() is only consulted for known alignment.
++ */
++#define atomic_is_lock_free(obj)                                               \
++	__atomic_always_lock_free(sizeof(*(obj)), (obj))
++
++/*
++ * 7.17.6: atomic integer types.
++ *
++ * The element types are spelled with the compiler's predefined type macros
++ * so that the header does not depend on <stdint.h>.
++ */
++__extension__ typedef _Atomic(__stdc_atomic_bool) atomic_bool;
++__extension__ typedef _Atomic(char) atomic_char;
++__extension__ typedef _Atomic(signed char) atomic_schar;
++__extension__ typedef _Atomic(unsigned char) atomic_uchar;
++__extension__ typedef _Atomic(short) atomic_short;
++__extension__ typedef _Atomic(unsigned short) atomic_ushort;
++__extension__ typedef _Atomic(int) atomic_int;
++__extension__ typedef _Atomic(unsigned int) atomic_uint;
++__extension__ typedef _Atomic(long) atomic_long;
++__extension__ typedef _Atomic(unsigned long) atomic_ulong;
++__extension__ typedef _Atomic(long long) atomic_llong;
++__extension__ typedef _Atomic(unsigned long long) atomic_ullong;
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++__extension__ typedef _Atomic(__CHAR8_TYPE__) atomic_char8_t;
++#endif
++__extension__ typedef _Atomic(__CHAR16_TYPE__) atomic_char16_t;
++__extension__ typedef _Atomic(__CHAR32_TYPE__) atomic_char32_t;
++__extension__ typedef _Atomic(__WCHAR_TYPE__) atomic_wchar_t;
++__extension__ typedef _Atomic(__INT_LEAST8_TYPE__) atomic_int_least8_t;
++__extension__ typedef _Atomic(__UINT_LEAST8_TYPE__) atomic_uint_least8_t;
++__extension__ typedef _Atomic(__INT_LEAST16_TYPE__) atomic_int_least16_t;
++__extension__ typedef _Atomic(__UINT_LEAST16_TYPE__) atomic_uint_least16_t;
++__extension__ typedef _Atomic(__INT_LEAST32_TYPE__) atomic_int_least32_t;
++__extension__ typedef _Atomic(__UINT_LEAST32_TYPE__) atomic_uint_least32_t;
++__extension__ typedef _Atomic(__INT_LEAST64_TYPE__) atomic_int_least64_t;
++__extension__ typedef _Atomic(__UINT_LEAST64_TYPE__) atomic_uint_least64_t;
++__extension__ typedef _Atomic(__INT_FAST8_TYPE__) atomic_int_fast8_t;
++__extension__ typedef _Atomic(__UINT_FAST8_TYPE__) atomic_uint_fast8_t;
++__extension__ typedef _Atomic(__INT_FAST16_TYPE__) atomic_int_fast16_t;
++__extension__ typedef _Atomic(__UINT_FAST16_TYPE__) atomic_uint_fast16_t;
++__extension__ typedef _Atomic(__INT_FAST32_TYPE__) atomic_int_fast32_t;
++__extension__ typedef _Atomic(__UINT_FAST32_TYPE__) atomic_uint_fast32_t;
++__extension__ typedef _Atomic(__INT_FAST64_TYPE__) atomic_int_fast64_t;
++__extension__ typedef _Atomic(__UINT_FAST64_TYPE__) atomic_uint_fast64_t;
++__extension__ typedef _Atomic(__INTPTR_TYPE__) atomic_intptr_t;
++__extension__ typedef _Atomic(__UINTPTR_TYPE__) atomic_uintptr_t;
++__extension__ typedef _Atomic(__SIZE_TYPE__) atomic_size_t;
++__extension__ typedef _Atomic(__PTRDIFF_TYPE__) atomic_ptrdiff_t;
++__extension__ typedef _Atomic(__INTMAX_TYPE__) atomic_intmax_t;
++__extension__ typedef _Atomic(__UINTMAX_TYPE__) atomic_uintmax_t;
++
++/*
++ * atomic_flag is a structure type whose single member is itself atomic, so
++ * that the object is one byte wide and therefore always lock-free.  The
++ * flag operations below address that byte through the builtins.
++ */
++struct __stdc_atomic_flag {
++	atomic_bool __value;
++};
++typedef struct __stdc_atomic_flag atomic_flag;
++
++#ifdef __cplusplus
++#define ATOMIC_FLAG_INIT {false}
++#else
++#define ATOMIC_FLAG_INIT {0}
++#endif
++
++/*
++ * 7.17.4: fences.  Prototypes are provided for source compatibility and so
++ * that the address of the functions can be taken; the macros redirect the
++ * ordinary calls to the builtins.  libc exports real definitions.  The
++ * __atomic_fallback_* functions are the lock-based support for atomic
++ * objects that are not lock-free; they are defined in libc and are part of
++ * the implementation, not of the public interface.
++ */
++__BEGIN_DECLS
++void atomic_thread_fence(memory_order);
++void atomic_signal_fence(memory_order);
++#ifndef __cplusplus
++_Bool atomic_flag_test_and_set(volatile atomic_flag *);
++_Bool atomic_flag_test_and_set_explicit(volatile atomic_flag *, memory_order);
++#else
++bool atomic_flag_test_and_set(volatile atomic_flag *);
++bool atomic_flag_test_and_set_explicit(volatile atomic_flag *, memory_order);
++#endif
++void atomic_flag_clear(volatile atomic_flag *);
++void atomic_flag_clear_explicit(volatile atomic_flag *, memory_order);
++
++void __atomic_fallback_load(__SIZE_TYPE__, const volatile void *, void *, int);
++void __atomic_fallback_store(__SIZE_TYPE__, volatile void *, const void *, int);
++void __atomic_fallback_exchange(
++    __SIZE_TYPE__, volatile void *, const void *, void *, int);
++int __atomic_fallback_compare_exchange(
++    __SIZE_TYPE__, volatile void *, void *, const void *, int, int, int);
++void __atomic_fallback_fetch_add(
++    __SIZE_TYPE__, volatile void *, const void *, void *, int);
++void __atomic_fallback_fetch_sub(
++    __SIZE_TYPE__, volatile void *, const void *, void *, int);
++void __atomic_fallback_fetch_and(
++    __SIZE_TYPE__, volatile void *, const void *, void *, int);
++void __atomic_fallback_fetch_or(
++    __SIZE_TYPE__, volatile void *, const void *, void *, int);
++void __atomic_fallback_fetch_xor(
++    __SIZE_TYPE__, volatile void *, const void *, void *, int);
++__END_DECLS
++
++#define atomic_thread_fence(order) __atomic_thread_fence(order)
++#define atomic_signal_fence(order) __atomic_signal_fence(order)
++
++#define atomic_flag_test_and_set(object)                                       \
++	__atomic_test_and_set((object), __ATOMIC_SEQ_CST)
++#define atomic_flag_test_and_set_explicit(object, order)                       \
++	__atomic_test_and_set((object), (order))
++#define atomic_flag_clear(object) __atomic_clear((object), __ATOMIC_SEQ_CST)
++#define atomic_flag_clear_explicit(object, order)                              \
++	__atomic_clear((object), (order))
++
++/*
++ * 7.17.2/7.17.7: operations on atomic types.
++ *
++ * atomic_init() is an ordinary relaxed store; it may not be used
++ * concurrently with any other access to the object.
++ */
++#define atomic_init(object, value)                                             \
++	atomic_store_explicit((object), (value), memory_order_relaxed)
++
++#if defined(__clang__)
++
++/*
++ * clang: type-generic builtins that operate on the atomic object directly.
++ */
++#define atomic_store_explicit(object, desired, order)                          \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__c11_atomic_store(__stdc_o, __stdc_v, (order));       \
++		else                                                           \
++			__atomic_fallback_store(                               \
++			    sizeof(__stdc_v), __stdc_o, &__stdc_v, (order));   \
++	})
++#define atomic_load_explicit(object, order)                                    \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v;                       \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__stdc_v = __c11_atomic_load(__stdc_o, (order));       \
++		else                                                           \
++			__atomic_fallback_load(                                \
++			    sizeof(__stdc_v), __stdc_o, &__stdc_v, (order));   \
++		__stdc_v;                                                      \
++	})
++#define atomic_exchange_explicit(object, desired, order)                       \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		__typeof__((void)0, *__stdc_o) __stdc_r;                       \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__stdc_r = __c11_atomic_exchange(                      \
++			    __stdc_o, __stdc_v, (order));                      \
++		else                                                           \
++			__atomic_fallback_exchange(sizeof(__stdc_v), __stdc_o, \
++			    &__stdc_v, &__stdc_r, (order));                    \
++		__stdc_r;                                                      \
++	})
++#define atomic_compare_exchange_strong_explicit(                               \
++    object, expected, desired, success, failure)                               \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		int __stdc_r;                                                  \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__stdc_r =                                             \
++			    __c11_atomic_compare_exchange_strong(__stdc_o,     \
++			        (expected), __stdc_v, (success), (failure));   \
++		else                                                           \
++			__stdc_r = __atomic_fallback_compare_exchange(         \
++			    sizeof(__stdc_v), __stdc_o, (expected), &__stdc_v, \
++			    0, (success), (failure));                          \
++		(__stdc_atomic_bool) __stdc_r;                                 \
++	})
++#define atomic_compare_exchange_weak_explicit(                                 \
++    object, expected, desired, success, failure)                               \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		int __stdc_r;                                                  \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__stdc_r =                                             \
++			    __c11_atomic_compare_exchange_weak(__stdc_o,       \
++			        (expected), __stdc_v, (success), (failure));   \
++		else                                                           \
++			__stdc_r = __atomic_fallback_compare_exchange(         \
++			    sizeof(__stdc_v), __stdc_o, (expected), &__stdc_v, \
++			    1, (success), (failure));                          \
++		(__stdc_atomic_bool) __stdc_r;                                 \
++	})
++#define __stdc_clang_fetch(name, fallback, object, operand, order)             \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_r;                       \
++		if (__atomic_always_lock_free(sizeof(__stdc_r), 0))            \
++			__stdc_r = name(__stdc_o, (operand), (order));         \
++		else {                                                         \
++			__typeof__((void)0, *__stdc_o) __stdc_v =              \
++			    (__typeof__((void)0, *__stdc_o))(operand);         \
++			fallback(sizeof(__stdc_r), __stdc_o, &__stdc_v,        \
++			    &__stdc_r, (order));                               \
++		}                                                              \
++		__stdc_r;                                                      \
++	})
++#define atomic_fetch_add_explicit(object, operand, order)                      \
++	__stdc_clang_fetch(__c11_atomic_fetch_add,                             \
++	    __atomic_fallback_fetch_add, object, operand, order)
++#define atomic_fetch_sub_explicit(object, operand, order)                      \
++	__stdc_clang_fetch(__c11_atomic_fetch_sub,                             \
++	    __atomic_fallback_fetch_sub, object, operand, order)
++#define atomic_fetch_or_explicit(object, operand, order)                       \
++	__stdc_clang_fetch(__c11_atomic_fetch_or, __atomic_fallback_fetch_or,  \
++	    object, operand, order)
++#define atomic_fetch_xor_explicit(object, operand, order)                      \
++	__stdc_clang_fetch(__c11_atomic_fetch_xor,                             \
++	    __atomic_fallback_fetch_xor, object, operand, order)
++#define atomic_fetch_and_explicit(object, operand, order)                      \
++	__stdc_clang_fetch(__c11_atomic_fetch_and,                             \
++	    __atomic_fallback_fetch_and, object, operand, order)
++
++#else /* GCC and other compilers with the GCC __atomic_* interface */
++
++/*
++ * The GCC __atomic_* builtins take the address of the result instead of
++ * returning it.  The temporaries are ordinary (non-atomic) objects, so the
++ * comma operator in __typeof__((void)0, *p) is used to obtain the plain
++ * value type of the atomic object.
++ *
++ * __atomic_fetch_add/sub on a pointer object: GCC's builtin adds the operand
++ * as a raw value ("as an integer of the width of the pointer"), while ISO C
++ * requires pointer arithmetic; a pointer object (always lock-free) is
++ * detected with __builtin_classify_type and served by a compare-exchange
++ * loop.  Integer objects keep the single-instruction builtin.
++ */
++#define atomic_store_explicit(object, desired, order)                          \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__atomic_store(__stdc_o, &__stdc_v, (order));          \
++		else                                                           \
++			__atomic_fallback_store(                               \
++			    sizeof(__stdc_v), __stdc_o, &__stdc_v, (order));   \
++	})
++#define atomic_load_explicit(object, order)                                    \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v;                       \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__atomic_load(__stdc_o, &__stdc_v, (order));           \
++		else                                                           \
++			__atomic_fallback_load(                                \
++			    sizeof(__stdc_v), __stdc_o, &__stdc_v, (order));   \
++		__stdc_v;                                                      \
++	})
++#define atomic_exchange_explicit(object, desired, order)                       \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		__typeof__((void)0, *__stdc_o) __stdc_r;                       \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__atomic_exchange(                                     \
++			    __stdc_o, &__stdc_v, &__stdc_r, (order));          \
++		else                                                           \
++			__atomic_fallback_exchange(sizeof(__stdc_v), __stdc_o, \
++			    &__stdc_v, &__stdc_r, (order));                    \
++		__stdc_r;                                                      \
++	})
++#define atomic_compare_exchange_strong_explicit(                               \
++    object, expected, desired, success, failure)                               \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		int __stdc_r;                                                  \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__stdc_r = __atomic_compare_exchange(__stdc_o,         \
++			    (expected), &__stdc_v, 0, (success), (failure));   \
++		else                                                           \
++			__stdc_r = __atomic_fallback_compare_exchange(         \
++			    sizeof(__stdc_v), __stdc_o, (expected), &__stdc_v, \
++			    0, (success), (failure));                          \
++		(__stdc_atomic_bool) __stdc_r;                                 \
++	})
++#define atomic_compare_exchange_weak_explicit(                                 \
++    object, expected, desired, success, failure)                               \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_v = (desired);           \
++		int __stdc_r;                                                  \
++		if (__atomic_always_lock_free(sizeof(__stdc_v), 0))            \
++			__stdc_r = __atomic_compare_exchange(__stdc_o,         \
++			    (expected), &__stdc_v, 1, (success), (failure));   \
++		else                                                           \
++			__stdc_r = __atomic_fallback_compare_exchange(         \
++			    sizeof(__stdc_v), __stdc_o, (expected), &__stdc_v, \
++			    1, (success), (failure));                          \
++		(__stdc_atomic_bool) __stdc_r;                                 \
++	})
++#define __stdc_ptr_fetch(object, operand, order, op)                           \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_old =                    \
++		    atomic_load_explicit(__stdc_o, memory_order_relaxed);      \
++		__typeof__((void)0, *__stdc_o) __stdc_new;                     \
++		do {                                                           \
++			__stdc_new = __stdc_old op(operand);                   \
++		} while (!atomic_compare_exchange_weak_explicit(__stdc_o,      \
++		    &__stdc_old, __stdc_new, (order), memory_order_relaxed));  \
++		__stdc_old;                                                    \
++	})
++#define __stdc_gcc_fetch(name, fallback, pointer_expr, object, operand, order) \
++	__extension__({                                                        \
++		__auto_type __stdc_o = (object);                               \
++		__typeof__((void)0, *__stdc_o) __stdc_r;                       \
++		if (__atomic_always_lock_free(sizeof(__stdc_r), 0))            \
++			__stdc_r = __builtin_choose_expr(                      \
++			    __builtin_classify_type(*__stdc_o) == 5,           \
++			    (pointer_expr),                                    \
++			    name(__stdc_o, (operand), (order)));               \
++		else {                                                         \
++			__typeof__((void)0, *__stdc_o) __stdc_v =              \
++			    (__typeof__((void)0, *__stdc_o))(operand);         \
++			fallback(sizeof(__stdc_r), __stdc_o, &__stdc_v,        \
++			    &__stdc_r, (order));                               \
++		}                                                              \
++		__stdc_r;                                                      \
++	})
++#define atomic_fetch_add_explicit(object, operand, order)                      \
++	__stdc_gcc_fetch(__atomic_fetch_add, __atomic_fallback_fetch_add,      \
++	    __stdc_ptr_fetch(object, operand, order, +), object, operand,      \
++	    order)
++#define atomic_fetch_sub_explicit(object, operand, order)                      \
++	__stdc_gcc_fetch(__atomic_fetch_sub, __atomic_fallback_fetch_sub,      \
++	    __stdc_ptr_fetch(object, operand, order, -), object, operand,      \
++	    order)
++#define atomic_fetch_or_explicit(object, operand, order)                       \
++	__stdc_gcc_fetch(__atomic_fetch_or, __atomic_fallback_fetch_or,        \
++	    __atomic_fetch_or((object), (operand), (order)), object, operand,  \
++	    order)
++#define atomic_fetch_xor_explicit(object, operand, order)                      \
++	__stdc_gcc_fetch(__atomic_fetch_xor, __atomic_fallback_fetch_xor,      \
++	    __atomic_fetch_xor((object), (operand), (order)), object, operand, \
++	    order)
++#define atomic_fetch_and_explicit(object, operand, order)                      \
++	__stdc_gcc_fetch(__atomic_fetch_and, __atomic_fallback_fetch_and,      \
++	    __atomic_fetch_and((object), (operand), (order)), object, operand, \
++	    order)
++
++#endif /* __clang__ */
++
++#define atomic_store(object, desired)                                          \
++	atomic_store_explicit((object), (desired), memory_order_seq_cst)
++#define atomic_load(object) atomic_load_explicit((object), memory_order_seq_cst)
++#define atomic_exchange(object, desired)                                       \
++	atomic_exchange_explicit((object), (desired), memory_order_seq_cst)
++#define atomic_compare_exchange_strong(object, expected, desired)              \
++	atomic_compare_exchange_strong_explicit((object), (expected),          \
++	    (desired), memory_order_seq_cst, memory_order_seq_cst)
++#define atomic_compare_exchange_weak(object, expected, desired)                \
++	atomic_compare_exchange_weak_explicit((object), (expected), (desired), \
++	    memory_order_seq_cst, memory_order_seq_cst)
++#define atomic_fetch_add(object, operand)                                      \
++	atomic_fetch_add_explicit((object), (operand), memory_order_seq_cst)
++#define atomic_fetch_sub(object, operand)                                      \
++	atomic_fetch_sub_explicit((object), (operand), memory_order_seq_cst)
++#define atomic_fetch_or(object, operand)                                       \
++	atomic_fetch_or_explicit((object), (operand), memory_order_seq_cst)
++#define atomic_fetch_xor(object, operand)                                      \
++	atomic_fetch_xor_explicit((object), (operand), memory_order_seq_cst)
++#define atomic_fetch_and(object, operand)                                      \
++	atomic_fetch_and_explicit((object), (operand), memory_order_seq_cst)
++
++#endif /* !_STDATOMIC_H_ */
+Index: include/stdbit.h
+===================================================================
+--- /dev/null
++++ include/stdbit.h
+@@ -0,0 +1,388 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2024 (C23) 7.18: bit and byte utilities <stdbit.h>.
++ *
++ * The typed functions are real libc entry points (see gen/stdbit.c), so
++ * that they have external linkage and a stable address as the standard
++ * requires, and so that a program that declares its own prototype links
++ * against the same symbol.  The type-generic macros use the compiler's
++ * __builtin_stdc_* primitives when they exist and otherwise dispatch to the
++ * typed functions with _Generic; the derived macros (leading ones, the
++ * first-bit searches, bit width, bit floor and bit ceil) are written in
++ * terms of the three primitive operations and the width of the argument, so
++ * they do not need per-type support.
++ *
++ * Every helper takes the width of the operation explicitly and treats an
++ * all-zero operand as the full width, so no shift is ever out of range and
++ * clz/ctz are never applied to zero.  Nothing depends on the endianness or
++ * the word size of the machine; the endianness constants come from the
++ * compiler's own byte-order macros and __STDC_ENDIAN_NATIVE__ equals exactly
++ * one of the other two.
++ */
++
++#ifndef _STDBIT_H_
++#define _STDBIT_H_
++
++#include <sys/cdefs.h>
++
++#include <limits.h>
++#include <stdbool.h>
++
++#define __STDC_VERSION_STDBIT_H__ 202311L
++
++#define __STDC_ENDIAN_LITTLE__ 1234
++#define __STDC_ENDIAN_BIG__ 4321
++
++#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__)
++#error "<stdbit.h> requires the compiler byte-order macros"
++#endif
++#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
++#define __STDC_ENDIAN_NATIVE__ __STDC_ENDIAN_LITTLE__
++#else
++#define __STDC_ENDIAN_NATIVE__ __STDC_ENDIAN_BIG__
++#endif
++
++#if defined(__has_builtin)
++#define __stdc_has_builtin(x) __has_builtin(x)
++#else
++#define __stdc_has_builtin(x) 0
++#endif
++
++__BEGIN_DECLS
++
++unsigned int stdc_leading_zeros_uc(unsigned char);
++unsigned int stdc_leading_zeros_us(unsigned short);
++unsigned int stdc_leading_zeros_ui(unsigned int);
++unsigned int stdc_leading_zeros_ul(unsigned long);
++unsigned int stdc_leading_zeros_ull(unsigned long long);
++unsigned int stdc_leading_ones_uc(unsigned char);
++unsigned int stdc_leading_ones_us(unsigned short);
++unsigned int stdc_leading_ones_ui(unsigned int);
++unsigned int stdc_leading_ones_ul(unsigned long);
++unsigned int stdc_leading_ones_ull(unsigned long long);
++unsigned int stdc_trailing_zeros_uc(unsigned char);
++unsigned int stdc_trailing_zeros_us(unsigned short);
++unsigned int stdc_trailing_zeros_ui(unsigned int);
++unsigned int stdc_trailing_zeros_ul(unsigned long);
++unsigned int stdc_trailing_zeros_ull(unsigned long long);
++unsigned int stdc_trailing_ones_uc(unsigned char);
++unsigned int stdc_trailing_ones_us(unsigned short);
++unsigned int stdc_trailing_ones_ui(unsigned int);
++unsigned int stdc_trailing_ones_ul(unsigned long);
++unsigned int stdc_trailing_ones_ull(unsigned long long);
++unsigned int stdc_first_leading_zero_uc(unsigned char);
++unsigned int stdc_first_leading_zero_us(unsigned short);
++unsigned int stdc_first_leading_zero_ui(unsigned int);
++unsigned int stdc_first_leading_zero_ul(unsigned long);
++unsigned int stdc_first_leading_zero_ull(unsigned long long);
++unsigned int stdc_first_leading_one_uc(unsigned char);
++unsigned int stdc_first_leading_one_us(unsigned short);
++unsigned int stdc_first_leading_one_ui(unsigned int);
++unsigned int stdc_first_leading_one_ul(unsigned long);
++unsigned int stdc_first_leading_one_ull(unsigned long long);
++unsigned int stdc_first_trailing_zero_uc(unsigned char);
++unsigned int stdc_first_trailing_zero_us(unsigned short);
++unsigned int stdc_first_trailing_zero_ui(unsigned int);
++unsigned int stdc_first_trailing_zero_ul(unsigned long);
++unsigned int stdc_first_trailing_zero_ull(unsigned long long);
++unsigned int stdc_first_trailing_one_uc(unsigned char);
++unsigned int stdc_first_trailing_one_us(unsigned short);
++unsigned int stdc_first_trailing_one_ui(unsigned int);
++unsigned int stdc_first_trailing_one_ul(unsigned long);
++unsigned int stdc_first_trailing_one_ull(unsigned long long);
++unsigned int stdc_count_zeros_uc(unsigned char);
++unsigned int stdc_count_zeros_us(unsigned short);
++unsigned int stdc_count_zeros_ui(unsigned int);
++unsigned int stdc_count_zeros_ul(unsigned long);
++unsigned int stdc_count_zeros_ull(unsigned long long);
++unsigned int stdc_count_ones_uc(unsigned char);
++unsigned int stdc_count_ones_us(unsigned short);
++unsigned int stdc_count_ones_ui(unsigned int);
++unsigned int stdc_count_ones_ul(unsigned long);
++unsigned int stdc_count_ones_ull(unsigned long long);
++bool stdc_has_single_bit_uc(unsigned char);
++bool stdc_has_single_bit_us(unsigned short);
++bool stdc_has_single_bit_ui(unsigned int);
++bool stdc_has_single_bit_ul(unsigned long);
++bool stdc_has_single_bit_ull(unsigned long long);
++unsigned int stdc_bit_width_uc(unsigned char);
++unsigned int stdc_bit_width_us(unsigned short);
++unsigned int stdc_bit_width_ui(unsigned int);
++unsigned int stdc_bit_width_ul(unsigned long);
++unsigned int stdc_bit_width_ull(unsigned long long);
++unsigned char stdc_bit_floor_uc(unsigned char);
++unsigned short stdc_bit_floor_us(unsigned short);
++unsigned int stdc_bit_floor_ui(unsigned int);
++unsigned long stdc_bit_floor_ul(unsigned long);
++unsigned long long stdc_bit_floor_ull(unsigned long long);
++unsigned char stdc_bit_ceil_uc(unsigned char);
++unsigned short stdc_bit_ceil_us(unsigned short);
++unsigned int stdc_bit_ceil_ui(unsigned int);
++unsigned long stdc_bit_ceil_ul(unsigned long);
++unsigned long long stdc_bit_ceil_ull(unsigned long long);
++
++__END_DECLS
++
++#ifndef __cplusplus
++
++/*
++ * Dispatch over the standard integer types.  Signed and plain char are
++ * accepted as a convenience and converted to the corresponding unsigned
++ * type.  When the compiler defines a 128-bit integer type, the 128-bit
++ * branches are added too, so extended types are handled exactly even on
++ * compilers without the __builtin_stdc_* primitives; the default arm still
++ * names the widest standard type.
++ */
++#if defined(__SIZEOF_INT128__) &&                                              \
++    (__stdc_has_builtin(__builtin_clzll) || defined(__GNUC__))
++__extension__ typedef unsigned __int128 __stdc_uint128;
++__extension__ typedef __int128 __stdc_int128;
++
++static __inline unsigned int
++__stdc_lz_u128(__stdc_uint128 __x)
++{
++	unsigned long long __hi = (unsigned long long)(__x >> 64);
++
++	if (__hi != 0)
++		return (unsigned int)__builtin_clzll(__hi);
++	__hi = (unsigned long long)__x;
++	if (__hi != 0)
++		return 64U + (unsigned int)__builtin_clzll(__hi);
++	return 128U;
++}
++
++static __inline unsigned int
++__stdc_tz_u128(__stdc_uint128 __x)
++{
++	unsigned long long __lo = (unsigned long long)__x;
++
++	if (__lo != 0)
++		return (unsigned int)__builtin_ctzll(__lo);
++	__lo = (unsigned long long)(__x >> 64);
++	if (__lo != 0)
++		return 64U + (unsigned int)__builtin_ctzll(__lo);
++	return 128U;
++}
++
++static __inline unsigned int
++__stdc_co_u128(__stdc_uint128 __x)
++{
++	return (unsigned int)__builtin_popcountll((unsigned long long)__x) +
++	       (unsigned int)__builtin_popcountll(
++	           (unsigned long long)(__x >> 64));
++}
++
++#define __stdc_128_types(name128)                                              \
++	__stdc_uint128:                                                        \
++	name128, __stdc_int128 : name128,
++#else
++#define __stdc_128_types(name128)
++#endif
++
++#define __stdc_generic(name, name128, x)                                       \
++	_Generic((x),                                                          \
++	    _Bool: name##_uc,                                                  \
++	    char: name##_uc,                                                   \
++	    signed char: name##_uc,                                            \
++	    unsigned char: name##_uc,                                          \
++	    short: name##_us,                                                  \
++	    unsigned short: name##_us,                                         \
++	    int: name##_ui,                                                    \
++	    unsigned int: name##_ui,                                           \
++	    long: name##_ul,                                                   \
++	    unsigned long: name##_ul,                                          \
++	    long long: name##_ull,                                             \
++	    unsigned long long: name##_ull,                                    \
++	    __stdc_128_types(name128) default: name##_ull)(x)
++
++#if __stdc_has_builtin(__builtin_stdc_leading_zeros)
++#define __stdc_leading_zeros(x) __builtin_stdc_leading_zeros(x)
++#else
++#define __stdc_leading_zeros(x)                                                \
++	__stdc_generic(stdc_leading_zeros, __stdc_lz_u128, x)
++#endif
++#if __stdc_has_builtin(__builtin_stdc_trailing_zeros)
++#define __stdc_trailing_zeros(x) __builtin_stdc_trailing_zeros(x)
++#else
++#define __stdc_trailing_zeros(x)                                               \
++	__stdc_generic(stdc_trailing_zeros, __stdc_tz_u128, x)
++#endif
++#if __stdc_has_builtin(__builtin_stdc_count_ones)
++#define __stdc_count_ones(x) __builtin_stdc_count_ones(x)
++#else
++#define __stdc_count_ones(x) __stdc_generic(stdc_count_ones, __stdc_co_u128, x)
++#endif
++
++#define __stdc_arg_width(x) ((unsigned int)(sizeof(x) * CHAR_BIT))
++
++#define stdc_leading_zeros(x) __stdc_leading_zeros(x)
++#define stdc_trailing_zeros(x) __stdc_trailing_zeros(x)
++#define stdc_count_ones(x) __stdc_count_ones(x)
++#define stdc_leading_ones(x) __stdc_leading_zeros((__typeof__(x))~(x))
++#define stdc_trailing_ones(x) __stdc_trailing_zeros((__typeof__(x))~(x))
++#define stdc_count_zeros(x) (__stdc_arg_width(x) - __stdc_count_ones(x))
++#define stdc_bit_width(x) (__stdc_arg_width(x) - __stdc_leading_zeros(x))
++#define stdc_has_single_bit(x)                                                 \
++	__extension__({                                                        \
++		__auto_type __stdc_x = (x);                                    \
++		(bool)(__stdc_x != 0 && (__stdc_x & (__stdc_x - 1)) == 0);     \
++	})
++
++#define stdc_first_leading_zero(x)                                             \
++	__extension__({                                                        \
++		unsigned int __stdc_n = stdc_leading_ones(x);                  \
++		__stdc_n < __stdc_arg_width(x) ? __stdc_n + 1 : 0U;            \
++	})
++#define stdc_first_leading_one(x)                                              \
++	__extension__({                                                        \
++		unsigned int __stdc_n = stdc_leading_zeros(x);                 \
++		__stdc_n < __stdc_arg_width(x) ? __stdc_n + 1 : 0U;            \
++	})
++#define stdc_first_trailing_zero(x)                                            \
++	__extension__({                                                        \
++		unsigned int __stdc_n = stdc_trailing_ones(x);                 \
++		__stdc_n < __stdc_arg_width(x) ? __stdc_n + 1 : 0U;            \
++	})
++#define stdc_first_trailing_one(x)                                             \
++	__extension__({                                                        \
++		unsigned int __stdc_n = stdc_trailing_zeros(x);                \
++		__stdc_n < __stdc_arg_width(x) ? __stdc_n + 1 : 0U;            \
++	})
++
++/*
++ * bit_floor and bit_ceil yield the type of their argument.  The shift count
++ * is always strictly less than the width of that type, so no shift is out
++ * of range and no operation has undefined behaviour; a value whose ceiling
++ * is not representable wraps modulo 2**width (the standard leaves that
++ * case undefined).
++ */
++#define stdc_bit_floor(x)                                                      \
++	__extension__({                                                        \
++		__auto_type __stdc_x = (x);                                    \
++		(__typeof__(__stdc_x))(__stdc_x == 0                           \
++		                           ? 0                                 \
++					   : ((__typeof__(__stdc_x))1          \
++		                                 << (stdc_bit_width(           \
++		                                         __stdc_x) -           \
++		                                        1)));                  \
++	})
++#define stdc_bit_ceil(x)                                                                  \
++	__extension__({                                                                   \
++		__auto_type __stdc_x = (x);                                               \
++		(__typeof__(__stdc_x))(__stdc_x <= 1                                      \
++		                           ? 1                                            \
++					   : ((__typeof__(__stdc_x))2                     \
++		                                 << (stdc_bit_width((                     \
++		                                         __typeof__(__stdc_x))(__stdc_x - \
++		                                                               1)) -      \
++		                                        1)));                             \
++	})
++
++#else /* __cplusplus */
++
++/*
++ * C++ has no _Generic, so the type-generic interface is provided with
++ * overloaded inline functions that forward to the typed C functions.
++ * Only the unsigned integer types are overloaded, as the standard
++ * specifies for the type-generic macros.
++ */
++#define __stdc_cxx_ui(bare)                                                    \
++	inline unsigned int stdc_##bare(unsigned char __x)                     \
++	{                                                                      \
++		return stdc_##bare##_uc(__x);                                  \
++	}                                                                      \
++	inline unsigned int stdc_##bare(unsigned short __x)                    \
++	{                                                                      \
++		return stdc_##bare##_us(__x);                                  \
++	}                                                                      \
++	inline unsigned int stdc_##bare(unsigned int __x)                      \
++	{                                                                      \
++		return stdc_##bare##_ui(__x);                                  \
++	}                                                                      \
++	inline unsigned int stdc_##bare(unsigned long __x)                     \
++	{                                                                      \
++		return stdc_##bare##_ul(__x);                                  \
++	}                                                                      \
++	inline unsigned int stdc_##bare(unsigned long long __x)                \
++	{                                                                      \
++		return stdc_##bare##_ull(__x);                                 \
++	}
++
++__stdc_cxx_ui(leading_zeros) __stdc_cxx_ui(leading_ones)
++    __stdc_cxx_ui(trailing_zeros) __stdc_cxx_ui(trailing_ones)
++        __stdc_cxx_ui(first_leading_zero) __stdc_cxx_ui(first_leading_one)
++            __stdc_cxx_ui(first_trailing_zero) __stdc_cxx_ui(first_trailing_one)
++                __stdc_cxx_ui(count_zeros) __stdc_cxx_ui(count_ones)
++                    __stdc_cxx_ui(bit_width)
++#undef __stdc_cxx_ui
++
++#define __stdc_cxx_bool(bare)                                                  \
++	inline bool stdc_##bare(unsigned char __x)                             \
++	{                                                                      \
++		return stdc_##bare##_uc(__x);                                  \
++	}                                                                      \
++	inline bool stdc_##bare(unsigned short __x)                            \
++	{                                                                      \
++		return stdc_##bare##_us(__x);                                  \
++	}                                                                      \
++	inline bool stdc_##bare(unsigned int __x)                              \
++	{                                                                      \
++		return stdc_##bare##_ui(__x);                                  \
++	}                                                                      \
++	inline bool stdc_##bare(unsigned long __x)                             \
++	{                                                                      \
++		return stdc_##bare##_ul(__x);                                  \
++	}                                                                      \
++	inline bool stdc_##bare(unsigned long long __x)                        \
++	{                                                                      \
++		return stdc_##bare##_ull(__x);                                 \
++	}
++
++                        __stdc_cxx_bool(has_single_bit)
++#undef __stdc_cxx_bool
++
++#define __stdc_cxx_self(bare)                                                  \
++	inline unsigned char stdc_##bare(unsigned char __x)                    \
++	{                                                                      \
++		return stdc_##bare##_uc(__x);                                  \
++	}                                                                      \
++	inline unsigned short stdc_##bare(unsigned short __x)                  \
++	{                                                                      \
++		return stdc_##bare##_us(__x);                                  \
++	}                                                                      \
++	inline unsigned int stdc_##bare(unsigned int __x)                      \
++	{                                                                      \
++		return stdc_##bare##_ui(__x);                                  \
++	}                                                                      \
++	inline unsigned long stdc_##bare(unsigned long __x)                    \
++	{                                                                      \
++		return stdc_##bare##_ul(__x);                                  \
++	}                                                                      \
++	inline unsigned long long stdc_##bare(unsigned long long __x)          \
++	{                                                                      \
++		return stdc_##bare##_ull(__x);                                 \
++	}
++
++                            __stdc_cxx_self(bit_floor) __stdc_cxx_self(bit_ceil)
++#undef __stdc_cxx_self
++
++#endif /* !__cplusplus */
++
++#endif /* !_STDBIT_H_ */
+Index: include/stdckdint.h
+===================================================================
+--- /dev/null
++++ include/stdckdint.h
+@@ -0,0 +1,77 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2024 (C23) 7.20: checked integer arithmetic
++ * <stdckdint.h>.
++ *
++ * ckd_add, ckd_sub and ckd_mul evaluate their two operands at their
++ * mathematical (infinite precision) value, convert the exact result to the
++ * type of the object designated by the first argument, store that converted
++ * value, and yield true exactly when the conversion is not value
++ * preserving.  Every argument is evaluated exactly once and no operation
++ * has undefined behaviour, even when the mathematical result is not
++ * representable in any integer type.
++ *
++ * The expansions use the compiler overflow builtins, which implement
++ * precisely this contract and are the only reasonable portable expression
++ * of it; the C library is not required to provide any runtime support.  The
++ * macros are guarded with #ifndef so that a translation unit that reaches
++ * this header through the compiler's own <stdckdint.h> (both clang and GCC
++ * ship one) does not produce a redefinition diagnostic.
++ */
++
++#ifndef _STDCKDINT_H_
++#define _STDCKDINT_H_
++
++#define __STDC_VERSION_STDCKDINT_H__ 202311L
++
++/*
++ * The result type is bool.  _Bool is a C keyword and needs no header there;
++ * in C++ bool is the keyword, so the macros use whichever applies.
++ */
++#ifdef __cplusplus
++#define __stdc_ckd_bool bool
++#else
++#define __stdc_ckd_bool _Bool
++#endif
++
++#if defined(__has_builtin)
++#if !__has_builtin(__builtin_add_overflow) ||                                  \
++    !__has_builtin(__builtin_sub_overflow) ||                                  \
++    !__has_builtin(__builtin_mul_overflow)
++#error "<stdckdint.h> requires the compiler overflow builtins"
++#endif
++#endif
++
++#ifndef ckd_add
++#define ckd_add(result, a, b)                                                  \
++	((__stdc_ckd_bool)__builtin_add_overflow((a), (b), (result)))
++#endif
++
++#ifndef ckd_sub
++#define ckd_sub(result, a, b)                                                  \
++	((__stdc_ckd_bool)__builtin_sub_overflow((a), (b), (result)))
++#endif
++
++#ifndef ckd_mul
++#define ckd_mul(result, a, b)                                                  \
++	((__stdc_ckd_bool)__builtin_mul_overflow((a), (b), (result)))
++#endif
++
++#endif /* !_STDCKDINT_H_ */
+Index: include/stdnoreturn.h
+===================================================================
+--- /dev/null
++++ include/stdnoreturn.h
+@@ -0,0 +1,45 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.23: _Noreturn <stdnoreturn.h>.
++ *
++ * The only thing this header defines is the convenience macro noreturn,
++ * which expands to the function specifier _Noreturn.  It is written for C
++ * only: in C++ the equivalent facility is the [[noreturn]] attribute, the
++ * macro is not part of the C++ standard library, and defining it would
++ * collide with the C++ keyword.  As required by the standard the header
++ * therefore defines nothing when compiled as C++.
++ *
++ * C23 retains _Noreturn and the macro (both are deprecated in favour of
++ * the [[noreturn]] attribute but remain valid); the macro still expands to
++ * _Noreturn so that pre-C23 sources keep compiling unchanged.  This header
++ * does not pull in any other header and adds no symbol to libc.
++ */
++
++#ifndef _STDNORETURN_H_
++#define _STDNORETURN_H_
++
++#ifndef __cplusplus
++
++#define noreturn _Noreturn
++#define __noreturn_is_defined 1
++
++#endif /* !__cplusplus */
++
++#endif /* !_STDNORETURN_H_ */
+Index: include/threads.h
+===================================================================
+--- /dev/null
++++ include/threads.h
+@@ -0,0 +1,136 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.26: Threads <threads.h>,
++ * carried forward through C17 and C23.
++ *
++ * The C11 threads interface is a thin, standardised skin over POSIX
++ * threads.  OpenBSD keeps its thread implementation inside libc (the
++ * historical libpthread is only a set of manual pages), so the functions
++ * are provided by libc and use the pthread_* entry points directly; no new
++ * synchronisation primitive is invented and every object is a real pthread
++ * object underneath.
++ *
++ * The object types are the corresponding pthread types (pthread_t is a
++ * pointer in OpenBSD, so thrd_t, mtx_t and cnd_t are complete object
++ * types).  mtx_plain/mtx_recursive/mtx_timed are bit flags so that
++ * "mtx_recursive | mtx_timed" works as the standard allows.
++ *
++ * The return values are the standard thrd_* codes; the pthread functions
++ * return the error number directly, so they are mapped without consulting
++ * errno.
++ */
++
++#ifndef _THREADS_H_
++#define _THREADS_H_
++
++#include <sys/cdefs.h>
++
++#include <pthread.h>
++#include <time.h>
++
++/*
++ * The base clang currently predefines __STDC_NO_THREADS__ when targeting
++ * OpenBSD, because the base system has historically lacked <threads.h>.
++ * This header is part of libc and does provide the interface, so the
++ * precondition is stale; it is withdrawn here so that a translation unit
++ * that includes <threads.h> sees a consistent implementation.  The base
++ * compiler's target description should be updated to match; until then,
++ * code that decides whether to include <threads.h> by testing the macro
++ * before including anything will still see the stale value.
++ */
++#undef __STDC_NO_THREADS__
++
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++#define __STDC_VERSION_THREADS_H__ 202311L
++#endif
++
++typedef pthread_t thrd_t;
++typedef int (*thrd_start_t)(void *);
++
++typedef pthread_mutex_t mtx_t;
++typedef pthread_cond_t cnd_t;
++typedef pthread_key_t tss_t;
++typedef void (*tss_dtor_t)(void *);
++typedef pthread_once_t once_flag;
++
++enum {
++	thrd_success = 0,
++	thrd_busy = 1,
++	thrd_error = 2,
++	thrd_nomem = 3,
++	thrd_timedout = 4
++};
++
++/*
++ * Mutex types.  The values are distinct bits so that the recursive and
++ * timed properties can be requested together.
++ */
++#define mtx_plain 0
++#define mtx_recursive 1
++#define mtx_timed 2
++
++#define ONCE_FLAG_INIT PTHREAD_ONCE_INIT
++#define TSS_DTOR_ITERATIONS PTHREAD_DESTRUCTOR_ITERATIONS
++
++/*
++ * thread_local was a convenience macro for _Thread_local in C11; C23 made
++ * thread_local a keyword and removed the macro.  It never existed in C++.
++ */
++#if !defined(__cplusplus) &&                                                   \
++    !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L)
++#define thread_local _Thread_local
++#endif
++
++__BEGIN_DECLS
++
++int thrd_create(thrd_t *, thrd_start_t, void *);
++int thrd_equal(thrd_t, thrd_t);
++thrd_t thrd_current(void);
++int thrd_sleep(const struct timespec *, struct timespec *);
++void thrd_yield(void);
++__dead void thrd_exit(int);
++int thrd_detach(thrd_t);
++int thrd_join(thrd_t, int *);
++
++int mtx_init(mtx_t *, int);
++int mtx_lock(mtx_t *);
++int mtx_timedlock(mtx_t *__restrict, const struct timespec *__restrict);
++int mtx_trylock(mtx_t *);
++int mtx_unlock(mtx_t *);
++void mtx_destroy(mtx_t *);
++
++int cnd_init(cnd_t *);
++int cnd_signal(cnd_t *);
++int cnd_broadcast(cnd_t *);
++int cnd_wait(cnd_t *, mtx_t *);
++int cnd_timedwait(
++    cnd_t *__restrict, mtx_t *__restrict, const struct timespec *__restrict);
++void cnd_destroy(cnd_t *);
++
++int tss_create(tss_t *, tss_dtor_t);
++void tss_delete(tss_t);
++void *tss_get(tss_t);
++int tss_set(tss_t, void *);
++
++void call_once(once_flag *, void (*)(void));
++
++__END_DECLS
++
++#endif /* !_THREADS_H_ */
+Index: lib/libc/Symbols.list
+===================================================================
+--- lib/libc/Symbols.list
++++ lib/libc/Symbols.list
+@@ -1695,6 +1695,21 @@ _spinunlock
+ _thread_atfork
+ _thread_dofork
+ _thread_set_callbacks
++__atomic_fallback_compare_exchange
++__atomic_fallback_exchange
++__atomic_fallback_fetch_add
++__atomic_fallback_fetch_and
++__atomic_fallback_fetch_or
++__atomic_fallback_fetch_sub
++__atomic_fallback_fetch_xor
++__atomic_fallback_load
++__atomic_fallback_store
++atomic_flag_clear
++atomic_flag_clear_explicit
++atomic_flag_test_and_set
++atomic_flag_test_and_set_explicit
++atomic_signal_fence
++atomic_thread_fence
+ pthread_atfork
+ pthread_cond_broadcast
+ pthread_cond_destroy
+@@ -1721,6 +1736,105 @@ pthread_once
+ pthread_self
+ pthread_setspecific
+ 
++/* threads.h (C11) */
++call_once
++cnd_broadcast
++cnd_destroy
++cnd_init
++cnd_signal
++cnd_timedwait
++cnd_wait
++mtx_destroy
++mtx_init
++mtx_lock
++mtx_timedlock
++mtx_trylock
++mtx_unlock
++thrd_create
++thrd_current
++thrd_detach
++thrd_equal
++thrd_exit
++thrd_join
++thrd_sleep
++thrd_yield
++tss_create
++tss_delete
++tss_get
++tss_set
++
++/* stdbit.h (C23) */
++stdc_leading_zeros_uc
++stdc_leading_zeros_us
++stdc_leading_zeros_ui
++stdc_leading_zeros_ul
++stdc_leading_zeros_ull
++stdc_leading_ones_uc
++stdc_leading_ones_us
++stdc_leading_ones_ui
++stdc_leading_ones_ul
++stdc_leading_ones_ull
++stdc_trailing_zeros_uc
++stdc_trailing_zeros_us
++stdc_trailing_zeros_ui
++stdc_trailing_zeros_ul
++stdc_trailing_zeros_ull
++stdc_trailing_ones_uc
++stdc_trailing_ones_us
++stdc_trailing_ones_ui
++stdc_trailing_ones_ul
++stdc_trailing_ones_ull
++stdc_first_leading_zero_uc
++stdc_first_leading_zero_us
++stdc_first_leading_zero_ui
++stdc_first_leading_zero_ul
++stdc_first_leading_zero_ull
++stdc_first_leading_one_uc
++stdc_first_leading_one_us
++stdc_first_leading_one_ui
++stdc_first_leading_one_ul
++stdc_first_leading_one_ull
++stdc_first_trailing_zero_uc
++stdc_first_trailing_zero_us
++stdc_first_trailing_zero_ui
++stdc_first_trailing_zero_ul
++stdc_first_trailing_zero_ull
++stdc_first_trailing_one_uc
++stdc_first_trailing_one_us
++stdc_first_trailing_one_ui
++stdc_first_trailing_one_ul
++stdc_first_trailing_one_ull
++stdc_count_zeros_uc
++stdc_count_zeros_us
++stdc_count_zeros_ui
++stdc_count_zeros_ul
++stdc_count_zeros_ull
++stdc_count_ones_uc
++stdc_count_ones_us
++stdc_count_ones_ui
++stdc_count_ones_ul
++stdc_count_ones_ull
++stdc_has_single_bit_uc
++stdc_has_single_bit_us
++stdc_has_single_bit_ui
++stdc_has_single_bit_ul
++stdc_has_single_bit_ull
++stdc_bit_width_uc
++stdc_bit_width_us
++stdc_bit_width_ui
++stdc_bit_width_ul
++stdc_bit_width_ull
++stdc_bit_floor_uc
++stdc_bit_floor_us
++stdc_bit_floor_ui
++stdc_bit_floor_ul
++stdc_bit_floor_ull
++stdc_bit_ceil_uc
++stdc_bit_ceil_us
++stdc_bit_ceil_ui
++stdc_bit_ceil_ul
++stdc_bit_ceil_ull
++
+ /* time */
+ asctime
+ asctime_r
+Index: lib/libc/gen/Makefile.inc
+===================================================================
+--- lib/libc/gen/Makefile.inc
++++ lib/libc/gen/Makefile.inc
+@@ -20,7 +20,7 @@ SRCS+=  alarm.c assert.c auth_subr.c aut
+         rewinddir.c scandir.c seekdir.c setdomainname.c sethostname.c \
+         setprogname.c setmode.c setproctitle.c shm_open.c \
+         siginterrupt.c siglist.c signal.c signame.c \
+-        sigsetops.c sigwait.c sleep.c statvfs.c strtofflags.c sysconf.c \
++        sigsetops.c sigwait.c sleep.c stdbit.c statvfs.c strtofflags.c sysconf.c \
+         syslog.c syslog_r.c telldir.c time.c times.c \
+         timespec_get.c tolower_.c tree.c ttyname.c \
+         ttyslot.c toupper_.c ualarm.c uname.c unvis.c usleep.c \
+@@ -54,5 +54,6 @@ MAN+=	__tfork_thread.3 alarm.3 auth_subr
+ 	scandir.3 setjmp.3 setmode.3 setproctitle.3 shm_open.3 \
+ 	siginterrupt.3 signal.3 \
+ 	sigaddset.3 sigwait.3 sleep.3 statvfs.3 sysconf.3 strtofflags.3 \
++	stdalign.3 stdatomic.3 stdbit.3 stdckdint.3 stdnoreturn.3 \
+ 	syslog.3 time.3 times.3 timespec_get.3 toascii.3 tolower.3 toupper.3 \
+ 	ttyname.3 ualarm.3 uname.3 unvis.3 usleep.3 utime.3 valloc.3 vis.3
+Index: lib/libc/gen/stdalign.3
+===================================================================
+--- /dev/null
++++ lib/libc/gen/stdalign.3
+@@ -0,0 +1,68 @@
++.\"	$OpenBSD$
++.\"
++.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++.\"
++.\" Permission to use, copy, modify, and distribute this software for any
++.\" purpose with or without fee is hereby granted, provided that the above
++.\" copyright notice and this permission notice appear in all copies.
++.\"
++.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++.\"
++.Dd October 24, 2026
++.Dt STDALIGN 3
++.Os
++.Sh NAME
++.Nm stdalign
++.Nd alignment macros
++.Sh SYNOPSIS
++.In stdalign.h
++.Fn alignas "type"
++.Fn alignof "type"
++.Sh DESCRIPTION
++The
++.In stdalign.h
++header provides two macros that name the ISO C alignment specifier and
++operator.
++.Bl -tag -width Ds
++.It Fn alignas
++Expands to
++.Va _Alignas .
++It specifies the alignment of an object or a member.
++.It Fn alignof
++Expands to
++.Va _Alignof .
++It yields the alignment requirement of a type as a value of type
++.Vt size_t .
++.El
++.Pp
++The macros
++.Dv __alignas_is_defined
++and
++.Dv __alignof_is_defined
++are defined to
++.Dv 1
++and can be used to detect that the header is available.
++.Pp
++In ISO C23
++.Va alignas
++and
++.Va alignof
++are keywords and the header no longer defines the macros; including it is
++harmless and has no effect.
++.Sh STANDARDS
++The
++.In stdalign.h
++header conforms to
++.St -isoC-2011
++and ISO/IEC 9899:2024 (C23).
++.Sh HISTORY
++The
++.In stdalign.h
++header appeared in
++.Ox 8.0 .
+Index: lib/libc/gen/stdatomic.3
+===================================================================
+--- /dev/null
++++ lib/libc/gen/stdatomic.3
+@@ -0,0 +1,138 @@
++.\"	$OpenBSD$
++.\"
++.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++.\"
++.\" Permission to use, copy, modify, and distribute this software for any
++.\" purpose with or without fee is hereby granted, provided that the above
++.\" copyright notice and this permission notice appear in all copies.
++.\"
++.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++.\"
++.Dd October 24, 2026
++.Dt STDATOMIC 3
++.Os
++.Sh NAME
++.Nm stdatomic
++.Nd atomic types and operations
++.Sh SYNOPSIS
++.In stdatomic.h
++.Sh DESCRIPTION
++The
++.In stdatomic.h
++header provides the ISO C11 atomic types and the operations on them.
++The types are the atomic-qualified forms of the standard integer and
++pointer types:
++.Vt atomic_bool ,
++.Vt atomic_int ,
++.Vt atomic_uint ,
++.Vt atomic_long ,
++.Vt atomic_ulong ,
++.Vt atomic_llong ,
++.Vt atomic_ullong ,
++the least, fast, pointer-sized and maximum-width variants, and
++.Vt atomic_flag .
++.Pp
++The type-generic operations are function-like macros that accept a pointer
++to an atomic object:
++.Bl -tag -width Ds -offset indent -compact
++.It Fn atomic_init object value
++.It Fn atomic_load object
++.It Fn atomic_store object value
++.It Fn atomic_exchange object value
++.It Fn atomic_compare_exchange_strong object expected desired
++.It Fn atomic_compare_exchange_weak object expected desired
++.It Fn atomic_fetch_add object operand
++.It Fn atomic_fetch_sub object operand
++.It Fn atomic_fetch_or object operand
++.It Fn atomic_fetch_xor object operand
++.It Fn atomic_fetch_and object operand
++.El
++.Pp
++Each has an
++.Dq _explicit
++form that takes a
++.Vt memory_order
++argument, and the compare-and-exchange macros take both a success and a
++failure order.
++.Pp
++.Vt memory_order
++is an enumeration with the standard values
++.Dv memory_order_relaxed ,
++.Dv memory_order_consume ,
++.Dv memory_order_acquire ,
++.Dv memory_order_release ,
++.Dv memory_order_acq_rel
++and
++.Dv memory_order_seq_cst .
++.Pp
++.Vt atomic_flag
++is a one-byte lock-free type initialized with
++.Dv ATOMIC_FLAG_INIT
++and manipulated with
++.Fn atomic_flag_test_and_set
++and
++.Fn atomic_flag_clear
++(and their explicit forms).
++.Pp
++.Fn atomic_thread_fence
++and
++.Fn atomic_signal_fence
++issue memory fences.
++.Fn atomic_is_lock_free
++reports whether an object is lock-free and is a compile-time constant.
++The
++.Dv ATOMIC_*_LOCK_FREE
++macros describe the standard atomic types; the values are 0, 1 or 2 as
++specified by ISO C.
++.Pp
++The implementation is built on the compiler's atomic builtins, which
++lower to the atomic instructions of the machine and never call an
++external support library.
++.Sh RETURN VALUES
++.Fn atomic_load ,
++.Fn atomic_exchange ,
++.Fn atomic_fetch_add
++and the other read-modify-write operations return the value that was
++contained in the object; the compare-and-exchange operations return a
++non-zero value if the exchange happened.
++.Fn atomic_store
++and the flag clear operations return no value.
++.Sh NOTES
++For atomic pointer types,
++.Fn atomic_fetch_add
++and
++.Fn atomic_fetch_sub
++scale the operand by the size of the pointed-to type, as the standard
++requires.
++.Pp
++Atomic objects whose size is not lock-free are handled internally with a
++lock-based fallback, so the interface is self-contained and does not
++depend on an external atomic runtime.
++.Fn atomic_is_lock_free
++still reports such a type as not lock-free.
++.Sh SEE ALSO
++.Xr threads 3
++.Sh STANDARDS
++The
++.In stdatomic.h
++header conforms to
++.St -isoC-2011
++and ISO/IEC 9899:2024 (C23).
++The
++.Dv _Bool
++member of
++.Vt atomic_flag
++and the removal of
++.Dv ATOMIC_VAR_INIT
++follow ISO C23.
++.Sh HISTORY
++The
++.In stdatomic.h
++header appeared in
++.Ox 8.0 .
+Index: lib/libc/gen/stdbit.3
+===================================================================
+--- /dev/null
++++ lib/libc/gen/stdbit.3
+@@ -0,0 +1,152 @@
++.\"	$OpenBSD$
++.\"
++.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++.\"
++.\" Permission to use, copy, modify, and distribute this software for any
++.\" purpose with or without fee is hereby granted, provided that the above
++.\" copyright notice and this permission notice appear in all copies.
++.\"
++.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++.\"
++.Dd October 24, 2026
++.Dt STDBIT 3
++.Os
++.Sh NAME
++.Nm stdc_leading_zeros ,
++.Nm stdc_leading_ones ,
++.Nm stdc_trailing_zeros ,
++.Nm stdc_trailing_ones ,
++.Nm stdc_first_leading_zero ,
++.Nm stdc_first_leading_one ,
++.Nm stdc_first_trailing_zero ,
++.Nm stdc_first_trailing_one ,
++.Nm stdc_count_zeros ,
++.Nm stdc_count_ones ,
++.Nm stdc_has_single_bit ,
++.Nm stdc_bit_width ,
++.Nm stdc_bit_floor ,
++.Nm stdc_bit_ceil
++.Nd bit and byte utilities
++.Sh SYNOPSIS
++.In stdbit.h
++.Ft unsigned int
++.Fn stdc_leading_zeros "unsigned int value"
++.Ft unsigned int
++.Fn stdc_leading_ones "unsigned int value"
++.Ft unsigned int
++.Fn stdc_trailing_zeros "unsigned int value"
++.Ft unsigned int
++.Fn stdc_trailing_ones "unsigned int value"
++.Ft unsigned int
++.Fn stdc_first_leading_zero "unsigned int value"
++.Ft unsigned int
++.Fn stdc_first_leading_one "unsigned int value"
++.Ft unsigned int
++.Fn stdc_first_trailing_zero "unsigned int value"
++.Ft unsigned int
++.Fn stdc_first_trailing_one "unsigned int value"
++.Ft unsigned int
++.Fn stdc_count_zeros "unsigned int value"
++.Ft unsigned int
++.Fn stdc_count_ones "unsigned int value"
++.Ft bool
++.Fn stdc_has_single_bit "unsigned int value"
++.Ft unsigned int
++.Fn stdc_bit_width "unsigned int value"
++.Ft unsigned int
++.Fn stdc_bit_floor "unsigned int value"
++.Ft unsigned int
++.Fn stdc_bit_ceil "unsigned int value"
++.Sh DESCRIPTION
++The
++.In stdbit.h
++header provides the ISO C23 bit and byte utilities.
++The functions above are type-generic macros that accept any unsigned
++integer type; for each there are also typed functions with the suffixes
++.Sy _uc ,
++.Sy _us ,
++.Sy _ui ,
++.Sy _ul
++and
++.Sy _ull
++for
++.Vt unsigned char ,
++.Vt unsigned short ,
++.Vt unsigned int ,
++.Vt unsigned long
++and
++.Vt unsigned long long .
++.Pp
++.Fn stdc_leading_zeros
++and
++.Fn stdc_trailing_zeros
++count the number of consecutive zero bits starting from the most or least
++significant bit; the corresponding
++.Fn _ones
++macros count one bits.
++.Fn stdc_first_leading_zero ,
++.Fn stdc_first_leading_one ,
++.Fn stdc_first_trailing_zero
++and
++.Fn stdc_first_trailing_one
++return the one-based position of the first matching bit, or zero if no
++such bit exists.
++.Fn stdc_count_zeros
++and
++.Fn stdc_count_ones
++count all zero or one bits.
++.Pp
++.Fn stdc_bit_width
++returns the number of bits needed to represent the value, ignoring
++leading zeros;
++.Fn stdc_bit_floor
++returns the largest power of two not greater than the value, and
++.Fn stdc_bit_ceil
++the smallest power of two not less than the value.
++Both return a value of the same type as their argument.
++.Fn stdc_has_single_bit
++reports whether the value is a power of two.
++.Pp
++The macros
++.Dv __STDC_ENDIAN_LITTLE__ ,
++.Dv __STDC_ENDIAN_BIG__
++and
++.Dv __STDC_ENDIAN_NATIVE__
++are distinct integer constants;
++.Dv __STDC_ENDIAN_NATIVE__
++equals one of the other two according to the byte order of the machine.
++.Sh RETURN VALUES
++The counting, searching and width functions return a value of type
++.Vt unsigned int .
++The first-bit searches return zero when no matching bit is present.
++.Fn stdc_bit_floor
++and
++.Fn stdc_bit_ceil
++return the type of their argument.
++.Sh NOTES
++The typed functions are libc entry points with external linkage and a
++stable address.
++The type-generic interface accepts the standard unsigned integer types and,
++where the compiler provides a 128-bit integer type, that type as well; in
++C++ it is provided with overloaded functions.
++.Pp
++The C29
++.Fn stdc_rotate_left
++and
++.Fn stdc_rotate_right
++additions are not part of ISO C23 and are not provided.
++.Sh STANDARDS
++The
++.In stdbit.h
++header conforms to ISO/IEC 9899:2024 (C23).
++.Sh HISTORY
++The
++.In stdbit.h
++header appeared in
++.Ox 8.0 .
+Index: lib/libc/gen/stdbit.c
+===================================================================
+--- /dev/null
++++ lib/libc/gen/stdbit.c
+@@ -0,0 +1,178 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2024 (C23) 7.18: bit and byte utilities, runtime support.
++ *
++ * These are the external definitions behind the typed functions declared
++ * in <stdbit.h>.  The three primitive operations (count leading zeros,
++ * count trailing zeros, population count) are implemented with the
++ * compiler's clz/ctz/popcount primitives when they exist and with a
++ * portable bit-by-bit loop otherwise.  An all-zero operand yields the
++ * width, so the primitives are never applied to zero and no shift count is
++ * ever out of range.
++ *
++ * Every derived operation is expressed in terms of the primitives and the
++ * width of the operand, so there is a single place per operation where the
++ * width is handled.
++ */
++
++#include <sys/cdefs.h>
++
++#include <limits.h>
++#include <stdbit.h>
++
++/* Number of leading zero bits of x within w bits; x == 0 yields w. */
++static __inline unsigned int
++__stdc_lz(unsigned long long x, unsigned int w)
++{
++#if __stdc_has_builtin(__builtin_clzll)
++	if (x == 0)
++		return w;
++	return (unsigned int)__builtin_clzll(x) -
++	    ((unsigned int)(sizeof(unsigned long long) * CHAR_BIT) - w);
++#else
++	unsigned long long m = (unsigned long long)1 << (w - 1);
++	unsigned int	   n = 0;
++
++	while (n < w && (x & m) == 0) {
++		n++;
++		m >>= 1;
++	}
++	return n;
++#endif
++}
++
++/* Number of trailing zero bits of x within w bits; x == 0 yields w. */
++static __inline unsigned int
++__stdc_tz(unsigned long long x, unsigned int w)
++{
++#if __stdc_has_builtin(__builtin_ctzll)
++	if (x == 0)
++		return w;
++	return (unsigned int)__builtin_ctzll(x);
++#else
++	unsigned int n = 0;
++
++	while (n < w && (x & 1) == 0) {
++		n++;
++		x >>= 1;
++	}
++	return n;
++#endif
++}
++
++/* Number of one bits in x. */
++static __inline unsigned int
++__stdc_co(unsigned long long x)
++{
++#if __stdc_has_builtin(__builtin_popcountll)
++	return (unsigned int)__builtin_popcountll(x);
++#else
++	unsigned int n = 0;
++
++	while (x != 0) {
++		n += (unsigned int)(x & 1);
++		x >>= 1;
++	}
++	return n;
++#endif
++}
++
++#define __stdc_define(sfx, type)                                               \
++	unsigned int stdc_leading_zeros_##sfx(type x)                          \
++	{                                                                      \
++		return __stdc_lz((unsigned long long)x,                        \
++		    (unsigned int)(sizeof(type) * CHAR_BIT));                  \
++	}                                                                      \
++	unsigned int stdc_trailing_zeros_##sfx(type x)                         \
++	{                                                                      \
++		return __stdc_tz((unsigned long long)x,                        \
++		    (unsigned int)(sizeof(type) * CHAR_BIT));                  \
++	}                                                                      \
++	unsigned int stdc_leading_ones_##sfx(type x)                           \
++	{                                                                      \
++		return __stdc_lz((unsigned long long)(type)~x,                 \
++		    (unsigned int)(sizeof(type) * CHAR_BIT));                  \
++	}                                                                      \
++	unsigned int stdc_trailing_ones_##sfx(type x)                          \
++	{                                                                      \
++		return __stdc_tz((unsigned long long)(type)~x,                 \
++		    (unsigned int)(sizeof(type) * CHAR_BIT));                  \
++	}                                                                      \
++	unsigned int stdc_count_ones_##sfx(type x)                             \
++	{                                                                      \
++		return __stdc_co((unsigned long long)x);                       \
++	}                                                                      \
++	unsigned int stdc_count_zeros_##sfx(type x)                            \
++	{                                                                      \
++		return (unsigned int)(sizeof(type) * CHAR_BIT) -               \
++		    stdc_count_ones_##sfx(x);                                  \
++	}                                                                      \
++	unsigned int stdc_bit_width_##sfx(type x)                              \
++	{                                                                      \
++		return (unsigned int)(sizeof(type) * CHAR_BIT) -               \
++		    stdc_leading_zeros_##sfx(x);                               \
++	}                                                                      \
++	bool stdc_has_single_bit_##sfx(type x)                                 \
++	{                                                                      \
++		return x != 0 && (x & (type)(x - 1)) == 0;                     \
++	}                                                                      \
++	unsigned int stdc_first_leading_zero_##sfx(type x)                     \
++	{                                                                      \
++		unsigned int n = stdc_leading_ones_##sfx(x);                   \
++		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
++								     0;        \
++	}                                                                      \
++	unsigned int stdc_first_leading_one_##sfx(type x)                      \
++	{                                                                      \
++		unsigned int n = stdc_leading_zeros_##sfx(x);                  \
++		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
++								     0;        \
++	}                                                                      \
++	unsigned int stdc_first_trailing_zero_##sfx(type x)                    \
++	{                                                                      \
++		unsigned int n = stdc_trailing_ones_##sfx(x);                  \
++		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
++								     0;        \
++	}                                                                      \
++	unsigned int stdc_first_trailing_one_##sfx(type x)                     \
++	{                                                                      \
++		unsigned int n = stdc_trailing_zeros_##sfx(x);                 \
++		return n < (unsigned int)(sizeof(type) * CHAR_BIT) ? n + 1 :   \
++								     0;        \
++	}                                                                      \
++	type stdc_bit_floor_##sfx(type x)                                      \
++	{                                                                      \
++		if (x == 0)                                                    \
++			return 0;                                              \
++		return (type)((type)1 << (stdc_bit_width_##sfx(x) - 1));       \
++	}                                                                      \
++	type stdc_bit_ceil_##sfx(type x)                                       \
++	{                                                                      \
++		if (x <= 1)                                                    \
++			return 1;                                              \
++		return (type)((type)2                                          \
++		    << (stdc_bit_width_##sfx((type)(x - 1)) - 1));             \
++	}
++
++__stdc_define(uc, unsigned char) __stdc_define(us, unsigned short)
++    __stdc_define(ui, unsigned int) __stdc_define(ul, unsigned long)
++	__stdc_define(ull, unsigned long long)
++
++#undef __stdc_define
+Index: lib/libc/gen/stdckdint.3
+===================================================================
+--- /dev/null
++++ lib/libc/gen/stdckdint.3
+@@ -0,0 +1,85 @@
++.\"	$OpenBSD$
++.\"
++.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++.\"
++.\" Permission to use, copy, modify, and distribute this software for any
++.\" purpose with or without fee is hereby granted, provided that the above
++.\" copyright notice and this permission notice appear in all copies.
++.\"
++.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++.\"
++.Dd October 24, 2026
++.Dt STDCKDINT 3
++.Os
++.Sh NAME
++.Nm ckd_add ,
++.Nm ckd_sub ,
++.Nm ckd_mul
++.Nd checked integer arithmetic
++.Sh SYNOPSIS
++.In stdckdint.h
++.Ft bool
++.Fn ckd_add "result" "a" "b"
++.Ft bool
++.Fn ckd_sub "result" "a" "b"
++.Ft bool
++.Fn ckd_mul "result" "a" "b"
++.Sh DESCRIPTION
++The
++.In stdckdint.h
++header provides macros for arithmetic with overflow detection.
++Each macro evaluates its two operands at their mathematical value,
++converts the exact result to the type of the object designated by
++.Fa result ,
++stores that converted value, and yields
++.Dv true
++exactly when the conversion is not value preserving.
++Every argument is evaluated exactly once and no operation has undefined
++behaviour, even when the mathematical result is not representable in any
++integer type.
++.Pp
++The macros accept any integer types; the operands need not have the same
++type, and
++.Fa result
++may be narrower, wider or of a different signedness than the operands.
++When the result type is unsigned and the exact value is out of range, the
++stored value wraps modulo the width of the type and the macro yields
++.Dv true .
++.Sh RETURN VALUES
++.Fn ckd_add ,
++.Fn ckd_sub
++and
++.Fn ckd_mul
++return a value of type
++.Vt bool :
++.Dv true
++if the result could not be represented in the destination type,
++.Dv false
++otherwise.
++.Sh EXAMPLES
++The following stores the sum of two
++.Vt int
++values only when it fits:
++.Bd -literal -offset indent
++int sum;
++
++if (!ckd_add(&sum, a, b))
++	use(sum);
++else
++	overflow();
++.Ed
++.Sh STANDARDS
++The
++.In stdckdint.h
++header conforms to ISO/IEC 9899:2024 (C23).
++.Sh HISTORY
++The
++.In stdckdint.h
++header appeared in
++.Ox 8.0 .
+Index: lib/libc/gen/stdnoreturn.3
+===================================================================
+--- /dev/null
++++ lib/libc/gen/stdnoreturn.3
+@@ -0,0 +1,59 @@
++.\"	$OpenBSD$
++.\"
++.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++.\"
++.\" Permission to use, copy, modify, and distribute this software for any
++.\" purpose with or without fee is hereby granted, provided that the above
++.\" copyright notice and this permission notice appear in all copies.
++.\"
++.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++.\"
++.Dd October 24, 2026
++.Dt STDNORETURN 3
++.Os
++.Sh NAME
++.Nm stdnoreturn
++.Nd non-returning function specifier
++.Sh SYNOPSIS
++.In stdnoreturn.h
++.Fn noreturn "function declaration"
++.Sh DESCRIPTION
++The
++.In stdnoreturn.h
++header defines the
++.Fn noreturn
++macro, which expands to the
++.Va _Noreturn
++function specifier.
++A function declared with it does not return to its caller and must not be
++called in a context that expects it to.
++.Pp
++The macro is intended for C only.
++In C++ the equivalent facility is the
++.Va [[noreturn]]
++attribute, and the header defines nothing.
++.Pp
++In ISO C23
++.Va _Noreturn
++is deprecated in favour of the
++.Va [[noreturn]]
++attribute, but the
++.Fn noreturn
++macro and its expansion are unchanged.
++.Sh STANDARDS
++The
++.In stdnoreturn.h
++header conforms to
++.St -isoC-2011
++and ISO/IEC 9899:2024 (C23).
++.Sh HISTORY
++The
++.In stdnoreturn.h
++header appeared in
++.Ox 8.0 .
+Index: lib/libc/hidden/stdatomic.h
+===================================================================
+--- /dev/null
++++ lib/libc/hidden/stdatomic.h
+@@ -0,0 +1,30 @@
++/*	$OpenBSD$	*/
++/*
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++#ifndef _LIBC_STDATOMIC_H_
++#define _LIBC_STDATOMIC_H_
++
++#include_next <stdatomic.h>
++
++PROTO_NORMAL(atomic_flag_clear);
++PROTO_NORMAL(atomic_flag_clear_explicit);
++PROTO_NORMAL(atomic_flag_test_and_set);
++PROTO_NORMAL(atomic_flag_test_and_set_explicit);
++PROTO_NORMAL(atomic_signal_fence);
++PROTO_NORMAL(atomic_thread_fence);
++
++#endif /* !_LIBC_STDATOMIC_H_ */
+Index: lib/libc/hidden/threads.h
+===================================================================
+--- /dev/null
++++ lib/libc/hidden/threads.h
+@@ -0,0 +1,49 @@
++/*	$OpenBSD$	*/
++/*
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++#ifndef _LIBC_THREADS_H_
++#define _LIBC_THREADS_H_
++
++#include_next <threads.h>
++
++PROTO_NORMAL(call_once);
++PROTO_NORMAL(cnd_broadcast);
++PROTO_NORMAL(cnd_destroy);
++PROTO_NORMAL(cnd_init);
++PROTO_NORMAL(cnd_signal);
++PROTO_NORMAL(cnd_timedwait);
++PROTO_NORMAL(cnd_wait);
++PROTO_NORMAL(mtx_destroy);
++PROTO_NORMAL(mtx_init);
++PROTO_NORMAL(mtx_lock);
++PROTO_NORMAL(mtx_timedlock);
++PROTO_NORMAL(mtx_trylock);
++PROTO_NORMAL(mtx_unlock);
++PROTO_NORMAL(thrd_create);
++PROTO_NORMAL(thrd_current);
++PROTO_NORMAL(thrd_detach);
++PROTO_NORMAL(thrd_equal);
++PROTO_NORMAL(thrd_exit);
++PROTO_NORMAL(thrd_join);
++PROTO_NORMAL(thrd_sleep);
++PROTO_NORMAL(thrd_yield);
++PROTO_NORMAL(tss_create);
++PROTO_NORMAL(tss_delete);
++PROTO_NORMAL(tss_get);
++PROTO_NORMAL(tss_set);
++
++#endif /* !_LIBC_THREADS_H_ */
+Index: lib/libc/shlib_version
+===================================================================
+--- lib/libc/shlib_version
++++ lib/libc/shlib_version
+@@ -1,4 +1,4 @@
+ major=104
+-minor=0
++minor=1
+ # note: If changes were made to include/thread_private.h or if system calls
+ # were added/changed then librthread/shlib_version must also be updated.
+Index: lib/libc/thread/Makefile.inc
+===================================================================
+--- lib/libc/thread/Makefile.inc
++++ lib/libc/thread/Makefile.inc
+@@ -2,10 +2,11 @@
+ 
+ .PATH: ${LIBCSRCDIR}/thread
+ 
+-SRCS+=	callbacks.c atfork.c
++SRCS+=	callbacks.c atfork.c atomic.c atomic_fallback.c
+ 
+ # threads infrastructure
+-SRCS+=	rthread.c \
++SRCS+=	thrd.c \
++	rthread.c \
+ 	rthread_condattr.c \
+ 	rthread_debug.c \
+ 	rthread_libc.c \
+@@ -32,4 +33,3 @@ CFLAGS+=-DNO_PIC
+ .endif
+ 
+ OBJS+=	_atomic_lock.o
+-
+Index: lib/libc/thread/atomic.c
+===================================================================
+--- /dev/null
++++ lib/libc/thread/atomic.c
+@@ -0,0 +1,85 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.17: Atomics, runtime support.
++ *
++ * The type-generic operations in <stdatomic.h> are macros over the compiler
++ * builtins.  The fence and flag operations are additionally defined here as
++ * real functions so that their address can be taken and so that the
++ * declarations in the header are backed by exported symbols, as 7.17
++ * requires.  The header's function-like macros are undefined first so that
++ * the definitions below are not rewritten by the preprocessor.
++ */
++
++#include <stdatomic.h>
++
++#undef atomic_thread_fence
++
++void
++atomic_thread_fence(memory_order order)
++{
++	__atomic_thread_fence(order);
++}
++DEF_WEAK(atomic_thread_fence);
++
++#undef atomic_signal_fence
++
++void
++atomic_signal_fence(memory_order order)
++{
++	__atomic_signal_fence(order);
++}
++DEF_WEAK(atomic_signal_fence);
++
++#undef atomic_flag_test_and_set
++
++_Bool
++atomic_flag_test_and_set(volatile atomic_flag *object)
++{
++	return __atomic_test_and_set(object, __ATOMIC_SEQ_CST);
++}
++DEF_WEAK(atomic_flag_test_and_set);
++
++#undef atomic_flag_test_and_set_explicit
++
++_Bool
++atomic_flag_test_and_set_explicit(
++    volatile atomic_flag *object, memory_order order)
++{
++	return __atomic_test_and_set(object, order);
++}
++DEF_WEAK(atomic_flag_test_and_set_explicit);
++
++#undef atomic_flag_clear
++
++void
++atomic_flag_clear(volatile atomic_flag *object)
++{
++	__atomic_clear(object, __ATOMIC_SEQ_CST);
++}
++DEF_WEAK(atomic_flag_clear);
++
++#undef atomic_flag_clear_explicit
++
++void
++atomic_flag_clear_explicit(volatile atomic_flag *object, memory_order order)
++{
++	__atomic_clear(object, order);
++}
++DEF_WEAK(atomic_flag_clear_explicit);
+Index: lib/libc/thread/atomic_fallback.c
+===================================================================
+--- /dev/null
++++ lib/libc/thread/atomic_fallback.c
+@@ -0,0 +1,226 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.17: Atomics, lock-based support.
++ *
++ * A type whose size is not lock-free cannot be manipulated with a single
++ * atomic instruction.  <stdatomic.h> detects that case at compile time and
++ * calls these functions instead of letting the compiler emit a call to its
++ * atomic runtime (libatomic), which the base system does not provide.
++ *
++ * Each function holds one of a small, fixed number of spinlocks selected by
++ * the address of the object.  The lock is taken with sequential-consistency
++ * ordering, which is stronger than any memory order the standard asks for,
++ * so the requested order is always satisfied and the order argument is
++ * ignored.  The lock itself is implemented with the compiler's atomic
++ * byte test-and-set/clear builtins, which are lock-free on every supported
++ * architecture, so no unbounded spinning on a non-atomic value occurs.
++ *
++ * The arithmetic behind atomic_fetch_add and atomic_fetch_sub is performed
++ * on the operand's own bytes, propagating carry or borrow in the machine's
++ * byte order; the bitwise operations are byte-wise and order-independent.
++ */
++
++#include <sys/cdefs.h>
++
++#include <stdatomic.h>
++#include <string.h>
++
++#define FALLBACK_NLOCKS 64
++
++static unsigned char fallback_locks[FALLBACK_NLOCKS];
++
++static unsigned char *
++fallback_lock(const volatile void *obj)
++{
++	unsigned long v = (unsigned long)obj;
++
++	/* Hash object addresses to a fixed table; collisions only serialize work. */
++	return &fallback_locks[(v >> 4) & (FALLBACK_NLOCKS - 1)];
++}
++
++static void
++fallback_acquire(unsigned char *l)
++{
++	while (__atomic_test_and_set(l, __ATOMIC_SEQ_CST))
++		;
++}
++
++static void
++fallback_release(unsigned char *l)
++{
++	__atomic_clear(l, __ATOMIC_SEQ_CST);
++}
++
++void
++__atomic_fallback_load(
++    size_t size, const volatile void *obj, void *ret, int order)
++{
++	unsigned char *l = fallback_lock(obj);
++
++	(void)order;
++	fallback_acquire(l);
++	memcpy(ret, (const void *)obj, size);
++	fallback_release(l);
++}
++
++void
++__atomic_fallback_store(
++    size_t size, volatile void *obj, const void *val, int order)
++{
++	unsigned char *l = fallback_lock(obj);
++
++	(void)order;
++	fallback_acquire(l);
++	memcpy((void *)obj, val, size);
++	fallback_release(l);
++}
++
++void
++__atomic_fallback_exchange(
++    size_t size, volatile void *obj, const void *val, void *ret, int order)
++{
++	unsigned char *l = fallback_lock(obj);
++
++	(void)order;
++	fallback_acquire(l);
++	memcpy(ret, (const void *)obj, size);
++	memcpy((void *)obj, val, size);
++	fallback_release(l);
++}
++
++int
++__atomic_fallback_compare_exchange(size_t size, volatile void *obj,
++    void *expected, const void *desired, int weak, int success, int failure)
++{
++	unsigned char *l = fallback_lock(obj);
++	int	       ret;
++
++	(void)weak;
++	(void)success;
++	(void)failure;
++	fallback_acquire(l);
++	if (memcmp((const void *)obj, expected, size) == 0) {
++		memcpy((void *)obj, desired, size);
++		ret = 1;
++	} else {
++		memcpy(expected, (const void *)obj, size);
++		ret = 0;
++	}
++	fallback_release(l);
++	return ret;
++}
++
++/* a = a + b, or a = a - b when sub is non-zero, byte by byte. */
++static void
++fallback_add(unsigned char *a, const unsigned char *b, size_t size, int sub)
++{
++	unsigned carry = sub ? 1 : 0;
++	size_t	 i;
++
++#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
++	for (i = 0; i < size; i++) {
++		unsigned t = a[i] + (unsigned char)(sub ? ~b[i] : b[i]) + carry;
++		a[i] = (unsigned char)t;
++		carry = t >> 8;
++	}
++#else
++	for (i = size; i-- > 0;) {
++		unsigned t = a[i] + (unsigned char)(sub ? ~b[i] : b[i]) + carry;
++		a[i] = (unsigned char)t;
++		carry = t >> 8;
++	}
++#endif
++}
++
++static void
++fallback_fetch_add(size_t size, volatile void *obj, const void *val, void *ret,
++    int order, int sub)
++{
++	unsigned char *l = fallback_lock(obj);
++
++	(void)order;
++	fallback_acquire(l);
++	memcpy(ret, (const void *)obj, size);
++	fallback_add((unsigned char *)(void *)obj, val, size, sub);
++	fallback_release(l);
++}
++
++void
++__atomic_fallback_fetch_add(
++    size_t size, volatile void *obj, const void *val, void *ret, int order)
++{
++	fallback_fetch_add(size, obj, val, ret, order, 0);
++}
++
++void
++__atomic_fallback_fetch_sub(
++    size_t size, volatile void *obj, const void *val, void *ret, int order)
++{
++	fallback_fetch_add(size, obj, val, ret, order, 1);
++}
++
++static void
++fallback_fetch_bitwise(size_t size, volatile void *obj, const void *val,
++    void *ret, int order, int op)
++{
++	unsigned char	    *l = fallback_lock(obj);
++	unsigned char	    *o = (unsigned char *)(void *)obj;
++	const unsigned char *v = val;
++	size_t		     i;
++
++	(void)order;
++	fallback_acquire(l);
++	memcpy(ret, (const void *)obj, size);
++	for (i = 0; i < size; i++) {
++		switch (op) {
++		case 1:
++			o[i] &= v[i];
++			break;
++		case 2:
++			o[i] |= v[i];
++			break;
++		default:
++			o[i] ^= v[i];
++			break;
++		}
++	}
++	fallback_release(l);
++}
++
++void
++__atomic_fallback_fetch_and(
++    size_t size, volatile void *obj, const void *val, void *ret, int order)
++{
++	fallback_fetch_bitwise(size, obj, val, ret, order, 1);
++}
++
++void
++__atomic_fallback_fetch_or(
++    size_t size, volatile void *obj, const void *val, void *ret, int order)
++{
++	fallback_fetch_bitwise(size, obj, val, ret, order, 2);
++}
++
++void
++__atomic_fallback_fetch_xor(
++    size_t size, volatile void *obj, const void *val, void *ret, int order)
++{
++	fallback_fetch_bitwise(size, obj, val, ret, order, 3);
++}
+Index: lib/libc/thread/thrd.c
+===================================================================
+--- /dev/null
++++ lib/libc/thread/thrd.c
+@@ -0,0 +1,301 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.26: Threads.
++ *
++ * Thin wrappers over the OpenBSD pthread implementation that lives in libc.
++ * pthread_* returns the error number directly, so the return codes are
++ * mapped without inspecting errno.  The only substantive work is the
++ * trampoline for thrd_create(): a C11 thread start routine returns int,
++ * whereas a pthread start routine returns void *, so the start routine and
++ * its argument are passed through a small heap block that carries the
++ * integer result back as an intptr_t.
++ */
++
++#include <errno.h>
++#include <stdint.h>
++#include <stdlib.h>
++#include <threads.h>
++
++/*
++ * Most of the pthread_* entry points used below are declared
++ * PROTO_STD_DEPRECATED in libc/hidden/pthread.h.  That marker is a
++ * libc-internal convention meaning "not ordinarily called from inside
++ * libc"; it is not a real deprecation.  The ISO C threads wrappers must call
++ * them, so the diagnostic is silenced here instead of changing the upstream
++ * hidden namespace for the whole library.
++ */
++#if defined(__clang__)
++#pragma clang diagnostic ignored "-Wdeprecated-declarations"
++#elif defined(__GNUC__)
++#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
++#endif
++
++struct _thrd_start {
++	thrd_start_t ts_func;
++	void	    *ts_arg;
++};
++
++static void *
++_thrd_trampoline(void *p)
++{
++	struct _thrd_start *start = p;
++	thrd_start_t	    func = start->ts_func;
++	void		   *arg = start->ts_arg;
++	int		    result;
++
++	free(start);
++	result = func(arg);
++	return (void *)(intptr_t)result;
++}
++
++static int
++_thrd_map(int error)
++{
++	if (error == 0)
++		return thrd_success;
++	/* Resource exhaustion must be reported as thrd_nomem. */
++	if (error == ENOMEM || error == EAGAIN)
++		return thrd_nomem;
++	return thrd_error;
++}
++
++int
++thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
++{
++	struct _thrd_start *start;
++	pthread_t	    thread;
++	int		    error;
++
++	if ((start = malloc(sizeof(*start))) == NULL)
++		return thrd_nomem;
++	start->ts_func = func;
++	start->ts_arg = arg;
++	error = pthread_create(&thread, NULL, _thrd_trampoline, start);
++	if (error != 0) {
++		free(start);
++		return _thrd_map(error);
++	}
++	*thr = thread;
++	return thrd_success;
++}
++DEF_WEAK(thrd_create);
++
++int
++thrd_equal(thrd_t thr0, thrd_t thr1)
++{
++	return pthread_equal(thr0, thr1);
++}
++DEF_WEAK(thrd_equal);
++
++thrd_t
++thrd_current(void)
++{
++	return pthread_self();
++}
++DEF_WEAK(thrd_current);
++
++int
++thrd_sleep(const struct timespec *duration, struct timespec *remaining)
++{
++	if (nanosleep(duration, remaining) == 0)
++		return 0;
++	return errno == EINTR ? -1 : -2;
++}
++DEF_WEAK(thrd_sleep);
++
++void
++thrd_yield(void)
++{
++	sched_yield();
++}
++DEF_WEAK(thrd_yield);
++
++__dead void
++thrd_exit(int result)
++{
++	pthread_exit((void *)(intptr_t)result);
++}
++DEF_WEAK(thrd_exit);
++
++int
++thrd_detach(thrd_t thr)
++{
++	return _thrd_map(pthread_detach(thr));
++}
++DEF_WEAK(thrd_detach);
++
++int
++thrd_join(thrd_t thr, int *result)
++{
++	void *value;
++
++	if (pthread_join(thr, &value) != 0)
++		return thrd_error;
++	if (result != NULL)
++		*result = (int)(intptr_t)value;
++	return thrd_success;
++}
++DEF_WEAK(thrd_join);
++
++int
++mtx_init(mtx_t *mtx, int type)
++{
++	pthread_mutexattr_t attr;
++	int		    error, ptype;
++
++	/* mtx_timed is accepted as a capability flag; pthreads needs no setup. */
++	if ((type & ~(mtx_recursive | mtx_timed)) != 0)
++		return thrd_error;
++	ptype = (type & mtx_recursive) ? PTHREAD_MUTEX_RECURSIVE :
++					 PTHREAD_MUTEX_NORMAL;
++	if (pthread_mutexattr_init(&attr) != 0)
++		return thrd_error;
++	error = pthread_mutexattr_settype(&attr, ptype);
++	if (error == 0)
++		error = pthread_mutex_init(mtx, &attr);
++	pthread_mutexattr_destroy(&attr);
++	return _thrd_map(error);
++}
++DEF_WEAK(mtx_init);
++
++int
++mtx_lock(mtx_t *mtx)
++{
++	return _thrd_map(pthread_mutex_lock(mtx));
++}
++DEF_WEAK(mtx_lock);
++
++int
++mtx_timedlock(mtx_t *__restrict mtx, const struct timespec *__restrict ts)
++{
++	int error = pthread_mutex_timedlock(mtx, ts);
++
++	if (error == 0)
++		return thrd_success;
++	return error == ETIMEDOUT ? thrd_timedout : thrd_error;
++}
++DEF_WEAK(mtx_timedlock);
++
++int
++mtx_trylock(mtx_t *mtx)
++{
++	int error = pthread_mutex_trylock(mtx);
++
++	if (error == 0)
++		return thrd_success;
++	return error == EBUSY ? thrd_busy : thrd_error;
++}
++DEF_WEAK(mtx_trylock);
++
++int
++mtx_unlock(mtx_t *mtx)
++{
++	return _thrd_map(pthread_mutex_unlock(mtx));
++}
++DEF_WEAK(mtx_unlock);
++
++void
++mtx_destroy(mtx_t *mtx)
++{
++	(void)pthread_mutex_destroy(mtx);
++}
++DEF_WEAK(mtx_destroy);
++
++int
++cnd_init(cnd_t *cond)
++{
++	return _thrd_map(pthread_cond_init(cond, NULL));
++}
++DEF_WEAK(cnd_init);
++
++int
++cnd_signal(cnd_t *cond)
++{
++	return _thrd_map(pthread_cond_signal(cond));
++}
++DEF_WEAK(cnd_signal);
++
++int
++cnd_broadcast(cnd_t *cond)
++{
++	return _thrd_map(pthread_cond_broadcast(cond));
++}
++DEF_WEAK(cnd_broadcast);
++
++int
++cnd_wait(cnd_t *cond, mtx_t *mtx)
++{
++	return _thrd_map(pthread_cond_wait(cond, mtx));
++}
++DEF_WEAK(cnd_wait);
++
++int
++cnd_timedwait(cnd_t *__restrict cond, mtx_t *__restrict mtx,
++    const struct timespec *__restrict ts)
++{
++	int error = pthread_cond_timedwait(cond, mtx, ts);
++
++	if (error == 0)
++		return thrd_success;
++	return error == ETIMEDOUT ? thrd_timedout : thrd_error;
++}
++DEF_WEAK(cnd_timedwait);
++
++void
++cnd_destroy(cnd_t *cond)
++{
++	(void)pthread_cond_destroy(cond);
++}
++DEF_WEAK(cnd_destroy);
++
++int
++tss_create(tss_t *key, tss_dtor_t dtor)
++{
++	return _thrd_map(pthread_key_create(key, dtor));
++}
++DEF_WEAK(tss_create);
++
++void
++tss_delete(tss_t key)
++{
++	(void)pthread_key_delete(key);
++}
++DEF_WEAK(tss_delete);
++
++void *
++tss_get(tss_t key)
++{
++	return pthread_getspecific(key);
++}
++DEF_WEAK(tss_get);
++
++int
++tss_set(tss_t key, void *val)
++{
++	return _thrd_map(pthread_setspecific(key, val));
++}
++DEF_WEAK(tss_set);
++
++void
++call_once(once_flag *flag, void (*func)(void))
++{
++	(void)pthread_once(flag, func);
++}
++DEF_WEAK(call_once);
+Index: lib/libpthread/man/Makefile.inc
+===================================================================
+--- lib/libpthread/man/Makefile.inc
++++ lib/libpthread/man/Makefile.inc
+@@ -62,3 +62,4 @@ MAN+=	\
+ 	sem_wait.3
+ 
+ MAN+=	pthreads.3
++MAN+=	threads.3
+Index: lib/libpthread/man/threads.3
+===================================================================
+--- /dev/null
++++ lib/libpthread/man/threads.3
+@@ -0,0 +1,252 @@
++.\"	$OpenBSD$
++.\"
++.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++.\"
++.\" Permission to use, copy, modify, and distribute this software for any
++.\" purpose with or without fee is hereby granted, provided that the above
++.\" copyright notice and this permission notice appear in all copies.
++.\"
++.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++.\" MERCHANTABILITY AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++.\"
++.Dd October 24, 2026
++.Dt THREADS 3
++.Os
++.Sh NAME
++.Nm thrd_create ,
++.Nm thrd_equal ,
++.Nm thrd_current ,
++.Nm thrd_sleep ,
++.Nm thrd_yield ,
++.Nm thrd_exit ,
++.Nm thrd_detach ,
++.Nm thrd_join ,
++.Nm mtx_init ,
++.Nm mtx_lock ,
++.Nm mtx_timedlock ,
++.Nm mtx_trylock ,
++.Nm mtx_unlock ,
++.Nm mtx_destroy ,
++.Nm cnd_init ,
++.Nm cnd_signal ,
++.Nm cnd_broadcast ,
++.Nm cnd_wait ,
++.Nm cnd_timedwait ,
++.Nm cnd_destroy ,
++.Nm tss_create ,
++.Nm tss_get ,
++.Nm tss_set ,
++.Nm tss_delete ,
++.Nm call_once
++.Nd ISO C threads
++.Sh SYNOPSIS
++.In threads.h
++.Ft typedef ... thrd_t ;
++.Ft typedef int (*thrd_start_t )(void * );
++.Ft typedef ... mtx_t ;
++.Ft typedef ... cnd_t ;
++.Ft typedef ... tss_t ;
++.Ft typedef void (*tss_dtor_t )(void * );
++.Ft typedef ... once_flag ;
++.Ft int
++.Fn thrd_create "thrd_t *thr" "thrd_start_t func" "void *arg"
++.Ft int
++.Fn thrd_equal "thrd_t thr0" "thrd_t thr1"
++.Ft thrd_t
++.Fn thrd_current "void"
++.Ft int
++.Fn thrd_sleep "const struct timespec *duration" "struct timespec *remaining"
++.Ft void
++.Fn thrd_yield "void"
++.Ft _Noreturn void
++.Fn thrd_exit "int res"
++.Ft int
++.Fn thrd_detach "thrd_t thr"
++.Ft int
++.Fn thrd_join "thrd_t thr" "int *res"
++.Ft int
++.Fn mtx_init "mtx_t *mtx" "int type"
++.Ft int
++.Fn mtx_lock "mtx_t *mtx"
++.Ft int
++.Fn mtx_timedlock "mtx_t *mtx" "const struct timespec *ts"
++.Ft int
++.Fn mtx_trylock "mtx_t *mtx"
++.Ft int
++.Fn mtx_unlock "mtx_t *mtx"
++.Ft void
++.Fn mtx_destroy "mtx_t *mtx"
++.Ft int
++.Fn cnd_init "cnd_t *cond"
++.Ft int
++.Fn cnd_signal "cnd_t *cond"
++.Ft int
++.Fn cnd_broadcast "cnd_t *cond"
++.Ft int
++.Fn cnd_wait "cnd_t *cond" "mtx_t *mtx"
++.Ft int
++.Fn cnd_timedwait "cnd_t *cond" "mtx_t *mtx" "const struct timespec *ts"
++.Ft void
++.Fn cnd_destroy "cnd_t *cond"
++.Ft int
++.Fn tss_create "tss_t *key" "tss_dtor_t dtor"
++.Ft void *
++.Fn tss_get "tss_t key"
++.Ft int
++.Fn tss_set "tss_t key" "void *val"
++.Ft void
++.Fn tss_delete "tss_t key"
++.Ft void
++.Fn call_once "once_flag *flag" "void (*func)(void)"
++.Sh DESCRIPTION
++The
++.In threads.h
++header provides the ISO C11 threads interface.
++It is a standardised interface over the
++.Xr pthread 3
++implementation that is part of
++.Xr libc 3 ;
++every object is a real pthread object underneath and no separate
++synchronisation primitive is introduced.
++.Pp
++.Fn thrd_create
++creates a thread that runs
++.Fa func
++with argument
++.Fa arg .
++.Fn thrd_join
++waits for a thread to terminate and stores its result;
++.Fn thrd_detach
++releases the resources of a thread whose result is not needed.
++.Fn thrd_exit
++terminates the calling thread.
++.Fn thrd_equal
++compares two thread identifiers and
++.Fn thrd_current
++returns the identifier of the calling thread.
++.Fn thrd_sleep
++suspends the calling thread;
++.Fn thrd_yield
++offers the processor to another thread.
++.Pp
++.Fn mtx_init
++initializes a mutex.
++.Fa type
++is
++.Dv mtx_plain ,
++.Dv mtx_recursive
++or
++.Dv mtx_timed ,
++or the bitwise OR of
++.Dv mtx_recursive
++and
++.Dv mtx_timed .
++.Fn mtx_lock
++blocks until the mutex is locked,
++.Fn mtx_trylock
++returns
++.Dv thrd_busy
++if the mutex is already locked,
++and
++.Fn mtx_timedlock
++blocks until the absolute
++.Fa ts
++time.
++.Pp
++.Fn cnd_init
++initializes a condition variable.
++.Fn cnd_wait
++and
++.Fn cnd_timedwait
++atomically release the mutex and wait for a signal;
++.Fn cnd_timedwait
++returns
++.Dv thrd_timedout
++when the absolute
++.Fa ts
++time passes.
++.Fn cnd_signal
++wakes one waiter and
++.Fn cnd_broadcast
++wakes all of them.
++.Pp
++.Fn tss_create
++creates a thread-specific storage key with destructor
++.Fa dtor ;
++.Fn tss_get
++and
++.Fn tss_set
++access the value associated with the calling thread.
++.Pp
++.Fn call_once
++calls
++.Fa func
++exactly once for a given
++.Fa flag .
++A
++.Vt once_flag
++must be initialized with
++.Dv ONCE_FLAG_INIT .
++.Pp
++The
++.Dv thread_local
++macro, available before ISO C23, is a synonym for
++.Va _Thread_local .
++.Sh RETURN VALUES
++The functions that can fail return
++.Dv thrd_success
++on success and one of
++.Dv thrd_timedout ,
++.Dv thrd_busy ,
++.Dv thrd_nomem
++or
++.Dv thrd_error
++on failure.
++.Fn thrd_join
++stores the result of the thread in
++.Fa res
++when
++.Fa res
++is not
++.Dv NULL .
++.Fn thrd_sleep
++returns 0 when the requested interval elapsed, \-1 when it was interrupted
++and \-2 on error.
++.Pp
++.Fn thrd_yield ,
++.Fn thrd_exit ,
++.Fn mtx_destroy ,
++.Fn cnd_destroy
++and
++.Fn tss_delete
++return no value.
++.Sh NOTES
++The base clang currently predefines
++.Dv __STDC_NO_THREADS__
++when targeting
++.Ox ,
++because the base system has historically lacked
++.In threads.h .
++This interface is provided by libc nonetheless; including
++.In threads.h
++withdraws the stale macro, and the compiler's target description should be
++updated to match.
++.Sh SEE ALSO
++.Xr pthread 3 ,
++.Xr stdatomic 3
++.Sh STANDARDS
++The
++.In threads.h
++header conforms to
++.St -isoC-2011
++and ISO/IEC 9899:2024 (C23).
++.Sh HISTORY
++The
++.In threads.h
++header appeared in
++.Ox 8.0 .
+Index: regress/lib/libc/Makefile
+===================================================================
+--- regress/lib/libc/Makefile
++++ regress/lib/libc/Makefile
+@@ -12,6 +12,7 @@ SUBDIR+= gcvt getaddrinfo getcap getopt
+ SUBDIR+= hash
+ SUBDIR+= hsearch
+ SUBDIR+= ieeefp ifnameindex illumos
++SUBDIR+= iso-c-headers
+ SUBDIR+= ldexp locale longjmp
+ SUBDIR+= malloc mkstemp modf
+ SUBDIR+= netdb
+@@ -20,9 +21,10 @@ SUBDIR+= popen printf
+ SUBDIR+= qsort
+ SUBDIR+= regex
+ SUBDIR+= setjmp setjmp-signal sigsetjmp sigthr sleep sprintf stdio
+-SUBDIR+= stdio_threading stpncpy strchr strerror strlcat strlcpy strnlen
++SUBDIR+= stdalign stdatomic stdbit stdckdint stdio_threading stdnoreturn
++SUBDIR+= stpncpy strchr strerror strlcat strlcpy strnlen
+ SUBDIR+= strtod strtol strtonum sys
+-SUBDIR+= telldir time timingsafe
++SUBDIR+= telldir threads time timingsafe
+ SUBDIR+= uuid
+ SUBDIR+= vis
+ SUBDIR+= wprintf
+Index: regress/lib/libc/glob/globtest.in
+===================================================================
+--- regress/lib/libc/glob/globtest.in
++++ regress/lib/libc/glob/globtest.in
+@@ -46,6 +46,9 @@ fake/bin/systrace
+ fake/bin/tar
+ fake/bin/test
+ 
++[fake/bin/[[:alpha:]] <0x10>
++fake/bin/[[:alpha:]
++
+ [fake/bin/[[:alpha:]]*] <0x4000>
+ fake/bin/cat 0100644
+ fake/bin/chgrp 0100644
+@@ -113,4 +116,3 @@ fake/bin/cat
+ 
+ [fake/b[a-z]*] <0x4000>
+ fake/bin 0040755
+-
+Index: regress/lib/libc/iso-c-headers/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/iso-c-headers/Makefile
+@@ -0,0 +1,25 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	joint
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++run-regress-${PROG}: ${PROG}
++	./${PROG}
++	sh ${.CURDIR}/matrix.sh
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/iso-c-headers/joint.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/iso-c-headers/joint.c
+@@ -0,0 +1,74 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * All six headers in one translation unit, each included twice in opposite
++ * orders, so that the include guards are exercised and the headers are
++ * proven to be mutually compatible.  The program only checks a couple of
++ * values from every header; its purpose is to link, not to re-test.
++ */
++
++#include <assert.h>
++#include <stdalign.h>
++#include <stdatomic.h>
++#include <stdbit.h>
++#include <stdckdint.h>
++#include <stdint.h>
++#include <stdnoreturn.h>
++#include <threads.h>
++
++static atomic_int joint_counter = 0;
++static once_flag joint_once = ONCE_FLAG_INIT;
++
++static void
++joint_once_func(void)
++{
++	atomic_fetch_add(&joint_counter, 1);
++}
++
++noreturn static void
++joint_die(void)
++{
++	thrd_exit(1);
++}
++
++int
++main(void)
++{
++	alignas(8) char buf[8];
++	int sum = 0;
++	mtx_t mtx;
++
++	assert(__STDC_ENDIAN_NATIVE__ == __STDC_ENDIAN_LITTLE__ ||
++	       __STDC_ENDIAN_NATIVE__ == __STDC_ENDIAN_BIG__);
++	assert(!ckd_add(&sum, 20, 22) && sum == 42);
++	assert(stdc_bit_width(256u) == 9);
++	assert(stdc_bit_ceil(5u) == 8);
++	atomic_store(&joint_counter, 5);
++	assert(atomic_load(&joint_counter) == 5);
++	call_once(&joint_once, joint_once_func);
++	assert(atomic_load(&joint_counter) == 6);
++	assert(mtx_init(&mtx, mtx_plain) == thrd_success);
++	assert(mtx_lock(&mtx) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	mtx_destroy(&mtx);
++	assert((uintptr_t)buf % 8 == 0);
++
++	(void)joint_die;
++	return 0;
++}
+Index: regress/lib/libc/iso-c-headers/matrix.sh
+===================================================================
+--- /dev/null
++++ regress/lib/libc/iso-c-headers/matrix.sh
+@@ -0,0 +1,95 @@
++#!/bin/sh
++#	$OpenBSD$
++#
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++#
++# Compile each of the six headers on its own, and all of them together in
++# both include orders, under C11, C17 and C23, with strict warnings.  The
++# -I/usr/include is deliberate: it makes the installed OpenBSD headers win
++# over the compiler's resource headers (clang searches -I directories first),
++# so the test proves that the tree's headers, not the compiler's, are used.
++
++set -u
++
++CC=${CC:-cc}
++WARN="-Wall -Wextra -Werror -Wpedantic"
++HEADERS="stdalign stdnoreturn stdatomic stdbit stdckdint threads"
++STDS="c11 c17 c23"
++status=0
++
++try()
++{
++	# $1 = standard, $2 = source text
++	printf '%s\n' "$2" | $CC -std=$1 -I/usr/include $WARN -fsyntax-only -x c - \
++	    2>/tmp/iso-c-headers.err || {
++		echo "FAIL: -std=$1: $2" >&2
++		sed 's/^/    /' /tmp/iso-c-headers.err >&2
++		status=1
++	}
++}
++
++for std in $STDS; do
++	for h in $HEADERS; do
++		try "$std" "#include <$h.h>
++int main(void) { return 0; }"
++	done
++done
++
++# Each header alone, but translated: the macros must survive a use.
++try c11 "#include <stdalign.h>
++alignas(8) int x; int main(void) { return (int)alignof(int) - (int)alignof(int) + (int)sizeof(x) - 4; }"
++try c11 "#include <stdnoreturn.h>
++noreturn void f(void); int main(void) { return 0; }"
++try c11 "#include <stdatomic.h>
++atomic_int x; int main(void) { return atomic_load(&x); }"
++try c11 "#include <threads.h>
++int main(void) { thrd_t t; return (int)(long)&t - (int)(long)&t; }"
++try c23 "#include <stdbit.h>
++int main(void) { return (int)stdc_bit_width(0u); }"
++try c23 "#include <stdckdint.h>
++int main(void) { int r; return ckd_add(&r, 1, 1); }"
++
++# All six, forward and reverse.
++try c23 "#include <stdalign.h>
++#include <stdatomic.h>
++#include <stdbit.h>
++#include <stdckdint.h>
++#include <stdnoreturn.h>
++#include <threads.h>
++int main(void) { return 0; }"
++try c23 "#include <threads.h>
++#include <stdnoreturn.h>
++#include <stdckdint.h>
++#include <stdbit.h>
++#include <stdatomic.h>
++#include <stdalign.h>
++int main(void) { return 0; }"
++
++# Canary: the installed libc headers still compile as C99 and C89 with the
++# strict warning set (the C11/C23 headers are not pulled in indirectly).
++printf '#include <stddef.h>\n#include <limits.h>\n#include <stdlib.h>\n#include <string.h>\nint main(void) { return 0; }\n' | \
++	$CC -std=c99 -I/usr/include $WARN -fsyntax-only -x c - || status=1
++printf '#include <stddef.h>\n#include <limits.h>\nint main(void) { return 0; }\n' | \
++	$CC -std=c89 -I/usr/include $WARN -fsyntax-only -x c - || status=1
++
++# C++: all six headers must be includable, and the stdbit type-generic
++# interface is available through overloads.
++if command -v c++ >/dev/null 2>&1; then
++	printf '#include <stdalign.h>\n#include <stdatomic.h>\n#include <stdbit.h>\n#include <stdckdint.h>\n#include <stdnoreturn.h>\n#include <threads.h>\nint main() {\n\tunsigned int z = stdc_leading_zeros(1u);\n\tint r = 0;\n\tbool o = ckd_add(&r, 1, 1);\n\treturn (int)z + (int)o + r; }\n' | \
++		c++ -std=c++17 -I/usr/include -Wall -Wextra -fsyntax-only -x c++ - || status=1
++fi
++
++rm -f /tmp/iso-c-headers.err
++exit $status
+Index: regress/lib/libc/stdalign/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdalign/Makefile
+@@ -0,0 +1,21 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	stdalign
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/stdalign/stdalign.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdalign/stdalign.c
+@@ -0,0 +1,53 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/* ISO C11 <stdalign.h>: macros, keywords and alignment semantics. */
++
++#include <assert.h>
++#include <stdalign.h>
++#include <stddef.h>
++#include <stdint.h>
++
++struct aligned {
++	char c;
++	alignas(64) char pad[64];
++};
++
++int
++main(void)
++{
++	alignas(16) char buf[16];
++
++	/* The object really is 64-byte aligned. */
++	assert((uintptr_t)&buf % 16 == 0);
++	assert(offsetof(struct aligned, pad) % 64 == 0);
++
++	/* alignof yields size_t and is at least 1 for any type. */
++	assert(alignof(char) >= 1);
++	assert(alignof(struct aligned) >= 64);
++
++#ifdef __STDC_VERSION__
++#if __STDC_VERSION__ < 202311L
++	/* Pre-C23 the markers exist and expand to 1. */
++	assert(__alignas_is_defined == 1);
++	assert(__alignof_is_defined == 1);
++#endif
++#endif
++
++	return 0;
++}
+Index: regress/lib/libc/stdatomic/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdatomic/Makefile
+@@ -0,0 +1,21 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	stdatomic
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/stdatomic/stdatomic.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdatomic/stdatomic.c
+@@ -0,0 +1,173 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO C11 <stdatomic.h>: the operations are exercised from several real
++ * threads so that the read-modify-write operations and the memory orders
++ * see genuine contention, not just a single-threaded simulation.
++ */
++
++#include <assert.h>
++#include <pthread.h>
++#include <stdatomic.h>
++#include <string.h>
++
++#define NTHREADS 8
++#define ITERATIONS 200000
++
++static atomic_int counter;
++static atomic_flag lock = ATOMIC_FLAG_INIT;
++
++static void *
++bump(void *arg)
++{
++	int i;
++
++	(void)arg;
++	for (i = 0; i < ITERATIONS; i++)
++		atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
++	return NULL;
++}
++
++static void *
++locked_bump(void *arg)
++{
++	int i;
++
++	(void)arg;
++	for (i = 0; i < ITERATIONS; i++) {
++		while (atomic_flag_test_and_set_explicit(
++		    &lock, memory_order_acquire))
++			;
++		counter++;
++		atomic_flag_clear_explicit(&lock, memory_order_release);
++	}
++	return NULL;
++}
++
++int
++main(void)
++{
++	pthread_t th[NTHREADS];
++	int i, expected, desired;
++
++	for (i = 0; i < NTHREADS; i++)
++		assert(pthread_create(&th[i], NULL, bump, NULL) == 0);
++	for (i = 0; i < NTHREADS; i++)
++		assert(pthread_join(th[i], NULL) == 0);
++	assert(atomic_load(&counter) == NTHREADS * ITERATIONS);
++
++	atomic_store(&counter, 0);
++	for (i = 0; i < NTHREADS; i++)
++		assert(pthread_create(&th[i], NULL, locked_bump, NULL) == 0);
++	for (i = 0; i < NTHREADS; i++)
++		assert(pthread_join(th[i], NULL) == 0);
++	assert(atomic_load(&counter) == NTHREADS * ITERATIONS);
++
++	atomic_store(&counter, 10);
++	expected = 10;
++	desired = 20;
++	assert(atomic_compare_exchange_strong(&counter, &expected, desired));
++	assert(atomic_load(&counter) == 20);
++	expected = 10;
++	assert(!atomic_compare_exchange_strong(&counter, &expected, desired));
++	assert(expected == 20);
++
++	assert(atomic_exchange(&counter, 0xff) == 20);
++	assert(atomic_fetch_or(&counter, 0x100) == 0xff);
++	assert(atomic_fetch_and(&counter, ~0x1) == 0x1ff);
++	assert(atomic_fetch_xor(&counter, 0xff) == 0x1fe);
++
++	assert(atomic_is_lock_free(&counter));
++	atomic_thread_fence(memory_order_seq_cst);
++	atomic_signal_fence(memory_order_acquire);
++
++	/* atomic aggregate load, store and compare-exchange */
++	{
++		struct pair {
++			int a;
++			int b;
++		};
++		_Atomic(struct pair) var;
++		struct pair v, w, expect;
++
++		v.a = 1;
++		v.b = 2;
++		atomic_init(&var, v);
++		v.a = 3;
++		v.b = 4;
++		atomic_store(&var, v);
++		w = atomic_load(&var);
++		assert(w.a == 3 && w.b == 4);
++		expect = w;
++		v.a = 5;
++		v.b = 6;
++		assert(atomic_compare_exchange_strong(&var, &expect, v));
++		w = atomic_load(&var);
++		assert(w.a == 5 && w.b == 6);
++	}
++
++	/* atomic pointer arithmetic is scaled by the pointed-to size */
++	{
++		int arr[4];
++		_Atomic(int *) ap = &arr[0];
++		int *old;
++
++		old = atomic_exchange(&ap, &arr[2]);
++		assert(old == &arr[0]);
++		assert(atomic_load(&ap) == &arr[2]);
++		old = atomic_fetch_add(&ap, 1);
++		assert(old == &arr[2]);
++		assert(atomic_load(&ap) == &arr[3]);
++		old = atomic_fetch_sub(&ap, 3);
++		assert(old == &arr[3]);
++		assert(atomic_load(&ap) == &arr[0]);
++		assert(atomic_is_lock_free(&ap));
++	}
++
++	/*
++	 * A type that is not lock-free is handled by the libc lock-based
++	 * fallback, so it links and works without an external atomic runtime.
++	 */
++	{
++		struct big16 {
++			unsigned char b[16];
++		};
++		_Atomic(struct big16) big;
++		struct big16 v, w, expect;
++		int i;
++
++		for (i = 0; i < 16; i++)
++			v.b[i] = (unsigned char)(i + 1);
++		atomic_store(&big, v);
++		w = atomic_load(&big);
++		assert(memcmp(&w, &v, sizeof(v)) == 0);
++		expect = w;
++		assert(atomic_compare_exchange_strong(&big, &expect, v));
++	}
++
++	/* ATOMIC_VAR_INIT was removed in C23. */
++#if !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L)
++	{
++		atomic_int var = ATOMIC_VAR_INIT(7);
++		assert(atomic_load(&var) == 7);
++	}
++#endif
++
++	return 0;
++}
+Index: regress/lib/libc/stdbit/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdbit/Makefile
+@@ -0,0 +1,21 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	stdbit
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/stdbit/stdbit.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdbit/stdbit.c
+@@ -0,0 +1,95 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/* ISO C23 <stdbit.h>: bit counting, searching and power-of-two helpers. */
++
++#include <assert.h>
++#include <limits.h>
++#include <stdbit.h>
++#include <stdbool.h>
++
++int
++main(void)
++{
++	/* leading / trailing zeros and ones */
++	assert(stdc_leading_zeros(0u) == 32);
++	assert(stdc_leading_zeros(1u) == 31);
++	assert(stdc_leading_zeros(0x80000000u) == 0);
++	assert(stdc_leading_zeros_uc((unsigned char)0) == 8);
++	assert(stdc_leading_zeros_us((unsigned short)1) == 15);
++	assert(stdc_leading_zeros_ull(1ull) == 63);
++	assert(stdc_leading_ones(0xffffffffu) == 32);
++	assert(stdc_leading_ones(0u) == 0);
++	assert(stdc_leading_ones(0xf0000000u) == 4);
++	assert(stdc_leading_ones_uc((unsigned char)0xff) == 8);
++	assert(stdc_trailing_zeros(0u) == 32);
++	assert(stdc_trailing_zeros(1u) == 0);
++	assert(stdc_trailing_zeros(0x80u) == 7);
++	assert(stdc_trailing_zeros_uc((unsigned char)0) == 8);
++	assert(stdc_trailing_ones(0xffu) == 8);
++	assert(stdc_trailing_ones(0u) == 0);
++	assert(stdc_trailing_ones_ull(~0ull) == 64);
++
++	/* population counts */
++	assert(stdc_count_ones(0u) == 0);
++	assert(stdc_count_ones(0xfu) == 4);
++	assert(stdc_count_zeros(0u) == 32);
++	assert(stdc_count_zeros(0xffffffffu) == 0);
++
++	/* first set / clear bit positions are one-based, 0 when absent */
++	assert(stdc_first_leading_zero(0u) == 1);
++	assert(stdc_first_leading_zero(0xffffffffu) == 0);
++	assert(stdc_first_leading_zero(0x7fffffffu) == 1);
++	assert(stdc_first_leading_one(0u) == 0);
++	assert(stdc_first_leading_one(1u) == 32);
++	assert(stdc_first_leading_one(0x80000000u) == 1);
++	assert(stdc_first_trailing_zero(0xffffffffu) == 0);
++	assert(stdc_first_trailing_zero(0xfffffffeu) == 1);
++	assert(stdc_first_trailing_one(0u) == 0);
++	assert(stdc_first_trailing_one(1u) == 1);
++	assert(stdc_first_trailing_one(4u) == 3);
++
++	/* width and powers of two */
++	assert(stdc_bit_width(0u) == 0);
++	assert(stdc_bit_width(1u) == 1);
++	assert(stdc_bit_width(256u) == 9);
++	assert(stdc_bit_floor(0u) == 0);
++	assert(stdc_bit_floor(1u) == 1);
++	assert(stdc_bit_floor(255u) == 128);
++	assert(stdc_bit_floor_uc((unsigned char)200) == 128);
++	assert(stdc_bit_ceil(0u) == 1);
++	assert(stdc_bit_ceil(1u) == 1);
++	assert(stdc_bit_ceil(128u) == 128);
++	assert(stdc_bit_ceil(129u) == 256);
++	/* An unrepresentable ceiling wraps (the standard leaves it undefined).
++	 */
++	assert(stdc_bit_ceil_ull(0x8000000000000001ull) == 0);
++
++	assert(stdc_has_single_bit(1u) == true);
++	assert(stdc_has_single_bit(2u) == true);
++	assert(stdc_has_single_bit(3u) == false);
++	assert(stdc_has_single_bit(0u) == false);
++	assert(stdc_has_single_bit(0x80000000u) == true);
++
++	/* endianness constants are distinct and native is one of them */
++	assert(__STDC_ENDIAN_LITTLE__ != __STDC_ENDIAN_BIG__);
++	assert(__STDC_ENDIAN_NATIVE__ == __STDC_ENDIAN_LITTLE__ ||
++	       __STDC_ENDIAN_NATIVE__ == __STDC_ENDIAN_BIG__);
++
++	return 0;
++}
+Index: regress/lib/libc/stdckdint/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdckdint/Makefile
+@@ -0,0 +1,21 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	stdckdint
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/stdckdint/stdckdint.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdckdint/stdckdint.c
+@@ -0,0 +1,368 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * Regression test for <stdckdint.h> (ISO C23 7.20).
++ *
++ * The boundary section checks both the overflow indication and the value
++ * stored in the destination for every standard integer type and for mixed
++ * signed/unsigned and wide/narrow combinations.  Where the architecture has
++ * __int128 the same cases are then replayed over a boundary grid and compared
++ * against an independent arbitrary-precision oracle built on that type.
++ */
++
++#include <limits.h>
++#include <stdbool.h>
++#include <stdckdint.h>
++#include <stddef.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <string.h>
++
++#ifndef __STDC_VERSION_STDCKDINT_H__
++#error "stdckdint.h did not define __STDC_VERSION_STDCKDINT_H__"
++#endif
++#if __STDC_VERSION_STDCKDINT_H__ != 202311L
++#error "unexpected __STDC_VERSION_STDCKDINT_H__"
++#endif
++
++static int failures;
++
++#define CHECK(cond, what)                                                      \
++	do {                                                                   \
++		if (!(cond)) {                                                 \
++			printf(                                                \
++			    "FAIL: %s (%s:%d)\n", (what), __FILE__, __LINE__); \
++			failures++;                                            \
++		}                                                              \
++	} while (0)
++
++static unsigned probe_calls;
++
++static unsigned
++probe(void)
++{
++	probe_calls++;
++	return (1u);
++}
++
++static size_t	slots[4];
++static unsigned slot_index;
++
++static size_t *
++next_slot(void)
++{
++	return (&slots[slot_index++]);
++}
++
++static void
++test_boundaries(void)
++{
++	size_t		   z;
++	int		   i;
++	long long	   ll;
++	unsigned short	   h;
++	unsigned long long q;
++
++	/* int: saturation at both ends, stored value on overflow. */
++	i = 0;
++	CHECK(ckd_add(&i, INT_MAX, 1) && i == INT_MIN, "int MAX+1");
++	CHECK(ckd_sub(&i, INT_MIN, 1) && i == INT_MAX, "int MIN-1");
++	CHECK(ckd_mul(&i, INT_MAX, 2) && i == -2, "int MAX*2");
++	CHECK(ckd_mul(&i, INT_MIN, -1) && i == INT_MIN, "int MIN*-1");
++	CHECK(!ckd_add(&i, 0, 0) && i == 0, "int 0+0");
++	CHECK(!ckd_sub(&i, INT_MIN, INT_MIN) && i == 0, "int MIN-MIN");
++	CHECK(!ckd_mul(&i, INT_MIN, 1) && i == INT_MIN, "int MIN*1");
++
++	/* size_t: exact boundaries and unsigned wrap. */
++	z = 0;
++	CHECK(!ckd_add(&z, (size_t)SIZE_MAX, (size_t)0) && z == SIZE_MAX,
++	    "size_t MAX+0");
++	CHECK(
++	    ckd_add(&z, (size_t)SIZE_MAX, (size_t)1) && z == 0, "size_t MAX+1");
++	CHECK(ckd_sub(&z, (size_t)0, (size_t)1) && z == SIZE_MAX, "size_t 0-1");
++	CHECK(!ckd_sub(&z, (size_t)SIZE_MAX, (size_t)SIZE_MAX) && z == 0,
++	    "size_t MAX-MAX");
++	CHECK(ckd_mul(&z, (size_t)SIZE_MAX, (size_t)2) && z == SIZE_MAX - 1,
++	    "size_t MAX*2");
++	CHECK(!ckd_mul(&z, (size_t)0, (size_t)SIZE_MAX) && z == 0,
++	    "size_t 0*MAX");
++
++	/* long long: signed wrap. */
++	ll = 0;
++	CHECK(ckd_add(&ll, LLONG_MAX, 1LL) && ll == LLONG_MIN, "llong MAX+1");
++	CHECK(ckd_sub(&ll, LLONG_MIN, 1LL) && ll == LLONG_MAX, "llong MIN-1");
++	CHECK(ckd_mul(&ll, LLONG_MIN, -1LL) && ll == LLONG_MIN, "llong MIN*-1");
++
++	/* narrow destination: representability is judged against it. */
++	h = 0;
++	CHECK(!ckd_add(&h, 30000, 30000) && h == 60000, "ushort fits");
++	CHECK(ckd_add(&h, 40000, 40000) && h == 14464, "ushort wraps");
++
++	/* operands are promoted to infinite precision, not to a common
++	 * operand type. */
++	q = 0;
++	CHECK(!ckd_add(&q, (unsigned)UINT_MAX, 1u) &&
++		q == (unsigned long long)UINT_MAX + 1ULL,
++	    "widening add");
++
++	/* mixed signedness. */
++	CHECK(ckd_add(&q, (int)-1, 0u) && q == ULLONG_MAX, "mixed -1+0u");
++	ll = 0;
++	CHECK(ckd_add(&ll, (unsigned long long)-1, 0ULL) && ll == -1,
++	    "mixed ull -1");
++
++	/* single evaluation of operands and of the result pointer. */
++	probe_calls = 0;
++	z = 0;
++	(void)ckd_add(&z, probe(), probe());
++	CHECK(probe_calls == 2, "operands evaluated once");
++	slot_index = 0;
++	(void)ckd_add(next_slot(), (size_t)1, (size_t)2);
++	CHECK(slot_index == 1 && slots[0] == 3, "result pointer once");
++
++	/* the macro has type bool */
++	_Static_assert(
++	    _Generic(ckd_add(&z, (size_t)1, (size_t)2), _Bool: 1, default: 0),
++	    "ckd_add() must have type bool");
++}
++
++#ifdef __SIZEOF_INT128__
++
++/* __int128 is the reference arithmetic; silence the -Wpedantic complaint. */
++__extension__ typedef __int128		i128;
++__extension__ typedef unsigned __int128 u128;
++
++static uint64_t
++mask_of(unsigned width)
++{
++	return width >= 64 ? UINT64_MAX : (UINT64_C(1) << width) - 1;
++}
++
++struct int_info {
++	unsigned width;
++	unsigned is_signed;
++};
++
++static i128
++value_of(uint64_t bits, struct int_info in)
++{
++	uint64_t m = mask_of(in.width);
++
++	bits &= m;
++	if (in.is_signed && in.width < 64 &&
++	    (bits & (UINT64_C(1) << (in.width - 1))))
++		return (i128)bits - ((i128)1 << in.width);
++	if (in.is_signed && in.width == 64)
++		return (i128)(int64_t)bits;
++	return (i128)bits;
++}
++
++static int
++convert(i128 res, struct int_info rr, uint64_t *out)
++{
++	uint64_t m = mask_of(rr.width);
++	int	 overflow;
++
++	if (rr.is_signed) {
++		i128 lo = -((i128)1 << (rr.width - 1));
++		i128 hi = ((i128)1 << (rr.width - 1)) - 1;
++
++		overflow = res < lo || res > hi;
++	} else {
++		overflow = res < 0 || (u128)res > (u128)m;
++	}
++	*out = (uint64_t)((u128)res & m);
++	return overflow;
++}
++
++static int
++oracle(int op, struct int_info ra, struct int_info rb, struct int_info rr,
++    uint64_t a_bits, uint64_t b_bits, uint64_t *out)
++{
++	uint64_t ma, mb, a, b, m;
++	u128	 amag, bmag, prod;
++	int	 sa, sb, sign;
++
++	if (op == 0)
++		return convert(
++		    value_of(a_bits, ra) + value_of(b_bits, rb), rr, out);
++	if (op == 1)
++		return convert(
++		    value_of(a_bits, ra) - value_of(b_bits, rb), rr, out);
++
++	ma = mask_of(ra.width);
++	mb = mask_of(rb.width);
++	a = a_bits & ma;
++	b = b_bits & mb;
++	sa = ra.is_signed && (a >> (ra.width - 1) & 1);
++	sb = rb.is_signed && (b >> (rb.width - 1) & 1);
++	amag = sa ? (u128)(~a & ma) + 1 : (u128)a;
++	bmag = sb ? (u128)(~b & mb) + 1 : (u128)b;
++	prod = amag * bmag;
++	sign = sa ^ sb;
++	m = mask_of(rr.width);
++
++	if (prod == 0) {
++		*out = 0;
++		return 0;
++	}
++	if (sign) {
++		*out = (uint64_t)((~(prod & m)) + 1) & m;
++		if (rr.is_signed)
++			return prod > (u128)((i128)1 << (rr.width - 1));
++		return 1;
++	}
++	*out = (uint64_t)(prod & m);
++	if (rr.is_signed)
++		return prod > (u128)(((i128)1 << (rr.width - 1)) - 1);
++	return prod > (u128)m;
++}
++
++static const uint64_t vals[] = {
++    UINT64_C(0),
++    UINT64_C(1),
++    UINT64_C(2),
++    UINT64_C(3),
++    UINT64_C(127),
++    UINT64_C(128),
++    UINT64_C(255),
++    UINT64_C(256),
++    UINT64_C(0x7fff),
++    UINT64_C(0x8000),
++    UINT64_C(0xffff),
++    UINT64_C(0x10000),
++    UINT64_C(0x7fffffff),
++    UINT64_C(0x80000000),
++    UINT64_C(0xffffffff),
++    UINT64_C(0x100000000),
++    UINT64_C(0x7fffffffffffffff),
++    UINT64_C(0x8000000000000000),
++    UINT64_C(0xffffffffffffffff),
++    UINT64_C(100),
++    UINT64_C(1000),
++    UINT64_C(65535),
++};
++
++#define RUN_CASE(AT, AS, AUT, BT, BS, BUT, RT, RS, RUT)                               \
++	do {                                                                          \
++		struct int_info ra = {sizeof(AT) * CHAR_BIT, (AS)};                   \
++		struct int_info rb = {sizeof(BT) * CHAR_BIT, (BS)};                   \
++		struct int_info rr = {sizeof(RT) * CHAR_BIT, (RS)};                   \
++		size_t		i, j;                                                 \
++		int		k;                                                    \
++                                                                                      \
++		for (i = 0; i < sizeof(vals) / sizeof(vals[0]); i++) {                \
++			for (j = 0; j < sizeof(vals) / sizeof(vals[0]); j++) {        \
++				uint64_t av = vals[i] & mask_of(ra.width);            \
++				uint64_t bv = vals[j] & mask_of(rb.width);            \
++				AT	 a = (AT)(AUT)av;                             \
++				BT	 b = (BT)(BUT)bv;                             \
++				RT	 r;                                           \
++				uint64_t want;                                        \
++				int	 wf, gf;                                      \
++                                                                                      \
++				for (k = 0; k < 3; k++) {                             \
++					r = (RT)(RUT)UINT64_C(                        \
++					    0x5a5a5a5a5a5a5a5a);                      \
++					wf = oracle(                                  \
++					    k, ra, rb, rr, av, bv, &want);            \
++					switch (k) {                                  \
++					case 0:                                       \
++						gf = ckd_add(&r, a, b) != 0;          \
++						break;                                \
++					case 1:                                       \
++						gf = ckd_sub(&r, a, b) != 0;          \
++						break;                                \
++					default:                                      \
++						gf = ckd_mul(&r, a, b) != 0;          \
++						break;                                \
++					}                                             \
++					if (gf != wf ||                               \
++					    (uint64_t)(RUT)r != want) {               \
++						if (failures < 40)                    \
++							printf(                       \
++							    "FAIL: %s op=%d "         \
++							    "a=%#llx b=%#llx "        \
++							    "gf=%d wf=%d "            \
++							    "got=%#llx "              \
++							    "want=%#llx\n",           \
++							    #RT, k,                   \
++							    (unsigned long long)      \
++								av,                   \
++							    (unsigned long long)      \
++								bv,                   \
++							    gf, wf,                   \
++							    (unsigned long long)(RUT) \
++								r,                    \
++							    (unsigned long long)      \
++								want);                \
++						failures++;                           \
++					}                                             \
++				}                                                     \
++			}                                                             \
++		}                                                                     \
++	} while (0)
++
++static void
++test_grid(void)
++{
++	RUN_CASE(signed char, 1, unsigned char, signed char, 1, unsigned char,
++	    signed char, 1, unsigned char);
++	RUN_CASE(unsigned char, 0, unsigned char, unsigned char, 0,
++	    unsigned char, unsigned char, 0, unsigned char);
++	RUN_CASE(short, 1, unsigned short, short, 1, unsigned short, short, 1,
++	    unsigned short);
++	RUN_CASE(unsigned short, 0, unsigned short, unsigned short, 0,
++	    unsigned short, unsigned short, 0, unsigned short);
++	RUN_CASE(
++	    int, 1, unsigned int, int, 1, unsigned int, int, 1, unsigned int);
++	RUN_CASE(unsigned int, 0, unsigned int, unsigned int, 0, unsigned int,
++	    unsigned int, 0, unsigned int);
++	RUN_CASE(long long, 1, unsigned long long, long long, 1,
++	    unsigned long long, long long, 1, unsigned long long);
++	RUN_CASE(unsigned long long, 0, unsigned long long, unsigned long long,
++	    0, unsigned long long, unsigned long long, 0, unsigned long long);
++	RUN_CASE(size_t, 0, size_t, size_t, 0, size_t, size_t, 0, size_t);
++	RUN_CASE(int, 1, unsigned int, int, 1, unsigned int, long long, 1,
++	    unsigned long long);
++	RUN_CASE(int, 1, unsigned int, unsigned int, 0, unsigned int, int, 1,
++	    unsigned int);
++	RUN_CASE(int, 1, unsigned int, int, 1, unsigned int, unsigned char, 0,
++	    unsigned char);
++	RUN_CASE(unsigned long long, 0, unsigned long long, int, 1,
++	    unsigned int, long long, 1, unsigned long long);
++}
++
++#endif /* __SIZEOF_INT128__ */
++
++int
++main(void)
++{
++	test_boundaries();
++#ifdef __SIZEOF_INT128__
++	test_grid();
++#endif
++
++	if (failures != 0) {
++		printf("%d stdckdint check(s) failed\n", failures);
++		return (1);
++	}
++	printf("stdckdint: all checks passed\n");
++	return (0);
++}
+Index: regress/lib/libc/stdnoreturn/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdnoreturn/Makefile
+@@ -0,0 +1,21 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	stdnoreturn
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/stdnoreturn/stdnoreturn.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/stdnoreturn/stdnoreturn.c
+@@ -0,0 +1,50 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO C11 <stdnoreturn.h>: the noreturn macro must expand to a function
++ * specifier so that a function declared with it is treated as not
++ * returning.  The test is primarily a compile-time one: a function marked
++ * noreturn that does not syntactically return must not trigger
++ * -Wreturn-type, and the header must be includable on its own.
++ */
++
++#include <assert.h>
++#include <stdlib.h>
++#include <stdnoreturn.h>
++
++noreturn static void
++give_up(void)
++{
++	exit(0);
++}
++
++static int
++classify(int n)
++{
++	if (n < 0)
++		give_up();
++	return n + 1;
++}
++
++int
++main(void)
++{
++	assert(classify(41) == 42);
++	return 0;
++}
+Index: regress/lib/libc/threads/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/threads/Makefile
+@@ -0,0 +1,21 @@
++#	$OpenBSD$
++
++# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++#
++# Permission to use, copy, modify, and distribute this software for any
++# purpose with or without fee is hereby granted, provided that the above
++# copyright notice and this permission notice appear in all copies.
++#
++# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++PROG=	threads
++CFLAGS+=-I/usr/include
++WARNINGS=yes
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/threads/threads.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/threads/threads.c
+@@ -0,0 +1,204 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO C11 <threads.h>: thread creation/joining, plain, recursive and timed
++ * mutexes, condition variables (wait, signal, timedwait), call_once and
++ * thread-specific storage, including the TSS destructor.
++ */
++
++#include <assert.h>
++#include <stdatomic.h>
++#include <threads.h>
++#include <time.h>
++
++#define ITERATIONS 100000
++
++static mtx_t mtx;
++static cnd_t cnd;
++static int ready;
++static int counter;
++
++static int
++bump_worker(void *arg)
++{
++	int i, r;
++
++	for (i = 0; i < ITERATIONS; i++) {
++		assert(mtx_lock(&mtx) == thrd_success);
++		counter++;
++		assert(mtx_unlock(&mtx) == thrd_success);
++	}
++	assert(mtx_lock(&mtx) == thrd_success);
++	ready = 1;
++	assert(cnd_signal(&cnd) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	r = (int)(long)arg - 50;
++	return r;
++}
++
++static int
++recursive_worker(void *arg)
++{
++	(void)arg;
++	assert(mtx_lock(&mtx) == thrd_success);
++	assert(mtx_lock(&mtx) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	return 0;
++}
++
++static once_flag once = ONCE_FLAG_INIT;
++static atomic_int once_count;
++
++static void
++once_func(void)
++{
++	atomic_fetch_add(&once_count, 1);
++}
++
++static tss_t tss_key;
++static atomic_int dtor_count;
++
++static void
++tss_dtor(void *p)
++{
++	(void)p;
++	atomic_fetch_add(&dtor_count, 1);
++}
++
++static int
++tss_worker(void *arg)
++{
++	(void)arg;
++	assert(tss_set(tss_key, (void *)0x1234) == thrd_success);
++	assert(tss_get(tss_key) == (void *)0x1234);
++	return 0;
++}
++
++static int
++exit_worker(void *arg)
++{
++	thrd_exit((int)(long)arg);
++	return 0; /* not reached */
++}
++
++static int
++once_worker(void *arg)
++{
++	(void)arg;
++	call_once(&once, once_func);
++	return 0;
++}
++
++int
++main(void)
++{
++	thrd_t thr, thr2, thr3, thr4;
++	int result, i;
++	struct timespec ts;
++
++	/* thread create + join + return value */
++	assert(mtx_init(&mtx, mtx_plain) == thrd_success);
++	assert(cnd_init(&cnd) == thrd_success);
++	assert(thrd_create(&thr, bump_worker, (void *)92) == thrd_success);
++	assert(mtx_lock(&mtx) == thrd_success);
++	while (!ready)
++		assert(cnd_wait(&cnd, &mtx) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	assert(thrd_join(thr, &result) == thrd_success);
++	assert(result == 42);
++	assert(counter == ITERATIONS);
++	cnd_destroy(&cnd);
++	mtx_destroy(&mtx);
++
++	/* recursive mutex */
++	assert(mtx_init(&mtx, mtx_recursive) == thrd_success);
++	assert(thrd_create(&thr2, recursive_worker, NULL) == thrd_success);
++	assert(thrd_join(thr2, NULL) == thrd_success);
++	mtx_destroy(&mtx);
++
++	/* trylock and timedlock */
++	clock_gettime(CLOCK_REALTIME, &ts);
++	assert(mtx_init(&mtx, mtx_timed) == thrd_success);
++	assert(mtx_lock(&mtx) == thrd_success);
++	assert(mtx_trylock(&mtx) == thrd_busy);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	assert(mtx_trylock(&mtx) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	ts.tv_sec += 1;
++	assert(mtx_timedlock(&mtx, &ts) == thrd_success);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	assert(mtx_lock(&mtx) == thrd_success);
++	clock_gettime(CLOCK_REALTIME, &ts);
++	assert(mtx_timedlock(&mtx, &ts) == thrd_timedout);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	mtx_destroy(&mtx);
++
++	/* condition variable timeout */
++	assert(mtx_init(&mtx, mtx_plain) == thrd_success);
++	assert(cnd_init(&cnd) == thrd_success);
++	assert(mtx_lock(&mtx) == thrd_success);
++	clock_gettime(CLOCK_REALTIME, &ts);
++	ts.tv_sec += 1;
++	assert(cnd_timedwait(&cnd, &mtx, &ts) == thrd_timedout);
++	assert(mtx_unlock(&mtx) == thrd_success);
++	cnd_destroy(&cnd);
++	mtx_destroy(&mtx);
++
++	/* call_once runs the routine exactly once */
++	call_once(&once, once_func);
++	call_once(&once, once_func);
++	assert(atomic_load(&once_count) == 1);
++
++	/* thread-specific storage and destructor */
++	assert(tss_create(&tss_key, tss_dtor) == thrd_success);
++	assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
++	assert(thrd_join(thr3, NULL) == thrd_success);
++	assert(atomic_load(&dtor_count) == 1);
++	tss_delete(tss_key);
++
++	/* detach, identity, sleep and yield */
++	assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
++	assert(thrd_detach(thr3) == thrd_success);
++	assert(thrd_equal(thrd_current(), thrd_current()));
++	ts.tv_sec = 0;
++	ts.tv_nsec = 1000000;
++	assert(thrd_sleep(&ts, NULL) == 0);
++	thrd_yield();
++
++	/* thrd_exit must deliver its value through thrd_join */
++	assert(thrd_create(&thr3, exit_worker, (void *)99) == thrd_success);
++	assert(thrd_join(thr3, &result) == thrd_success);
++	assert(result == 99);
++
++	/* call_once from several threads must run the routine once */
++	assert(thrd_create(&thr3, once_worker, NULL) == thrd_success);
++	assert(thrd_create(&thr4, once_worker, NULL) == thrd_success);
++	assert(thrd_join(thr3, NULL) == thrd_success);
++	assert(thrd_join(thr4, NULL) == thrd_success);
++	assert(atomic_load(&once_count) == 1);
++
++	/* repeated create/join under stress */
++	for (i = 0; i < 2000; i++) {
++		assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
++		assert(thrd_join(thr3, NULL) == thrd_success);
++	}
++
++	return 0;
++}

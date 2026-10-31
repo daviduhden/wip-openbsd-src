@@ -42,7 +42,9 @@ double
 ldexp(double value, int exp)
 {
 	double temp;
-	__asm("fscale" : "=t"(temp) : "0"(value), "u"((double)exp));
+	__asm ("fscale"
+		: "=t" (temp)
+		: "0" (value), "u" ((double)exp));
 	return (temp);
 }
 DEF_STRONG(ldexp);

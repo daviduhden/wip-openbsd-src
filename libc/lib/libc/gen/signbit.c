@@ -16,9 +16,8 @@
  */
 
 #include <sys/types.h>
-
-#include <float.h>
 #include <machine/ieee.h>
+#include <float.h>
 #include <math.h>
 
 int
@@ -37,6 +36,6 @@ __signbitf(float f)
 	return p->sng_sign;
 }
 
-#if LDBL_MANT_DIG == DBL_MANT_DIG
+#if	LDBL_MANT_DIG == DBL_MANT_DIG
 __strong_alias(__signbitl, __signbit);
-#endif /* LDBL_MANT_DIG == DBL_MANT_DIG */
+#endif	/* LDBL_MANT_DIG == DBL_MANT_DIG */

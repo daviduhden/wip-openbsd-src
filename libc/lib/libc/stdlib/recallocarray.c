@@ -1,5 +1,4 @@
-/*	$OpenBSD: recallocarray.c,v 1.2 2021/03/18 11:16:58 claudio Exp $
- */
+/*	$OpenBSD: recallocarray.c,v 1.2 2021/03/18 11:16:58 claudio Exp $	*/
 /*
  * Copyright (c) 2008, 2017 Otto Moerbeek <otto@drijf.net>
  *
@@ -17,8 +16,8 @@
  */
 
 #include <errno.h>
-#include <stdint.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -32,7 +31,7 @@ void *
 recallocarray(void *ptr, size_t oldnmemb, size_t newnmemb, size_t size)
 {
 	size_t oldsize, newsize;
-	void  *newptr;
+	void *newptr;
 
 	if (ptr == NULL)
 		return calloc(newnmemb, size);
@@ -50,7 +49,7 @@ recallocarray(void *ptr, size_t oldnmemb, size_t newnmemb, size_t size)
 		return NULL;
 	}
 	oldsize = oldnmemb * size;
-
+	
 	/*
 	 * Don't bother too much if we're shrinking just a bit,
 	 * we do not shrink for series of small steps, oh well.

@@ -30,12 +30,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/sysctl.h>
-
 #include <net/if.h>
-
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 /*
  * From RFC 2553:
@@ -81,18 +79,18 @@ struct if_nameindex *
 if_nameindex(void)
 {
 	struct if_nameindex_msg *ifnm = NULL;
-	struct if_nameindex	*ifni = NULL, *ifni2;
-	char			*cp;
-	size_t			 needed;
-	unsigned int		 ni, i;
-	int			 mib[6];
+	struct if_nameindex *ifni = NULL, *ifni2;
+	char *cp;
+	size_t needed;
+	unsigned int ni, i;
+	int mib[6];
 
 	mib[0] = CTL_NET;
 	mib[1] = PF_ROUTE;
-	mib[2] = 0; /* protocol */
-	mib[3] = 0; /* not used */
+	mib[2] = 0;		/* protocol */
+	mib[3] = 0;		/* not used */
 	mib[4] = NET_RT_IFNAMES;
-	mib[5] = 0; /* no flags */
+	mib[5] = 0;		/* no flags */
 	while (1) {
 		struct if_nameindex_msg *buf = NULL;
 

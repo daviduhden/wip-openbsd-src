@@ -35,7 +35,6 @@
  */
 
 #include <sys/types.h>
-
 #include <ieeefp.h>
 #include <machine/sysarch.h>
 

@@ -1,5 +1,4 @@
-/*	$OpenBSD: test___freadptr.c,v 1.1 2025/05/25 00:20:54 yasuoka Exp $
- */
+/*	$OpenBSD: test___freadptr.c,v 1.1 2025/05/25 00:20:54 yasuoka Exp $	*/
 
 /*
  * Copyright (c) 2025 YASUOKA Masahiko <yasuoka@yasuoka.net>
@@ -18,7 +17,6 @@
  */
 
 #include <sys/types.h>
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdio_ext.h>
@@ -26,9 +24,9 @@
 #include <string.h>
 
 /* we use assert() */
-#undef NDEBUG
+#undef	NDEBUG
 
-#define TMPFILENAME "test___freadptr.tmp"
+#define	TMPFILENAME	"test___freadptr.tmp"
 
 void test___freadptr0(void);
 
@@ -36,10 +34,10 @@ void test___freadptr0(void);
 void
 test___freadptr0(void)
 {
-	FILE	   *fp;
-	int	    r;
-	ssize_t	    s;
-	const char *p;
+	FILE		*fp;
+	int		 r;
+	ssize_t		 s;
+	const char	*p;
 
 	fp = fopen(TMPFILENAME, "w");
 	assert(fp != NULL);
@@ -51,7 +49,7 @@ test___freadptr0(void)
 	assert(fgetc(fp) == 'H');
 	p = __freadptr(fp, &s);
 	assert(p != NULL);
-	assert(s > 4); /* this test assume this (not by the spec) */
+	assert(s > 4);		/* this test assume this (not by the spec) */
 	assert(*p == 'e');
 	assert(strncmp(p, "ello world", s) == 0);
 

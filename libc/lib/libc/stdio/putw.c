@@ -32,16 +32,15 @@
  */
 
 #include <stdio.h>
-
-#include "fvwrite.h"
 #include "local.h"
+#include "fvwrite.h"
 
 int
 putw(int w, FILE *fp)
 {
 	struct __suio uio;
 	struct __siov iov;
-	int	      ret;
+	int ret;
 
 	iov.iov_base = &w;
 	iov.iov_len = uio.uio_resid = sizeof(w);

@@ -33,15 +33,14 @@
 
 #include <errno.h>
 #include <stdio.h>
-
-#include "glue.h"
 #include "local.h"
+#include "glue.h"
 
 int
 _fwalk(int (*function)(FILE *))
 {
-	FILE	    *fp;
-	int	     n, ret;
+	FILE *fp;
+	int n, ret;
 	struct glue *g;
 
 	ret = 0;

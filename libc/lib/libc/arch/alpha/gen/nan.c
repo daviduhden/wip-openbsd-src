@@ -5,4 +5,5 @@
 #include <math.h>
 
 /* bytes for qNaN on an alpha (IEEE single format) */
-char __nan[] __attribute__((__aligned__(sizeof(float)))) = {0, 0, 0xc0, 0x7f};
+char __nan[] __attribute__((__aligned__(sizeof(float)))) =
+					{ 0, 0, 0xc0, 0x7f };

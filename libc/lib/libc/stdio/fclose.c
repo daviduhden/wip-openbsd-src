@@ -35,7 +35,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "local.h"
 
 int
@@ -52,14 +51,14 @@ __cleanfile(FILE *fp, int doclose)
 		FREEUB(fp);
 	if (HASLB(fp))
 		FREELB(fp);
-	fp->_r = fp->_w = 0; /* Mess up if reaccessed. */
+	fp->_r = fp->_w = 0;	/* Mess up if reaccessed. */
 	return r;
 }
 
 void
 __relefile(FILE *fp)
 {
-	fp->_flags = 0; /* Release this FILE for reuse. */
+	fp->_flags = 0;		/* Release this FILE for reuse. */
 }
 
 int
@@ -67,7 +66,7 @@ fclose(FILE *fp)
 {
 	int r;
 
-	if (fp->_flags == 0) { /* not open! */
+	if (fp->_flags == 0) {	/* not open! */
 		errno = EBADF;
 		return (EOF);
 	}

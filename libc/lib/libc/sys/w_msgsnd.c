@@ -16,7 +16,6 @@
  */
 
 #include <sys/msg.h>
-
 #include "cancel.h"
 
 int

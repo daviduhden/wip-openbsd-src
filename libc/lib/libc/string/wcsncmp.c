@@ -31,7 +31,6 @@
  */
 
 #include <wchar.h>
-
 #include "locale/runetype.h"
 
 int
@@ -43,7 +42,8 @@ wcsncmp(const wchar_t *s1, const wchar_t *s2, size_t n)
 	do {
 		if (*s1 != *s2++) {
 			/* XXX assumes wchar_t = int */
-			return (*(const rune_t *)s1 - *(const rune_t *)--s2);
+			return (*(const rune_t *)s1 -
+			    *(const rune_t *)--s2);
 		}
 		if (*s1++ == 0)
 			break;

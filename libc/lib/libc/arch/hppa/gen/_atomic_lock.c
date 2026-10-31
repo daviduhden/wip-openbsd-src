@@ -33,7 +33,9 @@ _atomic_lock(volatile _atomic_lock_t *lock)
 	}
 #endif
 
-	asm volatile("ldcws 0(%2),%0" : "=&r"(old), "+m"(lock) : "r"(lock));
+	asm volatile ("ldcws 0(%2),%0"
+		     : "=&r" (old), "+m" (lock)
+		     : "r" (lock));
 
 	return (old == _ATOMIC_LOCK_LOCKED);
 }

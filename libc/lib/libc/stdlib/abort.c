@@ -33,10 +33,11 @@
 #include <string.h>
 #include <unistd.h>
 
+
 void
 abort(void)
 {
-	sigset_t	 mask;
+	sigset_t mask;
 	struct sigaction sa;
 
 	sigfillset(&mask);

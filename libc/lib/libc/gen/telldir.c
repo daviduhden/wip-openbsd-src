@@ -29,9 +29,8 @@
  */
 
 #include <dirent.h>
-
-#include "telldir.h"
 #include "thread_private.h"
+#include "telldir.h"
 
 /*
  * return a pointer into a directory

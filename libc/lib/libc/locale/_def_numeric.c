@@ -5,9 +5,13 @@
  */
 
 #include <locale.h>
-
 #include "localedef.h"
 
-const _NumericLocale _DefaultNumericLocale = {".", "", ""};
+const _NumericLocale _DefaultNumericLocale =
+{
+	".",
+	"",
+	""
+};
 
 const _NumericLocale *_CurrentNumericLocale = &_DefaultNumericLocale;

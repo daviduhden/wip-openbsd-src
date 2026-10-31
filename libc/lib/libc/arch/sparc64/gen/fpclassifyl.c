@@ -1,5 +1,4 @@
-/*	$OpenBSD: fpclassifyl.c,v 1.2 2015/10/27 05:54:49 guenther Exp $
- */
+/*	$OpenBSD: fpclassifyl.c,v 1.2 2015/10/27 05:54:49 guenther Exp $	*/
 /*
  * Copyright (c) 2008 Martynas Venckus <martynas@openbsd.org>
  *
@@ -17,7 +16,6 @@
  */
 
 #include <sys/types.h>
-
 #include <machine/ieee.h>
 #include <math.h>
 

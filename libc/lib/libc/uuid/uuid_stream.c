@@ -1,5 +1,4 @@
-/*	$OpenBSD: uuid_stream.c,v 1.3 2015/09/10 18:13:46 guenther Exp $
- */
+/*	$OpenBSD: uuid_stream.c,v 1.3 2015/09/10 18:13:46 guenther Exp $	*/
 /*	$NetBSD: uuid_stream.c,v 1.3 2008/04/19 18:21:38 plunky Exp $	*/
 
 /*-
@@ -56,7 +55,6 @@
  */
 
 #include <sys/types.h>
-
 #include <endian.h>
 #include <uuid.h>
 
@@ -158,7 +156,7 @@ void
 uuid_enc_le(void *buf, const uuid_t *uuid)
 {
 	uint8_t *p = buf;
-	int	 i;
+	int i;
 
 	le32enc(p, uuid->time_low);
 	le16enc(p + 4, uuid->time_mid);
@@ -173,7 +171,7 @@ void
 uuid_dec_le(const void *buf, uuid_t *uuid)
 {
 	const uint8_t *p = buf;
-	int	       i;
+	int i;
 
 	uuid->time_low = le32dec(p);
 	uuid->time_mid = le16dec(p + 4);
@@ -188,7 +186,7 @@ void
 uuid_enc_be(void *buf, const uuid_t *uuid)
 {
 	uint8_t *p = buf;
-	int	 i;
+	int i;
 
 	be32enc(p, uuid->time_low);
 	be16enc(p + 4, uuid->time_mid);
@@ -203,7 +201,7 @@ void
 uuid_dec_be(const void *buf, uuid_t *uuid)
 {
 	const uint8_t *p = buf;
-	int	       i;
+	int i;
 
 	uuid->time_low = be32dec(p);
 	uuid->time_mid = be16dec(p + 4);

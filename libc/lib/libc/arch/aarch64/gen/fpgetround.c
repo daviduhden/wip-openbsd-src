@@ -27,7 +27,6 @@
  */
 
 #include <sys/types.h>
-
 #include <ieeefp.h>
 
 fp_rnd

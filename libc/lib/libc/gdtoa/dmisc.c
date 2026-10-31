@@ -32,13 +32,12 @@ THIS SOFTWARE.
 #include "gdtoaimp.h"
 
 #ifndef MULTIPLE_THREADS
-char *dtoa_result;
+ char *dtoa_result;
 #endif
 
-char *
+ char *
 #ifdef KR_headers
-rv_alloc(i)
-int i;
+rv_alloc(i) int i;
 #else
 rv_alloc(int i)
 #endif
@@ -46,29 +45,28 @@ rv_alloc(int i)
 	int j, k, *r;
 
 	j = sizeof(ULong);
-	for (k = 0; sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= i;
-	    j <<= 1)
-		k++;
-	r = (int *)Balloc(k);
+	for(k = 0;
+		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= i;
+		j <<= 1)
+			k++;
+	r = (int*)Balloc(k);
 	if (r == NULL)
 		return (
 #ifndef MULTIPLE_THREADS
-		    dtoa_result =
+		dtoa_result =
 #endif
 			NULL);
 	*r = k;
 	return
 #ifndef MULTIPLE_THREADS
-	    dtoa_result =
+	dtoa_result =
 #endif
-		(char *)(r + 1);
-}
+		(char *)(r+1);
+	}
 
-char *
+ char *
 #ifdef KR_headers
-nrv_alloc(s, rve, n)
-char *s, **rve;
-int   n;
+nrv_alloc(s, rve, n) char *s, **rve; int n;
 #else
 nrv_alloc(char *s, char **rve, int n)
 #endif
@@ -78,12 +76,12 @@ nrv_alloc(char *s, char **rve, int n)
 	t = rv = rv_alloc(n);
 	if (t == NULL)
 		return (NULL);
-	while ((*t = *s++) != 0)
+	while((*t = *s++) !=0)
 		t++;
 	if (rve)
 		*rve = t;
 	return rv;
-}
+	}
 
 /* freedtoa(s) must be used to free values s returned by dtoa
  * when MULTIPLE_THREADS is #defined.  It should be used in all cases,
@@ -91,33 +89,32 @@ nrv_alloc(char *s, char **rve, int n)
  * when MULTIPLE_THREADS is not defined.
  */
 
-void
+ void
 #ifdef KR_headers
-    freedtoa(s) char *s;
+freedtoa(s) char *s;
 #else
 freedtoa(char *s)
 #endif
 {
 	Bigint *b = (Bigint *)((int *)s - 1);
-	b->maxwds = 1 << (b->k = *(int *)b);
+	b->maxwds = 1 << (b->k = *(int*)b);
 	Bfree(b);
 #ifndef MULTIPLE_THREADS
 	if (s == dtoa_result)
 		dtoa_result = 0;
 #endif
-}
+	}
 DEF_STRONG(freedtoa);
 
-int
+ int
 quorem
 #ifdef KR_headers
-    (b, S)
-Bigint *b, *S;
+	(b, S) Bigint *b, *S;
 #else
-    (Bigint *b, Bigint *S)
+	(Bigint *b, Bigint *S)
 #endif
 {
-	int    n;
+	int n;
 	ULong *bx, *bxe, q, *sx, *sxe;
 #ifdef ULLong
 	ULLong borrow, carry, y, ys;
@@ -131,7 +128,7 @@ Bigint *b, *S;
 	n = S->wds;
 #ifdef DEBUG
 	/*debug*/ if (b->wds > n)
-		/*debug*/ Bug("oversize b in quorem");
+	/*debug*/	Bug("oversize b in quorem");
 #endif
 	if (b->wds < n)
 		return 0;
@@ -139,10 +136,10 @@ Bigint *b, *S;
 	sxe = sx + --n;
 	bx = b->x;
 	bxe = bx + n;
-	q = *bxe / (*sxe + 1); /* ensure q <= true quotient */
+	q = *bxe / (*sxe + 1);	/* ensure q <= true quotient */
 #ifdef DEBUG
 	/*debug*/ if (q > 9)
-		/*debug*/ Bug("oversized quotient in quorem");
+	/*debug*/	Bug("oversized quotient in quorem");
 #endif
 	if (q) {
 		borrow = 0;
@@ -173,14 +170,15 @@ Bigint *b, *S;
 			*bx++ = y & 0xffff;
 #endif
 #endif
-		} while (sx <= sxe);
+			}
+			while(sx <= sxe);
 		if (!*bxe) {
 			bx = b->x;
-			while (--bxe > bx && !*bxe)
+			while(--bxe > bx && !*bxe)
 				--n;
 			b->wds = n;
+			}
 		}
-	}
 	if (cmp(b, S) >= 0) {
 		q++;
 		borrow = 0;
@@ -213,14 +211,15 @@ Bigint *b, *S;
 			*bx++ = y & 0xffff;
 #endif
 #endif
-		} while (sx <= sxe);
+			}
+			while(sx <= sxe);
 		bx = b->x;
 		bxe = bx + n;
 		if (!*bxe) {
-			while (--bxe > bx && !*bxe)
+			while(--bxe > bx && !*bxe)
 				--n;
 			b->wds = n;
+			}
 		}
-	}
 	return q;
-}
+	}

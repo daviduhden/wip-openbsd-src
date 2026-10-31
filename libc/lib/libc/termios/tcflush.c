@@ -29,10 +29,9 @@
  */
 
 #include <sys/ioctl.h>
-
-#include <errno.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <errno.h>
 
 int
 tcflush(int fd, int which)

@@ -32,7 +32,6 @@
 
 #include <sys/types.h>
 #include <sys/mman.h>
-
 #include <errno.h>
 #include <nl_types.h>
 #include <stdlib.h>
@@ -40,14 +39,14 @@
 int
 catclose(nl_catd catd)
 {
-	if (catd == (nl_catd)-1) {
+	if (catd == (nl_catd) -1) {
 		errno = EBADF;
 		return -1;
 	}
-
+	
 	if (catd) {
 		munmap(catd->__data, catd->__size);
-		free(catd);
+		free (catd);
 	}
 
 	return 0;

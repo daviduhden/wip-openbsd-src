@@ -17,7 +17,6 @@
  */
 
 #include <sys/types.h>
-
 #include <ieeefp.h>
 
 fp_except
@@ -25,6 +24,6 @@ fpgetmask()
 {
 	register_t fpscr;
 
-	__asm__ volatile("sts fpscr, %0" : "=r"(fpscr));
+	__asm__ volatile ("sts fpscr, %0" : "=r" (fpscr));
 	return ((fpscr >> 7) & 0x1f);
 }

@@ -126,6 +126,7 @@ _nanoruntime(struct timespec *ts, struct timekeep *tk)
 	return 0;
 }
 
+
 int
 _nanouptime(struct timespec *tsp, struct timekeep *tk)
 {

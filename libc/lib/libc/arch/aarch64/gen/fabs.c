@@ -16,7 +16,6 @@
  */
 
 #include <sys/types.h>
-
 #include <machine/ieee.h>
 #include <math.h>
 
@@ -30,7 +29,7 @@ fabs(double d)
 
 	p->dbl_sign = 0;
 
-	return (d);
+	return(d);
 }
 
 __strong_alias(fabsl, fabs);

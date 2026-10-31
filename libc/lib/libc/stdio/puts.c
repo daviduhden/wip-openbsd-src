@@ -33,9 +33,8 @@
 
 #include <stdio.h>
 #include <string.h>
-
-#include "fvwrite.h"
 #include "local.h"
+#include "fvwrite.h"
 
 /*
  * Write the given string to stdout, appending a newline.
@@ -43,10 +42,10 @@
 int
 puts(const char *s)
 {
-	size_t	      c = strlen(s);
+	size_t c = strlen(s);
 	struct __suio uio;
 	struct __siov iov[2];
-	int	      ret;
+	int ret;
 
 	iov[0].iov_base = (void *)s;
 	iov[0].iov_len = c;

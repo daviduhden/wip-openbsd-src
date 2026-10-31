@@ -17,7 +17,6 @@
  */
 
 #include <sys/types.h>
-
 #include <wchar.h>
 
 /*
@@ -32,8 +31,8 @@ wcslcat(wchar_t *dst, const wchar_t *src, size_t dsize)
 {
 	const wchar_t *odst = dst;
 	const wchar_t *osrc = src;
-	size_t	       n = dsize;
-	size_t	       dlen;
+	size_t n = dsize;
+	size_t dlen;
 
 	/* Find the end of dst and adjust bytes left but don't go past end. */
 	while (n-- != 0 && *dst != L'\0')
@@ -42,7 +41,7 @@ wcslcat(wchar_t *dst, const wchar_t *src, size_t dsize)
 	n = dsize - dlen;
 
 	if (n-- == 0)
-		return (dlen + wcslen(src));
+		return(dlen + wcslen(src));
 	while (*src != L'\0') {
 		if (n != 0) {
 			*dst++ = *src;
@@ -52,6 +51,6 @@ wcslcat(wchar_t *dst, const wchar_t *src, size_t dsize)
 	}
 	*dst = L'\0';
 
-	return (dlen + (src - osrc)); /* count does not include NUL */
+	return(dlen + (src - osrc));	/* count does not include NUL */
 }
 DEF_WEAK(wcslcat);

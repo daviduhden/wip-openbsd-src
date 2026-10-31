@@ -26,8 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	$Citrus: xpg4dl/FreeBSD/lib/libc/locale/wcstod.c,v 1.2 2001/09/27
- * 16:23:57 yamt Exp $
+ *	$Citrus: xpg4dl/FreeBSD/lib/libc/locale/wcstod.c,v 1.2 2001/09/27 16:23:57 yamt Exp $
  */
 
 /*
@@ -43,7 +42,7 @@ float_type
 FUNCNAME(const wchar_t *nptr, wchar_t **endptr)
 {
 	const wchar_t *src;
-	size_t	       size;
+	size_t size;
 	const wchar_t *start;
 	const wchar_t *aftersign;
 
@@ -81,7 +80,7 @@ FUNCNAME(const wchar_t *nptr, wchar_t **endptr)
 	}
 	size = wcsspn(src, L"0123456789");
 	src += size;
-	if (*src == L'.') { /* XXX use localeconv */
+	if (*src == L'.') {/* XXX use localeconv */
 		src++;
 		size = wcsspn(src, L"0123456789");
 		src += size;
@@ -100,13 +99,13 @@ match:
 	 * convert to a char-string and pass it to strtod.
 	 */
 	if (src > aftersign) {
-		mbstate_t      st;
-		char	      *buf;
-		char	      *end;
+		mbstate_t st;
+		char *buf;
+		char *end;
 		const wchar_t *s;
-		size_t	       size_converted;
-		float_type     result;
-		size_t	       bufsize;
+		size_t size_converted;
+		float_type result;
+		size_t bufsize;
 
 		s = start;
 		memset(&st, 0, sizeof(st));
@@ -135,7 +134,7 @@ match:
 			const char *s = buf;
 			memset(&st, 0, sizeof(st));
 			size = mbsnrtowcs(NULL, &s, end - buf, 0, &st);
-			*endptr = (wchar_t *)start + size;
+			*endptr = (wchar_t*)start + size;
 		}
 
 		free(buf);
@@ -145,7 +144,7 @@ match:
 
 fail:
 	if (endptr)
-		*endptr = (wchar_t *)nptr;
+		*endptr = (wchar_t*)nptr;
 
 	return 0;
 }

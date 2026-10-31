@@ -32,7 +32,6 @@
  */
 
 #include <stdio.h>
-
 #include "local.h"
 
 /*
@@ -43,7 +42,7 @@
 int
 feof(FILE *fp)
 {
-	int ret;
+	int	ret;
 
 	FLOCKFILE(fp);
 	ret = __sfeof(fp);

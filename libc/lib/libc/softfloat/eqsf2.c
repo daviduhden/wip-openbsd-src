@@ -5,10 +5,9 @@
  * Written by Ben Harris, 2000.  This file is in the Public Domain.
  */
 
-#include <softfloat.h>
-
-#include "milieu.h"
 #include "softfloat-for-gcc.h"
+#include "milieu.h"
+#include <softfloat.h>
 
 flag __eqsf2(float32, float32) __dso_protected;
 

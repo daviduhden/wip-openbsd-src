@@ -32,67 +32,65 @@
 
 #include <sys/types.h>
 #include <sys/mman.h>
-
-#include <db.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
-#include <netgroup.h>
+#include <db.h>
+#include <syslog.h>
 #include <pwd.h>
+#include <errno.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
-#include <unistd.h>
+#include <limits.h>
+#include <netgroup.h>
 #ifdef YP
+#include <stdio.h>
 #include <rpc/rpc.h>
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
-#include <stdio.h>
-
-#include "ypexclude.h"
 #include "ypinternal.h"
+#include "ypexclude.h"
 #endif
 #include "thread_private.h"
 
-#define MINIMUM(a, b) (((a) < (b)) ? (a) : (b))
+#define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
 
 struct pw_storage {
 	struct passwd pw;
-	uid_t	      uid;
-	char	      name[_PW_NAME_LEN + 1];
-	char	      pwbuf[_PW_BUF_LEN];
+	uid_t uid;
+	char name[_PW_NAME_LEN + 1];
+	char pwbuf[_PW_BUF_LEN];
 };
 
 _THREAD_PRIVATE_KEY(pw);
 
-static DB *_pw_db; /* password database */
+static DB *_pw_db;			/* password database */
 
 /* mmap'd password storage */
 static struct pw_storage *_pw_storage = MAP_FAILED;
 
 /* Following are used only by setpwent(), getpwent(), and endpwent() */
-static int _pw_keynum;	 /* key counter */
-static int _pw_stayopen; /* keep fd's open */
-static int _pw_flags;	 /* password flags */
+static int _pw_keynum;			/* key counter */
+static int _pw_stayopen;		/* keep fd's open */
+static int _pw_flags;			/* password flags */
 
 static int __hashpw(DBT *, char *buf, size_t buflen, struct passwd *, int *);
 static int __initdb(int);
-static struct passwd *_pwhashbyname(
-    const char *name, char *buf, size_t buflen, struct passwd *pw, int *);
-static struct passwd *_pwhashbyuid(
-    uid_t uid, char *buf, size_t buflen, struct passwd *pw, int *);
+static struct passwd *_pwhashbyname(const char *name, char *buf,
+	size_t buflen, struct passwd *pw, int *);
+static struct passwd *_pwhashbyuid(uid_t uid, char *buf,
+	size_t buflen, struct passwd *pw, int *);
 
 #ifdef YP
-static char *__ypdomain;
+static char	*__ypdomain;
 
 /* Following are used only by setpwent(), getpwent(), and endpwent() */
 enum _ypmode { YPMODE_NONE, YPMODE_FULL, YPMODE_USER, YPMODE_NETGRP };
-static enum _ypmode	  __ypmode;
-static char		 *__ypcurrent;
-static int		  __ypcurrentlen;
-static int		  __yp_pw_flags;
-static int		  __getpwent_has_yppw = -1;
+static enum	_ypmode __ypmode;
+static char	*__ypcurrent;
+static int	__ypcurrentlen;
+static int	__yp_pw_flags;
+static int	__getpwent_has_yppw = -1;
 static struct _ypexclude *__ypexhead;
 
 static int __has_yppw(void);
@@ -101,21 +99,22 @@ static int __ypparse(struct passwd *pw, char *s, int);
 
 #define LOOKUP_BYNAME 0
 #define LOOKUP_BYUID 1
-static struct passwd *__yppwlookup(
-    int, char *, uid_t, struct passwd *, char *, size_t, int *);
+static struct passwd *__yppwlookup(int, char *, uid_t, struct passwd *,
+    char *, size_t, int *);
 
 /* macro for deciding which YP maps to use. */
-#define PASSWD_BYNAME                                                          \
+#define PASSWD_BYNAME \
 	(__has_ypmaster() ? "master.passwd.byname" : "passwd.byname")
-#define PASSWD_BYUID (__has_ypmaster() ? "master.passwd.byuid" : "passwd.byuid")
+#define PASSWD_BYUID \
+	(__has_ypmaster() ? "master.passwd.byuid" : "passwd.byuid")
 
 static struct passwd *__ypproto;
 
 static void __ypproto_set(struct passwd *, struct pw_storage *, int, int *);
 
 static void
-__ypproto_set(
-    struct passwd *pw, struct pw_storage *buf, int flags, int *yp_pw_flagsp)
+__ypproto_set(struct passwd *pw, struct pw_storage *buf, int flags,
+    int *yp_pw_flagsp)
 {
 	char *ptr = buf->pwbuf;
 	__ypproto = &buf->pw;
@@ -182,9 +181,9 @@ __ypproto_set(
 static int
 __ypparse(struct passwd *pw, char *s, int yp_pw_flags)
 {
-	char  *bp, *cp, *endp;
+	char *bp, *cp, *endp;
 	u_long ul;
-	int    count = 0;
+	int count = 0;
 
 	/* count the colons. */
 	bp = s;
@@ -275,7 +274,8 @@ __get_pw_buf(char **bufp, size_t *buflenp, uid_t uid, const char *name)
 #ifdef PWDEBUG
 				struct syslog_data sdata = SYSLOG_DATA_INIT;
 				syslog_r(LOG_CRIT | LOG_CONS, &sdata,
-				    "repeated passwd lookup of uid %u", uid);
+				    "repeated passwd lookup of uid %u",
+				    uid);
 #endif
 				remap = false;
 			}
@@ -286,12 +286,11 @@ __get_pw_buf(char **bufp, size_t *buflenp, uid_t uid, const char *name)
 
 	if (remap) {
 		_pw_storage = mmap(NULL, sizeof(*_pw_storage),
-		    PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+		    PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
 		if (_pw_storage == MAP_FAILED)
 			return NULL;
 		if (name != NULL)
-			strlcpy(
-			    _pw_storage->name, name, sizeof(_pw_storage->name));
+			strlcpy(_pw_storage->name, name, sizeof(_pw_storage->name));
 		_pw_storage->uid = uid;
 	}
 
@@ -305,13 +304,13 @@ getpwent(void)
 {
 #ifdef YP
 	static char *name = NULL;
-	char	    *map;
+	char *map;
 #endif
-	char	       bf[1 + sizeof(_pw_keynum)];
+	char bf[1 + sizeof(_pw_keynum)];
 	struct passwd *pw, *ret = NULL;
-	char	      *pwbuf;
-	size_t	       buflen;
-	DBT	       key;
+	char *pwbuf;
+	size_t buflen;
+	DBT key;
 
 	_THREAD_PRIVATE_MUTEX_LOCK(pw);
 	if (!_pw_db && !__initdb(0))
@@ -330,17 +329,17 @@ getpwent(void)
 again:
 	if (__getpwent_has_yppw && (__ypmode != YPMODE_NONE)) {
 		const char *user, *host, *dom;
-		int	    keylen, datalen, r, s;
-		char	   *key = NULL, *data = NULL;
+		int keylen, datalen, r, s;
+		char *key = NULL, *data = NULL;
 
 		if (!__ypdomain)
 			yp_get_default_domain(&__ypdomain);
 		switch (__ypmode) {
 		case YPMODE_FULL:
 			if (__ypcurrent) {
-				r = yp_next(__ypdomain, map, __ypcurrent,
-				    __ypcurrentlen, &key, &keylen, &data,
-				    &datalen);
+				r = yp_next(__ypdomain, map,
+				    __ypcurrent, __ypcurrentlen,
+				    &key, &keylen, &data, &datalen);
 				free(__ypcurrent);
 				__ypcurrent = NULL;
 				if (r != 0 || datalen >= buflen) {
@@ -352,8 +351,9 @@ again:
 				__ypcurrent = key;
 				__ypcurrentlen = keylen;
 			} else {
-				r = yp_first(__ypdomain, map, &__ypcurrent,
-				    &__ypcurrentlen, &data, &datalen);
+				r = yp_first(__ypdomain, map,
+				    &__ypcurrent, &__ypcurrentlen,
+				    &data, &datalen);
 				if (r != 0 || datalen >= buflen) {
 					__ypmode = YPMODE_NONE;
 					free(data);
@@ -365,14 +365,14 @@ again:
 			break;
 		case YPMODE_NETGRP:
 			s = getnetgrent(&host, &user, &dom);
-			if (s == 0) { /* end of group */
+			if (s == 0) {	/* end of group */
 				endnetgrent();
 				__ypmode = YPMODE_NONE;
 				goto again;
 			}
 			if (user && *user) {
-				r = yp_match(__ypdomain, map, user,
-				    strlen(user), &data, &datalen);
+				r = yp_match(__ypdomain, map,
+				    user, strlen(user), &data, &datalen);
 			} else
 				goto again;
 			if (r != 0 || datalen >= buflen) {
@@ -388,8 +388,8 @@ again:
 			break;
 		case YPMODE_USER:
 			if (name) {
-				r = yp_match(__ypdomain, map, name,
-				    strlen(name), &data, &datalen);
+				r = yp_match(__ypdomain, map,
+				    name, strlen(name), &data, &datalen);
 				__ypmode = YPMODE_NONE;
 				free(name);
 				name = NULL;
@@ -399,7 +399,7 @@ again:
 				}
 				bcopy(data, pwbuf, datalen);
 				free(data);
-			} else { /* XXX */
+			} else {		/* XXX */
 				__ypmode = YPMODE_NONE;
 				goto again;
 			}
@@ -425,7 +425,7 @@ again:
 	if (__hashpw(&key, pwbuf, buflen, pw, &_pw_flags)) {
 #ifdef YP
 		static struct pw_storage __yppbuf;
-		const char		*user, *host, *dom;
+		const char *user, *host, *dom;
 
 		/* if we don't have YP at all, don't bother. */
 		if (__getpwent_has_yppw) {
@@ -445,8 +445,8 @@ again:
 					break;
 				}
 
-				__ypproto_set(
-				    pw, &__yppbuf, _pw_flags, &__yp_pw_flags);
+				__ypproto_set(pw, &__yppbuf, _pw_flags,
+				    &__yp_pw_flags);
 				goto again;
 			} else if (pw->pw_name[0] == '-') {
 				/* an attempted exclusion */
@@ -455,17 +455,16 @@ again:
 					break;
 				case '@':
 					setnetgrent(pw->pw_name + 2);
-					while (
-					    getnetgrent(&host, &user, &dom)) {
+					while (getnetgrent(&host, &user, &dom)) {
 						if (user && *user)
-							__ypexclude_add(
-							    &__ypexhead, user);
+							__ypexclude_add(&__ypexhead,
+							    user);
 					}
 					endnetgrent();
 					break;
 				default:
-					__ypexclude_add(
-					    &__ypexhead, pw->pw_name + 1);
+					__ypexclude_add(&__ypexhead,
+					    pw->pw_name + 1);
 					break;
 				}
 				goto again;
@@ -489,7 +488,7 @@ done:
 static int
 __has_yppw(void)
 {
-	DBT  key, data, pkey, pdata;
+	DBT key, data, pkey, pdata;
 	char bf[2];
 
 	key.data = (u_char *)_PW_YPTOKEN;
@@ -503,7 +502,7 @@ __has_yppw(void)
 
 	if ((_pw_db->get)(_pw_db, &key, &data, 0) &&
 	    (_pw_db->get)(_pw_db, &pkey, &pdata, 0))
-		return (0); /* No YP. */
+		return (0);	/* No YP. */
 	return (1);
 }
 
@@ -513,11 +512,11 @@ __has_yppw(void)
 static int
 __has_ypmaster(void)
 {
-	int	     keylen, resultlen;
-	char	    *key, *result;
-	static int   checked = -1;
+	int keylen, resultlen;
+	char *key, *result;
+	static int checked = -1;
 	static uid_t saved_uid, saved_euid;
-	uid_t	     uid = getuid(), euid = geteuid();
+	uid_t uid = getuid(), euid = geteuid();
 
 	/*
 	 * Do not recheck IFF the saved UID and the saved
@@ -536,8 +535,8 @@ __has_ypmaster(void)
 	if (!__ypdomain)
 		yp_get_default_domain(&__ypdomain);
 
-	if (yp_first(__ypdomain, "master.passwd.byname", &key, &keylen, &result,
-		&resultlen)) {
+	if (yp_first(__ypdomain, "master.passwd.byname",
+	    &key, &keylen, &result, &resultlen)) {
 		saved_uid = uid;
 		saved_euid = euid;
 		checked = 0;
@@ -553,15 +552,15 @@ __has_ypmaster(void)
 }
 
 static struct passwd *
-__yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
-    size_t buflen, int *flagsp)
+__yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw,
+    char *buf, size_t buflen, int *flagsp)
 {
 	char bf[1 + _PW_NAME_LEN], *ypcurrent = NULL, *map = NULL;
-	int  yp_pw_flags = 0, ypcurrentlen, r, s = -1, pw_keynum;
+	int yp_pw_flags = 0, ypcurrentlen, r, s = -1, pw_keynum;
 	static struct pw_storage __yppbuf;
-	struct _ypexclude	*ypexhead = NULL;
-	const char		*host, *user, *dom;
-	DBT			 key;
+	struct _ypexclude *ypexhead = NULL;
+	const char *host, *user, *dom;
+	DBT key;
 
 	for (pw_keynum = 1; pw_keynum; pw_keynum++) {
 		bf[0] = _PW_KEYBYNUM;
@@ -595,8 +594,9 @@ __yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
 			case '\0':
 				free(ypcurrent);
 				ypcurrent = NULL;
-				r = yp_match(__ypdomain, map, name,
-				    strlen(name), &ypcurrent, &ypcurrentlen);
+				r = yp_match(__ypdomain, map,
+				    name, strlen(name),
+				    &ypcurrent, &ypcurrentlen);
 				if (r != 0 || ypcurrentlen >= buflen) {
 					free(ypcurrent);
 					ypcurrent = NULL;
@@ -604,13 +604,13 @@ __yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
 				}
 				break;
 			case '@':
-			pwnam_netgrp:
+pwnam_netgrp:
 				free(ypcurrent);
 				ypcurrent = NULL;
-				if (s == -1) /* first time */
+				if (s == -1)	/* first time */
 					setnetgrent(pw->pw_name + 2);
 				s = getnetgrent(&host, &user, &dom);
-				if (s == 0) { /* end of group */
+				if (s == 0) {	/* end of group */
 					endnetgrent();
 					s = -1;
 					continue;
@@ -637,8 +637,9 @@ __yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
 				free(ypcurrent);
 				ypcurrent = NULL;
 				user = pw->pw_name + 1;
-				r = yp_match(__ypdomain, map, user,
-				    strlen(user), &ypcurrent, &ypcurrentlen);
+				r = yp_match(__ypdomain, map,
+				    user, strlen(user),
+				    &ypcurrent, &ypcurrentlen);
 				if (r != 0 || ypcurrentlen >= buflen) {
 					free(ypcurrent);
 					ypcurrent = NULL;
@@ -650,7 +651,7 @@ __yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
 			buf[ypcurrentlen] = '\0';
 			if (__ypparse(pw, buf, yp_pw_flags) ||
 			    __ypexclude_is(&ypexhead, pw->pw_name)) {
-				if (s == 1) /* inside netgrp */
+				if (s == 1)	/* inside netgrp */
 					goto pwnam_netgrp;
 				continue;
 			}
@@ -664,8 +665,7 @@ __yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
 				setnetgrent(pw->pw_name + 2);
 				while (getnetgrent(&host, &user, &dom)) {
 					if (user && *user)
-						__ypexclude_add(
-						    &ypexhead, user);
+						__ypexclude_add(&ypexhead, user);
 				}
 				endnetgrent();
 				break;
@@ -678,7 +678,7 @@ __yppwlookup(int lookup, char *name, uid_t uid, struct passwd *pw, char *buf,
 		if ((lookup == LOOKUP_BYUID && pw->pw_uid == uid) ||
 		    (lookup == LOOKUP_BYNAME && strcmp(pw->pw_name, name) == 0))
 			goto done;
-		if (s == 1) /* inside netgrp */
+		if (s == 1)	/* inside netgrp */
 			goto pwnam_netgrp;
 		continue;
 	}
@@ -695,13 +695,13 @@ done:
 #endif /* YP */
 
 static struct passwd *
-_pwhashbyname(
-    const char *name, char *buf, size_t buflen, struct passwd *pw, int *flagsp)
+_pwhashbyname(const char *name, char *buf, size_t buflen, struct passwd *pw,
+    int *flagsp)
 {
-	char   bf[1 + _PW_NAME_LEN];
+	char bf[1 + _PW_NAME_LEN];
 	size_t len;
-	DBT    key;
-	int    r;
+	DBT key;
+	int r;
 
 	len = strlen(name);
 	if (len > _PW_NAME_LEN)
@@ -717,12 +717,12 @@ _pwhashbyname(
 }
 
 static struct passwd *
-_pwhashbyuid(
-    uid_t uid, char *buf, size_t buflen, struct passwd *pw, int *flagsp)
+_pwhashbyuid(uid_t uid, char *buf, size_t buflen, struct passwd *pw,
+    int *flagsp)
 {
 	char bf[1 + sizeof(int)];
-	DBT  key;
-	int  r;
+	DBT key;
+	int r;
 
 	bf[0] = _PW_KEYBYUID;
 	bcopy(&uid, &bf[1], sizeof(uid));
@@ -739,9 +739,9 @@ getpwnam_internal(const char *name, struct passwd *pw, char *buf, size_t buflen,
     struct passwd **pwretp, bool shadow, bool reentrant)
 {
 	struct passwd *pwret = NULL;
-	int	       flags = 0, *flagsp = &flags;
-	int	       my_errno = 0;
-	int	       saved_errno, tmp_errno;
+	int flags = 0, *flagsp = &flags;
+	int my_errno = 0;
+	int saved_errno, tmp_errno;
 
 	_THREAD_PRIVATE_MUTEX_LOCK(pw);
 	saved_errno = errno;
@@ -758,8 +758,8 @@ getpwnam_internal(const char *name, struct passwd *pw, char *buf, size_t buflen,
 
 #ifdef YP
 	if (__has_yppw())
-		pwret = __yppwlookup(
-		    LOOKUP_BYNAME, (char *)name, 0, pw, buf, buflen, flagsp);
+		pwret = __yppwlookup(LOOKUP_BYNAME, (char *)name, 0, pw,
+		    buf, buflen, flagsp);
 #endif /* YP */
 	if (!pwret)
 		pwret = _pwhashbyname(name, buf, buflen, pw, flagsp);
@@ -792,7 +792,7 @@ struct passwd *
 getpwnam(const char *name)
 {
 	struct passwd *pw = NULL;
-	int	       my_errno;
+	int my_errno;
 
 	my_errno = getpwnam_internal(name, NULL, NULL, 0, &pw, false, false);
 	if (my_errno) {
@@ -806,7 +806,7 @@ struct passwd *
 getpwnam_shadow(const char *name)
 {
 	struct passwd *pw = NULL;
-	int	       my_errno;
+	int my_errno;
 
 	my_errno = getpwnam_internal(name, NULL, NULL, 0, &pw, true, false);
 	if (my_errno) {
@@ -822,9 +822,9 @@ getpwuid_internal(uid_t uid, struct passwd *pw, char *buf, size_t buflen,
     struct passwd **pwretp, bool shadow, bool reentrant)
 {
 	struct passwd *pwret = NULL;
-	int	       flags = 0, *flagsp = &flags;
-	int	       my_errno = 0;
-	int	       saved_errno, tmp_errno;
+	int flags = 0, *flagsp = &flags;
+	int my_errno = 0;
+	int saved_errno, tmp_errno;
 
 	_THREAD_PRIVATE_MUTEX_LOCK(pw);
 	saved_errno = errno;
@@ -841,8 +841,8 @@ getpwuid_internal(uid_t uid, struct passwd *pw, char *buf, size_t buflen,
 
 #ifdef YP
 	if (__has_yppw())
-		pwret = __yppwlookup(
-		    LOOKUP_BYUID, NULL, uid, pw, buf, buflen, flagsp);
+		pwret = __yppwlookup(LOOKUP_BYUID, NULL, uid, pw,
+		    buf, buflen, flagsp);
 #endif /* YP */
 	if (!pwret)
 		pwret = _pwhashbyuid(uid, buf, buflen, pw, flagsp);
@@ -863,6 +863,7 @@ fail:
 	return (my_errno);
 }
 
+
 int
 getpwuid_r(uid_t uid, struct passwd *pw, char *buf, size_t buflen,
     struct passwd **pwretp)
@@ -875,7 +876,7 @@ struct passwd *
 getpwuid(uid_t uid)
 {
 	struct passwd *pw = NULL;
-	int	       my_errno;
+	int my_errno;
 
 	my_errno = getpwuid_internal(uid, NULL, NULL, 0, &pw, false, false);
 	if (my_errno) {
@@ -889,7 +890,7 @@ struct passwd *
 getpwuid_shadow(uid_t uid)
 {
 	struct passwd *pw = NULL;
-	int	       my_errno;
+	int my_errno;
 
 	my_errno = getpwuid_internal(uid, NULL, NULL, 0, &pw, true, false);
 	if (my_errno) {
@@ -921,7 +922,7 @@ DEF_WEAK(setpassent);
 void
 setpwent(void)
 {
-	(void)setpassent(0);
+	(void) setpassent(0);
 }
 
 void
@@ -951,7 +952,7 @@ static int
 __initdb(int shadow)
 {
 	static int warned;
-	int	   saved_errno = errno, fd;
+	int saved_errno = errno, fd;
 #ifdef YP
 	__ypmode = YPMODE_NONE;
 	__getpwent_has_yppw = -1;
@@ -985,10 +986,11 @@ __initdb(int shadow)
 }
 
 static int
-__hashpw(DBT *key, char *buf, size_t buflen, struct passwd *pw, int *flagsp)
+__hashpw(DBT *key, char *buf, size_t buflen, struct passwd *pw,
+    int *flagsp)
 {
 	char *p, *t;
-	DBT   data;
+	DBT data;
 
 	if ((_pw_db->get)(_pw_db, key, &data, 0))
 		return (0);
@@ -999,10 +1001,7 @@ __hashpw(DBT *key, char *buf, size_t buflen, struct passwd *pw, int *flagsp)
 	}
 
 	t = buf;
-#define EXPAND(e)                                                              \
-	e = t;                                                                 \
-	while ((*t++ = *p++))                                                  \
-		;
+#define	EXPAND(e)	e = t; while ((*t++ = *p++));
 	EXPAND(pw->pw_name);
 	EXPAND(pw->pw_passwd);
 	bcopy(p, (char *)&pw->pw_uid, sizeof(int));
@@ -1023,6 +1022,6 @@ __hashpw(DBT *key, char *buf, size_t buflen, struct passwd *pw, int *flagsp)
 		bcopy(p, (char *)flagsp, sizeof(int));
 		p += sizeof(int);
 	} else
-		*flagsp = _PASSWORD_NOUID | _PASSWORD_NOGID; /* default */
+		*flagsp = _PASSWORD_NOUID|_PASSWORD_NOGID;	/* default */
 	return (1);
 }

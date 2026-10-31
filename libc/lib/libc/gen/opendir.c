@@ -39,6 +39,7 @@
 
 #include "telldir.h"
 
+
 /*
  * Open a directory specified by name.
  */
@@ -46,7 +47,7 @@ DIR *
 opendir(const char *name)
 {
 	DIR *dirp;
-	int  fd;
+	int fd;
 
 	if ((fd = open(name, O_RDONLY | O_DIRECTORY | O_CLOEXEC)) == -1)
 		return (NULL);
@@ -64,7 +65,7 @@ DIR *
 fdopendir(int fd)
 {
 	DIR *dirp;
-	int  flags;
+	int flags;
 
 	if ((flags = fcntl(fd, F_GETFL)) == -1)
 		return (NULL);
@@ -92,9 +93,9 @@ DEF_WEAK(fdopendir);
 DIR *
 __fdopendir(int fd)
 {
-	DIR	   *dirp;
+	DIR *dirp;
 	struct stat sb;
-	int	    pageoffset;
+	int pageoffset;
 
 	if (fstat(fd, &sb))
 		return (NULL);

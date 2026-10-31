@@ -20,7 +20,6 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/tty.h>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -33,7 +32,7 @@ int
 posix_openpt(int oflag)
 {
 	struct ptmget ptm;
-	int	      fd, mfd = -1;
+	int fd, mfd = -1;
 
 	/* User must specify O_RDWR in oflag. */
 	if ((oflag & O_ACCMODE) != O_RDWR ||

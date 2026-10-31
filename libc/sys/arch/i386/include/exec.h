@@ -31,14 +31,13 @@
 #ifndef _MACHINE_EXEC_H_
 #define _MACHINE_EXEC_H_
 
-#define __LDPGSZ 4096
+#define __LDPGSZ	4096
 
-#define ARCH_ELFSIZE 32
+#define ARCH_ELFSIZE		32
 
-#define ELF_TARG_CLASS ELFCLASS32
-#define ELF_TARG_DATA ELFDATA2LSB
-#define ELF_TARG_MACH                                                          \
-	EM_386 /* XXX - EM_486 is currently unused                             \
-		  by all OSs/compilers/linkers */
+#define ELF_TARG_CLASS		ELFCLASS32
+#define ELF_TARG_DATA		ELFDATA2LSB
+#define ELF_TARG_MACH		EM_386 /* XXX - EM_486 is currently unused
+                                          by all OSs/compilers/linkers */
 
-#endif /* _MACHINE_EXEC_H_ */
+#endif  /* _MACHINE_EXEC_H_ */

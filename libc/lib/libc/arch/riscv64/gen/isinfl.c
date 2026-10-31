@@ -16,7 +16,6 @@
  */
 
 #include <sys/types.h>
-
 #include <machine/ieee.h>
 #include <math.h>
 
@@ -25,6 +24,7 @@ __isinfl(long double e)
 {
 	struct ieee_ext *p = (struct ieee_ext *)&e;
 
-	return (p->ext_exp == EXT_EXP_INFNAN && p->ext_frach == 0 &&
-	    p->ext_frachm == 0 && p->ext_fraclm == 0 && p->ext_fracl == 0);
+	return (p->ext_exp == EXT_EXP_INFNAN &&
+	    p->ext_frach == 0 && p->ext_frachm == 0 &&
+	    p->ext_fraclm == 0 && p->ext_fracl == 0);
 }

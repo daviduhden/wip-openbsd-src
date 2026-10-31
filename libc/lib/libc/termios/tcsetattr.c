@@ -29,9 +29,8 @@
  */
 
 #include <sys/ioctl.h>
-
-#include <errno.h>
 #include <termios.h>
+#include <errno.h>
 
 int
 tcsetattr(int fd, int opt, const struct termios *t)

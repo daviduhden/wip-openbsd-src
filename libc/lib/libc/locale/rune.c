@@ -61,7 +61,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <assert.h>
 #include <errno.h>
 #include <locale.h>
@@ -70,26 +69,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
-
-#include "rune_local.h"
 #include "runetype.h"
+#include "rune_local.h"
 
-#define SAFE_ADD(x, y)                                                         \
-	do {                                                                   \
-		if ((x) > SIZE_MAX - (y))                                      \
-			return NULL;                                           \
-		(x) += (y);                                                    \
-	} while (0);
+#define SAFE_ADD(x, y)			\
+do {					\
+	if ((x) > SIZE_MAX - (y))	\
+		return NULL;		\
+	(x) += (y);			\
+} while (0);
 
-static int  readrange(_RuneLocale *, _RuneRange *, uint32_t, void *, FILE *);
+static int readrange(_RuneLocale *, _RuneRange *, uint32_t, void *, FILE *);
 static void _freeentry(_RuneRange *);
 
 static int
-readrange(
-    _RuneLocale *rl, _RuneRange *rr, uint32_t nranges, void *lastp, FILE *fp)
+readrange(_RuneLocale *rl, _RuneRange *rr, uint32_t nranges, void *lastp,
+	FILE *fp)
 {
-	uint32_t       i;
-	_RuneEntry    *re;
+	uint32_t i;
+	_RuneEntry *re;
 	_FileRuneEntry fre;
 
 	re = (_RuneEntry *)rl->rl_variable;
@@ -121,8 +119,8 @@ static int
 readentry(_RuneRange *rr, FILE *fp)
 {
 	_RuneEntry *re;
-	size_t	    l, i, j;
-	int	    error;
+	size_t l, i, j;
+	int error;
 
 	re = rr->rr_rune_ranges;
 	for (i = 0; i < rr->rr_nranges; i++) {
@@ -198,7 +196,7 @@ void
 _freeentry(_RuneRange *rr)
 {
 	_RuneEntry *re;
-	uint32_t    i;
+	uint32_t i;
 
 	re = rr->rr_rune_ranges;
 	for (i = 0; i < rr->rr_nranges; i++) {
@@ -207,18 +205,19 @@ _freeentry(_RuneRange *rr)
 	}
 }
 
+
 _RuneLocale *
 _Read_RuneMagi(FILE *fp)
 {
 	/* file */
 	_FileRuneLocale frl;
 	/* host data */
-	char	    *hostdata;
-	size_t	     hostdatalen;
-	void	    *lastp;
+	char *hostdata;
+	size_t hostdatalen;
+	void *lastp;
 	_RuneLocale *rl;
-	struct stat  sb;
-	int	     x;
+	struct stat sb;
+	int x;
 	uint32_t runetype_nranges, maplower_nranges, mapupper_nranges, var_len;
 
 	if (fstat(fileno(fp), &sb) == -1)
@@ -282,7 +281,8 @@ _Read_RuneMagi(FILE *fp)
 	if (readentry(&rl->rl_runetype_ext, fp) != 0)
 		goto err;
 
-	if ((uint8_t *)rl->rl_variable + rl->rl_variable_len > (uint8_t *)lastp)
+	if ((uint8_t *)rl->rl_variable + rl->rl_variable_len >
+	    (uint8_t *)lastp)
 		goto rune_err;
 
 	if (rl->rl_variable_len == 0)
@@ -298,7 +298,7 @@ _Read_RuneMagi(FILE *fp)
 	if (ftello(fp) != sb.st_size)
 		goto rune_err;
 
-	return (rl);
+	return(rl);
 rune_err:
 	_freeentry(&rl->rl_runetype_ext);
 err:

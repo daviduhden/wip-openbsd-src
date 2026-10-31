@@ -29,7 +29,6 @@
  */
 
 #include <sys/time.h>
-
 #include <unistd.h>
 
 unsigned int
@@ -41,7 +40,7 @@ alarm(unsigned int secs)
 	itv.it_value.tv_sec = secs;
 	itv.it_value.tv_usec = 0;
 	if (setitimer(ITIMER_REAL, &itv, &oitv) == -1)
-		return ((unsigned int)-1);
+		return ((unsigned int) -1);
 	if (oitv.it_value.tv_usec)
 		oitv.it_value.tv_sec++;
 	return (oitv.it_value.tv_sec);

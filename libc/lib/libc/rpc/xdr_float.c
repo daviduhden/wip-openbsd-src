@@ -39,11 +39,10 @@
  * xdr.
  */
 
+#include <stdio.h>
 #include <sys/types.h>
-
 #include <rpc/types.h>
 #include <rpc/xdr.h>
-#include <stdio.h>
 
 /*
  * NB: Not portable.
@@ -56,7 +55,7 @@ bool_t
 xdr_float(XDR *xdrs, float *fp)
 {
 	bool_t rv;
-	long   tmpl;
+	long tmpl;
 	switch (xdrs->x_op) {
 
 	case XDR_ENCODE:
@@ -78,8 +77,8 @@ bool_t
 xdr_double(XDR *xdrs, double *dp)
 {
 	int32_t *i32p;
-	bool_t	 rv;
-	long	 tmpl;
+	bool_t rv;
+	long tmpl;
 
 	switch (xdrs->x_op) {
 
@@ -93,7 +92,7 @@ xdr_double(XDR *xdrs, double *dp)
 		tmpl = *i32p;
 		rv = XDR_PUTLONG(xdrs, &tmpl);
 #else
-		tmpl = *(i32p + 1);
+		tmpl = *(i32p+1);
 		rv = XDR_PUTLONG(xdrs, &tmpl);
 		if (!rv)
 			return (rv);
@@ -113,7 +112,7 @@ xdr_double(XDR *xdrs, double *dp)
 		*i32p = tmpl;
 #else
 		rv = XDR_GETLONG(xdrs, &tmpl);
-		*(i32p + 1) = tmpl;
+		*(i32p+1) = tmpl;
 		if (!rv)
 			return (rv);
 		rv = XDR_GETLONG(xdrs, &tmpl);

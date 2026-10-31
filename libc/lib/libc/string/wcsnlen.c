@@ -42,3 +42,4 @@ wcsnlen(const wchar_t *s, size_t maxlen)
 
 	return p - s;
 }
+

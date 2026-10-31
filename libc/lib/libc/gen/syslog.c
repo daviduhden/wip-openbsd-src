@@ -29,7 +29,6 @@
  */
 
 #include <sys/types.h>
-
 #include <stdarg.h>
 #include <syslog.h>
 #include <time.h>

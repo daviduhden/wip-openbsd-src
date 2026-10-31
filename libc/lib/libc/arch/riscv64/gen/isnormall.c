@@ -16,7 +16,6 @@
  */
 
 #include <sys/types.h>
-
 #include <machine/ieee.h>
 #include <math.h>
 

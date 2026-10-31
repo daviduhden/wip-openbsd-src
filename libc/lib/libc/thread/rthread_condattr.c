@@ -64,3 +64,4 @@ pthread_condattr_setclock(pthread_condattr_t *attr, clockid_t clock_id)
 	(*attr)->ca_clock = clock_id;
 	return (0);
 }
+

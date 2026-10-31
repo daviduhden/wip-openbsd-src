@@ -33,4 +33,3 @@ CFLAGS+=-DNO_PIC
 .endif
 
 OBJS+=	_atomic_lock.o
-

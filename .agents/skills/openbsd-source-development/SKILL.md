@@ -19,6 +19,15 @@ not already evident from the code, and verify that the diff changes comments
 only. Imported upstream files should retain their provenance and existing
 attribution; avoid broad comment rewrites that obscure upstream comparison.
 
+For repository-wide documentation passes, inventory each component and keep
+review status at file granularity. Large imported trees (especially libc)
+contain substantial upstream documentation; do not infer that a component was
+fully reviewed from a sample or from its existing comment density. Mark files
+as reviewed only after reading the complete file and its relevant callers.
+When validating a comment-only patch, compare the non-comment token stream or
+otherwise inspect every changed hunk; compilation alone does not establish
+that executable text is unchanged.
+
 ## Objective
 
 Make the smallest correct change that preserves OpenBSD behavior, style, and
@@ -59,12 +68,20 @@ upstream compatibility, and that can be reviewed as a standalone diff.
 8. **Review ABI.** For `libc/`, check `Symbols.list`, `shlib_version`, hidden
    headers, namespace rules, and man pages. For `pax`/`fvwm`, internal ABI
    changes must not break the multicall links or module protocol.
-9. **Review behavior changes.** Compare with the previous implementation and
+9. **Synchronize imported libc incrementally.** Use the revision recorded in
+   `libc/UPSTREAM` as the merge base, fetch the new OpenBSD `-current` tip,
+   and compare BASE, local changes, and NEW. Do not replace modified files
+   wholesale. Preserve local ISO C11/C17/C23 interfaces unless NEW provides
+   equivalent behavior, and check headers, hidden declarations, pthread
+   wrappers, symbols, Makefiles, tests, and manual pages together. Update
+   `libc/patch` against NEW and verify that it applies and reconstructs the
+   final source-relative tree before changing `libc/UPSTREAM`.
+10. **Review behavior changes.** Compare with the previous implementation and
    with upstream. State whether the change is a bug fix, a compatibility
    change, or a local policy change.
-10. **Add or adjust tests** using `openbsd-source-regress`; do not claim a test
+11. **Add or adjust tests** using `openbsd-source-regress`; do not claim a test
     that was not run.
-11. **Inspect the diff** with `git diff --check` and `git diff -- <paths>`.
+12. **Inspect the diff** with `git diff --check` and `git diff -- <paths>`.
 
 ## Useful commands
 

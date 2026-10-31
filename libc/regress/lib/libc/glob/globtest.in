@@ -46,6 +46,9 @@ fake/bin/systrace
 fake/bin/tar
 fake/bin/test
 
+[fake/bin/[[:alpha:]] <0x10>
+fake/bin/[[:alpha:]
+
 [fake/bin/[[:alpha:]]*] <0x4000>
 fake/bin/cat 0100644
 fake/bin/chgrp 0100644
@@ -113,4 +116,3 @@ fake/bin/cat
 
 [fake/b[a-z]*] <0x4000>
 fake/bin 0040755
-

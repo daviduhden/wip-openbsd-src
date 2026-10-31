@@ -33,7 +33,6 @@
 
 #include <stdio.h>
 #include <unistd.h>
-
 #include "local.h"
 
 /*
@@ -44,14 +43,14 @@ int
 __sread(void *cookie, char *buf, int n)
 {
 	FILE *fp = cookie;
-	int   ret;
-
+	int ret;
+	
 	ret = read(fp->_file, buf, n);
 	/* if the read succeeded, update the current offset */
 	if (ret >= 0)
 		fp->_offset += ret;
 	else
-		fp->_flags &= ~__SOFF; /* paranoia */
+		fp->_flags &= ~__SOFF;	/* paranoia */
 	return (ret);
 }
 
@@ -61,8 +60,8 @@ __swrite(void *cookie, const char *buf, int n)
 	FILE *fp = cookie;
 
 	if (fp->_flags & __SAPP)
-		(void)lseek(fp->_file, 0, SEEK_END);
-	fp->_flags &= ~__SOFF; /* in case FAPPEND mode is set */
+		(void) lseek(fp->_file, 0, SEEK_END);
+	fp->_flags &= ~__SOFF;	/* in case FAPPEND mode is set */
 	return (write(fp->_file, buf, n));
 }
 
@@ -71,7 +70,7 @@ __sseek(void *cookie, fpos_t offset, int whence)
 {
 	FILE *fp = cookie;
 	off_t ret;
-
+	
 	ret = lseek(fp->_file, offset, whence);
 	if (ret == -1)
 		fp->_flags &= ~__SOFF;

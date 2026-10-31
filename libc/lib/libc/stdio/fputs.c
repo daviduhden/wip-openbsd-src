@@ -33,9 +33,8 @@
 
 #include <stdio.h>
 #include <string.h>
-
-#include "fvwrite.h"
 #include "local.h"
+#include "fvwrite.h"
 
 /*
  * Write the given string to the given file.
@@ -45,7 +44,7 @@ fputs(const char *s, FILE *fp)
 {
 	struct __suio uio;
 	struct __siov iov;
-	int	      ret;
+	int ret;
 
 	iov.iov_base = (void *)s;
 	iov.iov_len = uio.uio_resid = strlen(s);

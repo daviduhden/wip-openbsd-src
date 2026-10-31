@@ -32,14 +32,15 @@
 #include <sys/queue.h>
 #include <sys/stat.h>
 
-#include <db.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#define __MPOOLINTERFACE_PRIVATE
+#include <db.h>
+
+#define	__MPOOLINTERFACE_PRIVATE
 #include <mpool.h>
 
 static BKT *mpool_bkt(MPOOL *);
@@ -54,8 +55,8 @@ MPOOL *
 mpool_open(void *key, int fd, pgno_t pagesize, pgno_t maxcache)
 {
 	struct stat sb;
-	MPOOL	   *mp;
-	int	    entry;
+	MPOOL *mp;
+	int entry;
 
 	/*
 	 * Get information about the file.
@@ -88,14 +89,14 @@ mpool_open(void *key, int fd, pgno_t pagesize, pgno_t maxcache)
  *	Initialize input/output filters.
  */
 void
-mpool_filter(MPOOL *mp, void (*pgin)(void *, pgno_t, void *),
-    void (*pgout)(void *, pgno_t, void *), void *pgcookie)
+mpool_filter(MPOOL *mp, void (*pgin) (void *, pgno_t, void *),
+    void (*pgout) (void *, pgno_t, void *), void *pgcookie)
 {
 	mp->pgin = pgin;
 	mp->pgout = pgout;
 	mp->pgcookie = pgcookie;
 }
-
+	
 /*
  * mpool_new --
  *	Get a new page of memory.
@@ -104,7 +105,7 @@ void *
 mpool_new(MPOOL *mp, pgno_t *pgnoaddr, u_int flags)
 {
 	struct _hqh *head;
-	BKT	    *bp;
+	BKT *bp;
 
 	if (mp->npages == MAX_PAGE_NUMBER) {
 		(void)fprintf(stderr, "mpool_new: page allocation overflow.\n");
@@ -138,14 +139,14 @@ int
 mpool_delete(MPOOL *mp, void *page)
 {
 	struct _hqh *head;
-	BKT	    *bp;
+	BKT *bp;
 
 	bp = (BKT *)((char *)page - sizeof(BKT));
 
 #ifdef DEBUG
 	if (!(bp->flags & MPOOL_PINNED)) {
-		(void)fprintf(
-		    stderr, "mpool_delete: page %d not pinned\n", bp->pgno);
+		(void)fprintf(stderr,
+		    "mpool_delete: page %d not pinned\n", bp->pgno);
 		abort();
 	}
 #endif
@@ -158,19 +159,20 @@ mpool_delete(MPOOL *mp, void *page)
 	free(bp);
 	mp->curcache--;
 	return (RET_SUCCESS);
-}
-
+}	
+	
 /*
  * mpool_get
  *	Get a page.
  */
 void *
-mpool_get(MPOOL *mp, pgno_t pgno, u_int flags) /* XXX not used? */
+mpool_get(MPOOL *mp, pgno_t pgno,
+    u_int flags)		/* XXX not used? */
 {
 	struct _hqh *head;
-	BKT	    *bp;
-	off_t	     off;
-	int	     nr;
+	BKT *bp;
+	off_t off;
+	int nr;
 
 #ifdef STATISTICS
 	++mp->pageget;
@@ -268,8 +270,8 @@ mpool_put(MPOOL *mp, void *page, u_int flags)
 	bp = (BKT *)((char *)page - sizeof(BKT));
 #ifdef DEBUG
 	if (!(bp->flags & MPOOL_PINNED)) {
-		(void)fprintf(
-		    stderr, "mpool_put: page %d not pinned\n", bp->pgno);
+		(void)fprintf(stderr,
+		    "mpool_put: page %d not pinned\n", bp->pgno);
 		abort();
 	}
 #endif
@@ -310,8 +312,9 @@ mpool_sync(MPOOL *mp)
 
 	/* Walk the lru chain, flushing any dirty pages to disk. */
 	TAILQ_FOREACH(bp, &mp->lqh, q)
-	if (bp->flags & MPOOL_DIRTY && mpool_write(mp, bp) == RET_ERROR)
-		return (RET_ERROR);
+		if (bp->flags & MPOOL_DIRTY &&
+		    mpool_write(mp, bp) == RET_ERROR)
+			return (RET_ERROR);
 
 	/* Sync the file descriptor. */
 	return (fsync(mp->fd) ? RET_ERROR : RET_SUCCESS);
@@ -325,7 +328,7 @@ static BKT *
 mpool_bkt(MPOOL *mp)
 {
 	struct _hqh *head;
-	BKT	    *bp;
+	BKT *bp;
 
 	/* If under the max cached, always create a new page. */
 	if (mp->curcache < mp->maxcache)
@@ -338,31 +341,30 @@ mpool_bkt(MPOOL *mp)
 	 * The cache never shrinks.
 	 */
 	TAILQ_FOREACH(bp, &mp->lqh, q)
-	if (!(bp->flags & MPOOL_PINNED)) {
-		/* Flush if dirty. */
-		if (bp->flags & MPOOL_DIRTY && mpool_write(mp, bp) == RET_ERROR)
-			return (NULL);
+		if (!(bp->flags & MPOOL_PINNED)) {
+			/* Flush if dirty. */
+			if (bp->flags & MPOOL_DIRTY &&
+			    mpool_write(mp, bp) == RET_ERROR)
+				return (NULL);
 #ifdef STATISTICS
-		++mp->pageflush;
+			++mp->pageflush;
 #endif
-		/* Remove from the hash and lru queues. */
-		head = &mp->hqh[HASHKEY(bp->pgno)];
-		TAILQ_REMOVE(head, bp, hq);
-		TAILQ_REMOVE(&mp->lqh, bp, q);
+			/* Remove from the hash and lru queues. */
+			head = &mp->hqh[HASHKEY(bp->pgno)];
+			TAILQ_REMOVE(head, bp, hq);
+			TAILQ_REMOVE(&mp->lqh, bp, q);
 #ifdef DEBUG
-		{
-			void *spage;
-			spage = bp->page;
-			memset(bp, 0xff, sizeof(BKT) + mp->pagesize);
-			bp->page = spage;
-		}
+			{ void *spage;
+				spage = bp->page;
+				memset(bp, 0xff, sizeof(BKT) + mp->pagesize);
+				bp->page = spage;
+			}
 #endif
-		bp->flags = 0;
-		return (bp);
-	}
+			bp->flags = 0;
+			return (bp);
+		}
 
-new:
-	if ((bp = (BKT *)malloc(sizeof(BKT) + mp->pagesize)) == NULL)
+new:	if ((bp = (BKT *)malloc(sizeof(BKT) + mp->pagesize)) == NULL)
 		return (NULL);
 #ifdef STATISTICS
 	++mp->pagealloc;
@@ -416,16 +418,17 @@ static BKT *
 mpool_look(MPOOL *mp, pgno_t pgno)
 {
 	struct _hqh *head;
-	BKT	    *bp;
+	BKT *bp;
 
 	head = &mp->hqh[HASHKEY(pgno)];
 	TAILQ_FOREACH(bp, head, hq)
-	if ((bp->pgno == pgno) && ((bp->flags & MPOOL_INUSE) == MPOOL_INUSE)) {
+		if ((bp->pgno == pgno) &&
+			((bp->flags & MPOOL_INUSE) == MPOOL_INUSE)) {
 #ifdef STATISTICS
-		++mp->cachehit;
+			++mp->cachehit;
 #endif
-		return (bp);
-	}
+			return (bp);
+		}
 #ifdef STATISTICS
 	++mp->cachemiss;
 #endif
@@ -440,8 +443,8 @@ mpool_look(MPOOL *mp, pgno_t pgno)
 void
 mpool_stat(MPOOL *mp)
 {
-	BKT  *bp;
-	int   cnt;
+	BKT *bp;
+	int cnt;
 	char *sep;
 
 	(void)fprintf(stderr, "%lu pages in the file\n", mp->npages);
@@ -454,17 +457,15 @@ mpool_stat(MPOOL *mp)
 	    mp->pagealloc, mp->pageflush);
 	if (mp->cachehit + mp->cachemiss)
 		(void)fprintf(stderr,
-		    "%.0f%% cache hit rate (%lu hits, %lu misses)\n",
-		    ((double)mp->cachehit / (mp->cachehit + mp->cachemiss)) *
-			100,
-		    mp->cachehit, mp->cachemiss);
-	(void)fprintf(stderr, "%lu page reads, %lu page writes\n", mp->pageread,
-	    mp->pagewrite);
+		    "%.0f%% cache hit rate (%lu hits, %lu misses)\n", 
+		    ((double)mp->cachehit / (mp->cachehit + mp->cachemiss))
+		    * 100, mp->cachehit, mp->cachemiss);
+	(void)fprintf(stderr, "%lu page reads, %lu page writes\n",
+	    mp->pageread, mp->pagewrite);
 
 	sep = "";
 	cnt = 0;
-	TAILQ_FOREACH(bp, &mp->lqh, q)
-	{
+	TAILQ_FOREACH(bp, &mp->lqh, q) {
 		(void)fprintf(stderr, "%s%d", sep, bp->pgno);
 		if (bp->flags & MPOOL_DIRTY)
 			(void)fprintf(stderr, "d");
@@ -475,6 +476,7 @@ mpool_stat(MPOOL *mp)
 			cnt = 0;
 		} else
 			sep = ", ";
+			
 	}
 	(void)fprintf(stderr, "\n");
 }

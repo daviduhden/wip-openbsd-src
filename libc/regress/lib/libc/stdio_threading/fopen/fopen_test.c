@@ -15,9 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <pthread.h>
 #include <stdio.h>
-
+#include <pthread.h>
 #include "local.h"
 
 int
@@ -30,7 +29,7 @@ void
 fopen_thread(void *v)
 {
 	FILE *file;
-	int   i;
+	int i;
 
 	for (i = 0; i < 4096; i++) {
 		file = fwopen(&i, writefn);

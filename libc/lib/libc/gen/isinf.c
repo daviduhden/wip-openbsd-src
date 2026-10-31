@@ -16,9 +16,8 @@
  */
 
 #include <sys/types.h>
-
-#include <float.h>
 #include <machine/ieee.h>
+#include <float.h>
 #include <math.h>
 
 int
@@ -26,21 +25,21 @@ __isinf(double d)
 {
 	struct ieee_double *p = (struct ieee_double *)&d;
 
-	return (p->dbl_exp == DBL_EXP_INFNAN && p->dbl_frach == 0 &&
-	    p->dbl_fracl == 0);
+	return (p->dbl_exp == DBL_EXP_INFNAN &&
+	    p->dbl_frach == 0 && p->dbl_fracl == 0);
 }
 
 int
 __isinff(float f)
 {
 	struct ieee_single *p = (struct ieee_single *)&f;
-
+ 
 	return (p->sng_exp == SNG_EXP_INFNAN && p->sng_frac == 0);
 }
 
-#if LDBL_MANT_DIG == DBL_MANT_DIG
+#if	LDBL_MANT_DIG == DBL_MANT_DIG
 __strong_alias(__isinfl, __isinf);
-#endif /* LDBL_MANT_DIG == DBL_MANT_DIG */
+#endif	/* LDBL_MANT_DIG == DBL_MANT_DIG */
 
 /*
  * 3BSD compatibility aliases.

@@ -1,5 +1,4 @@
-/*	$OpenBSD: getnetnamadr_async.c,v 1.26 2018/04/28 15:16:49 schwarze Exp $
- */
+/*	$OpenBSD: getnetnamadr_async.c,v 1.26 2018/04/28 15:16:49 schwarze Exp $	*/
 /*
  * Copyright (c) 2012 Eric Faurot <eric@openbsd.org>
  *
@@ -18,11 +17,10 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <asr.h>
 #include <netdb.h>
+#include <asr.h>
 
 #include "asr_private.h"
 

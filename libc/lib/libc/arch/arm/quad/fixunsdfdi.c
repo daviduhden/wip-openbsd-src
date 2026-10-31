@@ -1,6 +1,5 @@
 /*	$OpenBSD: fixunsdfdi.c,v 1.1 2022/09/03 08:26:05 mbuhl Exp $	*/
-/*	$NetBSD: fixunsdfdi_ieee754.c,v 1.1 2013/08/24 00:51:48 matt Exp $
- */
+/*	$NetBSD: fixunsdfdi_ieee754.c,v 1.1 2013/08/24 00:51:48 matt Exp $	*/
 
 /*-
  * Copyright (c) 1992, 1993
@@ -44,10 +43,9 @@ __RCSID("$NetBSD: fixunsdfdi_ieee754.c,v 1.1 2013/08/24 00:51:48 matt Exp $");
 #include "softfloat/softfloat-for-gcc.h"
 #endif
 
+#include "../../../quad/quad.h"
 #include <limits.h>
 #include <machine/ieee.h>
-
-#include "../../../quad/quad.h"
 
 /*
  * Convert double to unsigned quad.
@@ -58,8 +56,8 @@ u_quad_t
 __fixunsdfdi(double x)
 {
 	struct ieee_double ux = *(struct ieee_double *)&x;
-	signed int	   exp = ux.dbl_exp - DBL_EXP_BIAS;
-	u_quad_t	   r;
+	signed int exp = ux.dbl_exp - DBL_EXP_BIAS;
+	u_quad_t r;
 
 	if (ux.dbl_sign)
 		return UQUAD_MAX;
@@ -68,7 +66,7 @@ __fixunsdfdi(double x)
 	if (exp < 0)
 		return 0;
 
-	r = 1 << DBL_FRACHBITS; /* implicit bit */
+	r = 1 << DBL_FRACHBITS;		/* implicit bit */
 	r |= ux.dbl_frach;
 	exp -= DBL_FRACHBITS;
 	if (exp == 0)

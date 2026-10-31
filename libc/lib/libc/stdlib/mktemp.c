@@ -16,7 +16,6 @@
  */
 
 #include <sys/stat.h>
-
 #include <errno.h>
 #include <stdlib.h>
 
@@ -39,8 +38,8 @@ _mktemp(char *path)
 	return NULL;
 }
 
-__warn_references(
-    mktemp, "mktemp() possibly used unsafely; consider using mkstemp()");
+__warn_references(mktemp,
+    "mktemp() possibly used unsafely; consider using mkstemp()");
 
 char *
 mktemp(char *path)

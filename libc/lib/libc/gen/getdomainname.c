@@ -30,14 +30,13 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
-
 #include <unistd.h>
 
 int
 getdomainname(char *name, size_t namelen)
 {
-	const int mib[2] = {CTL_KERN, KERN_DOMAINNAME};
-	size_t	  size;
+	const int mib[2] = { CTL_KERN, KERN_DOMAINNAME };
+	size_t size;
 
 	size = namelen;
 	if (sysctl(mib, 2, name, &size, NULL, 0) == -1)

@@ -1,5 +1,51 @@
 # Phase II technical report -- ISO C11/C17/C23 headers for OpenBSD libc
 
+## 0. OpenBSD-current synchronization (2026-10-31)
+
+The imported source was synchronized from BASE
+`c30c84965dc47c6c65e75cc3b5dd6eb181819bfa` (2026-10-17 21:45:34 UTC)
+to NEW `484ecc5061dce11274ca0829ca8933cd67f5642e` (2026-10-31
+10:46:05 UTC; title: “simplify casting around m_get_sockaddr”). BASE is
+an ancestor of NEW; the comparison covered the 320 intervening commits.
+
+Within the imported paths, upstream changed 8 files and added, removed, or
+renamed none:
+
+| Upstream area | Files | Integration |
+| --- | --- | --- |
+| `lib/libc/gen/glob.c` | 1 | Adopted the upstream rollback for an unmatched outer bracket after a POSIX character class; added a `GLOB_NOCHECK` regression fixture. |
+| `lib/libc/sys/{execve,sysctl,waitid}.2` | 3 | Synchronized descriptions and revision tags. |
+| `sys/arch/arm64/include/vmparam.h` | 1 | Updated `MAXTSIZ` from 256 MiB to 512 MiB. |
+| `sys/arch/sparc64/include/intr.h` | 1 | Removed the obsolete `send_softint()` declaration. |
+| `sys/sys/mbuf.h` | 1 | Removed the obsolete `ml_dechain()` declaration. |
+| `sys/sys/mount.h` | 1 | Removed obsolete buffer-page declarations and macros; retained `bufhighpages`. |
+
+The removed kernel-header interfaces have no references in this imported
+tree. No upstream change touched `stdalign.h`, `stdatomic.h`, `stdnoreturn.h`,
+`threads.h`, `stdbit.h`, `stdckdint.h`, the local C11 thread/atomic sources,
+or their symbol/build integration. The local additions were retained; no
+local implementation was removed as redundant. The existing ABI extension
+and `lib/libc/shlib_version` minor version remain unchanged.
+
+The local delta is now represented by `libc/patch`: 33 added source,
+manual, and regression files plus 8 modified integration/regression files.
+The patch excludes `tests/`, this report, README, and UPSTREAM metadata. It
+applied cleanly to a clean archive of NEW; all 41 patched files were compared
+byte-for-byte with the resulting component files. The unmodified imported
+paths came directly from the NEW archive. The old imported files had broad
+formatting drift; those paths were restored from NEW rather than carrying
+the drift forward.
+
+Host tests were rebuilt and run with clang using
+`bmake -C libc/tests run`: all six test programs, the bit fallback script,
+and the header inclusion matrix passed. `bmake clean` removed their outputs.
+The OpenBSD libc build and `regress` harness were not run because this host
+does not provide an OpenBSD build environment. `mandoc -T lint` was run on
+the three synchronized system-call pages; the host mandoc reports an
+unsupported `.St -p1003.1-2024` macro in `execve.2` and numerous missing
+cross-reference database entries. These are tool/database limitations and
+were not edited out of the upstream page.
+
 This report accompanies the implementation in this directory.  It records
 what was audited, what defects were found and fixed, what was verified and
 what was not.  The validation status of every claim is stated explicitly;

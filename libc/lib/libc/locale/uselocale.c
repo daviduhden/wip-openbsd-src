@@ -24,8 +24,8 @@
 locale_t
 uselocale(locale_t newloc)
 {
-	struct tib  *tib;
-	_RuneLocale *oldrunes;
+	struct tib		*tib;
+	_RuneLocale		*oldrunes;
 
 	tib = TIB_GET();
 	oldrunes = tib->tib_locale;
@@ -40,7 +40,6 @@ uselocale(locale_t newloc)
 		errno = EINVAL;
 		return _LOCALE_NONE;
 	}
-	return oldrunes == NULL		? LC_GLOBAL_LOCALE :
-	    oldrunes == _Utf8RuneLocale ? _LOCALE_UTF8 :
-					  _LOCALE_C;
+	return oldrunes == NULL ? LC_GLOBAL_LOCALE :
+	    oldrunes == _Utf8RuneLocale ? _LOCALE_UTF8 : _LOCALE_C;
 }

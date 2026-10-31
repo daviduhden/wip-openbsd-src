@@ -16,7 +16,6 @@
  */
 
 #include <sys/types.h>
-
 #include <ieeefp.h>
 
 fp_except
@@ -24,6 +23,6 @@ fpgetsticky(void)
 {
 	uint32_t fflags;
 
-	__asm volatile("frflags %0" : "=r"(fflags));
+	__asm volatile ("frflags %0" : "=r"(fflags));
 	return fflags;
 }

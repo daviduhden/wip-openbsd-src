@@ -93,6 +93,24 @@ git diff --relative .
 Do not send a Git patch that renames files implicitly; CVS cannot represent it.
 Convert renames to explicit add/remove and explain them.
 
+For the patch-style `libc/` import in this repository, use the exact upstream
+revision in `libc/UPSTREAM` as the three-way BASE. Generate `libc/patch` with
+source-relative paths against NEW, including local additions and removals
+under imported source roots but excluding host-only tests and project reports.
+Apply the patch to a clean copy of NEW, then compare the reconstructed
+imported paths with `libc/`; do not advance `libc/UPSTREAM` until both
+application and reconstruction have been checked. Preserve local extensions
+unless equivalent upstream behavior has been verified.
+
+For `ext4fs/sys-patches.diff`, record the exact `src` revision in
+`ext4fs/README.md`. The diff changes shared files only; the new driver and
+mount utility are copied separately into their source-relative paths. When
+the patch has stale contexts, compare the intended edit with the matching
+files from the recorded revision and rebase each hunk semantically. Generate
+the replacement with function context and verify `patch -p1 --dry-run` plus
+a clean-tree application and byte comparison. Do not run that patch against
+`/usr/src` as part of review.
+
 ## Submission conventions
 
 - Send the diff inline in the message; do not use an attachment that a mailer

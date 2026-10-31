@@ -1,5 +1,4 @@
-/*	$OpenBSD: gai_strerror.c,v 1.8 2015/09/14 07:38:38 guenther Exp $
- */
+/*	$OpenBSD: gai_strerror.c,v 1.8 2015/09/14 07:38:38 guenther Exp $	*/
 
 /*
  * Copyright (c) 1997-1999, Craig Metz, All rights reserved.
@@ -36,9 +35,8 @@
 /* gai_strerror() v1.38 */
 
 #include <sys/types.h>
-
-#include <errno.h>
 #include <netdb.h>
+#include <errno.h>
 
 const char *
 gai_strerror(int errnum)

@@ -32,7 +32,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <wchar.h>
-
 #include "local.h"
 
 wint_t

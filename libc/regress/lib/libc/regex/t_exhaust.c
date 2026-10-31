@@ -37,18 +37,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <err.h>
-#include <regex.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <regex.h>
 #include <string.h>
-// #include <atf-c.h>
+#include <stdlib.h>
+#include <err.h>
+//#include <atf-c.h>
+
 
 static char *
 mkstr(const char *str, size_t len)
 {
 	size_t i, slen = strlen(str);
-	char  *p = malloc(slen * len + 1);
+	char *p = malloc(slen * len + 1);
 	if (p == NULL)
 		err(1, "malloc");
 	for (i = 0; i < len; i++)
@@ -61,7 +62,7 @@ concat(const char *d, const char *s)
 {
 	size_t dlen = strlen(d);
 	size_t slen = strlen(s);
-	char  *p = malloc(dlen + slen + 1);
+	char *p = malloc(dlen + slen + 1);
 	strlcpy(p, d, dlen + slen + 1);
 	strlcat(p, s, dlen + slen + 1);
 	return p;
@@ -148,21 +149,21 @@ p6(size_t len)
 }
 
 static char *(*patterns[])(size_t) = {
-    p0,
-    p1,
-    p2,
-    p3,
-    p4,
-    p5,
-    p6,
+	p0,
+	p1,
+	p2,
+	p3,
+	p4,
+	p5,
+	p6,
 };
 
 int
 main(void)
 {
 	regex_t re;
-	int	e, ret = 0;
-	size_t	i;
+	int e, ret = 0;
+	size_t i;
 
 	for (i = 0; i < sizeof(patterns) / sizeof(patterns[0]); i++) {
 		char *d = (*patterns[i])(9999);
@@ -170,8 +171,7 @@ main(void)
 		free(d);
 		if (e) {
 			if (e != REG_ESPACE) {
-				printf("regcomp returned %d for pattern %zu", e,
-				    i);
+				printf("regcomp returned %d for pattern %zu", e, i);
 				ret = 1;
 			}
 			continue;

@@ -32,9 +32,8 @@
  */
 
 #include <stdio.h>
-
 #include "local.h"
-#undef clearerr
+#undef	clearerr
 
 void
 clearerr(FILE *fp)

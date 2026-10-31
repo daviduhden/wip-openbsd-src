@@ -33,15 +33,14 @@
  */
 
 #include <sys/types.h>
-
-#include <float.h>
 #include <ieeefp.h>
+#include <float.h>
 
 static const int map[] = {
-    1, /* round to nearest */
-    2, /* round to positive infinity */
-    3, /* round to negative infinity */
-    0  /* round to zero */
+	1,	/* round to nearest */
+	2,	/* round to positive infinity */
+	3,	/* round to negative infinity */
+	0	/* round to zero */
 };
 
 /*
@@ -73,6 +72,6 @@ static const int map[] = {
 int
 __flt_rounds()
 {
-	return (map[fpgetround()]);
+	return(map[fpgetround()]);
 }
 DEF_STRONG(__flt_rounds);

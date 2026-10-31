@@ -32,6 +32,7 @@
 #include <limits.h>
 #include <unistd.h>
 
+
 static char logname[LOGIN_NAME_MAX];
 
 char *
@@ -44,7 +45,7 @@ getlogin(void)
 		return NULL;
 	}
 	if (*logname == '\0') {
-		errno = ENOENT; /* well? */
+		errno = ENOENT;  /* well? */
 		return NULL;
 	}
 	return logname;

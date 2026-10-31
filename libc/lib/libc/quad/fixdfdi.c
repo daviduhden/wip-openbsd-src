@@ -45,11 +45,12 @@ __fixdfdi(double x)
 		if (x <= QUAD_MIN)
 			return (QUAD_MIN);
 		else
-			return ((quad_t) - (u_quad_t)-x);
-	else if (x >= QUAD_MAX)
-		return (QUAD_MAX);
+			return ((quad_t)-(u_quad_t)-x);
 	else
-		return ((quad_t)(u_quad_t)x);
+		if (x >= QUAD_MAX)
+			return (QUAD_MAX);
+		else
+			return ((quad_t)(u_quad_t)x);
 }
 
 #ifdef __ARM_EABI__

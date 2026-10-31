@@ -32,10 +32,9 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/stat.h>
-
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 int
 remove(const char *file)

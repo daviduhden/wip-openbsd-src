@@ -15,9 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio_ext.h>
 #include <stdlib.h>
-
+#include <stdio_ext.h>
 #include "local.h"
 
 const char *

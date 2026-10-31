@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "local.h"
 
 /*
@@ -48,7 +47,7 @@ fpurge(FILE *fp)
 	if (!fp->_flags) {
 		FUNLOCKFILE(fp);
 		errno = EBADF;
-		return (EOF);
+		return(EOF);
 	}
 
 	if (HASUB(fp))
@@ -56,7 +55,7 @@ fpurge(FILE *fp)
 	fp->_ungetwc_inbuf = 0;
 	fp->_p = fp->_bf._base;
 	fp->_r = 0;
-	fp->_w = fp->_flags & (__SLBF | __SNBF | __SRD) ? 0 : fp->_bf._size;
+	fp->_w = fp->_flags & (__SLBF|__SNBF|__SRD) ? 0 : fp->_bf._size;
 	FUNLOCKFILE(fp);
 	return (0);
 }

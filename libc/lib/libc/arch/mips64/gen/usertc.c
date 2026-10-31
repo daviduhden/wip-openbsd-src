@@ -23,11 +23,12 @@ get_cp0_count(void)
 {
 	uint32_t count;
 
-	__asm volatile("	.set	push\n"
-		       "	.set	mips64r2\n"
-		       "	rdhwr	%0, $2\n"
-		       "	.set	pop\n"
-	    : "=r"(count));
+	__asm volatile (
+	"	.set	push\n"
+	"	.set	mips64r2\n"
+	"	rdhwr	%0, $2\n"
+	"	.set	pop\n"
+	: "=r" (count));
 
 	return count;
 }

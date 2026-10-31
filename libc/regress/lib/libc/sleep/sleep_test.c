@@ -34,7 +34,6 @@
  */
 
 #include <sys/types.h>
-
 #include <err.h>
 #include <errno.h>
 #include <limits.h>
@@ -62,9 +61,9 @@ garbage(void)
 int
 main(int argc, char *argv[])
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 	char const	*errstr;
-	int		 i;
+	int	i;
 
 	if (argc != 2)
 		return (1);
@@ -83,3 +82,4 @@ main(int argc, char *argv[])
 	printf("%d\n", sleep(i));
 	return (0);
 }
+
