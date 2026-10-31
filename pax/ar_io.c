@@ -153,6 +153,9 @@ ar_open(const char *name)
 	if (chdname != nullptr)
 		if (chdir(chdname) == -1) {
 			syswarn(1, errno, "Failed chdir to %s", chdname);
+			(void)close(arfd);
+			arfd = -1;
+			can_unlnk = 0;
 			return (-1);
 		}
 	/*

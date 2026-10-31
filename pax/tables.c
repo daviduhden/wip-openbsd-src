@@ -1226,7 +1226,7 @@ chk_dev(dev_t dev, int add)
  *	that unsigned longs are the same size or bigger than the fields used
  *	for ino_t and dev_t. If not the types will have to be changed.
  * Return:
- *	0 if all ok, -1 otherwise.
+ *	0 after mapping, or after warning that a truncation could not be fixed.
  */
 
 int
@@ -1522,7 +1522,7 @@ do_atdir(const char *name, dev_t dev, ino_t ino)
 	 * return if we did not find it.
 	 */
 	if (pt == nullptr || pt->ft.ft_name == nullptr ||
-	    strcmp(name, pt->ft.ft_name) == 0)
+	    strcmp(name, pt->ft.ft_name) != 0)
 		return (-1);
 
 	/*

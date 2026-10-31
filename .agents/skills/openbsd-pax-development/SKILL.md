@@ -73,7 +73,8 @@ on input but there is no `-J` writer.
    verification.
 5. **Preserve metadata rules.** Clear setuid/setgid when chown fails or `-p`
    was not requested. Directories get temporary owner access and are restored
-   with a dev/ino check.
+   with a dev/ino and saved-path match; check both preorder insertion and
+   postorder lookup in the `-t` access-time table.
 6. **Validate malformed input.** Extended header records, cpio name lengths,
    component lengths, truncated blocks, and oversized numeric fields must be
    rejected before indexing or allocating.
@@ -132,6 +133,9 @@ truncate -s 100 /tmp/a.tar
 | Extended header rejected | Record length/`=` bounds and `invalid=` policy |
 | `tar -P` behaves like `pax -P` | The two options have different meanings |
 | cpio name overflow | `rd_nm()`/`rd_ln_nm()` bounds |
+| Directory access time is not restored after traversal | `add_atdir()` and `do_atdir()` must agree on the saved path as well as dev/ino |
+| Archive open fails after changing directory | The `chdir()` failure path must close and invalidate the opened descriptor |
+| cpio remapping warns but continues | `map_dev()` reports possible hard-link damage and intentionally keeps writing |
 
 ## References
 
