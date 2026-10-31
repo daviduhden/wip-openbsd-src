@@ -445,11 +445,15 @@ copy_directory() {
 		error "Cannot create staging directory under $TARGET_TREE"
 		return 1
 	}
+	# Build the replacement away from the destination so a failed copy cannot
+	# leave a partially populated component tree in place.
 	cp -Rp "$COMPONENT_DIR" "$stage/component" || return 1
 	find "$stage/component" -type d -exec chmod a+rx,go-w {} + || return 1
 	find "$stage/component" -type f -exec chmod a+r,go-w {} + || return 1
 	find "$stage/component" -type f -perm -0100 -exec chmod a+x {} + || return 1
 	if [ -d "$target" ]; then
+		# Restore only this component's CVS administrative directories into the
+		# staged Git copy; the surrounding checkout and sibling paths stay intact.
 		(cd "$target" && find . -type d -name CVS -prune) |
 			while IFS= read -r cvs; do
 				mkdir -p "$stage/component/${cvs%/*}" || exit 1

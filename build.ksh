@@ -107,6 +107,7 @@ build_fvwm() {
 }
 
 add_component() {
+	# Keep installation targets unique while preserving their selection order.
 	case " ${INSTALL_COMPONENTS:-} " in
 	*" $1 "*) ;;
 	*) INSTALL_COMPONENTS="${INSTALL_COMPONENTS:-} $1" ;;
@@ -114,6 +115,7 @@ add_component() {
 }
 
 do_install() {
+	# With no earlier build selection, install defaults to both components.
 	if [ "$(id -u)" -ne 0 ] && [ -z "${DESTDIR:-}" ]; then
 		warn "Installing to system paths needs root; use doas or DESTDIR."
 	fi
@@ -151,6 +153,8 @@ main() {
 	check_deps
 
 	INSTALL_COMPONENTS=""
+	# Process actions in argument order; install uses components accumulated
+	# by earlier build actions, or do_install()'s default when none were built.
 	while [ $# -gt 0 ]; do
 		case "$1" in
 		all)
