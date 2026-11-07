@@ -109,6 +109,26 @@ state precisely what was verified statically versus at runtime on OpenBSD.
   `UINT32_MAX`. Preserve coverage for both ordinary ordering and that boundary.
 - Widen shifts through `u_int64_t` where the on-disk field is unsigned.
 
+### GitHub Actions supply chain
+
+The repository workflow is `.github/workflows/agent-knowledge-validation.yml`.
+Third-party actions are pinned by full commit SHA and carry the reviewed
+release in a trailing comment. Current verified pins (2026-11-07):
+
+| Action | Release | Commit SHA |
+| --- | --- | --- |
+| `actions/checkout` | `v7.0.1` | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
+| `actions/upload-artifact` | `v7.0.2` | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
+| `actions/cache` | `v6.1.0` | `55cc8345863c7cc4c66a329aec7e433d2d1c52a9` |
+
+Review a pin update as a supply-chain change: confirm the stable release and
+its immutable commit, replace the SHA and version comment together, and do
+not alter triggers, permissions, job names, concurrency, or step behavior.
+Do not add automatic triggers. Validate statically with
+`actionlint .github/workflows/*.yml`, `yamllint` when a tracked configuration
+exists, and `git diff`; never treat a static pass as a workflow run or as
+runtime proof of the action's behavior.
+
 ## Verification on OpenBSD
 
 ```sh
