@@ -100,7 +100,13 @@ under imported source roots but excluding host-only tests and project reports.
 Apply the patch to a clean copy of NEW, then compare the reconstructed
 imported paths with `libc/`; do not advance `libc/UPSTREAM` until both
 application and reconstruction have been checked. Preserve local extensions
-unless equivalent upstream behavior has been verified.
+unless equivalent upstream behavior has been verified. Include the native
+`lib/librthread` provider in that comparison; follow `libc/SYNC.md` for the
+complete import roots and byte/mode/symlink reconstruction checks. Unified
+patch context prefixes are structural: validate actual added source lines
+separately from the patch container's whitespace attributes. Check newly
+imported files with `git diff --cached --check` after staging; document
+inherited upstream whitespace without silently reformatting pristine code.
 
 For `ext4fs/sys-patches.diff`, record the exact `src` revision in
 `ext4fs/README.md`. The diff changes shared files only; the new driver and

@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 24, 2026
+.Dd November 7, 2026
 .Dt STDATOMIC 3
 .Os
 .Sh NAME
@@ -111,17 +111,24 @@ and
 scale the operand by the size of the pointed-to type, as the standard
 requires.
 .Pp
-Atomic objects whose size is not lock-free are handled internally with a
-lock-based fallback, so the interface is self-contained and does not
-depend on an external atomic runtime.
+The macros handle values whose size is not lock-free with a lock-based
+fallback in libc, preserving volatile accesses.
+These macro operations do not require an external atomic runtime.
 .Fn atomic_is_lock_free
-still reports such a type as not lock-free.
+reports the same value-size and alignment policy used by the macros.
+Atomic storage can be larger than the corresponding non-atomic value.
+.Pp
+Direct compiler-generated accesses and compound operations on an atomic
+object do not use this fallback ABI.
+They must not be mixed with macro operations routed through the fallback,
+and may require an external atomic runtime that the base system lacks.
+Complete language-level atomic support is therefore not provided.
 .Sh SEE ALSO
 .Xr threads 3
 .Sh STANDARDS
 The
 .In stdatomic.h
-header conforms to
+header implements the library interfaces described by
 .St -isoC-2011
 and ISO/IEC 9899:2024 (C23).
 The
@@ -132,7 +139,6 @@ and the removal of
 .Dv ATOMIC_VAR_INIT
 follow ISO C23.
 .Sh HISTORY
-The
-.In stdatomic.h
-header appeared in
-.Ox 8.0 .
+This interface is a local development addition to the
+.Ox
+source tree.

@@ -1753,7 +1753,7 @@ void printtm(FILE *f, struct tm *tm)
 int dotimetest(struct timetest *test, int print)
 {
 	int failures = 0;
-	struct tm local = {}, gmt = {};
+	struct tm local = { 0 }, gmt = { 0 };
 	time_t converted;
 	if (gmtime_r(&test->time, &gmt) == NULL) {
 		memset(&gmt, 0, sizeof(gmt));

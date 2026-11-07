@@ -82,7 +82,8 @@ installation that does not have the new libc header.  See
 ### libc
 
 Import of the OpenBSD `-current` C library (`lib/libc`, `include`,
-`libpthread`, with the `sys` headers they need), plus original
+`lib/libpthread` manuals and the `lib/librthread` libpthread provider,
+with the `sys` headers they need), plus original
 implementations of the six ISO C standard headers the base system does
 not install: `stdalign.h`, `stdnoreturn.h`, `stdatomic.h` and
 `threads.h` from C11, and `stdbit.h` and `stdckdint.h` from C23.  It is a

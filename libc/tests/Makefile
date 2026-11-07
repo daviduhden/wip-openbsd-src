@@ -26,16 +26,24 @@
 #   CC=...          # C compiler (default clang)
 
 CC =		clang
-CFLAGS =	-O2 -std=c23 -Wall -Wextra -Werror -Wpedantic
+CXX =		clang++
+CFLAGS =	-O2 -std=c99 -Wall -Wextra -Werror -pedantic-errors
+# Tests that declare arbitrary atomic types exercise a C11 language API.
+# Keep atomics and C23 BitInt test language requirements explicit.
+# The remaining host runtime tests use C99.
+ATOMIC_STD ?= c11
+ATOMIC_CFLAGS = ${CFLAGS:N-std=*} -std=${ATOMIC_STD}
+STDBIT_CFLAGS = ${CFLAGS:N-std=*} -std=c23
 SAN ?=
 
 LIBCDIR =	${.CURDIR}/..
 SHIM =		${.CURDIR}/.shim
 HDRS =		stdalign.h stdnoreturn.h stdatomic.h stdbit.h \
 		stdckdint.h threads.h
-THRD_C =	${LIBCDIR}/lib/libc/thread/thrd.c
+THRD_C =	${LIBCDIR}/lib/librthread/thrd.c
 ATOMICFB_C =	${LIBCDIR}/lib/libc/thread/atomic_fallback.c
 STDBIT_C =	${LIBCDIR}/lib/libc/gen/stdbit.c
+ATOMIC_C =	${LIBCDIR}/lib/libc/thread/atomic.c
 
 # The host C library is glibc: _POSIX_C_SOURCE exposes PTHREAD_MUTEX_NORMAL
 # and the timedlock/settype entry points without enabling glibc's C23
@@ -43,7 +51,8 @@ STDBIT_C =	${LIBCDIR}/lib/libc/gen/stdbit.c
 # tree's <threads.h>.  DEF_WEAK and __dead are libc-internal/OpenBSD macros
 # that have no host counterpart.
 HOSTDEFS =	-D_POSIX_C_SOURCE=200809L -D__dead= \
-		-D'DEF_WEAK(x)=typedef int __stdc_host_dummy'
+		-D'DEF_WEAK(x)=typedef int __stdc_host_dummy_\#\#x' \
+		-D'DEF_STRONG(x)=typedef int __stdc_host_strong_\#\#x'
 
 TESTS =		stdbit-tests stdatomic-tests stdatomic-fallback-tests \
 		threads-tests stdckdint-tests stdckdint-oracle-tests
@@ -58,14 +67,15 @@ shim:
 	@ln -sf ${.CURDIR}/host-stdlib.h ${SHIM}/stdlib.h
 
 stdbit-tests: ${STDBIT_C} shim
-	${CC} ${CFLAGS} ${SAN} ${HOSTDEFS} -I${SHIM} -I${.CURDIR} \
+	${CC} ${STDBIT_CFLAGS} ${SAN} ${HOSTDEFS} -I${SHIM} -I${.CURDIR} \
 	    ${STDBIT_C} stdbit-link-helper.c stdbit-tests.c -o $@
 
-stdatomic-tests: shim
-	${CC} ${CFLAGS} ${SAN} ${HOSTDEFS} -I${SHIM} -I${.CURDIR} stdatomic-tests.c -pthread -o $@
+stdatomic-tests: ${ATOMIC_C} shim
+	${CC} ${ATOMIC_CFLAGS} ${SAN} ${HOSTDEFS} -I${SHIM} -I${.CURDIR} \
+	    ${ATOMIC_C} stdatomic-tests.c -pthread -o $@
 
 stdatomic-fallback-tests: ${ATOMICFB_C} shim
-	${CC} ${CFLAGS} ${SAN} ${HOSTDEFS} -I${SHIM} -I${.CURDIR} \
+	${CC} ${ATOMIC_CFLAGS} ${SAN} ${HOSTDEFS} -I${SHIM} -I${.CURDIR} \
 	    ${ATOMICFB_C} stdatomic-fallback-tests.c -pthread -o $@
 
 threads-tests: ${THRD_C} shim
@@ -87,7 +97,7 @@ run: ${TESTS}
 	./stdckdint-tests
 	./stdckdint-oracle-tests
 	CC=${CC} sh ${.CURDIR}/stdbit-fallback.sh
-	CC=${CC} sh ${.CURDIR}/headers-compile.sh
+	CC="${CC}" CXX="${CXX}" sh ${.CURDIR}/headers-compile.sh
 
 test: run
 

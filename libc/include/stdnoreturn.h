@@ -23,8 +23,8 @@
  * which expands to the function specifier _Noreturn.  It is written for C
  * only: in C++ the equivalent facility is the [[noreturn]] attribute, the
  * macro is not part of the C++ standard library, and defining it would
- * collide with the C++ keyword.  As required by the standard the header
- * therefore defines nothing when compiled as C++.
+ * interfere with the C++ attribute spelling. For C++ inclusion, this header
+ * therefore leaves the convenience macro undefined.
  *
  * C23 retains _Noreturn and the macro (both are deprecated in favour of
  * the [[noreturn]] attribute but remain valid); the macro still expands to

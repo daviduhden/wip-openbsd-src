@@ -84,7 +84,23 @@ upstream compatibility, and that can be reviewed as a standalone diff.
    equivalent behavior, and check headers, hidden declarations, pthread
    wrappers, symbols, Makefiles, tests, and manual pages together. Update
    `libc/patch` against NEW and verify that it applies and reconstructs the
-   final source-relative tree before changing `libc/UPSTREAM`.
+   final source-relative tree before changing `libc/UPSTREAM`. Follow
+   `libc/SYNC.md`, saving uncommitted LOCAL changes before imports. OpenBSD's
+   `LIB=pthread` provider is `lib/librthread`, not the man-page tree
+   `lib/libpthread`; audit it alongside libc. Internal pthread calls require
+   matching `PROTO_NORMAL` declarations and `DEF_STD` aliases rather than
+   blanket deprecation-warning suppression.
+   For ISO generic APIs, audit distinct _BitInt types and deduplicate equal
+   widths across ABIs; a default integer conversion can silently truncate.
+   Atomic fallback accesses must retain volatile through actual byte accesses.
+   Atomic integer aliases must use corresponding public stdint/stddef/uchar
+   types; compiler fast/max type guesses can disagree with the OpenBSD ABI.
+   Query and operation lock-free predicates must use the same value-size and
+   alignment policy. Compiler-generated atomic operators use a separate ABI
+   from macro helpers and must not be claimed as supported without evidence.
+   Translate pthread errors according to each C11 function's allowed return
+   set; thrd_nomem is not a universal resource-error return. See
+   `libc/ISO-C-STATUS.md` for the current implementation boundaries.
 10. **Review behavior changes.** Compare with the previous implementation and
    with upstream. State whether the change is a bug fix, a compatibility
    change, or a local policy change.

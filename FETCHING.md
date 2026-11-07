@@ -14,8 +14,9 @@ The copy helper does not handle it; apply `stdckdint/stdckdint.patch` from the
 `src` root instead (see `stdckdint/README.md`).
 
 The `libc/` component is also patch-style: it keeps the imported OpenBSD
-`libc`/`include`/`libpthread`/`sys` files, the six new headers, their libc
-sources, manual pages and regress tests at source-relative paths (see
+`lib/libc`, `include`, `lib/libpthread` manuals, `lib/librthread` pthread
+provider and `sys` files, plus the six new headers, their library sources,
+manual pages and regress tests at source-relative paths (see
 `libc/README.md` and `libc/REPORT.md`).  The copy helper does not handle
 it either.
 

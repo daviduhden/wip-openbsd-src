@@ -21,11 +21,11 @@
  * carried forward through C17 and C23.
  *
  * The C11 threads interface is a thin, standardised skin over POSIX
- * threads.  OpenBSD keeps its thread implementation inside libc (the
- * historical libpthread is only a set of manual pages), so the functions
- * are provided by libc and use the pthread_* entry points directly; no new
- * synchronisation primitive is invented and every object is a real pthread
- * object underneath.
+ * threads.  OpenBSD keeps thread creation and lifecycle operations in
+ * libpthread, with synchronization internals in libc.  These entry points
+ * are provided by libpthread and use the pthread_* interfaces directly;
+ * no new synchronization primitive is invented and every object is a
+ * real pthread object underneath.
  *
  * The object types are the corresponding pthread types (pthread_t is a
  * pointer in OpenBSD, so thrd_t, mtx_t and cnd_t are complete object

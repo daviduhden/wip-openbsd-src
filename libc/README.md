@@ -9,7 +9,7 @@ pthread implementation:
 | --- | --- | --- |
 | `stdalign.h`   | C11 (deprecated C23) | implemented |
 | `stdnoreturn.h`| C11 (deprecated C23) | implemented |
-| `stdatomic.h`  | C11 / C17 / C23 | implemented, including non-lock-free types |
+| `stdatomic.h`  | C11 / C17 / C23 | macro APIs implemented; direct fallback expressions remain partial |
 | `threads.h`    | C11 / C17 / C23 | implemented |
 | `stdbit.h`     | C23 | implemented, including 128-bit types |
 | `stdckdint.h`  | C23 | implemented |
@@ -22,12 +22,14 @@ The source-relative delta against that exact revision is maintained in
 detailed audit, conformance matrix and test results are in
 [REPORT.md](REPORT.md).
 
-When synchronizing with a later `-current`, use the recorded revision as the
-three-way merge base.  Update upstream files first, then reapply and verify
-the local ISO C interfaces, implementations, tests, ABI entries, and manual
-pages.  Do not remove a local interface until equivalent upstream behavior
-has been confirmed.  Regenerate and apply-check `patch` against the new
-revision before updating `UPSTREAM`.
+For future synchronization, follow [SYNC.md](SYNC.md): pin the effective
+last synchronized revision as BASE, save the complete LOCAL worktree including
+uncommitted changes, and inspect the intervening history to pinned NEW.
+Classify and merge local deltas semantically. Do not remove an interface until
+upstream equivalence has been demonstrated. Regenerate and replay `patch`
+against pristine NEW, then compare bytes, modes, links and path sets before
+advancing `UPSTREAM`. Current results and unexecuted checks are recorded in
+[SYNC-2026-11-07.md](SYNC-2026-11-07.md).
 
 ## Layout
 
@@ -39,16 +41,19 @@ dropped, the convention already used by the sibling `ext4fs/` and
 | --- | --- |
 | `include/` | `include/` |
 | `lib/libc/` | `lib/libc/` |
-| `lib/libpthread/` | `lib/libpthread/` |
+| `lib/libpthread/` | `lib/libpthread/` (manual pages) |
+| `lib/librthread/` | `lib/librthread/` (`LIB=pthread`) |
 | `sys/sys/` | `sys/sys/` (dependency of the public headers) |
 | `sys/arch/<arch>/include/` | `sys/arch/<arch>/include/` (dependency) |
 | `regress/lib/libc/` | `regress/lib/libc/` |
 | `tests/` | host-side tests, not part of OpenBSD |
 
-`lib/libpthread` in `-current` contains only manual pages: the thread
-implementation lives in `lib/libc/thread/`.  The C11 `<threads.h>`
-functions are therefore built into libc, next to the pthread code they
-wrap; no new library is created.
+OpenBSD splits pthread support between `lib/libc/thread/` and
+`lib/librthread/`; the latter builds `libpthread`. `lib/libpthread/`
+contains the manuals. The C11 `<threads.h>` functions are built in
+`lib/librthread/thrd.c` and require `-pthread`, because thread lifecycle
+and mutex-attribute operations are supplied by that library. No new library
+is created. Atomics and typed bit operations remain in libc.
 
 ## What was added or changed
 
@@ -59,25 +64,28 @@ New public headers (`include/`):
 
 New library sources:
 
-* `lib/libc/thread/thrd.c` -- the C11 `<threads.h>` entry points.
+* `lib/librthread/thrd.c` -- the C11 `<threads.h>` entry points.
 * `lib/libc/thread/atomic.c` -- the fence and `atomic_flag` entry points.
 * `lib/libc/thread/atomic_fallback.c` -- the lock-based support for atomic
-  objects that are not lock-free, so libatomic is never needed.
+  values routed through the macro fallback; direct compiler operations
+  require separate runtime/ABI review.
 * `lib/libc/gen/stdbit.c` -- the C23 `<stdbit.h>` typed functions.
 
-New hidden-namespace headers (`lib/libc/hidden/`): `threads.h`,
-`stdatomic.h`.
+New hidden-namespace header (`lib/libc/hidden/`): `stdatomic.h`.
+The threads wrapper uses librthread's private pthread namespace.
 
 Manual pages: `stdalign.3`, `stdnoreturn.3`, `stdatomic.3`, `stdbit.3`,
 `stdckdint.3` (in `lib/libc/gen/`) and `threads.3` (in
 `lib/libpthread/man/`).
 
 Regress tests (`regress/lib/libc/`): `stdalign/`, `stdnoreturn/`,
-`stdatomic/`, `stdbit/`, `stdckdint/`, `threads/` and `iso-c-headers/`.
+`stdatomic/`, `stdbit/`, `stdckdint/`, `threads/`, `login_cap/` and
+`iso-c-headers/`.
 
 Modified build files: `include/Makefile`, `lib/libc/thread/Makefile.inc`,
 `lib/libc/gen/Makefile.inc`, `lib/libc/Symbols.list`,
-`lib/libpthread/man/Makefile.inc`, `regress/lib/libc/Makefile`.
+`lib/libpthread/man/Makefile.inc`, `lib/librthread/Makefile`,
+`lib/librthread/Symbols.map`, and `regress/lib/libc/Makefile`.
 
 Architecture dependencies: the `machine/` headers of `amd64`, `i386`,
 `arm64`, `armv7`, `riscv64`, `powerpc64`, `sparc64` and the shared `arm`
@@ -108,17 +116,23 @@ and `ATOMIC_VAR_INIT` for C17 and earlier.
 * The generic operations are macros over the compiler's atomic builtins.
   clang's `__c11_atomic_*` builtins are used when available; GCC's
   `__atomic_*` builtins with statement-expression temporaries otherwise.
-  Each argument is evaluated once.
+  Each argument is evaluated once. Atomic integer aliases follow the public
+  library typedefs, including OpenBSD fast types, rather than compiler guesses.
 * `atomic_fetch_add`/`atomic_fetch_sub` on an atomic pointer object scale
   the operand by the size of the pointed-to type, as ISO C requires, on
-  both compilers.
+  both compilers. GCC scales a captured unsigned pointer-width displacement
+  before its raw builtin; it does not introduce ordinary C pointer arithmetic
+  outside the original array.
 * **Non-lock-free types are supported.**  Every operation first tests
   `__atomic_always_lock_free()` (a compile-time constant) and, when it is
   false, calls a small lock-based fallback in libc
   (`__atomic_fallback_*`) instead of letting the compiler emit a call to
-  its atomic runtime.  The header is therefore self-contained and does not
-  depend on libatomic, for aggregates of any size and for 128-bit
-  integers.  The fallback uses a per-address spinlock with
+  its atomic runtime for these macro calls. Direct compiler-generated
+  atomic loads/stores/compound expressions do not use this fallback ABI
+  and must not be mixed with macro accesses routed through it. They may
+  require an unavailable external runtime, including where atomic storage
+  differs from payload size. Full language-level atomic support is partial.
+  The fallback uses a per-address spinlock with
   sequential-consistency ordering, which is stronger than any order the
   standard requests.
 * `atomic_char8_t` and `ATOMIC_CHAR8_T_LOCK_FREE` are provided in C23;
@@ -132,7 +146,8 @@ C++ inclusion is supported when the compiler implements `_Atomic(T)`
 
 ### `threads.h` (C11/C17/C23)
 
-A thin, standardised skin over the pthread implementation in libc:
+A thin, standardised skin over the pthread implementation in libpthread
+and libc, with the C11 entry points supplied by libpthread:
 
 * `thrd_t`, `mtx_t`, `cnd_t`, `tss_t` and `once_flag` are the
   corresponding pthread types; `thrd_create` uses a trampoline because a
@@ -201,12 +216,15 @@ executed binaries.
 
 ## Building and integrating
 
-`include/Makefile` lists the headers in `FILES`; `lib/libc/thread` and
-`lib/libc/gen` add the new objects through their `Makefile.inc`; the new
-symbols are in `lib/libc/Symbols.list`.  The added symbols are an
-ABI-compatible extension (new names only) and the base system's
-`lib/libc/shlib_version` minor should be bumped by the usual release
-process.
+`include/Makefile` installs the headers. `lib/libc/thread/Makefile.inc`
+and `lib/libc/gen/Makefile.inc` build atomics and bit operations, exported
+through libc's `Symbols.list` with local version 104.1. C11 threads are
+built by `lib/librthread/Makefile` and exported through `Symbols.map`,
+with local libpthread version 28.2 (upstream 28.1). This corrects the former
+local placement in libc, which left lifecycle dependencies unresolved.
+Historical OpenBSD pthread symbols and public structure layouts are retained;
+consumers of the local C11 thread extension must link with `-pthread`.
+The old local libc thread exports and unused hidden header are removed.
 
 ## Testing
 
@@ -241,13 +259,14 @@ runs:
 * `headers-compile.sh` -- independent and joint inclusion, provenance, the
   C11/C17/C23 matrix and a C++ check.
 
-They pass with clang 23 and GCC 16 under C11, C17 and C23 with
+The earlier audit recorded passes with clang 23 and GCC 16 under C11, C17
+and C23 with
 `-Wall -Wextra -Werror -Wpedantic`.  See REPORT.md for the exact results.
 
 ### Not executed here
 
 The OpenBSD regress suite and the actual libc build require an OpenBSD
-machine.  They were compile-checked against the imported headers for all
+machine.  The earlier revision was compile-checked against its imported headers for all
 of the supported architectures but not built or run on OpenBSD from this
 tree; no OpenBSD run is claimed.
 
@@ -257,7 +276,7 @@ tree; no OpenBSD run is claimed.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `stdalign.h` | n/a | n/a | n/a | yes | yes | empty header | markers only |
 | `stdnoreturn.h` | n/a | n/a | n/a | yes | yes | yes | empty header |
-| `stdatomic.h` | -- | -- | -- | yes | yes | yes | clang only |
+| `stdatomic.h` | -- | -- | -- | partial | partial | partial | clang inclusion |
 | `threads.h` | -- | -- | -- | yes | yes | yes | headers only |
 | `stdbit.h` | -- | -- | -- | -- | -- | yes | overloads |
 | `stdckdint.h` | -- | -- | -- | -- | -- | yes | yes |
@@ -267,8 +286,60 @@ tree; no OpenBSD run is claimed.
 * The base clang predefines `__STDC_NO_THREADS__` for OpenBSD; the header
   withdraws it, but the compiler target description should be fixed
   upstream.
-* GCC's resource `stdatomic.h` does not `#include_next`, so GCC builds use
-  the compiler's header instead of this one.  This is a compiler-side
-  property; the base compiler (clang) uses this implementation.
-* Everything else (non-lock-free atomics, 128-bit bit operations, C++
-  inclusion, `thrd_nomem`, pointer fetch scaling) is implemented.
+* GCC's resource `stdatomic.h` does not `#include_next` and can shadow an
+  installed header in ordinary user builds. The native source builds and
+  ISO regressions now explicitly select this tree's public source include
+  path before compiler resources; guard checks reject wrong headers.
+* Direct compiler-generated atomic operations on fallback objects are not
+  integrated with the macro helper ABI; do not mix the two. Native runtime
+  lowering and linkage need further work before full atomics conformance.
+* Raw bit-field arguments to stdbit/stdckdint generic interfaces are not
+  guaranteed; use an explicit eligible integer conversion. WG14 issue1077
+  remains open. Matching-width unsigned _BitInt operands are covered in
+  C23 stdbit dispatch; other widths are outside that contract.
+
+### C99 implementation checks and language API exceptions
+
+The host runtime tests default to `-std=c99 -pedantic-errors`, with strict
+warnings treated as errors. This checks the typed bit functions, checked
+integer arithmetic, and pthread-backed thread wrappers without requiring a
+C23 translation unit. The host `DEF_WEAK` replacement gives each expansion
+its own typedef name: repeated typedef declarations require C11 even when
+the declared type is identical. The standalone header inclusion matrix also
+checks C99; inclusion alone does not prove that every optional macro can be
+expanded in that language mode.
+
+Tests that explicitly declare `_Atomic(T)` remain C11 tests. The bit test
+selects C23 to exercise _BitInt; its forced fallback runs both C11 and C23. These are deliberate language interface exceptions, not ordinary
+application dependencies. Replacing arbitrary atomic types with ordinary
+objects would change their alignment, compiler semantics and possibly ABI;
+replacing atomics with volatile accesses would lose synchronization.
+Likewise, C99 has no portable expression that dispatches on an arbitrary
+operand type while preserving single evaluation and the exact result type.
+The modern header API tests and C11/C17/C23 matrix therefore remain present.
+
+The compiler overflow builtins in `stdckdint.h` are another explicit
+extension, available in C99 mode on the supported compilers. They preserve
+mixed-width, mixed-sign, single-evaluation arithmetic without undefined
+signed overflow. The C23 name of the header is not a C23 syntax dependency.
+The imported upstream tree also contains OpenBSD compiler attributes,
+assembly, architecture types, and kernel header extensions. Those are
+platform contracts; a host test run does not establish strict ISO C99
+conformance of the complete imported libc or its kernel dependencies.
+
+The checked-integer regressions retain exact result-type checks through an
+unevaluated compiler type predicate and a negative-array typedef, including
+in the exported patches. The imported time-conversion regression uses C99
+zero initializers. The remaining file-granular lexical candidates and audit
+limitations are recorded in `../docs/libc-C99-INVENTORY.md`.
+
+
+The latest interface-level audit and per-standard limitations are recorded in
+[ISO-C-STATUS.md](ISO-C-STATUS.md). New regressions described there have not
+been compiled or executed in this session. Native build include paths select
+the public source headers after private wrappers, ahead of compiler resources.
+
+The complete workspace delta is [patch](patch). The alternative
+[iso-c.patch](iso-c.patch) contains the focused six-header contribution,
+excluding prior login/glob/time-fixture changes. Both target the recorded
+upstream revision; they are alternative snapshots with overlapping changes.

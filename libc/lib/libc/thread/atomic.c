@@ -36,7 +36,7 @@ atomic_thread_fence(memory_order order)
 {
 	__atomic_thread_fence(order);
 }
-DEF_WEAK(atomic_thread_fence);
+DEF_STRONG(atomic_thread_fence);
 
 #undef atomic_signal_fence
 
@@ -45,7 +45,7 @@ atomic_signal_fence(memory_order order)
 {
 	__atomic_signal_fence(order);
 }
-DEF_WEAK(atomic_signal_fence);
+DEF_STRONG(atomic_signal_fence);
 
 #undef atomic_flag_test_and_set
 
@@ -54,7 +54,7 @@ atomic_flag_test_and_set(volatile atomic_flag *object)
 {
 	return __atomic_test_and_set(object, __ATOMIC_SEQ_CST);
 }
-DEF_WEAK(atomic_flag_test_and_set);
+DEF_STRONG(atomic_flag_test_and_set);
 
 #undef atomic_flag_test_and_set_explicit
 
@@ -64,7 +64,7 @@ atomic_flag_test_and_set_explicit(
 {
 	return __atomic_test_and_set(object, order);
 }
-DEF_WEAK(atomic_flag_test_and_set_explicit);
+DEF_STRONG(atomic_flag_test_and_set_explicit);
 
 #undef atomic_flag_clear
 
@@ -73,7 +73,7 @@ atomic_flag_clear(volatile atomic_flag *object)
 {
 	__atomic_clear(object, __ATOMIC_SEQ_CST);
 }
-DEF_WEAK(atomic_flag_clear);
+DEF_STRONG(atomic_flag_clear);
 
 #undef atomic_flag_clear_explicit
 
@@ -82,4 +82,4 @@ atomic_flag_clear_explicit(volatile atomic_flag *object, memory_order order)
 {
 	__atomic_clear(object, order);
 }
-DEF_WEAK(atomic_flag_clear_explicit);
+DEF_STRONG(atomic_flag_clear_explicit);

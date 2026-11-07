@@ -38,6 +38,7 @@ keeping sources and objects separate, and report honestly what was built.
 | Build fvwm only | `fvwm/` | `bsd.subdir.mk` then `bsd.xorg.mk`; subdirs use `bsd.prog.mk`/`bsd.lib.mk` |
 | Build one module | `fvwm/modules/<Name>/` | `../Makefile.inc`, `bsd.prog.mk`, `bsd.xorg.mk` |
 | Build libc | `libc/lib/libc/` in a full tree | `bsd.lib.mk`, `Makefile.inc` |
+| Build libpthread | `libc/lib/librthread/` in a full tree | `bsd.lib.mk`, `LIB=pthread`, sibling libc and libpthread manuals |
 | Build mount_ext4fs | `ext4fs/sbin/mount_ext4fs/` in a full tree | `bsd.prog.mk`, sibling `sbin/mount` |
 | Host tests | `tests/` or `libc/tests/` | no `bsd.*.mk` |
 
@@ -47,7 +48,11 @@ Top-level `make` builds only `pax` and `fvwm`. It does not build `libc`,
 ## Procedure
 
 1. **Read the Makefile and `Makefile.inc`.** Standalone programs use C99;
-   host tests add `-pedantic-errors`.
+   host tests add `-pedantic-errors`. Imported libc modern API tests select
+   their required language modes separately. `libc/tests` uses C23 for bit
+   tests and accepts `ATOMIC_STD=c11`, `c17` or `c23` for atomic tests. Native
+   private wrappers must precede the public source include directory, which
+   must precede compiler resources; see `libc/ISO-C-STATUS.md`.
    Confirm `PROG`, `SRCS`, `MAN`,
    `CFLAGS`, `LDADD`, and any `NOOBJ`.
 2. **Create an object directory when the tree supports it.**

@@ -78,9 +78,56 @@ test_agg(void)
 	OK(memcmp(&w40, &v40, sizeof(v40)) == 0);
 }
 
+/* Atomic storage may be rounded beyond the ordinary value representation. */
+static void
+test_small_agg(void)
+{
+	struct s3 {
+		unsigned char b[3];
+	};
+	_Atomic(struct s3) object;
+	struct s3 first = { { 1, 2, 3 } }, value, expected;
+	int evaluations = 0;
+
+	OK(atomic_is_lock_free((evaluations++, &object)) ==
+	    __atomic_always_lock_free(sizeof(struct s3), 0));
+	OK(evaluations == 1);
+	atomic_store(&object, first);
+	value = atomic_load(&object);
+	OK(memcmp(&value, &first, sizeof(value)) == 0);
+	expected = first;
+	OK(atomic_compare_exchange_strong(&object, &expected, first));
+}
+
+/* Volatile aggregate access must retain qualifiers through the fallback. */
+static void
+test_volatile_agg(void)
+{
+	volatile _Atomic(struct s24) object;
+	struct s24 first, second, value, expected;
+
+	memset(&first, 0x12, sizeof(first));
+	memset(&second, 0x34, sizeof(second));
+	atomic_init(&object, first);
+	value = atomic_load(&object);
+	OK(memcmp(&value, &first, sizeof(value)) == 0);
+	value = atomic_exchange_explicit(&object, second, memory_order_acq_rel);
+	OK(memcmp(&value, &first, sizeof(value)) == 0);
+	expected = first;
+	OK(!atomic_compare_exchange_strong(&object, &expected, first));
+	OK(memcmp(&expected, &second, sizeof(expected)) == 0);
+	OK(atomic_compare_exchange_strong(&object, &expected, first));
+	value = atomic_load_explicit(&object, memory_order_acquire);
+	OK(memcmp(&value, &first, sizeof(value)) == 0);
+	atomic_store_explicit(&object, second, memory_order_release);
+	value = atomic_load(&object);
+	OK(memcmp(&value, &second, sizeof(value)) == 0);
+}
+
 #if defined(__SIZEOF_INT128__)
 __extension__ typedef __int128 i128;
 static _Atomic(i128) a128;
+static volatile _Atomic(i128) volatile128;
 
 static void *
 bump128(void *arg)
@@ -98,6 +145,15 @@ test_int128(void)
 {
 	pthread_t th[8];
 	int i;
+
+	/* Signed operands and bitwise operations also preserve volatile. */
+	atomic_store(&volatile128, 5);
+	OK(atomic_fetch_add(&volatile128, -2) == 5);
+	OK(atomic_fetch_sub(&volatile128, 1) == 3);
+	OK(atomic_fetch_or(&volatile128, 8) == 2);
+	OK(atomic_fetch_and(&volatile128, 3) == 10);
+	OK(atomic_fetch_xor(&volatile128, 7) == 2);
+	OK(atomic_load(&volatile128) == 5);
 
 	atomic_store(&a128, 100);
 	OK(atomic_fetch_add(&a128, 23) == 100);
@@ -125,6 +181,8 @@ int
 main(void)
 {
 	test_agg();
+	test_small_agg();
+	test_volatile_agg();
 #if defined(__SIZEOF_INT128__)
 	test_int128();
 #endif

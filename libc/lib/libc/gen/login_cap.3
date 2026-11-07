@@ -32,7 +32,7 @@
 .\" $OpenBSD: login_cap.3,v 1.29 2026/08/25 00:08:28 jsg Exp $
 .\" BSDI $From: login_cap.3,v 1.4 1997/11/07 16:22:27 jch Exp $
 .\"
-.Dd $Mdocdate: August 25 2026 $
+.Dd November 7, 2026
 .Dt LOGIN_GETCLASS 3
 .Os
 .Sh NAME
@@ -228,8 +228,10 @@ Sets environment variables specified by the
 .Li setenv
 keyword.
 .It Dv LOGIN_SETGROUP
-Set the group ID and call
-.Xr initgroups 3
+Set the group ID and install the supplementary group list using
+.Xr getgrouplist 3
+and
+.Xr setgroups 2
 if the
 .Ar pwd
 argument is non-NULL.
@@ -281,6 +283,12 @@ using
 .Xr setuid 2 .
 .It Dv LOGIN_SETALL
 Sets all of the above.
+.It Dv LOGIN_SETWSCONSGROUP
+When used with
+.Dv LOGIN_SETGROUP ,
+append the wscons group to the supplementary group list if space permits.
+This flag is not included in
+.Dv LOGIN_SETALL .
 .It Dv LOGIN_SETXDGENV
 Attempts to create an XDG runtime directory for the user indicated by
 .Ar uid

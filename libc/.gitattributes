@@ -1,0 +1,3 @@
+# Unified diff context has a space prefix before original tabs/blank lines.
+patch whitespace=-space-before-tab,-blank-at-eol
+*.patch whitespace=-space-before-tab,-blank-at-eol

@@ -1,6 +1,25 @@
-# Phase II technical report -- ISO C11/C17/C23 headers for OpenBSD libc
+# ISO C extensions -- synchronization and historical audit record
 
-## 0. OpenBSD-current synchronization (2026-10-31)
+
+## Current synchronization
+
+The latest six-header audit is [ISO-C-STATUS.md](ISO-C-STATUS.md); it
+supersedes earlier full-conformance claims, especially for compiler-generated
+atomic expressions that do not share the macro fallback ABI.
+
+The authoritative current integration and validation record is
+[SYNC-2026-11-07.md](SYNC-2026-11-07.md). The permanent update procedure is
+[SYNC.md](SYNC.md). The current synchronization preserves all six headers,
+corrects native C11 Threads placement into lib/librthread, and retains
+atomics/bit operations in libc. No compiler or project runtime test was
+invoked for this synchronization.
+
+The Phase II and October 31 sections below are historical evidence for
+previous revisions. Their executed test results do not validate the new
+revision. In particular, the former libc placement of Threads and its
+namespace suppression were superseded; current consumers need -pthread.
+
+## 0. Historical synchronization (2026-10-31)
 
 The imported source was synchronized from BASE
 `c30c84965dc47c6c65e75cc3b5dd6eb181819bfa` (2026-10-17 21:45:34 UTC)
@@ -377,7 +396,7 @@ containing the new symbols is distinguishable from the upstream build.
 | Static analysis | not run | clang analyzer + GCC `-fanalyzer` clean |
 | Sanitizers | not run | ASan+UBSan clean; TSan blocked |
 | `stdckdint` testing | boundary cases | boundary cases + 800000-case oracle |
-| Patches | one monolithic + splits | none (the directory is the change) |
+| Patches | one monolithic + splits | Complete source-relative patch now maintained |
 
 ## 15. File inventory
 
@@ -398,10 +417,10 @@ host-side harness under `tests/` and this report are project-only.
 
 ## 16. Patch status
 
-There is no patch file in the tree.  The directory itself is the change,
-and a patch against the recorded upstream revision can be produced with
-`diff -ruN` (or `git diff` against a checkout) at any time.  The
-provenance of the import is in `UPSTREAM`.
+The complete `patch` is maintained against the revision recorded in
+`UPSTREAM`. It excludes project-only tests/reports and is regenerated and
+reconstructed using `SYNC.md`; the current run's exact verification is in
+`SYNC-2026-11-07.md`. The earlier statement that no patch existed is obsolete.
 
 ## 17. Items requiring upstream review
 
@@ -409,12 +428,12 @@ provenance of the import is in `UPSTREAM`.
    for `openbsd`; once libc installs `<threads.h>`, the compiler's
    per-OS "has threads" list must be updated so the macro is no longer
    defined.
-2. **ABI bump.**  The new symbols are an ABI extension; upstream should
-   bump the `lib/libc/shlib_version` minor.
-3. **`hidden/pthread.h`.**  `thrd.c` calls pthread entry points marked
-   `PROTO_STD_DEPRECATED`; the diagnostic is suppressed locally with a
-   documented justification.  Upstream may prefer to promote those entries
-   to `PROTO_NORMAL` with matching `DEF_WEAK` definitions.
+2. **ABI review.** The local tree includes libc minor 104.1 and libpthread
+   minor 28.2. Upstream acceptance still requires release/ABI review.
+3. **Native Threads namespace.** The wrappers now live in lib/librthread.
+   Their six newly internal dependencies use PROTO_NORMAL with matching
+   DEF_STD aliases; the former blanket suppression has been removed.
+   Native static/shared linking remains to be verified.
 4. **`__noreturn_is_defined`.**  `stdnoreturn.h` defines this
    non-standard marker for clang compatibility; upstream may drop it.
 5. **GCC header shadowing.**  GCC's resource `stdatomic.h` does not

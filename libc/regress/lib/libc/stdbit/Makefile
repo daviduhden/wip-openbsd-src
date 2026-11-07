@@ -15,7 +15,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 PROG=	stdbit
-CFLAGS+=-I/usr/include
+CFLAGS+=-std=c23 -I${.CURDIR}/../../../../include
 WARNINGS=yes
 
 .include <bsd.regress.mk>

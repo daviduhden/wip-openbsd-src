@@ -39,8 +39,16 @@
 
 #include <sys/cdefs.h>
 
+#include <limits.h>
 #include <stdatomic.h>
-#include <string.h>
+#include <stddef.h>
+
+#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) || \
+    !defined(__ORDER_BIG_ENDIAN__) || \
+    (__BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ && \
+    __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__)
+#error "atomic fallback requires a supported compiler byte order"
+#endif
 
 #define FALLBACK_NLOCKS 64
 
@@ -68,6 +76,42 @@ fallback_release(unsigned char *l)
 	__atomic_clear(l, __ATOMIC_SEQ_CST);
 }
 
+/* Keep the volatile qualification of the atomic object's accesses. */
+static void
+fallback_copy_out(void *dst, const volatile void *src, size_t size)
+{
+	unsigned char *d = dst;
+	const volatile unsigned char *s = src;
+	size_t i;
+
+	for (i = 0; i < size; i++)
+		d[i] = s[i];
+}
+
+static void
+fallback_copy_in(volatile void *dst, const void *src, size_t size)
+{
+	volatile unsigned char *d = dst;
+	const unsigned char *s = src;
+	size_t i;
+
+	for (i = 0; i < size; i++)
+		d[i] = s[i];
+}
+
+static int
+fallback_equal(const volatile void *obj, const void *expected, size_t size)
+{
+	const volatile unsigned char *o = obj;
+	const unsigned char *e = expected;
+	size_t i;
+
+	for (i = 0; i < size; i++)
+		if (o[i] != e[i])
+			return (0);
+	return (1);
+}
+
 void
 __atomic_fallback_load(
     size_t size, const volatile void *obj, void *ret, int order)
@@ -76,7 +120,7 @@ __atomic_fallback_load(
 
 	(void)order;
 	fallback_acquire(l);
-	memcpy(ret, (const void *)obj, size);
+	fallback_copy_out(ret, obj, size);
 	fallback_release(l);
 }
 
@@ -88,7 +132,7 @@ __atomic_fallback_store(
 
 	(void)order;
 	fallback_acquire(l);
-	memcpy((void *)obj, val, size);
+	fallback_copy_in(obj, val, size);
 	fallback_release(l);
 }
 
@@ -100,8 +144,8 @@ __atomic_fallback_exchange(
 
 	(void)order;
 	fallback_acquire(l);
-	memcpy(ret, (const void *)obj, size);
-	memcpy((void *)obj, val, size);
+	fallback_copy_out(ret, obj, size);
+	fallback_copy_in(obj, val, size);
 	fallback_release(l);
 }
 
@@ -116,11 +160,11 @@ __atomic_fallback_compare_exchange(size_t size, volatile void *obj,
 	(void)success;
 	(void)failure;
 	fallback_acquire(l);
-	if (memcmp((const void *)obj, expected, size) == 0) {
-		memcpy((void *)obj, desired, size);
+	if (fallback_equal(obj, expected, size)) {
+		fallback_copy_in(obj, desired, size);
 		ret = 1;
 	} else {
-		memcpy(expected, (const void *)obj, size);
+		fallback_copy_out(expected, obj, size);
 		ret = 0;
 	}
 	fallback_release(l);
@@ -129,7 +173,8 @@ __atomic_fallback_compare_exchange(size_t size, volatile void *obj,
 
 /* a = a + b, or a = a - b when sub is non-zero, byte by byte. */
 static void
-fallback_add(unsigned char *a, const unsigned char *b, size_t size, int sub)
+fallback_add(volatile unsigned char *a, const unsigned char *b, size_t size,
+    int sub)
 {
 	unsigned carry = sub ? 1 : 0;
 	size_t	 i;
@@ -138,13 +183,13 @@ fallback_add(unsigned char *a, const unsigned char *b, size_t size, int sub)
 	for (i = 0; i < size; i++) {
 		unsigned t = a[i] + (unsigned char)(sub ? ~b[i] : b[i]) + carry;
 		a[i] = (unsigned char)t;
-		carry = t >> 8;
+		carry = t >> CHAR_BIT;
 	}
 #else
 	for (i = size; i-- > 0;) {
 		unsigned t = a[i] + (unsigned char)(sub ? ~b[i] : b[i]) + carry;
 		a[i] = (unsigned char)t;
-		carry = t >> 8;
+		carry = t >> CHAR_BIT;
 	}
 #endif
 }
@@ -157,8 +202,8 @@ fallback_fetch_add(size_t size, volatile void *obj, const void *val, void *ret,
 
 	(void)order;
 	fallback_acquire(l);
-	memcpy(ret, (const void *)obj, size);
-	fallback_add((unsigned char *)(void *)obj, val, size, sub);
+	fallback_copy_out(ret, obj, size);
+	fallback_add(obj, val, size, sub);
 	fallback_release(l);
 }
 
@@ -181,13 +226,13 @@ fallback_fetch_bitwise(size_t size, volatile void *obj, const void *val,
     void *ret, int order, int op)
 {
 	unsigned char	    *l = fallback_lock(obj);
-	unsigned char	    *o = (unsigned char *)(void *)obj;
+	volatile unsigned char *o = obj;
 	const unsigned char *v = val;
 	size_t		     i;
 
 	(void)order;
 	fallback_acquire(l);
-	memcpy(ret, (const void *)obj, size);
+	fallback_copy_out(ret, obj, size);
 	for (i = 0; i < size; i++) {
 		switch (op) {
 		case 1:

@@ -27,7 +27,7 @@
  * and removed all four macros from the header.  The header is therefore
  * empty in C23, and nothing in it may shadow the keywords.  In C++ the
  * spelling alignas/alignof is a keyword as well (C++11 and later), so the
- * two function-like names are never defined there; the historical
+ * two convenience names are never defined there; the historical
  * __alignas_is_defined/__alignof_is_defined markers are retained for
  * source compatibility with the pre-C23 header.
  *

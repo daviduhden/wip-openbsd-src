@@ -23,6 +23,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdatomic.h>
 #include <threads.h>
 #include <time.h>
@@ -92,6 +93,13 @@ tss_worker(void *arg)
 }
 
 static int
+trivial_worker(void *arg)
+{
+	(void)arg;
+	return (0);
+}
+
+static int
 exit_worker(void *arg)
 {
 	thrd_exit((int)(long)arg);
@@ -106,12 +114,34 @@ once_worker(void *arg)
 	return 0;
 }
 
+/* Exhaust real pthread keys; C11 reports any TSS creation failure as error. */
+static void
+test_tss_exhaustion(void)
+{
+	tss_t keys[PTHREAD_KEYS_MAX], extra;
+	int count, error;
+
+	for (count = 0; count < PTHREAD_KEYS_MAX; count++) {
+		error = tss_create(&keys[count], NULL);
+		if (error != thrd_success) {
+			assert(error == thrd_error);
+			break;
+		}
+	}
+	if (count == PTHREAD_KEYS_MAX)
+		assert(tss_create(&extra, NULL) == thrd_error);
+	while (count > 0)
+		tss_delete(keys[--count]);
+}
+
 int
 main(void)
 {
 	thrd_t thr, thr2, thr3, thr4;
 	int result, i;
 	struct timespec ts;
+
+	test_tss_exhaustion();
 
 	/* thread create + join + return value */
 	assert(mtx_init(&mtx, mtx_plain) == thrd_success);
@@ -171,10 +201,9 @@ main(void)
 	assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
 	assert(thrd_join(thr3, NULL) == thrd_success);
 	assert(atomic_load(&dtor_count) == 1);
-	tss_delete(tss_key);
 
 	/* detach, identity, sleep and yield */
-	assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
+	assert(thrd_create(&thr3, trivial_worker, NULL) == thrd_success);
 	assert(thrd_detach(thr3) == thrd_success);
 	assert(thrd_equal(thrd_current(), thrd_current()));
 	ts.tv_sec = 0;
@@ -199,6 +228,8 @@ main(void)
 		assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
 		assert(thrd_join(thr3, NULL) == thrd_success);
 	}
+
+	tss_delete(tss_key);
 
 	return 0;
 }

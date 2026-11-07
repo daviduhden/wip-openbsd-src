@@ -17,7 +17,7 @@ that matches the task.
 |---|---|---|
 | `pax/` | `src/bin/pax` | whole-directory replacement |
 | `fvwm/` | `xenocara/app/fvwm` | whole-directory replacement |
-| `libc/` | `src/include`, `src/lib/libc`, `src/lib/libpthread`, `src/sys/**` | patch-style import |
+| `libc/` | `src/include`, `src/lib/libc`, `src/lib/libpthread`, `src/lib/librthread`, `src/sys/**` | patch-style import |
 | `ext4fs/` | `src/sys/ufs/ext4fs`, `src/sbin/mount_ext4fs` | new files + `sys-patches.diff` |
 | `stdckdint/` | `src/include/stdckdint.h`, `src/regress/lib/libc/stdckdint` | patch-style contribution |
 | `tests/` | none | host-side developer tests |
@@ -116,6 +116,8 @@ reformat a whole file or tree to satisfy it. Existing style wins, and
   `libc/UPSTREAM`.
 - Do not introduce compiler extensions unless the surrounding file already
   uses them and OpenBSD's clang supports them.
+  Follow `libc/SYNC.md`; include `lib/librthread` as the `LIB=pthread`
+  provider and validate both public symbol maps and private aliases.
 - When preparing an upstream patch, do not assume upstream accepts C23.
   Follow the target file's existing language level.
 

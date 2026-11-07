@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 24, 2026
+.Dd November 7, 2026
 .Dt THREADS 3
 .Os
 .Sh NAME
@@ -44,6 +44,8 @@
 .Nm tss_delete ,
 .Nm call_once
 .Nd ISO C threads
+.Sh LIBRARY
+.Lb libpthread
 .Sh SYNOPSIS
 .In threads.h
 .Ft typedef ... thrd_t ;
@@ -108,10 +110,13 @@ The
 .In threads.h
 header provides the ISO C11 threads interface.
 It is a standardised interface over the
-.Xr pthread 3
-implementation that is part of
-.Xr libc 3 ;
-every object is a real pthread object underneath and no separate
+.Xr pthreads 3
+implementation.
+The lifecycle functions and these wrappers are supplied by libpthread;
+some pthread synchronization primitives are implemented in libc.
+Programs using this interface must be compiled and linked with
+.Fl pthread .
+Every object is a real pthread object underneath and no separate
 synchronisation primitive is introduced.
 .Pp
 .Fn thrd_create
@@ -207,6 +212,20 @@ on success and one of
 or
 .Dv thrd_error
 on failure.
+.Pp
+Only
+.Fn thrd_create ,
+.Fn mtx_init
+and
+.Fn cnd_init
+return
+.Dv thrd_nomem
+for allocation failure.
+Exhaustion of thread-specific storage keys is reported by
+.Fn tss_create
+as
+.Dv thrd_error .
+.Pp
 .Fn thrd_join
 stores the result of the thread in
 .Fa res
@@ -232,12 +251,12 @@ when targeting
 .Ox ,
 because the base system has historically lacked
 .In threads.h .
-This interface is provided by libc nonetheless; including
+This interface is provided by libpthread nonetheless; including
 .In threads.h
 withdraws the stale macro, and the compiler's target description should be
 updated to match.
 .Sh SEE ALSO
-.Xr pthread 3 ,
+.Xr pthreads 3 ,
 .Xr stdatomic 3
 .Sh STANDARDS
 The
@@ -246,7 +265,6 @@ header conforms to
 .St -isoC-2011
 and ISO/IEC 9899:2024 (C23).
 .Sh HISTORY
-The
-.In threads.h
-header appeared in
-.Ox 8.0 .
+This interface is a local development addition to the
+.Ox
+source tree.

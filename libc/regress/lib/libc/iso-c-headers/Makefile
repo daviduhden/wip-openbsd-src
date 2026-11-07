@@ -15,11 +15,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 PROG=	joint
-CFLAGS+=-I/usr/include
+CFLAGS+=-I${.CURDIR}/../../../../include
 WARNINGS=yes
 
 run-regress-${PROG}: ${PROG}
 	./${PROG}
-	sh ${.CURDIR}/matrix.sh
+	CC="${CC}" CXX="${CXX}" sh ${.CURDIR}/matrix.sh
 
 .include <bsd.regress.mk>

@@ -15,7 +15,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 PROG=	threads
-CFLAGS+=-I/usr/include
+CFLAGS+=-I${.CURDIR}/../../../../include
 WARNINGS=yes
+LDADD+=	-lpthread
+DPADD+=	${LIBPTHREAD}
 
 .include <bsd.regress.mk>

@@ -176,3 +176,28 @@ __stdc_define(uc, unsigned char) __stdc_define(us, unsigned short)
 	__stdc_define(ull, unsigned long long)
 
 #undef __stdc_define
+
+/* Keep the public ISO functions strong while binding internal calls locally. */
+#define __stdc_aliases(sfx) \
+	DEF_STRONG(stdc_leading_zeros_##sfx); \
+	DEF_STRONG(stdc_leading_ones_##sfx); \
+	DEF_STRONG(stdc_trailing_zeros_##sfx); \
+	DEF_STRONG(stdc_trailing_ones_##sfx); \
+	DEF_STRONG(stdc_first_leading_zero_##sfx); \
+	DEF_STRONG(stdc_first_leading_one_##sfx); \
+	DEF_STRONG(stdc_first_trailing_zero_##sfx); \
+	DEF_STRONG(stdc_first_trailing_one_##sfx); \
+	DEF_STRONG(stdc_count_zeros_##sfx); \
+	DEF_STRONG(stdc_count_ones_##sfx); \
+	DEF_STRONG(stdc_has_single_bit_##sfx); \
+	DEF_STRONG(stdc_bit_width_##sfx); \
+	DEF_STRONG(stdc_bit_floor_##sfx); \
+	DEF_STRONG(stdc_bit_ceil_##sfx);
+
+__stdc_aliases(uc)
+__stdc_aliases(us)
+__stdc_aliases(ui)
+__stdc_aliases(ul)
+__stdc_aliases(ull)
+
+#undef __stdc_aliases

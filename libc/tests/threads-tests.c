@@ -1,12 +1,13 @@
 /*	$OpenBSD$	*/
 
 /*
- * Host-side functional test for the C11 <threads.h> interface and its libc
- * wrappers.  The wrappers from lib/libc/thread/thrd.c are linked in and run
+ * Host-side functional test for the C11 <threads.h> interface.  The
+ * wrappers from lib/librthread/thrd.c are linked in and run
  * on top of the host pthread implementation.
  * Not part of the OpenBSD build graph; see libc/tests/Makefile.
  */
 
+#include <limits.h>
 #include <stdio.h>
 #include <threads.h>
 #include <time.h>
@@ -114,12 +115,34 @@ once_worker(void *arg)
 	return 0;
 }
 
+/* Exhaust real pthread keys; C11 reports any TSS creation failure as error. */
+static void
+test_tss_exhaustion(void)
+{
+	tss_t keys[PTHREAD_KEYS_MAX], extra;
+	int count, error;
+
+	for (count = 0; count < PTHREAD_KEYS_MAX; count++) {
+		error = tss_create(&keys[count], NULL);
+		if (error != thrd_success) {
+			OK(error == thrd_error);
+			break;
+		}
+	}
+	if (count == PTHREAD_KEYS_MAX)
+		OK(tss_create(&extra, NULL) == thrd_error);
+	while (count > 0)
+		tss_delete(keys[--count]);
+}
+
 int
 main(void)
 {
 	thrd_t t, t2, t3, t5;
 	int res = -1, i;
 	struct timespec ts;
+
+	test_tss_exhaustion();
 
 	OK(mtx_init(&m, mtx_plain) == thrd_success);
 	OK(cnd_init(&c) == thrd_success);

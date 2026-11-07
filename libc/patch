@@ -58,7 +58,7 @@ Index: include/stdalign.h
 + * and removed all four macros from the header.  The header is therefore
 + * empty in C23, and nothing in it may shadow the keywords.  In C++ the
 + * spelling alignas/alignof is a keyword as well (C++11 and later), so the
-+ * two function-like names are never defined there; the historical
++ * two convenience names are never defined there; the historical
 + * __alignas_is_defined/__alignof_is_defined markers are retained for
 + * source compatibility with the pre-C23 header.
 + *
@@ -86,7 +86,7 @@ Index: include/stdatomic.h
 ===================================================================
 --- /dev/null
 +++ include/stdatomic.h
-@@ -0,0 +1,536 @@
+@@ -0,0 +1,569 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -130,11 +130,13 @@ Index: include/stdatomic.h
 + * every operation first tests __atomic_always_lock_free() (a compile-time
 + * constant) and, when it is false, calls a small lock-based fallback in
 + * libc (__atomic_fallback_*); the constant test is folded away so the
-+ * compiler's runtime is never referenced.  The fallback acquires a
++ * macros do not reference the compiler's runtime. The fallback acquires a
 + * per-address spinlock with sequential-consistency ordering, which is
 + * stronger than any memory order the standard asks for, so the requested
-+ * order is always satisfied.  This makes the whole interface, including
-+ * non-lock-free types, self-contained.
++ * order is always satisfied. This applies to operations through these
++ * macros. Compiler-generated direct atomic expressions use a separate
++ * lowering/ABI; they must not be mixed with this fallback and may need an
++ * unavailable external runtime. Full language-level support is not claimed.
 + *
 + * atomic_is_lock_free() is answered with __atomic_always_lock_free(), which
 + * is a compile-time constant.  The ATOMIC_*_LOCK_FREE constants come from
@@ -149,6 +151,10 @@ Index: include/stdatomic.h
 +#define _STDATOMIC_H_
 +
 +#include <sys/cdefs.h>
++
++#include <stddef.h>
++#include <stdint.h>
++#include <uchar.h>
 +
 +#if defined(__cplusplus) && !defined(__clang__)
 +#error "<stdatomic.h> in C++ requires a compiler that implements _Atomic(T)"
@@ -241,17 +247,20 @@ Index: include/stdatomic.h
 +/*
 + * 7.17.5: lock-free property.
 + *
-+ * sizeof() does not evaluate its operand, and the pointer argument of
-+ * __atomic_always_lock_free() is only consulted for known alignment.
++ * Use the value size and typical alignment, as the operation macros do.
++ * An atomic aggregate can have more storage than its non-atomic value;
++ * testing that storage size could advertise a lock-based operation as free.
++ * Evaluate the argument once even though the builtin needs no runtime value.
 + */
-+#define atomic_is_lock_free(obj)                                               \
-+	__atomic_always_lock_free(sizeof(*(obj)), (obj))
++#define atomic_is_lock_free(obj)                                              \
++	((void)(obj), __atomic_always_lock_free(                               \
++	    sizeof((void)0, *(obj)), 0))
 +
 +/*
 + * 7.17.6: atomic integer types.
 + *
-+ * The element types are spelled with the compiler's predefined type macros
-+ * so that the header does not depend on <stdint.h>.
++ * Use the public library types, not compiler guesses: OpenBSD's fast
++ * integer aliases can differ from the compiler's __INT_FAST*_TYPE__ macros.
 + */
 +__extension__ typedef _Atomic(__stdc_atomic_bool) atomic_bool;
 +__extension__ typedef _Atomic(char) atomic_char;
@@ -266,33 +275,33 @@ Index: include/stdatomic.h
 +__extension__ typedef _Atomic(long long) atomic_llong;
 +__extension__ typedef _Atomic(unsigned long long) atomic_ullong;
 +#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
-+__extension__ typedef _Atomic(__CHAR8_TYPE__) atomic_char8_t;
++__extension__ typedef _Atomic(unsigned char) atomic_char8_t;
 +#endif
-+__extension__ typedef _Atomic(__CHAR16_TYPE__) atomic_char16_t;
-+__extension__ typedef _Atomic(__CHAR32_TYPE__) atomic_char32_t;
-+__extension__ typedef _Atomic(__WCHAR_TYPE__) atomic_wchar_t;
-+__extension__ typedef _Atomic(__INT_LEAST8_TYPE__) atomic_int_least8_t;
-+__extension__ typedef _Atomic(__UINT_LEAST8_TYPE__) atomic_uint_least8_t;
-+__extension__ typedef _Atomic(__INT_LEAST16_TYPE__) atomic_int_least16_t;
-+__extension__ typedef _Atomic(__UINT_LEAST16_TYPE__) atomic_uint_least16_t;
-+__extension__ typedef _Atomic(__INT_LEAST32_TYPE__) atomic_int_least32_t;
-+__extension__ typedef _Atomic(__UINT_LEAST32_TYPE__) atomic_uint_least32_t;
-+__extension__ typedef _Atomic(__INT_LEAST64_TYPE__) atomic_int_least64_t;
-+__extension__ typedef _Atomic(__UINT_LEAST64_TYPE__) atomic_uint_least64_t;
-+__extension__ typedef _Atomic(__INT_FAST8_TYPE__) atomic_int_fast8_t;
-+__extension__ typedef _Atomic(__UINT_FAST8_TYPE__) atomic_uint_fast8_t;
-+__extension__ typedef _Atomic(__INT_FAST16_TYPE__) atomic_int_fast16_t;
-+__extension__ typedef _Atomic(__UINT_FAST16_TYPE__) atomic_uint_fast16_t;
-+__extension__ typedef _Atomic(__INT_FAST32_TYPE__) atomic_int_fast32_t;
-+__extension__ typedef _Atomic(__UINT_FAST32_TYPE__) atomic_uint_fast32_t;
-+__extension__ typedef _Atomic(__INT_FAST64_TYPE__) atomic_int_fast64_t;
-+__extension__ typedef _Atomic(__UINT_FAST64_TYPE__) atomic_uint_fast64_t;
-+__extension__ typedef _Atomic(__INTPTR_TYPE__) atomic_intptr_t;
-+__extension__ typedef _Atomic(__UINTPTR_TYPE__) atomic_uintptr_t;
-+__extension__ typedef _Atomic(__SIZE_TYPE__) atomic_size_t;
-+__extension__ typedef _Atomic(__PTRDIFF_TYPE__) atomic_ptrdiff_t;
-+__extension__ typedef _Atomic(__INTMAX_TYPE__) atomic_intmax_t;
-+__extension__ typedef _Atomic(__UINTMAX_TYPE__) atomic_uintmax_t;
++__extension__ typedef _Atomic(char16_t) atomic_char16_t;
++__extension__ typedef _Atomic(char32_t) atomic_char32_t;
++__extension__ typedef _Atomic(wchar_t) atomic_wchar_t;
++__extension__ typedef _Atomic(int_least8_t) atomic_int_least8_t;
++__extension__ typedef _Atomic(uint_least8_t) atomic_uint_least8_t;
++__extension__ typedef _Atomic(int_least16_t) atomic_int_least16_t;
++__extension__ typedef _Atomic(uint_least16_t) atomic_uint_least16_t;
++__extension__ typedef _Atomic(int_least32_t) atomic_int_least32_t;
++__extension__ typedef _Atomic(uint_least32_t) atomic_uint_least32_t;
++__extension__ typedef _Atomic(int_least64_t) atomic_int_least64_t;
++__extension__ typedef _Atomic(uint_least64_t) atomic_uint_least64_t;
++__extension__ typedef _Atomic(int_fast8_t) atomic_int_fast8_t;
++__extension__ typedef _Atomic(uint_fast8_t) atomic_uint_fast8_t;
++__extension__ typedef _Atomic(int_fast16_t) atomic_int_fast16_t;
++__extension__ typedef _Atomic(uint_fast16_t) atomic_uint_fast16_t;
++__extension__ typedef _Atomic(int_fast32_t) atomic_int_fast32_t;
++__extension__ typedef _Atomic(uint_fast32_t) atomic_uint_fast32_t;
++__extension__ typedef _Atomic(int_fast64_t) atomic_int_fast64_t;
++__extension__ typedef _Atomic(uint_fast64_t) atomic_uint_fast64_t;
++__extension__ typedef _Atomic(intptr_t) atomic_intptr_t;
++__extension__ typedef _Atomic(uintptr_t) atomic_uintptr_t;
++__extension__ typedef _Atomic(size_t) atomic_size_t;
++__extension__ typedef _Atomic(ptrdiff_t) atomic_ptrdiff_t;
++__extension__ typedef _Atomic(intmax_t) atomic_intmax_t;
++__extension__ typedef _Atomic(uintmax_t) atomic_uintmax_t;
 +
 +/*
 + * atomic_flag is a structure type whose single member is itself atomic, so
@@ -303,6 +312,11 @@ Index: include/stdatomic.h
 +	atomic_bool __value;
 +};
 +typedef struct __stdc_atomic_flag atomic_flag;
++
++/* Flag operations and fallback locks must never call an atomic runtime. */
++__extension__ typedef char __stdc_flag_is_lock_free[
++    (sizeof(atomic_bool) == 1 &&
++    __atomic_always_lock_free(sizeof(atomic_bool), 0)) ? 1 : -1];
 +
 +#ifdef __cplusplus
 +#define ATOMIC_FLAG_INIT {false}
@@ -368,6 +382,20 @@ Index: include/stdatomic.h
 + */
 +#define atomic_init(object, value)                                             \
 +	atomic_store_explicit((object), (value), memory_order_relaxed)
++
++/*
++ * A pointer fetch uses a byte displacement in the software fallback and in
++ * GCC's raw builtin. Select the pointer case before converting to the value
++ * type: integer operands, including 128-bit values, must not be narrowed.
++ */
++#define __stdc_pointer_delta(object, operand)                                 \
++	((uintptr_t)(operand) * (uintptr_t)sizeof(*__builtin_choose_expr(       \
++	    __builtin_classify_type(*(object)) == 5,                          \
++	    *(object), (char *)0)))
++#define __stdc_fetch_value(object, operand)                                   \
++	((__typeof__((void)0, *(object)))__builtin_choose_expr(                \
++	    __builtin_classify_type(*(object)) == 5,                          \
++	    __stdc_pointer_delta(object, operand), (operand)))
 +
 +#if defined(__clang__)
 +
@@ -448,7 +476,7 @@ Index: include/stdatomic.h
 +			__stdc_r = name(__stdc_o, (operand), (order));         \
 +		else {                                                         \
 +			__typeof__((void)0, *__stdc_o) __stdc_v =              \
-+			    (__typeof__((void)0, *__stdc_o))(operand);         \
++			    __stdc_fetch_value(__stdc_o, operand);         \
 +			fallback(sizeof(__stdc_r), __stdc_o, &__stdc_v,        \
 +			    &__stdc_r, (order));                               \
 +		}                                                              \
@@ -480,9 +508,10 @@ Index: include/stdatomic.h
 + *
 + * __atomic_fetch_add/sub on a pointer object: GCC's builtin adds the operand
 + * as a raw value ("as an integer of the width of the pointer"), while ISO C
-+ * requires pointer arithmetic; a pointer object (always lock-free) is
-+ * detected with __builtin_classify_type and served by a compare-exchange
-+ * loop.  Integer objects keep the single-instruction builtin.
++ * requires element scaling.  Pointer objects (always lock-free) use the
++ * same builtin with a pointer-width unsigned byte displacement.  This
++ * avoids ordinary C pointer arithmetic, including its out-of-array UB.
++ * Integer objects keep the unscaled builtin.
 + */
 +#define atomic_store_explicit(object, desired, order)                          \
 +	__extension__({                                                        \
@@ -548,55 +577,59 @@ Index: include/stdatomic.h
 +			    1, (success), (failure));                          \
 +		(__stdc_atomic_bool) __stdc_r;                                 \
 +	})
-+#define __stdc_ptr_fetch(object, operand, order, op)                           \
-+	__extension__({                                                        \
-+		__auto_type __stdc_o = (object);                               \
-+		__typeof__((void)0, *__stdc_o) __stdc_old =                    \
-+		    atomic_load_explicit(__stdc_o, memory_order_relaxed);      \
-+		__typeof__((void)0, *__stdc_o) __stdc_new;                     \
-+		do {                                                           \
-+			__stdc_new = __stdc_old op(operand);                   \
-+		} while (!atomic_compare_exchange_weak_explicit(__stdc_o,      \
-+		    &__stdc_old, __stdc_new, (order), memory_order_relaxed));  \
-+		__stdc_old;                                                    \
-+	})
++/*
++ * GCC documents pointer fetch operands as uintptr_t values without scaling.
++ * Scale captured operands with unsigned arithmetic before the builtin.
++ * Unary + on the captured operand promotes bit-fields to ordinary values.
++ * The inner choice keeps the sizeof expression valid for integer fetches;
++ * neither candidate is evaluated by sizeof for a non-VLA pointed-to type.
++ */
++#define __stdc_ptr_fetch(name, object, operand, order)                         \
++	name((object), __stdc_pointer_delta(object, operand), (order))
 +#define __stdc_gcc_fetch(name, fallback, pointer_expr, object, operand, order) \
 +	__extension__({                                                        \
-+		__auto_type __stdc_o = (object);                               \
-+		__typeof__((void)0, *__stdc_o) __stdc_r;                       \
-+		if (__atomic_always_lock_free(sizeof(__stdc_r), 0))            \
-+			__stdc_r = __builtin_choose_expr(                      \
-+			    __builtin_classify_type(*__stdc_o) == 5,           \
++		__auto_type __stdc_fetch_o = (object);                         \
++		__auto_type __stdc_fetch_operand = +(operand);                 \
++		int __stdc_fetch_order = (order);                              \
++		__typeof__((void)0, *__stdc_fetch_o) __stdc_fetch_r;           \
++		if (__atomic_always_lock_free(sizeof(__stdc_fetch_r), 0))      \
++			__stdc_fetch_r = __builtin_choose_expr(                \
++			    __builtin_classify_type(*__stdc_fetch_o) == 5,     \
 +			    (pointer_expr),                                    \
-+			    name(__stdc_o, (operand), (order)));               \
++			    name(__stdc_fetch_o, __stdc_fetch_operand,         \
++			        __stdc_fetch_order));                          \
 +		else {                                                         \
-+			__typeof__((void)0, *__stdc_o) __stdc_v =              \
-+			    (__typeof__((void)0, *__stdc_o))(operand);         \
-+			fallback(sizeof(__stdc_r), __stdc_o, &__stdc_v,        \
-+			    &__stdc_r, (order));                               \
++			__typeof__((void)0, *__stdc_fetch_o) __stdc_fetch_v =  \
++			    __stdc_fetch_value(__stdc_fetch_o,                  \
++			        __stdc_fetch_operand);                              \
++			fallback(sizeof(__stdc_fetch_r), __stdc_fetch_o,       \
++			    &__stdc_fetch_v, &__stdc_fetch_r,                  \
++			    __stdc_fetch_order);                               \
 +		}                                                              \
-+		__stdc_r;                                                      \
++		__stdc_fetch_r;                                                \
 +	})
 +#define atomic_fetch_add_explicit(object, operand, order)                      \
 +	__stdc_gcc_fetch(__atomic_fetch_add, __atomic_fallback_fetch_add,      \
-+	    __stdc_ptr_fetch(object, operand, order, +), object, operand,      \
++	    __stdc_ptr_fetch(__atomic_fetch_add, __stdc_fetch_o,               \
++	        __stdc_fetch_operand, __stdc_fetch_order), object, operand,      \
 +	    order)
 +#define atomic_fetch_sub_explicit(object, operand, order)                      \
 +	__stdc_gcc_fetch(__atomic_fetch_sub, __atomic_fallback_fetch_sub,      \
-+	    __stdc_ptr_fetch(object, operand, order, -), object, operand,      \
++	    __stdc_ptr_fetch(__atomic_fetch_sub, __stdc_fetch_o,               \
++	        __stdc_fetch_operand, __stdc_fetch_order), object, operand,      \
 +	    order)
 +#define atomic_fetch_or_explicit(object, operand, order)                       \
 +	__stdc_gcc_fetch(__atomic_fetch_or, __atomic_fallback_fetch_or,        \
-+	    __atomic_fetch_or((object), (operand), (order)), object, operand,  \
-+	    order)
++	    __atomic_fetch_or(__stdc_fetch_o, __stdc_fetch_operand,            \
++	        __stdc_fetch_order), object, operand, order)
 +#define atomic_fetch_xor_explicit(object, operand, order)                      \
 +	__stdc_gcc_fetch(__atomic_fetch_xor, __atomic_fallback_fetch_xor,      \
-+	    __atomic_fetch_xor((object), (operand), (order)), object, operand, \
-+	    order)
++	    __atomic_fetch_xor(__stdc_fetch_o, __stdc_fetch_operand,           \
++	        __stdc_fetch_order), object, operand, order)
 +#define atomic_fetch_and_explicit(object, operand, order)                      \
 +	__stdc_gcc_fetch(__atomic_fetch_and, __atomic_fallback_fetch_and,      \
-+	    __atomic_fetch_and((object), (operand), (order)), object, operand, \
-+	    order)
++	    __atomic_fetch_and(__stdc_fetch_o, __stdc_fetch_operand,           \
++	        __stdc_fetch_order), object, operand, order)
 +
 +#endif /* __clang__ */
 +
@@ -627,7 +660,7 @@ Index: include/stdbit.h
 ===================================================================
 --- /dev/null
 +++ include/stdbit.h
-@@ -0,0 +1,388 @@
+@@ -0,0 +1,448 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -680,13 +713,16 @@ Index: include/stdbit.h
 +#define __STDC_ENDIAN_LITTLE__ 1234
 +#define __STDC_ENDIAN_BIG__ 4321
 +
-+#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__)
++#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) || \
++    !defined(__ORDER_BIG_ENDIAN__)
 +#error "<stdbit.h> requires the compiler byte-order macros"
 +#endif
 +#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 +#define __STDC_ENDIAN_NATIVE__ __STDC_ENDIAN_LITTLE__
-+#else
++#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 +#define __STDC_ENDIAN_NATIVE__ __STDC_ENDIAN_BIG__
++#else
++#error "<stdbit.h> requires a uniformly little- or big-endian target"
 +#endif
 +
 +#if defined(__has_builtin)
@@ -777,8 +813,9 @@ Index: include/stdbit.h
 + * accepted as a convenience and converted to the corresponding unsigned
 + * type.  When the compiler defines a 128-bit integer type, the 128-bit
 + * branches are added too, so extended types are handled exactly even on
-+ * compilers without the __builtin_stdc_* primitives; the default arm still
-+ * names the widest standard type.
++ * compilers without the __builtin_stdc_* primitives.  C23 also requires
++ * bit-precise unsigned types whose widths match those integer types.
++ * Other bit-precise widths are outside the C23 interface contract.
 + */
 +#if defined(__SIZEOF_INT128__) &&                                              \
 +    (__stdc_has_builtin(__builtin_clzll) || defined(__GNUC__))
@@ -826,6 +863,61 @@ Index: include/stdbit.h
 +#define __stdc_128_types(name128)
 +#endif
 +
++/* One association per distinct width avoids duplicates on LP64 targets. */
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
++    defined(__BITINT_MAXWIDTH__)
++#define __stdc_bitint_uc(name) \
++	unsigned _BitInt(CHAR_BIT): name##_uc,
++#if __SIZEOF_SHORT__ != 1 && \
++    __BITINT_MAXWIDTH__ >= __SIZEOF_SHORT__ * CHAR_BIT
++#define __stdc_bitint_us(name) \
++	unsigned _BitInt(__SIZEOF_SHORT__ * CHAR_BIT): name##_us,
++#else
++#define __stdc_bitint_us(name)
++#endif
++#if __SIZEOF_INT__ != 1 && __SIZEOF_INT__ != __SIZEOF_SHORT__ && \
++    __BITINT_MAXWIDTH__ >= __SIZEOF_INT__ * CHAR_BIT
++#define __stdc_bitint_ui(name) \
++	unsigned _BitInt(__SIZEOF_INT__ * CHAR_BIT): name##_ui,
++#else
++#define __stdc_bitint_ui(name)
++#endif
++#if __SIZEOF_LONG__ != 1 && __SIZEOF_LONG__ != __SIZEOF_SHORT__ && \
++    __SIZEOF_LONG__ != __SIZEOF_INT__ && \
++    __BITINT_MAXWIDTH__ >= __SIZEOF_LONG__ * CHAR_BIT
++#define __stdc_bitint_ul(name) \
++	unsigned _BitInt(__SIZEOF_LONG__ * CHAR_BIT): name##_ul,
++#else
++#define __stdc_bitint_ul(name)
++#endif
++#if __SIZEOF_LONG_LONG__ != 1 && \
++    __SIZEOF_LONG_LONG__ != __SIZEOF_SHORT__ && \
++    __SIZEOF_LONG_LONG__ != __SIZEOF_INT__ && \
++    __SIZEOF_LONG_LONG__ != __SIZEOF_LONG__ && \
++    __BITINT_MAXWIDTH__ >= __SIZEOF_LONG_LONG__ * CHAR_BIT
++#define __stdc_bitint_ull(name) \
++	unsigned _BitInt(__SIZEOF_LONG_LONG__ * CHAR_BIT): name##_ull,
++#else
++#define __stdc_bitint_ull(name)
++#endif
++#if defined(__SIZEOF_INT128__) && __BITINT_MAXWIDTH__ >= 128 && \
++    (__stdc_has_builtin(__builtin_clzll) || defined(__GNUC__)) && \
++    __SIZEOF_SHORT__ * CHAR_BIT != 128 && \
++    __SIZEOF_INT__ * CHAR_BIT != 128 && \
++    __SIZEOF_LONG__ * CHAR_BIT != 128 && \
++    __SIZEOF_LONG_LONG__ * CHAR_BIT != 128
++#define __stdc_bitint_128(name128) unsigned _BitInt(128): name128,
++#else
++#define __stdc_bitint_128(name128)
++#endif
++#define __stdc_bitint_types(name, name128) \
++	__stdc_bitint_uc(name) __stdc_bitint_us(name) \
++	__stdc_bitint_ui(name) __stdc_bitint_ul(name) \
++	__stdc_bitint_ull(name) __stdc_bitint_128(name128)
++#else
++#define __stdc_bitint_types(name, name128)
++#endif
++
 +#define __stdc_generic(name, name128, x)                                       \
 +	_Generic((x),                                                          \
 +	    _Bool: name##_uc,                                                  \
@@ -839,8 +931,9 @@ Index: include/stdbit.h
 +	    long: name##_ul,                                                   \
 +	    unsigned long: name##_ul,                                          \
 +	    long long: name##_ull,                                             \
-+	    unsigned long long: name##_ull,                                    \
-+	    __stdc_128_types(name128) default: name##_ull)(x)
++	    __stdc_128_types(name128)                                          \
++	    __stdc_bitint_types(name, name128)                                 \
++	    unsigned long long: name##_ull)(x)
 +
 +#if __stdc_has_builtin(__builtin_stdc_leading_zeros)
 +#define __stdc_leading_zeros(x) __builtin_stdc_leading_zeros(x)
@@ -1128,8 +1221,8 @@ Index: include/stdnoreturn.h
 + * which expands to the function specifier _Noreturn.  It is written for C
 + * only: in C++ the equivalent facility is the [[noreturn]] attribute, the
 + * macro is not part of the C++ standard library, and defining it would
-+ * collide with the C++ keyword.  As required by the standard the header
-+ * therefore defines nothing when compiled as C++.
++ * interfere with the C++ attribute spelling. For C++ inclusion, this header
++ * therefore leaves the convenience macro undefined.
 + *
 + * C23 retains _Noreturn and the macro (both are deprecated in favour of
 + * the [[noreturn]] attribute but remain valid); the macro still expands to
@@ -1176,11 +1269,11 @@ Index: include/threads.h
 + * carried forward through C17 and C23.
 + *
 + * The C11 threads interface is a thin, standardised skin over POSIX
-+ * threads.  OpenBSD keeps its thread implementation inside libc (the
-+ * historical libpthread is only a set of manual pages), so the functions
-+ * are provided by libc and use the pthread_* entry points directly; no new
-+ * synchronisation primitive is invented and every object is a real pthread
-+ * object underneath.
++ * threads.  OpenBSD keeps thread creation and lifecycle operations in
++ * libpthread, with synchronization internals in libc.  These entry points
++ * are provided by libpthread and use the pthread_* interfaces directly;
++ * no new synchronization primitive is invented and every object is a
++ * real pthread object underneath.
 + *
 + * The object types are the corresponding pthread types (pthread_t is a
 + * pointer in OpenBSD, so thrd_t, mtx_t and cnd_t are complete object
@@ -1289,6 +1382,20 @@ Index: include/threads.h
 +__END_DECLS
 +
 +#endif /* !_THREADS_H_ */
+Index: lib/libc/Makefile.inc
+===================================================================
+--- lib/libc/Makefile.inc
++++ lib/libc/Makefile.inc
+@@ -8,7 +8,8 @@ all:
+ 	@echo "need to define LIBCSRCDIR" >&2; exit 1
+ .endif
+ 
+-CFLAGS+=-I${LIBCSRCDIR}/include -I${LIBCSRCDIR}/hidden -D__LIBC__ \
++CFLAGS+=-I${LIBCSRCDIR}/include -I${LIBCSRCDIR}/hidden \
++	-I${LIBCSRCDIR}/../../include -D__LIBC__ \
+ 	-Werror=deprecated-declarations \
+ 	-Werror-implicit-function-declaration -include namespace.h
+ 
 Index: lib/libc/Symbols.list
 ===================================================================
 --- lib/libc/Symbols.list
@@ -1315,37 +1422,10 @@ Index: lib/libc/Symbols.list
  pthread_atfork
  pthread_cond_broadcast
  pthread_cond_destroy
-@@ -1721,6 +1736,105 @@ pthread_once
+@@ -1721,6 +1736,78 @@ pthread_once
  pthread_self
  pthread_setspecific
  
-+/* threads.h (C11) */
-+call_once
-+cnd_broadcast
-+cnd_destroy
-+cnd_init
-+cnd_signal
-+cnd_timedwait
-+cnd_wait
-+mtx_destroy
-+mtx_init
-+mtx_lock
-+mtx_timedlock
-+mtx_trylock
-+mtx_unlock
-+thrd_create
-+thrd_current
-+thrd_detach
-+thrd_equal
-+thrd_exit
-+thrd_join
-+thrd_sleep
-+thrd_yield
-+tss_create
-+tss_delete
-+tss_get
-+tss_set
-+
 +/* stdbit.h (C23) */
 +stdc_leading_zeros_uc
 +stdc_leading_zeros_us
@@ -1441,11 +1521,63 @@ Index: lib/libc/gen/Makefile.inc
 +	stdalign.3 stdatomic.3 stdbit.3 stdckdint.3 stdnoreturn.3 \
  	syslog.3 time.3 times.3 timespec_get.3 toascii.3 tolower.3 toupper.3 \
  	ttyname.3 ualarm.3 uname.3 unvis.3 usleep.3 utime.3 valloc.3 vis.3
+Index: lib/libc/gen/login_cap.3
+===================================================================
+--- lib/libc/gen/login_cap.3
++++ lib/libc/gen/login_cap.3
+@@ -32,7 +32,7 @@
+ .\" $OpenBSD: login_cap.3,v 1.29 2026/08/25 00:08:28 jsg Exp $
+ .\" BSDI $From: login_cap.3,v 1.4 1997/11/07 16:22:27 jch Exp $
+ .\"
+-.Dd $Mdocdate: August 25 2026 $
++.Dd November 7, 2026
+ .Dt LOGIN_GETCLASS 3
+ .Os
+ .Sh NAME
+@@ -228,8 +228,10 @@ Sets environment variables specified by
+ .Li setenv
+ keyword.
+ .It Dv LOGIN_SETGROUP
+-Set the group ID and call
+-.Xr initgroups 3
++Set the group ID and install the supplementary group list using
++.Xr getgrouplist 3
++and
++.Xr setgroups 2
+ if the
+ .Ar pwd
+ argument is non-NULL.
+@@ -281,6 +283,12 @@ using
+ .Xr setuid 2 .
+ .It Dv LOGIN_SETALL
+ Sets all of the above.
++.It Dv LOGIN_SETWSCONSGROUP
++When used with
++.Dv LOGIN_SETGROUP ,
++append the wscons group to the supplementary group list if space permits.
++This flag is not included in
++.Dv LOGIN_SETALL .
+ .It Dv LOGIN_SETXDGENV
+ Attempts to create an XDG runtime directory for the user indicated by
+ .Ar uid
+Index: lib/libc/gen/login_cap.c
+===================================================================
+--- lib/libc/gen/login_cap.c
++++ lib/libc/gen/login_cap.c
+@@ -727,7 +727,7 @@ setusercontext(login_cap_t *lc, struct p
+ 			}
+ 		}
+ 
+-		if (setgroups(ngroups, groups) == 1) {
++		if (setgroups(ngroups, groups) == -1) {
+ 			syslog(LOG_ERR, "setgroups(%s,%u): %m",
+ 			    pwd->pw_name, pwd->pw_gid);
+ 			login_close(flc);
 Index: lib/libc/gen/stdalign.3
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdalign.3
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,67 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -1462,7 +1594,7 @@ Index: lib/libc/gen/stdalign.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd October 24, 2026
++.Dd November 7, 2026
 +.Dt STDALIGN 3
 +.Os
 +.Sh NAME
@@ -1510,15 +1642,14 @@ Index: lib/libc/gen/stdalign.3
 +.St -isoC-2011
 +and ISO/IEC 9899:2024 (C23).
 +.Sh HISTORY
-+The
-+.In stdalign.h
-+header appeared in
-+.Ox 8.0 .
++This interface is a local development addition to the
++.Ox
++source tree.
 Index: lib/libc/gen/stdatomic.3
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdatomic.3
-@@ -0,0 +1,138 @@
+@@ -0,0 +1,144 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -1535,7 +1666,7 @@ Index: lib/libc/gen/stdatomic.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd October 24, 2026
++.Dd November 7, 2026
 +.Dt STDATOMIC 3
 +.Os
 +.Sh NAME
@@ -1632,17 +1763,24 @@ Index: lib/libc/gen/stdatomic.3
 +scale the operand by the size of the pointed-to type, as the standard
 +requires.
 +.Pp
-+Atomic objects whose size is not lock-free are handled internally with a
-+lock-based fallback, so the interface is self-contained and does not
-+depend on an external atomic runtime.
++The macros handle values whose size is not lock-free with a lock-based
++fallback in libc, preserving volatile accesses.
++These macro operations do not require an external atomic runtime.
 +.Fn atomic_is_lock_free
-+still reports such a type as not lock-free.
++reports the same value-size and alignment policy used by the macros.
++Atomic storage can be larger than the corresponding non-atomic value.
++.Pp
++Direct compiler-generated accesses and compound operations on an atomic
++object do not use this fallback ABI.
++They must not be mixed with macro operations routed through the fallback,
++and may require an external atomic runtime that the base system lacks.
++Complete language-level atomic support is therefore not provided.
 +.Sh SEE ALSO
 +.Xr threads 3
 +.Sh STANDARDS
 +The
 +.In stdatomic.h
-+header conforms to
++header implements the library interfaces described by
 +.St -isoC-2011
 +and ISO/IEC 9899:2024 (C23).
 +The
@@ -1653,15 +1791,14 @@ Index: lib/libc/gen/stdatomic.3
 +.Dv ATOMIC_VAR_INIT
 +follow ISO C23.
 +.Sh HISTORY
-+The
-+.In stdatomic.h
-+header appeared in
-+.Ox 8.0 .
++This interface is a local development addition to the
++.Ox
++source tree.
 Index: lib/libc/gen/stdbit.3
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdbit.3
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,157 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -1678,7 +1815,7 @@ Index: lib/libc/gen/stdbit.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd October 24, 2026
++.Dd November 7, 2026
 +.Dt STDBIT 3
 +.Os
 +.Sh NAME
@@ -1797,8 +1934,14 @@ Index: lib/libc/gen/stdbit.3
 +The typed functions are libc entry points with external linkage and a
 +stable address.
 +The type-generic interface accepts the standard unsigned integer types and,
-+where the compiler provides a 128-bit integer type, that type as well; in
-+C++ it is provided with overloaded functions.
++where the compiler provides a 128-bit integer type, that type as well.
++In C23 mode, unsigned bit-precise types are supported when their widths
++match a standard unsigned type or that 128-bit extended type.
++Other bit-precise widths are outside the C23 interface contract.
++The fallback dispatch diagnoses unsupported types rather than truncating
++them to the widest standard type.
++In C++ the generic interface is provided with overloaded functions for
++the five standard unsigned integer types.
 +.Pp
 +The C29
 +.Fn stdc_rotate_left
@@ -1810,15 +1953,14 @@ Index: lib/libc/gen/stdbit.3
 +.In stdbit.h
 +header conforms to ISO/IEC 9899:2024 (C23).
 +.Sh HISTORY
-+The
-+.In stdbit.h
-+header appeared in
-+.Ox 8.0 .
++This interface is a local development addition to the
++.Ox
++source tree.
 Index: lib/libc/gen/stdbit.c
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdbit.c
-@@ -0,0 +1,178 @@
+@@ -0,0 +1,203 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -1997,11 +2139,36 @@ Index: lib/libc/gen/stdbit.c
 +	__stdc_define(ull, unsigned long long)
 +
 +#undef __stdc_define
++
++/* Keep the public ISO functions strong while binding internal calls locally. */
++#define __stdc_aliases(sfx) \
++	DEF_STRONG(stdc_leading_zeros_##sfx); \
++	DEF_STRONG(stdc_leading_ones_##sfx); \
++	DEF_STRONG(stdc_trailing_zeros_##sfx); \
++	DEF_STRONG(stdc_trailing_ones_##sfx); \
++	DEF_STRONG(stdc_first_leading_zero_##sfx); \
++	DEF_STRONG(stdc_first_leading_one_##sfx); \
++	DEF_STRONG(stdc_first_trailing_zero_##sfx); \
++	DEF_STRONG(stdc_first_trailing_one_##sfx); \
++	DEF_STRONG(stdc_count_zeros_##sfx); \
++	DEF_STRONG(stdc_count_ones_##sfx); \
++	DEF_STRONG(stdc_has_single_bit_##sfx); \
++	DEF_STRONG(stdc_bit_width_##sfx); \
++	DEF_STRONG(stdc_bit_floor_##sfx); \
++	DEF_STRONG(stdc_bit_ceil_##sfx);
++
++__stdc_aliases(uc)
++__stdc_aliases(us)
++__stdc_aliases(ui)
++__stdc_aliases(ul)
++__stdc_aliases(ull)
++
++#undef __stdc_aliases
 Index: lib/libc/gen/stdckdint.3
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdckdint.3
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,84 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -2018,7 +2185,7 @@ Index: lib/libc/gen/stdckdint.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd October 24, 2026
++.Dd November 7, 2026
 +.Dt STDCKDINT 3
 +.Os
 +.Sh NAME
@@ -2083,15 +2250,14 @@ Index: lib/libc/gen/stdckdint.3
 +.In stdckdint.h
 +header conforms to ISO/IEC 9899:2024 (C23).
 +.Sh HISTORY
-+The
-+.In stdckdint.h
-+header appeared in
-+.Ox 8.0 .
++This interface is a local development addition to the
++.Ox
++source tree.
 Index: lib/libc/gen/stdnoreturn.3
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdnoreturn.3
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,58 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -2108,7 +2274,7 @@ Index: lib/libc/gen/stdnoreturn.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd October 24, 2026
++.Dd November 7, 2026
 +.Dt STDNORETURN 3
 +.Os
 +.Sh NAME
@@ -2147,10 +2313,9 @@ Index: lib/libc/gen/stdnoreturn.3
 +.St -isoC-2011
 +and ISO/IEC 9899:2024 (C23).
 +.Sh HISTORY
-+The
-+.In stdnoreturn.h
-+header appeared in
-+.Ox 8.0 .
++This interface is a local development addition to the
++.Ox
++source tree.
 Index: lib/libc/hidden/stdatomic.h
 ===================================================================
 --- /dev/null
@@ -2186,60 +2351,96 @@ Index: lib/libc/hidden/stdatomic.h
 +PROTO_NORMAL(atomic_thread_fence);
 +
 +#endif /* !_LIBC_STDATOMIC_H_ */
-Index: lib/libc/hidden/threads.h
+Index: lib/libc/hidden/stdbit.h
 ===================================================================
 --- /dev/null
-+++ lib/libc/hidden/threads.h
-@@ -0,0 +1,49 @@
++++ lib/libc/hidden/stdbit.h
+@@ -0,0 +1,85 @@
 +/*	$OpenBSD$	*/
-+/*
-+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
-+ *
-+ * Permission to use, copy, modify, and distribute this software for any
-+ * purpose with or without fee is hereby granted, provided that the above
-+ * copyright notice and this permission notice appear in all copies.
-+ *
-+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-+ */
++/* SPDX-License-Identifier: ISC */
 +
-+#ifndef _LIBC_THREADS_H_
-+#define _LIBC_THREADS_H_
++#ifndef _LIBC_STDBIT_H_
++#define _LIBC_STDBIT_H_
 +
-+#include_next <threads.h>
++#include_next <stdbit.h>
 +
-+PROTO_NORMAL(call_once);
-+PROTO_NORMAL(cnd_broadcast);
-+PROTO_NORMAL(cnd_destroy);
-+PROTO_NORMAL(cnd_init);
-+PROTO_NORMAL(cnd_signal);
-+PROTO_NORMAL(cnd_timedwait);
-+PROTO_NORMAL(cnd_wait);
-+PROTO_NORMAL(mtx_destroy);
-+PROTO_NORMAL(mtx_init);
-+PROTO_NORMAL(mtx_lock);
-+PROTO_NORMAL(mtx_timedlock);
-+PROTO_NORMAL(mtx_trylock);
-+PROTO_NORMAL(mtx_unlock);
-+PROTO_NORMAL(thrd_create);
-+PROTO_NORMAL(thrd_current);
-+PROTO_NORMAL(thrd_detach);
-+PROTO_NORMAL(thrd_equal);
-+PROTO_NORMAL(thrd_exit);
-+PROTO_NORMAL(thrd_join);
-+PROTO_NORMAL(thrd_sleep);
-+PROTO_NORMAL(thrd_yield);
-+PROTO_NORMAL(tss_create);
-+PROTO_NORMAL(tss_delete);
-+PROTO_NORMAL(tss_get);
-+PROTO_NORMAL(tss_set);
++#ifndef _STDBIT_H_
++#error "libc requires its own <stdbit.h>"
++#endif
 +
-+#endif /* !_LIBC_THREADS_H_ */
++/* Internal ISO calls use hidden names; gen/stdbit.c supplies aliases. */
++PROTO_NORMAL(stdc_leading_zeros_uc);
++PROTO_NORMAL(stdc_leading_zeros_us);
++PROTO_NORMAL(stdc_leading_zeros_ui);
++PROTO_NORMAL(stdc_leading_zeros_ul);
++PROTO_NORMAL(stdc_leading_zeros_ull);
++PROTO_NORMAL(stdc_leading_ones_uc);
++PROTO_NORMAL(stdc_leading_ones_us);
++PROTO_NORMAL(stdc_leading_ones_ui);
++PROTO_NORMAL(stdc_leading_ones_ul);
++PROTO_NORMAL(stdc_leading_ones_ull);
++PROTO_NORMAL(stdc_trailing_zeros_uc);
++PROTO_NORMAL(stdc_trailing_zeros_us);
++PROTO_NORMAL(stdc_trailing_zeros_ui);
++PROTO_NORMAL(stdc_trailing_zeros_ul);
++PROTO_NORMAL(stdc_trailing_zeros_ull);
++PROTO_NORMAL(stdc_trailing_ones_uc);
++PROTO_NORMAL(stdc_trailing_ones_us);
++PROTO_NORMAL(stdc_trailing_ones_ui);
++PROTO_NORMAL(stdc_trailing_ones_ul);
++PROTO_NORMAL(stdc_trailing_ones_ull);
++PROTO_NORMAL(stdc_first_leading_zero_uc);
++PROTO_NORMAL(stdc_first_leading_zero_us);
++PROTO_NORMAL(stdc_first_leading_zero_ui);
++PROTO_NORMAL(stdc_first_leading_zero_ul);
++PROTO_NORMAL(stdc_first_leading_zero_ull);
++PROTO_NORMAL(stdc_first_leading_one_uc);
++PROTO_NORMAL(stdc_first_leading_one_us);
++PROTO_NORMAL(stdc_first_leading_one_ui);
++PROTO_NORMAL(stdc_first_leading_one_ul);
++PROTO_NORMAL(stdc_first_leading_one_ull);
++PROTO_NORMAL(stdc_first_trailing_zero_uc);
++PROTO_NORMAL(stdc_first_trailing_zero_us);
++PROTO_NORMAL(stdc_first_trailing_zero_ui);
++PROTO_NORMAL(stdc_first_trailing_zero_ul);
++PROTO_NORMAL(stdc_first_trailing_zero_ull);
++PROTO_NORMAL(stdc_first_trailing_one_uc);
++PROTO_NORMAL(stdc_first_trailing_one_us);
++PROTO_NORMAL(stdc_first_trailing_one_ui);
++PROTO_NORMAL(stdc_first_trailing_one_ul);
++PROTO_NORMAL(stdc_first_trailing_one_ull);
++PROTO_NORMAL(stdc_count_zeros_uc);
++PROTO_NORMAL(stdc_count_zeros_us);
++PROTO_NORMAL(stdc_count_zeros_ui);
++PROTO_NORMAL(stdc_count_zeros_ul);
++PROTO_NORMAL(stdc_count_zeros_ull);
++PROTO_NORMAL(stdc_count_ones_uc);
++PROTO_NORMAL(stdc_count_ones_us);
++PROTO_NORMAL(stdc_count_ones_ui);
++PROTO_NORMAL(stdc_count_ones_ul);
++PROTO_NORMAL(stdc_count_ones_ull);
++PROTO_NORMAL(stdc_has_single_bit_uc);
++PROTO_NORMAL(stdc_has_single_bit_us);
++PROTO_NORMAL(stdc_has_single_bit_ui);
++PROTO_NORMAL(stdc_has_single_bit_ul);
++PROTO_NORMAL(stdc_has_single_bit_ull);
++PROTO_NORMAL(stdc_bit_width_uc);
++PROTO_NORMAL(stdc_bit_width_us);
++PROTO_NORMAL(stdc_bit_width_ui);
++PROTO_NORMAL(stdc_bit_width_ul);
++PROTO_NORMAL(stdc_bit_width_ull);
++PROTO_NORMAL(stdc_bit_floor_uc);
++PROTO_NORMAL(stdc_bit_floor_us);
++PROTO_NORMAL(stdc_bit_floor_ui);
++PROTO_NORMAL(stdc_bit_floor_ul);
++PROTO_NORMAL(stdc_bit_floor_ull);
++PROTO_NORMAL(stdc_bit_ceil_uc);
++PROTO_NORMAL(stdc_bit_ceil_us);
++PROTO_NORMAL(stdc_bit_ceil_ui);
++PROTO_NORMAL(stdc_bit_ceil_ul);
++PROTO_NORMAL(stdc_bit_ceil_ull);
++
++#endif /* _LIBC_STDBIT_H_ */
 Index: lib/libc/shlib_version
 ===================================================================
 --- lib/libc/shlib_version
@@ -2254,7 +2455,7 @@ Index: lib/libc/thread/Makefile.inc
 ===================================================================
 --- lib/libc/thread/Makefile.inc
 +++ lib/libc/thread/Makefile.inc
-@@ -2,10 +2,11 @@
+@@ -2,7 +2,7 @@
  
  .PATH: ${LIBCSRCDIR}/thread
  
@@ -2262,13 +2463,8 @@ Index: lib/libc/thread/Makefile.inc
 +SRCS+=	callbacks.c atfork.c atomic.c atomic_fallback.c
  
  # threads infrastructure
--SRCS+=	rthread.c \
-+SRCS+=	thrd.c \
-+	rthread.c \
- 	rthread_condattr.c \
- 	rthread_debug.c \
- 	rthread_libc.c \
-@@ -32,4 +33,3 @@ CFLAGS+=-DNO_PIC
+ SRCS+=	rthread.c \
+@@ -32,4 +32,3 @@ CFLAGS+=-DNO_PIC
  .endif
  
  OBJS+=	_atomic_lock.o
@@ -2316,7 +2512,7 @@ Index: lib/libc/thread/atomic.c
 +{
 +	__atomic_thread_fence(order);
 +}
-+DEF_WEAK(atomic_thread_fence);
++DEF_STRONG(atomic_thread_fence);
 +
 +#undef atomic_signal_fence
 +
@@ -2325,7 +2521,7 @@ Index: lib/libc/thread/atomic.c
 +{
 +	__atomic_signal_fence(order);
 +}
-+DEF_WEAK(atomic_signal_fence);
++DEF_STRONG(atomic_signal_fence);
 +
 +#undef atomic_flag_test_and_set
 +
@@ -2334,7 +2530,7 @@ Index: lib/libc/thread/atomic.c
 +{
 +	return __atomic_test_and_set(object, __ATOMIC_SEQ_CST);
 +}
-+DEF_WEAK(atomic_flag_test_and_set);
++DEF_STRONG(atomic_flag_test_and_set);
 +
 +#undef atomic_flag_test_and_set_explicit
 +
@@ -2344,7 +2540,7 @@ Index: lib/libc/thread/atomic.c
 +{
 +	return __atomic_test_and_set(object, order);
 +}
-+DEF_WEAK(atomic_flag_test_and_set_explicit);
++DEF_STRONG(atomic_flag_test_and_set_explicit);
 +
 +#undef atomic_flag_clear
 +
@@ -2353,7 +2549,7 @@ Index: lib/libc/thread/atomic.c
 +{
 +	__atomic_clear(object, __ATOMIC_SEQ_CST);
 +}
-+DEF_WEAK(atomic_flag_clear);
++DEF_STRONG(atomic_flag_clear);
 +
 +#undef atomic_flag_clear_explicit
 +
@@ -2362,12 +2558,12 @@ Index: lib/libc/thread/atomic.c
 +{
 +	__atomic_clear(object, order);
 +}
-+DEF_WEAK(atomic_flag_clear_explicit);
++DEF_STRONG(atomic_flag_clear_explicit);
 Index: lib/libc/thread/atomic_fallback.c
 ===================================================================
 --- /dev/null
 +++ lib/libc/thread/atomic_fallback.c
-@@ -0,0 +1,226 @@
+@@ -0,0 +1,271 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -2409,8 +2605,16 @@ Index: lib/libc/thread/atomic_fallback.c
 +
 +#include <sys/cdefs.h>
 +
++#include <limits.h>
 +#include <stdatomic.h>
-+#include <string.h>
++#include <stddef.h>
++
++#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) || \
++    !defined(__ORDER_BIG_ENDIAN__) || \
++    (__BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__ && \
++    __BYTE_ORDER__ != __ORDER_BIG_ENDIAN__)
++#error "atomic fallback requires a supported compiler byte order"
++#endif
 +
 +#define FALLBACK_NLOCKS 64
 +
@@ -2438,6 +2642,42 @@ Index: lib/libc/thread/atomic_fallback.c
 +	__atomic_clear(l, __ATOMIC_SEQ_CST);
 +}
 +
++/* Keep the volatile qualification of the atomic object's accesses. */
++static void
++fallback_copy_out(void *dst, const volatile void *src, size_t size)
++{
++	unsigned char *d = dst;
++	const volatile unsigned char *s = src;
++	size_t i;
++
++	for (i = 0; i < size; i++)
++		d[i] = s[i];
++}
++
++static void
++fallback_copy_in(volatile void *dst, const void *src, size_t size)
++{
++	volatile unsigned char *d = dst;
++	const unsigned char *s = src;
++	size_t i;
++
++	for (i = 0; i < size; i++)
++		d[i] = s[i];
++}
++
++static int
++fallback_equal(const volatile void *obj, const void *expected, size_t size)
++{
++	const volatile unsigned char *o = obj;
++	const unsigned char *e = expected;
++	size_t i;
++
++	for (i = 0; i < size; i++)
++		if (o[i] != e[i])
++			return (0);
++	return (1);
++}
++
 +void
 +__atomic_fallback_load(
 +    size_t size, const volatile void *obj, void *ret, int order)
@@ -2446,7 +2686,7 @@ Index: lib/libc/thread/atomic_fallback.c
 +
 +	(void)order;
 +	fallback_acquire(l);
-+	memcpy(ret, (const void *)obj, size);
++	fallback_copy_out(ret, obj, size);
 +	fallback_release(l);
 +}
 +
@@ -2458,7 +2698,7 @@ Index: lib/libc/thread/atomic_fallback.c
 +
 +	(void)order;
 +	fallback_acquire(l);
-+	memcpy((void *)obj, val, size);
++	fallback_copy_in(obj, val, size);
 +	fallback_release(l);
 +}
 +
@@ -2470,8 +2710,8 @@ Index: lib/libc/thread/atomic_fallback.c
 +
 +	(void)order;
 +	fallback_acquire(l);
-+	memcpy(ret, (const void *)obj, size);
-+	memcpy((void *)obj, val, size);
++	fallback_copy_out(ret, obj, size);
++	fallback_copy_in(obj, val, size);
 +	fallback_release(l);
 +}
 +
@@ -2486,11 +2726,11 @@ Index: lib/libc/thread/atomic_fallback.c
 +	(void)success;
 +	(void)failure;
 +	fallback_acquire(l);
-+	if (memcmp((const void *)obj, expected, size) == 0) {
-+		memcpy((void *)obj, desired, size);
++	if (fallback_equal(obj, expected, size)) {
++		fallback_copy_in(obj, desired, size);
 +		ret = 1;
 +	} else {
-+		memcpy(expected, (const void *)obj, size);
++		fallback_copy_out(expected, obj, size);
 +		ret = 0;
 +	}
 +	fallback_release(l);
@@ -2499,7 +2739,8 @@ Index: lib/libc/thread/atomic_fallback.c
 +
 +/* a = a + b, or a = a - b when sub is non-zero, byte by byte. */
 +static void
-+fallback_add(unsigned char *a, const unsigned char *b, size_t size, int sub)
++fallback_add(volatile unsigned char *a, const unsigned char *b, size_t size,
++    int sub)
 +{
 +	unsigned carry = sub ? 1 : 0;
 +	size_t	 i;
@@ -2508,13 +2749,13 @@ Index: lib/libc/thread/atomic_fallback.c
 +	for (i = 0; i < size; i++) {
 +		unsigned t = a[i] + (unsigned char)(sub ? ~b[i] : b[i]) + carry;
 +		a[i] = (unsigned char)t;
-+		carry = t >> 8;
++		carry = t >> CHAR_BIT;
 +	}
 +#else
 +	for (i = size; i-- > 0;) {
 +		unsigned t = a[i] + (unsigned char)(sub ? ~b[i] : b[i]) + carry;
 +		a[i] = (unsigned char)t;
-+		carry = t >> 8;
++		carry = t >> CHAR_BIT;
 +	}
 +#endif
 +}
@@ -2527,8 +2768,8 @@ Index: lib/libc/thread/atomic_fallback.c
 +
 +	(void)order;
 +	fallback_acquire(l);
-+	memcpy(ret, (const void *)obj, size);
-+	fallback_add((unsigned char *)(void *)obj, val, size, sub);
++	fallback_copy_out(ret, obj, size);
++	fallback_add(obj, val, size, sub);
 +	fallback_release(l);
 +}
 +
@@ -2551,13 +2792,13 @@ Index: lib/libc/thread/atomic_fallback.c
 +    void *ret, int order, int op)
 +{
 +	unsigned char	    *l = fallback_lock(obj);
-+	unsigned char	    *o = (unsigned char *)(void *)obj;
++	volatile unsigned char *o = obj;
 +	const unsigned char *v = val;
 +	size_t		     i;
 +
 +	(void)order;
 +	fallback_acquire(l);
-+	memcpy(ret, (const void *)obj, size);
++	fallback_copy_out(ret, obj, size);
 +	for (i = 0; i < size; i++) {
 +		switch (op) {
 +		case 1:
@@ -2594,312 +2835,6 @@ Index: lib/libc/thread/atomic_fallback.c
 +{
 +	fallback_fetch_bitwise(size, obj, val, ret, order, 3);
 +}
-Index: lib/libc/thread/thrd.c
-===================================================================
---- /dev/null
-+++ lib/libc/thread/thrd.c
-@@ -0,0 +1,301 @@
-+/*	$OpenBSD$	*/
-+
-+/*-
-+ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
-+ *
-+ * Permission to use, copy, modify, and distribute this software for any
-+ * purpose with or without fee is hereby granted, provided that the above
-+ * copyright notice and this permission notice appear in all copies.
-+ *
-+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-+ */
-+
-+/*
-+ * ISO/IEC 9899:2011 (C11) 7.26: Threads.
-+ *
-+ * Thin wrappers over the OpenBSD pthread implementation that lives in libc.
-+ * pthread_* returns the error number directly, so the return codes are
-+ * mapped without inspecting errno.  The only substantive work is the
-+ * trampoline for thrd_create(): a C11 thread start routine returns int,
-+ * whereas a pthread start routine returns void *, so the start routine and
-+ * its argument are passed through a small heap block that carries the
-+ * integer result back as an intptr_t.
-+ */
-+
-+#include <errno.h>
-+#include <stdint.h>
-+#include <stdlib.h>
-+#include <threads.h>
-+
-+/*
-+ * Most of the pthread_* entry points used below are declared
-+ * PROTO_STD_DEPRECATED in libc/hidden/pthread.h.  That marker is a
-+ * libc-internal convention meaning "not ordinarily called from inside
-+ * libc"; it is not a real deprecation.  The ISO C threads wrappers must call
-+ * them, so the diagnostic is silenced here instead of changing the upstream
-+ * hidden namespace for the whole library.
-+ */
-+#if defined(__clang__)
-+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-+#elif defined(__GNUC__)
-+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-+#endif
-+
-+struct _thrd_start {
-+	thrd_start_t ts_func;
-+	void	    *ts_arg;
-+};
-+
-+static void *
-+_thrd_trampoline(void *p)
-+{
-+	struct _thrd_start *start = p;
-+	thrd_start_t	    func = start->ts_func;
-+	void		   *arg = start->ts_arg;
-+	int		    result;
-+
-+	free(start);
-+	result = func(arg);
-+	return (void *)(intptr_t)result;
-+}
-+
-+static int
-+_thrd_map(int error)
-+{
-+	if (error == 0)
-+		return thrd_success;
-+	/* Resource exhaustion must be reported as thrd_nomem. */
-+	if (error == ENOMEM || error == EAGAIN)
-+		return thrd_nomem;
-+	return thrd_error;
-+}
-+
-+int
-+thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
-+{
-+	struct _thrd_start *start;
-+	pthread_t	    thread;
-+	int		    error;
-+
-+	if ((start = malloc(sizeof(*start))) == NULL)
-+		return thrd_nomem;
-+	start->ts_func = func;
-+	start->ts_arg = arg;
-+	error = pthread_create(&thread, NULL, _thrd_trampoline, start);
-+	if (error != 0) {
-+		free(start);
-+		return _thrd_map(error);
-+	}
-+	*thr = thread;
-+	return thrd_success;
-+}
-+DEF_WEAK(thrd_create);
-+
-+int
-+thrd_equal(thrd_t thr0, thrd_t thr1)
-+{
-+	return pthread_equal(thr0, thr1);
-+}
-+DEF_WEAK(thrd_equal);
-+
-+thrd_t
-+thrd_current(void)
-+{
-+	return pthread_self();
-+}
-+DEF_WEAK(thrd_current);
-+
-+int
-+thrd_sleep(const struct timespec *duration, struct timespec *remaining)
-+{
-+	if (nanosleep(duration, remaining) == 0)
-+		return 0;
-+	return errno == EINTR ? -1 : -2;
-+}
-+DEF_WEAK(thrd_sleep);
-+
-+void
-+thrd_yield(void)
-+{
-+	sched_yield();
-+}
-+DEF_WEAK(thrd_yield);
-+
-+__dead void
-+thrd_exit(int result)
-+{
-+	pthread_exit((void *)(intptr_t)result);
-+}
-+DEF_WEAK(thrd_exit);
-+
-+int
-+thrd_detach(thrd_t thr)
-+{
-+	return _thrd_map(pthread_detach(thr));
-+}
-+DEF_WEAK(thrd_detach);
-+
-+int
-+thrd_join(thrd_t thr, int *result)
-+{
-+	void *value;
-+
-+	if (pthread_join(thr, &value) != 0)
-+		return thrd_error;
-+	if (result != NULL)
-+		*result = (int)(intptr_t)value;
-+	return thrd_success;
-+}
-+DEF_WEAK(thrd_join);
-+
-+int
-+mtx_init(mtx_t *mtx, int type)
-+{
-+	pthread_mutexattr_t attr;
-+	int		    error, ptype;
-+
-+	/* mtx_timed is accepted as a capability flag; pthreads needs no setup. */
-+	if ((type & ~(mtx_recursive | mtx_timed)) != 0)
-+		return thrd_error;
-+	ptype = (type & mtx_recursive) ? PTHREAD_MUTEX_RECURSIVE :
-+					 PTHREAD_MUTEX_NORMAL;
-+	if (pthread_mutexattr_init(&attr) != 0)
-+		return thrd_error;
-+	error = pthread_mutexattr_settype(&attr, ptype);
-+	if (error == 0)
-+		error = pthread_mutex_init(mtx, &attr);
-+	pthread_mutexattr_destroy(&attr);
-+	return _thrd_map(error);
-+}
-+DEF_WEAK(mtx_init);
-+
-+int
-+mtx_lock(mtx_t *mtx)
-+{
-+	return _thrd_map(pthread_mutex_lock(mtx));
-+}
-+DEF_WEAK(mtx_lock);
-+
-+int
-+mtx_timedlock(mtx_t *__restrict mtx, const struct timespec *__restrict ts)
-+{
-+	int error = pthread_mutex_timedlock(mtx, ts);
-+
-+	if (error == 0)
-+		return thrd_success;
-+	return error == ETIMEDOUT ? thrd_timedout : thrd_error;
-+}
-+DEF_WEAK(mtx_timedlock);
-+
-+int
-+mtx_trylock(mtx_t *mtx)
-+{
-+	int error = pthread_mutex_trylock(mtx);
-+
-+	if (error == 0)
-+		return thrd_success;
-+	return error == EBUSY ? thrd_busy : thrd_error;
-+}
-+DEF_WEAK(mtx_trylock);
-+
-+int
-+mtx_unlock(mtx_t *mtx)
-+{
-+	return _thrd_map(pthread_mutex_unlock(mtx));
-+}
-+DEF_WEAK(mtx_unlock);
-+
-+void
-+mtx_destroy(mtx_t *mtx)
-+{
-+	(void)pthread_mutex_destroy(mtx);
-+}
-+DEF_WEAK(mtx_destroy);
-+
-+int
-+cnd_init(cnd_t *cond)
-+{
-+	return _thrd_map(pthread_cond_init(cond, NULL));
-+}
-+DEF_WEAK(cnd_init);
-+
-+int
-+cnd_signal(cnd_t *cond)
-+{
-+	return _thrd_map(pthread_cond_signal(cond));
-+}
-+DEF_WEAK(cnd_signal);
-+
-+int
-+cnd_broadcast(cnd_t *cond)
-+{
-+	return _thrd_map(pthread_cond_broadcast(cond));
-+}
-+DEF_WEAK(cnd_broadcast);
-+
-+int
-+cnd_wait(cnd_t *cond, mtx_t *mtx)
-+{
-+	return _thrd_map(pthread_cond_wait(cond, mtx));
-+}
-+DEF_WEAK(cnd_wait);
-+
-+int
-+cnd_timedwait(cnd_t *__restrict cond, mtx_t *__restrict mtx,
-+    const struct timespec *__restrict ts)
-+{
-+	int error = pthread_cond_timedwait(cond, mtx, ts);
-+
-+	if (error == 0)
-+		return thrd_success;
-+	return error == ETIMEDOUT ? thrd_timedout : thrd_error;
-+}
-+DEF_WEAK(cnd_timedwait);
-+
-+void
-+cnd_destroy(cnd_t *cond)
-+{
-+	(void)pthread_cond_destroy(cond);
-+}
-+DEF_WEAK(cnd_destroy);
-+
-+int
-+tss_create(tss_t *key, tss_dtor_t dtor)
-+{
-+	return _thrd_map(pthread_key_create(key, dtor));
-+}
-+DEF_WEAK(tss_create);
-+
-+void
-+tss_delete(tss_t key)
-+{
-+	(void)pthread_key_delete(key);
-+}
-+DEF_WEAK(tss_delete);
-+
-+void *
-+tss_get(tss_t key)
-+{
-+	return pthread_getspecific(key);
-+}
-+DEF_WEAK(tss_get);
-+
-+int
-+tss_set(tss_t key, void *val)
-+{
-+	return _thrd_map(pthread_setspecific(key, val));
-+}
-+DEF_WEAK(tss_set);
-+
-+void
-+call_once(once_flag *flag, void (*func)(void))
-+{
-+	(void)pthread_once(flag, func);
-+}
-+DEF_WEAK(call_once);
 Index: lib/libpthread/man/Makefile.inc
 ===================================================================
 --- lib/libpthread/man/Makefile.inc
@@ -2913,7 +2848,7 @@ Index: lib/libpthread/man/threads.3
 ===================================================================
 --- /dev/null
 +++ lib/libpthread/man/threads.3
-@@ -0,0 +1,252 @@
+@@ -0,0 +1,270 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -2930,7 +2865,7 @@ Index: lib/libpthread/man/threads.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd October 24, 2026
++.Dd November 7, 2026
 +.Dt THREADS 3
 +.Os
 +.Sh NAME
@@ -2960,6 +2895,8 @@ Index: lib/libpthread/man/threads.3
 +.Nm tss_delete ,
 +.Nm call_once
 +.Nd ISO C threads
++.Sh LIBRARY
++.Lb libpthread
 +.Sh SYNOPSIS
 +.In threads.h
 +.Ft typedef ... thrd_t ;
@@ -3024,10 +2961,13 @@ Index: lib/libpthread/man/threads.3
 +.In threads.h
 +header provides the ISO C11 threads interface.
 +It is a standardised interface over the
-+.Xr pthread 3
-+implementation that is part of
-+.Xr libc 3 ;
-+every object is a real pthread object underneath and no separate
++.Xr pthreads 3
++implementation.
++The lifecycle functions and these wrappers are supplied by libpthread;
++some pthread synchronization primitives are implemented in libc.
++Programs using this interface must be compiled and linked with
++.Fl pthread .
++Every object is a real pthread object underneath and no separate
 +synchronisation primitive is introduced.
 +.Pp
 +.Fn thrd_create
@@ -3123,6 +3063,20 @@ Index: lib/libpthread/man/threads.3
 +or
 +.Dv thrd_error
 +on failure.
++.Pp
++Only
++.Fn thrd_create ,
++.Fn mtx_init
++and
++.Fn cnd_init
++return
++.Dv thrd_nomem
++for allocation failure.
++Exhaustion of thread-specific storage keys is reported by
++.Fn tss_create
++as
++.Dv thrd_error .
++.Pp
 +.Fn thrd_join
 +stores the result of the thread in
 +.Fa res
@@ -3148,12 +3102,12 @@ Index: lib/libpthread/man/threads.3
 +.Ox ,
 +because the base system has historically lacked
 +.In threads.h .
-+This interface is provided by libc nonetheless; including
++This interface is provided by libpthread nonetheless; including
 +.In threads.h
 +withdraws the stale macro, and the compiler's target description should be
 +updated to match.
 +.Sh SEE ALSO
-+.Xr pthread 3 ,
++.Xr pthreads 3 ,
 +.Xr stdatomic 3
 +.Sh STANDARDS
 +The
@@ -3162,22 +3116,451 @@ Index: lib/libpthread/man/threads.3
 +.St -isoC-2011
 +and ISO/IEC 9899:2024 (C23).
 +.Sh HISTORY
-+The
-+.In threads.h
-+header appeared in
-+.Ox 8.0 .
++This interface is a local development addition to the
++.Ox
++source tree.
+Index: lib/librthread/Makefile
+===================================================================
+--- lib/librthread/Makefile
++++ lib/librthread/Makefile
+@@ -7,7 +7,8 @@ CFLAGS+=-Wall -g -Werror -Wshadow
+ CFLAGS+=-Werror-implicit-function-declaration
+ CFLAGS+=-Wsign-compare
+ CFLAGS+=-I${.CURDIR} -include namespace.h \
+-	-I${LIBCSRCDIR}/arch/${MACHINE_CPU} -I${LIBCSRCDIR}/include
++	-I${LIBCSRCDIR}/arch/${MACHINE_CPU} -I${LIBCSRCDIR}/include \
++	-I${.CURDIR}/../../include
+ CDIAGFLAGS=
+ LDADD = -Wl,-znodelete
+ PFLAGS= -D__PROFIL_SRC__
+@@ -19,7 +20,8 @@ CFLAGS+=-DNO_PIC
+ VERSION_SCRIPT= ${.CURDIR}/Symbols.map
+ 
+ .PATH: ${.CURDIR}/arch/${MACHINE_CPU}
+-SRCS=	rthread.c \
++SRCS=	thrd.c \
++	rthread.c \
+ 	rthread_attr.c \
+ 	rthread_barrier.c \
+ 	rthread_barrier_attr.c \
+Index: lib/librthread/Symbols.map
+===================================================================
+--- lib/librthread/Symbols.map
++++ lib/librthread/Symbols.map
+@@ -93,6 +93,33 @@
+ 		sem_unlink;
+ 		sem_wait;
+ 
++		/* ISO C threads */
++		call_once;
++		cnd_broadcast;
++		cnd_destroy;
++		cnd_init;
++		cnd_signal;
++		cnd_timedwait;
++		cnd_wait;
++		mtx_destroy;
++		mtx_init;
++		mtx_lock;
++		mtx_timedlock;
++		mtx_trylock;
++		mtx_unlock;
++		thrd_create;
++		thrd_current;
++		thrd_detach;
++		thrd_equal;
++		thrd_exit;
++		thrd_join;
++		thrd_sleep;
++		thrd_yield;
++		tss_create;
++		tss_delete;
++		tss_get;
++		tss_set;
++
+ 		/* used for debugging & regress */
+ 		_thread_dump_info;
+ 
+Index: lib/librthread/pthread.h
+===================================================================
+--- lib/librthread/pthread.h
++++ lib/librthread/pthread.h
+@@ -55,23 +55,23 @@ PROTO_STD_DEPRECATED(pthread_cleanup_pop
+ PROTO_STD_DEPRECATED(pthread_cleanup_push);
+ PROTO_STD_DEPRECATED(pthread_condattr_getclock);
+ PROTO_STD_DEPRECATED(pthread_condattr_setclock);
+-PROTO_STD_DEPRECATED(pthread_create);
+-PROTO_STD_DEPRECATED(pthread_detach);
++PROTO_NORMAL(pthread_create);
++PROTO_NORMAL(pthread_detach);
+ PROTO_STD_DEPRECATED(pthread_getconcurrency);
+ PROTO_STD_DEPRECATED(pthread_getcpuclockid);
+ PROTO_STD_DEPRECATED(pthread_getschedparam);
+-PROTO_STD_DEPRECATED(pthread_join);
++PROTO_NORMAL(pthread_join);
+ PROTO_STD_DEPRECATED(pthread_kill);
+ PROTO_STD_DEPRECATED(pthread_mutex_getprioceiling);
+ PROTO_STD_DEPRECATED(pthread_mutex_setprioceiling);
+-PROTO_STD_DEPRECATED(pthread_mutexattr_destroy);
++PROTO_NORMAL(pthread_mutexattr_destroy);
+ PROTO_STD_DEPRECATED(pthread_mutexattr_getprioceiling);
+ PROTO_STD_DEPRECATED(pthread_mutexattr_getprotocol);
+ PROTO_STD_DEPRECATED(pthread_mutexattr_gettype);
+-PROTO_STD_DEPRECATED(pthread_mutexattr_init);
++PROTO_NORMAL(pthread_mutexattr_init);
+ PROTO_STD_DEPRECATED(pthread_mutexattr_setprioceiling);
+ PROTO_STD_DEPRECATED(pthread_mutexattr_setprotocol);
+-PROTO_STD_DEPRECATED(pthread_mutexattr_settype);
++PROTO_NORMAL(pthread_mutexattr_settype);
+ PROTO_STD_DEPRECATED(pthread_rwlock_destroy);
+ PROTO_NORMAL(pthread_rwlock_init);
+ PROTO_STD_DEPRECATED(pthread_rwlock_rdlock);
+Index: lib/librthread/rthread.c
+===================================================================
+--- lib/librthread/rthread.c
++++ lib/librthread/rthread.c
+@@ -322,6 +322,7 @@ pthread_join(pthread_t thread, void **re
+ 	_rthread_reaper();
+ 	return (e);
+ }
++DEF_STD(pthread_join);
+ 
+ int
+ pthread_detach(pthread_t thread)
+@@ -342,6 +343,7 @@ pthread_detach(pthread_t thread)
+ 	_rthread_reaper();
+ 	return (rc);
+ }
++DEF_STD(pthread_detach);
+ 
+ int
+ pthread_create(pthread_t *threadp, const pthread_attr_t *attr,
+@@ -420,6 +422,7 @@ fail1:
+ 
+ 	return (rc);
+ }
++DEF_STD(pthread_create);
+ 
+ int
+ pthread_kill(pthread_t thread, int sig)
+Index: lib/librthread/rthread_mutexattr.c
+===================================================================
+--- lib/librthread/rthread_mutexattr.c
++++ lib/librthread/rthread_mutexattr.c
+@@ -43,6 +43,7 @@ pthread_mutexattr_init(pthread_mutexattr
+ 
+ 	return (0);
+ }
++DEF_STD(pthread_mutexattr_init);
+ 
+ int
+ pthread_mutexattr_destroy(pthread_mutexattr_t *attrp)
+@@ -52,6 +53,7 @@ pthread_mutexattr_destroy(pthread_mutexa
+ 
+ 	return (0);
+ }
++DEF_STD(pthread_mutexattr_destroy);
+ 
+ int
+ pthread_mutexattr_settype(pthread_mutexattr_t *attrp, int type)
+@@ -61,6 +63,7 @@ pthread_mutexattr_settype(pthread_mutexa
+ 	(*attrp)->ma_type = type;
+ 	return (0);
+ }
++DEF_STD(pthread_mutexattr_settype);
+ 
+ int
+ pthread_mutexattr_gettype(pthread_mutexattr_t *attrp, int *type)
+Index: lib/librthread/shlib_version
+===================================================================
+--- lib/librthread/shlib_version
++++ lib/librthread/shlib_version
+@@ -1,2 +1,2 @@
+ major=28
+-minor=1
++minor=2
+Index: lib/librthread/thrd.c
+===================================================================
+--- /dev/null
++++ lib/librthread/thrd.c
+@@ -0,0 +1,263 @@
++/*	$OpenBSD$	*/
++
++/*-
++ * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
++ *
++ * Permission to use, copy, modify, and distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++/*
++ * ISO/IEC 9899:2011 (C11) 7.26: Threads.
++ *
++ * Thin wrappers over the OpenBSD pthread implementation in libpthread.
++ * pthread_* returns the error number directly, so the return codes are
++ * mapped without inspecting errno.  The only substantive work is the
++ * trampoline for thrd_create(): a C11 thread start routine returns int,
++ * whereas a pthread start routine returns void *, so the start routine and
++ * its argument are passed through a small heap block that carries the
++ * integer result back as an intptr_t.
++ */
++
++#include <errno.h>
++#include <stdint.h>
++#include <stdlib.h>
++#include <threads.h>
++
++struct _thrd_start {
++	thrd_start_t ts_func;
++	void	    *ts_arg;
++};
++
++static void *
++_thrd_trampoline(void *p)
++{
++	struct _thrd_start *start = p;
++	thrd_start_t	    func = start->ts_func;
++	void		   *arg = start->ts_arg;
++	int		    result;
++
++	free(start);
++	result = func(arg);
++	return (void *)(intptr_t)result;
++}
++
++static int
++_thrd_map_alloc(int error)
++{
++	if (error == 0)
++		return (thrd_success);
++	/* Only creation and initialization interfaces permit thrd_nomem. */
++	if (error == ENOMEM || error == EAGAIN)
++		return (thrd_nomem);
++	return (thrd_error);
++}
++
++int
++thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
++{
++	struct _thrd_start *start;
++	pthread_t	    thread;
++	int		    error;
++
++	if ((start = malloc(sizeof(*start))) == NULL)
++		return thrd_nomem;
++	start->ts_func = func;
++	start->ts_arg = arg;
++	error = pthread_create(&thread, NULL, _thrd_trampoline, start);
++	if (error != 0) {
++		free(start);
++		return (_thrd_map_alloc(error));
++	}
++	*thr = thread;
++	return thrd_success;
++}
++
++int
++thrd_equal(thrd_t thr0, thrd_t thr1)
++{
++	return pthread_equal(thr0, thr1);
++}
++
++thrd_t
++thrd_current(void)
++{
++	return pthread_self();
++}
++
++int
++thrd_sleep(const struct timespec *duration, struct timespec *remaining)
++{
++	if (nanosleep(duration, remaining) == 0)
++		return 0;
++	return errno == EINTR ? -1 : -2;
++}
++
++void
++thrd_yield(void)
++{
++	sched_yield();
++}
++
++__dead void
++thrd_exit(int result)
++{
++	pthread_exit((void *)(intptr_t)result);
++}
++
++int
++thrd_detach(thrd_t thr)
++{
++	return (pthread_detach(thr) == 0 ? thrd_success : thrd_error);
++}
++
++int
++thrd_join(thrd_t thr, int *result)
++{
++	void *value;
++
++	if (pthread_join(thr, &value) != 0)
++		return thrd_error;
++	if (result != NULL)
++		*result = (int)(intptr_t)value;
++	return thrd_success;
++}
++
++int
++mtx_init(mtx_t *mtx, int type)
++{
++	pthread_mutexattr_t attr;
++	int		    error, ptype;
++
++	/* mtx_timed is a capability flag; pthreads needs no setup. */
++	if ((type & ~(mtx_recursive | mtx_timed)) != 0)
++		return thrd_error;
++	ptype = (type & mtx_recursive) ? PTHREAD_MUTEX_RECURSIVE :
++					 PTHREAD_MUTEX_NORMAL;
++	error = pthread_mutexattr_init(&attr);
++	if (error != 0)
++		return (_thrd_map_alloc(error));
++	error = pthread_mutexattr_settype(&attr, ptype);
++	if (error == 0)
++		error = pthread_mutex_init(mtx, &attr);
++	pthread_mutexattr_destroy(&attr);
++	return (_thrd_map_alloc(error));
++}
++
++int
++mtx_lock(mtx_t *mtx)
++{
++	return (pthread_mutex_lock(mtx) == 0 ? thrd_success : thrd_error);
++}
++
++int
++mtx_timedlock(mtx_t *__restrict mtx, const struct timespec *__restrict ts)
++{
++	int error = pthread_mutex_timedlock(mtx, ts);
++
++	if (error == 0)
++		return thrd_success;
++	return error == ETIMEDOUT ? thrd_timedout : thrd_error;
++}
++
++int
++mtx_trylock(mtx_t *mtx)
++{
++	int error = pthread_mutex_trylock(mtx);
++
++	if (error == 0)
++		return thrd_success;
++	return error == EBUSY ? thrd_busy : thrd_error;
++}
++
++int
++mtx_unlock(mtx_t *mtx)
++{
++	return (pthread_mutex_unlock(mtx) == 0 ? thrd_success : thrd_error);
++}
++
++void
++mtx_destroy(mtx_t *mtx)
++{
++	(void)pthread_mutex_destroy(mtx);
++}
++
++int
++cnd_init(cnd_t *cond)
++{
++	return (_thrd_map_alloc(pthread_cond_init(cond, NULL)));
++}
++
++int
++cnd_signal(cnd_t *cond)
++{
++	return (pthread_cond_signal(cond) == 0 ? thrd_success : thrd_error);
++}
++
++int
++cnd_broadcast(cnd_t *cond)
++{
++	return (pthread_cond_broadcast(cond) == 0 ? thrd_success : thrd_error);
++}
++
++int
++cnd_wait(cnd_t *cond, mtx_t *mtx)
++{
++	return (pthread_cond_wait(cond, mtx) == 0 ? thrd_success : thrd_error);
++}
++
++int
++cnd_timedwait(cnd_t *__restrict cond, mtx_t *__restrict mtx,
++    const struct timespec *__restrict ts)
++{
++	int error = pthread_cond_timedwait(cond, mtx, ts);
++
++	if (error == 0)
++		return thrd_success;
++	return error == ETIMEDOUT ? thrd_timedout : thrd_error;
++}
++
++void
++cnd_destroy(cnd_t *cond)
++{
++	(void)pthread_cond_destroy(cond);
++}
++
++int
++tss_create(tss_t *key, tss_dtor_t dtor)
++{
++	return (pthread_key_create(key, dtor) == 0 ? thrd_success : thrd_error);
++}
++
++void
++tss_delete(tss_t key)
++{
++	(void)pthread_key_delete(key);
++}
++
++void *
++tss_get(tss_t key)
++{
++	return pthread_getspecific(key);
++}
++
++int
++tss_set(tss_t key, void *val)
++{
++	return (pthread_setspecific(key, val) == 0 ? thrd_success : thrd_error);
++}
++
++void
++call_once(once_flag *flag, void (*func)(void))
++{
++	(void)pthread_once(flag, func);
++}
 Index: regress/lib/libc/Makefile
 ===================================================================
 --- regress/lib/libc/Makefile
 +++ regress/lib/libc/Makefile
-@@ -12,6 +12,7 @@ SUBDIR+= gcvt getaddrinfo getcap getopt
+@@ -12,7 +12,8 @@ SUBDIR+= gcvt getaddrinfo getcap getopt
  SUBDIR+= hash
  SUBDIR+= hsearch
  SUBDIR+= ieeefp ifnameindex illumos
+-SUBDIR+= ldexp locale longjmp
 +SUBDIR+= iso-c-headers
- SUBDIR+= ldexp locale longjmp
++SUBDIR+= ldexp locale login_cap longjmp
  SUBDIR+= malloc mkstemp modf
  SUBDIR+= netdb
+ SUBDIR+= open_memstream orientation open_wmemstream
 @@ -20,9 +21,10 @@ SUBDIR+= popen printf
  SUBDIR+= qsort
  SUBDIR+= regex
@@ -3232,12 +3615,12 @@ Index: regress/lib/libc/iso-c-headers/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	joint
-+CFLAGS+=-I/usr/include
++CFLAGS+=-I${.CURDIR}/../../../../include
 +WARNINGS=yes
 +
 +run-regress-${PROG}: ${PROG}
 +	./${PROG}
-+	sh ${.CURDIR}/matrix.sh
++	CC="${CC}" CXX="${CXX}" sh ${.CURDIR}/matrix.sh
 +
 +.include <bsd.regress.mk>
 Index: regress/lib/libc/iso-c-headers/joint.c
@@ -3323,7 +3706,7 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/iso-c-headers/matrix.sh
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,192 @@
 +#!/bin/sh
 +#	$OpenBSD$
 +#
@@ -3343,82 +3726,249 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +#
 +# Compile each of the six headers on its own, and all of them together in
 +# both include orders, under C11, C17 and C23, with strict warnings.  The
-+# -I/usr/include is deliberate: it makes the installed OpenBSD headers win
-+# over the compiler's resource headers (clang searches -I directories first),
-+# so the test proves that the tree's headers, not the compiler's, are used.
++# A regular source include directory precedes compiler resources. Guard
++# checks reject compiler substitutes even if the search configuration changes.
 +
 +set -u
 +
 +CC=${CC:-cc}
++PUBLIC_INCDIR=${PUBLIC_INCDIR:-$(dirname "$0")/../../../../include}
 +WARN="-Wall -Wextra -Werror -Wpedantic"
 +HEADERS="stdalign stdnoreturn stdatomic stdbit stdckdint threads"
 +STDS="c11 c17 c23"
++tmp=$(mktemp -d "${TMPDIR:-/tmp}/iso-c-headers.XXXXXXXX") || exit 1
++trap 'rm -rf "$tmp"' 0
++trap 'exit 1' HUP INT TERM
 +status=0
 +
 +try()
 +{
 +	# $1 = standard, $2 = source text
-+	printf '%s\n' "$2" | $CC -std=$1 -I/usr/include $WARN -fsyntax-only -x c - \
-+	    2>/tmp/iso-c-headers.err || {
++	printf '%s\n' "$2" | $CC -std=$1 -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
++	    2>"$tmp/c.err" || {
 +		echo "FAIL: -std=$1: $2" >&2
-+		sed 's/^/    /' /tmp/iso-c-headers.err >&2
++		sed 's/^/    /' "$tmp/c.err" >&2
 +		status=1
 +	}
 +}
 +
-+for std in $STDS; do
-+	for h in $HEADERS; do
++guards=''
++for h in $HEADERS; do
++	guard=$(printf '_%s_H_' "$h" | tr '[:lower:]' '[:upper:]')
++	check="
++#ifndef $guard
++#error wrong $h.h
++#endif"
++	guards="$guards$check"
++	for std in $STDS; do
 +		try "$std" "#include <$h.h>
++$check
 +int main(void) { return 0; }"
 +	done
 +done
 +
 +# Each header alone, but translated: the macros must survive a use.
 +try c11 "#include <stdalign.h>
++#ifndef _STDALIGN_H_
++#error wrong stdalign.h
++#endif
 +alignas(8) int x; int main(void) { return (int)alignof(int) - (int)alignof(int) + (int)sizeof(x) - 4; }"
 +try c11 "#include <stdnoreturn.h>
++#ifndef _STDNORETURN_H_
++#error wrong stdnoreturn.h
++#endif
 +noreturn void f(void); int main(void) { return 0; }"
 +try c11 "#include <stdatomic.h>
++#ifndef _STDATOMIC_H_
++#error wrong stdatomic.h
++#endif
 +atomic_int x; int main(void) { return atomic_load(&x); }"
 +try c11 "#include <threads.h>
++#ifndef _THREADS_H_
++#error wrong threads.h
++#endif
 +int main(void) { thrd_t t; return (int)(long)&t - (int)(long)&t; }"
 +try c23 "#include <stdbit.h>
++#ifndef _STDBIT_H_
++#error wrong stdbit.h
++#endif
 +int main(void) { return (int)stdc_bit_width(0u); }"
 +try c23 "#include <stdckdint.h>
++#ifndef _STDCKDINT_H_
++#error wrong stdckdint.h
++#endif
 +int main(void) { int r; return ckd_add(&r, 1, 1); }"
 +
-+# All six, forward and reverse.
-+try c23 "#include <stdalign.h>
++# All six, forward and reverse, in every supported C mode.
++for std in $STDS; do
++	try "$std" "#include <stdalign.h>
 +#include <stdatomic.h>
 +#include <stdbit.h>
 +#include <stdckdint.h>
 +#include <stdnoreturn.h>
 +#include <threads.h>
++$guards
 +int main(void) { return 0; }"
-+try c23 "#include <threads.h>
++	try "$std" "#include <threads.h>
 +#include <stdnoreturn.h>
 +#include <stdckdint.h>
 +#include <stdbit.h>
 +#include <stdatomic.h>
 +#include <stdalign.h>
++$guards
 +int main(void) { return 0; }"
++done
 +
-+# Canary: the installed libc headers still compile as C99 and C89 with the
-+# strict warning set (the C11/C23 headers are not pulled in indirectly).
-+printf '#include <stddef.h>\n#include <limits.h>\n#include <stdlib.h>\n#include <string.h>\nint main(void) { return 0; }\n' | \
-+	$CC -std=c99 -I/usr/include $WARN -fsyntax-only -x c - || status=1
-+printf '#include <stddef.h>\n#include <limits.h>\nint main(void) { return 0; }\n' | \
-+	$CC -std=c89 -I/usr/include $WARN -fsyntax-only -x c - || status=1
++# Older-language canaries must not pull in the modern headers indirectly.
++for std in c89 iso9899:199409 c99; do
++	try "$std" "#include <stddef.h>
++#include <limits.h>
++#include <string.h>
++#include <stdlib.h>
++#if defined(_STDALIGN_H_) || defined(_STDNORETURN_H_) || \
++    defined(_STDATOMIC_H_) || defined(_THREADS_H_) || \
++    defined(_STDBIT_H_) || defined(_STDCKDINT_H_)
++#error modern headers leaked into a legacy inclusion
++#endif
++int main(void) { return 0; }"
++done
++
++# C23 keywords must not be hidden by the former convenience macros.
++try c23 "#include <stdalign.h>
++#include <stdatomic.h>
++#include <threads.h>
++#ifndef _STDALIGN_H_
++#error wrong stdalign.h
++#endif
++#ifndef _STDATOMIC_H_
++#error wrong stdatomic.h
++#endif
++#ifndef _THREADS_H_
++#error wrong threads.h
++#endif
++#if defined(alignas) || defined(alignof) || defined(thread_local) || \
++    defined(__alignas_is_defined) || defined(__alignof_is_defined)
++#error a C23 keyword or removed marker is still a macro
++#endif
++#ifdef ATOMIC_VAR_INIT
++#error ATOMIC_VAR_INIT was removed in C23
++#endif
++#if __STDC_VERSION_STDATOMIC_H__ != 202311L || \
++    __STDC_VERSION_THREADS_H__ != 202311L
++#error wrong C23 header version
++#endif
++typedef char atomic_char8_matches[_Generic((atomic_char8_t *)0,
++    _Atomic(unsigned char) *: 1, default: 0) ? 1 : -1];
++alignas(16) int aligned_object;
++thread_local int local_object;
++int main(void) { return local_object + aligned_object; }"
++
++# The pre-C23 initialization interface remains available in C11/C17.
++for std in c11 c17; do
++	try "$std" "#include <stdatomic.h>
++#ifndef _STDATOMIC_H_
++#error wrong stdatomic.h
++#endif
++#ifndef ATOMIC_VAR_INIT
++#error missing pre-C23 atomic initializer
++#endif
++atomic_int initialized = ATOMIC_VAR_INIT(1);
++int main(void) { return atomic_load(&initialized) - 1; }"
++done
 +
 +# C++: all six headers must be includable, and the stdbit type-generic
 +# interface is available through overloads.
-+if command -v c++ >/dev/null 2>&1; then
-+	printf '#include <stdalign.h>\n#include <stdatomic.h>\n#include <stdbit.h>\n#include <stdckdint.h>\n#include <stdnoreturn.h>\n#include <threads.h>\nint main() {\n\tunsigned int z = stdc_leading_zeros(1u);\n\tint r = 0;\n\tbool o = ckd_add(&r, 1, 1);\n\treturn (int)z + (int)o + r; }\n' | \
-+		c++ -std=c++17 -I/usr/include -Wall -Wextra -fsyntax-only -x c++ - || status=1
++CXX=${CXX:-c++}
++if command -v "$CXX" >/dev/null 2>&1; then
++	printf '%s\n' "#include <stdalign.h>
++#include <stdatomic.h>
++#include <stdbit.h>
++#include <stdckdint.h>
++#include <stdnoreturn.h>
++#include <threads.h>
++$guards
++int main() {
++	unsigned int z = stdc_leading_zeros(1u);
++	int r = 0;
++	bool o = ckd_add(&r, 1, 1);
++	return (int)z + (int)o + r; }" | \
++	    "$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
++	    -fsyntax-only -x c++ - || status=1
++else
++	printf 'SKIP: C++ compiler %s is unavailable\n' "$CXX" >&2
 +fi
 +
-+rm -f /tmp/iso-c-headers.err
 +exit $status
+Index: regress/lib/libc/login_cap/Makefile
+===================================================================
+--- /dev/null
++++ regress/lib/libc/login_cap/Makefile
+@@ -0,0 +1,5 @@
++#	$OpenBSD$
++
++PROG=	login_cap
++
++.include <bsd.regress.mk>
+Index: regress/lib/libc/login_cap/login_cap.c
+===================================================================
+--- /dev/null
++++ regress/lib/libc/login_cap/login_cap.c
+@@ -0,0 +1,55 @@
++/*	$OpenBSD$	*/
++/* SPDX-License-Identifier: ISC */
++
++#include <sys/types.h>
++
++#include <err.h>
++#include <errno.h>
++#include <grp.h>
++#include <limits.h>
++#include <login_cap.h>
++#include <pwd.h>
++#include <stdio.h>
++#include <unistd.h>
++
++int
++main(void)
++{
++	login_cap_t lc = { 0 };
++	struct passwd *pw;
++	gid_t groups[NGROUPS_MAX], rgid, egid, sgid;
++	uid_t uid;
++	int ngroups;
++
++	uid = getuid();
++	if (geteuid() == 0 || uid != geteuid()) {
++		puts("SKIP: requires an ordinary unprivileged user");
++		return (0);
++	}
++	if (getresgid(&rgid, &egid, &sgid) == -1)
++		err(1, "getresgid");
++	if (rgid != egid || rgid != sgid) {
++		puts("SKIP: requires equal real, effective and saved groups");
++		return (0);
++	}
++	if ((pw = getpwuid(uid)) == NULL)
++		errx(1, "getpwuid: no entry for current user");
++	if (pw->pw_gid != rgid) {
++		puts("SKIP: current group differs from passwd primary group");
++		return (0);
++	}
++
++	/* Ensure group setup can reach the supplementary-group operation. */
++	if (setresgid(rgid, rgid, rgid) == -1)
++		err(1, "setresgid to current group");
++	if ((ngroups = getgroups(NGROUPS_MAX, groups)) == -1)
++		err(1, "getgroups");
++	errno = 0;
++	if (setgroups(ngroups, groups) != -1 || errno != EPERM)
++		errx(1, "unprivileged setgroups must fail with EPERM");
++
++	/* A failed setgroups must not be reported as successful setup. */
++	if (setusercontext(&lc, pw, uid, LOGIN_SETGROUP) != -1)
++		errx(1, "setusercontext ignored failed setgroups");
++	return (0);
++}
 Index: regress/lib/libc/stdalign/Makefile
 ===================================================================
 --- /dev/null
@@ -3441,7 +3991,7 @@ Index: regress/lib/libc/stdalign/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	stdalign
-+CFLAGS+=-I/usr/include
++CFLAGS+=-I${.CURDIR}/../../../../include
 +WARNINGS=yes
 +
 +.include <bsd.regress.mk>
@@ -3525,7 +4075,7 @@ Index: regress/lib/libc/stdatomic/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	stdatomic
-+CFLAGS+=-I/usr/include
++CFLAGS+=-I${.CURDIR}/../../../../include
 +WARNINGS=yes
 +
 +.include <bsd.regress.mk>
@@ -3533,7 +4083,7 @@ Index: regress/lib/libc/stdatomic/stdatomic.c
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/stdatomic/stdatomic.c
-@@ -0,0 +1,173 @@
+@@ -0,0 +1,358 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -3561,6 +4111,7 @@ Index: regress/lib/libc/stdatomic/stdatomic.c
 +#include <assert.h>
 +#include <pthread.h>
 +#include <stdatomic.h>
++#include <stdint.h>
 +#include <string.h>
 +
 +#define NTHREADS 8
@@ -3596,11 +4147,78 @@ Index: regress/lib/libc/stdatomic/stdatomic.c
 +	return NULL;
 +}
 +
++/* Exercise the six real symbols as well as the function-like macros. */
++static void
++test_atomic_symbols(void)
++{
++	atomic_flag flag = ATOMIC_FLAG_INIT;
++	void (*thread_fence)(memory_order) = atomic_thread_fence;
++	void (*signal_fence)(memory_order) = atomic_signal_fence;
++	_Bool (*test_set)(volatile atomic_flag *) = atomic_flag_test_and_set;
++	_Bool (*test_set_explicit)(volatile atomic_flag *, memory_order) =
++	    atomic_flag_test_and_set_explicit;
++	void (*clear)(volatile atomic_flag *) = atomic_flag_clear;
++	void (*clear_explicit)(volatile atomic_flag *, memory_order) =
++	    atomic_flag_clear_explicit;
++
++	assert(!test_set(&flag));
++	assert(test_set_explicit(&flag, memory_order_relaxed));
++	clear(&flag);
++	assert(!test_set_explicit(&flag, memory_order_acquire));
++	clear_explicit(&flag, memory_order_release);
++	assert(!test_set(&flag));
++	clear_explicit(&flag, memory_order_relaxed);
++	thread_fence(memory_order_acq_rel);
++	signal_fence(memory_order_seq_cst);
++}
++
++/* The public atomic aliases must use the library's corresponding types. */
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++#define ATOMIC_TYPE_ASSERT static_assert
++#else
++#define ATOMIC_TYPE_ASSERT _Static_assert
++#endif
++#define CHECK_ATOMIC_TYPE(alias, type) \
++	ATOMIC_TYPE_ASSERT(_Generic((alias *)0, _Atomic(type) *: 1, default: 0), \
++	    #alias " has the wrong element type")
++CHECK_ATOMIC_TYPE(atomic_char16_t, char16_t);
++CHECK_ATOMIC_TYPE(atomic_char32_t, char32_t);
++CHECK_ATOMIC_TYPE(atomic_wchar_t, wchar_t);
++CHECK_ATOMIC_TYPE(atomic_intptr_t, intptr_t);
++CHECK_ATOMIC_TYPE(atomic_uintptr_t, uintptr_t);
++CHECK_ATOMIC_TYPE(atomic_size_t, size_t);
++CHECK_ATOMIC_TYPE(atomic_ptrdiff_t, ptrdiff_t);
++CHECK_ATOMIC_TYPE(atomic_intmax_t, intmax_t);
++CHECK_ATOMIC_TYPE(atomic_uintmax_t, uintmax_t);
++CHECK_ATOMIC_TYPE(atomic_int_least8_t, int_least8_t);
++CHECK_ATOMIC_TYPE(atomic_int_least16_t, int_least16_t);
++CHECK_ATOMIC_TYPE(atomic_int_least32_t, int_least32_t);
++CHECK_ATOMIC_TYPE(atomic_int_least64_t, int_least64_t);
++CHECK_ATOMIC_TYPE(atomic_int_fast8_t, int_fast8_t);
++CHECK_ATOMIC_TYPE(atomic_int_fast16_t, int_fast16_t);
++CHECK_ATOMIC_TYPE(atomic_int_fast32_t, int_fast32_t);
++CHECK_ATOMIC_TYPE(atomic_int_fast64_t, int_fast64_t);
++CHECK_ATOMIC_TYPE(atomic_uint_least8_t, uint_least8_t);
++CHECK_ATOMIC_TYPE(atomic_uint_least16_t, uint_least16_t);
++CHECK_ATOMIC_TYPE(atomic_uint_least32_t, uint_least32_t);
++CHECK_ATOMIC_TYPE(atomic_uint_least64_t, uint_least64_t);
++CHECK_ATOMIC_TYPE(atomic_uint_fast8_t, uint_fast8_t);
++CHECK_ATOMIC_TYPE(atomic_uint_fast16_t, uint_fast16_t);
++CHECK_ATOMIC_TYPE(atomic_uint_fast32_t, uint_fast32_t);
++CHECK_ATOMIC_TYPE(atomic_uint_fast64_t, uint_fast64_t);
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++CHECK_ATOMIC_TYPE(atomic_char8_t, unsigned char);
++#endif
++#undef CHECK_ATOMIC_TYPE
++#undef ATOMIC_TYPE_ASSERT
++
 +int
 +main(void)
 +{
 +	pthread_t th[NTHREADS];
 +	int i, expected, desired;
++
++	test_atomic_symbols();
 +
 +	for (i = 0; i < NTHREADS; i++)
 +		assert(pthread_create(&th[i], NULL, bump, NULL) == 0);
@@ -3658,6 +4276,77 @@ Index: regress/lib/libc/stdatomic/stdatomic.c
 +		assert(w.a == 5 && w.b == 6);
 +	}
 +
++#if defined(__GNUC__) && !defined(__clang__)
++	/* An out-of-array atomic address must not use C pointer arithmetic. */
++	{
++		int arr[2];
++		_Atomic(int *) ap = arr;
++		uintptr_t base = (uintptr_t)arr;
++		uintptr_t delta = (uintptr_t)8 * sizeof(arr[0]);
++		int *old;
++
++		old = atomic_fetch_add(&ap, 8);
++		assert(old == arr);
++		assert((uintptr_t)atomic_load(&ap) == base + delta);
++		old = atomic_fetch_sub(&ap, 8);
++		assert((uintptr_t)old == base + delta);
++		assert(atomic_load(&ap) == arr);
++
++		old = atomic_fetch_add(&ap, -8);
++		assert(old == arr);
++		assert((uintptr_t)atomic_load(&ap) == base - delta);
++		old = atomic_fetch_sub(&ap, -8);
++		assert((uintptr_t)old == base - delta);
++		assert(atomic_load(&ap) == arr);
++	}
++#endif
++
++	/* Bit-field operands undergo the usual integer promotions. */
++	{
++		struct {
++			unsigned int step : 3;
++		} bits = { 1 };
++		atomic_int value = 0;
++		int arr[3];
++		_Atomic(int *) ap = arr;
++		int *old;
++
++		assert(atomic_fetch_add(&value, bits.step) == 0);
++		assert(atomic_load(&value) == 1);
++		assert(atomic_fetch_sub(&value, bits.step) == 1);
++		assert(atomic_load(&value) == 0);
++		old = atomic_fetch_add(&ap, bits.step);
++		assert(old == arr);
++		assert(atomic_load(&ap) == &arr[1]);
++		old = atomic_fetch_sub(&ap, bits.step);
++		assert(old == &arr[1]);
++		assert(atomic_load(&ap) == arr);
++	}
++
++	/* Evaluate pointer-fetch arguments before the RMW, exactly once. */
++	{
++		int arr[5];
++		_Atomic(int *) ap = &arr[0];
++		int *old;
++		int objects = 0, operands = 0, orders = 0;
++
++		old = atomic_fetch_add_explicit((objects++, &ap),
++		    (atomic_store(&ap, &arr[1]), operands++, 1),
++		    (orders++, memory_order_seq_cst));
++		assert(old == &arr[1]);
++		assert(atomic_load(&ap) == &arr[2]);
++		assert(objects == 1 && operands == 1 && orders == 1);
++
++		atomic_store(&ap, &arr[4]);
++		objects = operands = orders = 0;
++		old = atomic_fetch_sub_explicit((objects++, &ap),
++		    (atomic_store(&ap, &arr[3]), operands++, 1),
++		    (orders++, memory_order_seq_cst));
++		assert(old == &arr[3]);
++		assert(atomic_load(&ap) == &arr[2]);
++		assert(objects == 1 && operands == 1 && orders == 1);
++	}
++
 +	/* atomic pointer arithmetic is scaled by the pointed-to size */
 +	{
 +		int arr[4];
@@ -3697,6 +4386,52 @@ Index: regress/lib/libc/stdatomic/stdatomic.c
 +		assert(atomic_compare_exchange_strong(&big, &expect, v));
 +	}
 +
++	/* Match the query to the operations with rounded atomic storage. */
++	{
++		struct s3 {
++			unsigned char bytes[3];
++		};
++		_Atomic(struct s3) object;
++		struct s3 first = { { 1, 2, 3 } }, value, expected;
++		int evaluations = 0;
++
++		assert(atomic_is_lock_free((evaluations++, &object)) ==
++		    __atomic_always_lock_free(sizeof(struct s3), 0));
++		assert(evaluations == 1);
++		atomic_store(&object, first);
++		value = atomic_load(&object);
++		assert(memcmp(&value, &first, sizeof(value)) == 0);
++		expected = first;
++		assert(atomic_compare_exchange_strong(&object, &expected, first));
++	}
++
++	/* Volatile aggregates retain qualifiers through the libc fallback. */
++	{
++		struct volatile_value {
++			unsigned char bytes[24];
++		};
++		volatile _Atomic(struct volatile_value) object;
++		struct volatile_value first, second, value, expected;
++
++		memset(&first, 0x12, sizeof(first));
++		memset(&second, 0x34, sizeof(second));
++		atomic_init(&object, first);
++		value = atomic_load(&object);
++		assert(memcmp(&value, &first, sizeof(value)) == 0);
++		value = atomic_exchange_explicit(&object, second,
++		    memory_order_acq_rel);
++		assert(memcmp(&value, &first, sizeof(value)) == 0);
++		expected = first;
++		assert(!atomic_compare_exchange_strong(&object, &expected, first));
++		assert(memcmp(&expected, &second, sizeof(expected)) == 0);
++		assert(atomic_compare_exchange_strong(&object, &expected, first));
++		value = atomic_load_explicit(&object, memory_order_acquire);
++		assert(memcmp(&value, &first, sizeof(value)) == 0);
++		atomic_store_explicit(&object, second, memory_order_release);
++		value = atomic_load(&object);
++		assert(memcmp(&value, &second, sizeof(value)) == 0);
++	}
++
 +	/* ATOMIC_VAR_INIT was removed in C23. */
 +#if !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L)
 +	{
@@ -3729,7 +4464,7 @@ Index: regress/lib/libc/stdbit/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	stdbit
-+CFLAGS+=-I/usr/include
++CFLAGS+=-std=c23 -I${.CURDIR}/../../../../include
 +WARNINGS=yes
 +
 +.include <bsd.regress.mk>
@@ -3737,7 +4472,7 @@ Index: regress/lib/libc/stdbit/stdbit.c
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/stdbit/stdbit.c
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,170 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -3763,9 +4498,84 @@ Index: regress/lib/libc/stdbit/stdbit.c
 +#include <stdbit.h>
 +#include <stdbool.h>
 +
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
++    !defined(__BITINT_MAXWIDTH__)
++#error "C23 bit tests require compiler bit-precise integer support"
++#endif
++
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
++    defined(__BITINT_MAXWIDTH__)
++/* C23 requires bit-precise types at standard/extended integer widths. */
++#define CHECK_BITINT(width) \
++	do { \
++		typedef unsigned _BitInt(width) bit_t; \
++		bit_t zero = 0, one = 1, maximum = (bit_t)-1; \
++		bit_t top = (bit_t)1 << ((width) - 1); \
++		unsigned int bits = (width); \
++		int calls = 0; \
++		/* Check both the value and the input precision. */ \
++		assert(stdc_leading_zeros(zero) == bits); \
++		assert(stdc_trailing_zeros(zero) == bits); \
++		assert(stdc_count_ones(zero) == 0); \
++		assert(stdc_count_zeros(zero) == bits); \
++		assert(stdc_leading_ones(maximum) == bits); \
++		assert(stdc_trailing_ones(maximum) == bits); \
++		assert(stdc_first_leading_zero(maximum) == 0); \
++		assert(stdc_first_leading_one(zero) == 0); \
++		assert(stdc_first_trailing_zero(maximum) == 0); \
++		assert(stdc_first_trailing_one(zero) == 0); \
++		assert(stdc_first_leading_zero(zero) == 1); \
++		assert(stdc_first_leading_one(one) == bits); \
++		assert(stdc_first_trailing_zero(zero) == 1); \
++		assert(stdc_first_trailing_one(top) == bits); \
++		assert(stdc_has_single_bit(top)); \
++		assert(stdc_bit_width(top) == bits); \
++		assert(stdc_bit_floor(top) == top); \
++		assert(stdc_bit_ceil(top) == top); \
++		assert(stdc_bit_floor(zero) == zero); \
++		assert(stdc_bit_ceil(zero) == one); \
++		assert(stdc_bit_ceil((bit_t)(top - 1)) == top); \
++		assert(_Generic(stdc_bit_floor(one), bit_t: 1, default: 0)); \
++		assert(_Generic(stdc_bit_ceil(one), bit_t: 1, default: 0)); \
++		assert(stdc_count_zeros((calls++, one)) == bits - 1); \
++		assert(calls == 1); \
++		assert(stdc_bit_floor((calls++, top)) == top); \
++		assert(calls == 2); \
++		assert(stdc_bit_ceil((calls++, top)) == top); \
++		assert(calls == 3); \
++	} while (0)
++
++static void
++test_bitint(void)
++{
++	CHECK_BITINT(CHAR_BIT);
++#if __BITINT_MAXWIDTH__ >= __SIZEOF_SHORT__ * CHAR_BIT
++	CHECK_BITINT(__SIZEOF_SHORT__ * CHAR_BIT);
++#endif
++#if __BITINT_MAXWIDTH__ >= __SIZEOF_INT__ * CHAR_BIT
++	CHECK_BITINT(__SIZEOF_INT__ * CHAR_BIT);
++#endif
++#if __BITINT_MAXWIDTH__ >= __SIZEOF_LONG__ * CHAR_BIT
++	CHECK_BITINT(__SIZEOF_LONG__ * CHAR_BIT);
++#endif
++#if __BITINT_MAXWIDTH__ >= __SIZEOF_LONG_LONG__ * CHAR_BIT
++	CHECK_BITINT(__SIZEOF_LONG_LONG__ * CHAR_BIT);
++#endif
++#if defined(__SIZEOF_INT128__) && __BITINT_MAXWIDTH__ >= 128
++	CHECK_BITINT(128);
++#endif
++}
++
++#undef CHECK_BITINT
++#endif
++
 +int
 +main(void)
 +{
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
++    defined(__BITINT_MAXWIDTH__)
++	test_bitint();
++#endif
 +	/* leading / trailing zeros and ones */
 +	assert(stdc_leading_zeros(0u) == 32);
 +	assert(stdc_leading_zeros(1u) == 31);
@@ -3855,7 +4665,7 @@ Index: regress/lib/libc/stdckdint/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	stdckdint
-+CFLAGS+=-I/usr/include
++CFLAGS+=-I${.CURDIR}/../../../../include
 +WARNINGS=yes
 +
 +.include <bsd.regress.mk>
@@ -3944,6 +4754,8 @@ Index: regress/lib/libc/stdckdint/stdckdint.c
 +	long long	   ll;
 +	unsigned short	   h;
 +	unsigned long long q;
++	typedef char ckd_result_is_bool[__builtin_types_compatible_p(
++	    __typeof__(ckd_add(&z, (size_t)1, (size_t)2)), _Bool) ? 1 : -1];
 +
 +	/* int: saturation at both ends, stored value on overflow. */
 +	i = 0;
@@ -4002,10 +4814,8 @@ Index: regress/lib/libc/stdckdint/stdckdint.c
 +	(void)ckd_add(next_slot(), (size_t)1, (size_t)2);
 +	CHECK(slot_index == 1 && slots[0] == 3, "result pointer once");
 +
-+	/* the macro has type bool */
-+	_Static_assert(
-+	    _Generic(ckd_add(&z, (size_t)1, (size_t)2), _Bool: 1, default: 0),
-+	    "ckd_add() must have type bool");
++	/* Keep the exact result-type check in C99 mode. */
++	(void)sizeof(ckd_result_is_bool);
 +}
 +
 +#ifdef __SIZEOF_INT128__
@@ -4254,7 +5064,7 @@ Index: regress/lib/libc/stdnoreturn/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	stdnoreturn
-+CFLAGS+=-I/usr/include
++CFLAGS+=-I${.CURDIR}/../../../../include
 +WARNINGS=yes
 +
 +.include <bsd.regress.mk>
@@ -4317,7 +5127,7 @@ Index: regress/lib/libc/threads/Makefile
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/threads/Makefile
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,23 @@
 +#	$OpenBSD$
 +
 +# Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -4335,15 +5145,17 @@ Index: regress/lib/libc/threads/Makefile
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +
 +PROG=	threads
-+CFLAGS+=-I/usr/include
++CFLAGS+=-I${.CURDIR}/../../../../include
 +WARNINGS=yes
++LDADD+=	-lpthread
++DPADD+=	${LIBPTHREAD}
 +
 +.include <bsd.regress.mk>
 Index: regress/lib/libc/threads/threads.c
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/threads/threads.c
-@@ -0,0 +1,204 @@
+@@ -0,0 +1,235 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -4369,6 +5181,7 @@ Index: regress/lib/libc/threads/threads.c
 + */
 +
 +#include <assert.h>
++#include <limits.h>
 +#include <stdatomic.h>
 +#include <threads.h>
 +#include <time.h>
@@ -4438,6 +5251,13 @@ Index: regress/lib/libc/threads/threads.c
 +}
 +
 +static int
++trivial_worker(void *arg)
++{
++	(void)arg;
++	return (0);
++}
++
++static int
 +exit_worker(void *arg)
 +{
 +	thrd_exit((int)(long)arg);
@@ -4452,12 +5272,34 @@ Index: regress/lib/libc/threads/threads.c
 +	return 0;
 +}
 +
++/* Exhaust real pthread keys; C11 reports any TSS creation failure as error. */
++static void
++test_tss_exhaustion(void)
++{
++	tss_t keys[PTHREAD_KEYS_MAX], extra;
++	int count, error;
++
++	for (count = 0; count < PTHREAD_KEYS_MAX; count++) {
++		error = tss_create(&keys[count], NULL);
++		if (error != thrd_success) {
++			assert(error == thrd_error);
++			break;
++		}
++	}
++	if (count == PTHREAD_KEYS_MAX)
++		assert(tss_create(&extra, NULL) == thrd_error);
++	while (count > 0)
++		tss_delete(keys[--count]);
++}
++
 +int
 +main(void)
 +{
 +	thrd_t thr, thr2, thr3, thr4;
 +	int result, i;
 +	struct timespec ts;
++
++	test_tss_exhaustion();
 +
 +	/* thread create + join + return value */
 +	assert(mtx_init(&mtx, mtx_plain) == thrd_success);
@@ -4517,10 +5359,9 @@ Index: regress/lib/libc/threads/threads.c
 +	assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
 +	assert(thrd_join(thr3, NULL) == thrd_success);
 +	assert(atomic_load(&dtor_count) == 1);
-+	tss_delete(tss_key);
 +
 +	/* detach, identity, sleep and yield */
-+	assert(thrd_create(&thr3, tss_worker, NULL) == thrd_success);
++	assert(thrd_create(&thr3, trivial_worker, NULL) == thrd_success);
 +	assert(thrd_detach(thr3) == thrd_success);
 +	assert(thrd_equal(thrd_current(), thrd_current()));
 +	ts.tv_sec = 0;
@@ -4546,5 +5387,20 @@ Index: regress/lib/libc/threads/threads.c
 +		assert(thrd_join(thr3, NULL) == thrd_success);
 +	}
 +
++	tss_delete(tss_key);
++
 +	return 0;
 +}
+Index: regress/lib/libc/time/time_conversion/timetest.c
+===================================================================
+--- regress/lib/libc/time/time_conversion/timetest.c
++++ regress/lib/libc/time/time_conversion/timetest.c
+@@ -1753,7 +1753,7 @@ void printtm(FILE *f, struct tm *tm)
+ int dotimetest(struct timetest *test, int print)
+ {
+ 	int failures = 0;
+-	struct tm local = {}, gmt = {};
++	struct tm local = { 0 }, gmt = { 0 };
+ 	time_t converted;
+ 	if (gmtime_r(&test->time, &gmt) == NULL) {
+ 		memset(&gmt, 0, sizeof(gmt));

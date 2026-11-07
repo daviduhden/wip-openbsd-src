@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 24, 2026
+.Dd November 7, 2026
 .Dt STDBIT 3
 .Os
 .Sh NAME
@@ -133,8 +133,14 @@ return the type of their argument.
 The typed functions are libc entry points with external linkage and a
 stable address.
 The type-generic interface accepts the standard unsigned integer types and,
-where the compiler provides a 128-bit integer type, that type as well; in
-C++ it is provided with overloaded functions.
+where the compiler provides a 128-bit integer type, that type as well.
+In C23 mode, unsigned bit-precise types are supported when their widths
+match a standard unsigned type or that 128-bit extended type.
+Other bit-precise widths are outside the C23 interface contract.
+The fallback dispatch diagnoses unsupported types rather than truncating
+them to the widest standard type.
+In C++ the generic interface is provided with overloaded functions for
+the five standard unsigned integer types.
 .Pp
 The C29
 .Fn stdc_rotate_left
@@ -146,7 +152,6 @@ The
 .In stdbit.h
 header conforms to ISO/IEC 9899:2024 (C23).
 .Sh HISTORY
-The
-.In stdbit.h
-header appeared in
-.Ox 8.0 .
+This interface is a local development addition to the
+.Ox
+source tree.

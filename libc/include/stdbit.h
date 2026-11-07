@@ -50,13 +50,16 @@
 #define __STDC_ENDIAN_LITTLE__ 1234
 #define __STDC_ENDIAN_BIG__ 4321
 
-#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__)
+#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) || \
+    !defined(__ORDER_BIG_ENDIAN__)
 #error "<stdbit.h> requires the compiler byte-order macros"
 #endif
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define __STDC_ENDIAN_NATIVE__ __STDC_ENDIAN_LITTLE__
-#else
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define __STDC_ENDIAN_NATIVE__ __STDC_ENDIAN_BIG__
+#else
+#error "<stdbit.h> requires a uniformly little- or big-endian target"
 #endif
 
 #if defined(__has_builtin)
@@ -147,8 +150,9 @@ __END_DECLS
  * accepted as a convenience and converted to the corresponding unsigned
  * type.  When the compiler defines a 128-bit integer type, the 128-bit
  * branches are added too, so extended types are handled exactly even on
- * compilers without the __builtin_stdc_* primitives; the default arm still
- * names the widest standard type.
+ * compilers without the __builtin_stdc_* primitives.  C23 also requires
+ * bit-precise unsigned types whose widths match those integer types.
+ * Other bit-precise widths are outside the C23 interface contract.
  */
 #if defined(__SIZEOF_INT128__) &&                                              \
     (__stdc_has_builtin(__builtin_clzll) || defined(__GNUC__))
@@ -196,6 +200,61 @@ __stdc_co_u128(__stdc_uint128 __x)
 #define __stdc_128_types(name128)
 #endif
 
+/* One association per distinct width avoids duplicates on LP64 targets. */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
+    defined(__BITINT_MAXWIDTH__)
+#define __stdc_bitint_uc(name) \
+	unsigned _BitInt(CHAR_BIT): name##_uc,
+#if __SIZEOF_SHORT__ != 1 && \
+    __BITINT_MAXWIDTH__ >= __SIZEOF_SHORT__ * CHAR_BIT
+#define __stdc_bitint_us(name) \
+	unsigned _BitInt(__SIZEOF_SHORT__ * CHAR_BIT): name##_us,
+#else
+#define __stdc_bitint_us(name)
+#endif
+#if __SIZEOF_INT__ != 1 && __SIZEOF_INT__ != __SIZEOF_SHORT__ && \
+    __BITINT_MAXWIDTH__ >= __SIZEOF_INT__ * CHAR_BIT
+#define __stdc_bitint_ui(name) \
+	unsigned _BitInt(__SIZEOF_INT__ * CHAR_BIT): name##_ui,
+#else
+#define __stdc_bitint_ui(name)
+#endif
+#if __SIZEOF_LONG__ != 1 && __SIZEOF_LONG__ != __SIZEOF_SHORT__ && \
+    __SIZEOF_LONG__ != __SIZEOF_INT__ && \
+    __BITINT_MAXWIDTH__ >= __SIZEOF_LONG__ * CHAR_BIT
+#define __stdc_bitint_ul(name) \
+	unsigned _BitInt(__SIZEOF_LONG__ * CHAR_BIT): name##_ul,
+#else
+#define __stdc_bitint_ul(name)
+#endif
+#if __SIZEOF_LONG_LONG__ != 1 && \
+    __SIZEOF_LONG_LONG__ != __SIZEOF_SHORT__ && \
+    __SIZEOF_LONG_LONG__ != __SIZEOF_INT__ && \
+    __SIZEOF_LONG_LONG__ != __SIZEOF_LONG__ && \
+    __BITINT_MAXWIDTH__ >= __SIZEOF_LONG_LONG__ * CHAR_BIT
+#define __stdc_bitint_ull(name) \
+	unsigned _BitInt(__SIZEOF_LONG_LONG__ * CHAR_BIT): name##_ull,
+#else
+#define __stdc_bitint_ull(name)
+#endif
+#if defined(__SIZEOF_INT128__) && __BITINT_MAXWIDTH__ >= 128 && \
+    (__stdc_has_builtin(__builtin_clzll) || defined(__GNUC__)) && \
+    __SIZEOF_SHORT__ * CHAR_BIT != 128 && \
+    __SIZEOF_INT__ * CHAR_BIT != 128 && \
+    __SIZEOF_LONG__ * CHAR_BIT != 128 && \
+    __SIZEOF_LONG_LONG__ * CHAR_BIT != 128
+#define __stdc_bitint_128(name128) unsigned _BitInt(128): name128,
+#else
+#define __stdc_bitint_128(name128)
+#endif
+#define __stdc_bitint_types(name, name128) \
+	__stdc_bitint_uc(name) __stdc_bitint_us(name) \
+	__stdc_bitint_ui(name) __stdc_bitint_ul(name) \
+	__stdc_bitint_ull(name) __stdc_bitint_128(name128)
+#else
+#define __stdc_bitint_types(name, name128)
+#endif
+
 #define __stdc_generic(name, name128, x)                                       \
 	_Generic((x),                                                          \
 	    _Bool: name##_uc,                                                  \
@@ -209,8 +268,9 @@ __stdc_co_u128(__stdc_uint128 __x)
 	    long: name##_ul,                                                   \
 	    unsigned long: name##_ul,                                          \
 	    long long: name##_ull,                                             \
-	    unsigned long long: name##_ull,                                    \
-	    __stdc_128_types(name128) default: name##_ull)(x)
+	    __stdc_128_types(name128)                                          \
+	    __stdc_bitint_types(name, name128)                                 \
+	    unsigned long long: name##_ull)(x)
 
 #if __stdc_has_builtin(__builtin_stdc_leading_zeros)
 #define __stdc_leading_zeros(x) __builtin_stdc_leading_zeros(x)

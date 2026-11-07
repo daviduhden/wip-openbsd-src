@@ -1,103 +1,86 @@
 libc import -- upstream provenance
 ==================================
 
-Upstream repository
--------------------
+Origin and branch
+-----------------
 
-  https://github.com/openbsd/src     (the OpenBSD CVS tree mirror)
+  https://github.com/openbsd/src (official OpenBSD CVS mirror), master
+  Official CVS: anoncvs.ca.openbsd.org:/cvs
+  No local CVS administrative directories are fabricated.
 
-Branch imported
----------------
-
-  master
-
-Commit imported
----------------
+Original import (historical)
+----------------------------
 
   c30c84965dc47c6c65e75cc3b5dd6eb181819bfa
-  Date:   2026-10-17 21:45:34 +0000
-  Title:  libc initialization now aborts if a setuid/setgid program does
-          not have the global variable _permit_setugid declaring that it
-          is setuid/setgid. The more important packages have been fixed,
-          and the long tail will be fixed by people who encounter this
-          problem. ok sthen
+  2026-10-17 21:45:34 UTC
 
-  This was the tip of OpenBSD -current at the time of the original import.  The
-  official tree is the CVS repository (anoncvs.ca.openbsd.org:/cvs);
-  the GitHub mirror is a byte-for-byte copy of the same file contents,
-  so the $OpenBSD$ revision tags and the copyright headers are intact.
-  CVS/ administrative files (Entries, Repository, Root) are not part of
-  either a git checkout or the GitHub mirror, so none could be carried
-  over; the source files themselves and their $OpenBSD$ tags are
-  preserved unchanged.
+Previous synchronized revision (three-way BASE)
+----------------------------------------------
 
-Incremental synchronization
----------------------------
+  484ecc5061dce11274ca0829ca8933cd67f5642e
+  2026-10-31 10:46:05 UTC
+  simplify casting around m_get_sockaddr
 
-  Previous synchronized revision (three-way BASE):
+Current synchronized revision (NEW)
+----------------------------------
 
-    c30c84965dc47c6c65e75cc3b5dd6eb181819bfa
-    2026-10-17 21:45:34 UTC
+  711709eb319e1b619533c82fb9931392e43061cd
+  2026-11-07 17:16:58 UTC
+  the installer MAKEDEV runs against this group file, and therefore needs
+  the wscons present.
 
-  New synchronized revision:
+  This was master observed by git ls-remote on 2026-11-07, and was checked
+  again before recording this revision. BASE is an ancestor of NEW, with
+  135 intervening commits, six affecting imported paths. Upstream modified
+  seven existing files, adding/deleting/renaming none in the prior scope.
+  The 27 existing lib/librthread paths were additionally imported to provide
+  the correct native pthread build integration; none changed in the range.
 
-    484ecc5061dce11274ca0829ca8933cd67f5642e
-    2026-10-31 10:46:05 UTC
-    simplify casting around m_get_sockaddr
+Import roots (OpenBSD src-relative)
+----------------------------------
 
-  The BASE is an ancestor of the new revision.  The intervening history
-  contains 320 commits.  Within the imported paths, upstream changed eight
-  existing files and added, deleted, or renamed none.  The changes are in
-  glob(3), three system call manual pages, and four kernel headers imported
-  as libc header dependencies.  No upstream change touched the six ISO C
-  headers or their pthread/atomic implementation.
+  include/
+  lib/libc/
+  lib/libpthread/                 (manual pages)
+  lib/librthread/                 (LIB=pthread)
+  regress/lib/libc/
+  sys/sys/                       (header dependency)
+  sys/arch/amd64/include/
+  sys/arch/i386/include/
+  sys/arch/arm/include/           (shared armv7 dependency)
+  sys/arch/arm64/include/
+  sys/arch/armv7/include/
+  sys/arch/riscv64/include/
+  sys/arch/powerpc64/include/
+  sys/arch/sparc64/include/
 
-  The upstream changes were applied before restoring the local additions
-  and integration files.  The glob(3) regression fixture is retained as a
-  local change.  The complete local delta against NEW is recorded in
-  patch; it excludes host-only tests and project reports.  See README.md
-  and REPORT.md for the integration and validation record.
+Method and preservation
+-----------------------
 
-Import method
--------------
+  A blob-filtered sparse Git clone was deepened to retain BASE and every
+  intervening commit. Pristine BASE and NEW archives were compared with a
+  saved dirty LOCAL snapshot. No local implementation was discarded as
+  upstream-equivalent. The six ISO headers, tests, ABI additions and manuals
+  remain maintained implementations in this tree.
 
-  A blob-filtered, single-commit (depth 1) sparse checkout of the paths
-  below, copied without modification into this component:
+  Atomics and typed bit functions remain in libc (local version 104.1).
+  The 25 C11 Threads functions were moved to their correct libpthread
+  provider (local version 28.2; upstream 28.1). Consumers of the earlier
+  local Threads extension must relink with -pthread. Historical upstream
+  exports and public structure layouts are unchanged.
 
-    include/                -> libc/include/
-    lib/libc/               -> libc/lib/libc/
-    lib/libpthread/         -> libc/lib/libpthread/
-    sys/sys/                -> libc/sys/sys/                 (dependency)
-    sys/arch/amd64/include/ -> libc/sys/arch/amd64/include/  (dependency)
-    sys/arch/i386/include/  -> libc/sys/arch/i386/include/
-    sys/arch/arm/include/   -> libc/sys/arch/arm/include/
-    sys/arch/arm64/include/ -> libc/sys/arch/arm64/include/
-    sys/arch/armv7/include/ -> libc/sys/arch/armv7/include/
-    sys/arch/riscv64/include/ -> libc/sys/arch/riscv64/include/
-    sys/arch/powerpc64/include/ -> libc/sys/arch/powerpc64/include/
-    sys/arch/sparc64/include/ -> libc/sys/arch/sparc64/include/
-    regress/lib/libc/       -> libc/regress/lib/libc/        (test harness)
+Verification before advancing NEW
+--------------------------------
 
-  sys/sys and the sys/arch/*/include trees are not libc, but the public
-  libc headers include <sys/*.h> and <machine/*.h>, so the corresponding
-  kernel headers are needed for the tree to be self-hosting for
-  compilation and for the host-side tests.  The architectures imported
-  are the ones whose machine headers are needed to check the new headers
-  across OpenBSD's supported platforms (see README).  These sys/ subtrees
-  are byte-for-byte upstream and are not part of the change set.
+  patch contains 35 added and 18 modified source-relative files against NEW.
+  It was applied to a fresh NEW archive without offsets, fuzz or rejects.
+  All 3239 imported final paths matched the reconstruction byte-for-byte,
+  including path sets, symlink targets and Git executable modes. No source
+  added-line whitespace defects were found. The patch excludes host tests,
+  reports and provenance metadata. No compiler or project runtime test was
+  invoked during this synchronization; native builds/linking remain pending.
 
-  src/lib/libpthread in OpenBSD -current contains only manual pages: the
-  thread implementation lives in lib/libc/thread/ (see
-  lib/libc/thread/Makefile.inc).  The imported libpthread/ directory is
-  therefore only the man pages, and the C11 <threads.h> implementation in
-  this tree is built into libc, next to the pthread implementation it
-  wraps.
-
-Verification
-------------
-
-  The current imported source paths were overlaid from the exact new
-  revision above.  The local ISO C additions, their integration, and
-  project-only tests remain local.  The `patch` file is generated against
-  NEW and must apply to that exact revision; it is not a replacement for
-  updating the revision recorded here during a future synchronization.
+  See SYNC.md for the permanent procedure and ISO-C-STATUS.md for current
+  interface audit and patch validation; SYNC-2026-11-07.md is historical.
+  REPORT.md retains historical test results
+  and must not be read as validation of this NEW revision.

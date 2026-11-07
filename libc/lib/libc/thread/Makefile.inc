@@ -5,8 +5,7 @@
 SRCS+=	callbacks.c atfork.c atomic.c atomic_fallback.c
 
 # threads infrastructure
-SRCS+=	thrd.c \
-	rthread.c \
+SRCS+=	rthread.c \
 	rthread_condattr.c \
 	rthread_debug.c \
 	rthread_libc.c \

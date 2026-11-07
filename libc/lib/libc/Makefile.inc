@@ -8,7 +8,8 @@ all:
 	@echo "need to define LIBCSRCDIR" >&2; exit 1
 .endif
 
-CFLAGS+=-I${LIBCSRCDIR}/include -I${LIBCSRCDIR}/hidden -D__LIBC__ \
+CFLAGS+=-I${LIBCSRCDIR}/include -I${LIBCSRCDIR}/hidden \
+	-I${LIBCSRCDIR}/../../include -D__LIBC__ \
 	-Werror=deprecated-declarations \
 	-Werror-implicit-function-declaration -include namespace.h
 

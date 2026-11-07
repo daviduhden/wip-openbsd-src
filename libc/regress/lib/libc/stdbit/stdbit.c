@@ -23,9 +23,84 @@
 #include <stdbit.h>
 #include <stdbool.h>
 
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
+    !defined(__BITINT_MAXWIDTH__)
+#error "C23 bit tests require compiler bit-precise integer support"
+#endif
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
+    defined(__BITINT_MAXWIDTH__)
+/* C23 requires bit-precise types at standard/extended integer widths. */
+#define CHECK_BITINT(width) \
+	do { \
+		typedef unsigned _BitInt(width) bit_t; \
+		bit_t zero = 0, one = 1, maximum = (bit_t)-1; \
+		bit_t top = (bit_t)1 << ((width) - 1); \
+		unsigned int bits = (width); \
+		int calls = 0; \
+		/* Check both the value and the input precision. */ \
+		assert(stdc_leading_zeros(zero) == bits); \
+		assert(stdc_trailing_zeros(zero) == bits); \
+		assert(stdc_count_ones(zero) == 0); \
+		assert(stdc_count_zeros(zero) == bits); \
+		assert(stdc_leading_ones(maximum) == bits); \
+		assert(stdc_trailing_ones(maximum) == bits); \
+		assert(stdc_first_leading_zero(maximum) == 0); \
+		assert(stdc_first_leading_one(zero) == 0); \
+		assert(stdc_first_trailing_zero(maximum) == 0); \
+		assert(stdc_first_trailing_one(zero) == 0); \
+		assert(stdc_first_leading_zero(zero) == 1); \
+		assert(stdc_first_leading_one(one) == bits); \
+		assert(stdc_first_trailing_zero(zero) == 1); \
+		assert(stdc_first_trailing_one(top) == bits); \
+		assert(stdc_has_single_bit(top)); \
+		assert(stdc_bit_width(top) == bits); \
+		assert(stdc_bit_floor(top) == top); \
+		assert(stdc_bit_ceil(top) == top); \
+		assert(stdc_bit_floor(zero) == zero); \
+		assert(stdc_bit_ceil(zero) == one); \
+		assert(stdc_bit_ceil((bit_t)(top - 1)) == top); \
+		assert(_Generic(stdc_bit_floor(one), bit_t: 1, default: 0)); \
+		assert(_Generic(stdc_bit_ceil(one), bit_t: 1, default: 0)); \
+		assert(stdc_count_zeros((calls++, one)) == bits - 1); \
+		assert(calls == 1); \
+		assert(stdc_bit_floor((calls++, top)) == top); \
+		assert(calls == 2); \
+		assert(stdc_bit_ceil((calls++, top)) == top); \
+		assert(calls == 3); \
+	} while (0)
+
+static void
+test_bitint(void)
+{
+	CHECK_BITINT(CHAR_BIT);
+#if __BITINT_MAXWIDTH__ >= __SIZEOF_SHORT__ * CHAR_BIT
+	CHECK_BITINT(__SIZEOF_SHORT__ * CHAR_BIT);
+#endif
+#if __BITINT_MAXWIDTH__ >= __SIZEOF_INT__ * CHAR_BIT
+	CHECK_BITINT(__SIZEOF_INT__ * CHAR_BIT);
+#endif
+#if __BITINT_MAXWIDTH__ >= __SIZEOF_LONG__ * CHAR_BIT
+	CHECK_BITINT(__SIZEOF_LONG__ * CHAR_BIT);
+#endif
+#if __BITINT_MAXWIDTH__ >= __SIZEOF_LONG_LONG__ * CHAR_BIT
+	CHECK_BITINT(__SIZEOF_LONG_LONG__ * CHAR_BIT);
+#endif
+#if defined(__SIZEOF_INT128__) && __BITINT_MAXWIDTH__ >= 128
+	CHECK_BITINT(128);
+#endif
+}
+
+#undef CHECK_BITINT
+#endif
+
 int
 main(void)
 {
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
+    defined(__BITINT_MAXWIDTH__)
+	test_bitint();
+#endif
 	/* leading / trailing zeros and ones */
 	assert(stdc_leading_zeros(0u) == 32);
 	assert(stdc_leading_zeros(1u) == 31);

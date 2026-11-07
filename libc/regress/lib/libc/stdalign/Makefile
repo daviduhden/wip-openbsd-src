@@ -15,7 +15,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 PROG=	stdalign
-CFLAGS+=-I/usr/include
+CFLAGS+=-I${.CURDIR}/../../../../include
 WARNINGS=yes
 
 .include <bsd.regress.mk>

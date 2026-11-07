@@ -41,11 +41,13 @@
  * every operation first tests __atomic_always_lock_free() (a compile-time
  * constant) and, when it is false, calls a small lock-based fallback in
  * libc (__atomic_fallback_*); the constant test is folded away so the
- * compiler's runtime is never referenced.  The fallback acquires a
+ * macros do not reference the compiler's runtime. The fallback acquires a
  * per-address spinlock with sequential-consistency ordering, which is
  * stronger than any memory order the standard asks for, so the requested
- * order is always satisfied.  This makes the whole interface, including
- * non-lock-free types, self-contained.
+ * order is always satisfied. This applies to operations through these
+ * macros. Compiler-generated direct atomic expressions use a separate
+ * lowering/ABI; they must not be mixed with this fallback and may need an
+ * unavailable external runtime. Full language-level support is not claimed.
  *
  * atomic_is_lock_free() is answered with __atomic_always_lock_free(), which
  * is a compile-time constant.  The ATOMIC_*_LOCK_FREE constants come from
@@ -60,6 +62,10 @@
 #define _STDATOMIC_H_
 
 #include <sys/cdefs.h>
+
+#include <stddef.h>
+#include <stdint.h>
+#include <uchar.h>
 
 #if defined(__cplusplus) && !defined(__clang__)
 #error "<stdatomic.h> in C++ requires a compiler that implements _Atomic(T)"
@@ -152,17 +158,20 @@ typedef enum {
 /*
  * 7.17.5: lock-free property.
  *
- * sizeof() does not evaluate its operand, and the pointer argument of
- * __atomic_always_lock_free() is only consulted for known alignment.
+ * Use the value size and typical alignment, as the operation macros do.
+ * An atomic aggregate can have more storage than its non-atomic value;
+ * testing that storage size could advertise a lock-based operation as free.
+ * Evaluate the argument once even though the builtin needs no runtime value.
  */
-#define atomic_is_lock_free(obj)                                               \
-	__atomic_always_lock_free(sizeof(*(obj)), (obj))
+#define atomic_is_lock_free(obj)                                              \
+	((void)(obj), __atomic_always_lock_free(                               \
+	    sizeof((void)0, *(obj)), 0))
 
 /*
  * 7.17.6: atomic integer types.
  *
- * The element types are spelled with the compiler's predefined type macros
- * so that the header does not depend on <stdint.h>.
+ * Use the public library types, not compiler guesses: OpenBSD's fast
+ * integer aliases can differ from the compiler's __INT_FAST*_TYPE__ macros.
  */
 __extension__ typedef _Atomic(__stdc_atomic_bool) atomic_bool;
 __extension__ typedef _Atomic(char) atomic_char;
@@ -177,33 +186,33 @@ __extension__ typedef _Atomic(unsigned long) atomic_ulong;
 __extension__ typedef _Atomic(long long) atomic_llong;
 __extension__ typedef _Atomic(unsigned long long) atomic_ullong;
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
-__extension__ typedef _Atomic(__CHAR8_TYPE__) atomic_char8_t;
+__extension__ typedef _Atomic(unsigned char) atomic_char8_t;
 #endif
-__extension__ typedef _Atomic(__CHAR16_TYPE__) atomic_char16_t;
-__extension__ typedef _Atomic(__CHAR32_TYPE__) atomic_char32_t;
-__extension__ typedef _Atomic(__WCHAR_TYPE__) atomic_wchar_t;
-__extension__ typedef _Atomic(__INT_LEAST8_TYPE__) atomic_int_least8_t;
-__extension__ typedef _Atomic(__UINT_LEAST8_TYPE__) atomic_uint_least8_t;
-__extension__ typedef _Atomic(__INT_LEAST16_TYPE__) atomic_int_least16_t;
-__extension__ typedef _Atomic(__UINT_LEAST16_TYPE__) atomic_uint_least16_t;
-__extension__ typedef _Atomic(__INT_LEAST32_TYPE__) atomic_int_least32_t;
-__extension__ typedef _Atomic(__UINT_LEAST32_TYPE__) atomic_uint_least32_t;
-__extension__ typedef _Atomic(__INT_LEAST64_TYPE__) atomic_int_least64_t;
-__extension__ typedef _Atomic(__UINT_LEAST64_TYPE__) atomic_uint_least64_t;
-__extension__ typedef _Atomic(__INT_FAST8_TYPE__) atomic_int_fast8_t;
-__extension__ typedef _Atomic(__UINT_FAST8_TYPE__) atomic_uint_fast8_t;
-__extension__ typedef _Atomic(__INT_FAST16_TYPE__) atomic_int_fast16_t;
-__extension__ typedef _Atomic(__UINT_FAST16_TYPE__) atomic_uint_fast16_t;
-__extension__ typedef _Atomic(__INT_FAST32_TYPE__) atomic_int_fast32_t;
-__extension__ typedef _Atomic(__UINT_FAST32_TYPE__) atomic_uint_fast32_t;
-__extension__ typedef _Atomic(__INT_FAST64_TYPE__) atomic_int_fast64_t;
-__extension__ typedef _Atomic(__UINT_FAST64_TYPE__) atomic_uint_fast64_t;
-__extension__ typedef _Atomic(__INTPTR_TYPE__) atomic_intptr_t;
-__extension__ typedef _Atomic(__UINTPTR_TYPE__) atomic_uintptr_t;
-__extension__ typedef _Atomic(__SIZE_TYPE__) atomic_size_t;
-__extension__ typedef _Atomic(__PTRDIFF_TYPE__) atomic_ptrdiff_t;
-__extension__ typedef _Atomic(__INTMAX_TYPE__) atomic_intmax_t;
-__extension__ typedef _Atomic(__UINTMAX_TYPE__) atomic_uintmax_t;
+__extension__ typedef _Atomic(char16_t) atomic_char16_t;
+__extension__ typedef _Atomic(char32_t) atomic_char32_t;
+__extension__ typedef _Atomic(wchar_t) atomic_wchar_t;
+__extension__ typedef _Atomic(int_least8_t) atomic_int_least8_t;
+__extension__ typedef _Atomic(uint_least8_t) atomic_uint_least8_t;
+__extension__ typedef _Atomic(int_least16_t) atomic_int_least16_t;
+__extension__ typedef _Atomic(uint_least16_t) atomic_uint_least16_t;
+__extension__ typedef _Atomic(int_least32_t) atomic_int_least32_t;
+__extension__ typedef _Atomic(uint_least32_t) atomic_uint_least32_t;
+__extension__ typedef _Atomic(int_least64_t) atomic_int_least64_t;
+__extension__ typedef _Atomic(uint_least64_t) atomic_uint_least64_t;
+__extension__ typedef _Atomic(int_fast8_t) atomic_int_fast8_t;
+__extension__ typedef _Atomic(uint_fast8_t) atomic_uint_fast8_t;
+__extension__ typedef _Atomic(int_fast16_t) atomic_int_fast16_t;
+__extension__ typedef _Atomic(uint_fast16_t) atomic_uint_fast16_t;
+__extension__ typedef _Atomic(int_fast32_t) atomic_int_fast32_t;
+__extension__ typedef _Atomic(uint_fast32_t) atomic_uint_fast32_t;
+__extension__ typedef _Atomic(int_fast64_t) atomic_int_fast64_t;
+__extension__ typedef _Atomic(uint_fast64_t) atomic_uint_fast64_t;
+__extension__ typedef _Atomic(intptr_t) atomic_intptr_t;
+__extension__ typedef _Atomic(uintptr_t) atomic_uintptr_t;
+__extension__ typedef _Atomic(size_t) atomic_size_t;
+__extension__ typedef _Atomic(ptrdiff_t) atomic_ptrdiff_t;
+__extension__ typedef _Atomic(intmax_t) atomic_intmax_t;
+__extension__ typedef _Atomic(uintmax_t) atomic_uintmax_t;
 
 /*
  * atomic_flag is a structure type whose single member is itself atomic, so
@@ -214,6 +223,11 @@ struct __stdc_atomic_flag {
 	atomic_bool __value;
 };
 typedef struct __stdc_atomic_flag atomic_flag;
+
+/* Flag operations and fallback locks must never call an atomic runtime. */
+__extension__ typedef char __stdc_flag_is_lock_free[
+    (sizeof(atomic_bool) == 1 &&
+    __atomic_always_lock_free(sizeof(atomic_bool), 0)) ? 1 : -1];
 
 #ifdef __cplusplus
 #define ATOMIC_FLAG_INIT {false}
@@ -279,6 +293,20 @@ __END_DECLS
  */
 #define atomic_init(object, value)                                             \
 	atomic_store_explicit((object), (value), memory_order_relaxed)
+
+/*
+ * A pointer fetch uses a byte displacement in the software fallback and in
+ * GCC's raw builtin. Select the pointer case before converting to the value
+ * type: integer operands, including 128-bit values, must not be narrowed.
+ */
+#define __stdc_pointer_delta(object, operand)                                 \
+	((uintptr_t)(operand) * (uintptr_t)sizeof(*__builtin_choose_expr(       \
+	    __builtin_classify_type(*(object)) == 5,                          \
+	    *(object), (char *)0)))
+#define __stdc_fetch_value(object, operand)                                   \
+	((__typeof__((void)0, *(object)))__builtin_choose_expr(                \
+	    __builtin_classify_type(*(object)) == 5,                          \
+	    __stdc_pointer_delta(object, operand), (operand)))
 
 #if defined(__clang__)
 
@@ -359,7 +387,7 @@ __END_DECLS
 			__stdc_r = name(__stdc_o, (operand), (order));         \
 		else {                                                         \
 			__typeof__((void)0, *__stdc_o) __stdc_v =              \
-			    (__typeof__((void)0, *__stdc_o))(operand);         \
+			    __stdc_fetch_value(__stdc_o, operand);         \
 			fallback(sizeof(__stdc_r), __stdc_o, &__stdc_v,        \
 			    &__stdc_r, (order));                               \
 		}                                                              \
@@ -391,9 +419,10 @@ __END_DECLS
  *
  * __atomic_fetch_add/sub on a pointer object: GCC's builtin adds the operand
  * as a raw value ("as an integer of the width of the pointer"), while ISO C
- * requires pointer arithmetic; a pointer object (always lock-free) is
- * detected with __builtin_classify_type and served by a compare-exchange
- * loop.  Integer objects keep the single-instruction builtin.
+ * requires element scaling.  Pointer objects (always lock-free) use the
+ * same builtin with a pointer-width unsigned byte displacement.  This
+ * avoids ordinary C pointer arithmetic, including its out-of-array UB.
+ * Integer objects keep the unscaled builtin.
  */
 #define atomic_store_explicit(object, desired, order)                          \
 	__extension__({                                                        \
@@ -459,55 +488,59 @@ __END_DECLS
 			    1, (success), (failure));                          \
 		(__stdc_atomic_bool) __stdc_r;                                 \
 	})
-#define __stdc_ptr_fetch(object, operand, order, op)                           \
-	__extension__({                                                        \
-		__auto_type __stdc_o = (object);                               \
-		__typeof__((void)0, *__stdc_o) __stdc_old =                    \
-		    atomic_load_explicit(__stdc_o, memory_order_relaxed);      \
-		__typeof__((void)0, *__stdc_o) __stdc_new;                     \
-		do {                                                           \
-			__stdc_new = __stdc_old op(operand);                   \
-		} while (!atomic_compare_exchange_weak_explicit(__stdc_o,      \
-		    &__stdc_old, __stdc_new, (order), memory_order_relaxed));  \
-		__stdc_old;                                                    \
-	})
+/*
+ * GCC documents pointer fetch operands as uintptr_t values without scaling.
+ * Scale captured operands with unsigned arithmetic before the builtin.
+ * Unary + on the captured operand promotes bit-fields to ordinary values.
+ * The inner choice keeps the sizeof expression valid for integer fetches;
+ * neither candidate is evaluated by sizeof for a non-VLA pointed-to type.
+ */
+#define __stdc_ptr_fetch(name, object, operand, order)                         \
+	name((object), __stdc_pointer_delta(object, operand), (order))
 #define __stdc_gcc_fetch(name, fallback, pointer_expr, object, operand, order) \
 	__extension__({                                                        \
-		__auto_type __stdc_o = (object);                               \
-		__typeof__((void)0, *__stdc_o) __stdc_r;                       \
-		if (__atomic_always_lock_free(sizeof(__stdc_r), 0))            \
-			__stdc_r = __builtin_choose_expr(                      \
-			    __builtin_classify_type(*__stdc_o) == 5,           \
+		__auto_type __stdc_fetch_o = (object);                         \
+		__auto_type __stdc_fetch_operand = +(operand);                 \
+		int __stdc_fetch_order = (order);                              \
+		__typeof__((void)0, *__stdc_fetch_o) __stdc_fetch_r;           \
+		if (__atomic_always_lock_free(sizeof(__stdc_fetch_r), 0))      \
+			__stdc_fetch_r = __builtin_choose_expr(                \
+			    __builtin_classify_type(*__stdc_fetch_o) == 5,     \
 			    (pointer_expr),                                    \
-			    name(__stdc_o, (operand), (order)));               \
+			    name(__stdc_fetch_o, __stdc_fetch_operand,         \
+			        __stdc_fetch_order));                          \
 		else {                                                         \
-			__typeof__((void)0, *__stdc_o) __stdc_v =              \
-			    (__typeof__((void)0, *__stdc_o))(operand);         \
-			fallback(sizeof(__stdc_r), __stdc_o, &__stdc_v,        \
-			    &__stdc_r, (order));                               \
+			__typeof__((void)0, *__stdc_fetch_o) __stdc_fetch_v =  \
+			    __stdc_fetch_value(__stdc_fetch_o,                  \
+			        __stdc_fetch_operand);                              \
+			fallback(sizeof(__stdc_fetch_r), __stdc_fetch_o,       \
+			    &__stdc_fetch_v, &__stdc_fetch_r,                  \
+			    __stdc_fetch_order);                               \
 		}                                                              \
-		__stdc_r;                                                      \
+		__stdc_fetch_r;                                                \
 	})
 #define atomic_fetch_add_explicit(object, operand, order)                      \
 	__stdc_gcc_fetch(__atomic_fetch_add, __atomic_fallback_fetch_add,      \
-	    __stdc_ptr_fetch(object, operand, order, +), object, operand,      \
+	    __stdc_ptr_fetch(__atomic_fetch_add, __stdc_fetch_o,               \
+	        __stdc_fetch_operand, __stdc_fetch_order), object, operand,      \
 	    order)
 #define atomic_fetch_sub_explicit(object, operand, order)                      \
 	__stdc_gcc_fetch(__atomic_fetch_sub, __atomic_fallback_fetch_sub,      \
-	    __stdc_ptr_fetch(object, operand, order, -), object, operand,      \
+	    __stdc_ptr_fetch(__atomic_fetch_sub, __stdc_fetch_o,               \
+	        __stdc_fetch_operand, __stdc_fetch_order), object, operand,      \
 	    order)
 #define atomic_fetch_or_explicit(object, operand, order)                       \
 	__stdc_gcc_fetch(__atomic_fetch_or, __atomic_fallback_fetch_or,        \
-	    __atomic_fetch_or((object), (operand), (order)), object, operand,  \
-	    order)
+	    __atomic_fetch_or(__stdc_fetch_o, __stdc_fetch_operand,            \
+	        __stdc_fetch_order), object, operand, order)
 #define atomic_fetch_xor_explicit(object, operand, order)                      \
 	__stdc_gcc_fetch(__atomic_fetch_xor, __atomic_fallback_fetch_xor,      \
-	    __atomic_fetch_xor((object), (operand), (order)), object, operand, \
-	    order)
+	    __atomic_fetch_xor(__stdc_fetch_o, __stdc_fetch_operand,           \
+	        __stdc_fetch_order), object, operand, order)
 #define atomic_fetch_and_explicit(object, operand, order)                      \
 	__stdc_gcc_fetch(__atomic_fetch_and, __atomic_fallback_fetch_and,      \
-	    __atomic_fetch_and((object), (operand), (order)), object, operand, \
-	    order)
+	    __atomic_fetch_and(__stdc_fetch_o, __stdc_fetch_operand,           \
+	        __stdc_fetch_order), object, operand, order)
 
 #endif /* __clang__ */
 

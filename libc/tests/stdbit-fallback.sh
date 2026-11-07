@@ -24,7 +24,7 @@
 set -eu
 
 CC=${CC:-cc}
-CFLAGS=${CFLAGS:--O2 -std=c23 -Wall -Wextra -Werror -Wpedantic}
+CFLAGS=${CFLAGS:--O2 -std=c11 -Wall -Wextra -Werror -Wpedantic}
 HERE=$(dirname "$0")
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/stdbit-fallback.XXXXXX")
 trap 'rm -rf "$TMP"' EXIT
@@ -37,6 +37,10 @@ cp "$HERE/stdbit-tests.c" "$HERE/stdbit-link-helper.c" "$TMP/"
 
 # Keep the builtins disabled only for our two files: passing -U__has_builtin
 # is not possible (it is an operator), so the generated copies are used.
-${CC} ${CFLAGS} -I"$TMP" "$TMP/stdbit.c" "$TMP/stdbit-link-helper.c" \
-    "$TMP/stdbit-tests.c" -o "$TMP/stdbit-fallback"
-"$TMP/stdbit-fallback"
+for std in c11 c23; do
+	${CC} ${CFLAGS} -std="$std" \
+	    -D'DEF_STRONG(x)=typedef int __stdc_host_strong_##x' \
+	    -I"$TMP" "$TMP/stdbit.c" "$TMP/stdbit-link-helper.c" \
+	    "$TMP/stdbit-tests.c" -o "$TMP/stdbit-fallback-$std"
+	"$TMP/stdbit-fallback-$std"
+done
