@@ -267,8 +267,9 @@ After each change:
    edits to satisfy synchronization. For a project change, at least one
    relevant knowledge artifact must receive a substantive update.
 4. Run `perl scripts/validate-agent-knowledge.pl --scope worktree` and the
-   applicable project checks. For a pull request, CI compares the base and head
-   revisions with `--scope range --base BASE_SHA --head HEAD_SHA`.
+   applicable project checks. For branch review, compare the base and head
+   revisions with `--scope range --base BASE_SHA --head HEAD_SHA`; the GitHub
+   workflow runs only on manual `workflow_dispatch` with `--scope worktree`.
 5. Review the validator output and final diff, then report the synchronization
    result. Warnings require human review; a structural pass does not establish
    semantic relevance.
