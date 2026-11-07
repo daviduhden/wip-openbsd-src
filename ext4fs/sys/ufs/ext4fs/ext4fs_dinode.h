@@ -85,15 +85,15 @@ struct ext4fs_dinode {
 	u_int32_t i_flags;
 	u_int32_t i_version;
 	union {
-		u_int32_t i_block[15];
+		u_int32_t blocks[15];
 		struct {
-			struct ext4fs_extent_header i_extent_header;
+			struct ext4fs_extent_header header;
 			union {
-				struct ext4fs_extent	 i_extent[4];
-				struct ext4fs_extent_idx i_extent_idx[4];
-			};
-		};
-	};
+				struct ext4fs_extent	 extents[4];
+				struct ext4fs_extent_idx indices[4];
+			} entries;
+		} extent;
+	} data;
 	u_int32_t i_nfs_generation;
 	u_int32_t i_extended_attributes_lo;
 	u_int32_t i_size_hi;
@@ -119,6 +119,12 @@ struct ext4fs_dinode {
 	/* 0xA0 */
 } __attribute__((packed));
 
+/* Preserve member spellings while keeping the overlays valid in C99. */
+#define i_block data.blocks
+#define i_extent_header data.extent.header
+#define i_extent data.extent.entries.extents
+#define i_extent_idx data.extent.entries.indices
+
 /*
  * Fixed size of the ext4 inode core, matching the Linux struct
  * ext4_inode.  The on-disk inode may be larger: the region between
@@ -137,18 +143,18 @@ struct ext4fs_dinode {
  * inline extent area so a field edit cannot silently change what is
  * read from or written to disk.
  */
-_Static_assert(sizeof(struct ext4fs_extent_header) == (size_t)12,
-    "ext4 extent header must be 12 bytes");
-_Static_assert(
-    sizeof(struct ext4fs_extent) == (size_t)12, "ext4 extent must be 12 bytes");
-_Static_assert(sizeof(struct ext4fs_extent_idx) == (size_t)12,
-    "ext4 extent index must be 12 bytes");
-_Static_assert(sizeof(((struct ext4fs_dinode *)0)->i_block) == (size_t)60,
-    "ext4 i_block area must be 60 bytes");
-_Static_assert(
-    EXT4FS_DINODE_SIZE == (size_t)160, "ext4 inode core must be 160 bytes");
-_Static_assert(EXT4FS_GOOD_OLD_INODE_SIZE == 128,
-    "ext4 good-old inode size must be 128 bytes");
+typedef char ext4fs_dinode_extent_header_size[
+    (sizeof(struct ext4fs_extent_header) == (size_t)12) ? 1 : -1];
+typedef char ext4fs_dinode_extent_size[
+    (sizeof(struct ext4fs_extent) == (size_t)12) ? 1 : -1];
+typedef char ext4fs_dinode_extent_index_size[
+    (sizeof(struct ext4fs_extent_idx) == (size_t)12) ? 1 : -1];
+typedef char ext4fs_dinode_block_area_size[
+    (sizeof(((struct ext4fs_dinode *)0)->i_block) == (size_t)60) ? 1 : -1];
+typedef char ext4fs_dinode_inode_size[
+    (EXT4FS_DINODE_SIZE == (size_t)160) ? 1 : -1];
+typedef char ext4fs_dinode_old_inode_size[
+    (EXT4FS_GOOD_OLD_INODE_SIZE == 128) ? 1 : -1];
 
 struct ext4fs_dinode_large {
 	struct ext4fs_dinode dinode;

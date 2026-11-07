@@ -28,12 +28,9 @@
 CC =		clang
 DEBUGGER =	lldb
 
-# Sources in this tree are ISO C23.  Declared here as well so that external
-# tooling which scans build metadata recognises the standard for files under
-# components that carry no declaration of their own (ext4fs, stdckdint).
-# Source-tree Makefiles must not inject -std= flags, so the standalone driver
-# is the anchor.
-CFLAGS +=	-std=c23
+# Standalone programs use C99; imported libc API headers have documented
+# compiler extensions (see docs/C99-MIGRATION.md).
+CFLAGS +=	-std=c99
 
 SUBDIR = pax fvwm
 

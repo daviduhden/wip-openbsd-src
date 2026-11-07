@@ -46,7 +46,9 @@ Top-level `make` builds only `pax` and `fvwm`. It does not build `libc`,
 
 ## Procedure
 
-1. **Read the Makefile and `Makefile.inc`.** Confirm `PROG`, `SRCS`, `MAN`,
+1. **Read the Makefile and `Makefile.inc`.** Standalone programs use C99;
+   host tests add `-pedantic-errors`.
+   Confirm `PROG`, `SRCS`, `MAN`,
    `CFLAGS`, `LDADD`, and any `NOOBJ`.
 2. **Create an object directory when the tree supports it.**
    ```sh

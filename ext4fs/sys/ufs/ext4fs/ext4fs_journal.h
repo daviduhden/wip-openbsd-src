@@ -154,18 +154,18 @@ struct jbd2_revoke_header {
  * The packed attribute fixes the layout; these assertions make any
  * change to a field type, size or order a compile-time error.
  */
-_Static_assert(
-    sizeof(struct jbd2_header) == (size_t)12, "jbd2 header must be 12 bytes");
-_Static_assert(sizeof(struct jbd2_superblock) == (size_t)1024,
-    "jbd2 superblock must be 1024 bytes");
-_Static_assert(sizeof(struct jbd2_block_tag3) == (size_t)16,
-    "jbd2 block tag v3 must be 16 bytes");
-_Static_assert(sizeof(struct jbd2_block_tag) == (size_t)12,
-    "jbd2 block tag must be 12 bytes");
-_Static_assert(sizeof(struct jbd2_journal_block_tail) == (size_t)4,
-    "jbd2 checksum tail must be 4 bytes");
-_Static_assert(sizeof(struct jbd2_revoke_header) == (size_t)16,
-    "jbd2 revoke header must be 16 bytes");
+typedef char ext4fs_journal_header_size[
+    (sizeof(struct jbd2_header) == (size_t)12) ? 1 : -1];
+typedef char ext4fs_journal_superblock_size[
+    (sizeof(struct jbd2_superblock) == (size_t)1024) ? 1 : -1];
+typedef char ext4fs_journal_tag3_size[
+    (sizeof(struct jbd2_block_tag3) == (size_t)16) ? 1 : -1];
+typedef char ext4fs_journal_tag_size[
+    (sizeof(struct jbd2_block_tag) == (size_t)12) ? 1 : -1];
+typedef char ext4fs_journal_tail_size[
+    (sizeof(struct jbd2_journal_block_tail) == (size_t)4) ? 1 : -1];
+typedef char ext4fs_journal_revoke_header_size[
+    (sizeof(struct jbd2_revoke_header) == (size_t)16) ? 1 : -1];
 
 /* Revocation table entry */
 struct jbd2_revoke_entry {

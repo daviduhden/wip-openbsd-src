@@ -496,20 +496,21 @@ struct ext4fs_directory_tail {
  * the format constants the driver assumes when it reads and writes the
  * superblock, group descriptors and directory tails.
  */
-_Static_assert((size_t)EXT4FS_SUPER_BLOCK_SIZE == sizeof(struct ext4fs),
-    "ext4 superblock structure must match EXT4FS_SUPER_BLOCK_SIZE");
-_Static_assert(
-    EXT4FS_SUPER_BLOCK_OFFSET == 1024, "ext4 superblock offset must be 1024");
-_Static_assert(sizeof(struct ext4fs_block_group_descriptor) == (size_t)64,
-    "ext4 group descriptor must be 64 bytes");
-_Static_assert(
-    sizeof(struct ext4fs_directory_tail) == (size_t)EXT4FS_DIR_TAIL_SIZE,
-    "ext4 directory tail must match EXT4FS_DIR_TAIL_SIZE");
-_Static_assert(EXT4FS_EXTENT_DEPTH_MAX == EXT4FS_MAX_EXTENT_DEPTH,
-    "ext4 extent depth limits have drifted apart");
-_Static_assert((size_t)EXT4FS_SYMLINK_LEN_MAX ==
-	sizeof(((struct ext4fs_dinode *)0)->i_block),
-    "fast symlink storage must fit the inode i_block area");
+typedef char ext4fs_superblock_size[
+    ((size_t)EXT4FS_SUPER_BLOCK_SIZE == sizeof(struct ext4fs)) ? 1 : -1];
+typedef char ext4fs_superblock_offset[
+    (EXT4FS_SUPER_BLOCK_OFFSET == 1024) ? 1 : -1];
+typedef char ext4fs_group_descriptor_size[
+    (sizeof(struct ext4fs_block_group_descriptor) == (size_t)64) ? 1 : -1];
+typedef char ext4fs_directory_tail_size[
+    (sizeof(struct ext4fs_directory_tail) == (size_t)EXT4FS_DIR_TAIL_SIZE) ?
+	1 : -1];
+typedef char ext4fs_extent_depth[
+    (EXT4FS_EXTENT_DEPTH_MAX == EXT4FS_MAX_EXTENT_DEPTH) ? 1 : -1];
+typedef char ext4fs_symlink_size[
+    ((size_t)EXT4FS_SYMLINK_LEN_MAX ==
+	sizeof(((struct ext4fs_dinode *)0)->i_block)) ?
+	1 : -1];
 
 struct ext4fs_feature {
 	int	    f_mask;

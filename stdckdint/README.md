@@ -112,3 +112,14 @@ OpenBSD base system's preferred permissive license.
 
 On architectures with `__int128` the full boundary grid is additionally
 replayed against an independent arbitrary-precision oracle.
+
+## C99 consumers
+
+The header macros can be used in C99 translation units with the supported
+compiler overflow builtins. `_Bool` is already part of C99. The builtins
+are an intentional compiler extension: retaining their infinite-precision
+mixed-sign semantics and single evaluation is safer than substituting
+unchecked arithmetic. The regression preserves its exact result-type check
+using a negative-array typedef and the compiler's unevaluated type predicate
+in C99 mode. The independent 128-bit oracle remains a documented compiler
+extension. The exported patch must contain the same regression source.

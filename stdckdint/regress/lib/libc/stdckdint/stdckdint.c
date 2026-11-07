@@ -78,6 +78,8 @@ test_boundaries(void)
 	long long	   ll;
 	unsigned short	   h;
 	unsigned long long q;
+	typedef char ckd_result_is_bool[__builtin_types_compatible_p(
+	    __typeof__(ckd_add(&z, (size_t)1, (size_t)2)), _Bool) ? 1 : -1];
 
 	/* int: saturation at both ends, stored value on overflow. */
 	i = 0;
@@ -136,10 +138,8 @@ test_boundaries(void)
 	(void)ckd_add(next_slot(), (size_t)1, (size_t)2);
 	CHECK(slot_index == 1 && slots[0] == 3, "result pointer once");
 
-	/* the macro has type bool */
-	_Static_assert(
-	    _Generic(ckd_add(&z, (size_t)1, (size_t)2), _Bool: 1, default: 0),
-	    "ckd_add() must have type bool");
+	/* Keep the exact result-type check in C99 mode. */
+	(void)sizeof(ckd_result_is_bool);
 }
 
 #ifdef __SIZEOF_INT128__

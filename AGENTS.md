@@ -89,8 +89,7 @@ Apply `style(9)`/KNF to new and modified code:
 - `if`, `for`, `while`, and `switch` braces on the same line as the keyword.
 - `case` labels at the same indentation as `switch`.
 - `return (value);` in imported/KNF code; do not mass-convert existing files.
-- Use `NULL` in imported OpenBSD code and `nullptr` only where the local file
-  already uses C23. Do not mix styles gratuitously.
+- Use `NULL` for null pointers and `<stdbool.h>` for C99 booleans.
 - Use `__dead`, `__packed`, and `__unused` from `<sys/cdefs.h>` where they
   apply.  OpenBSD does not provide `__printflike` or `__nonnull`; write
   `__attribute__((nonnull(...), format(printf, ...)))` as the surrounding
@@ -102,11 +101,12 @@ reformat a whole file or tree to satisfy it. Existing style wins, and
 
 ### C standard
 
-- `pax`, `fvwm`, and the host tests build as ISO C23 (`-std=c23`).
-- `ext4fs` is kernel code and stays C11-compatible (`_Static_assert`), because
-  the OpenBSD kernel build does not select C23.
-- `libc` additions must remain usable by the C11/C17/C23 header matrix and by
-  the OpenBSD libc build.
+- `pax`, `fvwm`, and host tests build as ISO C99 (`-std=c99`).
+- `ext4fs` uses C99 syntax; its source-tree Makefiles leave language flags
+  to the OpenBSD kernel build. Layout assertions use constant-size typedefs.
+- Imported libc implements modern ISO C interfaces. Preserve their API/ABI
+  and required compiler extensions; document exceptions and test language
+  modes separately. See `docs/C99-MIGRATION.md`.
 - When synchronizing `libc/` with OpenBSD `-current`, use the exact revision
   in `libc/UPSTREAM` as BASE and perform a three-way merge against the new
   upstream revision. Preserve local ISO C headers, implementations, tests,

@@ -41,3 +41,13 @@ parsing, checksum verification and inode checksums against the
 production sources.  They are not part of the OpenBSD build graph.  A
 real kernel build and mount test requires an OpenBSD source tree and a
 test image; nothing in this repository performs that.
+
+## C language compatibility
+
+The driver sources use C99 syntax. Fixed on-disk layout checks use named
+array typedefs with a negative bound on failure, so they remain compile-time
+checks without `_Static_assert`. Inode block and extent overlays use named
+C99 unions and structures; member aliases retain existing consumer spelling.
+The packed structure attribute remains a required OpenBSD compiler extension
+for the filesystem ABI. Do not remove it to satisfy an ISO-only checker.
+The source-tree build owns compiler flags; the driver does not set `-std=`.

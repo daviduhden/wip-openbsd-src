@@ -40,7 +40,7 @@ upstream compatibility, and that can be reviewed as a standalone diff.
 - Check local divergence: `git log --oneline -- <path>` and `git diff`.
 - Have the relevant OpenBSD man page available (`style(9)`, `err(3)`,
   `reallocarray(3)`, `pledge(2)`, `unveil(2)`, component-specific pages).
-- Know whether the target is the local C23 build or an upstream C99/C11 file.
+- Know whether the target is the local C99 build or an upstream C99/C11 file.
 
 ## Procedure
 
@@ -49,12 +49,21 @@ upstream compatibility, and that can be reviewed as a standalone diff.
 2. **Identify the contract.** Record inputs, outputs, ownership, locking,
    privileges, and error returns. For library code, check the installed
    prototype and man page.
-3. **Check the language level.** `pax/` and `fvwm/` use `-std=c23`; `ext4fs/`
-   is kernel C11; `libc/` must remain C11/C17/C23-compatible. Do not introduce
-   `nullptr`, `constexpr`, or `static_assert` into upstream-targeted C99 code.
+3. **Check the language level.** Standalone programs and host tests use
+   `-std=c99`; ext4fs leaves flags to the kernel build. Use typedef-based
+   constant-expression layout checks rather than C11 assertions. Exact-type
+   conformance checks must remain unevaluated; a size-only assertion is not
+   equivalent. Synchronize exported patch copies when changing their source.
+   Imported libc modern ISO interfaces retain documented compiler extensions;
+   review
+   `docs/C99-MIGRATION.md` before changing atomics or generic interfaces.
 4. **Apply KNF locally.** Tabs for indentation, 8-column tab stops, function
    return type on its own line, `return (value);` in files that use it. Do not
    reformat untouched lines.
+   When compiler execution is prohibited, restrict validation to source and
+   build metadata inspection; `-fsyntax-only` still invokes the compiler and
+   is not an exception. Report static evidence separately from earlier tests.
+
 5. **Handle allocation and overflow.** Use `reallocarray(3)` or
    `recallocarray(3)`; use `<stdckdint.h>` where the file already does; check
    every multiplication used as a size.
