@@ -10,7 +10,7 @@ X11BASE ?=	/usr/X11R6
 CC =		clang
 DEBUGGER =	lldb
 
-CFLAGS_COMMON =	-std=c23 -Wall -Wextra -Wpedantic \
+CFLAGS_COMMON =	-std=c99 -Wall -Wextra -Wpedantic \
 		-isystem ${.CURDIR}/../../compat \
 		-I${X11BASE}/include \
 		-I${.CURDIR}/../.. -I${.CURDIR}/../../libs

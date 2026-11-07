@@ -64,16 +64,16 @@ int	  Wait = 0;
 int	  FvwmErrorHandler(Display *, XErrorEvent *);
 
 /* assorted gray bitmaps for decorative borders */
-constexpr int g_width = 2;
-constexpr int g_height = 2;
+#define g_width (2)
+#define g_height (2)
 static char   g_bits[] = {0x02, 0x01};
 
-constexpr int l_g_width = 4;
-constexpr int l_g_height = 2;
+#define l_g_width (4)
+#define l_g_height (2)
 static char   l_g_bits[] = {0x08, 0x02};
 
-constexpr int s_g_width = 4;
-constexpr int s_g_height = 4;
+#define s_g_width (4)
+#define s_g_height (4)
 static char   s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
 
 Window	      icon_win; /* icon window */
@@ -131,8 +131,8 @@ initialize_pager(void)
 
 	/* load the font */
 	if (!uselabel ||
-	    ((font = XLoadQueryFont(dpy, font_string)) == nullptr)) {
-		if ((font = XLoadQueryFont(dpy, "fixed")) == nullptr) {
+	    ((font = XLoadQueryFont(dpy, font_string)) == NULL)) {
+		if ((font = XLoadQueryFont(dpy, "fixed")) == NULL) {
 			fprintf(stderr, "%s: No fonts available\n", MyName);
 			exit(1);
 		}
@@ -142,10 +142,10 @@ initialize_pager(void)
 	else
 		label_h = 0;
 
-	if (smallFont != nullptr) {
+	if (smallFont != NULL) {
 		windowFont = XLoadQueryFont(dpy, smallFont);
 	} else
-		windowFont = nullptr;
+		windowFont = NULL;
 
 	/* Load the colors */
 	fore_pix = GetColor(PagerFore);
@@ -257,7 +257,7 @@ initialize_pager(void)
 	XSetWMProtocols(dpy, Scr.Pager_w, &wm_del_win, 1);
 	XSetWMNormalHints(dpy, Scr.Pager_w, &sizehints);
 
-	if ((desk1 == desk2) && (Desks[0].label != nullptr))
+	if ((desk1 == desk2) && (Desks[0].label != NULL))
 		XStringListToTextProperty(&Desks[0].label, 1, &name);
 	else
 		XStringListToTextProperty(&pager_name, 1, &name);
@@ -307,7 +307,7 @@ initialize_pager(void)
 	class1.res_name = MyName;
 	class1.res_class = "FvwmModule";
 
-	XSetWMProperties(dpy, Scr.Pager_w, &name, &name, nullptr, 0, &sizehints,
+	XSetWMProperties(dpy, Scr.Pager_w, &name, &name, NULL, 0, &sizehints,
 	    &wmhints, &class1);
 	XFree((char *)name.value);
 
@@ -366,7 +366,7 @@ initialize_pager(void)
 		gcv.foreground = fore_pix;
 	rvGC = XCreateGC(dpy, Scr.Root, gcm, &gcv);
 
-	if (windowFont != nullptr) {
+	if (windowFont != NULL) {
 		/* Create GC's for doing window labels */
 		gcv.foreground = focus_fore_pix;
 		gcv.background = focus_pix;
@@ -395,13 +395,13 @@ initialize_pager(void)
 		/* if given in config set this now, otherwise it'll be set for
 		   each pager window when drawn later */
 		attributes.background_pixel =
-		    (BalloonBack == nullptr) ? 0 : GetColor(BalloonBack);
+		    (BalloonBack == NULL) ? 0 : GetColor(BalloonBack);
 
 		/* get font for balloon */
 		if ((balloon.font = XLoadQueryFont(dpy, BalloonFont)) ==
-		    nullptr) {
+		    NULL) {
 			if ((balloon.font = XLoadQueryFont(dpy, "fixed")) ==
-			    nullptr) {
+			    NULL) {
 				fprintf(stderr, "%s: No fonts available.\n",
 				    MyName);
 				exit(1);
@@ -443,7 +443,7 @@ initialize_pager(void)
 		/* if fore given in config set now, otherwise it'll be set later
 		 */
 		gcv.foreground =
-		    (BalloonFore == nullptr) ? 0 : GetColor(BalloonFore);
+		    (BalloonFore == NULL) ? 0 : GetColor(BalloonFore);
 
 		BalloonGC =
 		    XCreateGC(dpy, balloon.w, GCFont | GCForeground, &gcv);
@@ -622,7 +622,7 @@ HandleExpose(XEvent *Event)
 		DrawIconGrid(0);
 
 	t = Start;
-	while (t != nullptr) {
+	while (t != NULL) {
 		if (t->PagerView == Event->xany.window) {
 			LabelWindow(t);
 			PictureWindow(t);
@@ -753,7 +753,7 @@ ReConfigureAll(void)
 	PagerWindow *t;
 
 	t = Start;
-	while (t != nullptr) {
+	while (t != NULL) {
 		MoveResizePagerView(t);
 		t = t->next;
 	}
@@ -769,7 +769,7 @@ ReConfigureIcons(void)
 	m = (Scr.VyMax) / Scr.MyDisplayHeight;
 
 	t = Start;
-	while (t != nullptr) {
+	while (t != NULL) {
 		n1 = (Scr.Vx + t->x) / Scr.MyDisplayWidth;
 		m1 = (Scr.Vy + t->y) / Scr.MyDisplayHeight;
 		x = (Scr.Vx + t->x) * (icon_w - n) /
@@ -1174,7 +1174,7 @@ MoveStickyWindows(void)
 	PagerWindow *t;
 
 	t = Start;
-	while (t != nullptr) {
+	while (t != NULL) {
 		if (((t->flags & ICONIFIED) && (t->flags & StickyIcon)) ||
 		    (t->flags & STICKY)) {
 			if (t->desk != Scr.CurrentDesk) {
@@ -1300,21 +1300,21 @@ MoveWindow(XEvent *Event)
 	int	     row, column;
 
 	t = Start;
-	while ((t != nullptr) && (t->PagerView != Event->xbutton.subwindow))
+	while ((t != NULL) && (t->PagerView != Event->xbutton.subwindow))
 		t = t->next;
 
-	if (t == nullptr) {
+	if (t == NULL) {
 		t = Start;
 		while (
-		    (t != nullptr) && (t->IconView != Event->xbutton.subwindow))
+		    (t != NULL) && (t->IconView != Event->xbutton.subwindow))
 			t = t->next;
-		if (t != nullptr) {
+		if (t != NULL) {
 			IconMoveWindow(Event, t);
 			return;
 		}
 	}
 
-	if (t == nullptr)
+	if (t == NULL)
 		return;
 
 	NewDesk = t->desk - desk1;
@@ -1529,13 +1529,13 @@ LabelWindow(PagerWindow *t)
 	XGCValues     Globalgcv;
 	unsigned long Globalgcm;
 
-	if (windowFont == nullptr) {
+	if (windowFont == NULL) {
 		return;
 	}
 	if (MiniIcons && t->mini_icon.picture && (t->PagerView != None)) {
 		return; /* will draw picture instead... */
 	}
-	if (t->icon_name == nullptr) {
+	if (t->icon_name == NULL) {
 		return;
 	}
 	if (t == FocusWin) {
@@ -1562,13 +1562,13 @@ LabelIconWindow(PagerWindow *t)
 	XGCValues     Globalgcv;
 	unsigned long Globalgcm;
 
-	if (windowFont == nullptr) {
+	if (windowFont == NULL) {
 		return;
 	}
 	if (MiniIcons && t->mini_icon.picture && (t->PagerView != None)) {
 		return; /* will draw picture instead... */
 	}
-	if (t->icon_name == nullptr) {
+	if (t->icon_name == NULL) {
 		return;
 	}
 
@@ -1699,7 +1699,7 @@ IconMoveWindow(XEvent *Event, PagerWindow *t)
 	int    moved = 0;
 	int    KeepMoving = 0;
 
-	if (t == nullptr)
+	if (t == NULL)
 		return;
 
 	n = (Scr.VxMax) / Scr.MyDisplayWidth;
@@ -1821,7 +1821,7 @@ MapBalloonWindow(XEvent *event)
 	t = Start;
 
 	while (!matched_window) {
-		if (t == nullptr) {
+		if (t == NULL) {
 			return;
 		} else if (t->PagerView == event->xcrossing.window) {
 			view = t->PagerView;
@@ -1890,7 +1890,7 @@ MapBalloonWindow(XEvent *event)
 	XConfigureWindow(dpy, balloon.w, CWX | CWY | CWWidth, &window_changes);
 
 	/* if background not set in config make it match pager window */
-	if (BalloonBack == nullptr)
+	if (BalloonBack == NULL)
 		XSetWindowBackground(dpy, balloon.w, t->back);
 
 	XMapRaised(dpy, balloon.w);
@@ -1911,7 +1911,7 @@ DrawInBalloonWindow(void)
 	extern char *BalloonFore;
 
 	/* if foreground not set in config make it match pager window */
-	if (BalloonFore == nullptr)
+	if (BalloonFore == NULL)
 		XSetForeground(dpy, BalloonGC, balloon.pw->text);
 
 	XDrawString(dpy, balloon.w, BalloonGC, 2, balloon.font->ascent,

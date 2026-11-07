@@ -24,7 +24,7 @@
 #include <string.h>
 // clang-format on
 
-[[nodiscard]] static inline void *
+__attribute__((__warn_unused_result__)) static inline void *
 xmalloc(size_t size)
 {
 	void *ptr;
@@ -32,12 +32,12 @@ xmalloc(size_t size)
 	if (size == 0)
 		size = 1;
 	ptr = malloc(size);
-	if (ptr == nullptr)
+	if (ptr == NULL)
 		err(1, "malloc");
 	return ptr;
 }
 
-[[nodiscard]] static inline void *
+__attribute__((__warn_unused_result__)) static inline void *
 xcalloc(size_t nmemb, size_t size)
 {
 	void *ptr;
@@ -47,12 +47,12 @@ xcalloc(size_t nmemb, size_t size)
 		size = 1;
 	}
 	ptr = calloc(nmemb, size);
-	if (ptr == nullptr)
+	if (ptr == NULL)
 		err(1, "calloc");
 	return ptr;
 }
 
-[[nodiscard]] static inline void *
+__attribute__((__warn_unused_result__)) static inline void *
 xrealloc(void *ptr, size_t size)
 {
 	void *newptr;
@@ -60,12 +60,12 @@ xrealloc(void *ptr, size_t size)
 	if (size == 0)
 		size = 1;
 	newptr = realloc(ptr, size);
-	if (newptr == nullptr)
+	if (newptr == NULL)
 		err(1, "realloc");
 	return newptr;
 }
 
-[[nodiscard]] static inline void *
+__attribute__((__warn_unused_result__)) static inline void *
 xreallocarray(void *ptr, size_t nmemb, size_t size)
 {
 	size_t total;
@@ -75,24 +75,24 @@ xreallocarray(void *ptr, size_t nmemb, size_t size)
 	return xrealloc(ptr, total);
 }
 
-[[nodiscard]] static inline char *
+__attribute__((__warn_unused_result__)) static inline char *
 xstrdup(const char *s)
 {
 	char *copy;
 
 	copy = strdup(s);
-	if (copy == nullptr)
+	if (copy == NULL)
 		err(1, "strdup");
 	return copy;
 }
 
-[[nodiscard]] static inline char *
+__attribute__((__warn_unused_result__)) static inline char *
 xstrndup(const char *s, size_t n)
 {
 	char *copy;
 
 	copy = strndup(s, n);
-	if (copy == nullptr)
+	if (copy == NULL)
 		err(1, "strndup");
 	return copy;
 }

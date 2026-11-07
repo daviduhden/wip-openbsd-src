@@ -47,7 +47,7 @@ setEdgeThickness(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	int val, n;
 
-	n = GetIntegerArguments(action, nullptr, &val, 1);
+	n = GetIntegerArguments(action, NULL, &val, 1);
 	if (n != 1) {
 		fvwm_msg(ERR, "setEdgeThickness",
 		    "EdgeThickness requires 1 numeric argument, found %d args",
@@ -583,7 +583,7 @@ MoveViewport(int newx, int newy, Bool grab)
 				t1 = t1->stack_prev;
 			}
 		}
-		for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+		for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 			t->tmpflags.ViewportMoved =
 			    False; /* Clear double move blocker. */
 			/* If its an icon, and its sticking, autoplace it so
@@ -671,7 +671,7 @@ UpdateScreenSize(int new_width, int new_height)
 	Scr.Vx = page_x * new_width;
 	Scr.Vy = page_y * new_height;
 
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		int dx, dy, px, py, deltax, deltay;
 
 		if (t->flags & STICKY)
@@ -746,7 +746,7 @@ GetDeskNumber(char *action)
 	int val[4];
 	int min, max;
 
-	n = GetIntegerArguments(action, nullptr, &(val[0]), 4);
+	n = GetIntegerArguments(action, NULL, &(val[0]), 4);
 	if (n <= 0)
 		return Scr.CurrentDesk;
 	if (n == 1)
@@ -883,7 +883,7 @@ changeDesks(int desk)
 	}
 
 	MyXUngrabServer(dpy);
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		/* If its an icon, and its sticking, autoplace it so
 		 * that it doesn't wind up on top a a stationary
 		 * icon */
@@ -905,7 +905,7 @@ changeDesks(int desk)
 	  SetFocus(StickyWin->w, StickyWin,1);*/
 	else
 #endif
-		SetFocus(Scr.NoFocusWin, nullptr, 1);
+		SetFocus(Scr.NoFocusWin, NULL, 1);
 }
 
 /**************************************************************************
@@ -923,7 +923,7 @@ changeWindowsDesk(XEvent *eventp, Window w, FvwmWindow *t,
 	if (DeferExecution(eventp, &w, &t, &context, SELECT, ButtonRelease))
 		return;
 
-	if (t == nullptr)
+	if (t == NULL)
 		return;
 
 	desk = GetDeskNumber(action);
@@ -1013,7 +1013,7 @@ goto_page_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)Module;
 	int val[2], n, x, y;
 
-	n = GetIntegerArguments(action, nullptr, val, 2);
+	n = GetIntegerArguments(action, NULL, val, 2);
 	if (n != 2) {
 		fvwm_msg(
 		    ERR, "goto_page_func", "GotoPage requires two arguments");

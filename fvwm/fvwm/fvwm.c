@@ -37,10 +37,11 @@
 // clang-format on
 #endif /* SHAPE */
 
-constexpr int MAXHOSTNAME = 255;
+#define MAXHOSTNAME (255)
 
 #ifndef lint
-[[maybe_unused]] static char sccsid[] = "@(#)fvwm.c " VERSION " fvwm";
+static char sccsid[] __attribute__((__unused__)) =
+    "@(#)fvwm.c " VERSION " fvwm";
 #endif
 
 int master_pid; /* process number of 1st fvwm process */
@@ -53,7 +54,7 @@ Bool   fFvwmInStartup = True; /* Set to False when startup has finished */
 
 char *default_config_command = "Read " FVWMRC;
 
-constexpr int MAX_CFG_CMDS = 10;
+#define MAX_CFG_CMDS (10)
 static char  *config_commands[MAX_CFG_CMDS];
 static int    num_config_commands = 0;
 
@@ -89,12 +90,12 @@ int    g_argc;
 static char execpath[PATH_MAX];
 
 /* assorted gray bitmaps for decorative borders */
-constexpr int g_width = 2;
-constexpr int g_height = 2;
+#define g_width (2)
+#define g_height (2)
 static char   g_bits[] = {0x02, 0x01};
 
-constexpr int l_g_width = 4;
-constexpr int l_g_height = 2;
+#define l_g_width (4)
+#define l_g_height (2)
 static char   l_g_bits[] = {0x08, 0x02};
 
 #ifdef SHAPE
@@ -106,7 +107,7 @@ long	      isIconicState = 0;
 extern XEvent Event;
 Bool	      Restarting = False;
 int	      fd_width, x_fd;
-char	     *display_name = nullptr;
+char	     *display_name = NULL;
 
 typedef enum { FVWM_RUNNING = 0, FVWM_DONE, FVWM_RESTART } FVWM_STATE;
 
@@ -242,7 +243,7 @@ main(int argc, char **argv)
 
 		sigact.sa_handler =
 		    DeadPipe; /* This handler does nothing ??? */
-		sigaction(SIGPIPE, &sigact, nullptr);
+		sigaction(SIGPIPE, &sigact, NULL);
 
 		/*
 		 * If we need to restart then we need to stop what we're doing
@@ -255,7 +256,7 @@ main(int argc, char **argv)
 		sigact.sa_flags = 0;
 #endif
 		sigact.sa_handler = Restart;
-		sigaction(SIGUSR1, &sigact, nullptr);
+		sigaction(SIGUSR1, &sigact, NULL);
 	}
 #else
 	/* We don't have sigaction(), so fall back to less robust methods.  */
@@ -296,16 +297,16 @@ main(int argc, char **argv)
 				 * number.
 				 */
 				cp = strchr(message, ':');
-				if (cp != nullptr) {
+				if (cp != NULL) {
 					cp = strchr(cp, '.');
-					if (cp != nullptr)
+					if (cp != NULL)
 						*cp = '\0'; /* truncate at
 							       display part */
 				}
 				snprintf(message + strlen(message),
 				    sizeof(message) - strlen(message), ".%d",
 				    myscreen);
-				if ((dpy = XOpenDisplay(message)) == nullptr)
+				if ((dpy = XOpenDisplay(message)) == NULL)
 					errx(1, "can't open display %s",
 					    XDisplayName(message));
 				Scr.screen = myscreen;
@@ -378,7 +379,7 @@ main(int argc, char **argv)
 
 	/* Make sure property priority colors is empty */
 	XChangeProperty(dpy, Scr.Root, _XA_MIT_PRIORITY_COLORS, XA_CARDINAL, 32,
-	    PropModeReplace, nullptr, 0);
+	    PropModeReplace, NULL, 0);
 
 	XSetErrorHandler(CatchRedirectError);
 	XSetIOErrorHandler(CatchFatal);
@@ -409,12 +410,12 @@ main(int argc, char **argv)
 		int i;
 		for (i = 0; i < num_config_commands; i++) {
 			ExecuteFunction(
-			    config_commands[i], nullptr, &Event, C_ROOT, 1);
+			    config_commands[i], NULL, &Event, C_ROOT, 1);
 			free(config_commands[i]);
 		}
 	} else {
 		ExecuteFunction(
-		    default_config_command, nullptr, &Event, C_ROOT, 1);
+		    default_config_command, NULL, &Event, C_ROOT, 1);
 	}
 	DBUG("main", "Done running config_commands");
 
@@ -521,7 +522,7 @@ main(int argc, char **argv)
 			err(1, "unveil /etc/X11/fvwm");
 		if (unveil("/tmp", "rwc") == -1)
 			err(1, "unveil /tmp");
-		if (home != nullptr && *home != '\0' &&
+		if (home != NULL && *home != '\0' &&
 		    unveil(home, "rwc") == -1)
 			err(1, "unveil %s", home);
 		if (unveil("/etc", "r") == -1)
@@ -554,13 +555,13 @@ main(int argc, char **argv)
 
 			strlcpy(dir, execpath, sizeof(dir));
 			slash = strrchr(dir, '/');
-			if (slash != nullptr && slash != dir) {
+			if (slash != NULL && slash != dir) {
 				*slash = '\0';
 				if (unveil(dir, "rx") == -1 && errno != ENOENT)
 					err(1, "unveil %s", dir);
 			}
 		}
-		if (unveil(nullptr, nullptr) == -1)
+		if (unveil(NULL, NULL) == -1)
 			err(1, "unveil");
 
 		/* Modules, fallback commands and Restart execute later. Keep
@@ -571,7 +572,7 @@ main(int argc, char **argv)
 	HandleEvents();
 	switch (fvwmRunState) {
 	case FVWM_DONE:
-		Done(0, nullptr); /* does not return */
+		Done(0, NULL); /* does not return */
 
 	case FVWM_RESTART:
 		Done(1, *g_argv); /* does not return */
@@ -604,18 +605,18 @@ StartupStuff(void)
 	/* migo (02-Oct-1999): execute StartFunction */
 	if (FindPopup("StartFunction")) {
 		ExecuteFunction(
-		    "Function StartFunction", nullptr, &Event, C_ROOT, 1);
+		    "Function StartFunction", NULL, &Event, C_ROOT, 1);
 	}
 
 	if (Restarting) {
 		mr = FindPopup("RestartFunction");
-		if (mr != nullptr)
-			ExecuteFunction("Function RestartFunction", nullptr,
+		if (mr != NULL)
+			ExecuteFunction("Function RestartFunction", NULL,
 			    &Event, C_ROOT, 1);
 	} else {
 		mr = FindPopup("InitFunction");
-		if (mr != nullptr)
-			ExecuteFunction("Function InitFunction", nullptr,
+		if (mr != NULL)
+			ExecuteFunction("Function InitFunction", NULL,
 			    &Event, C_ROOT, 1);
 	}
 } /* StartupStuff */
@@ -699,7 +700,7 @@ CaptureAllWindows(void)
 					_XA_WM_STATE, 0L, 3L, False,
 					_XA_WM_STATE, &atype, &aformat, &nitems,
 					&bytes_remain, &prop) == Success) {
-					if (prop != nullptr) {
+					if (prop != NULL) {
 						if (aformat == 32 && nitems >= 1)
 							isIconicState =
 							    *(long *)prop;
@@ -758,11 +759,11 @@ SetRCDefaults(void)
 	    "+ \"Exit FVWM\" Quit", "Mouse 1 R N Popup builtin_menu",
 	    "AddToFunc WindowListFunc \"I\" WindowId $0 Iconify -1",
 	    "+ \"I\" WindowId $0 FlipFocus", "+ \"I\" WindowId $0 Raise",
-	    "+ \"I\" WindowId $0 WarpToWindow 5p 5p", nullptr};
+	    "+ \"I\" WindowId $0 WarpToWindow 5p 5p", NULL};
 	int   i = 0;
 
 	while (defaults[i]) {
-		ExecuteFunction(defaults[i], nullptr, &Event, C_ROOT, 1);
+		ExecuteFunction(defaults[i], NULL, &Event, C_ROOT, 1);
 		i++;
 	}
 } /* SetRCDefaults */
@@ -796,11 +797,11 @@ MappedNotOverride(Window w)
 	if ((w == Scr.NoFocusWin) || (!XGetWindowAttributes(dpy, w, &wa)))
 		return False;
 
-	prop = nullptr;
+	prop = NULL;
 	if (XGetWindowProperty(dpy, w, _XA_WM_STATE, 0L, 3L, False,
 		_XA_WM_STATE, &atype, &aformat, &nitems, &bytes_remain,
 		&prop) == Success) {
-		if (prop != nullptr) {
+		if (prop != NULL) {
 			if (aformat == 32 && nitems >= 1)
 				isIconicState = *(long *)prop;
 			XFree(prop);
@@ -892,7 +893,7 @@ newhandler(int sig)
 #ifdef HAVE_SIGACTION
 	struct sigaction sigact;
 
-	sigaction(sig, nullptr, &sigact);
+	sigaction(sig, NULL, &sigact);
 	if (sigact.sa_handler != SIG_IGN) {
 		/*
 		 * SigDone requires that we QUIT as soon as possible afterwards,
@@ -905,7 +906,7 @@ newhandler(int sig)
 		sigact.sa_flags = 0;
 #endif
 		sigact.sa_handler = SigDone;
-		sigaction(sig, &sigact, nullptr);
+		sigaction(sig, &sigact, NULL);
 	}
 #else
 	/* We don't have sigaction(), so use less robust methods.  */
@@ -1221,8 +1222,7 @@ DestroyFvwmDecor(FvwmDecor *fl)
 	 * The loop below frees exactly three titlebar button states, so
 	 * the build configuration must keep MaxButtonState at three.
 	 */
-	static_assert(MaxButtonState == 3,
-	    "DestroyFvwmDecor assumes three titlebar button states");
+	(void)sizeof(char[MaxButtonState == 3 ? 1 : -1]);
 
 	/* reset to default button set (frees allocated mem) */
 	ResetAllButtons(fl);
@@ -1238,18 +1238,18 @@ DestroyFvwmDecor(FvwmDecor *fl)
 #ifdef USEDECOR
 	if (fl->tag) {
 		free(fl->tag);
-		fl->tag = nullptr;
+		fl->tag = NULL;
 	}
 #endif
-	if (fl->HiReliefGC != nullptr) {
+	if (fl->HiReliefGC != NULL) {
 		XFreeGC(dpy, fl->HiReliefGC);
-		fl->HiReliefGC = nullptr;
+		fl->HiReliefGC = NULL;
 	}
-	if (fl->HiShadowGC != nullptr) {
+	if (fl->HiShadowGC != NULL) {
 		XFreeGC(dpy, fl->HiShadowGC);
-		fl->HiShadowGC = nullptr;
+		fl->HiShadowGC = NULL;
 	}
-	if (fl->WindowFont.font != nullptr)
+	if (fl->WindowFont.font != NULL)
 		XFreeFont(dpy, fl->WindowFont.font);
 }
 
@@ -1264,14 +1264,14 @@ InitFvwmDecor(FvwmDecor *fl)
 	int	   i;
 	ButtonFace tmpbf;
 
-	fl->HiReliefGC = nullptr;
-	fl->HiShadowGC = nullptr;
+	fl->HiReliefGC = NULL;
+	fl->HiShadowGC = NULL;
 	fl->TitleHeight = 0;
-	fl->WindowFont.font = nullptr;
+	fl->WindowFont.font = NULL;
 
 #ifdef USEDECOR
-	fl->tag = nullptr;
-	fl->next = nullptr;
+	fl->tag = NULL;
+	fl->next = NULL;
 
 	if (fl != &Scr.DefaultDecor) {
 		extern void AddToDecor(FvwmDecor *, char *);
@@ -1283,7 +1283,7 @@ InitFvwmDecor(FvwmDecor *fl)
 	/* initialize title-bar button styles */
 	tmpbf.style = SimpleButton;
 #ifdef MULTISTYLE
-	tmpbf.next = nullptr;
+	tmpbf.next = NULL;
 #endif
 	for (i = 0; i < 5; ++i) {
 		int j = 0;
@@ -1302,7 +1302,7 @@ InitFvwmDecor(FvwmDecor *fl)
 	for (i = 0; i < MaxButtonState; ++i) {
 		fl->titlebar.state[i].style = SimpleButton;
 #ifdef MULTISTYLE
-		fl->titlebar.state[i].next = nullptr;
+		fl->titlebar.state[i].next = NULL;
 #endif
 	}
 
@@ -1311,8 +1311,8 @@ InitFvwmDecor(FvwmDecor *fl)
 	fl->BorderStyle.active.style = SimpleButton;
 	fl->BorderStyle.inactive.style = SimpleButton;
 #ifdef MULTISTYLE
-	fl->BorderStyle.active.next = nullptr;
-	fl->BorderStyle.inactive.next = nullptr;
+	fl->BorderStyle.active.next = NULL;
+	fl->BorderStyle.inactive.next = NULL;
 #endif
 #endif
 }
@@ -1330,16 +1330,16 @@ InitVariables(void)
 	MenuContext = XUniqueContext();
 
 	/* initialize some lists */
-	Scr.AllBindings = nullptr;
-	Scr.TheList = nullptr;
+	Scr.AllBindings = NULL;
+	Scr.TheList = NULL;
 
-	Scr.menus.all = nullptr;
-	Scr.menus.DefaultStyle = nullptr;
-	Scr.menus.LastStyle = nullptr;
+	Scr.menus.all = NULL;
+	Scr.menus.DefaultStyle = NULL;
+	Scr.menus.LastStyle = NULL;
 	Scr.menus.PopupDelay10ms = DEFAULT_POPUP_DELAY;
 	Scr.menus.DoubleClickTime = DEFAULT_MENU_CLICKTIME;
 
-	Scr.DefaultIcon = nullptr;
+	Scr.DefaultIcon = NULL;
 
 	Scr.StdColors.fore = 0;
 	Scr.StdColors.back = 0;
@@ -1374,13 +1374,13 @@ InitVariables(void)
 	Scr.NoBoundaryWidth = 1;
 	Scr.BoundaryWidth = BOUNDARY_WIDTH;
 	Scr.CornerWidth = CORNER_WIDTH;
-	Scr.Hilite = nullptr;
-	Scr.Focus = nullptr;
-	Scr.PreviousFocus = nullptr;
-	Scr.Ungrabbed = nullptr;
+	Scr.Hilite = NULL;
+	Scr.Focus = NULL;
+	Scr.PreviousFocus = NULL;
+	Scr.Ungrabbed = NULL;
 
-	Scr.StdFont.font = nullptr;
-	Scr.IconFont.font = nullptr;
+	Scr.StdFont.font = NULL;
+	Scr.IconFont.font = NULL;
 
 #ifndef NON_VIRTUAL
 	Scr.VxMax = 2 * Scr.MyDisplayWidth;
@@ -1406,7 +1406,7 @@ InitVariables(void)
 		if ((XGetWindowProperty(dpy, Scr.Root, _XA_WM_DESKTOP, 0L, 1L,
 			True, _XA_WM_DESKTOP, &atype, &aformat, &nitems,
 			&bytes_remain, &prop)) == Success) {
-			if (prop != nullptr) {
+			if (prop != NULL) {
 				if (aformat == 32 && nitems >= 1) {
 					Restarting = True;
 					Scr.CurrentDesk =
@@ -1518,9 +1518,9 @@ Done(int restart, char *command)
 #endif
 
 	mr = FindPopup("ExitFunction");
-	if (mr != nullptr)
+	if (mr != NULL)
 		ExecuteFunction(
-		    "Function ExitFunction", nullptr, &Event, C_ROOT, 1);
+		    "Function ExitFunction", NULL, &Event, C_ROOT, 1);
 
 	/* Close all my pipes */
 	ClosePipes();
@@ -1541,10 +1541,10 @@ Done(int restart, char *command)
 			char *my_argv[10];
 			int   i, j;
 
-			if (strstr(command, "fvwm") != nullptr) {
+			if (strstr(command, "fvwm") != NULL) {
 				i = 0;
 				j = 0;
-				while ((g_argv[j] != nullptr) && (i < 8)) {
+				while ((g_argv[j] != NULL) && (i < 8)) {
 					if (strcmp(g_argv[j], "-s") != 0) {
 						my_argv[i] = g_argv[j];
 						i++;
@@ -1554,10 +1554,10 @@ Done(int restart, char *command)
 				}
 				my_argv[i++] = "-s";
 				while (i < 10)
-					my_argv[i++] = nullptr;
+					my_argv[i++] = NULL;
 			} else {
 				my_argv[0] = command;
-				my_argv[1] = nullptr;
+				my_argv[1] = NULL;
 			}
 
 			sleep(1);
@@ -1660,7 +1660,7 @@ SaveDesktopState(void)
 	FvwmWindow   *t;
 	unsigned long data[1];
 
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		data[0] = (unsigned long)t->Desk;
 		XChangeProperty(dpy, t->w, _XA_WM_DESKTOP, _XA_WM_DESKTOP, 32,
 		    PropModeReplace, (unsigned char *)data, 1);

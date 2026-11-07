@@ -60,9 +60,9 @@ typedef PropMotifWmHints PropMwmHints;
 
 /* values for MwmHints.input_mode */
 #define MWM_INPUT_MODELESS 0
-constexpr int MWM_INPUT_PRIMARY_APPLICATION_MODAL = 1;
-constexpr int MWM_INPUT_SYSTEM_MODAL = 2;
-constexpr int MWM_INPUT_FULL_APPLICATION_MODAL = 3;
+#define MWM_INPUT_PRIMARY_APPLICATION_MODAL (1)
+#define MWM_INPUT_SYSTEM_MODAL (2)
+#define MWM_INPUT_FULL_APPLICATION_MODAL (3)
 
 /* bit definitions for MwmHints.decorations */
 #define MWM_DECOR_ALL (1L << 0)
@@ -77,7 +77,7 @@ constexpr int MWM_INPUT_FULL_APPLICATION_MODAL = 3;
 #define PROP_MWM_HINTS_ELEMENTS PROP_MOTIF_WM_HINTS_ELEMENTS
 
 /* default values for configuration parameters */
-constexpr int DEFMAXWIDTH = 10000;
+#define DEFMAXWIDTH (10000)
 #define DEFMINWIDTH 0
 
 /*************************************************************************
@@ -87,7 +87,7 @@ void		  MainEventLoop(void);
 void		  ReadFvwmPipe(void);
 void		  ProcessMessage(unsigned long type, unsigned long *body);
 void		  SendFvwmPipe(char *message, unsigned long window);
-[[noreturn]] void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) void DeadPipe(int nonsense);
 void		  MakeMeWindow(void);
 void		  WaitForExpose(void);
 void		  RedrawWindow(int force);

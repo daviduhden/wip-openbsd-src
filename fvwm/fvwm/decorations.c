@@ -108,21 +108,21 @@ GetMwmHints(FvwmWindow *t)
 	int	       actual_format;
 	Atom	       actual_type;
 	unsigned long  nitems, bytesafter;
-	unsigned char *prop = nullptr;
+	unsigned char *prop = NULL;
 
 	if (XGetWindowProperty(dpy, t->w, _XA_MwmAtom, 0L, 20L, False,
 		_XA_MwmAtom, &actual_type, &actual_format, &nitems, &bytesafter,
 		&prop) == Success) {
-		if (prop != nullptr && actual_format == 32 &&
+		if (prop != NULL && actual_format == 32 &&
 		    nitems >= PROP_MOTIF_WM_HINTS_ELEMENTS) {
 			t->mwm_hints = (int *)prop;
 			return;
 		}
-		if (prop != nullptr)
+		if (prop != NULL)
 			XFree(prop);
 	}
 
-	t->mwm_hints = nullptr;
+	t->mwm_hints = NULL;
 }
 
 /****************************************************************************
@@ -488,7 +488,7 @@ check_if_function_allowed(int function, FvwmWindow *t, MenuItem *mi)
 		case F_DELETE:
 			if (!(t->flags & DoesWmDeleteWindow))
 				return 0;
-			[[fallthrough]];
+			/* FALLTHROUGH */
 		case F_CLOSE:
 			if (!(t->functions & MWM_FUNC_CLOSE))
 				return 0;
@@ -590,5 +590,5 @@ check_allowed_function(MenuItem *mi)
 int
 check_allowed_function2(int function, FvwmWindow *t)
 {
-	return check_if_function_allowed(function, t, nullptr);
+	return check_if_function_allowed(function, t, NULL);
 }

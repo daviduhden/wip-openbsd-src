@@ -8,6 +8,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -46,7 +48,7 @@
 char *MyName;
 int   fd[2];
 
-struct list *list_root = nullptr;
+struct list *list_root = NULL;
 
 int ScreenWidth, ScreenHeight;
 int Mscreen;
@@ -57,7 +59,7 @@ static char  *MkNum(const char *name, int def);
 static int    cpp_process(Display *display, const char *host, char *options,
     const char *config_file, int keep_output);
 static int    is_cpp_linemarker(const char *line);
-constexpr int MAXHOSTNAME = 255;
+#define MAXHOSTNAME (255)
 #define EXTRA 20
 
 char *cpp_prog = FVWM_CPP; /* Name of the cpp program */
@@ -77,8 +79,8 @@ main(int argc, char **argv)
 {
 	Display *dpy; /* which display are we talking to */
 	char	*temp, *s;
-	char	*display_name = nullptr;
-	char	*filename = nullptr;
+	char	*display_name = NULL;
+	char	*filename = NULL;
 	int	 i, cpp_debug = 0;
 
 	cpp_options[0] = '\0';
@@ -87,7 +89,7 @@ main(int argc, char **argv)
 	temp = argv[0];
 
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -152,7 +154,7 @@ main(int argc, char **argv)
 			filename[i] = 0;
 		}
 
-	if (filename == nullptr) {
+	if (filename == NULL) {
 		fprintf(
 		    stderr, "%s: no configuration file specified\n", MyName);
 		exit(1);
@@ -162,7 +164,7 @@ main(int argc, char **argv)
 	unveil_home_read("FvwmCpp");
 	if (unveil("/bin/sh", "rx") == -1 ||
 	    unveil("/usr/libexec/ld.so", "rx") == -1 ||
-	    unveil(nullptr, nullptr) == -1)
+	    unveil(NULL, NULL) == -1)
 		err(1, "FvwmCpp: unveil");
 
 	if (cpp_process(dpy, display_name, cpp_options, filename, cpp_debug) !=
@@ -184,9 +186,9 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 	struct hostent *hostname;
 	char	       *vc;
 	struct passwd  *pwent;
-	FILE	       *cpp_in = nullptr;
-	FILE	       *cpp_out = nullptr;
-	FILE	       *mirror = nullptr;
+	FILE	       *cpp_in = NULL;
+	FILE	       *cpp_out = NULL;
+	FILE	       *mirror = NULL;
 	int		to_child[2];
 	int		from_child[2];
 	pid_t		pid;
@@ -196,7 +198,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 	int		created_temp = 0;
 	char		kept_path[BUFSIZ];
 	size_t		line_cap = 1024;
-	char	       *linebuf = nullptr;
+	char	       *linebuf = NULL;
 	size_t		line_len = 0;
 	unsigned char	chunk[BUFSIZ];
 	size_t		nread;
@@ -206,12 +208,12 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 
 	if (cpp_outfile[0] != '\0') {
 		mirror = fopen(cpp_outfile, "w");
-		if (mirror == nullptr)
+		if (mirror == NULL)
 			fprintf(stderr, "%s: unable to open %s for writing\n",
 			    MyName, cpp_outfile);
 	} else if (keep_output) {
 		const char *tmpdir = getenv("TMPDIR");
-		if (tmpdir == nullptr)
+		if (tmpdir == NULL)
 			tmpdir = "/tmp";
 		strlcpy(tmp_name, tmpdir, sizeof(tmp_name));
 		strlcat(tmp_name, "/fvwmcppXXXXXXXXXX", sizeof(tmp_name));
@@ -219,7 +221,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 			int fd_tmp = mkstemp(tmp_name);
 			if (fd_tmp >= 0) {
 				mirror = fdopen(fd_tmp, "w");
-				if (mirror != nullptr) {
+				if (mirror != NULL) {
 					strlcpy(kept_path, tmp_name,
 					    sizeof(kept_path));
 					created_temp = 1;
@@ -240,7 +242,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 	}
 
 	snprintf(command, sizeof(command), "%s %s", cpp_prog,
-	    (cpp_opts != nullptr) ? cpp_opts : "");
+	    (cpp_opts != NULL) ? cpp_opts : "");
 
 	pid = fork();
 	if (pid == -1) {
@@ -261,7 +263,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 		close(to_child[1]);
 		close(from_child[0]);
 		close(from_child[1]);
-		execl("/bin/sh", "sh", "-c", command, (char *)nullptr);
+		execl("/bin/sh", "sh", "-c", command, (char *)NULL);
 		_exit(127);
 	}
 
@@ -271,7 +273,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 
 	cpp_in = fdopen(to_child[1], "w");
 	cpp_out = fdopen(from_child[0], "r");
-	if (cpp_in == nullptr || cpp_out == nullptr) {
+	if (cpp_in == NULL || cpp_out == NULL) {
 		perror("fdopen in cpp_process");
 		if (cpp_in)
 			fclose(cpp_in);
@@ -283,7 +285,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 			close(from_child[0]);
 		if (mirror)
 			fclose(mirror);
-		waitpid(pid, nullptr, 0);
+		waitpid(pid, NULL, 0);
 		return -1;
 	}
 
@@ -306,7 +308,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 	hostname = gethostbyname(client);
 	strlcpy(server, XDisplayName(host), sizeof(server));
 	colon = strchr(server, ':');
-	if (colon != nullptr)
+	if (colon != NULL)
 		*colon = '\0';
 	if ((server[0] == '\0') || (!strcmp(server, "unix")))
 		strlcpy(server, client, sizeof(server));
@@ -328,7 +330,7 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 
 	{
 		const char *home = getenv("HOME");
-		WRITE_DEF("HOME", (home != nullptr) ? home : "");
+		WRITE_DEF("HOME", (home != NULL) ? home : "");
 	}
 
 	WRITE_NUM("VERSION", ProtocolVersion(display));
@@ -477,7 +479,7 @@ is_cpp_linemarker(const char *line)
 {
 	const unsigned char *p;
 
-	if (line == nullptr)
+	if (line == NULL)
 		return 0;
 
 	p = (const unsigned char *)line;
@@ -509,7 +511,7 @@ is_cpp_linemarker(const char *line)
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -519,7 +521,7 @@ DeadPipe(int nonsense)
 static char *
 MkDef(const char *name, const char *def)
 {
-	char *cp = nullptr;
+	char *cp = NULL;
 	int   n;
 
 	/* Get space to hold everything, if needed */

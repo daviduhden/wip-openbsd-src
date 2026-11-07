@@ -68,12 +68,12 @@ CreateIconWindow(FvwmWindow *tmp_win, int def_x, int def_y)
 	tmp_win->icon_p_width = 0;
 
 	/* First, check for a monochrome bitmap */
-	if (tmp_win->icon_bitmap_file != nullptr)
+	if (tmp_win->icon_bitmap_file != NULL)
 		GetBitmapFile(tmp_win);
 
 #ifdef XPM
 	/* Next, check for a color pixmap */
-	if ((tmp_win->icon_bitmap_file != nullptr) &&
+	if ((tmp_win->icon_bitmap_file != NULL) &&
 	    (tmp_win->icon_p_height == 0) && (tmp_win->icon_p_width == 0))
 		GetXPMFile(tmp_win);
 #endif /* XPM */
@@ -425,7 +425,7 @@ AutoPlace(FvwmWindow *t)
 
 		/* check all boxes in order */
 		for (icon_boxes_ptr = t->IconBoxes; /* init */
-		    icon_boxes_ptr != nullptr;	    /* until no more boxes */
+		    icon_boxes_ptr != NULL;	    /* until no more boxes */
 		    icon_boxes_ptr = icon_boxes_ptr->next) { /* all boxes */
 			if (loc_ok == True) {
 				break; /* leave for loop */
@@ -677,7 +677,7 @@ GrabIconButtons(FvwmWindow *tmp_win, Window w)
 
 	MouseEntry = Scr.AllBindings;
 	while (MouseEntry != (Binding *)0) {
-		if ((MouseEntry->Action != nullptr) &&
+		if ((MouseEntry->Action != NULL) &&
 		    (MouseEntry->Context & C_ICON) &&
 		    (MouseEntry->IsMouse == 1)) {
 			if (MouseEntry->Button_Key > 0)
@@ -721,7 +721,7 @@ GrabIconKeys(FvwmWindow *tmp_win, Window w)
 {
 	(void)tmp_win;
 	Binding *tmp;
-	for (tmp = Scr.AllBindings; tmp != nullptr; tmp = tmp->NextBinding) {
+	for (tmp = Scr.AllBindings; tmp != NULL; tmp = tmp->NextBinding) {
 		if ((tmp->Context & C_ICON) && (tmp->IsMouse == 0))
 			XGrabKey(dpy, tmp->Button_Key, tmp->Modifier, w, True,
 			    GrabModeAsync, GrabModeAsync);
@@ -737,13 +737,13 @@ GrabIconKeys(FvwmWindow *tmp_win, Window w)
 void
 GetBitmapFile(FvwmWindow *tmp_win)
 {
-	char	    *path = nullptr;
+	char	    *path = NULL;
 	int	     HotX, HotY;
 	extern char *IconPath;
 
 	path = findIconFile(tmp_win->icon_bitmap_file, IconPath, R_OK);
 
-	if (path == nullptr)
+	if (path == NULL)
 		return;
 	if (XReadBitmapFile(dpy, Scr.Root, path,
 		(unsigned int *)&tmp_win->icon_p_width,
@@ -768,12 +768,12 @@ GetXPMFile(FvwmWindow *tmp_win)
 	XWindowAttributes root_attr;
 	XpmAttributes	  xpm_attributes;
 	extern char	 *PixmapPath;
-	char		 *path = nullptr;
+	char		 *path = NULL;
 	XpmImage	  my_image;
 	int		  rc;
 
 	path = findIconFile(tmp_win->icon_bitmap_file, PixmapPath, R_OK);
-	if (path == nullptr)
+	if (path == NULL)
 		return;
 
 	XGetWindowAttributes(dpy, Scr.Root, &root_attr);
@@ -782,7 +782,7 @@ GetXPMFile(FvwmWindow *tmp_win)
 	xpm_attributes.valuemask =
 	    XpmSize | XpmReturnPixels | XpmColormap | XpmCloseness;
 
-	rc = XpmReadFileToXpmImage(path, &my_image, nullptr);
+	rc = XpmReadFileToXpmImage(path, &my_image, NULL);
 	if (rc != XpmSuccess) {
 		fvwm_msg(ERR, "GetXPMFile",
 		    "XpmReadFileToXpmImage failed, pixmap %s, rc %d", path, rc);
@@ -894,7 +894,7 @@ DeIconify(FvwmWindow *tmp_win)
 
 	/* AS dje  RaiseWindow(tmp_win); */
 	/* now de-iconify transients */
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		if ((t == tmp_win) || IsTransientDescendantOf(t, tmp_win)) {
 			t->flags |= MAPPED;
 			t->tmpflags.IconifiedByParent = 0;
@@ -972,7 +972,7 @@ Iconify(FvwmWindow *tmp_win, int def_x, int def_y)
 	}
 
 	/* iconify transients first */
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		if ((t == tmp_win) || IsTransientDescendantOf(t, tmp_win)) {
 			/*
 			 * Prevent the receipt of an UnmapNotify, since that
@@ -1044,11 +1044,11 @@ Iconify(FvwmWindow *tmp_win, int def_x, int def_y)
 	if ((tmp_win->flags & ClickToFocus) || (tmp_win->flags & SloppyFocus)) {
 		if (tmp_win == Scr.Focus) {
 			if (Scr.PreviousFocus == Scr.Focus)
-				Scr.PreviousFocus = nullptr;
+				Scr.PreviousFocus = NULL;
 			if ((tmp_win->flags & ClickToFocus) && (tmp_win->next))
 				SetFocus(tmp_win->next->w, tmp_win->next, 1);
 			else {
-				SetFocus(Scr.NoFocusWin, nullptr, 1);
+				SetFocus(Scr.NoFocusWin, NULL, 1);
 			}
 		}
 	}

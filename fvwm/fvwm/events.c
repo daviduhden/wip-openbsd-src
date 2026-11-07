@@ -111,7 +111,7 @@ InitEventHandlerJumpTable(void)
 	int i;
 
 	for (i = 0; i < LASTEvent; i++) {
-		EventHandlerJumpTable[i] = nullptr;
+		EventHandlerJumpTable[i] = NULL;
 	}
 	EventHandlerJumpTable[Expose] = HandleExpose;
 	EventHandlerJumpTable[DestroyNotify] = HandleDestroyNotify;
@@ -157,7 +157,7 @@ DispatchEvent(void)
 	StashEventTime(&Event);
 
 	if (XFindContext(dpy, w, FvwmContext, (caddr_t *)&Tmp_win) == XCNOENT)
-		Tmp_win = nullptr;
+		Tmp_win = NULL;
 	last_event_type = Event.type;
 	last_event_window = w;
 
@@ -298,7 +298,7 @@ HandleFocusIn(void)
 		w = d.xany.window;
 	}
 	if (XFindContext(dpy, w, FvwmContext, (caddr_t *)&Tmp_win) == XCNOENT) {
-		Tmp_win = nullptr;
+		Tmp_win = NULL;
 	}
 
 	if (!Tmp_win) {
@@ -314,7 +314,7 @@ HandleFocusIn(void)
 				    (!(Scr.Hilite->flags & ICONIFIED))) {
 					InstallWindowColormaps(Scr.Hilite);
 				} else {
-					InstallWindowColormaps(nullptr);
+					InstallWindowColormaps(NULL);
 				}
 			}
 		}
@@ -328,7 +328,7 @@ HandleFocusIn(void)
 			    (!(Scr.Hilite->flags & ICONIFIED))) {
 				InstallWindowColormaps(Scr.Hilite);
 			} else {
-				InstallWindowColormaps(nullptr);
+				InstallWindowColormaps(NULL);
 			}
 		}
 	}
@@ -360,18 +360,18 @@ HandleKeyPress(void)
 
 		mapping =
 		    XGetKeyboardMapping(dpy, Event.xkey.keycode, 1, &width);
-		if (mapping != nullptr && width > 0) {
+		if (mapping != NULL && width > 0) {
 			KeySym	primary = mapping[0];
 			KeyCode canonical = XKeysymToKeycode(dpy, primary);
 
 			if (canonical != 0)
 				Event.xkey.keycode = canonical;
 		}
-		if (mapping != nullptr)
+		if (mapping != NULL)
 			XFree(mapping);
 	}
 
-	for (key = Scr.AllBindings; key != nullptr; key = key->NextBinding) {
+	for (key = Scr.AllBindings; key != NULL; key = key->NextBinding) {
 		if ((key->Button_Key == (int)Event.xkey.keycode) &&
 		    ((key->Modifier == (int)(modifier & (~LockMask))) ||
 			(key->Modifier == AnyModifier)) &&
@@ -393,7 +393,7 @@ HandleKeyPress(void)
 		}
 	}
 
-	ButtonWindow = nullptr;
+	ButtonWindow = NULL;
 }
 
 /***********************************************************************
@@ -452,7 +452,7 @@ HandlePropertyNotify(void)
 			/* limit to prevent hanging X server */
 			Tmp_win->name[200] = 0;
 
-		if (Tmp_win->name == nullptr)
+		if (Tmp_win->name == NULL)
 			Tmp_win->name = NoName;
 		BroadcastName(M_WINDOW_NAME, Tmp_win->w, Tmp_win->frame,
 		    (unsigned long)Tmp_win, Tmp_win->name);
@@ -481,7 +481,7 @@ HandlePropertyNotify(void)
 		if (Tmp_win->icon_name && strlen(Tmp_win->icon_name) > 200)
 			/* limit to prevent hanging X server */
 			Tmp_win->icon_name[200] = 0;
-		if (Tmp_win->icon_name == nullptr)
+		if (Tmp_win->icon_name == NULL)
 			Tmp_win->icon_name = NoName;
 		BroadcastName(M_ICON_NAME, Tmp_win->w, Tmp_win->frame,
 		    (unsigned long)Tmp_win, Tmp_win->icon_name);
@@ -493,7 +493,7 @@ HandlePropertyNotify(void)
 			XFree((char *)Tmp_win->wmhints);
 		Tmp_win->wmhints = XGetWMHints(dpy, Event.xany.window);
 
-		if (Tmp_win->wmhints == nullptr)
+		if (Tmp_win->wmhints == NULL)
 			return;
 
 		if ((Tmp_win->wmhints->flags & IconPixmapHint) ||
@@ -567,11 +567,11 @@ HandlePropertyNotify(void)
 			FetchWmColormapWindows(Tmp_win); /* frees old data */
 			ReInstallActiveColormap();
 		} else if (Event.xproperty.atom == _XA_WM_STATE) {
-			if ((Tmp_win != nullptr) &&
+			if ((Tmp_win != NULL) &&
 			    (Tmp_win->flags & ClickToFocus) &&
 			    (Tmp_win == Scr.Focus)) {
 				if (OnThisPage) {
-					Scr.Focus = nullptr;
+					Scr.Focus = NULL;
 					SetFocus(Tmp_win->w, Tmp_win, 0);
 				}
 			}
@@ -683,7 +683,7 @@ HandleMapRequestKeepRaised(Window KeepRaised)
 
 	if (XFindContext(dpy, Event.xany.window, FvwmContext,
 		(caddr_t *)&Tmp_win) == XCNOENT)
-		Tmp_win = nullptr;
+		Tmp_win = NULL;
 
 	if (!PPosOverride)
 		XFlush(dpy);
@@ -692,7 +692,7 @@ HandleMapRequestKeepRaised(Window KeepRaised)
 	if (!Tmp_win) {
 		/* Add decorations. */
 		Tmp_win = AddWindow(Event.xany.window);
-		if (Tmp_win == nullptr)
+		if (Tmp_win == NULL)
 			return;
 	}
 	/*
@@ -893,7 +893,7 @@ HandleUnmapNotify(void)
 		weMustUnmap = 1;
 		if (XFindContext(dpy, Event.xany.window, FvwmContext,
 			(caddr_t *)&Tmp_win) == XCNOENT)
-			Tmp_win = nullptr;
+			Tmp_win = NULL;
 	}
 
 	if (!Tmp_win)
@@ -903,26 +903,26 @@ HandleUnmapNotify(void)
 		XUnmapWindow(dpy, Event.xunmap.window);
 
 	if (Tmp_win == Scr.Hilite)
-		Scr.Hilite = nullptr;
+		Scr.Hilite = NULL;
 
 	if (Scr.PreviousFocus == Tmp_win)
-		Scr.PreviousFocus = nullptr;
+		Scr.PreviousFocus = NULL;
 
 	if ((Tmp_win == Scr.Focus) && (Tmp_win->flags & ClickToFocus)) {
 		if (Tmp_win->next) {
 			HandleHardFocus(Tmp_win->next);
 		} else
-			SetFocus(Scr.NoFocusWin, nullptr, 1);
+			SetFocus(Scr.NoFocusWin, NULL, 1);
 	}
 
 	if (Scr.Focus == Tmp_win)
-		SetFocus(Scr.NoFocusWin, nullptr, 1);
+		SetFocus(Scr.NoFocusWin, NULL, 1);
 
 	if (Tmp_win == Scr.pushed_window)
-		Scr.pushed_window = nullptr;
+		Scr.pushed_window = NULL;
 
 	if (Tmp_win == colormap_win)
-		colormap_win = nullptr;
+		colormap_win = NULL;
 
 	if ((!(Tmp_win->flags & MAPPED) && !(Tmp_win->flags & ICONIFIED))) {
 		return;
@@ -1066,7 +1066,7 @@ HandleButtonPress(void)
 
 	modifier = (Event.xbutton.state & mods_used);
 	/* need to search for an appropriate mouse binding */
-	for (MouseEntry = Scr.AllBindings; MouseEntry != nullptr;
+	for (MouseEntry = Scr.AllBindings; MouseEntry != NULL;
 	    MouseEntry = MouseEntry->NextBinding) {
 		if (((MouseEntry->Button_Key == (int)Event.xbutton.button) ||
 			(MouseEntry->Button_Key == 0)) &&
@@ -1087,7 +1087,7 @@ HandleButtonPress(void)
 		    ButtonWindow, (Scr.Hilite == ButtonWindow), True, True, x);
 	else
 		SetTitleBar(ButtonWindow, (Scr.Hilite == ButtonWindow), False);
-	ButtonWindow = nullptr;
+	ButtonWindow = NULL;
 }
 
 /***********************************************************************
@@ -1139,10 +1139,10 @@ HandleEnterNotify(void)
 		if (!Scr.Focus ||
 		    (!(Scr.Focus->flags & ClickToFocus) &&
 			!(Scr.Focus->flags & SloppyFocus))) {
-			SetFocus(Scr.NoFocusWin, nullptr, 1);
+			SetFocus(Scr.NoFocusWin, NULL, 1);
 		}
 		if (Scr.ColormapFocus == COLORMAP_FOLLOWS_MOUSE) {
-			InstallWindowColormaps(nullptr);
+			InstallWindowColormaps(NULL);
 		}
 		return;
 	}
@@ -1159,7 +1159,7 @@ HandleEnterNotify(void)
 		    (Event.xany.window == Tmp_win->w))
 			InstallWindowColormaps(Tmp_win);
 		else
-			InstallWindowColormaps(nullptr);
+			InstallWindowColormaps(NULL);
 	}
 	return;
 }
@@ -1182,10 +1182,10 @@ HandleLeaveNotify(void)
 	if (Event.xcrossing.window == Scr.Root) {
 		if (Event.xcrossing.mode == NotifyNormal) {
 			if (Event.xcrossing.detail != NotifyInferior) {
-				if (Scr.Focus != nullptr) {
-					SetFocus(Scr.NoFocusWin, nullptr, 1);
+				if (Scr.Focus != NULL) {
+					SetFocus(Scr.NoFocusWin, NULL, 1);
 				}
-				if (Scr.Hilite != nullptr)
+				if (Scr.Hilite != NULL)
 					SetBorder(Scr.Hilite, False, True, True,
 					    None);
 			}
@@ -1240,7 +1240,7 @@ HandleConfigureRequest(void)
 	Event.xany.window = cre->window; /* mash parent field */
 	if (XFindContext(dpy, cre->window, FvwmContext, (caddr_t *)&Tmp_win) ==
 	    XCNOENT)
-		Tmp_win = nullptr;
+		Tmp_win = NULL;
 
 	/*
 	 * According to the July 27, 1988 ICCCM draft, we should ignore size and
@@ -1302,7 +1302,7 @@ HandleConfigureRequest(void)
 	if (cre->value_mask & CWStackMode) {
 		FvwmWindow *otherwin;
 
-		otherwin = nullptr;
+		otherwin = NULL;
 		xwc.sibling = (((cre->value_mask & CWSibling) &&
 				   (XFindContext(dpy, cre->above, FvwmContext,
 					(caddr_t *)&otherwin) == XCSUCCESS)) ?
@@ -1317,7 +1317,7 @@ HandleConfigureRequest(void)
 		    RBW - Update the stacking order ring.
 		*/
 		if (xwc.stack_mode == Above || xwc.stack_mode == Below) {
-			FvwmSib = (otherwin != nullptr) ?
+			FvwmSib = (otherwin != NULL) ?
 			    otherwin :
 			    Scr.FvwmRoot.stack_next; /*  Set up for Above.  */
 			if (xwc.stack_mode == Below) {
@@ -1502,7 +1502,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 		if (readPipes[i] >= 0) {
 			FD_SET(readPipes[i], &in_fdset);
 		}
-		if (pipeQueue[i] != nullptr) {
+		if (pipeQueue[i] != NULL) {
 			FD_SET(writePipes[i], &out_fdset);
 		}
 	}
@@ -1514,7 +1514,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	 */
 	DBUG("My_XNextEvent", "waiting for module input/output");
 	XFlush(dpy);
-	if (select(fd_width, &in_fdset, &out_fdset, nullptr, nullptr) > 0) {
+	if (select(fd_width, &in_fdset, &out_fdset, NULL, NULL) > 0) {
 		/* Check for exec helper messages. */
 		if (exec_helper_fd() >= 0 &&
 		    FD_ISSET(exec_helper_fd(), &in_fdset)) {
@@ -1579,7 +1579,7 @@ ResyncFvwmStackRing(void)
 
 	t2 = &Scr.FvwmRoot;
 	for (i = 0; i < nchildren; i++) {
-		for (t1 = Scr.FvwmRoot.next; t1 != nullptr; t1 = t1->next) {
+		for (t1 = Scr.FvwmRoot.next; t1 != NULL; t1 = t1->next) {
 			if (t1->flags & ICONIFIED &&
 			    (!(t1->flags & SUPPRESSICON))) {
 				if (t1->icon_w == children[i]) {
@@ -1594,7 +1594,7 @@ ResyncFvwmStackRing(void)
 			}
 		}
 
-		if (t1 != nullptr && t1 != t2) {
+		if (t1 != NULL && t1 != t2) {
 			/*
 				Move the window to its new position, working
 			   from the bottom up (that's the way XQueryTree

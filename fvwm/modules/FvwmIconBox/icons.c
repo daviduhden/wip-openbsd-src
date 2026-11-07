@@ -99,7 +99,7 @@ ConfigureIconWindow(struct icon_info *item)
 	if (max_icon_height == 0)
 		return;
 
-	if (item->icon_file != nullptr &&
+	if (item->icon_file != NULL &&
 	    (!(item->extra_flags & DEFAULTICON) ||
 		!(item->wmhints &&
 		    item->wmhints->flags &
@@ -200,11 +200,11 @@ AdjustIconWindow(struct icon_info *item, int n)
 void
 GetBitmapFile(struct icon_info *item)
 {
-	char *path = nullptr;
+	char *path = NULL;
 	int   HotX, HotY;
 
 	path = findIconFile(item->icon_file, iconPath, R_OK);
-	if (path == nullptr)
+	if (path == NULL)
 		return;
 
 	if (XReadBitmapFile(dpy, Root, path, (unsigned int *)&item->icon_w,
@@ -232,12 +232,12 @@ GetXPMFile(struct icon_info *item)
 #ifdef XPM
 	XWindowAttributes root_attr;
 	XpmAttributes	  xpm_attributes;
-	char		 *path = nullptr;
+	char		 *path = NULL;
 	int		  rc;
 	XpmImage	  my_image;
 
 	path = findIconFile(item->icon_file, pixmapPath, R_OK);
-	if (path == nullptr)
+	if (path == NULL)
 		return;
 
 	XGetWindowAttributes(dpy, Root, &root_attr);
@@ -245,7 +245,7 @@ GetXPMFile(struct icon_info *item)
 	xpm_attributes.closeness = 40000; /* same closeness used elsewhere */
 	xpm_attributes.valuemask =
 	    XpmSize | XpmReturnPixels | XpmColormap | XpmCloseness;
-	rc = XpmReadFileToXpmImage(path, &my_image, nullptr);
+	rc = XpmReadFileToXpmImage(path, &my_image, NULL);
 	if (rc != XpmSuccess) {
 		fprintf(stderr, "Problem reading pixmap %s, rc %d\n", path, rc);
 		free(path);
@@ -326,11 +326,11 @@ GetIconBitmap(struct icon_info *item)
 
 	item->icon_depth = depth;
 	if ((item->extra_flags & ICONFILE_OWNED) &&
-	    item->icon_file != nullptr) {
+	    item->icon_file != NULL) {
 		free(item->icon_file);
 		item->extra_flags &= ~ICONFILE_OWNED;
 	}
-	item->icon_file = nullptr;
+	item->icon_file = NULL;
 	item->icon_maskPixmap = None;
 #ifdef SHAPE
 	if (item->wmhints->flags & IconMaskHint) {
@@ -344,7 +344,7 @@ GetIconBitmap(struct icon_info *item)
 
 	item->iconPixmap =
 	    XCreatePixmap(dpy, Root, item->icon_w, item->icon_h, depth);
-	gc = XCreateGC(dpy, item->iconPixmap, 0, nullptr);
+	gc = XCreateGC(dpy, item->iconPixmap, 0, NULL);
 	XCopyArea(dpy, item->wmhints->icon_pixmap, item->iconPixmap, gc, 0, 0,
 	    item->icon_w, item->icon_h, 0, 0);
 	XFreeGC(dpy, gc);
@@ -358,15 +358,15 @@ GetBackPixmap(void)
 	XpmAttributes xpm_attributes;
 	XpmImage      my_image;
 #endif
-	char  *path = nullptr;
+	char  *path = NULL;
 	Pixmap tmp_bitmap, maskPixmap;
 	int    x, y, w = 0, h = 0, rc;
 
-	if (IconwinPixmapFile == nullptr)
+	if (IconwinPixmapFile == NULL)
 		return False;
 
 	if ((path = findIconFile(IconwinPixmapFile, iconPath, R_OK)) !=
-	    nullptr) {
+	    NULL) {
 		if (XReadBitmapFile(dpy, Root, path, (unsigned int *)&w,
 			(unsigned int *)&h, &tmp_bitmap, (int *)&x,
 			(int *)&y) != BitmapSuccess)
@@ -383,14 +383,14 @@ GetBackPixmap(void)
 #ifdef XPM
 	if (w == 0 && h == 0 &&
 	    (path = findIconFile(IconwinPixmapFile, pixmapPath, R_OK)) !=
-		nullptr) {
+		NULL) {
 		XGetWindowAttributes(dpy, Root, &root_attr);
 		xpm_attributes.colormap = root_attr.colormap;
 		xpm_attributes.closeness =
 		    40000; /* same closeness used elsewhere */
 		xpm_attributes.valuemask =
 		    XpmSize | XpmReturnPixels | XpmColormap | XpmCloseness;
-		rc = XpmReadFileToXpmImage(path, &my_image, nullptr);
+		rc = XpmReadFileToXpmImage(path, &my_image, NULL);
 		if (rc != XpmSuccess) {
 			fprintf(stderr, "Problem reading pixmap %s, rc %d\n",
 			    path, rc);

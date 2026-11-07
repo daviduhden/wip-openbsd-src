@@ -67,8 +67,8 @@ initModules(void)
 		readPipes[i] = -1;
 		pipeOn[i] = -1;
 		PipeMask[i] = MAX_MASK;
-		pipeQueue[i] = (struct queue_buff_struct *)nullptr;
-		pipeName[i] = nullptr;
+		pipeQueue[i] = (struct queue_buff_struct *)NULL;
+		pipeName[i] = NULL;
 	}
 }
 
@@ -81,11 +81,11 @@ ClosePipes(void)
 			close(writePipes[i]);
 			close(readPipes[i]);
 		}
-		if (pipeName[i] != nullptr) {
+		if (pipeName[i] != NULL) {
 			free(pipeName[i]);
 			pipeName[i] = 0;
 		}
-		while (pipeQueue[i] != nullptr) {
+		while (pipeQueue[i] != NULL) {
 			DeleteQueueBuff(i);
 		}
 	}
@@ -100,11 +100,11 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	int   i, val, nargs = 0;
 	char *cptr;
 	/*
-	 * Room for 20 arguments plus the nullptr terminator: the loop
+	 * Room for 20 arguments plus the NULL terminator: the loop
 	 * below may fill args[0..19] and then writes args[nargs] = 0.
 	 */
 	char	    *args[21];
-	char	    *arg1 = nullptr;
+	char	    *arg1 = NULL;
 	char	     arg2[20];
 	char	     arg3[20];
 	char	     arg5[20];
@@ -116,7 +116,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (eventp->type != KeyPress)
 		UngrabEm();
 
-	if (action == nullptr)
+	if (action == NULL)
 		return;
 
 	if (tmp_win)
@@ -133,7 +133,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		return;
 
 	arg1 = findIconFile(cptr, ModulePath, X_OK);
-	if (arg1 == nullptr) {
+	if (arg1 == NULL) {
 		fvwm_msg(ERR, "executeModule",
 		    "No such module '%s' in ModulePath '%s'", cptr, ModulePath);
 		free(cptr);
@@ -178,20 +178,20 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	args[0] = arg1;
 	args[1] = arg2;
 	args[2] = arg3;
-	if (fvwm_file != nullptr)
+	if (fvwm_file != NULL)
 		args[3] = fvwm_file;
 	else
 		args[3] = "none";
 	args[4] = arg5;
 	args[5] = arg6;
 	nargs = 6;
-	while ((action != nullptr) && (nargs < 20) &&
-	    (args[nargs - 1] != nullptr)) {
+	while ((action != NULL) && (nargs < 20) &&
+	    (args[nargs - 1] != NULL)) {
 		args[nargs] = 0;
 		action = GetNextToken(action, &args[nargs]);
 		nargs++;
 	}
-	if (args[nargs - 1] == nullptr)
+	if (args[nargs - 1] == NULL)
 		nargs--;
 	args[nargs] = 0;
 
@@ -212,7 +212,7 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		pipeOn[i] = -1;
 		PipeMask[i] = MAX_MASK;
 		free(arg1);
-		pipeQueue[i] = nullptr;
+		pipeQueue[i] = NULL;
 
 		/* make the PositiveWrite pipe non-blocking. Don't want to jam
 		   up fvwm because of an uncooperative module */
@@ -259,7 +259,7 @@ HandleModuleInput(Window w, int channel)
 	int  size;
 	int  cont, n;
 
-	/* Already read a (possibly nullptr) window id from the pipe,
+	/* Already read a (possibly NULL) window id from the pipe,
 	 * Now read an fvwm bultin command line */
 	n = read(readPipes[channel], &size, sizeof(size));
 	if (n < (int)sizeof(size)) {
@@ -325,7 +325,7 @@ HandleModuleInput(Window w, int channel)
 
 		if (XFindContext(dpy, w, FvwmContext, (caddr_t *)&tmp_win) ==
 		    XCNOENT) {
-			tmp_win = nullptr;
+			tmp_win = NULL;
 			w = None;
 		}
 		if (tmp_win) {
@@ -365,12 +365,12 @@ KillModule(int channel, int place)
 	readPipes[channel] = -1;
 	writePipes[channel] = -1;
 	pipeOn[channel] = -1;
-	while (pipeQueue[channel] != nullptr) {
+	while (pipeQueue[channel] != NULL) {
 		DeleteQueueBuff(channel);
 	}
-	if (pipeName[channel] != nullptr) {
+	if (pipeName[channel] != NULL) {
 		free(pipeName[channel]);
-		pipeName[channel] = nullptr;
+		pipeName[channel] = NULL;
 	}
 
 	return;
@@ -381,11 +381,11 @@ KillModuleByName(char *name)
 {
 	int i = 0;
 
-	if (name == nullptr)
+	if (name == NULL)
 		return;
 
 	while (i < npipes) {
-		if ((pipeName[i] != nullptr) &&
+		if ((pipeName[i] != NULL) &&
 		    (matchWildcards(name, pipeName[i]))) {
 			KillModule(i, 10);
 		}
@@ -504,7 +504,7 @@ SendName(int module, unsigned long event_type, unsigned long data1,
 	unsigned long *body;
 	int	       l;
 
-	if (name == nullptr)
+	if (name == NULL)
 		return;
 
 	body = make_named_packet(&l, event_type, name, 3, data1, data2, data3);
@@ -519,7 +519,7 @@ BroadcastName(unsigned long event_type, unsigned long data1,
 	unsigned long *body;
 	int	       i, l;
 
-	if (name == nullptr)
+	if (name == NULL)
 		return;
 
 	body = make_named_packet(&l, event_type, name, 3, data1, data2, data3);
@@ -540,7 +540,7 @@ SendMiniIcon(int module, unsigned long event_type, unsigned long data1,
 	unsigned long *body;
 	int	       l;
 
-	if ((name == nullptr) || (event_type != M_MINI_ICON))
+	if ((name == NULL) || (event_type != M_MINI_ICON))
 		return;
 
 	body = make_named_packet(&l, event_type, name, 8, data1, data2, data3,
@@ -591,7 +591,7 @@ SendStrToModule(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	str = strdup(action + strlen(module) + 1);
 
 	for (i = 0; i < npipes; i++) {
-		if ((pipeName[i] != nullptr) &&
+		if ((pipeName[i] != NULL) &&
 		    (matchWildcards(module, pipeName[i]))) {
 			SendName(i, M_STRING, 0, 0, 0, str);
 		}
@@ -657,7 +657,7 @@ AddToQueue(int module, unsigned long *ptr, int size, int done)
 
 	c = (struct queue_buff_struct *)xmalloc(
 	    sizeof(struct queue_buff_struct));
-	c->next = nullptr;
+	c->next = NULL;
 	c->size = size;
 	c->done = done;
 	d = (unsigned long *)xmalloc(size);
@@ -665,11 +665,11 @@ AddToQueue(int module, unsigned long *ptr, int size, int done)
 	memcpy((void *)d, (const void *)ptr, size);
 
 	e = pipeQueue[module];
-	if (e == nullptr) {
+	if (e == NULL) {
 		pipeQueue[module] = c;
 		return;
 	}
-	while (e->next != nullptr)
+	while (e->next != NULL)
 		e = e->next;
 	e->next = c;
 }
@@ -679,7 +679,7 @@ DeleteQueueBuff(int module)
 {
 	struct queue_buff_struct *a;
 
-	if (pipeQueue[module] == nullptr)
+	if (pipeQueue[module] == NULL)
 		return;
 	a = pipeQueue[module];
 	pipeQueue[module] = a->next;
@@ -695,10 +695,10 @@ FlushQueue(int module)
 	struct queue_buff_struct *d;
 	int			  a;
 
-	if ((pipeOn[module] <= 0) || (pipeQueue[module] == nullptr))
+	if ((pipeOn[module] <= 0) || (pipeQueue[module] == NULL))
 		return;
 
-	while (pipeQueue[module] != nullptr) {
+	while (pipeQueue[module] != NULL) {
 		d = pipeQueue[module];
 		dptr = (char *)d->data;
 		while (d->done < d->size) {
@@ -740,7 +740,7 @@ send_list_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		SendPacket(*Module, M_NEW_PAGE, 5, Scr.Vx, Scr.Vy,
 		    Scr.CurrentDesk, Scr.VxMax, Scr.VyMax);
 
-		if (Scr.Hilite != nullptr)
+		if (Scr.Hilite != NULL)
 			SendPacket(*Module, M_FOCUS_CHANGE, 5, Scr.Hilite->w,
 			    Scr.Hilite->frame, (unsigned long)Scr.Hilite,
 			    Scr.DefaultDecor.HiColors.fore,
@@ -749,18 +749,18 @@ send_list_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			SendPacket(*Module, M_FOCUS_CHANGE, 5, 0, 0, 0,
 			    Scr.DefaultDecor.HiColors.fore,
 			    Scr.DefaultDecor.HiColors.back);
-		if (Scr.DefaultIcon != nullptr)
+		if (Scr.DefaultIcon != NULL)
 			SendName(
 			    *Module, M_DEFAULTICON, 0, 0, 0, Scr.DefaultIcon);
 
-		for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+		for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 			SendConfig(*Module, M_CONFIGURE_WINDOW, t);
 			SendName(*Module, M_WINDOW_NAME, t->w, t->frame,
 			    (unsigned long)t, t->name);
 			SendName(*Module, M_ICON_NAME, t->w, t->frame,
 			    (unsigned long)t, t->icon_name);
 
-			if (t->icon_bitmap_file != nullptr &&
+			if (t->icon_bitmap_file != NULL &&
 			    t->icon_bitmap_file != Scr.DefaultIcon)
 				SendName(*Module, M_ICON_FILE, t->w, t->frame,
 				    (unsigned long)t, t->icon_bitmap_file);
@@ -782,7 +782,7 @@ send_list_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SendPacket(*Module, M_ICONIFY, 7, t->w,
 				    t->frame, (unsigned long)t, 0, 0, 0, 0);
 #ifdef MINI_ICONS
-			if (t->mini_icon != nullptr)
+			if (t->mini_icon != NULL)
 				SendMiniIcon(*Module, M_MINI_ICON, t->w,
 				    t->frame, (unsigned long)t,
 				    t->mini_icon->width, t->mini_icon->height,
@@ -791,7 +791,7 @@ send_list_func(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 #endif
 		}
 
-		if (Scr.Hilite == nullptr)
+		if (Scr.Hilite == NULL)
 			BroadcastPacket(M_FOCUS_CHANGE, 5, 0, 0, 0,
 			    Scr.DefaultDecor.HiColors.fore,
 			    Scr.DefaultDecor.HiColors.back);
@@ -815,6 +815,6 @@ set_mask_function(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	(void)context;
 	int val = 0;
 
-	GetIntegerArguments(action, nullptr, &val, 1);
+	GetIntegerArguments(action, NULL, &val, 1);
 	PipeMask[*Module] = (unsigned long)val;
 }

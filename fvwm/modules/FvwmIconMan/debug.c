@@ -6,17 +6,17 @@
 #include "debuglevels.h"
 // clang-format on
 
-[[maybe_unused]] static char const rcsid[] =
+__attribute__((__unused__)) static char const rcsid[] =
     "$Id: debug.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
-static FILE *console = nullptr;
+static FILE *console = NULL;
 
 void
 ConsoleMessage(const char *fmt, ...)
 {
 	va_list args;
 
-	assert(console != nullptr);
+	assert(console != NULL);
 
 	fputs("FvwmIconMan: ", console);
 
@@ -30,7 +30,7 @@ OpenConsole(const char *filenm)
 {
 	if (!filenm)
 		console = stderr;
-	else if ((console = fopen(filenm, "w")) == nullptr) {
+	else if ((console = fopen(filenm, "w")) == NULL) {
 		fprintf(stderr, "%s: cannot open %s\n", Module, filenm);
 		return 0;
 	}
@@ -43,7 +43,7 @@ ConsoleDebug(int flag, const char *fmt, ...)
 {
 	(void)flag;
 	(void)fmt;
-	assert(console != nullptr);
+	assert(console != NULL);
 
 #ifdef PRINT_DEBUG
 	if (flag) {

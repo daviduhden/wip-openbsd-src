@@ -8,6 +8,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -68,14 +70,14 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *display_name = nullptr;
+	char *display_name = NULL;
 	int   Clength;
 	char *tline;
 
 	/* Save the program name for error messages and config parsing */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -167,7 +169,7 @@ main(int argc, char **argv)
  * Detected a broken pipe - time to exit
  *
  **********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -246,7 +248,7 @@ ClientWindow(Window input)
 	if (XGetWindowProperty(dpy, input, _XA_WM_STATE, 0L, 3L, False,
 		_XA_WM_STATE, &atype, &aformat, &nitems, &bytesafter,
 		&prop) == Success) {
-		if (prop != nullptr) {
+		if (prop != NULL) {
 			XFree(prop);
 			return input;
 		}

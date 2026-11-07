@@ -2,8 +2,8 @@
  * Independent conformance test for the FVWM <stdckdint.h>.
  *
  * The system header (compiler resource header or libc) is not trusted here:
- * the fallback in fvwm/compat/stdckdint.h is forced so that the code under
- * test is always the vendored implementation.  Every case checks both the
+ * the include path selects fvwm/compat/stdckdint.h so the code under test
+ * is always the vendored implementation.  Every case checks both the
  * overflow indication and the value actually stored in the destination, and
  * the destination is compared against an independent arbitrary-precision
  * oracle built on __int128 rather than against another wrapper around the
@@ -47,7 +47,7 @@
 #include "xalloc.h"
 
 #if !defined(FVWM_COMPAT_STDCKDINT_FALLBACK)
-#error "build stdckdint-tests with -DFVWM_STDCKDINT_FORCE_FALLBACK"
+#error "build stdckdint-tests with fvwm/compat on the include path"
 #endif
 
 /* The header must announce itself with the C23 value. */
@@ -281,6 +281,8 @@ test_hand_written(void)
 	size_t	  z;
 	long long ll;
 	_Bool	  ov;
+	typedef char ckd_result_is_bool[__builtin_types_compatible_p(
+	    __typeof__(ckd_add(&z, (size_t)1, (size_t)2)), _Bool) ? 1 : -1];
 
 	/* int: min/max, both directions, stored value on overflow. */
 	i = 0;
@@ -361,10 +363,8 @@ test_hand_written(void)
 	CHECK(slot_index == 1, "result pointer evaluated exactly once");
 	CHECK(slots[0] == 3, "result stored through pointer");
 
-	/* The macro's value has type bool. */
-	_Static_assert(
-	    _Generic(ckd_add(&z, (size_t)1, (size_t)2), _Bool: 1, default: 0),
-	    "ckd_add() must have type bool");
+	/* The compiler type predicate preserves this check in C99 mode. */
+	(void)sizeof(ckd_result_is_bool);
 }
 
 /*

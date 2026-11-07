@@ -54,7 +54,7 @@ AnimatedMoveOfWindow(Window w, int startX, int startY, int endX, int endY,
 	int deltaX, deltaY;
 
 	/* set our defaults */
-	if (ppctMovement == nullptr)
+	if (ppctMovement == NULL)
 		ppctMovement = rgpctMovementDefault;
 	if (cmsDelay < 0)
 		cmsDelay = cmsDelayDefault;
@@ -128,7 +128,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (DeferExecution(eventp, &w, &tmp_win, &context, MOVE, ButtonPress))
 		return;
 
-	if (tmp_win == nullptr)
+	if (tmp_win == NULL)
 		return;
 
 	/* gotta have a window */
@@ -147,7 +147,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		fAnimated = FALSE;
 		FinalX = x % Scr.MyDisplayWidth;
 		FinalY = y % Scr.MyDisplayHeight;
-		if (GetIntegerArguments(action, nullptr, page, 2) == 2) {
+		if (GetIntegerArguments(action, NULL, page, 2) == 2) {
 			if (page[0] < 0 || page[1] < 0 ||
 			    page[0] * Scr.MyDisplayWidth > Scr.VxMax ||
 			    page[1] * Scr.MyDisplayHeight > Scr.VyMax) {
@@ -169,7 +169,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (w == tmp_win->frame) {
 		if (fAnimated) {
 			AnimatedMoveOfWindow(
-			    w, -1, -1, FinalX, FinalY, fWarp, -1, nullptr);
+			    w, -1, -1, FinalX, FinalY, fWarp, -1, NULL);
 		}
 		SetupFrame(tmp_win, FinalX, FinalY, tmp_win->frame_width,
 		    tmp_win->frame_height, FALSE);
@@ -190,7 +190,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			AnimatedMoveOfWindow(tmp_win->icon_w, -1, -1,
 			    tmp_win->icon_xl_loc,
 			    FinalY + tmp_win->icon_p_height, fWarp, -1,
-			    nullptr);
+			    NULL);
 		} else {
 			XMoveWindow(dpy, tmp_win->icon_w, tmp_win->icon_xl_loc,
 			    FinalY + tmp_win->icon_p_height);
@@ -203,7 +203,7 @@ move_window_doit(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			if (fAnimated) {
 				AnimatedMoveOfWindow(tmp_win->icon_pixmap_w, -1,
 				    -1, tmp_win->icon_x_loc, FinalY, fWarp, -1,
-				    nullptr);
+				    NULL);
 			} else {
 				XMoveWindow(dpy, tmp_win->icon_pixmap_w,
 				    tmp_win->icon_x_loc, FinalY);

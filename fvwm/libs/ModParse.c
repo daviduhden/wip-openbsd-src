@@ -28,13 +28,13 @@
 static char *
 DoPeekArgument(const char *pstr, const char **pret)
 {
-	char	   *tok = nullptr;
+	char	   *tok = NULL;
 	const char *p;
 	char	    bc = 0, be = 0, tmptok[MAX_TOKEN_LENGTH];
 	int	    len = 0;
 
 	if (!pstr)
-		return nullptr;
+		return NULL;
 
 	p = pstr;
 	EatWS(p); /* skip leading space */
@@ -70,7 +70,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 		/* sanity checks: */
 		if (bc && !be) { /* did we have block start, but not end? */
 			/* should yell about this */
-			return nullptr;
+			return NULL;
 		}
 
 		if (len) {
@@ -90,7 +90,7 @@ DoPeekArgument(const char *pstr, const char **pret)
 char *
 PeekArgument(const char *pstr)
 {
-	return DoPeekArgument(pstr, nullptr);
+	return DoPeekArgument(pstr, NULL);
 }
 
 /*
@@ -101,10 +101,10 @@ char *
 GetArgument(char **pstr)
 {
 	char	   *tok;
-	const char *next = nullptr;
+	const char *next = NULL;
 
 	if (!pstr || !*pstr || !(tok = DoPeekArgument(*pstr, &next)))
-		return nullptr;
+		return NULL;
 
 	*pstr = (char *)next;
 	/* skip tok and following whitespace/separators in pstr & DON'T realloc
@@ -112,7 +112,7 @@ GetArgument(char **pstr)
 	EatWS(*pstr);
 
 	if (*pstr && !**pstr)
-		*pstr = nullptr; /* change \0 to nullptr */
+		*pstr = NULL; /* change \0 to NULL */
 
 	return tok;
 }
@@ -159,15 +159,15 @@ MatchArgument(const char *pstr, char *tok)
  * space, and must be freed after use.
  *
  **************************************************************************/
-[[maybe_unused]] static char *
+__attribute__((__unused__)) static char *
 GetNextArgument(char *indata, char **token)
 {
 	char *t, *start, *end, *text;
 
 	t = indata;
-	if (t == nullptr) {
-		*token = nullptr;
-		return nullptr;
+	if (t == NULL) {
+		*token = NULL;
+		return NULL;
 	}
 	while (isspace((unsigned char)*t) && (*t != 0))
 		t++;
@@ -226,7 +226,7 @@ GetNextArgument(char *indata, char **token)
    function:		MatchToken
    description:	        matches one word
    returns:		pointer to delimiter character
-			nullptr if no match
+			NULL if no match
 */
 
 /*
@@ -247,9 +247,9 @@ XCmpToken(const void *vs, const void *vt)
 	const char *s = (const char *)vs;
 	const char *w = *(const char *const *)vt;
 
-	if (w == nullptr)
+	if (w == NULL)
 		return 1; /* non existant word */
-	if (s == nullptr)
+	if (s == NULL)
 		return -1; /* non existant string */
 
 #ifdef WORD_IS_UPPERCASE

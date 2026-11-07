@@ -46,7 +46,7 @@ static void AddToList(name_list *);	       /* prototype */
 static char *
 dup_style_string(const char *s)
 {
-	return (s != nullptr) ? xstrdup(s) : nullptr;
+	return (s != NULL) ? xstrdup(s) : NULL;
 }
 
 /* A macro for skipping over white space */
@@ -65,7 +65,7 @@ dup_style_string(const char *s)
 	SKIPSPACE;                                                             \
 	tmp = restofline;                                                      \
 	len = 0;                                                               \
-	while ((tmp != nullptr) && (*tmp != 0) && (*tmp != ',') &&             \
+	while ((tmp != NULL) && (*tmp != 0) && (*tmp != ',') &&             \
 	    (*tmp != '\n') && (!isspace((unsigned char)*tmp))) {               \
 		tmp++;                                                         \
 		len++;                                                         \
@@ -119,8 +119,8 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	restofline = GetNextToken(text, &tname.name); /* parse style name */
 	/* in case there was no argument! */
-	if ((tname.name == nullptr) ||
-	    (restofline == nullptr)) { /* If no name, or blank cmd */
+	if ((tname.name == NULL) ||
+	    (restofline == NULL)) { /* If no name, or blank cmd */
 		if (tname.name)
 			free(tname.name);
 		return; /* drop it. */
@@ -128,7 +128,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	SKIPSPACE; /* skip over white space */
 
-	if (restofline == nullptr) {
+	if (restofline == NULL) {
 		free(tname.name);
 		return;
 	}
@@ -182,7 +182,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				SKIPSPACE;
 				tmp = restofline;
 				len = 0;
-				while ((tmp != nullptr) && (*tmp != 0) &&
+				while ((tmp != NULL) && (*tmp != 0) &&
 				    (*tmp != ',') && (*tmp != '\n') &&
 				    (*tmp != '/') &&
 				    (!isspace((unsigned char)*tmp))) {
@@ -205,7 +205,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 						tmp++;
 					restofline = tmp;
 					len = 0;
-					while ((tmp != nullptr) &&
+					while ((tmp != NULL) &&
 					    (*tmp != 0) && (*tmp != ',') &&
 					    (*tmp != '\n') && (*tmp != '/') &&
 					    (!isspace((unsigned char)*tmp))) {
@@ -1080,7 +1080,7 @@ ProcessNewStyle(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		if (tname.off_flags & ICON_FLAG)
 			Scr.DefaultIcon = tname.value;
 		tname.off_flags &= ~ICON_FLAG;
-		tname.value = nullptr;
+		tname.value = NULL;
 	}
 	AddToList(&tname); /* add temp name list to list */
 }
@@ -1106,7 +1106,7 @@ Get_TBLR(char *restofline, unsigned char *IconFill)
 static void
 AddToList(name_list *tname)
 {
-	name_list *nptr, *lastptr = nullptr;
+	name_list *nptr, *lastptr = NULL;
 
 	/* This used to contain logic that returned if the style didn't contain
 	   anything.  I don't see why we should bother. dje. */
@@ -1117,14 +1117,14 @@ AddToList(name_list *tname)
 
 	/* seems like a pretty inefficient way to keep track of the end
 	   of the list, but how long can the style list be? dje */
-	for (nptr = Scr.TheList; nptr != nullptr; nptr = nptr->next) {
+	for (nptr = Scr.TheList; nptr != NULL; nptr = nptr->next) {
 		lastptr = nptr; /* find end of style list */
 	}
 
 	nptr = (name_list *)xmalloc(sizeof(name_list)); /* malloc area */
 	memcpy((void *)nptr, (const void *)tname,
 	    sizeof(name_list));	      /* copy term area into list */
-	if (lastptr != nullptr)	      /* If not first entry in list */
+	if (lastptr != NULL)	      /* If not first entry in list */
 		lastptr->next = nptr; /* chain this entry to the list */
 	else			      /* else first entry in list */
 		Scr.TheList = nptr;   /* set the list root pointer. */

@@ -7,6 +7,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -54,28 +56,28 @@ PagerStringList *NewPagerStringItem(PagerStringList *last, int desk);
  *
  **************************************************************************/
 ScreenInfo   Scr;
-PagerWindow *Start = nullptr;
-PagerWindow *FocusWin = nullptr;
+PagerWindow *Start = NULL;
+PagerWindow *FocusWin = NULL;
 
 Display *dpy; /* which display are we talking to */
 int	 x_fd, fd_width;
 
-char *PagerFore = nullptr;
-char *PagerBack = nullptr;
-char *font_string = nullptr;
-char *smallFont = nullptr;
-char *HilightC = nullptr;
-char *WindowBack = nullptr;
-char *WindowFore = nullptr;
-char *WindowHiBack = nullptr;
-char *WindowHiFore = nullptr;
+char *PagerFore = NULL;
+char *PagerBack = NULL;
+char *font_string = NULL;
+char *smallFont = NULL;
+char *HilightC = NULL;
+char *WindowBack = NULL;
+char *WindowFore = NULL;
+char *WindowHiBack = NULL;
+char *WindowHiFore = NULL;
 
 int   ShowBalloons = 0, ShowPagerBalloons = 0, ShowIconBalloons = 0;
-char *BalloonTypeString = nullptr;
-char *BalloonBack = nullptr;
-char *BalloonFore = nullptr;
-char *BalloonFont = nullptr;
-char *BalloonBorderColor = nullptr;
+char *BalloonTypeString = NULL;
+char *BalloonBack = NULL;
+char *BalloonFore = NULL;
+char *BalloonFont = NULL;
+char *BalloonBorderColor = NULL;
 int   BalloonBorderWidth = 1;
 int   BalloonYOffset = 2;
 
@@ -94,7 +96,7 @@ Pixel		 win_fore_pix = -1;
 Pixel		 win_hi_back_pix = -1;
 Pixel		 win_hi_fore_pix = -1;
 char		 fAlwaysCurrentDesk = 0;
-PagerStringList	 string_list = {nullptr, 0, nullptr, nullptr};
+PagerStringList	 string_list = {NULL, 0, NULL, NULL};
 Bool		 error_occured = False;
 
 static volatile sig_atomic_t isTerminated = False;
@@ -111,14 +113,14 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *display_name = nullptr;
+	char *display_name = NULL;
 	int   itemp, i;
 	char  line[100];
 
 	/* Save our program  name - for error messages */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	{
@@ -157,11 +159,11 @@ main(int argc, char **argv)
 #endif
 		sigact.sa_handler = TerminateHandler;
 
-		sigaction(SIGPIPE, &sigact, nullptr);
-		sigaction(SIGTERM, &sigact, nullptr);
-		sigaction(SIGQUIT, &sigact, nullptr);
-		sigaction(SIGINT, &sigact, nullptr);
-		sigaction(SIGHUP, &sigact, nullptr);
+		sigaction(SIGPIPE, &sigact, NULL);
+		sigaction(SIGTERM, &sigact, NULL);
+		sigaction(SIGQUIT, &sigact, NULL);
+		sigaction(SIGINT, &sigact, NULL);
+		sigaction(SIGHUP, &sigact, NULL);
 	}
 #else
 	/* We don't have sigaction(), so fall back to less robust methods.  */
@@ -361,7 +363,7 @@ TerminateHandler(int nonsense)
 	isTerminated = True;
 }
 
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -381,7 +383,7 @@ list_add(unsigned long *body)
 
 	t = Start;
 	prev = &Start;
-	while (t != nullptr) {
+	while (t != NULL) {
 		prev = &(t->next);
 		t = t->next;
 	}
@@ -394,13 +396,13 @@ list_add(unsigned long *body)
 	(*prev)->width = body[5];
 	(*prev)->height = body[6];
 	(*prev)->desk = body[7];
-	(*prev)->next = nullptr;
+	(*prev)->next = NULL;
 	(*prev)->flags = body[8];
 	(*prev)->pager_view_width = 0;
 	(*prev)->pager_view_height = 0;
 	(*prev)->icon_view_width = 0;
 	(*prev)->icon_view_height = 0;
-	(*prev)->icon_name = nullptr;
+	(*prev)->icon_name = NULL;
 	(*prev)->mini_icon.picture = 0;
 	(*prev)->title_height = body[9];
 	(*prev)->border_width = body[10];
@@ -430,10 +432,10 @@ list_configure(unsigned long *body)
 
 	target_w = body[0];
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
-	if (t == nullptr) {
+	if (t == NULL) {
 		list_add(body);
 	} else {
 		t->t = (char *)body[2];
@@ -496,21 +498,21 @@ list_destroy(unsigned long *body)
 	target_w = body[0];
 	t = Start;
 	prev = &Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		prev = &(t->next);
 		t = t->next;
 	}
-	if (t != nullptr) {
-		if (prev != nullptr)
+	if (t != NULL) {
+		if (prev != NULL)
 			*prev = t->next;
 		/* remove window from the chain */
 		if (t->PagerView != None)
 			XDestroyWindow(dpy, t->PagerView);
 		XDestroyWindow(dpy, t->IconView);
 		if (FocusWin == t)
-			FocusWin = nullptr;
+			FocusWin = NULL;
 
-		if (t->icon_name != nullptr)
+		if (t->icon_name != NULL)
 			free(t->icon_name);
 		free(t);
 	}
@@ -538,16 +540,16 @@ list_focus(unsigned long *body)
 		focus_fore_pix = body[3];
 	}
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
 	if (t != FocusWin) {
 		temp = FocusWin;
 		FocusWin = t;
 
-		if (temp != nullptr)
+		if (temp != NULL)
 			Hilight(temp, OFF);
-		if (FocusWin != nullptr)
+		if (FocusWin != NULL)
 			Hilight(FocusWin, ON);
 	}
 }
@@ -595,16 +597,16 @@ list_new_desk(unsigned long *body)
 
 		desk1 = Scr.CurrentDesk;
 		desk2 = Scr.CurrentDesk;
-		for (t = Start; t != nullptr; t = t->next) {
+		for (t = Start; t != NULL; t = t->next) {
 			if (t->desk == oldDesk || t->desk == Scr.CurrentDesk)
 				ChangeDeskForWindow(t, t->desk);
 		}
 		item = FindDeskStrings(Scr.CurrentDesk);
-		if (Desks[0].label != nullptr) {
+		if (Desks[0].label != NULL) {
 			free(Desks[0].label);
-			Desks[0].label = nullptr;
+			Desks[0].label = NULL;
 		}
-		if (item->next != nullptr && item->next->label != nullptr) {
+		if (item->next != NULL && item->next->label != NULL) {
 			CopyString(&Desks[0].label, item->next->label);
 		} else {
 			snprintf(line, sizeof(line), "Desk %d", desk1);
@@ -612,11 +614,11 @@ list_new_desk(unsigned long *body)
 		}
 		XStoreName(dpy, Scr.Pager_w, Desks[0].label);
 		XSetIconName(dpy, Scr.Pager_w, Desks[0].label);
-		if (Desks[0].Dcolor != nullptr) {
+		if (Desks[0].Dcolor != NULL) {
 			free(Desks[0].Dcolor);
-			Desks[0].Dcolor = nullptr;
+			Desks[0].Dcolor = NULL;
 		}
-		if (item->next != nullptr && item->next->Dcolor != nullptr) {
+		if (item->next != NULL && item->next->Dcolor != NULL) {
 			CopyString(&Desks[0].Dcolor, item->next->Dcolor);
 		} else {
 			/* Use default title if not specified by user. */
@@ -650,10 +652,10 @@ list_raise(unsigned long *body)
 
 	target_w = body[0];
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
-	if (t != nullptr) {
+	if (t != NULL) {
 		if (t->PagerView != None)
 			XRaiseWindow(dpy, t->PagerView);
 		XRaiseWindow(dpy, t->IconView);
@@ -674,10 +676,10 @@ list_lower(unsigned long *body)
 
 	target_w = body[0];
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
-	if (t != nullptr) {
+	if (t != NULL) {
 		if (t->PagerView != None)
 			XLowerWindow(dpy, t->PagerView);
 		if ((t->desk - desk1 >= 0) && (t->desk - desk1 < ndesks))
@@ -713,10 +715,10 @@ list_iconify(unsigned long *body)
 
 	target_w = body[0];
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
-	if (t == nullptr) {
+	if (t == NULL) {
 		return;
 	} else {
 		t->t = (char *)body[2];
@@ -758,10 +760,10 @@ list_deiconify(unsigned long *body)
 
 	target_w = body[0];
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
-	if (t == nullptr) {
+	if (t == NULL) {
 		return;
 	} else {
 		t->flags &= ~ICONIFIED;
@@ -796,11 +798,11 @@ list_icon_name(unsigned long *body)
 
 	target_w = body[0];
 	t = Start;
-	while ((t != nullptr) && (t->w != target_w)) {
+	while ((t != NULL) && (t->w != target_w)) {
 		t = t->next;
 	}
-	if (t != nullptr) {
-		if (t->icon_name != nullptr)
+	if (t != NULL) {
+		if (t->icon_name != NULL)
 			free(t->icon_name);
 		CopyString(&t->icon_name, (char *)(&body[3]));
 		LabelWindow(t);
@@ -846,7 +848,7 @@ list_end(void)
 
 	for (i = 0; i < nchildren; i++) {
 		ptr = Start;
-		while (ptr != nullptr) {
+		while (ptr != NULL) {
 			if ((ptr->frame == children[i]) ||
 			    (ptr->icon_w == children[i]) ||
 			    (ptr->icon_pixmap_w == children[i])) {
@@ -884,7 +886,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 	FD_SET(x_fd, &in_fdset);
 	FD_SET(fd[1], &in_fdset);
 
-	if (select(fd_width, &in_fdset, 0, 0, nullptr) > 0) {
+	if (select(fd_width, &in_fdset, 0, 0, NULL) > 0) {
 		if (FD_ISSET(x_fd, &in_fdset)) {
 			if (XPending(dpy)) {
 				XNextEvent(dpy, event);
@@ -914,11 +916,11 @@ My_XNextEvent(Display *dpy, XEvent *event)
 void
 ParseOptions(void)
 {
-	char *tline = nullptr;
+	char *tline = NULL;
 	int   n, desk;
 
-	Scr.FvwmRoot = nullptr;
-	Scr.Hilite = nullptr;
+	Scr.FvwmRoot = NULL;
+	Scr.Hilite = NULL;
 	Scr.VScale = 32;
 
 	Scr.MyDisplayWidth = DisplayWidth(dpy, Scr.screen);
@@ -933,7 +935,7 @@ ParseOptions(void)
 	Scr.Vx = 0;
 	Scr.Vy = 0;
 
-	for (GetConfigLine(fd, &tline); tline != nullptr;
+	for (GetConfigLine(fd, &tline); tline != NULL;
 	    GetConfigLine(fd, &tline)) {
 		int	 g_x, g_y, flags;
 		unsigned width, height;
@@ -942,7 +944,7 @@ ParseOptions(void)
 		char	*arg2;
 		char	*tline2;
 
-		arg1 = arg2 = nullptr;
+		arg1 = arg2 = NULL;
 		tline2 = GetModuleResource(tline, &resource, MyName);
 		if (!resource)
 			continue;
@@ -1005,11 +1007,11 @@ ParseOptions(void)
 				PagerStringList *item;
 
 				item = FindDeskStrings(desk);
-				if (item->next != nullptr) {
+				if (item->next != NULL) {
 					/* replace label */
-					if (item->next->label != nullptr) {
+					if (item->next->label != NULL) {
 						free(item->next->label);
-						item->next->label = nullptr;
+						item->next->label = NULL;
 					}
 					CopyString(&(item->next->label), arg2);
 				} else {
@@ -1064,11 +1066,11 @@ ParseOptions(void)
 				PagerStringList *item;
 
 				item = FindDeskStrings(desk);
-				if (item->next != nullptr) {
+				if (item->next != NULL) {
 					/* replace Dcolor */
-					if (item->next->Dcolor != nullptr) {
+					if (item->next->Dcolor != NULL) {
 						free(item->next->Dcolor);
-						item->next->Dcolor = nullptr;
+						item->next->Dcolor = NULL;
 					}
 					CopyString(&(item->next->Dcolor), arg2);
 				} else {
@@ -1096,7 +1098,7 @@ ParseOptions(void)
 			CopyString(&smallFont, arg1);
 			if (strncasecmp(smallFont, "none", 4) == 0) {
 				free(smallFont);
-				smallFont = nullptr;
+				smallFont = NULL;
 			}
 		} else if (StrEquals(resource, "MiniIcons")) {
 			MiniIcons = 1;
@@ -1183,14 +1185,14 @@ ParseOptions(void)
 }
 
 /* Returns the item in the sring list that has item->next->desk == desk or
- * the last item (item->next == nullptr) if no entry matches the desk number. */
+ * the last item (item->next == NULL) if no entry matches the desk number. */
 PagerStringList *
 FindDeskStrings(int desk)
 {
 	PagerStringList *item;
 
 	item = &string_list;
-	while (item->next != nullptr) {
+	while (item->next != NULL) {
 		if (item->next->desk == desk)
 			break;
 		item = item->next;
@@ -1206,9 +1208,9 @@ NewPagerStringItem(PagerStringList *last, int desk)
 	newitem = (PagerStringList *)xmalloc(sizeof(PagerStringList));
 	last->next = newitem;
 	newitem->desk = desk;
-	newitem->next = nullptr;
-	newitem->label = nullptr;
-	newitem->Dcolor = nullptr;
+	newitem->next = NULL;
+	newitem->label = NULL;
+	newitem->Dcolor = NULL;
 
 	return newitem;
 }

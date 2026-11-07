@@ -80,7 +80,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	extern Bool desperate;
 
 	mr = FindPopup(action);
-	if (mr == nullptr) {
+	if (mr == NULL) {
 		if (!desperate)
 			fvwm_msg(ERR, "ComplexFunction", "No such function %s",
 			    action);
@@ -90,7 +90,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	/* Get the argument list */
 	/* First entry in action is the function-name, ignore it */
 	action = GetNextToken(action, &junk);
-	if (junk != nullptr)
+	if (junk != NULL)
 		free(junk);
 	for (i = 0; i < 10; i++)
 		action = GetNextToken(action, &arguments[i]);
@@ -102,7 +102,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (eventp->type == ButtonPress)
 		eventp->type = ButtonRelease;
 	mi = mr->first;
-	while (mi != nullptr) {
+	while (mi != NULL) {
 		/* make lower case */
 		c = *(mi->item);
 		NeedsTarget = mi->func_needs_window;
@@ -126,7 +126,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	if (!Persist) {
 		for (i = 0; i < 10; i++)
-			if (arguments[i] != nullptr)
+			if (arguments[i] != NULL)
 				free(arguments[i]);
 		return;
 	}
@@ -138,7 +138,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			eventp, &w, &tmp_win, &context, SELECT, ButtonPress)) {
 			WaitForButtonsUp();
 			for (i = 0; i < 10; i++)
-				if (arguments[i] != nullptr)
+				if (arguments[i] != NULL)
 					free(arguments[i]);
 			return;
 		}
@@ -147,7 +147,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (!GrabEm(SELECT)) {
 		XBell(dpy, 0);
 		for (i = 0; i < 10; i++)
-			if (arguments[i] != nullptr)
+			if (arguments[i] != NULL)
 				free(arguments[i]);
 		return;
 	}
@@ -178,7 +178,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		ev->type = ButtonRelease;
 
 	mi = mr->first;
-	while (mi != nullptr) {
+	while (mi != NULL) {
 		/* make lower case */
 		c = *(mi->item);
 		if (isupper(c))
@@ -197,7 +197,7 @@ ComplexFunction(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	WaitForButtonsUp();
 	UngrabEm();
 	for (i = 0; i < 10; i++)
-		if (arguments[i] != nullptr)
+		if (arguments[i] != NULL)
 			free(arguments[i]);
 }
 
@@ -219,7 +219,7 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 	while (i < l) {
 		if (input[i] == '$') {
 			n = input[i + 1] - '0';
-			if ((n >= 0) && (n <= 9) && (arguments[n] != nullptr)) {
+			if ((n >= 0) && (n <= 9) && (arguments[n] != NULL)) {
 				l2 += strlen(arguments[n]) - 2;
 				i++;
 			} else if (input[i + 1] == 'w' || input[i + 1] == 'd') {
@@ -238,7 +238,7 @@ expand(char *input, char *arguments[], FvwmWindow *tmp_win)
 		if (input[i] == '$') {
 			n = input[i + 1] - '0';
 			if ((n >= 0) && (n <= 9)) {
-				if (arguments[n] != nullptr) {
+				if (arguments[n] != NULL) {
 					for (k = 0;
 					    k < (int)strlen(arguments[n]); k++)
 						out[j++] = arguments[n][k];

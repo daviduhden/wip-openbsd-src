@@ -34,7 +34,7 @@
 char *MyName;
 int   fd[2];
 
-struct list *list_root = nullptr;
+struct list *list_root = NULL;
 
 Display *dpy; /* which display are we talking to */
 int	 ScreenWidth, ScreenHeight;
@@ -52,13 +52,13 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *display_name = nullptr;
+	char *display_name = NULL;
 
 	/* Record the program name for error messages */
 	temp = argv[0];
 
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -111,7 +111,7 @@ Loop(int *fd)
 	int	      count;
 
 	unveil_home_write("FvwmSave");
-	unveil(nullptr, nullptr);
+	unveil(NULL, NULL);
 	sandbox_save_state("FvwmSave");
 
 	while (1) {
@@ -160,14 +160,14 @@ find_window(unsigned long id)
 {
 	struct list *l;
 
-	if (list_root == nullptr)
-		return nullptr;
+	if (list_root == NULL)
+		return NULL;
 
-	for (l = list_root; l != nullptr; l = l->next) {
+	for (l = list_root; l != NULL; l = l->next) {
 		if (l->id == id)
 			return l;
 	}
-	return nullptr;
+	return NULL;
 }
 
 /***********************************************************************
@@ -221,7 +221,7 @@ list_new_page(unsigned long *body)
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -286,12 +286,12 @@ do_save(void)
 	snprintf(tname, sizeof(tname), "%s/new.xinitrc",
 	    getenv("HOME") ? getenv("HOME") : ".");
 	out = fopen(tname, "w+");
-	if (out == nullptr) {
+	if (out == NULL) {
 		fprintf(stderr, "%s: couldn't open %s for writing\n", MyName,
 		    tname);
 		return;
 	}
-	for (t = list_root; t != nullptr; t = t->next) {
+	for (t = list_root; t != NULL; t = t->next) {
 		tname[0] = 0;
 
 		x1 = t->frame_x;

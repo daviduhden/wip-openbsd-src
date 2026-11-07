@@ -46,29 +46,29 @@ dummy(FILE *f, const char *fmt, ...)
 #define fprintf dummy
 #endif
 
-constexpr int TEXT_SPC = 3;
-constexpr int BOX_SPC = 3;
-constexpr int ITEM_HSPC = 10;
-constexpr int ITEM_VSPC = 5;
+#define TEXT_SPC (3)
+#define BOX_SPC (3)
+#define ITEM_HSPC (10)
+#define ITEM_VSPC (5)
 
 /* initial allocation sizes, structures grow dynamically as needed */
-constexpr int INITIAL_LINE_CAPACITY = 8;
-constexpr int INITIAL_LINE_ITEMS_CAPACITY = 8;
-constexpr int INITIAL_ITEMS_CAPACITY = 128;
-constexpr int INITIAL_CHOICES_CAPACITY = 8;
+#define INITIAL_LINE_CAPACITY (8)
+#define INITIAL_LINE_ITEMS_CAPACITY (8)
+#define INITIAL_ITEMS_CAPACITY (128)
+#define INITIAL_CHOICES_CAPACITY (8)
 
-constexpr int I_TEXT = 1;
-constexpr int I_INPUT = 2;
-constexpr int I_SELECT = 3;
-constexpr int I_CHOICE = 4;
-constexpr int I_BUTTON = 5;
+#define I_TEXT (1)
+#define I_INPUT (2)
+#define I_SELECT (3)
+#define I_CHOICE (4)
+#define I_BUTTON (5)
 
-constexpr int IS_SINGLE = 1;
-constexpr int IS_MULTIPLE = 2;
+#define IS_SINGLE (1)
+#define IS_MULTIPLE (2)
 
-constexpr int IB_CONTINUE = 1;
-constexpr int IB_RESTART = 2;
-constexpr int IB_QUIT = 3;
+#define IB_CONTINUE (1)
+#define IB_RESTART (2)
+#define IB_QUIT (3)
 
 typedef union _item {
 	int type;      /* item type, one of I_TEXT .. I_BUTTON */
@@ -124,10 +124,10 @@ typedef union _item {
 	} button;
 } Item;
 
-constexpr int L_LEFT = 1;
-constexpr int L_RIGHT = 2;
-constexpr int L_CENTER = 3;
-constexpr int L_LEFTRIGHT = 4;
+#define L_LEFT (1)
+#define L_RIGHT (2)
+#define L_CENTER (3)
+#define L_LEFTRIGHT (4)
 
 typedef struct _line {
 	int    n;	       /* number of items on the line */
@@ -141,10 +141,10 @@ int   fd_in;  /* fd for Fvwm->Module packets */
 int   fd_out; /* fd for Module->Fvwm packets */
 FILE *fp_err;
 
-Line *lines = nullptr;
+Line *lines = NULL;
 int   n_lines;
 int   lines_capacity = 0;
-Item *items = nullptr;
+Item *items = NULL;
 int   n_items;
 int   items_capacity = 0;
 Item  def_button;
@@ -192,7 +192,7 @@ form_xmalloc(size_t n)
 {
 	void *p = malloc(n);
 
-	if (p == nullptr) {
+	if (p == NULL) {
 		fprintf(fp_err, "%s: out of memory\n", prog_name);
 		exit(1);
 	}
@@ -204,7 +204,7 @@ form_xrealloc(void *p, size_t n)
 {
 	void *q = realloc(p, n);
 
-	if (q == nullptr) {
+	if (q == NULL) {
 		fprintf(fp_err, "%s: out of memory\n", prog_name);
 		exit(1);
 	}
@@ -227,7 +227,7 @@ ensure_line_capacity(int count)
 		lines[i].justify = L_CENTER;
 		lines[i].size_x = 0;
 		lines[i].size_y = 0;
-		lines[i].items = nullptr;
+		lines[i].items = NULL;
 		lines[i].items_cap = 0;
 	}
 	lines_capacity = new_cap;
@@ -299,11 +299,11 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 	delta = (char *)items - (char *)old_items;
 	for (i = 0; i < lines_capacity; i++)
 		for (j = 0; j < lines[i].n; j++)
-			if (lines[i].items[j] != nullptr)
+			if (lines[i].items[j] != NULL)
 				lines[i].items[j] =
 				    (Item *)((char *)lines[i].items[j] + delta);
 	for (i = 0; i < n_items; i++) {
-		if (items[i].type == I_CHOICE && items[i].choice.sel != nullptr)
+		if (items[i].type == I_CHOICE && items[i].choice.sel != NULL)
 			items[i].choice.sel =
 			    (Item *)((char *)items[i].choice.sel + delta);
 		if (items[i].type == I_SELECT) {
@@ -316,11 +316,11 @@ grow_items(Item **pcur_sel, Item **pcur_button)
 					delta);
 		}
 	}
-	if (cur_text != nullptr)
+	if (cur_text != NULL)
 		cur_text = (Item *)((char *)cur_text + delta);
-	if (*pcur_sel != nullptr)
+	if (*pcur_sel != NULL)
 		*pcur_sel = (Item *)((char *)*pcur_sel + delta);
-	if (*pcur_button != nullptr && *pcur_button != &def_button)
+	if (*pcur_button != NULL && *pcur_button != &def_button)
 		*pcur_button = (Item *)((char *)*pcur_button + delta);
 }
 
@@ -335,13 +335,13 @@ CopyNString(char *cp, int n)
 		n = strlen(cp);
 	if (n <= 0) {
 		bp = form_xmalloc(1);
-		if (bp != nullptr)
+		if (bp != NULL)
 			*bp = '\0';
 		return bp;
 	}
 	bp = dp = (char *)form_xmalloc(n + 1);
-	if (bp == nullptr)
-		return nullptr;
+	if (bp == NULL)
+		return NULL;
 	len = n;
 	while (len-- > 0)
 		*dp++ = *cp++;
@@ -452,7 +452,7 @@ ReadConfig(void)
 		def_button.button.commands_cap = 8;
 	}
 	def_button.button.key = IB_CONTINUE;
-	cur_sel = nullptr;
+	cur_sel = NULL;
 
 	/* default fonts in case the *FFFont's are missing */
 	xfs[f_text] = xfs[f_input] = xfs[f_button] =
@@ -672,7 +672,7 @@ ReadConfig(void)
 			cp += 6;
 			while (isspace((unsigned char)*cp))
 				cp++;
-			if (cur_sel == nullptr) {
+			if (cur_sel == NULL) {
 				fprintf(fp_err,
 				    "Choice specified before "
 				    "Selection, skipping\n");
@@ -899,7 +899,7 @@ ReadConfig(void)
 	}
 }
 
-constexpr int MAX_INTENSITY = 65535;
+#define MAX_INTENSITY (65535)
 
 /* allocate color cells */
 static void
@@ -945,7 +945,7 @@ GetColors(void)
 		    GetShadow(colors[c_itemback]); /* alloc shadow */
 		colors[c_itemhi] =
 		    GetHilite(colors[c_itemback]); /* alloc shadow */
-	} else if (!XAllocColorCells(dpy, d_cmap, 0, nullptr, 0, colors, 6)) {
+	} else if (!XAllocColorCells(dpy, d_cmap, 0, NULL, 0, colors, 6)) {
 		colors[c_back] = colors[c_itemback] = WhitePixel(dpy, screen);
 		colors[c_fore] = colors[c_itemfore] = colors[c_itemlo] =
 		    colors[c_itemhi] = BlackPixel(dpy, screen);
@@ -997,7 +997,7 @@ Restart(void)
 	int   i;
 	Item *item;
 
-	cur_text = nullptr;
+	cur_text = NULL;
 	abs_cursor = rel_cursor = 0;
 	for (i = 0; i < n_items; i++) {
 		item = items + i;
@@ -1546,7 +1546,7 @@ ReadXServer(void)
 				break;
 			case KeyPress: /* we do text input here */
 				n = XLookupString(
-				    &event.xkey, (char *)buf, 10, &ks, nullptr);
+				    &event.xkey, (char *)buf, 10, &ks, NULL);
 				keypress = buf[0];
 				fprintf(fp_err, "Keypress [%s]\n", buf);
 				if (n == 0) { /* not a regular key, translate it
@@ -1996,7 +1996,7 @@ MainLoop(void)
 		FD_SET(fd_x, &fds);
 
 		XFlush(dpy);
-		if (select(32, &fds, nullptr, nullptr, nullptr) > 0) {
+		if (select(32, &fds, NULL, NULL, NULL) > 0) {
 			if (FD_ISSET(fd_in, &fds))
 				ReadFvwm();
 			if (FD_ISSET(fd_x, &fds))
@@ -2044,7 +2044,7 @@ main(int argc, char **argv)
 			prog_name = argv[6];
 		fd_out = FvwmParseFd(argv[1]);
 		fd_in = FvwmParseFd(argv[2]);
-		ref = strtol(argv[4], nullptr, 16);
+		ref = strtol(argv[4], NULL, 16);
 		if (ref == 0)
 			ref = None;
 #ifdef DEBUG
@@ -2055,7 +2055,7 @@ main(int argc, char **argv)
 	fd[0] = fd_out;
 	fd[1] = fd_in;
 
-	if (!(dpy = XOpenDisplay(nullptr))) {
+	if (!(dpy = XOpenDisplay(NULL))) {
 		fprintf(fp_err, "%s: can't open display.\n", prog_name);
 		exit(1);
 	}
@@ -2077,9 +2077,9 @@ main(int argc, char **argv)
 	return 0;
 }
 
-[[noreturn]] void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) void DeadPipe(int nonsense);
 
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;

@@ -46,19 +46,19 @@
 
 extern Boolean debugging;
 
-char *fvwm_file = nullptr;
+char *fvwm_file = NULL;
 
 int numfilesread = 0;
 
-constexpr int MAX_NESTING_DEPTH = 128;
+#define MAX_NESTING_DEPTH (128)
 
 /*
  * The execution helper tracks one slot per concurrently running
  * PipeRead command.  A nesting limit above the slot count would let
  * the main process start a command the helper cannot track.
  */
-static_assert(MAX_NESTING_DEPTH <= PIPEREAD_SLOTS,
-    "MAX_NESTING_DEPTH must not exceed PIPEREAD_SLOTS");
+typedef char piperead_nesting_fits[
+    MAX_NESTING_DEPTH <= PIPEREAD_SLOTS ? 1 : -1];
 
 /*
  * Bound for one assembled PipeRead command line.  The historical
@@ -83,8 +83,8 @@ static int last_read_failed = 0;
 
 static const char *read_system_rc_cmd = "Read system" FVWMRC;
 
-constexpr int PIPE_READ_INTERVAL_SEC = 1;
-constexpr int PIPE_READ_MAX_IDLE_LOOPS = 10;
+#define PIPE_READ_INTERVAL_SEC (1)
+#define PIPE_READ_MAX_IDLE_LOOPS (10)
 
 /*
  * One active PipeRead invocation.  Frames are linked into a stack:
@@ -116,17 +116,19 @@ static u_int32_t	      piperead_next_id = 1;
  * response.
  */
 static int
-piperead_msg(struct imsg *imsg, void *)
+piperead_msg(struct imsg *imsg, void *arg)
 {
 	struct piperead_frame *frame;
 	u_int32_t	       id;
+
+	(void)arg;
 
 	switch (imsg->hdr.type) {
 	case IMSG_PIPEREAD_DATA:
 		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
-		for (frame = active_frames; frame != nullptr;
+		for (frame = active_frames; frame != NULL;
 		    frame = frame->next) {
 			if (frame->id == id) {
 				pipebuf_append(&frame->buf,
@@ -155,7 +157,7 @@ piperead_msg(struct imsg *imsg, void *)
 		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id) + sizeof(int))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
-		for (frame = active_frames; frame != nullptr;
+		for (frame = active_frames; frame != NULL;
 		    frame = frame->next) {
 			if (frame->id == id) {
 				memcpy(&frame->exit_status,
@@ -170,7 +172,7 @@ piperead_msg(struct imsg *imsg, void *)
 		if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(id))
 			return 0;
 		memcpy(&id, imsg->data, sizeof(id));
-		for (frame = active_frames; frame != nullptr;
+		for (frame = active_frames; frame != NULL;
 		    frame = frame->next) {
 			if (frame->id == id) {
 				frame->error = 1;
@@ -179,7 +181,7 @@ piperead_msg(struct imsg *imsg, void *)
 		}
 		break;
 	default:
-		exec_helper_dispatch(imsg, nullptr);
+		exec_helper_dispatch(imsg, NULL);
 		break;
 	}
 	return 0;
@@ -217,7 +219,7 @@ piperead_execute_line(struct piperead_frame *frame, char *line, size_t len,
 		/* Keep the original block on failure: realloc() leaves it
 		 * allocated and the frame still owns it. */
 		nbuf = realloc(frame->lbuf, ncap);
-		if (nbuf == nullptr) {
+		if (nbuf == NULL) {
 			/* Out of memory: drop the partial command. */
 			frame->lbuf_len = 0;
 			frame->lbuf_cap = 0;
@@ -310,7 +312,7 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		tv.tv_usec = 0;
 
 		ready = select((helper_fd >= 0 ? helper_fd : 0) + 1, &readfds,
-		    nullptr, nullptr, &tv);
+		    NULL, NULL, &tv);
 		if (ready < 0) {
 			if (errno == EINTR)
 				continue;
@@ -327,7 +329,7 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		}
 
 		if (helper_fd >= 0 && FD_ISSET(helper_fd, &readfds)) {
-			if (exec_helper_drain(piperead_msg, nullptr) == -1) {
+			if (exec_helper_drain(piperead_msg, NULL) == -1) {
 				/* The helper is gone. */
 				frame.error = 1;
 				break;
@@ -382,21 +384,23 @@ extern void StartupStuff(void);
  * Arg 2 (optional) "Quiet" to suppress message on missing file.
  */
 static void
-ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
+ReadSubFunc(XEvent *eventp, Window w, FvwmWindow *tmp_win, unsigned long context,
     char *action, int *Module, int piperead)
 {
+	char  *filename = NULL, *Home, *home_file, *ofilename = NULL;
+	char  *option; /* optional arg to read */
+	char  *rest, *tline, line[1024];
+	FILE  *stream = NULL;
+	char   missing_quiet; /* missing file msg control */
+	char  *cmdname;
+	size_t len;
+
+	(void)w;
 	if (numfilesread >= MAX_NESTING_DEPTH) {
 		fvwm_msg(ERR, piperead ? "PipeRead" : "Read",
 		    "nesting depth exceeded (%d)", MAX_NESTING_DEPTH);
 		return;
 	}
-	char  *filename = nullptr, *Home, *home_file, *ofilename = nullptr;
-	char  *option; /* optional arg to read */
-	char  *rest, *tline, line[1024];
-	FILE  *stream = nullptr;
-	char   missing_quiet; /* missing file msg control */
-	char  *cmdname;
-	size_t len;
 
 	/* domivogt (30-Dec-1998: I tried using conditional evaluation instead
 	 * of the cmdname variable ( piperead?"PipeRead":"Read" ), but gcc seems
@@ -413,7 +417,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 	/*  fvwm_msg(INFO,cmdname,"action == '%s'",action); */
 
 	rest = GetNextToken(action, &ofilename); /* read file name arg */
-	if (ofilename == nullptr) {
+	if (ofilename == NULL) {
 		fvwm_msg(ERR, cmdname, "missing parameter");
 		last_read_failed = 1;
 		numfilesread--;
@@ -421,7 +425,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 	}
 	missing_quiet = 'n';		    /* init */
 	rest = GetNextToken(rest, &option); /* read optional arg */
-	if (option != nullptr) {	    /* if there is a second arg */
+	if (option != NULL) {	    /* if there is a second arg */
 		if (strncasecmp(option, "Quiet", 5) ==
 		    0) { /* is the arg "quiet"? */
 			missing_quiet =
@@ -460,7 +464,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 	filename = ofilename;
 	if (ofilename[0] != '/') {
 		Home = getenv("HOME");
-		if (Home != nullptr) {
+		if (Home != NULL) {
 			len = strlen(Home) + strlen(ofilename) + 3;
 			home_file = xmalloc(len);
 			strlcpy(home_file, Home, len);
@@ -469,10 +473,10 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 			filename = home_file;
 			stream = fopen(filename, "r");
 		} else {
-			stream = nullptr;
+			stream = NULL;
 		}
-		if (stream == nullptr) {
-			if ((filename != nullptr) && (filename != ofilename))
+		if (stream == NULL) {
+			if ((filename != NULL) && (filename != ofilename))
 				free(filename);
 			Home = FVWM_CONFIGDIR;
 			len = strlen(Home) + strlen(ofilename) + 3;
@@ -487,7 +491,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 		stream = fopen(filename, "r");
 	}
 
-	if (stream == nullptr) {
+	if (stream == NULL) {
 		if (missing_quiet == 'n') {
 			fvwm_msg(ERR, cmdname,
 			    "file '%s' not found in $HOME "
@@ -502,18 +506,18 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 		return;
 	}
 
-	if (filename != ofilename && ofilename != nullptr) {
+	if (filename != ofilename && ofilename != NULL) {
 		free(ofilename);
-		ofilename = nullptr;
+		ofilename = NULL;
 	}
 	fcntl(fileno(stream), F_SETFD, 1);
-	if (fvwm_file != nullptr)
+	if (fvwm_file != NULL)
 		free(fvwm_file);
 	fvwm_file = filename;
 
 	while (stream) {
 		tline = fgets(line, (sizeof line) - 1, stream);
-		if (tline == nullptr)
+		if (tline == NULL)
 			break;
 		{
 			int l;
@@ -522,7 +526,7 @@ ReadSubFunc(XEvent *eventp, Window, FvwmWindow *tmp_win, unsigned long context,
 			    line[l - 1] == '\n') {
 				char *cont = fgets(
 				    line + l - 2, sizeof(line) - l + 1, stream);
-				if (cont == nullptr)
+				if (cont == NULL)
 					break;
 			}
 		}
@@ -554,7 +558,7 @@ ReadFile(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	if (last_read_failed && this_read == 0) {
 		fvwm_msg(INFO, "Read", "trying to read system rc file");
 		ExecuteFunction(
-		    (char *)read_system_rc_cmd, nullptr, &Event, C_ROOT, -1);
+		    (char *)read_system_rc_cmd, NULL, &Event, C_ROOT, -1);
 	}
 
 	if (this_read == 0) {
@@ -581,7 +585,7 @@ PipeRead(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	if (last_read_failed && this_read == 0) {
 		fvwm_msg(INFO, "PipeRead", "trying to read system rc file");
 		ExecuteFunction(
-		    (char *)read_system_rc_cmd, nullptr, &Event, C_ROOT, -1);
+		    (char *)read_system_rc_cmd, NULL, &Event, C_ROOT, -1);
 	}
 
 	if (this_read == 0) {

@@ -19,8 +19,7 @@ COMPAT_DIR="${TESTS_DIR}/../fvwm/compat"
 CC=${CC:-clang}
 CFLAGS=${CFLAGS:--O2 -pipe}
 WARNINGS=${WARNINGS:--Wall -Wextra -Wpedantic}
-CSTD=${CSTD:--std=c23}
-FORCE=${FORCE:-FVWM_STDCKDINT_FORCE_FALLBACK}
+CSTD=${CSTD:--std=c99}
 
 tmp=$(mktemp -d) || exit 1
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
@@ -30,7 +29,7 @@ fail=0
 must_reject() {
 	printf '%s\n' "$2" >"$tmp/case.c"
 	if # shellcheck disable=SC2086
-		"$CC" $CFLAGS $CSTD $WARNINGS -isystem "$COMPAT_DIR" -D"$FORCE" \
+		"$CC" $CFLAGS $CSTD $WARNINGS -isystem "$COMPAT_DIR" \
 			-fsyntax-only "$tmp/case.c" >/dev/null 2>&1
 	then
 		printf 'FAIL: %s was accepted\n' "$1"
@@ -43,7 +42,7 @@ must_reject() {
 must_accept() {
 	printf '%s\n' "$2" >"$tmp/case.c"
 	if # shellcheck disable=SC2086
-		"$CC" $CFLAGS $CSTD $WARNINGS -isystem "$COMPAT_DIR" -D"$FORCE" \
+		"$CC" $CFLAGS $CSTD $WARNINGS -isystem "$COMPAT_DIR" \
 			-fsyntax-only "$tmp/case.c" >/dev/null 2>&1
 	then
 		printf 'ok: %s accepted\n' "$1"

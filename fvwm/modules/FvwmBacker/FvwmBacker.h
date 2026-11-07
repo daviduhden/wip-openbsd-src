@@ -29,7 +29,7 @@ void		  ReadFvwmPipe(void);
 void		  ProcessMessage(unsigned long type, unsigned long *body,
 		      unsigned long body_words);
 void		  SendFvwmPipe(char *message, unsigned long window);
-[[noreturn]] void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) void DeadPipe(int nonsense);
 void		  ParseConfig(void);
 void		  AddCommand(char *string);
 

@@ -22,7 +22,7 @@ extern void  CopyString(char **dest, char *source);
 extern void  RelieveWindow(
     Window win, int x, int y, int w, int h, GC rGC, GC sGC);
 extern void		 SendFvwmPipe(int *, char *text, unsigned long window);
-[[noreturn]] extern void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) extern void DeadPipe(int nonsense);
 extern void		 CreateIconWindow(struct icon_info *item);
 extern void		 ConfigureIconWindow(struct icon_info *item);
 extern void		 DrawIconWindow(struct icon_info *item);
@@ -152,7 +152,7 @@ extern char *pixmapPath;
 
 extern int icon_relief;
 
-constexpr int NOPLACE = -1;
+#define NOPLACE (-1)
 #define LEFT 0
 #define RIGHT 1
 #define TOP 2
@@ -169,10 +169,10 @@ constexpr int NOPLACE = -1;
 
 /* sorting */
 #define UNSORT 0
-constexpr int WINDOWNAME = 1;
-constexpr int ICONNAME = 2;
-constexpr int RESNAME = 3;
-constexpr int RESCLASS = 4;
+#define WINDOWNAME (1)
+#define ICONNAME (2)
+#define RESNAME (3)
+#define RESCLASS (4)
 
 /* local flags */
 #define HIDE_H (1 << 0)

@@ -81,7 +81,7 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 	char	   *cbody;
 
 	errno = 0;
-	*body = nullptr;
+	*body = NULL;
 
 	/*
 	 * A pipe read may return less than the whole header.  Acting on a
@@ -106,7 +106,7 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 			body_length * sizeof(unsigned long)) == -1) {
 			/* The packet is incomplete; discard its partial body. */
 			free(*body);
-			*body = nullptr;
+			*body = NULL;
 			DeadPipe(errno);
 			return -1;
 		}
@@ -128,7 +128,7 @@ SendText(int *fd, char *message, unsigned long window)
 {
 	int w;
 
-	if (message != nullptr) {
+	if (message != NULL) {
 		if (write_full(fd[0], &window, sizeof(window)) == -1) {
 			DeadPipe(errno);
 			return;
@@ -165,7 +165,7 @@ SetMessageMask(int *fd, unsigned long mask)
 }
 
 /***************************************************************************
- * Gets a module configuration line from fvwm. Returns nullptr if there are
+ * Gets a module configuration line from fvwm. Returns NULL if there are
  * no more lines to be had. "line" is a pointer to a char *.
  *
  * The returned text points into static packet storage. It remains valid only
@@ -183,12 +183,12 @@ GetConfigLine(int *fd, char **tline)
 	static int    first_pass = 1;
 	int	      count, done = 0;
 	int	      body_size;
-	static char  *line = nullptr;
+	static char  *line = NULL;
 	unsigned long header[HEADER_SIZE];
 
-	if (line != nullptr) {
+	if (line != NULL) {
 		free(line);
-		line = nullptr;
+		line = NULL;
 	}
 
 	if (first_pass) {
@@ -198,14 +198,14 @@ GetConfigLine(int *fd, char **tline)
 
 	while (!done) {
 		/* Drop the body of any packet we are skipping. */
-		if (line != nullptr) {
+		if (line != NULL) {
 			free(line);
-			line = nullptr;
+			line = NULL;
 		}
 		count = ReadFvwmPacket(fd[1], header, (unsigned long **)&line);
 		/* DB(("Packet count is %d", count)); */
 		if (count <= 0)
-			*tline = nullptr;
+			*tline = NULL;
 		else {
 			*tline = &line[3 * sizeof(long)];
 			body_size = header[2] - HEADER_SIZE;
@@ -223,10 +223,10 @@ GetConfigLine(int *fd, char **tline)
 			done = 1;
 		else if (header[1] == M_END_CONFIG_INFO) {
 			done = 1;
-			if (line != nullptr)
+			if (line != NULL)
 				free(line);
-			line = nullptr;
-			*tline = nullptr;
+			line = NULL;
+			*tline = NULL;
 		}
 	}
 }

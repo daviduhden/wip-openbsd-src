@@ -4,7 +4,7 @@
 #include "xmanager.h"
 // clang-format on
 
-[[maybe_unused]] static char const rcsid[] =
+__attribute__((__unused__)) static char const rcsid[] =
     "$Id: functions.c,v 1.2 2021/01/24 09:21:21 matthieu Exp $";
 
 static Button *get_select_button(void);
@@ -39,7 +39,7 @@ get_select_button(void)
 {
 	if (globals.select_win)
 		return globals.select_win->button;
-	return nullptr;
+	return NULL;
 }
 
 static Button *
@@ -47,7 +47,7 @@ get_focus_button(void)
 {
 	if (globals.focus_win)
 		return globals.focus_win->button;
-	return nullptr;
+	return NULL;
 }
 
 static WinManager *
@@ -59,7 +59,7 @@ get_current_man(void)
 		return globals.managers;
 	if (b && b->drawn_state.win)
 		return b->drawn_state.win->manager;
-	return nullptr;
+	return NULL;
 }
 
 static WinData *
@@ -69,7 +69,7 @@ get_current_win(void)
 
 	if (b && b->drawn_state.win)
 		return b->drawn_state.win;
-	return nullptr;
+	return NULL;
 }
 
 static Button *
@@ -81,7 +81,7 @@ get_current_button(void)
 static Button *
 button_move(ButtonValue *bv)
 {
-	Button	   *b = nullptr, *cur;
+	Button	   *b = NULL, *cur;
 	WinManager *man;
 	int	    i;
 
@@ -115,7 +115,7 @@ button_move(ButtonValue *bv)
 		if (!cur) {
 			ConsoleDebug(
 			    FUNCTIONS, "\tno current button, skipping\n");
-			return nullptr;
+			return NULL;
 		}
 
 		switch (bv->base) {
@@ -199,12 +199,12 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 
 	case AbsoluteButton: {
 		/* Now we find the manager modulo the VISIBLE managers */
-		static WinManager **wa = nullptr;
+		static WinManager **wa = NULL;
 		int		    i, num_mapped, n;
 
 		n = globals.num_managers;
 		if (n) {
-			if (wa == nullptr) {
+			if (wa == NULL) {
 				wa = (WinManager **)xmalloc(
 				    n * sizeof(WinManager *));
 			}
@@ -221,7 +221,7 @@ builtin_gotomanager(int numargs, BuiltinArg *args)
 					i += num_mapped;
 				new = wa[i];
 			} else {
-				new = nullptr;
+				new = NULL;
 			}
 		}
 	} break;
@@ -440,7 +440,7 @@ builtin_ret(int numargs, BuiltinArg *args)
 {
 	(void)numargs;
 	(void)args;
-	function_context.fp = nullptr;
+	function_context.fp = NULL;
 	return 0;
 }
 
@@ -484,7 +484,7 @@ builtin_searchforward(int numargs, BuiltinArg *args)
 				break;
 			b = button_next(man, cur);
 			if (b == cur) {
-				cur = nullptr;
+				cur = NULL;
 				break;
 			}
 			cur = b;
@@ -518,7 +518,7 @@ builtin_searchback(int numargs, BuiltinArg *args)
 				break;
 			b = button_prev(man, cur);
 			if (b == cur) {
-				cur = nullptr;
+				cur = NULL;
 				break;
 			}
 			cur = b;

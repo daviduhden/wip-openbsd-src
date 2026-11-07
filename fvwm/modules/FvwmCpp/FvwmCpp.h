@@ -8,4 +8,4 @@
  *
  *************************************************************************/
 
-[[noreturn]] void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) void DeadPipe(int nonsense);

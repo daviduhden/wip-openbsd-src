@@ -39,7 +39,7 @@
 	(((x1) + (w1) > (x2) && (x1) < (x2) + (w2)) &&                         \
 	    ((y1) + (h1) > (y2) && (y1) < (y2) + (h2)))
 
-constexpr int MAX_ARGS = 3;
+#define MAX_ARGS (3)
 
 #define SET_BIT(field, bit) ((field) |= (bit))
 #define CLEAR_BIT(field, bit) ((field) &= ~(bit))
@@ -332,8 +332,8 @@ extern ContextDefaults contextDefaults[];
 extern void		 ReadFvwmPipe(void);
 extern void		*Malloc(size_t size);
 extern void		 Free(void *p);
-[[noreturn]] extern void ShutMeDown(int flag);
-[[noreturn]] extern void DeadPipe(int nothing);
+__attribute__((__noreturn__)) extern void ShutMeDown(int flag);
+__attribute__((__noreturn__)) extern void DeadPipe(int nothing);
 extern void		 SendFvwmPipe(char *message, unsigned long window);
 extern char		*copy_string(char **target, char *src);
 

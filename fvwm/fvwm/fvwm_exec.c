@@ -76,7 +76,7 @@ struct piperead_slot {
 static struct piperead_slot piperead_slots[PIPEREAD_SLOTS];
 
 /* Pids of detached (Exec) children, for exit reporting. */
-constexpr int MAX_EXEC_CHILDREN = 512;
+#define MAX_EXEC_CHILDREN (512)
 static pid_t  exec_children[MAX_EXEC_CHILDREN];
 static int    exec_children_count;
 
@@ -86,7 +86,7 @@ static int    exec_children_count;
 static pid_t pending_reaps[MAX_PENDING_REAPS];
 static int   pending_reaps_count;
 
-[[noreturn]] static void
+__attribute__((__noreturn__)) static void
 usage(void)
 {
 	extern char *__progname;
@@ -96,8 +96,9 @@ usage(void)
 }
 
 static void
-sigchld_handler(int)
+sigchld_handler(int signo)
 {
+	(void)signo;
 	got_sigchld = 1;
 }
 
@@ -108,7 +109,7 @@ sigchld_handler(int)
  * unrestricted: the launched program needs the user's full
  * privileges.
  */
-[[noreturn]] static void
+__attribute__((__noreturn__)) static void
 exec_child(char **argv, char **envp)
 {
 	closefrom(3);
@@ -153,7 +154,7 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 	    (size_t)envc > remaining)
 		return -1;
 
-	if ((child_argv = calloc(cargc + 1, sizeof(char *))) == nullptr)
+	if ((child_argv = calloc(cargc + 1, sizeof(char *))) == NULL)
 		err(1, "calloc");
 	for (i = 0; i < (size_t)cargc; i++) {
 		size_t len;
@@ -168,9 +169,9 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 		data += len + 1;
 		remaining -= len + 1;
 	}
-	child_argv[cargc] = nullptr;
+	child_argv[cargc] = NULL;
 
-	if ((child_envp = calloc(envc + 1, sizeof(char *))) == nullptr)
+	if ((child_envp = calloc(envc + 1, sizeof(char *))) == NULL)
 		err(1, "calloc");
 	for (i = 0; i < (size_t)envc; i++) {
 		size_t len;
@@ -185,7 +186,7 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 		data += len + 1;
 		remaining -= len + 1;
 	}
-	child_envp[envc] = nullptr;
+	child_envp[envc] = NULL;
 
 	*argvp = child_argv;
 	*envpp = child_envp;
@@ -194,7 +195,7 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 
 /*
  * decode_piperead_msg -- validate an IMSG_PIPEREAD_RUN payload and
- * return a NUL-terminated copy of the command.  Returns nullptr on
+ * return a NUL-terminated copy of the command.  Returns NULL on
  * malformed input (the caller reports and drops the request).
  */
 static char *
@@ -204,14 +205,14 @@ decode_piperead_msg(struct imsg *imsg)
 	size_t len;
 
 	if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(u_int32_t) + 1)
-		return nullptr;
+		return NULL;
 
 	len = imsg->hdr.len - IMSG_HEADER_SIZE - sizeof(u_int32_t);
 	if (strnlen((char *)imsg->data + sizeof(u_int32_t), len) == len)
-		return nullptr; /* no terminating NUL */
+		return NULL; /* no terminating NUL */
 
 	cmd = strdup((char *)imsg->data + sizeof(u_int32_t));
-	if (cmd == nullptr)
+	if (cmd == NULL)
 		err(1, "strdup");
 	return cmd;
 }
@@ -397,7 +398,7 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
 			_exit(127);
 		close(pipe_fd[1]);
 		closefrom(3);
-		execl("/bin/sh", "sh", "-c", command, (char *)nullptr);
+		execl("/bin/sh", "sh", "-c", command, (char *)NULL);
 		_exit(127);
 	}
 
@@ -419,9 +420,11 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
  * period; the deadline is enforced in the main loop.
  */
 static void
-piperead_kill(struct imsgbuf *, u_int32_t id)
+piperead_kill(struct imsgbuf *ibuf, u_int32_t id)
 {
 	int i;
+
+	(void)ibuf;
 
 	for (i = 0; i < PIPEREAD_SLOTS; i++) {
 		struct piperead_slot *slot = &piperead_slots[i];
@@ -434,7 +437,7 @@ piperead_kill(struct imsgbuf *, u_int32_t id)
 			continue;
 		}
 		slot->kill_pending = 1;
-		slot->kill_deadline = time(nullptr) + 1;
+		slot->kill_deadline = time(NULL) + 1;
 		return;
 	}
 }
@@ -444,7 +447,7 @@ main(int argc, char **argv)
 {
 	struct imsgbuf ibuf;
 	struct imsg    imsg;
-	const char    *errstr = nullptr;
+	const char    *errstr = NULL;
 	ssize_t	       n;
 	int	       s;
 
@@ -452,11 +455,11 @@ main(int argc, char **argv)
 	if (argc != 1)
 		usage();
 
-	if (getenv("FVWM_EXEC_FD") == nullptr)
+	if (getenv("FVWM_EXEC_FD") == NULL)
 		errx(1, "FVWM_EXEC_FD not set");
 
 	s = (int)strtonum(getenv("FVWM_EXEC_FD"), 0, INT_MAX, &errstr);
-	if (errstr != nullptr)
+	if (errstr != NULL)
 		errx(1, "FVWM_EXEC_FD is %s: %s", errstr,
 		    getenv("FVWM_EXEC_FD"));
 
@@ -472,7 +475,7 @@ main(int argc, char **argv)
 
 		memset(&sa, 0, sizeof(sa));
 		sa.sa_handler = sigchld_handler;
-		if (sigaction(SIGCHLD, &sa, nullptr) == -1)
+		if (sigaction(SIGCHLD, &sa, NULL) == -1)
 			err(1, "sigaction");
 	}
 
@@ -515,7 +518,7 @@ main(int argc, char **argv)
 			err(1, "poll");
 		}
 
-		now = time(nullptr);
+		now = time(NULL);
 		if (got_sigchld)
 			reap_children(&ibuf);
 
@@ -551,7 +554,7 @@ main(int argc, char **argv)
 				} *chunk;
 
 				chunk = malloc(sizeof(u_int32_t) + (size_t)nr);
-				if (chunk == nullptr)
+				if (chunk == NULL)
 					err(1, "malloc");
 				chunk->id = slot->id;
 				memcpy(chunk->data, chunk_data, (size_t)nr);
@@ -642,7 +645,7 @@ main(int argc, char **argv)
 				}
 				memcpy(&id, imsg.data, sizeof(id));
 				if ((command = decode_piperead_msg(&imsg)) ==
-				    nullptr) {
+				    NULL) {
 					warnx("malformed IMSG_PIPEREAD_RUN");
 					break;
 				}

@@ -41,10 +41,10 @@
 #include "misc.h"
 // clang-format on
 
-constexpr int SIZE_HINDENT = 5;
-constexpr int SIZE_VINDENT = 3;
-constexpr int MAX_WINDOW_WIDTH = 32767;
-constexpr int MAX_WINDOW_HEIGHT = 32767;
+#define SIZE_HINDENT (5)
+#define SIZE_VINDENT (3)
+#define MAX_WINDOW_WIDTH (32767)
+#define MAX_WINDOW_HEIGHT (32767)
 
 /* Cursor types */
 #define POSITION 0     /* upper Left corner cursor */
@@ -63,15 +63,15 @@ constexpr int MAX_WINDOW_HEIGHT = 32767;
 #define RIGHT 10
 #define BOTTOM 11
 #define LEFT 12
-constexpr int TOP_LEFT = 13;
-constexpr int TOP_RIGHT = 14;
-constexpr int BOTTOM_LEFT = 15;
-constexpr int BOTTOM_RIGHT = 16;
-constexpr int MAX_CURSORS = 18;
+#define TOP_LEFT (13)
+#define TOP_RIGHT (14)
+#define BOTTOM_LEFT (15)
+#define BOTTOM_RIGHT (16)
+#define MAX_CURSORS (18)
 
 /* colormap focus styes */
 #define COLORMAP_FOLLOWS_MOUSE 1 /* default */
-constexpr int COLORMAP_FOLLOWS_FOCUS = 2;
+#define COLORMAP_FOLLOWS_FOCUS (2)
 
 #ifndef NON_VIRTUAL
 typedef struct {
@@ -101,7 +101,7 @@ typedef enum {
 	/* max button is 15 (0xF) */
 } ButtonFaceStyle;
 
-constexpr int ButtonFaceTypeMask = 0x000F;
+#define ButtonFaceTypeMask (0x000F)
 
 /* button style flags (per-state) */
 enum {

@@ -53,7 +53,7 @@ struct moduleInfoList {
 	struct moduleInfoList *next;
 };
 
-struct moduleInfoList *modlistroot = nullptr;
+struct moduleInfoList *modlistroot = NULL;
 
 void	    AddToModList(char *tline); /* prototypes */
 extern void StartupStuff(void);
@@ -96,9 +96,9 @@ AddToModList(char *tline)
 
 	/* Find end of list */
 	t = modlistroot;
-	prev = nullptr;
+	prev = NULL;
 
-	while (t != nullptr) {
+	while (t != NULL) {
 		prev = t;
 		t = t->next;
 	}
@@ -106,9 +106,9 @@ AddToModList(char *tline)
 	this = (struct moduleInfoList *)xmalloc(sizeof(struct moduleInfoList));
 	len = strlen(tline) + 1;
 	this->data = (char *)xmalloc(len);
-	this->next = nullptr;
+	this->next = NULL;
 	strlcpy(this->data, tline, len);
-	if (prev == nullptr) {
+	if (prev == NULL) {
 		modlistroot = this;
 	} else
 		prev->next = this;
@@ -145,17 +145,17 @@ DestroyModConfig(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	char *mi;
 
 	GetNextToken(action, &info);
-	if (info == nullptr) {
+	if (info == NULL) {
 		return;
 	}
 
 	current = modlistroot;
-	prev = nullptr;
+	prev = NULL;
 
-	while (current != nullptr) {
+	while (current != NULL) {
 		GetNextToken(current->data, &mi);
 		next = current->next;
-		if (mi != nullptr && matchWildcards(info, mi + 1)) {
+		if (mi != NULL && matchWildcards(info, mi + 1)) {
 			free(current->data);
 			free(current);
 			if (prev) {
@@ -216,7 +216,7 @@ SendDataToModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	SendName(*Module, M_CONFIG_INFO, 0, 0, 0, msg2);
 
 	t = modlistroot;
-	while (t != nullptr) {
+	while (t != NULL) {
 		SendName(*Module, M_CONFIG_INFO, 0, 0, 0, t->data);
 		t = t->next;
 	}

@@ -24,7 +24,7 @@
 Display	   *dpy;
 int	    screen;
 Window	    root;
-char	   *display_name = nullptr;
+char	   *display_name = NULL;
 static void SetRootWindow(
     char *tline, XWindowAttributes *root_attr, Atom colors_atom);
 static void FreePreviousResources(
@@ -103,7 +103,7 @@ SetRootWindow(char *tline, XWindowAttributes *root_attr, Atom colors_atom)
 
 	if ((xpm_attributes.valuemask & XpmReturnAllocPixels) &&
 	    xpm_attributes.nalloc_pixels > 0 &&
-	    xpm_attributes.alloc_pixels != nullptr) {
+	    xpm_attributes.alloc_pixels != NULL) {
 		XChangeProperty(dpy, root, colors_atom, XA_CARDINAL, 32,
 		    PropModeReplace,
 		    (unsigned char *)xpm_attributes.alloc_pixels,
@@ -122,8 +122,8 @@ FreePreviousResources(
 	Atom	       type;
 	int	       format;
 	unsigned long  length, after;
-	unsigned char *data = nullptr;
-	int	       visual_class = (root_attr->visual != nullptr) ?
+	unsigned char *data = NULL;
+	int	       visual_class = (root_attr->visual != NULL) ?
 	    root_attr->visual->class :
 	    StaticGray;
 	Bool	       can_free_colors = (visual_class == PseudoColor ||
@@ -133,23 +133,23 @@ FreePreviousResources(
 		XA_CARDINAL, &type, &format, &length, &after,
 		&data) == Success) {
 		if (can_free_colors && type == XA_CARDINAL && format == 32 &&
-		    length > 0 && data != nullptr) {
+		    length > 0 && data != NULL) {
 			Pixel *pixels = (Pixel *)data;
 			XFreeColors(
 			    dpy, root_attr->colormap, pixels, (int)length, 0);
 		}
-		if (data != nullptr)
+		if (data != NULL)
 			XFree(data);
 	}
 
-	data = nullptr;
+	data = NULL;
 	if (XGetWindowProperty(dpy, root, pixmap_atom, 0L, 1L, True,
 		AnyPropertyType, &type, &format, &length, &after,
 		&data) == Success) {
 		if ((type == XA_PIXMAP) && (format == 32) && (length == 1) &&
-		    data != nullptr)
+		    data != NULL)
 			XKillClient(dpy, *((Pixmap *)data));
-		if (data != nullptr)
+		if (data != NULL)
 			XFree(data);
 	}
 }

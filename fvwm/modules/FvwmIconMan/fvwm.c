@@ -7,7 +7,7 @@
 #include "xmanager.h"
 // clang-format on
 
-[[maybe_unused]] static char const rcsid[] =
+__attribute__((__unused__)) static char const rcsid[] =
     "$Id: fvwm.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 typedef struct {
@@ -192,7 +192,7 @@ id_to_win(Ulong id)
 {
 	WinData *win;
 	win = find_win_hashtab(id);
-	if (win == nullptr) {
+	if (win == NULL) {
 		win = new_windata();
 		win->app_id = id;
 		win->app_id_set = 1;
@@ -242,8 +242,8 @@ focus_change(FvwmPacketBody *body)
 		del_win_state(globals.focus_win, FOCUS_CONTEXT);
 		if (globals.focus_win->manager &&
 		    globals.focus_win->manager->focus_button)
-			globals.focus_win->manager->focus_button = nullptr;
-		globals.focus_win = nullptr;
+			globals.focus_win->manager->focus_button = NULL;
+		globals.focus_win = NULL;
 	}
 
 	if (win->complete && win->button && win->manager &&
@@ -378,7 +378,7 @@ destroy_window(FvwmPacketBody *body)
 	app_id = body->minimal_data.app_id;
 	win = id_to_win(app_id);
 	if (win == globals.focus_win)
-		globals.focus_win = nullptr;
+		globals.focus_win = NULL;
 	delete_win_hashtab(win);
 	if (win->button) {
 		ConsoleDebug(FVWM, "destroy_window: deleting windows_button\n");

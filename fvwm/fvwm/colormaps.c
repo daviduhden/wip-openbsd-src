@@ -60,7 +60,7 @@ HandleColormapNotify(void)
 	while (XCheckTypedEvent(dpy, ColormapNotify, &Event)) {
 		if (XFindContext(dpy, cevent->window, FvwmContext,
 			(caddr_t *)&Tmp_win) == XCNOENT)
-			Tmp_win = nullptr;
+			Tmp_win = NULL;
 		if ((Tmp_win) && (cevent->new)) {
 			XGetWindowAttributes(dpy, Tmp_win->w, &(Tmp_win->attr));
 			if ((Tmp_win == colormap_win) &&
@@ -221,12 +221,12 @@ UninstallRootColormap(void)
 void
 FetchWmColormapWindows(FvwmWindow *tmp)
 {
-	if (tmp->cmap_windows != (Window *)nullptr)
+	if (tmp->cmap_windows != (Window *)NULL)
 		XFree((void *)tmp->cmap_windows);
 
 	if (!XGetWMColormapWindows(dpy, tmp->w, &(tmp->cmap_windows),
 		&(tmp->number_cmap_windows))) {
 		tmp->number_cmap_windows = 0;
-		tmp->cmap_windows = nullptr;
+		tmp->cmap_windows = NULL;
 	}
 }

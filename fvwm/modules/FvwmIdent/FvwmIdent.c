@@ -8,6 +8,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -76,7 +78,7 @@ int		     found = 0;
 
 static int ListSize = 0;
 
-struct Item *itemlistRoot = nullptr;
+struct Item *itemlistRoot = NULL;
 int	     max_col1, max_col2;
 char id[15], desktop[10], swidth[10], sheight[10], borderw[10], geometry[30];
 char mymin_aspect[11], max_aspect[11];
@@ -91,14 +93,14 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *display_name = nullptr;
+	char *display_name = NULL;
 	int   Clength;
 	char *tline;
 
 	/* Save the program name for error messages and config parsing */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	size_t name_len = strlen(temp);
@@ -235,7 +237,7 @@ process_message(unsigned long type, unsigned long *body)
  * Detected a broken pipe - time to exit
  *
  **********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -357,8 +359,8 @@ list_end(void)
 	close(fd[1]);
 
 	/* load the font */
-	if ((font = XLoadQueryFont(dpy, font_string)) == nullptr) {
-		if ((font = XLoadQueryFont(dpy, "fixed")) == nullptr)
+	if ((font = XLoadQueryFont(dpy, font_string)) == NULL) {
+		if ((font = XLoadQueryFont(dpy, "fixed")) == NULL)
 			exit(1);
 	}
 
@@ -499,7 +501,7 @@ RedrawWindow(void)
 
 	fontheight = font->ascent + font->descent;
 
-	while (cur != nullptr) {
+	while (cur != NULL) {
 		/* first column */
 		XDrawString(dpy, main_win, NormalGC, 5,
 		    5 + font->ascent + i * fontheight, cur->col1,
@@ -550,12 +552,12 @@ AddToList(char *s1, char *s2)
 
 	item->col1 = s1;
 	item->col2 = s2;
-	item->next = nullptr;
+	item->next = NULL;
 
-	if (cur == nullptr)
+	if (cur == NULL)
 		itemlistRoot = item;
 	else {
-		while (cur->next != nullptr)
+		while (cur->next != NULL)
 			cur = cur->next;
 		cur->next = item;
 	}
@@ -674,7 +676,7 @@ MakeList(void)
 	AddToList("Geometry:", geometry);
 
 	{
-		Atom *protocols = nullptr, *ap;
+		Atom *protocols = NULL, *ap;
 		Atom  _XA_WM_TAKE_FOCUS =
 		    XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 		XWMHints *wmhintsp = XGetWMHints(dpy, target.id);
@@ -751,7 +753,7 @@ freelist(void)
 {
 	struct Item *cur = itemlistRoot, *cur2;
 
-	while (cur != nullptr) {
+	while (cur != NULL) {
 		cur2 = cur;
 		cur = cur->next;
 		free(cur2);

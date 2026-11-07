@@ -17,7 +17,7 @@
 // clang-format on
 
 #define ReapChildren()                                                         \
-	while ((waitpid(-1, nullptr, WNOHANG)) > 0)                            \
+	while ((waitpid(-1, NULL, WNOHANG)) > 0)                            \
 		;
 
 typedef struct name_list_struct {
@@ -206,12 +206,12 @@ extern void RelieveWindowHH(
     FvwmWindow *, Window, int, int, int, int, GC, GC, int, int);
 void RelieveParts(FvwmWindow *t, int i, GC hor, GC vert);
 #define NO_HILITE 0x0000
-constexpr int TOP_HILITE = 0x0001;
-constexpr int RIGHT_HILITE = 0x0002;
-constexpr int BOTTOM_HILITE = 0x0004;
-constexpr int LEFT_HILITE = 0x0008;
-constexpr int FULL_HILITE = 0x000F;
-constexpr int HH_HILITE = 0x0010;
+#define TOP_HILITE (0x0001)
+#define RIGHT_HILITE (0x0002)
+#define BOTTOM_HILITE (0x0004)
+#define LEFT_HILITE (0x0008)
+#define FULL_HILITE (0x000F)
+#define HH_HILITE (0x0010)
 
 void Maximize(F_CMD_ARGS);
 #ifdef WINDOWSHADE
@@ -335,7 +335,7 @@ void UpdateDecor(F_CMD_ARGS);
 void SetColormapFocus(F_CMD_ARGS);
 void SetColorLimit(F_CMD_ARGS);
 
-constexpr int UP = 1;
+#define UP (1)
 #define DOWN 0
 void MapIt(FvwmWindow *t);
 void UnmapIt(FvwmWindow *t);
@@ -484,10 +484,10 @@ void CoerceEnterNotifyOnCurrentWindow(void);
 /*
 ** message levels for fvwm_msg:
 */
-constexpr int DBG = -1;
+#define DBG (-1)
 #define INFO 0
-constexpr int WARN = 1;
-constexpr int ERR = 2;
+#define WARN (1)
+#define ERR (2)
 void	      fvwm_msg(int type, const char *id, const char *msg, ...);
 
 #endif /* MISC_H */

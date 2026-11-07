@@ -23,7 +23,7 @@ static volatile sig_atomic_t isTerminated = False;
 
 static char *IM_VERSION = "1.3";
 
-[[maybe_unused]] static char const rcsid[] =
+__attribute__((__unused__)) static char const rcsid[] =
     "$Id: FvwmIconMan.c,v 1.1.1.1 2006/11/26 10:53:49 matthieu Exp $";
 
 static void TerminateHandler(int);
@@ -47,7 +47,7 @@ copy_string(char **target, char *src)
 void
 Free(void *p)
 {
-	if (p != nullptr)
+	if (p != NULL)
 		free(p);
 }
 
@@ -65,7 +65,7 @@ ShutMeDown(int flag)
 	exit(flag);
 }
 
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nothing)
 {
 	(void)nothing;
@@ -82,7 +82,7 @@ SendFvwmPipe(char *message, unsigned long window)
 
 	while (1) {
 		temp = strchr(hold, ',');
-		if (temp != nullptr) {
+		if (temp != NULL) {
 			temp_msg = (char *)xmalloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
@@ -114,7 +114,7 @@ main_loop(void)
 		 * there is nothing there yet ...
 		 */
 		readset = saveset;
-		if (select(fd_width, &readset, nullptr, nullptr, nullptr) < 0) {
+		if (select(fd_width, &readset, NULL, NULL, NULL) < 0) {
 			ConsoleMessage(
 			    "Internal error with select: errno=%d\n", errno);
 		} else {
@@ -147,7 +147,7 @@ main(int argc, char **argv)
 		if (fork() == 0) {
 			chdir("/home/bradym/src/FvwmIconMan");
 			execl("/usr/local/bin/ddd", "/usr/local/bin/ddd",
-			    "FvwmIconMan", buf, nullptr);
+			    "FvwmIconMan", buf, NULL);
 		} else {
 			int i, done = 0;
 			for (i = 0; i < (1 << 27) && !done; i++)
@@ -187,11 +187,11 @@ main(int argc, char **argv)
 #endif
 		sigact.sa_handler = TerminateHandler;
 
-		sigaction(SIGPIPE, &sigact, nullptr);
-		sigaction(SIGINT, &sigact, nullptr);
-		sigaction(SIGHUP, &sigact, nullptr);
-		sigaction(SIGTERM, &sigact, nullptr);
-		sigaction(SIGQUIT, &sigact, nullptr);
+		sigaction(SIGPIPE, &sigact, NULL);
+		sigaction(SIGINT, &sigact, NULL);
+		sigaction(SIGHUP, &sigact, NULL);
+		sigaction(SIGTERM, &sigact, NULL);
+		sigaction(SIGQUIT, &sigact, NULL);
 	}
 #else
 	/* We don't have sigaction(), so fall back to less robust methods.  */

@@ -37,7 +37,7 @@ between the controller, `fvwm_exec`, and modules.
 | `fvwm/utils/` | `xpmroot` |
 | `fvwm/icons/` | bitmaps and pixmaps |
 | `fvwm/sample.fvwmrc/` | default configuration examples |
-| `fvwm/compat/` | vendored `<stdckdint.h>` |
+| `fvwm/compat/` | C99 checked-integer compatibility header |
 | `fvwm/docs/` | HTML/text documentation, not built |
 
 Build integration:
@@ -83,7 +83,16 @@ Build integration:
    creation, font/GC setup, and any lazy Xlib load. `pledge` before a lazy
    `dlopen`/`mmap(PROT_EXEC)` aborts the process.
 8. **Check both build styles.** The controller and modules build from different
-   `Makefile.inc` files but share `-std=c23` and the X11 flags.
+   `Makefile.inc` files but share `-std=c99` and the X11 flags.
+
+The checked-integer compatibility header deliberately uses Clang/GCC overflow
+builtins in C99 mode.  Preserve single evaluation, mixed signed/unsigned
+operands and the stored wrapped result; ordinary unchecked arithmetic is not
+an equivalent replacement.  Integer constants used in array bounds and case
+labels must remain integer constant expressions (macros or enums), rather
+than `static const` objects.  Retain compiler attributes for noreturn, unused
+and ignored-result diagnostics; these are documented platform extensions,
+not a requirement for a post-C99 language mode.
 
 ## Useful commands
 

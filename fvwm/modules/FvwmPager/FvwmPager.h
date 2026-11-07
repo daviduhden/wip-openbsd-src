@@ -90,7 +90,7 @@ typedef struct pager_string_list {
 	char			 *label;
 } PagerStringList;
 
-constexpr int ON = 1;
+#define ON (1)
 #define OFF 0
 
 /*************************************************************************
@@ -101,7 +101,7 @@ constexpr int ON = 1;
 char		 *GetNextToken(char *indata, char **token);
 void		  Loop(int *fd);
 void		  SendInfo(int *fd, char *message, unsigned long window);
-[[noreturn]] void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) void DeadPipe(int nonsense);
 void		  process_message(unsigned long type, unsigned long *body);
 void		  ParseOptions(void);
 

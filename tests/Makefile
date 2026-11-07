@@ -29,8 +29,8 @@
 
 CC =		clang
 DEBUGGER =	lldb
-CFLAGS =	-O2 -pipe -std=c23 -D_GNU_SOURCE -Wall -Wextra -Wpedantic
-DEBUG_CFLAGS =	-O0 -g -std=c23 -D_GNU_SOURCE -Wall -Wextra -Wpedantic
+CFLAGS =	-O2 -pipe -std=c99 -D_GNU_SOURCE -Wall -Wextra -Wpedantic -pedantic-errors
+DEBUG_CFLAGS =	-O0 -g -std=c99 -D_GNU_SOURCE -Wall -Wextra -Wpedantic -pedantic-errors
 SUFFIX =
 
 # Nonexistent include directories are harmless; point X11INCS at
@@ -47,12 +47,12 @@ TESTS =		stdckdint-tests fvwm-parse-tests fvwm-exec-tests \
 
 all: $(TESTS)
 
-# Exercise the fallback implementation of the C23 <stdckdint.h> API even
-# when the host provides a native header.  xalloc.h is included so the
+# Exercise the vendored checked-integer implementation in C99 mode.
+# The system header is not selected.  xalloc.h is included so the
 # real consumer (xreallocarray) is covered as well.
 stdckdint-tests: stdckdint-tests.c ../fvwm/compat/stdckdint.h ../fvwm/fvwm/xalloc.h
 	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../fvwm/compat -I../fvwm/fvwm \
-	    -DFVWM_STDCKDINT_FORCE_FALLBACK stdckdint-tests.c -o $@$(SUFFIX)
+	    stdckdint-tests.c -o $@$(SUFFIX)
 
 fvwm-parse-tests: fvwm-parse-tests.c ../fvwm/libs/Parse.c ../fvwm/libs/Strings.c ../fvwm/libs/System.c openbsd-shims.c
 	$(CC) $(CFLAGS) $(SANITIZE) $(X11INCS) -isystem ../fvwm/compat -I../fvwm \

@@ -27,10 +27,10 @@ UpdateString(char **string, char *value)
 {
 	size_t value_len;
 
-	if (value == nullptr)
+	if (value == NULL)
 		return;
 	value_len = strlen(value);
-	if (*string == nullptr)
+	if (*string == NULL)
 		*string = xmalloc(value_len + 1);
 	else
 		*string = xrealloc(*string, value_len + 1);
@@ -43,7 +43,7 @@ UpdateString(char **string, char *value)
 void
 InitList(List *list)
 {
-	list->head = list->tail = nullptr;
+	list->head = list->tail = NULL;
 	list->count = 0;
 }
 
@@ -56,12 +56,12 @@ AddItem(List *list, long id, long flags, long desk)
 	Item *new;
 	new = (Item *)xmalloc(sizeof(Item));
 	new->id = id;
-	new->name = nullptr;
+	new->name = NULL;
 	new->flags = flags;
 	new->desk = desk;
-	new->next = nullptr;
+	new->next = NULL;
 
-	if (list->tail == nullptr)
+	if (list->tail == NULL)
 		list->head = list->tail = new;
 	else {
 		list->tail->next = new;
@@ -79,10 +79,10 @@ FindItem(List *list, long id)
 	Item *temp;
 	int   i;
 
-	for (i = 0, temp = list->head; temp != nullptr && temp->id != id;
+	for (i = 0, temp = list->head; temp != NULL && temp->id != id;
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 	return i;
 }
@@ -97,10 +97,10 @@ FindItemDesk(List *list, long id, long desk)
 	int   i;
 
 	for (i = 0, temp = list->head;
-	    temp != nullptr && (temp->id != id || temp->desk != desk);
+	    temp != NULL && (temp->id != id || temp->desk != desk);
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 	return i;
 }
@@ -114,10 +114,10 @@ UpdateItemName(List *list, long id, char *string)
 	Item *temp;
 	int   i;
 
-	for (i = 0, temp = list->head; temp != nullptr && id != temp->id;
+	for (i = 0, temp = list->head; temp != NULL && id != temp->id;
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 	UpdateString(&temp->name, string);
 	return i;
@@ -134,12 +134,12 @@ UpdateItemDesk(List *list, long id, long desk)
 {
 	Item *temp;
 
-	for (temp = list->head; temp != nullptr && temp->id != id;
+	for (temp = list->head; temp != NULL && temp->id != id;
 	    temp = temp->next)
 		;
 	/*  	printf("sk=%ld %ld \n", id, temp->id);
 	 */
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 
 	/*  printf("dsk=%d\n", temp->desk);
@@ -159,10 +159,10 @@ UpdateItemFlags(List *list, long id, long flags)
 {
 	Item *temp;
 	int   i;
-	for (i = 0, temp = list->head; temp != nullptr && id != temp->id;
+	for (i = 0, temp = list->head; temp != NULL && id != temp->id;
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 	if (flags != -1)
 		temp->flags = flags;
@@ -175,8 +175,8 @@ UpdateItemFlags(List *list, long id, long flags)
 void
 FreeItem(Item *ptr)
 {
-	if (ptr != nullptr) {
-		if (ptr->name != nullptr)
+	if (ptr != NULL) {
+		if (ptr->name != NULL)
 			free(ptr->name);
 		free(ptr);
 	}
@@ -191,7 +191,7 @@ DeleteItem(List *list, long id)
 	Item *temp, *temp2;
 	int   i;
 
-	if (list->head == nullptr)
+	if (list->head == NULL)
 		return -1;
 	if (list->head->id == id) {
 		temp2 = list->head;
@@ -199,10 +199,10 @@ DeleteItem(List *list, long id)
 		i = -1;
 	} else {
 		for (i = 0, temp = list->head;
-		    temp->next != nullptr && temp->next->id != id;
+		    temp->next != NULL && temp->next->id != id;
 		    i++, temp = temp->next)
 			;
-		if (temp->next == nullptr)
+		if (temp->next == NULL)
 			return -1;
 		temp2 = temp->next;
 		temp->next = temp2->next;
@@ -224,12 +224,12 @@ FreeList(List *list)
 {
 	Item *temp, *temp2;
 
-	for (temp = list->head; temp != nullptr;) {
+	for (temp = list->head; temp != NULL;) {
 		temp2 = temp;
 		temp = temp->next;
 		FreeItem(temp2);
 	}
-	list->head = list->tail = nullptr;
+	list->head = list->tail = NULL;
 	list->count = 0;
 }
 
@@ -245,9 +245,9 @@ PrintList(List *list)
 	    "I-Name", "R-Name", "R-Class");
 	ConsoleMessage("   ---------- --------------- --------------- "
 		       "--------------- --------------- ----\n");
-	for (temp = list->head; temp != nullptr; temp = temp->next) {
+	for (temp = list->head; temp != NULL; temp = temp->next) {
 		ConsoleMessage("   %10ld %-15.15s %4ld\n", temp->id,
-		    (temp->name == nullptr) ? "<null>" : temp->name,
+		    (temp->name == NULL) ? "<null>" : temp->name,
 		    temp->flags);
 	}
 }
@@ -261,11 +261,11 @@ ItemName(List *list, int n)
 	Item *temp;
 	int   i;
 
-	for (i = 0, temp = list->head; temp != nullptr && i < n;
+	for (i = 0, temp = list->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
-		return nullptr;
+	if (temp == NULL)
+		return NULL;
 	return temp->name;
 }
 
@@ -277,10 +277,10 @@ ItemFlags(List *list, long id)
 {
 	Item *temp;
 
-	for (temp = list->head; temp != nullptr && id != temp->id;
+	for (temp = list->head; temp != NULL && id != temp->id;
 	    temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 
 	else
@@ -295,11 +295,11 @@ ItemDesk(List *list, long id)
 {
 	Item *temp;
 
-	for (temp = list->head; temp != nullptr && id != temp->id;
+	for (temp = list->head; temp != NULL && id != temp->id;
 	    temp = temp->next)
 		;
 
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 	else
 		return temp->desk;
@@ -315,9 +315,9 @@ XorFlags(List *list, int n, long value)
 	int   i;
 	long  ret;
 
-	for (i = 0, temp = list->head; temp != nullptr && i < n;
+	for (i = 0, temp = list->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
-		if (temp == nullptr)
+		if (temp == NULL)
 			return -1;
 	ret = temp->flags;
 	temp->flags ^= value;
@@ -345,7 +345,7 @@ ItemCountDesk(List *list, long desk)
 
 	/*return list->count;*/
 
-	for (temp = list->head; temp != nullptr; temp = temp->next) {
+	for (temp = list->head; temp != NULL; temp = temp->next) {
 		if (temp->desk == desk)
 			count++;
 	}
@@ -362,10 +362,10 @@ ItemID(List *list, int n)
 	Item *temp;
 	int   i;
 
-	for (i = 0, temp = list->head; temp != nullptr && i < n;
+	for (i = 0, temp = list->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return -1;
 	return temp->id;
 }
@@ -379,10 +379,10 @@ CopyItem(List *dest, List *source, int n)
 	Item *temp;
 	int   i;
 
-	for (i = 0, temp = source->head; temp != nullptr && i < n;
+	for (i = 0, temp = source->head; temp != NULL && i < n;
 	    i++, temp = temp->next)
 		;
-	if (temp == nullptr)
+	if (temp == NULL)
 		return;
 	AddItem(dest, temp->id, temp->flags, temp->desk);
 	UpdateItemName(dest, temp->id, temp->name);

@@ -85,14 +85,14 @@ int
 main(int argc, char **argv)
 {
 	char *temp, *s;
-	char *displayName = nullptr;
+	char *displayName = NULL;
 
-	commands = nullptr;
+	commands = NULL;
 
 	/* Save the program name for error messages and config parsing */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	Module = temp;
@@ -121,7 +121,7 @@ main(int argc, char **argv)
 	/* Open a log file if necessary */
 #ifdef LOGFILE
 	logFile = fopen(LOGFILE, "a");
-	if (logFile != nullptr)
+	if (logFile != NULL)
 		fprintf(logFile, "Initialising FvwmBacker\n");
 #endif
 
@@ -163,10 +163,10 @@ EndLessLoop(void)
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
 
-		if (!select(fd_width, &readset, nullptr, nullptr, &tv)) {
+		if (!select(fd_width, &readset, NULL, NULL, &tv)) {
 			FD_ZERO(&readset);
 			FD_SET(Fvwm_fd[1], &readset);
-			select(fd_width, &readset, nullptr, nullptr, nullptr);
+			select(fd_width, &readset, NULL, NULL, NULL);
 		}
 
 		if (!FD_ISSET(Fvwm_fd[1], &readset))
@@ -186,7 +186,7 @@ ReadFvwmPipe(void)
 	int	      count;
 	unsigned long header[HEADER_SIZE], *body;
 
-	body = nullptr;
+	body = NULL;
 	if ((count = ReadFvwmPacket(Fvwm_fd[1], header, &body)) > 0) {
 		ProcessMessage(header[1], body, header[2] - HEADER_SIZE);
 		free(body);
@@ -203,7 +203,7 @@ ProcessMessage(unsigned long type, unsigned long *body,
     unsigned long body_words)
 {
 	if (type == M_NEW_DESK) {
-		if (body == nullptr || body_words < 1 || commands == nullptr ||
+		if (body == NULL || body_words < 1 || commands == NULL ||
 		    DeskCount <= 0 || body[0] >= (unsigned long)DeskCount ||
 		    commands[body[0]].type == -1) {
 			return;
@@ -241,7 +241,7 @@ ProcessMessage(unsigned long type, unsigned long *body,
 			fprintf(logFile, "Color set.\n");
 			fflush(logFile);
 #endif
-		} else if (commands[body[0]].cmdStr != nullptr) {
+		} else if (commands[body[0]].cmdStr != NULL) {
 			SendFvwmPipe(
 			    commands[body[0]].cmdStr, (unsigned long)0);
 		}
@@ -261,7 +261,7 @@ SendFvwmPipe(char *message, unsigned long window)
 
 	while (1) {
 		temp = strchr(hold, ',');
-		if (temp != nullptr) {
+		if (temp != NULL) {
 			temp_msg = xmalloc((size_t)(temp - hold) + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
@@ -283,7 +283,7 @@ SendFvwmPipe(char *message, unsigned long window)
     Based on DeadPipe() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
  **********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -342,7 +342,7 @@ AddCommand(char *string)
 		temp++;
 	if (DeskCount < 1) {
 		commands = (Command *)xreallocarray(
-		    nullptr, (size_t)num + 1, sizeof(*commands));
+		    NULL, (size_t)num + 1, sizeof(*commands));
 		while (DeskCount < num + 1)
 			commands[DeskCount++].type = -1;
 	} else {

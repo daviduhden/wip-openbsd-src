@@ -59,7 +59,7 @@
 static inline void
 sandbox_stdio(const char *progname)
 {
-	if (pledge("stdio", nullptr) == -1)
+	if (pledge("stdio", NULL) == -1)
 		err(1, "%s: pledge stdio", progname);
 }
 
@@ -75,7 +75,7 @@ sandbox_stdio(const char *progname)
 static inline void
 sandbox_x11_only(const char *progname)
 {
-	if (pledge("stdio rpath inet dns", nullptr) == -1)
+	if (pledge("stdio rpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath", progname);
 }
 
@@ -88,7 +88,7 @@ sandbox_x11_only(const char *progname)
 static inline void
 sandbox_x11_config(const char *progname)
 {
-	if (pledge("stdio rpath inet dns", nullptr) == -1)
+	if (pledge("stdio rpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath", progname);
 }
 
@@ -100,7 +100,7 @@ sandbox_x11_config(const char *progname)
 static inline void
 sandbox_save_state(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath inet dns", nullptr) == -1)
+	if (pledge("stdio rpath wpath cpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath wpath cpath", progname);
 }
 
@@ -111,7 +111,7 @@ sandbox_save_state(const char *progname)
 static inline void
 sandbox_cpp_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc dns getpw inet", nullptr) ==
+	if (pledge("stdio rpath wpath cpath proc dns getpw inet", NULL) ==
 	    -1)
 		err(1, "%s: pledge", progname);
 }
@@ -123,7 +123,7 @@ sandbox_cpp_preproc(const char *progname)
 static inline void
 sandbox_m4_preproc(const char *progname)
 {
-	if (pledge("stdio rpath wpath cpath proc dns getpw inet", nullptr) ==
+	if (pledge("stdio rpath wpath cpath proc dns getpw inet", NULL) ==
 	    -1)
 		err(1, "%s: pledge", progname);
 }
@@ -134,7 +134,7 @@ sandbox_m4_preproc(const char *progname)
 static inline void
 sandbox_xpmroot(const char *progname)
 {
-	if (pledge("stdio rpath inet dns", nullptr) == -1)
+	if (pledge("stdio rpath inet dns", NULL) == -1)
 		err(1, "%s: pledge stdio rpath", progname);
 }
 
@@ -148,7 +148,7 @@ unveil_tempdir(const char *progname)
 	const char *tmp;
 
 	tmp = getenv("TMPDIR");
-	if (tmp == nullptr)
+	if (tmp == NULL)
 		tmp = "/tmp";
 	if (unveil(tmp, "rwc") == -1 && errno != EPERM)
 		err(1, "%s: unveil %s", progname, tmp);
@@ -163,7 +163,7 @@ unveil_home_read(const char *progname)
 	const char *home;
 
 	home = getenv("HOME");
-	if (home == nullptr || *home == '\0') {
+	if (home == NULL || *home == '\0') {
 		warnx("%s: HOME not set, cannot unveil", progname);
 		return;
 	}
@@ -180,7 +180,7 @@ unveil_home_write(const char *progname)
 	const char *home;
 
 	home = getenv("HOME");
-	if (home == nullptr || *home == '\0') {
+	if (home == NULL || *home == '\0') {
 		warnx("%s: HOME not set, cannot unveil", progname);
 		return;
 	}

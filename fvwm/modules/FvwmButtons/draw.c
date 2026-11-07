@@ -307,7 +307,7 @@ DrawTitle(button_info *b, Window win, GC gc)
 	/* -----------------------------------------------------------------------
 	 */
 
-	if (!(b->flags & b_Title) || !font || b->title == nullptr)
+	if (!(b->flags & b_Title) || !font || b->title == NULL)
 		return;
 
 	/* If a title is to be shown, truncate it until it fits */

@@ -8,6 +8,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -54,7 +56,7 @@ static char *MkDef(const char *name, const char *def);
 static char *MkNum(const char *name, int def);
 static char *m4_defs(
     Display *display, const char *host, char *m4_options, char *config_file);
-constexpr int MAXHOSTNAME = 255;
+#define MAXHOSTNAME (255)
 #define EXTRA 50
 
 int   m4_enable;	       /* use m4? */
@@ -78,8 +80,8 @@ main(int argc, char **argv)
 {
 	Display *dpy; /* which display are we talking to */
 	char	*temp, *s;
-	char	*display_name = nullptr;
-	char	*filename = nullptr;
+	char	*display_name = NULL;
+	char	*filename = NULL;
 	char	*tmp_file, read_string[80], delete_string[80];
 	int	 i, m4_debug = 0;
 
@@ -92,7 +94,7 @@ main(int argc, char **argv)
 	temp = argv[0];
 
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	{
@@ -156,7 +158,7 @@ main(int argc, char **argv)
 			filename = argv[i];
 	}
 
-	if (filename != nullptr) {
+	if (filename != NULL) {
 		for (i = 0; filename[i] != '\0'; i++)
 			if ((filename[i] == '\n') || (filename[i] == '\r')) {
 				filename[i] = 0;
@@ -173,7 +175,7 @@ main(int argc, char **argv)
 	unveil_home_read("FvwmM4");
 	if (unveil("/bin/sh", "rx") == -1 ||
 	    unveil("/usr/libexec/ld.so", "rx") == -1 ||
-	    unveil(nullptr, nullptr) == -1)
+	    unveil(NULL, NULL) == -1)
 		err(1, "FvwmM4: unveil");
 
 	tmp_file = m4_defs(dpy, display_name, m4_options, filename);
@@ -204,7 +206,7 @@ shell_safe_path(const char *path)
 	if (*p == '\0')
 		return 0;
 	for (; *p != '\0'; p++)
-		if (!isalnum(*p) && strchr("_./-+", *p) == nullptr)
+		if (!isalnum(*p) && strchr("_./-+", *p) == NULL)
 			return 0;
 	return 1;
 }
@@ -228,7 +230,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 
 	if (m4_outfile[0] == '\0') {
 		const char *tmpdir = getenv("TMPDIR");
-		if (tmpdir != nullptr) {
+		if (tmpdir != NULL) {
 			strlcpy(tmp_name, tmpdir, sizeof(tmp_name));
 		} else {
 			strlcpy(tmp_name, "/tmp", sizeof(tmp_name));
@@ -271,7 +273,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 		snprintf(options, sizeof(options), "%s  %s > %s\n", m4_prog,
 		    m4_options, tmp_name);
 	tmpf = popen(options, "w");
-	if (tmpf == nullptr) {
+	if (tmpf == NULL) {
 		perror("Cannot open pipe to m4");
 		exit(0377);
 	}
@@ -292,7 +294,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 	hostname = gethostbyname(client);
 	strlcpy(server, XDisplayName(host), sizeof(server));
 	colon = strchr(server, ':');
-	if (colon != nullptr)
+	if (colon != NULL)
 		*colon = '\0';
 	if ((server[0] == '\0') || (!strcmp(server, "unix")))
 		strlcpy(server, client,
@@ -314,7 +316,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 	fputs(MkDef("OSTYPE", ostype), tmpf);
 
 	pwent = getpwuid(geteuid());
-	if (pwent != nullptr && pwent->pw_name != nullptr)
+	if (pwent != NULL && pwent->pw_name != NULL)
 		fputs(MkDef("USER", pwent->pw_name), tmpf);
 	else
 		fputs(MkDef("USER", ""), tmpf);
@@ -322,7 +324,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 	{
 		const char *home = getenv("HOME");
 
-		fputs(MkDef("HOME", (home != nullptr) ? home : ""), tmpf);
+		fputs(MkDef("HOME", (home != NULL) ? home : ""), tmpf);
 	}
 	fputs(MkNum("VERSION", ProtocolVersion(display)), tmpf);
 	fputs(MkNum("REVISION", ProtocolRevision(display)), tmpf);
@@ -412,7 +414,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -422,13 +424,13 @@ DeadPipe(int nonsense)
 static char *
 MkDef(const char *name, const char *def)
 {
-	static char *cp = nullptr;
+	static char *cp = NULL;
 	static int   maxsize = 0;
 	int	     needed;
 	const char  *prefix = m4_prefix ? "m4_define" : "define";
 	const char  *suffix = m4_prefix ? "m4_" : "";
 
-	needed = snprintf(nullptr, 0, "%s(%s,%s%s%s%s%s)%sdnl\n", prefix, name,
+	needed = snprintf(NULL, 0, "%s(%s,%s%s%s%s%s)%sdnl\n", prefix, name,
 	    m4_startquote, m4_startquote, def, m4_endquote, m4_endquote,
 	    suffix);
 	if (needed < 0) {
@@ -438,7 +440,7 @@ MkDef(const char *name, const char *def)
 	needed += 1; /* account for terminating null */
 	if (needed > maxsize) {
 		char *tmp = realloc(cp, needed);
-		if (tmp == nullptr) {
+		if (tmp == NULL) {
 			perror("MkDef can't allocate enough space for a macro "
 			       "definition");
 			free(cp);

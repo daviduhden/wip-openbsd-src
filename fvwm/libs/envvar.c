@@ -121,7 +121,7 @@ strIns(char *s, const char *ins, int idx, int maxstrlen)
  *
  *  OUTPUT        len     length of variable, including $ and { }.
  *
- *  RETURNS       Pointer to the $ that introduces the variable, or nullptr
+ *  RETURNS       Pointer to the $ that introduces the variable, or NULL
  *                if no variable is found.
  *
  *  DESCRIPTION   Searches for matches like $NAME and ${NAME}, where NAME is
@@ -138,11 +138,11 @@ static char *
 findEnvVar(const char *s, int *len)
 {
 	int	    brace = 0;
-	char	   *ret = nullptr;
+	char	   *ret = NULL;
 	const char *next;
 
 	if (!s)
-		return nullptr;
+		return NULL;
 	while (*s) {
 		next = s + 1;
 		if (*s == '$' &&
@@ -161,7 +161,7 @@ findEnvVar(const char *s, int *len)
 					++*len;
 					break;
 				}
-				ret = nullptr;
+				ret = NULL;
 			} else
 				break;
 		}
@@ -188,17 +188,17 @@ getEnv(const char *name)
 	static char *empty = "";
 	char	    *ret, *tmp, *p, *p2;
 
-	if ((tmp = strdup(name)) == nullptr)
+	if ((tmp = strdup(name)) == NULL)
 		return empty; /* better than no test at all. */
 	p = tmp;
 	if (*p == '$')
 		++p;
 	if (*p == '{') {
 		++p;
-		if ((p2 = strchr(p, '}')) != nullptr)
+		if ((p2 = strchr(p, '}')) != NULL)
 			*p2 = '\0';
 	}
-	if ((ret = getenv(p)) == nullptr)
+	if ((ret = getenv(p)) == NULL)
 		ret = empty;
 	free(tmp);
 	return ret;
@@ -238,7 +238,7 @@ envExpand(char *s, int maxstrlen)
 	int	    len, ret = 0;
 
 	s2 = s;
-	while ((var = findEnvVar(s2, &len)) != nullptr) {
+	while ((var = findEnvVar(s2, &len)) != NULL) {
 		int idx, inslen;
 
 		++ret;
@@ -281,7 +281,7 @@ envExpand(char *s, int maxstrlen)
  *                variables expanded.
  *                Use free() to deallocate the buffer when it is no
  *                longer needed.
- *                nullptr is returned if there is not enough memory.
+ *                NULL is returned if there is not enough memory.
  *
  *  NOTES         A non-existing variable is substituted with the empty
  *                string.
@@ -300,8 +300,8 @@ envDupExpand(const char *s, int extra)
 	 */
 	if (extra < 0)
 		extra = 0;
-	if ((scan = strdup(s)) == nullptr)
-		return nullptr;
+	if ((scan = strdup(s)) == NULL)
+		return NULL;
 
 	/*
 	 *  calculate length needed.
@@ -309,7 +309,7 @@ envDupExpand(const char *s, int extra)
 	s2 = scan;
 	slen = strlen(s);
 	bufflen = slen + 1 + extra;
-	while ((var = findEnvVar(s2, &len)) != nullptr) {
+	while ((var = findEnvVar(s2, &len)) != NULL) {
 		save = var[len];
 		var[len] = '\0';
 		env = getEnv(var);

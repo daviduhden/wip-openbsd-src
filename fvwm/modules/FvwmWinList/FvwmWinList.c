@@ -23,6 +23,8 @@
 
 */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -149,7 +151,7 @@ main(int argc, char **argv)
 	/* Save the program name for error messages and config parsing */
 	temp = argv[0];
 	s = strrchr(argv[0], '/');
-	if (s != nullptr)
+	if (s != NULL)
 		temp = s + 1;
 
 	/* Setup my name */
@@ -186,8 +188,8 @@ main(int argc, char **argv)
 #endif
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_handler = TerminateHandler;
-	sigaction(SIGPIPE, &sigact, nullptr);
-	sigaction(SIGTERM, &sigact, nullptr);
+	sigaction(SIGPIPE, &sigact, NULL);
+	sigaction(SIGTERM, &sigact, NULL);
 #else
 	signal(SIGPIPE, TerminateHandler);
 	signal(SIGTERM, TerminateHandler);
@@ -252,7 +254,7 @@ MainEventLoop(void)
 		 * having one fewer select statements
 		 */
 		XFlush(dpy);
-		if (select(fd_width, &readset, nullptr, nullptr, nullptr) > 0) {
+		if (select(fd_width, &readset, NULL, NULL, NULL) > 0) {
 			if (FD_ISSET(x_fd, &readset) || XPending(dpy))
 				LoopOnEvents();
 			if (FD_ISSET(Fvwm_fd[1], &readset))
@@ -323,7 +325,7 @@ ProcessMessage(unsigned long type, unsigned long *body)
 		if ((i = FindItem(&windows, body[0])) == -1)
 			break;
 
-		if (UpdateButton(&buttons, i, nullptr, -1) != -1) {
+		if (UpdateButton(&buttons, i, NULL, -1) != -1) {
 			p.width = body[3];
 			p.height = body[4];
 			p.depth = body[5];
@@ -350,8 +352,8 @@ ProcessMessage(unsigned long type, unsigned long *body)
 			/* Keep buttons aligned with windows: pad with empty
 			 * buttons so the new button lands at index i. */
 			while (buttons.count < i)
-				AddButton(&buttons, "", nullptr, 0);
-			AddButton(&buttons, name, nullptr, 1);
+				AddButton(&buttons, "", NULL, 0);
+			AddButton(&buttons, name, NULL, 1);
 			UpdateButtonSet(&buttons, i,
 			    ItemFlags(&windows, body[0]) & ICONIFIED ? 1 : 0);
 			UpdateButtonDesk(
@@ -427,7 +429,7 @@ SendFvwmPipe(char *message, unsigned long window)
 
 	while (1) {
 		temp = strchr(hold, ',');
-		if (temp != nullptr) {
+		if (temp != NULL) {
 			temp_msg = xmalloc(temp - hold + 1);
 			strncpy(temp_msg, hold, (temp - hold));
 			temp_msg[(temp - hold)] = '\0';
@@ -457,7 +459,7 @@ SendFvwmPipe(char *message, unsigned long window)
     Based on DeadPipe() from FvwmIdent:
       Copyright 1994, Robert Nation and Nobutaka Suzuki.
  **********************************************************************/
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -522,7 +524,7 @@ ConsoleMessage(const char *fmt, ...)
 	va_list args;
 	FILE   *filep;
 
-	if (console == nullptr)
+	if (console == NULL)
 		filep = stderr;
 	else
 		filep = console;
@@ -539,7 +541,7 @@ int
 OpenConsole(void)
 {
 #ifndef NO_CONSOLE
-	if ((console = fopen("/dev/console", "w")) == nullptr) {
+	if ((console = fopen("/dev/console", "w")) == NULL) {
 		fprintf(stderr, "%s: cannot open console\n", Module);
 		return 0;
 	}
@@ -708,7 +710,7 @@ LoopOnEvents(void)
 			break;
 		case KeyPress:
 			num =
-			    XLookupString(&Event.xkey, buffer, 10, nullptr, 0);
+			    XLookupString(&Event.xkey, buffer, 10, NULL, 0);
 			if (num == 1) {
 				if (buffer[0] == 'q' || buffer[0] == 'Q')
 					exit(0);
@@ -775,7 +777,7 @@ find_frame_window(Window win, int *off_x, int *off_y)
 	XWindowAttributes attr;
 
 	while (1) {
-		junkw = nullptr;
+		junkw = NULL;
 		if (XQueryTree(dpy, win, &root, &parent, &junkw,
 			(unsigned int *)&junki) &&
 		    junkw)
@@ -812,7 +814,7 @@ AdjustWindow(void)
 	}
 	for (i = 0; i < total; i++) {
 		temp = ItemName(&windows, i);
-		if (temp != nullptr) {
+		if (temp != NULL) {
 			tw = 10 + XTextWidth(ButtonFont, temp, strlen(temp));
 			tw += XTextWidth(ButtonFont, "()", 2);
 
@@ -926,7 +928,7 @@ MakeMeWindow(void)
 	hints.width_inc = 0;
 	hints.height_inc = 0;
 
-	if (geometry != nullptr) {
+	if (geometry != NULL) {
 		ret = XParseGeometry(geometry, &x, &y, &dummy1, &dummy2);
 
 		if (ret & XValue && ret & YValue) {
@@ -972,10 +974,10 @@ MakeMeWindow(void)
 			fore[i] = GetColor("black");
 		} else {
 			back[i] =
-			    GetColor(BackColor[i] == nullptr ? BackColor[0] :
+			    GetColor(BackColor[i] == NULL ? BackColor[0] :
 							       BackColor[i]);
 			fore[i] =
-			    GetColor(ForeColor[i] == nullptr ? ForeColor[0] :
+			    GetColor(ForeColor[i] == NULL ? ForeColor[0] :
 							       ForeColor[i]);
 		}
 
@@ -1069,8 +1071,8 @@ StartMeUp(void)
 	ScreenHeight = DisplayHeight(dpy, screen);
 	ScreenWidth = DisplayWidth(dpy, screen);
 
-	if ((ButtonFont = XLoadQueryFont(dpy, font_string)) == nullptr) {
-		if ((ButtonFont = XLoadQueryFont(dpy, "fixed")) == nullptr)
+	if ((ButtonFont = XLoadQueryFont(dpy, font_string)) == NULL) {
+		if ((ButtonFont = XLoadQueryFont(dpy, "fixed")) == NULL)
 			exit(1);
 	}
 

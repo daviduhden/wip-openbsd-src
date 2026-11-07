@@ -8,7 +8,7 @@
 #include "xmanager.h"
 // clang-format on
 
-[[maybe_unused]] static char const rcsid[] =
+__attribute__((__unused__)) static char const rcsid[] =
     "$Id: xmanager.c,v 1.1.1.1 2006/11/26 10:53:51 matthieu Exp $";
 
 #ifdef SHAPE
@@ -24,22 +24,22 @@
 #endif
 
 /* button dirty bits: */
-constexpr int ICON_STATE_CHANGED = 1;
-constexpr int STATE_CHANGED = 2;
-constexpr int PICTURE_CHANGED = 4;
-constexpr int STRING_CHANGED = 16;
-constexpr int REDRAW_BUTTON = 32;
-constexpr int GEOMETRY_CHANGED = 64;
+#define ICON_STATE_CHANGED (1)
+#define STATE_CHANGED (2)
+#define PICTURE_CHANGED (4)
+#define STRING_CHANGED (16)
+#define REDRAW_BUTTON (32)
+#define GEOMETRY_CHANGED (64)
 
 /* manager dirty bits: */
 /*      GEOMETRY_CHANGED    64 same as with button */
-constexpr int MAPPING_CHANGED = 2;
-constexpr int SHAPE_CHANGED = 4;
-constexpr int REDRAW_MANAGER = 8;
+#define MAPPING_CHANGED (2)
+#define SHAPE_CHANGED (4)
+#define REDRAW_MANAGER (8)
 
 /* ButtonArray dirty bits: */
-constexpr int NUM_BUTTONS_CHANGED = 1;
-constexpr int NUM_WINDOWS_CHANGED = 2;
+#define NUM_BUTTONS_CHANGED (1)
+#define NUM_WINDOWS_CHANGED (2)
 
 #define ALL_CHANGED 0x7f /* high bit is special */
 
@@ -476,7 +476,7 @@ xy_to_button(WinManager *man, int x, int y)
 			return man->buttons.buttons[index];
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 /***************************************************************************/
@@ -497,7 +497,7 @@ static void
 clear_button(Button *b)
 {
 	assert(b);
-	b->drawn_state.win = nullptr;
+	b->drawn_state.win = NULL;
 	b->drawn_state.dirty_flags = REDRAW_BUTTON;
 }
 
@@ -543,7 +543,7 @@ set_num_buttons(ButtonArray *buttons, int n)
 			buttons->buttons[i]->drawn_state.dirty_flags = 0;
 			buttons->buttons[i]->drawn_state.w = 0;
 			buttons->buttons[i]->drawn_state.h = 0;
-			buttons->buttons[i]->drawn_state.win = nullptr;
+			buttons->buttons[i]->drawn_state.win = NULL;
 		}
 
 		buttons->dirty_flags |= NUM_BUTTONS_CHANGED;
@@ -702,7 +702,7 @@ set_win_displaystring(WinData *win)
 	copy_string(&win->display_string,
 	    make_display_string(win, man->formatstring, maxlen));
 	if (used_resource_placeholder)
-		win->resname = nullptr;
+		win->resname = NULL;
 	if (win->button)
 		win->button->drawn_state.dirty_flags |= STRING_CHANGED;
 }
@@ -867,7 +867,7 @@ init_button_array(ButtonArray *array)
 {
 	array->num_buttons = 0;
 	array->num_windows = 0;
-	array->buttons = nullptr;
+	array->buttons = NULL;
 }
 
 /* Pretty much like resize_manager, but used only to figure the
@@ -1175,7 +1175,7 @@ check_in_window(WinData *win)
 	if (win->manager && win->complete &&
 	    !(win->manager->usewinlist && (win->fvwm_flags & WINDOWLISTSKIP))) {
 		in_viewport = win_in_viewport(win);
-		if (win->button == nullptr && in_viewport) {
+		if (win->button == NULL && in_viewport) {
 			insert_windows_button(win);
 			if (win->manager->window_up == 0 &&
 			    globals.got_window_list)
@@ -1689,9 +1689,9 @@ delete_windows_button(WinData *win)
 	    win->manager, spot + 1, buttons->num_windows - 1, -1);
 	clear_button(buttons->buttons[buttons->num_windows - 1]);
 	increase_num_windows(buttons, -1);
-	win->button = nullptr;
+	win->button = NULL;
 	if (globals.focus_win == win) {
-		globals.focus_win = nullptr;
+		globals.focus_win = NULL;
 	}
 	if (selected_index >= 0) {
 		ConsoleDebug(X11,
@@ -1751,7 +1751,7 @@ move_highlight(WinManager *man, Button *b)
 
 	if (old && old->button) {
 		del_win_state(old, SELECT_CONTEXT);
-		old->manager->select_button = nullptr;
+		old->manager->select_button = NULL;
 		draw_button(old->manager, old->button->index, 0);
 	}
 	if (b && b->drawn_state.win) {
@@ -1759,7 +1759,7 @@ move_highlight(WinManager *man, Button *b)
 		draw_button(man, b->index, 0);
 		globals.select_win = b->drawn_state.win;
 	} else {
-		globals.select_win = nullptr;
+		globals.select_win = NULL;
 	}
 
 	man->select_button = b;

@@ -109,7 +109,7 @@ SetBorder(
 
 		/* make sure that the previously highlighted window got
 		 * unhighlighted */
-		if ((Scr.Hilite != t) && (Scr.Hilite != nullptr))
+		if ((Scr.Hilite != t) && (Scr.Hilite != NULL))
 			SetBorder(Scr.Hilite, False, False, True, None);
 
 #if defined(PIXMAP_BUTTONS) && defined(BORDERSTYLE)
@@ -134,7 +134,7 @@ SetBorder(
 			return;
 
 		if (Scr.Hilite == t) {
-			Scr.Hilite = nullptr;
+			Scr.Hilite = NULL;
 			NewColor = True;
 		}
 
@@ -806,7 +806,7 @@ SetTitleBar(FvwmWindow *t, Bool onoroff, Bool NewTitle)
 	}
 	flush_expose(t->title_w);
 
-	if (t->name != (char *)nullptr) {
+	if (t->name != (char *)NULL) {
 		w = XTextWidth(
 		    GetDecor(t, WindowFont.font), t->name, strlen(t->name));
 		if (w > t->title_width - 12)
@@ -866,7 +866,7 @@ SetTitleBar(FvwmWindow *t, Bool onoroff, Bool NewTitle)
 
 		XDrawLine(dpy, t->title_w, ShadowGC, hor_off + w + 1, 0,
 		    hor_off + w + 1, t->title_height);
-		if (t->name != (char *)nullptr)
+		if (t->name != (char *)NULL)
 			XDrawString(dpy, t->title_w, Scr.ScratchGC3, hor_off,
 			    GetDecor(t, WindowFont.y) + 1, t->name,
 			    strlen(t->name));
@@ -902,7 +902,7 @@ SetTitleBar(FvwmWindow *t, Bool onoroff, Bool NewTitle)
 				    ShadowGC, BOTTOM_HILITE);
 		}
 
-		if (t->name != (char *)nullptr)
+		if (t->name != (char *)NULL)
 			XDrawString(dpy, t->title_w, Scr.ScratchGC3, hor_off,
 			    GetDecor(t, WindowFont.y) + 1, t->name,
 			    strlen(t->name));

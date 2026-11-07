@@ -6,6 +6,8 @@
 // clang-format on
 
 #ifndef TRUE
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 #endif
@@ -22,15 +24,15 @@
 int
 matchWildcards(char *pattern, char *string)
 {
-	if (string == nullptr) {
-		if (pattern == nullptr)
+	if (string == NULL) {
+		if (pattern == NULL)
 			return TRUE;
 		else if (strcmp(pattern, "*") == 0)
 			return TRUE;
 		else
 			return FALSE;
 	}
-	if (pattern == nullptr)
+	if (pattern == NULL)
 		return TRUE;
 
 	while (*string && *pattern) {

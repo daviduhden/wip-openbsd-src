@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 
@@ -51,9 +53,9 @@
  *	SIGPIPE handler - SIGPIPE means fvwm is dying
  *
  ***********************************************************************/
-[[noreturn]] void DeadPipe(int nonsense);
+__attribute__((__noreturn__)) void DeadPipe(int nonsense);
 
-[[noreturn]] void
+__attribute__((__noreturn__)) void
 DeadPipe(int nonsense)
 {
 	(void)nonsense;
@@ -70,7 +72,7 @@ int
 main(int argc, char **argv)
 {
 	char *enter_fn = "Raise", /* default */
-	    *leave_fn = nullptr, mask_mesg[80];
+	    *leave_fn = NULL, mask_mesg[80];
 	unsigned long header[HEADER_SIZE], *body,
 	    last_win = 0,  /* last window handled */
 	    focus_win = 0; /* current focus */
@@ -94,13 +96,13 @@ main(int argc, char **argv)
 		usec = (timeout % 1000) * 1000;
 		delay = &value;
 	} else
-		delay = nullptr;
+		delay = NULL;
 
 	if (argv[7]) {					    /* if specified */
 		if (*argv[7] && !StrEquals(argv[7], "NOP")) /* not empty */
 			enter_fn = argv[7]; /* override default */
 		else
-			enter_fn = nullptr; /* nop */
+			enter_fn = NULL; /* nop */
 
 		if (argv[8] && *argv[8] && !StrEquals(argv[8], "NOP"))
 			/* leave function specified */
@@ -128,7 +130,7 @@ main(int argc, char **argv)
 			delay->tv_usec = usec;
 		}
 		select(fd_width, &in_fdset, 0, 0,
-		    (focus_win == last_win) ? nullptr : delay);
+		    (focus_win == last_win) ? NULL : delay);
 #ifdef DEBUG
 		fprintf(stderr,
 		    "[FvwmAuto]: after select:  focus_win: 0x%08lx, last_win: "
@@ -150,7 +152,7 @@ main(int argc, char **argv)
 			    focus_win);
 #endif
 		}
-		if (((FD_ISSET(fd[1], &in_fdset) == 0) == (delay != nullptr)) &&
+		if (((FD_ISSET(fd[1], &in_fdset) == 0) == (delay != NULL)) &&
 		    /* new message and timeout==0  or */
 		    /* no message and timeout>0 */
 		    focus_win != last_win) { /* there's sth. to do */

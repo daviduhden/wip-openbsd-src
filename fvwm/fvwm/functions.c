@@ -188,7 +188,7 @@ setPath(char **p_path, char *newpath, int free_old_path)
 	char *oldpath = *p_path;
 	int   oldlen = strlen(oldpath);
 	char *stripped_path = stripcpy(newpath);
-	int   found_plus = strchr(newpath, '+') != nullptr;
+	int   found_plus = strchr(newpath, '+') != NULL;
 
 	/** Leave room for the old path, if we find a '+' in newpath **/
 	*p_path = envDupExpand(stripped_path, found_plus ? oldlen : 0);
@@ -237,10 +237,10 @@ FindBuiltinFunction(char *func)
 	static int func_config_size = 0;
 
 	if (!func)
-		return nullptr;
+		return NULL;
 
 	if (!func_config_size) {
-		/* remove finial nullptr entry from size */
+		/* remove finial NULL entry from size */
 		func_config_size =
 		    ((sizeof(func_config)) / (sizeof(struct functions))) - 1;
 	}
@@ -289,14 +289,14 @@ ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
 	   the asterisk. */
 	if (Action[0] == '*') { /* a module config command */
 		ModuleConfig(
-		    nullptr, 0, 0, 0, Action, 0); /* process the command */
+		    NULL, 0, 0, 0, Action, 0); /* process the command */
 		return;				  /* done */
 	}
 
 	for (j = 0; j < 10; j++)
-		arguments[j] = nullptr;
+		arguments[j] = NULL;
 
-	if (tmp_win == nullptr)
+	if (tmp_win == NULL)
 		w = Scr.Root;
 	else
 		w = tmp_win->w;
@@ -336,7 +336,7 @@ ExecuteFunction(char *Action, FvwmWindow *tmp_win, XEvent *eventp,
 
 	if (function)
 		free(function);
-	if (taction != nullptr)
+	if (taction != NULL)
 		free(taction);
 	return;
 }

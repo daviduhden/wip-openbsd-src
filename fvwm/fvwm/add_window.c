@@ -61,10 +61,10 @@ static XrmOptionDescRec table[] = {
      * to specify the desktop. I have to include dummy options that
      * are meaningless since Xrm seems to allow -w to match -workspace
      * if there would be no ambiguity. */
-    {"-workspacf", "*junk", XrmoptionSepArg, (caddr_t) nullptr},
-    {"-workspace", "*desk", XrmoptionSepArg, (caddr_t) nullptr},
-    {"-xrn", nullptr, XrmoptionResArg, (caddr_t) nullptr},
-    {"-xrm", nullptr, XrmoptionResArg, (caddr_t) nullptr},
+    {"-workspacf", "*junk", XrmoptionSepArg, (caddr_t) NULL},
+    {"-workspace", "*desk", XrmoptionSepArg, (caddr_t) NULL},
+    {"-xrn", NULL, XrmoptionResArg, (caddr_t) NULL},
+    {"-xrm", NULL, XrmoptionResArg, (caddr_t) NULL},
 };
 
 extern char *IconPath;
@@ -94,18 +94,18 @@ static void merge_styles(name_list *, name_list *); /* prototype */
 static void
 free_partial_window(FvwmWindow *fw)
 {
-	if (fw == nullptr)
+	if (fw == NULL)
 		return;
 	free_window_names(fw, True, True);
-	if (fw->wmhints != nullptr)
+	if (fw->wmhints != NULL)
 		XFree((char *)fw->wmhints);
-	if (fw->class.res_name != nullptr && fw->class.res_name != NoResource)
+	if (fw->class.res_name != NULL && fw->class.res_name != NoResource)
 		XFree((char *)fw->class.res_name);
-	if (fw->class.res_class != nullptr && fw->class.res_class != NoClass)
+	if (fw->class.res_class != NULL && fw->class.res_class != NoClass)
 		XFree((char *)fw->class.res_class);
-	if (fw->mwm_hints != nullptr)
+	if (fw->mwm_hints != NULL)
 		XFree((char *)fw->mwm_hints);
-	if (fw->cmap_windows != nullptr)
+	if (fw->cmap_windows != NULL)
 		XFree((void *)fw->cmap_windows);
 	free((char *)fw);
 }
@@ -129,7 +129,7 @@ AddWindow(Window w)
 	extern Bool	   NeedToResizeToo;
 	extern FvwmWindow *colormap_win;
 	int		   client_argc;
-	char		 **client_argv = nullptr, *str_type;
+	char		 **client_argv = NULL, *str_type;
 	Bool		   status;
 	XrmValue	   rm_value;
 	XTextProperty	   text_prop;
@@ -139,24 +139,24 @@ AddWindow(Window w)
 	/* allocate space for the fvwm window */
 	tmp_win = (FvwmWindow *)calloc(1, sizeof(FvwmWindow));
 	if (tmp_win == (FvwmWindow *)0) {
-		return nullptr;
+		return NULL;
 	}
 	tmp_win->flags = 0;
 	tmp_win->tmpflags.ViewportMoved = 0;
 	tmp_win->tmpflags.IconifiedByParent = 0;
 	tmp_win->w = w;
 
-	tmp_win->cmap_windows = (Window *)nullptr;
+	tmp_win->cmap_windows = (Window *)NULL;
 #ifdef MINI_ICONS
-	tmp_win->mini_pixmap_file = nullptr;
-	tmp_win->mini_icon = nullptr;
+	tmp_win->mini_pixmap_file = NULL;
+	tmp_win->mini_icon = NULL;
 #endif
 
 	if (!PPosOverride)
 		if (XGetGeometry(dpy, tmp_win->w, &JunkRoot, &JunkX, &JunkY,
 			&JunkWidth, &JunkHeight, &JunkBW, &JunkDepth) == 0) {
 			free((char *)tmp_win);
-			return (nullptr);
+			return (NULL);
 		}
 	if (XGetWMName(dpy, tmp_win->w, &text_prop) != 0)
 		tmp_win->name = (char *)text_prop.value;
@@ -167,9 +167,9 @@ AddWindow(Window w)
 	tmp_win->class.res_class = NoClass;
 	XGetClassHint(dpy, tmp_win->w, &tmp_win->class);
 #if 1
-	if (tmp_win->class.res_name == nullptr)
+	if (tmp_win->class.res_name == NULL)
 		tmp_win->class.res_name = NoResource;
-	if (tmp_win->class.res_class == nullptr)
+	if (tmp_win->class.res_class == NULL)
 		tmp_win->class.res_class = NoClass;
 #endif /* 1 */
 
@@ -215,8 +215,8 @@ AddWindow(Window w)
 	tmp_win->buttons = styles.on_buttons; /* on and off buttons combined. */
 #ifdef USEDECOR
 	/* search for a UseDecor tag in the Style */
-	tmp_win->fl = nullptr;
-	if (styles.Decor != nullptr) {
+	tmp_win->fl = NULL;
+	if (styles.Decor != NULL) {
 		FvwmDecor *fl = &Scr.DefaultDecor;
 		for (; fl; fl = fl->next)
 			if (strcasecmp(styles.Decor, fl->tag) == 0) {
@@ -224,7 +224,7 @@ AddWindow(Window w)
 				break;
 			}
 	}
-	if (tmp_win->fl == nullptr)
+	if (tmp_win->fl == NULL)
 		tmp_win->fl = &Scr.DefaultDecor;
 #endif
 
@@ -250,7 +250,7 @@ AddWindow(Window w)
 	} else if ((tmp_win->wmhints) &&
 	    (tmp_win->wmhints->flags & (IconWindowHint | IconPixmapHint))) {
 		/* window has its own icon */
-		tmp_win->icon_bitmap_file = nullptr;
+		tmp_win->icon_bitmap_file = NULL;
 	} else {
 		/* use default icon */
 		tmp_win->icon_bitmap_file = Scr.DefaultIcon;
@@ -260,7 +260,7 @@ AddWindow(Window w)
 	if (styles.on_flags & MINIICON_FLAG) {
 		tmp_win->mini_pixmap_file = styles.mini_value;
 	} else {
-		tmp_win->mini_pixmap_file = nullptr;
+		tmp_win->mini_pixmap_file = NULL;
 	}
 #endif
 
@@ -334,14 +334,14 @@ AddWindow(Window w)
 		}
 		/**/
 		XrmDestroyDatabase(db);
-		db = nullptr;
+		db = NULL;
 	}
 
 	/*  RBW - 11/02/1998  */
 	if (!PlaceWindow(tmp_win, styles.on_flags, styles.Desk, styles.PageX,
 		styles.PageY)) {
 		free_partial_window(tmp_win);
-		return nullptr;
+		return NULL;
 	}
 
 	/*
@@ -356,13 +356,13 @@ AddWindow(Window w)
 		&JunkHeight, &JunkBW, &JunkDepth) == 0) {
 		free_partial_window(tmp_win);
 		MyXUngrabServer(dpy);
-		return (nullptr);
+		return (NULL);
 	}
 
 	XSetWindowBorderWidth(dpy, tmp_win->w, 0);
 	if (XGetWMIconName(dpy, tmp_win->w, &text_prop))
 		tmp_win->icon_name = (char *)text_prop.value;
-	if (tmp_win->icon_name == (char *)nullptr)
+	if (tmp_win->icon_name == (char *)NULL)
 		tmp_win->icon_name = tmp_win->name;
 
 	tmp_win->flags &= ~ICONIFIED;
@@ -374,7 +374,7 @@ AddWindow(Window w)
 	tmp_win->ShadowPixel = Scr.StdRelief.back;
 	tmp_win->BackPixel = Scr.StdColors.back;
 
-	if (styles.ForeColor != nullptr) {
+	if (styles.ForeColor != NULL) {
 		XColor color;
 
 		if ((XParseColor(dpy, Scr.FvwmRoot.attr.colormap,
@@ -383,7 +383,7 @@ AddWindow(Window w)
 			tmp_win->TextPixel = color.pixel;
 		}
 	}
-	if (styles.BackColor != nullptr) {
+	if (styles.BackColor != NULL) {
 		XColor color;
 
 		if ((XParseColor(dpy, Scr.FvwmRoot.attr.colormap,
@@ -398,12 +398,12 @@ AddWindow(Window w)
 	/* add the window to the end of the fvwm list */
 	tmp_win->next = Scr.FvwmRoot.next;
 	tmp_win->prev = &Scr.FvwmRoot;
-	while (tmp_win->next != nullptr) {
+	while (tmp_win->next != NULL) {
 		tmp_win->prev = tmp_win->next;
 		tmp_win->next = tmp_win->next->next;
 	}
 	/* tmp_win->prev points to the last window in the list, tmp_win->next is
-	   nullptr. Now fix the last window to point to tmp_win */
+	   NULL. Now fix the last window to point to tmp_win */
 	tmp_win->prev->next = tmp_win;
 
 	/*
@@ -639,7 +639,7 @@ AddWindow(Window w)
 		tmp_win->mini_icon = CachePicture(dpy, Scr.Root, IconPath,
 		    PixmapPath, tmp_win->mini_pixmap_file, Scr.ColorLimit);
 	} else {
-		tmp_win->mini_icon = nullptr;
+		tmp_win->mini_icon = NULL;
 	}
 #endif
 
@@ -735,7 +735,7 @@ AddWindow(Window w)
 	    (unsigned long)tmp_win, tmp_win->name);
 	BroadcastName(M_ICON_NAME, tmp_win->w, tmp_win->frame,
 	    (unsigned long)tmp_win, tmp_win->icon_name);
-	if (tmp_win->icon_bitmap_file != nullptr &&
+	if (tmp_win->icon_bitmap_file != NULL &&
 	    tmp_win->icon_bitmap_file != Scr.DefaultIcon)
 		BroadcastName(M_ICON_FILE, tmp_win->w, tmp_win->frame,
 		    (unsigned long)tmp_win, tmp_win->icon_bitmap_file);
@@ -744,7 +744,7 @@ AddWindow(Window w)
 	BroadcastName(M_RES_NAME, tmp_win->w, tmp_win->frame,
 	    (unsigned long)tmp_win, tmp_win->class.res_name);
 #ifdef MINI_ICONS
-	if (tmp_win->mini_icon != nullptr)
+	if (tmp_win->mini_icon != NULL)
 		BroadcastMiniIcon(M_MINI_ICON, tmp_win->w, tmp_win->frame,
 		    (unsigned long)tmp_win, tmp_win->mini_icon->width,
 		    tmp_win->mini_icon->height, tmp_win->mini_icon->depth,
@@ -793,7 +793,7 @@ GrabButtons(FvwmWindow *tmp_win)
 
 	MouseEntry = Scr.AllBindings;
 	while (MouseEntry != (Binding *)0) {
-		if ((MouseEntry->Action != nullptr) &&
+		if ((MouseEntry->Action != NULL) &&
 		    (MouseEntry->Context & C_WINDOW) &&
 		    (MouseEntry->IsMouse == 1)) {
 			if (MouseEntry->Button_Key > 0) {
@@ -866,7 +866,7 @@ void
 GrabKeys(FvwmWindow *tmp_win)
 {
 	Binding *tmp;
-	for (tmp = Scr.AllBindings; tmp != nullptr; tmp = tmp->NextBinding) {
+	for (tmp = Scr.AllBindings; tmp != NULL; tmp = tmp->NextBinding) {
 		if ((tmp->Context &
 			(C_WINDOW | C_TITLE | C_RALL | C_LALL | C_SIDEBAR)) &&
 		    (tmp->IsMouse == 0)) {
@@ -895,13 +895,13 @@ void
 FetchWmProtocols(FvwmWindow *tmp)
 {
 	unsigned long flags = 0L;
-	Atom	     *protocols = nullptr, *ap;
+	Atom	     *protocols = NULL, *ap;
 	int	      i, n;
 	Atom	      atype;
 	int	      aformat;
 	unsigned long bytes_remain, nitems;
 
-	if (tmp == nullptr)
+	if (tmp == NULL)
 		return;
 	/* First, try the Xlib function to read the protocols.
 	 * This is what Twm uses. */
@@ -1053,7 +1053,7 @@ GetWindowSizeHints(FvwmWindow *tmp)
  *	styles - callers return area
  *
  *  Changes:
- *      dje 10/06/97 test for nullptr class removed, can't happen.
+ *      dje 10/06/97 test for NULL class removed, can't happen.
  *      use merge subroutine instead of coding merges 3 times.
  *      Use structure to return values, not many, many args
  *      and return value.
@@ -1067,7 +1067,7 @@ LookInList(FvwmWindow *tmp_win, name_list *styles)
 
 	memset(styles, 0, sizeof(name_list)); /* clear callers return area */
 	/* look thru all styles in order defined. */
-	for (nptr = Scr.TheList; nptr != nullptr; nptr = nptr->next) {
+	for (nptr = Scr.TheList; nptr != NULL; nptr = nptr->next) {
 		/* If name/res_class/res_name match, merge */
 		if (matchWildcards(nptr->name, tmp_win->class.res_class) ==
 		    TRUE) {
@@ -1103,14 +1103,14 @@ LookInList(FvwmWindow *tmp_win, name_list *styles)
 static void
 merge_styles(name_list *styles, name_list *nptr)
 {
-	if (nptr->value != nullptr)
+	if (nptr->value != NULL)
 		styles->value = nptr->value;
 #ifdef MINI_ICONS
-	if (nptr->mini_value != nullptr)
+	if (nptr->mini_value != NULL)
 		styles->mini_value = nptr->mini_value;
 #endif
 #ifdef USEDECOR
-	if (nptr->Decor != nullptr)
+	if (nptr->Decor != NULL)
 		styles->Decor = nptr->Decor;
 #endif
 	if (nptr->off_flags & STARTSONDESK_FLAG)
@@ -1134,7 +1134,7 @@ merge_styles(name_list *styles, name_list *nptr)
 	styles->on_buttons &= ~(nptr->on_buttons);
 	/* Note, only one style cmd can define a windows iconboxes,
 	   the last one encountered. */
-	if (nptr->IconBoxes != nullptr) { /* If style has iconboxes */
+	if (nptr->IconBoxes != NULL) { /* If style has iconboxes */
 		styles->IconBoxes = nptr->IconBoxes; /* copy it */
 	}
 	return; /* return */

@@ -68,20 +68,20 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	int	     numWindows;
 	int	     ii;
 	char	     tname[80] = "";
-	char	     loc[40], *name = nullptr;
+	char	     loc[40], *name = NULL;
 	int	     dwidth, dheight;
 	char	     tlabel[50] = "";
 	int	     last_desk_done = INT_MIN;
 	int	     last_desk_displayed = INT_MIN;
 	int	     next_desk = 0;
-	char	    *t_hot = nullptr; /* Menu label with hotkey added */
+	char	    *t_hot = NULL; /* Menu label with hotkey added */
 	char	     scut = '0';      /* Current short cut key */
-	char	    *line = nullptr, *tok = nullptr;
+	char	    *line = NULL, *tok = NULL;
 	int	     desk = Scr.CurrentDesk;
 	int	     flags = SHOW_EVERYTHING;
-	char	    *func = nullptr;
-	char	    *tfunc = nullptr;
-	char	    *default_action = nullptr;
+	char	    *func = NULL;
+	char	    *tfunc = NULL;
+	char	    *default_action = NULL;
 	MenuStatus   menu_retval;
 	XEvent	    *teventp;
 	MenuOptions  mops;
@@ -90,7 +90,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	mops.flags.allflags = 0;
 	if (action && *action) {
 		/* parse postitioning args */
-		action = GetMenuOptions(action, w, tmp_win, nullptr, &mops);
+		action = GetMenuOptions(action, w, tmp_win, NULL, &mops);
 		line = action;
 		/* parse options */
 		while (line && *line) {
@@ -147,7 +147,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 			else if (StrEquals(tok, "OnlyOnTop"))
 				flags = SHOW_ONTOP;
 			else if (!line || !*line) {
-				if (default_action != nullptr)
+				if (default_action != NULL)
 					free(default_action);
 				default_action = strdup(tok);
 			} else {
@@ -169,16 +169,16 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	AddToMenu(mr, tlabel, "TITLE", FALSE, FALSE);
 
 	numWindows = 0;
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		numWindows++;
 	}
 	windowList = malloc((numWindows + 1) * sizeof(t));
-	if (windowList == nullptr) {
+	if (windowList == NULL) {
 		DestroyMenu(mr);
 		return;
 	}
 	/* get the windowlist starting from the current window (if any)*/
-	if ((t = Scr.Focus) == nullptr)
+	if ((t = Scr.Focus) == NULL)
 		t = Scr.FvwmRoot.next;
 	for (ii = 0; ii < numWindows; ii++) {
 		windowList[ii] = t;
@@ -243,7 +243,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				 * top */
 				if (t->Desk != last_desk_displayed) {
 					if (last_desk_displayed != INT_MIN)
-						AddToMenu(mr, nullptr, nullptr,
+						AddToMenu(mr, NULL, NULL,
 						    FALSE, FALSE);
 					last_desk_displayed = t->Desk;
 				}
@@ -323,7 +323,7 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 					snprintf(tfunc, funclen, "%s %ld", func,
 					    t->w);
 					free(func);
-					func = nullptr;
+					func = NULL;
 				}
 				AddToMenu(mr, t_hot, tfunc, FALSE, FALSE);
 				free(tfunc);
@@ -355,12 +355,12 @@ do_windowList(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	else
 		teventp = eventp;
 	menu_retval =
-	    do_menu(mr, nullptr, &miExecuteAction, 0, TRUE, teventp, &mops);
+	    do_menu(mr, NULL, &miExecuteAction, 0, TRUE, teventp, &mops);
 	DestroyMenu(mr);
 	if (menu_retval == MENU_DOUBLE_CLICKED && default_action &&
 	    *default_action)
 		ExecuteFunction(
 		    default_action, tmp_win, eventp, context, *Module);
-	if (default_action != nullptr)
+	if (default_action != NULL)
 		free(default_action);
 }

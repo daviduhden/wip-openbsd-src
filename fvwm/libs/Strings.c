@@ -23,23 +23,23 @@ CatString3(char *a, char *b, char *c)
 {
 	int len = 0;
 
-	if (a != nullptr)
+	if (a != NULL)
 		len += strlen(a);
-	if (b != nullptr)
+	if (b != NULL)
 		len += strlen(b);
-	if (c != nullptr)
+	if (c != NULL)
 		len += strlen(c);
 
 	if (len > 255)
-		return nullptr;
+		return NULL;
 
-	if (a == nullptr)
+	if (a == NULL)
 		CatS[0] = 0;
 	else
 		strlcpy(CatS, a, sizeof(CatS));
-	if (b != nullptr)
+	if (b != NULL)
 		strlcat(CatS, b, sizeof(CatS));
-	if (c != nullptr)
+	if (c != NULL)
 		strlcat(CatS, c, sizeof(CatS));
 	return CatS;
 }
@@ -54,8 +54,8 @@ CopyString(char **dest, char *source)
 	int   len;
 	char *start;
 
-	if (source == nullptr) {
-		*dest = nullptr;
+	if (source == NULL) {
+		*dest = NULL;
 		return;
 	}
 	while (((isspace((unsigned char)*source)) && (*source != '\n')) &&
@@ -92,8 +92,8 @@ stripcpy(char *source)
 	char *tmp, *ptr;
 	int   len;
 
-	if (source == nullptr)
-		return nullptr;
+	if (source == NULL)
+		return NULL;
 
 	while (isspace((unsigned char)*source))
 		source++;

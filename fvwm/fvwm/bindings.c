@@ -42,7 +42,7 @@ RegrabAllKeys(void)
 {
 	FvwmWindow *t;
 
-	for (t = Scr.FvwmRoot.next; t != nullptr; t = t->next) {
+	for (t = Scr.FvwmRoot.next; t != NULL; t = t->next) {
 		GrabKeys(t);
 	}
 }
@@ -55,7 +55,7 @@ static void
 remove_binding(
     int contexts, int mods, int button, KeySym keysym, int mouse_binding)
 {
-	Binding *temp = Scr.AllBindings, *temp2, *prev = nullptr;
+	Binding *temp = Scr.AllBindings, *temp2, *prev = NULL;
 	KeyCode	 keycode = 0;
 
 	if (!mouse_binding)
@@ -79,7 +79,7 @@ remove_binding(
 				free(temp->key_name);
 				free(temp->Action);
 				free(temp);
-				temp = nullptr;
+				temp = NULL;
 			}
 		}
 		if (temp)
@@ -114,7 +114,7 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 
 	/* tline points after the key word "Mouse" or "Key" */
 	ptr = GetNextToken(tline, &token);
-	if (token != nullptr) {
+	if (token != NULL) {
 		if (fKey)
 			n1 = sscanf(token, "%19s", key);
 		else
@@ -123,13 +123,13 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	}
 
 	ptr = GetNextToken(ptr, &token);
-	if (token != nullptr) {
+	if (token != NULL) {
 		n2 = sscanf(token, "%19s", context);
 		free(token);
 	}
 
 	action = GetNextToken(ptr, &token);
-	if (token != nullptr) {
+	if (token != NULL) {
 		n3 = sscanf(token, "%19s", modifiers);
 		free(token);
 	}
@@ -226,14 +226,14 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		maxmods = 0;
 	}
 	for (i = min; i <= max; i++) {
-		KeySym *mapping = nullptr;
+		KeySym *mapping = NULL;
 		int	mapping_width = 0;
 		int	column_limit = maxmods;
 
 		if (fKey) {
 			mapping =
 			    XGetKeyboardMapping(dpy, i, 1, &mapping_width);
-			if (mapping == nullptr || mapping_width <= 0) {
+			if (mapping == NULL || mapping_width <= 0) {
 				if (mapping)
 					XFree(mapping);
 				continue;
@@ -259,7 +259,7 @@ ParseBindEntry(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 				Scr.AllBindings->IsMouse = !fKey;
 				Scr.AllBindings->Button_Key = i;
 				Scr.AllBindings->key_name =
-				    fKey ? stripcpy(key) : nullptr;
+				    fKey ? stripcpy(key) : NULL;
 				Scr.AllBindings->Context = contexts;
 				Scr.AllBindings->Modifier = mods;
 				Scr.AllBindings->Action = stripcpy(action);

@@ -60,7 +60,7 @@ static double c400_distance(XColor *, XColor *);   /* prototype */
 #include "fvwmlib.h"
 // clang-format on
 
-static FvwmPicture *PictureList = nullptr;
+static FvwmPicture *PictureList = NULL;
 Colormap	    PictureCMap;
 Display		   *PictureSaveDisplay; /* Save area for display pointer */
 
@@ -88,7 +88,7 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 	p = (FvwmPicture *)xcalloc(1, sizeof(FvwmPicture));
 	p->count = 1;
 	p->name = path;
-	p->next = nullptr;
+	p->next = NULL;
 
 #ifdef XPM
 	/* Try to load it as an X Pixmap first */
@@ -97,7 +97,7 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 	xpm_attributes.valuemask = XpmSize | XpmReturnPixels |
 	    XpmReturnAllocPixels | XpmColormap | XpmCloseness;
 
-	rc = XpmReadFileToXpmImage(path, &my_image, nullptr);
+	rc = XpmReadFileToXpmImage(path, &my_image, NULL);
 	if (rc == XpmSuccess) {
 		color_reduce_pixmap(&my_image, color_limit);
 		rc = XpmCreatePixmapFromXpmImage(dpy, Root, &my_image,
@@ -127,7 +127,7 @@ LoadPicture(Display *dpy, Window Root, char *path, int color_limit)
 	}
 
 	free(p);
-	return nullptr;
+	return NULL;
 }
 
 FvwmPicture *
@@ -139,7 +139,7 @@ GetPicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
 
 	if (!(path = findIconFile(name, PixmapPath, R_OK)))
 		if (!(path = findIconFile(name, IconPath, R_OK)))
-			return nullptr;
+			return NULL;
 	p = LoadPicture(dpy, Root, path, color_limit);
 	if (!p)
 		free(path);
@@ -162,11 +162,11 @@ CachePicture(Display *dpy, Window Root, char *IconPath, char *PixmapPath,
 #ifdef XPM
 	if (!(path = findIconFile(name, PixmapPath, R_OK)))
 		if (!(path = findIconFile(name, IconPath, R_OK)))
-			return nullptr;
+			return NULL;
 #else
 	/* Ignore the given pixmap path when compiled without XPM support */
 	if (!(path = findIconFile(name, IconPath, R_OK)))
-		return nullptr;
+		return NULL;
 #endif
 
 	/* See if the picture is already cached */
@@ -202,7 +202,7 @@ DestroyPicture(Display *dpy, FvwmPicture *p)
 {
 	FvwmPicture *q = PictureList;
 
-	if (!p) /* bag out if nullptr */
+	if (!p) /* bag out if NULL */
 		return;
 	if (p->count == 0) /* extra destroy: do not underflow */
 		return;
@@ -210,7 +210,7 @@ DestroyPicture(Display *dpy, FvwmPicture *p)
 		return;
 
 	/* Let it fly */
-	if (p->name != nullptr)
+	if (p->name != NULL)
 		free(p->name);
 	if (p->picture != None)
 		XFreePixmap(dpy, p->picture);
@@ -221,7 +221,7 @@ DestroyPicture(Display *dpy, FvwmPicture *p)
 	 * Release the colours XpmCreatePixmapFromXpmImage() allocated for
 	 * this pixmap.  XpmFreeAttributes frees the alloc_pixels array.
 	 */
-	if (p->xpm_attrs.alloc_pixels != nullptr) {
+	if (p->xpm_attrs.alloc_pixels != NULL) {
 		XFreeColors(dpy, p->xpm_attrs.colormap,
 		    p->xpm_attrs.alloc_pixels, p->xpm_attrs.nalloc_pixels, 0);
 	}
@@ -259,13 +259,13 @@ findIconFile(char *icon, char *pathlist, int type)
 	size_t pathlen;
 
 	if (!icon)
-		return nullptr;
+		return NULL;
 
 	l = (pathlist) ? strlen(pathlist) : 0;
 	pathlen = strlen(icon) + l + 10;
 	path = xmalloc(pathlen);
 	*path = '\0';
-	if (*icon == '/' || pathlist == nullptr || *pathlist == '\0') {
+	if (*icon == '/' || pathlist == NULL || *pathlist == '\0') {
 		/* No search if icon begins with a slash */
 		/* No search if pathlist is empty */
 		strlcpy(path, icon, pathlen);
@@ -275,7 +275,7 @@ findIconFile(char *icon, char *pathlist, int type)
 	/* Search each element of the pathlist for the icon file */
 	while ((pathlist) && (*pathlist)) {
 		dir_end = strchr(pathlist, ':');
-		if (dir_end != nullptr) {
+		if (dir_end != NULL) {
 			strncpy(path, pathlist, dir_end - pathlist);
 			path[dir_end - pathlist] = 0;
 		} else
@@ -290,14 +290,14 @@ findIconFile(char *icon, char *pathlist, int type)
 			return path;
 
 		/* Point to next element of the path */
-		if (dir_end == nullptr)
-			pathlist = nullptr;
+		if (dir_end == NULL)
+			pathlist = NULL;
 		else
 			pathlist = dir_end + 1;
 	}
-	/* Hmm, couldn't find the file.  Return nullptr */
+	/* Hmm, couldn't find the file.  Return NULL */
 	free(path);
-	return nullptr;
+	return NULL;
 }
 
 #ifdef XPM
@@ -355,13 +355,13 @@ static Color_Info base_array[] = {
 static Bool
 xpmcolor_require_c_color(XpmColor *p)
 {
-	if (p->c_color != nullptr)
+	if (p->c_color != NULL)
 		return False;
-	else if (p->g_color != nullptr)
+	else if (p->g_color != NULL)
 		p->c_color = strdup(p->g_color);
-	else if (p->g4_color != nullptr)
+	else if (p->g4_color != NULL)
 		p->c_color = strdup(p->g4_color);
-	else if (p->m_color != nullptr)
+	else if (p->m_color != NULL)
 		p->c_color = strdup(p->m_color);
 	else
 		p->c_color = strdup("none");

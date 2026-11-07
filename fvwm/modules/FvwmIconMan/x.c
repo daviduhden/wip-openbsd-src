@@ -6,7 +6,7 @@
 #include "xmanager.h"
 // clang-format on
 
-[[maybe_unused]] static char const rcsid[] =
+__attribute__((__unused__)) static char const rcsid[] =
     "$Id: x.c,v 1.1.1.1 2006/11/26 10:53:50 matthieu Exp $";
 
 #define GRAB_EVENTS                                                            \
@@ -79,7 +79,7 @@ find_windows_manager(Window win)
 	  ConsoleMessage ("manager: %d %x\n", i, globals.managers[i].theWindow);
 	}
       */
-	return nullptr;
+	return NULL;
 }
 
 static void
@@ -94,7 +94,7 @@ handle_buttonevent(XEvent *theEvent, WinManager *man)
 	if (b && theEvent->xbutton.button >= 1 &&
 	    theEvent->xbutton.button <= 3) {
 		win = b->drawn_state.win;
-		if (win != nullptr) {
+		if (win != NULL) {
 			ConsoleDebug(X11, "Found the window:\n");
 			ConsoleDebug(X11, "\tid:        %ld\n", win->app_id);
 			ConsoleDebug(X11, "\tdesknum:   %ld\n", win->desknum);
@@ -107,7 +107,7 @@ handle_buttonevent(XEvent *theEvent, WinManager *man)
 			modifier = (theEvent->xbutton.state & MODS_USED);
 			/* need to search for an appropriate mouse binding */
 			for (MouseEntry = man->bindings[MOUSE];
-			    MouseEntry != nullptr;
+			    MouseEntry != NULL;
 			    MouseEntry = MouseEntry->NextBinding) {
 				if (((MouseEntry->Button_Key ==
 					 (int)theEvent->xbutton.button) ||
@@ -139,7 +139,7 @@ find_frame_window(Window win, int *off_x, int *off_y)
 	ConsoleDebug(X11, "In find_frame_window: 0x%x\n", (unsigned int)win);
 
 	while (1) {
-		junkw = nullptr;
+		junkw = NULL;
 		if (XQueryTree(theDisplay, win, &root, &parent, &junkw,
 			(unsigned int *)&junki) &&
 		    junkw)
@@ -218,7 +218,7 @@ xevent_loop(void)
 
 				mapping = XGetKeyboardMapping(theDisplay,
 				    theEvent.xkey.keycode, 1, &width);
-				if (mapping != nullptr) {
+				if (mapping != NULL) {
 					KeySym primary =
 					    (width > 0) ? mapping[0] : NoSymbol;
 					KeyCode canonical =
@@ -236,7 +236,7 @@ xevent_loop(void)
 			ConsoleDebug(
 			    X11, "\tKeyPress: %d\n", theEvent.xkey.keycode);
 
-			for (key = man->bindings[KEYPRESS]; key != nullptr;
+			for (key = man->bindings[KEYPRESS]; key != NULL;
 			    key = key->NextBinding) {
 				if ((key->Button_Key ==
 					(int)theEvent.xkey.keycode) &&
@@ -290,7 +290,7 @@ xevent_loop(void)
 
 		case LeaveNotify:
 			ConsoleDebug(X11, "XEVENT: LeaveNotify\n");
-			move_highlight(man, nullptr);
+			move_highlight(man, NULL);
 			break;
 
 		case ConfigureNotify:
@@ -376,7 +376,7 @@ set_window_properties(Window win, char *name, char *icon, XSizeHints *sizehints)
 	class.res_name = Module + 1;
 	class.res_class = "FvwmModule";
 
-	XSetWMProperties(theDisplay, win, &win_name, &win_icon, nullptr, 0,
+	XSetWMProperties(theDisplay, win, &win_name, &win_icon, NULL, 0,
 	    sizehints, &wmhints, &class);
 
 	XFree(win_name.value);
@@ -451,7 +451,7 @@ X_init_manager(int man_id)
 	man->geometry.y = 0;
 	man->gravity = NorthWestGravity;
 
-	man->select_button = nullptr;
+	man->select_button = NULL;
 	man->cursor_in_window = 0;
 	man->sizehints_flags = 0;
 
@@ -755,7 +755,7 @@ void
 init_display(void)
 {
 	theDisplay = XOpenDisplay("");
-	if (theDisplay == nullptr) {
+	if (theDisplay == NULL) {
 		ConsoleMessage("Can't open display: %s\n", XDisplayName(""));
 		ShutMeDown(1);
 	}

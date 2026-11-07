@@ -25,14 +25,11 @@
  *
  *	#include <stdckdint.h>
  *
- * finds this file.  A conforming system header reachable after it is used
- * through #include_next; otherwise the compiler overflow builtins provide the
- * macros.
- *
- * #include_next (not #include) is required so that the lookup does not
- * recurse into this very file.  It is a GCC/Clang extension, as are the
- * builtins the fallback needs; this is a portability shim, not portable
- * code.
+ * finds this file.  The implementation uses compiler overflow builtins in
+ * C99 mode; it does not depend on a system C23 header.  These builtins are
+ * an intentional compiler extension: they preserve mixed signed/unsigned
+ * operand semantics and single evaluation without overflowing intermediate
+ * C expressions.  OpenBSD's Clang supports them.
  *
  * The fallback matches C23 7.20.1: each operand is taken at its mathematical
  * value, the exact sum/difference/product is converted to the type of
@@ -41,23 +38,13 @@
  * exactly once.  This is the same formulation as the GCC and Clang resource
  * headers and the musl <stdckdint.h> proposal; no code is copied from them.
  *
- * FVWM_STDCKDINT_FORCE_FALLBACK lets the test suite exercise the fallback on
- * hosts that already provide a native header.  The build never defines it.
+ * FVWM_COMPAT_STDCKDINT_FALLBACK identifies this implementation for tests;
+ * the same overflow operations are used on every supported host.
  */
 
 #ifndef FVWM_COMPAT_STDCKDINT_H
 #define FVWM_COMPAT_STDCKDINT_H
 
-#if !defined(FVWM_STDCKDINT_FORCE_FALLBACK)
-#if defined(__has_include_next)
-#if __has_include_next(<stdckdint.h>)
-#include_next <stdckdint.h>
-#define FVWM_COMPAT_STDCKDINT_HAVE_NATIVE 1
-#endif
-#endif
-#endif /* !FVWM_STDCKDINT_FORCE_FALLBACK */
-
-#ifndef FVWM_COMPAT_STDCKDINT_HAVE_NATIVE
 #define FVWM_COMPAT_STDCKDINT_FALLBACK 1
 
 #ifndef __STDC_VERSION_STDCKDINT_H__
@@ -86,7 +73,5 @@
 #define ckd_mul(result, a, b)                                                  \
 	((_Bool)__builtin_mul_overflow((a), (b), (result)))
 #endif
-
-#endif /* !FVWM_COMPAT_STDCKDINT_HAVE_NATIVE */
 
 #endif /* FVWM_COMPAT_STDCKDINT_H */

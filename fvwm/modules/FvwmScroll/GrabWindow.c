@@ -7,6 +7,8 @@
  * own risk. Permission to use this program for any purpose is given,
  * as long as the copyright is kept intact. */
 
+#include <stdbool.h>
+
 #define TRUE true
 #define FALSE false
 #define MAX_ICON_NAME_LEN 255
@@ -45,11 +47,11 @@ int exposed;
 int Reduction_H = 2;
 int Reduction_V = 2;
 
-constexpr int BAR_WIDTH = 21;
-constexpr int SCROLL_BAR_WIDTH = 9;
+#define BAR_WIDTH (21)
+#define SCROLL_BAR_WIDTH (9)
 
-constexpr int PAD_WIDTH2 = 3;
-constexpr int PAD_WIDTH3 = 5;
+#define PAD_WIDTH2 (3)
+#define PAD_WIDTH3 (5)
 
 Window	     main_win, holder_win;
 Pixel	     back_pix, fore_pix, hilite_pix, shadow_pix;
@@ -230,7 +232,7 @@ GetColor(char *name)
 #define LEFT 6
 #define BOTTOM 5
 #define TOP 4
-constexpr int QUIT = 3;
+#define QUIT (3)
 #define VERTICAL 2
 #define HORIZONTAL 1
 #define NONE 0
@@ -244,7 +246,7 @@ Loop(Window target)
 	XEvent	      Event;
 	int	      tw, th;
 	char	     *temp;
-	char	     *prop = nullptr;
+	char	     *prop = NULL;
 	Atom	      actual = None;
 	int	      actual_format;
 	unsigned long nitems, bytesafter;
@@ -555,11 +557,11 @@ Loop(Window target)
 			break;
 		case PropertyNotify:
 			if (Event.xproperty.atom == XA_WM_NAME) {
-				temp = nullptr;
+				temp = NULL;
 				if (XFetchName(dpy, target, &temp) == 0)
-					temp = nullptr;
+					temp = NULL;
 				change_window_name(temp);
-				if (temp != nullptr)
+				if (temp != NULL)
 					XFree(temp);
 			} else if (Event.xproperty.atom == XA_WM_ICON_NAME) {
 				if (XGetWindowProperty(dpy, target,
@@ -568,7 +570,7 @@ Loop(Window target)
 					&actual, &actual_format, &nitems,
 					&bytesafter,
 					(unsigned char **)&prop) == Success &&
-				    (prop != nullptr)) {
+				    (prop != NULL)) {
 					change_icon_name(prop);
 					XFree(prop);
 				}
@@ -576,7 +578,7 @@ Loop(Window target)
 				XWMHints *wmhints;
 
 				wmhints = XGetWMHints(dpy, target);
-				if (wmhints != nullptr) {
+				if (wmhints != NULL) {
 					XSetWMHints(dpy, main_win, wmhints);
 					XFree(wmhints);
 				}
@@ -734,7 +736,7 @@ change_window_name(char *str)
 {
 	XTextProperty name;
 
-	if (str == nullptr)
+	if (str == NULL)
 		return;
 
 	if (XStringListToTextProperty(&str, 1, &name) == 0) {
@@ -753,7 +755,7 @@ change_icon_name(char *str)
 {
 	XTextProperty name;
 
-	if (str == nullptr)
+	if (str == NULL)
 		return;
 	if (XStringListToTextProperty(&str, 1, &name) == 0) {
 		fprintf(stderr, "%s: cannot allocate window name", MyName);
@@ -770,7 +772,7 @@ GrabWindow(Window target)
 	Window	      Junk, root;
 	unsigned int  tw, th, border_width, depth;
 	int	      x, y;
-	char	     *prop = nullptr;
+	char	     *prop = NULL;
 	Atom	      actual = None;
 	int	      actual_format;
 	unsigned long nitems, bytesafter;
@@ -793,11 +795,11 @@ GrabWindow(Window target)
 	XSelectInput(dpy, target,
 	    PropertyChangeMask | StructureNotifyMask | ColormapChangeMask);
 	if (XFetchName(dpy, target, &temp) == 0)
-		temp = nullptr;
+		temp = NULL;
 	if (XGetWindowProperty(dpy, target, XA_WM_ICON_NAME, 0,
 		MAX_ICON_NAME_LEN, False, XA_STRING, &actual, &actual_format,
 		&nitems, &bytesafter, (unsigned char **)&prop) == Success &&
-	    (prop != nullptr)) {
+	    (prop != NULL)) {
 		change_icon_name(prop);
 		XFree(prop);
 	}
@@ -806,7 +808,7 @@ GrabWindow(Window target)
 		XWMHints *wmhints;
 
 		wmhints = XGetWMHints(dpy, target);
-		if (wmhints != nullptr) {
+		if (wmhints != NULL) {
 			XSetWMHints(dpy, main_win, wmhints);
 			XFree(wmhints);
 		}

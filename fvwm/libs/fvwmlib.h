@@ -43,11 +43,12 @@ extern void		f_db_print(const char *fmt, ...)
 
 char		   *CatString3(char *a, char *b, char *c);
 void		    CopyString(char **dest, char *source);
-[[nodiscard]] char *stripcpy(char *source);
+__attribute__((__warn_unused_result__)) char *stripcpy(char *source);
 int		    StrEquals(char *s1, char *s2);
 
 int		    envExpand(char *s, int maxstrlen);
-[[nodiscard]] char *envDupExpand(const char *s, int extra);
+char *envDupExpand(const char *s, int extra)
+    __attribute__((__warn_unused_result__));
 
 int matchWildcards(char *pattern, char *string);
 
@@ -64,7 +65,7 @@ int matchWildcards(char *pattern, char *string);
 #define IsBlockEnd(c, cs)                                                      \
 	(((c) == ']' && (cs) == '[') || ((c) == '}' && (cs) == '{') ||         \
 	    ((c) == ')' && (cs) == '('))
-constexpr int MAX_TOKEN_LENGTH = 255;
+#define MAX_TOKEN_LENGTH (255)
 
 char *SkipQuote(
     char *s, const char *qlong, const char *qstart, const char *qend);

@@ -65,7 +65,7 @@ resize_window(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	if (DeferExecution(eventp, &w, &tmp_win, &context, MOVE, ButtonPress))
 		return;
 
-	if (tmp_win == nullptr)
+	if (tmp_win == NULL)
 		return;
 
 	XQueryPointer(dpy, Scr.Root, &JunkRoot, &JunkChild, &JunkX, &JunkY,
