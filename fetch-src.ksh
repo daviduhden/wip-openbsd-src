@@ -58,6 +58,15 @@ remove_xenocara_content() {
 	rm -rf /usr/xenocara/*
 }
 
+# Function to remove the www content
+remove_www_content() {
+	if [ -L /usr/www ]; then
+		error "Refusing to clear symlinked /usr/www"
+		return 1
+	fi
+	rm -rf /usr/www/*
+}
+
 check_openbsd() {
 	if [ "$(uname -s)" != "OpenBSD" ]; then
 		error "This mode is supported only on OpenBSD."
@@ -83,10 +92,10 @@ set_cvsroot() {
 	export CVSROOT="anoncvs@anoncvs.eu.openbsd.org:/cvs"
 }
 
-# Function to select which repository to checkout (src or xenocara)
+# Function to select which repository to checkout (src, xenocara or www)
 select_repository_to_checkout() {
 	log "Select the repository to clone (checkout):"
-	select SELECTED_REPO in src xenocara; do
+	select SELECTED_REPO in src xenocara www; do
 		if [ -n "$SELECTED_REPO" ]; then
 			log "You selected $SELECTED_REPO"
 			break
@@ -118,6 +127,17 @@ checkout_selected_repository() {
 			{
 				error "cvs checkout of xenocara failed;" \
 					"/usr/xenocara is incomplete"
+				return 1
+			}
+		;;
+	www)
+		remove_www_content || return 1
+		log "Checking out www from anoncvs..."
+		cvs -qd anoncvs@anoncvs.eu.openbsd.org:/cvs \
+			checkout -P www ||
+			{
+				error "cvs checkout of www failed;" \
+					"/usr/www is incomplete"
 				return 1
 			}
 		;;
@@ -658,7 +678,12 @@ main() {
 	set_cvsroot || warn "Continuing without updating ~/.profile"
 	select_repository_to_checkout
 	checkout_selected_repository || return 1
-	ask_copy_from_wip
+	if [ "$SELECTED_REPO" = www ]; then
+		# No local component maps to the website checkout.
+		DO_COPY=0
+	else
+		ask_copy_from_wip
+	fi
 	if [ "${DO_COPY:-0}" -eq 1 ]; then
 		move_to_wip_openbsd_src
 		choose_target_tree

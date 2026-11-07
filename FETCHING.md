@@ -1,4 +1,25 @@
-# Copying the local components into OpenBSD checkouts
+# Fetching OpenBSD trees and copying local components
+
+The interactive checkout menu supports `src`, `xenocara` and `www`, using
+CVS HEAD and the destinations `/usr/src`, `/usr/xenocara` and `/usr/www`.
+`www` contains the OpenBSD website sources and has no local replacement
+component; selecting it skips the local-copy question. It is not a
+`--copy-only` target and does not add an entry to `--list`.
+
+To fetch `www` without creating the bootstrap account or configuring doas:
+
+```sh
+doas ./fetch-src.ksh --no-provision
+# Select www in the repository menu.
+```
+
+This still clears the selected tree and updates `~/.profile`; back up any
+existing `/usr/www` work first. A symlinked `/usr/www` is rejected. To update
+an existing checkout while retaining local edits, use CVS instead:
+
+```sh
+cd /usr/www && cvs -q up -Pd -A
+```
 
 The standalone build layout is unchanged. The copy helper maps:
 
@@ -55,8 +76,8 @@ installation prefixes/build integration still need native review.
 
 Without options, the existing interactive bootstrap workflow clears the
 selected tree, checks out a fresh one, and configures the host. It is
-destructive: it removes the contents of `/usr/src` or `/usr/xenocara`, writes
-`~/.profile`, and creates the `user` account and a `doas` rule. Do not use
+destructive: it removes the contents of `/usr/src`, `/usr/xenocara` or
+`/usr/www`, writes `~/.profile`, and creates the `user` account and a `doas` rule. Do not use
 that mode merely to copy sources into an existing checkout. `--no-provision`
 keeps the wipe/checkout workflow but skips creating the `user` account and
 configuring doas:

@@ -24,7 +24,9 @@ that matches the task.
 
 `pax/` and `fvwm/` build standalone. The other components are copied into a
 full checkout or applied as patches. `fetch-src.ksh` handles only `pax` and
-`fvwm`; see `FETCHING.md` and the `openbsd-source-sync` skill.
+`fvwm` for local copies. Its interactive CVS checkout also supports `www`
+at `/usr/www`, without copying local components; see `FETCHING.md` and the
+`openbsd-source-sync` skill.
 
 ### Git versus CVS
 
@@ -114,10 +116,10 @@ reformat a whole file or tree to satisfy it. Existing style wins, and
   behavior; verify equivalence before removing local code. Regenerate and
   validate `libc/patch` against the new upstream snapshot before advancing
   `libc/UPSTREAM`.
-- Do not introduce compiler extensions unless the surrounding file already
-  uses them and OpenBSD's clang supports them.
   Follow `libc/SYNC.md`; include `lib/librthread` as the `LIB=pthread`
   provider and validate both public symbol maps and private aliases.
+- Do not introduce compiler extensions unless the surrounding file already
+  uses them and OpenBSD's clang supports them.
 - When preparing an upstream patch, do not assume upstream accepts C23.
   Follow the target file's existing language level.
 

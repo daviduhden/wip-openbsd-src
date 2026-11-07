@@ -8,8 +8,8 @@ description: Synchronize local components with OpenBSD CVS checkouts using fetch
 ## When to use
 
 Use when moving `pax/` or `fvwm/` into a real checkout, inspecting
-`fetch-src.ksh`, recovering from a copy, or planning an update from
-OpenBSD-current.
+`fetch-src.ksh`, recovering from a copy, fetching the website tree (`www`)
+into `/usr/www`, or planning an update from OpenBSD-current.
 
 Do not use this skill to run a destructive mode without explicit authorization.
 Do not use it for `libc/`, `ext4fs/`, or `stdckdint/`; those are patch-style
@@ -23,7 +23,8 @@ added and removed paths.
 
 ## Prerequisites
 
-- An OpenBSD host with `/usr/src` and/or `/usr/xenocara` checked out from CVS.
+- An OpenBSD host; local copies require `/usr/src` and/or `/usr/xenocara`
+  checked out from CVS. Website checkout uses `/usr/www`.
 - Write access to the target tree; `doas` for system paths.
 - A clean understanding of the difference between:
   - `--list`: read-only;
@@ -40,6 +41,13 @@ added and removed paths.
 | `./fetch-src.ksh --copy-only TREE COMPONENT` | no | yes | replaces exactly that component |
 | `doas ./fetch-src.ksh --no-provision` | yes | yes | clears the selected tree and checks it out; skips user/doas setup |
 | `doas ./fetch-src.ksh` | yes | yes | wipe, checkout, optional copy, creates `user`, rewrites/updates `/etc/doas.conf` |
+
+Checkout selection accepts `src`, `xenocara` and `www`; from `/usr`, it
+runs `cvs checkout -P` for the selected module. The `www` destination is
+`/usr/www`, with a symlink check before clearing it. There is no local
+website component, so `www` skips the local-copy question. Do not add it
+to `--list`, `--copy-only`, component resolution or tree-shape detection.
+`--no-provision` still clears the selected tree and updates `~/.profile`.
 
 Mapping:
 
@@ -99,7 +107,7 @@ rejected.
 # Replaces one component; recoverable backup
 doas ./fetch-src.ksh --copy-only /usr/src pax
 
-# Destructive: clears /usr/src or /usr/xenocara and checks it out
+# Destructive: clears /usr/src, /usr/xenocara or /usr/www and checks it out
 doas ./fetch-src.ksh --no-provision
 
 # Destructive: also creates a user and updates doas.conf
@@ -119,6 +127,7 @@ For an existing tree, update with CVS and then re-apply local components:
 ```sh
 cd /usr/src && cvs -q up -Pd -A
 cd /usr/xenocara && cvs -q up -Pd -A
+cd /usr/www && cvs -q up -Pd -A
 ```
 
 Resolve CVS conflicts before copying local components over the tree. Record the
@@ -127,6 +136,10 @@ upstream revision used for any comparison.
 ## Validation and acceptance
 
 - `--list` prints the expected two mappings and writes nothing.
+- `www` checkout uses `/usr/www`, fails on a symlinked destination and on
+  CVS failure, and never prompts to copy local components. Validate these
+  branches statically when execution or system writes are prohibited; do
+  not run a destructive checkout as a test.
 - The target component exists before and after the copy.
 - `TREE/.wip-backups/NAME.*/component` contains the previous version.
 - `TREE/.wip-changes/NAME.created.txt`, `deleted.txt`, and `created-dirs.txt`
