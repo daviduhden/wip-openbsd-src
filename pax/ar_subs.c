@@ -90,7 +90,7 @@ list(void)
 	    ((*frmt->st_rd)() < 0))
 		return;
 
-	now = time(nullptr);
+	now = time(NULL);
 
 	/*
 	 * step through the archive until the format says it is done
@@ -152,7 +152,7 @@ list(void)
 	 * the patterns supplied by the user were all matched
 	 */
 	(void)(*frmt->end_rd)();
-	(void)sigprocmask(SIG_BLOCK, &s_mask, nullptr);
+	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
 	ar_close(0);
 	pat_chk();
 }
@@ -163,7 +163,7 @@ cmp_file_times(int mtime_flag, int ctime_flag, ARCHD *arcn, const char *path)
 	struct stat sb;
 	long	    res;
 
-	if (path == nullptr)
+	if (path == NULL)
 		path = arcn->name;
 	if (lstat(path, &sb) != 0)
 		return (0);
@@ -248,7 +248,7 @@ extract(void)
 	if (iflag && (name_start() < 0))
 		return;
 
-	now = time(nullptr);
+	now = time(NULL);
 
 	/*
 	 * step through each entry on the archive until the format read routine
@@ -301,7 +301,7 @@ extract(void)
 		 * flawed in this respect.
 		 */
 		if ((uflag || Dflag) &&
-		    cmp_file_times(uflag, Dflag, arcn, nullptr)) {
+		    cmp_file_times(uflag, Dflag, arcn, NULL)) {
 			(void)rd_skip(arcn->skip + arcn->pad);
 			continue;
 		}
@@ -325,7 +325,7 @@ extract(void)
 		 * same age or newer skip
 		 */
 		if ((Yflag || Zflag) &&
-		    cmp_file_times(Yflag, Zflag, arcn, nullptr)) {
+		    cmp_file_times(Yflag, Zflag, arcn, NULL)) {
 			(void)rd_skip(arcn->skip + arcn->pad);
 			continue;
 		}
@@ -342,7 +342,7 @@ extract(void)
 		/*
 		 * if required, chdir around.
 		 */
-		if ((arcn->pat != nullptr) && (arcn->pat->chdname != nullptr))
+		if ((arcn->pat != NULL) && (arcn->pat->chdname != NULL))
 			if (chdir(arcn->pat->chdname) != 0)
 				syswarn(1, errno, "Cannot chdir to %s",
 				    arcn->pat->chdname);
@@ -397,7 +397,7 @@ extract(void)
 		/*
 		 * if required, chdir around.
 		 */
-		if ((arcn->pat != nullptr) && (arcn->pat->chdname != nullptr))
+		if ((arcn->pat != NULL) && (arcn->pat->chdname != NULL))
 			if (fchdir(cwdfd) != 0)
 				syswarn(1, errno,
 				    "Can't fchdir to starting directory");
@@ -409,7 +409,7 @@ extract(void)
 	 * to avoid chance for multiple entry into the cleanup code.
 	 */
 	(void)(*frmt->end_rd)();
-	(void)sigprocmask(SIG_BLOCK, &s_mask, nullptr);
+	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
 	ar_close(0);
 	sltab_process(0);
 	proc_dir(0);
@@ -465,7 +465,7 @@ wr_archive(ARCHD *arcn, int is_app)
 	if (iflag && (name_start() < 0))
 		return;
 
-	now = time(nullptr);
+	now = time(NULL);
 
 	/*
 	 * while there are files to archive, process them one at at time
@@ -608,7 +608,7 @@ trailer:
 		(*frmt->end_wr)();
 		wr_fin();
 	}
-	(void)sigprocmask(SIG_BLOCK, &s_mask, nullptr);
+	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
 	ar_close(0);
 	if (tflag)
 		proc_dir(0);
@@ -656,7 +656,7 @@ append(void)
 	 */
 	if (get_arc() < 0)
 		return;
-	if ((orgfrmt != nullptr) && (orgfrmt != frmt)) {
+	if ((orgfrmt != NULL) && (orgfrmt != frmt)) {
 		paxwarn(1, "Cannot mix current archive format %s with %s",
 		    frmt->name, orgfrmt->name);
 		return;
@@ -941,7 +941,7 @@ copy(void)
 		 * same age or newer skip
 		 */
 		if ((Yflag || Zflag) &&
-		    cmp_file_times(Yflag, Zflag, arcn, nullptr))
+		    cmp_file_times(Yflag, Zflag, arcn, NULL))
 			continue;
 
 		if (vflag) {
@@ -1020,7 +1020,7 @@ copy(void)
 	 * patterns were selected block off signals to avoid chance for
 	 * multiple entry into the cleanup code.
 	 */
-	(void)sigprocmask(SIG_BLOCK, &s_mask, nullptr);
+	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);
 	ar_close(0);
 	sltab_process(0);
 	proc_dir(0);
@@ -1063,7 +1063,7 @@ next_head(ARCHD *arcn)
 	 * previous archive member before we reuse the structure.
 	 */
 	pax_kv_free(&arcn->xattr);
-	arcn->gattr = nullptr;
+	arcn->gattr = NULL;
 	arcn->invalid = PAX_ENTRY_NONE;
 
 	/*
@@ -1190,7 +1190,7 @@ next_head(ARCHD *arcn)
 	 * the header. NOTE: the parameters are different than trailer routines
 	 * which encode trailers outside of the header!
 	 */
-	if (frmt->inhead && ((*frmt->trail)(arcn, nullptr, 0, nullptr) == 0)) {
+	if (frmt->inhead && ((*frmt->trail)(arcn, NULL, 0, NULL) == 0)) {
 		/*
 		 * valid trailer found, drain input as required
 		 */
@@ -1227,7 +1227,7 @@ get_arc(void)
 	 * to read the archive.
 	 */
 	for (i = 0; ford[i] >= 0; ++i) {
-		if (fsub[ford[i]].name != nullptr && fsub[ford[i]].hsz < minhd)
+		if (fsub[ford[i]].name != NULL && fsub[ford[i]].hsz < minhd)
 			minhd = fsub[ford[i]].hsz;
 	}
 	if (rd_start() < 0)
@@ -1279,7 +1279,7 @@ get_arc(void)
 		 * important).
 		 */
 		for (i = 0; ford[i] >= 0; ++i) {
-			if (fsub[ford[i]].id == nullptr ||
+			if (fsub[ford[i]].id == NULL ||
 			    (*fsub[ford[i]].id)(hdbuf, hdsz) < 0)
 				continue;
 			frmt = &(fsub[ford[i]]);

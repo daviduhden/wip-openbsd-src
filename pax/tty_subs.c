@@ -54,8 +54,8 @@
  */
 
 #define DEVTTY "/dev/tty"	/* device for interactive i/o */
-static FILE *ttyoutf = nullptr; /* output pointing at control tty */
-static FILE *ttyinf = nullptr;	/* input pointing at control tty */
+static FILE *ttyoutf = NULL; /* output pointing at control tty */
+static FILE *ttyinf = NULL;	/* input pointing at control tty */
 
 /*
  * tty_init()
@@ -69,15 +69,15 @@ tty_init(void)
 	int ttyfd;
 
 	if ((ttyfd = open(DEVTTY, O_RDWR | O_CLOEXEC)) >= 0) {
-		if ((ttyoutf = fdopen(ttyfd, "w")) != nullptr) {
-			if ((ttyinf = fdopen(ttyfd, "r")) != nullptr)
+		if ((ttyoutf = fdopen(ttyfd, "w")) != NULL) {
+			if ((ttyinf = fdopen(ttyfd, "r")) != NULL)
 				return (0);
 			/*
 			 * fclose(ttyoutf) already closed ttyfd; do not
 			 * close it a second time below.
 			 */
 			(void)fclose(ttyoutf);
-			ttyoutf = nullptr;
+			ttyoutf = NULL;
 		} else
 			(void)close(ttyfd);
 	}
@@ -101,7 +101,7 @@ tty_prnt(const char *fmt, ...)
 	va_list ap;
 	char	buf[8192];
 
-	if (ttyoutf == nullptr)
+	if (ttyoutf == NULL)
 		return;
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
@@ -121,7 +121,7 @@ tty_prnt(const char *fmt, ...)
 int
 tty_read(char *str, int len)
 {
-	if (ttyinf == nullptr || fgets(str, len, ttyinf) == nullptr)
+	if (ttyinf == NULL || fgets(str, len, ttyinf) == NULL)
 		return (-1);
 
 	/*

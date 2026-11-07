@@ -66,7 +66,7 @@ static void sig_cleanup(int);
  * Variables that can be accessed by any routine within pax
  */
 int	     act = DEFOP;     /* read/write/append/copy */
-FSUB	    *frmt = nullptr;  /* archive format type */
+FSUB	    *frmt = NULL;  /* archive format type */
 int	     cflag;	      /* match all EXCEPT pattern/file */
 int	     cwdfd;	      /* starting cwd */
 int	     dflag;	      /* directory member match only  */
@@ -245,13 +245,13 @@ main(int argc, char **argv)
 	/*
 	 * Where should we put temporary files?
 	 */
-	if ((tmpdir = getenv("TMPDIR")) == nullptr || *tmpdir == '\0')
+	if ((tmpdir = getenv("TMPDIR")) == NULL || *tmpdir == '\0')
 		tmpdir = _PATH_TMP;
 	tdlen = strlen(tmpdir);
 	while (tdlen > 0 && tmpdir[tdlen - 1] == '/')
 		tdlen--;
 	tempfile = malloc(tdlen + 1 + sizeof(_TFILE_BASE));
-	if (tempfile == nullptr) {
+	if (tempfile == NULL) {
 		paxwarn(1, "Cannot allocate memory for temp file name.");
 		return (exit_val);
 	}
@@ -290,7 +290,7 @@ main(int argc, char **argv)
 	 */
 
 	/* Unveil the archive file if explicitly specified. */
-	if (arcname != nullptr && *arcname != '\0') {
+	if (arcname != NULL && *arcname != '\0') {
 		const char *perm;
 
 		switch (act) {
@@ -310,7 +310,7 @@ main(int argc, char **argv)
 	}
 
 	/* Unveil the current working directory or -C target. */
-	if (chdname != nullptr) {
+	if (chdname != NULL) {
 		if (unveil(chdname, "rwc") == -1)
 			err(1, "unveil");
 	} else if (act == EXTRACT || act == COPY) {
@@ -327,7 +327,7 @@ main(int argc, char **argv)
 	}
 
 	/* Unveil the copy destination directory (pax -rw). */
-	if (act == COPY && dirptr != nullptr)
+	if (act == COPY && dirptr != NULL)
 		(void)unveil(dirptr, "rwc");
 
 	/* Unveil the temporary file directory. */
@@ -335,12 +335,12 @@ main(int argc, char **argv)
 		char *tmpcopy = strdup(tempfile);
 		char *slash;
 
-		if (tmpcopy != nullptr) {
+		if (tmpcopy != NULL) {
 			slash = strrchr(tmpcopy, '/');
 			if (slash == tmpcopy) {
 				/* TMPDIR is "/": unveil the root itself. */
 				(void)unveil("/", "rwc");
-			} else if (slash != nullptr) {
+			} else if (slash != NULL) {
 				*slash = '\0';
 				(void)unveil(tmpcopy, "rwc");
 			}
@@ -349,13 +349,13 @@ main(int argc, char **argv)
 	}
 
 	/* If using compression, unveil compressor paths. */
-	if (gzip_program != nullptr && act != COPY && act != APPND) {
+	if (gzip_program != NULL && act != COPY && act != APPND) {
 		/*
 		 * The default compressor names live in the base system or
 		 * in packages.  An explicit path given with -z (or -Z) is
 		 * unveiled directly so custom locations keep working.
 		 */
-		if (strchr(gzip_program, '/') != nullptr)
+		if (strchr(gzip_program, '/') != NULL)
 			(void)unveil(gzip_program, "rx");
 		else {
 			(void)unveil("/usr/bin", "rx");
@@ -364,7 +364,7 @@ main(int argc, char **argv)
 	}
 
 	/* Lock unveil. */
-	if (unveil(nullptr, nullptr) == -1)
+	if (unveil(NULL, NULL) == -1)
 		err(1, "unveil");
 
 	/*
@@ -383,7 +383,7 @@ main(int argc, char **argv)
 	/* Compressed multi-volume operations can execute another compressor
 	 * later. Keep those parents unpledged; their unveil view stays locked.
 	 */
-	if (gzip_program == nullptr || act == COPY || act == APPND) {
+	if (gzip_program == NULL || act == COPY || act == APPND) {
 		const char *promises;
 
 		if (act == LIST)
@@ -393,7 +393,7 @@ main(int argc, char **argv)
 		else
 			promises =
 			    "stdio rpath wpath cpath fattr dpath getpw tape";
-		if (pledge(promises, nullptr) == -1)
+		if (pledge(promises, NULL) == -1)
 			err(1, "pledge");
 	}
 
@@ -408,7 +408,7 @@ main(int argc, char **argv)
 		archive();
 		break;
 	case APPND:
-		if (gzip_program != nullptr)
+		if (gzip_program != NULL)
 			errx(1, "can not gzip while appending");
 		append();
 		break;
@@ -465,13 +465,13 @@ setup_sig(int sig, const struct sigaction *n_hand)
 {
 	struct sigaction o_hand;
 
-	if (sigaction(sig, nullptr, &o_hand) == -1)
+	if (sigaction(sig, NULL, &o_hand) == -1)
 		return (-1);
 
 	if (o_hand.sa_handler == SIG_IGN)
 		return (0);
 
-	return (sigaction(sig, n_hand, nullptr));
+	return (sigaction(sig, n_hand, NULL));
 }
 
 /*
@@ -551,8 +551,8 @@ gen_init(void)
 		goto out;
 
 	n_hand.sa_handler = SIG_IGN;
-	if ((sigaction(SIGPIPE, &n_hand, nullptr) == -1) ||
-	    (sigaction(SIGXFSZ, &n_hand, nullptr) == -1))
+	if ((sigaction(SIGPIPE, &n_hand, NULL) == -1) ||
+	    (sigaction(SIGXFSZ, &n_hand, NULL) == -1))
 		goto out;
 	return (0);
 

@@ -925,7 +925,7 @@ buf_fill(void)
 		 */
 		if (cnt < 0)
 			break;
-		if (frmt == nullptr || ar_next() < 0) {
+		if (frmt == NULL || ar_next() < 0) {
 			fini = 1;
 			return (0);
 		}

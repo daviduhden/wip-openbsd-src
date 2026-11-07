@@ -21,7 +21,12 @@ the documented POSIX/OpenBSD behavior.
 
 ## Prerequisites
 
-- `pax/` builds with OpenBSD make or bmake.
+- `pax/` builds as C99 with OpenBSD make or bmake.
+- Keep archive layout checks as named negative-array typedefs; C11/C23
+  assertion keywords must not become a build requirement.
+- The positive `offt_mul()` guard divides `INT64_MAX` before multiplying.
+  Its signed 64-bit `off_t` requirement is checked at compile time, matching
+  OpenBSD; never replace it with multiplication followed by an overflow test.
 - The relevant format definition and option parser have been read.
 - A set of test archives exists for each affected personality.
 - For sandbox changes, an OpenBSD host is available for `ktrace` review.

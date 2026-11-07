@@ -82,7 +82,7 @@
 typedef struct pattern {
 	char  *pstr;	     /* pattern to match, user supplied */
 	char  *pend;	     /* end of a prefix match */
-	char  *chdname;	     /* the dir to change to if not nullptr.  */
+	char  *chdname;	     /* the dir to change to if not NULL.  */
 	size_t plen;	     /* length of pstr */
 	int    flgs;	     /* processing/state flags */
 #define MTCH 0x1	     /* pattern has been matched */
@@ -292,8 +292,8 @@ typedef struct oplist {
 } OPLIST;
 
 #define OPT_ASSIGN_NONE 0
-constexpr int OPT_ASSIGN_EQ = 1;
-constexpr int OPT_ASSIGN_COLON = 2;
+#define OPT_ASSIGN_EQ 1
+#define OPT_ASSIGN_COLON 2
 
 /*
  * General Macros
@@ -311,8 +311,8 @@ constexpr int OPT_ASSIGN_COLON = 2;
 /*
  * General Defines
  */
-constexpr int HEX = 16;
-constexpr int OCT = 8;
+#define HEX 16
+#define OCT 8
 #define _PAX_ 1
 #define _TFILE_BASE "paxXXXXXXXXXX"
 #define MAX_TIME_T (sizeof(time_t) == sizeof(long long) ? LLONG_MAX : INT_MAX)

@@ -143,11 +143,11 @@ typedef struct {
 /*
  * Data Interchange Format - Extended tar header format - POSIX 1003.1-1990
  */
-constexpr int TPFSZ = 155;
+#define TPFSZ 155
 #define TMAGIC "ustar" /* ustar and a null */
-constexpr int TMAGLEN = 6;
+#define TMAGLEN 6
 #define TVERSION "00" /* 00 and no null */
-constexpr int TVERSLEN = 2;
+#define TVERSLEN 2
 
 typedef struct {
 	char name[TNMSZ];	/* name of entry */
@@ -175,23 +175,28 @@ typedef struct {
  * other tar implementations cannot read.  Every member has type char,
  * so no padding is possible.
  */
-static_assert(CHK_LEN == 8, "tar checksum field must be 8 bytes");
-static_assert(TNMSZ == 100, "tar name field must be 100 bytes");
-static_assert(sizeof(HD_TAR) == (size_t)257, "old tar header layout changed");
-static_assert(sizeof(HD_USTAR) == (size_t)500, "ustar header layout changed");
-static_assert(sizeof(((HD_TAR *)0)->chksum) == (size_t)CHK_LEN,
-    "old tar checksum field must match CHK_LEN");
-static_assert(sizeof(((HD_USTAR *)0)->chksum) == (size_t)CHK_LEN,
-    "ustar checksum field must match CHK_LEN");
-static_assert(sizeof(TMAGIC) == (size_t)TMAGLEN, "ustar magic length mismatch");
+typedef char pax_tar_checksum_length[
+    (CHK_LEN == 8) ? 1 : -1];
+typedef char pax_tar_name_length[
+    (TNMSZ == 100) ? 1 : -1];
+typedef char pax_tar_old_header_size[
+    (sizeof(HD_TAR) == (size_t)257) ? 1 : -1];
+typedef char pax_tar_ustar_header_size[
+    (sizeof(HD_USTAR) == (size_t)500) ? 1 : -1];
+typedef char pax_tar_old_checksum_size[
+    (sizeof(((HD_TAR *)0)->chksum) == (size_t)CHK_LEN) ? 1 : -1];
+typedef char pax_tar_ustar_checksum_size[
+    (sizeof(((HD_USTAR *)0)->chksum) == (size_t)CHK_LEN) ? 1 : -1];
+typedef char pax_tar_magic_length[
+    (sizeof(TMAGIC) == (size_t)TMAGLEN) ? 1 : -1];
 
 #ifdef _PAX_
-static_assert(offsetof(HD_TAR, chksum) == (size_t)CHK_OFFSET,
-    "old tar checksum offset changed");
-static_assert(offsetof(HD_USTAR, chksum) == (size_t)CHK_OFFSET,
-    "ustar checksum offset changed");
-static_assert(BLNKSUM == (long)CHK_LEN * ' ',
-    "tar checksum blank sum must equal CHK_LEN spaces");
+typedef char pax_tar_old_checksum_offset[
+    (offsetof(HD_TAR, chksum) == (size_t)CHK_OFFSET) ? 1 : -1];
+typedef char pax_tar_ustar_checksum_offset[
+    (offsetof(HD_USTAR, chksum) == (size_t)CHK_OFFSET) ? 1 : -1];
+typedef char pax_tar_blank_checksum[
+    (BLNKSUM == (long)CHK_LEN * ' ') ? 1 : -1];
 #endif /* _PAX_ */
 
 #endif /* _PAX_TAR_H_ */

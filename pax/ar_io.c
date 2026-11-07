@@ -89,7 +89,7 @@ static void	ar_start_gzip(int, const char *, int);
  * ar_open()
  *	Opens the next archive volume. Determines the type of the device and
  *	sets up block sizes as required by the archive device and the format.
- *	Note: we may be called with name == nullptr on the first open only.
+ *	Note: we may be called with name == NULL on the first open only.
  * Return:
  *	-1 on failure, 0 otherwise
  */
@@ -112,27 +112,27 @@ ar_open(const char *name)
 	switch (act) {
 	case LIST:
 	case EXTRACT:
-		if (name == nullptr) {
+		if (name == NULL) {
 			arfd = STDIN_FILENO;
 			arcname = STDN;
 		} else if ((arfd = open(name, EXT_MODE, DMOD)) == -1)
 			syswarn(1, errno, "Failed open to read on %s", name);
-		if (arfd != -1 && gzip_program != nullptr)
+		if (arfd != -1 && gzip_program != NULL)
 			ar_start_gzip(arfd, gzip_program, 0);
 		break;
 	case ARCHIVE:
-		if (name == nullptr) {
+		if (name == NULL) {
 			arfd = STDOUT_FILENO;
 			arcname = STDO;
 		} else if ((arfd = open(name, AR_MODE, DMOD)) == -1)
 			syswarn(1, errno, "Failed open to write on %s", name);
 		else
 			can_unlnk = 1;
-		if (arfd != -1 && gzip_program != nullptr)
+		if (arfd != -1 && gzip_program != NULL)
 			ar_start_gzip(arfd, gzip_program, 1);
 		break;
 	case APPND:
-		if (name == nullptr) {
+		if (name == NULL) {
 			arfd = STDOUT_FILENO;
 			arcname = STDO;
 		} else if ((arfd = open(name, APP_MODE, DMOD)) == -1)
@@ -150,7 +150,7 @@ ar_open(const char *name)
 	if (arfd < 0)
 		return (-1);
 
-	if (chdname != nullptr)
+	if (chdname != NULL)
 		if (chdir(chdname) == -1) {
 			syswarn(1, errno, "Failed chdir to %s", chdname);
 			(void)close(arfd);
@@ -368,7 +368,7 @@ ar_close(int in_sig)
 	 * The volume number is only increased when the last device has data
 	 * and we have already determined the archive format.
 	 */
-	if (frmt != nullptr)
+	if (frmt != NULL)
 		++arvol;
 
 	if (!vflag) {
@@ -389,7 +389,7 @@ ar_close(int in_sig)
 	 * we have skipped over looking for a header to id. there is no way we
 	 * could have written anything yet.
 	 */
-	if (frmt == nullptr) {
+	if (frmt == NULL) {
 		(void)dprintf(listfd,
 		    "%s: unknown format, %lld bytes skipped.\n", argv0,
 		    (long long)rdcnt);
@@ -1124,7 +1124,7 @@ ar_next(void)
 	if (sigprocmask(SIG_BLOCK, &s_mask, &o_mask) == -1)
 		syswarn(0, errno, "Unable to set signal mask");
 	ar_close(0);
-	if (sigprocmask(SIG_SETMASK, &o_mask, nullptr) == -1)
+	if (sigprocmask(SIG_SETMASK, &o_mask, NULL) == -1)
 		syswarn(0, errno, "Unable to restore signal mask");
 
 	if (done || !wr_trail || force_one_volume || op_mode == OP_TAR)
@@ -1238,7 +1238,7 @@ ar_next(void)
 				free((char *)arcname);
 				freeit = 0;
 			}
-			if ((arcname = strdup(buf)) == nullptr) {
+			if ((arcname = strdup(buf)) == NULL) {
 				done = 1;
 				lstrval = -1;
 				paxwarn(0, "Cannot save archive name.");
@@ -1296,7 +1296,7 @@ ar_start_gzip(int fd, const char *path, int wr)
 
 		/* The compressor must execute with no inherited syscall
 		 * ceiling. */
-		if (execlp(path, path, gzip_flags, (char *)nullptr) == -1)
+		if (execlp(path, path, gzip_flags, (char *)NULL) == -1)
 			err(1, "could not exec %s", path);
 		/* NOTREACHED */
 	}

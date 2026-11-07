@@ -623,7 +623,7 @@ chk_path(char *name, uid_t st_uid, gid_t st_gid, int ign)
 		 * work forward from the first / and check each part of the path
 		 */
 		spt = strchr(spt, '/');
-		if (spt == nullptr)
+		if (spt == NULL)
 			break;
 
 		/*
@@ -1000,7 +1000,7 @@ file_write(
 			strp = &gnu_link_string;
 			break;
 		default:
-			strp = nullptr;
+			strp = NULL;
 			break;
 		}
 		if (strp) {
@@ -1009,7 +1009,7 @@ file_write(
 				    "WARNING! Major Internal Error! GNU "
 				    "hack Failing!");
 			*strp = malloc(wcnt + 1);
-			if (*strp == nullptr) {
+			if (*strp == NULL) {
 				paxwarn(1, "Out of memory");
 				return (-1);
 			}

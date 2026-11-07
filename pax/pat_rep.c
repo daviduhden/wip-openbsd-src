@@ -68,10 +68,10 @@ typedef struct replace {
  */
 
 #define MAXSUBEXP 10		   /* max subexpressions, DO NOT CHANGE */
-static PATTERN *pathead = nullptr; /* file pattern match list head */
-static PATTERN *pattail = nullptr; /* file pattern match list tail */
-static REPLACE *rephead = nullptr; /* replacement string list head */
-static REPLACE *reptail = nullptr; /* replacement string list tail */
+static PATTERN *pathead = NULL; /* file pattern match list head */
+static PATTERN *pattail = NULL; /* file pattern match list tail */
+static REPLACE *rephead = NULL; /* replacement string list head */
+static REPLACE *reptail = NULL; /* replacement string list tail */
 
 static int   rep_name(char *, size_t, int *, int);
 static int   tty_rename(ARCHD *);
@@ -108,7 +108,7 @@ rep_add(char *str)
 	/*
 	 * throw out the bad parameters
 	 */
-	if ((str == nullptr) || (*str == '\0')) {
+	if ((str == NULL) || (*str == '\0')) {
 		paxwarn(1, "Empty replacement string");
 		return (-1);
 	}
@@ -134,7 +134,7 @@ rep_add(char *str)
 	 * allocate space for the node that handles this replacement pattern
 	 * and split out the regular expression and try to compile it
 	 */
-	if ((rep = malloc(sizeof(REPLACE))) == nullptr) {
+	if ((rep = malloc(sizeof(REPLACE))) == NULL) {
 		paxwarn(1, "Unable to allocate memory for replacement string");
 		return (-1);
 	}
@@ -200,8 +200,8 @@ rep_add(char *str)
 	/*
 	 * all done, link it in at the end
 	 */
-	rep->fow = nullptr;
-	if (rephead == nullptr) {
+	rep->fow = NULL;
+	if (rephead == NULL) {
 		reptail = rephead = rep;
 		return (0);
 	}
@@ -229,7 +229,7 @@ pat_add(char *str, char *chdirname)
 	/*
 	 * throw out the junk
 	 */
-	if ((str == nullptr) || (*str == '\0')) {
+	if ((str == NULL) || (*str == '\0')) {
 		paxwarn(1, "Empty pattern string");
 		return (-1);
 	}
@@ -239,19 +239,19 @@ pat_add(char *str, char *chdirname)
 	 * part of argv so do not bother to copy it, just point at it. Add the
 	 * node to the end of the pattern list
 	 */
-	if ((pt = malloc(sizeof(PATTERN))) == nullptr) {
+	if ((pt = malloc(sizeof(PATTERN))) == NULL) {
 		paxwarn(1, "Unable to allocate memory for pattern string");
 		return (-1);
 	}
 
 	pt->pstr = str;
-	pt->pend = nullptr;
+	pt->pend = NULL;
 	pt->plen = strlen(str);
-	pt->fow = nullptr;
+	pt->fow = NULL;
 	pt->flgs = 0;
 	pt->chdname = chdirname;
 
-	if (pathead == nullptr) {
+	if (pathead == NULL) {
 		pattail = pathead = pt;
 		return (0);
 	}
@@ -276,7 +276,7 @@ pat_chk(void)
 	 * walk down the list checking the flags to make sure MTCH was set,
 	 * if not complain
 	 */
-	for (pt = pathead; pt != nullptr; pt = pt->fow) {
+	for (pt = pathead; pt != NULL; pt = pt->fow) {
 		if (pt->flgs & MTCH)
 			continue;
 		if (!wban) {
@@ -313,7 +313,7 @@ pat_sel(ARCHD *arcn)
 	/*
 	 * if no patterns just return
 	 */
-	if ((pathead == nullptr) || ((pt = arcn->pat) == nullptr))
+	if ((pathead == NULL) || ((pt = arcn->pat) == NULL))
 		return (0);
 
 	/*
@@ -335,7 +335,7 @@ pat_sel(ARCHD *arcn)
 	if (pt->flgs & DIR_MTCH)
 		return (0);
 
-	if (!dflag && ((pt->pend != nullptr) || (arcn->type == PAX_DIR))) {
+	if (!dflag && ((pt->pend != NULL) || (arcn->type == PAX_DIR))) {
 		/*
 		 * ok we matched a directory and we are allowing
 		 * subtree matches but because of the -n only its children will
@@ -349,23 +349,23 @@ pat_sel(ARCHD *arcn)
 		 * if this was a prefix match, remove trailing part of path
 		 * so we can copy it. Future matches will be exact prefix match
 		 */
-		if (pt->pend != nullptr)
+		if (pt->pend != NULL)
 			*pt->pend = '\0';
 
-		if ((pt->pstr = strdup(arcn->name)) == nullptr) {
+		if ((pt->pstr = strdup(arcn->name)) == NULL) {
 			paxwarn(1, "Pattern select out of memory");
-			if (pt->pend != nullptr)
+			if (pt->pend != NULL)
 				*pt->pend = '/';
-			pt->pend = nullptr;
+			pt->pend = NULL;
 			return (-1);
 		}
 
 		/*
 		 * put the trailing / back in the source string
 		 */
-		if (pt->pend != nullptr) {
+		if (pt->pend != NULL) {
 			*pt->pend = '/';
-			pt->pend = nullptr;
+			pt->pend = NULL;
 		}
 		pt->plen = strlen(pt->pstr);
 
@@ -392,12 +392,12 @@ pat_sel(ARCHD *arcn)
 	 */
 	pt = pathead;
 	ppt = &pathead;
-	while ((pt != nullptr) && (pt != arcn->pat)) {
+	while ((pt != NULL) && (pt != arcn->pat)) {
 		ppt = &(pt->fow);
 		pt = pt->fow;
 	}
 
-	if (pt == nullptr) {
+	if (pt == NULL) {
 		/*
 		 * should never happen....
 		 */
@@ -406,7 +406,7 @@ pat_sel(ARCHD *arcn)
 	}
 	*ppt = pt->fow;
 	free(pt);
-	arcn->pat = nullptr;
+	arcn->pat = NULL;
 	return (0);
 }
 
@@ -427,13 +427,13 @@ pat_match(ARCHD *arcn)
 {
 	PATTERN *pt;
 
-	arcn->pat = nullptr;
+	arcn->pat = NULL;
 
 	/*
 	 * if there are no more patterns and we have -n (and not -c) we are
 	 * done. otherwise with no patterns to match, matches all
 	 */
-	if (pathead == nullptr) {
+	if (pathead == NULL) {
 		if (nflag && !cflag)
 			return (-1);
 		return (0);
@@ -443,7 +443,7 @@ pat_match(ARCHD *arcn)
 	 * have to search down the list one at a time looking for a match.
 	 */
 	pt = pathead;
-	while (pt != nullptr) {
+	while (pt != NULL) {
 		/*
 		 * check for a file name match unless we have DIR_MTCH set in
 		 * this pattern then we want a prefix match
@@ -467,7 +467,7 @@ pat_match(ARCHD *arcn)
 	 * return the result, remember that cflag (-c) inverts the sense of a
 	 * match
 	 */
-	if (pt == nullptr)
+	if (pt == NULL)
 		return (cflag ? 0 : 1);
 
 	/*
@@ -481,7 +481,7 @@ pat_match(ARCHD *arcn)
 
 	if (pat_sel(arcn) < 0)
 		return (-1);
-	arcn->pat = nullptr;
+	arcn->pat = NULL;
 	return (1);
 }
 
@@ -500,7 +500,7 @@ fn_match(char *pattern, char *string, char **pend)
 	char c;
 	char test;
 
-	*pend = nullptr;
+	*pend = NULL;
 	for (;;) {
 		switch (c = *pattern++) {
 		case '\0':
@@ -555,13 +555,13 @@ fn_match(char *pattern, char *string, char **pend)
 			 * range match
 			 */
 			if (((test = *string++) == '\0') ||
-			    ((pattern = range_match(pattern, test)) == nullptr))
+			    ((pattern = range_match(pattern, test)) == NULL))
 				return (-1);
 			break;
 		case '\\':
 			if ((c = *pattern++) == '\0')
 				return (-1);
-			[[fallthrough]];
+			/* FALLTHROUGH */
 		default:
 			if (c != *string++)
 				return (-1);
@@ -587,7 +587,7 @@ range_match(char *pattern, int test)
 		 * Illegal pattern
 		 */
 		if (c == '\0')
-			return (nullptr);
+			return (NULL);
 
 		if ((*pattern == '-') && ((c2 = pattern[1]) != '\0') &&
 		    (c2 != ']')) {
@@ -597,7 +597,7 @@ range_match(char *pattern, int test)
 		} else if (c == test)
 			ok = 1;
 	}
-	return (ok == negate ? nullptr : pattern);
+	return (ok == negate ? NULL : pattern);
 }
 
 /*
@@ -610,7 +610,7 @@ has_dotdot(const char *path)
 {
 	const char *p = path;
 
-	while ((p = strstr(p, "..")) != nullptr) {
+	while ((p = strstr(p, "..")) != NULL) {
 		if ((p == path || p[-1] == '/') &&
 		    (p[2] == '/' || p[2] == '\0'))
 			return (1);
@@ -675,16 +675,16 @@ mod_name(ARCHD *arcn)
 		}
 	}
 	if (rmleadslash) {
-		const char *last = nullptr;
+		const char *last = NULL;
 		const char *p = arcn->name;
 
-		while ((p = strstr(p, "..")) != nullptr) {
+		while ((p = strstr(p, "..")) != NULL) {
 			if ((p == arcn->name || p[-1] == '/') &&
 			    (p[2] == '/' || p[2] == '\0'))
 				last = p + 2;
 			p += 2;
 		}
-		if (last != nullptr) {
+		if (last != NULL) {
 			while (*last == '/')
 				last++;
 			paxwarn(1, "Removing leading \"%.*s\"",
@@ -719,7 +719,7 @@ mod_name(ARCHD *arcn)
 	 * in that case it should be modified. what we really need to do is to
 	 * call an oracle here. :)
 	 */
-	if (rephead != nullptr) {
+	if (rephead != NULL) {
 		/*
 		 * we have replacement strings, modify the name and the link
 		 * name if any.
@@ -953,7 +953,7 @@ rep_name(char *name, size_t nsize, int *nlen, int prnt)
 	/*
 	 * try each replacement string in order
 	 */
-	while (pt != nullptr) {
+	while (pt != NULL) {
 		do {
 			char *oinpt = inpt;
 			/*

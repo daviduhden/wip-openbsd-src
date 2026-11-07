@@ -83,7 +83,7 @@ static unsigned int pax_global_seq = 1;
 #endif
 
 /* shortest possible extended record: "5 a=\n" */
-constexpr int MINXHDRSZ = 5;
+#define MINXHDRSZ 5
 
 /*
  * Routines for reading, writing and header identify of various versions of tar
@@ -399,7 +399,7 @@ tar_opt(void)
 {
 	OPLIST *opt;
 
-	while ((opt = opt_next()) != nullptr) {
+	while ((opt = opt_next()) != NULL) {
 		if (strcmp(opt->name, TAR_OPTION) ||
 		    strcmp(opt->value, TAR_NODIR)) {
 			paxwarn(1,
@@ -986,11 +986,11 @@ needs_hdrcharset_binary(const char *str)
 	const char *p;
 	size_t	    len;
 
-	if (str == nullptr)
+	if (str == NULL)
 		return 0;
 	memset(&st, 0, sizeof(st));
 	for (p = str; *p != '\0';) {
-		len = mbrtowc(nullptr, p, MB_CUR_MAX, &st);
+		len = mbrtowc(NULL, p, MB_CUR_MAX, &st);
 		if (len == (size_t)-1 || len == (size_t)-2) {
 			memset(&st, 0, sizeof(st));
 			return 1;
@@ -1011,7 +1011,7 @@ xheader_contains(const struct xheader *xhdr, const char *keyword)
 	const struct xheader_record *rec;
 	size_t			     klen;
 
-	if (xhdr == nullptr || keyword == nullptr)
+	if (xhdr == NULL || keyword == NULL)
 		return 0;
 	klen = strlen(keyword);
 	SLIST_FOREACH(rec, xhdr, entry)
@@ -1019,11 +1019,11 @@ xheader_contains(const struct xheader *xhdr, const char *keyword)
 		const char *space = strchr(rec->record, ' ');
 		const char *eq;
 
-		if (space == nullptr)
+		if (space == NULL)
 			continue;
 		space++;
 		eq = strchr(space, '=');
-		if (eq == nullptr || eq <= space)
+		if (eq == NULL || eq <= space)
 			continue;
 		if ((size_t)(eq - space) == klen &&
 		    strncmp(space, keyword, klen) == 0)
@@ -1046,13 +1046,13 @@ xheader_add(struct xheader *xhdr, const char *keyword, const char *value)
 	do {
 		reclen = tmplen;
 		tmplen =
-		    snprintf(nullptr, 0, "%d %s=%s\n", reclen, keyword, value);
+		    snprintf(NULL, 0, "%d %s=%s\n", reclen, keyword, value);
 	} while (tmplen >= 0 && tmplen != reclen);
 	if (tmplen < 0)
 		return -1;
 
 	rec = calloc(1, sizeof(*rec));
-	if (rec == nullptr)
+	if (rec == NULL)
 		return -1;
 	rec->reclen = reclen;
 	if (asprintf(&s, "%d %s=%s\n", reclen, keyword, value) < 0) {
@@ -1081,13 +1081,13 @@ xheader_add_ull(
 	do {
 		reclen = tmplen;
 		tmplen = snprintf(
-		    nullptr, 0, "%d %s=%llu\n", reclen, keyword, value);
+		    NULL, 0, "%d %s=%llu\n", reclen, keyword, value);
 	} while (tmplen >= 0 && tmplen != reclen);
 	if (tmplen < 0)
 		return -1;
 
 	rec = calloc(1, sizeof(*rec));
-	if (rec == nullptr)
+	if (rec == NULL)
 		return -1;
 	rec->reclen = reclen;
 	if (asprintf(&s, "%d %s=%llu\n", reclen, keyword, value) < 0) {
@@ -1130,14 +1130,14 @@ xheader_add_ts(
 	tmplen = MINXHDRSZ;
 	do {
 		reclen = tmplen;
-		tmplen = snprintf(nullptr, 0, "%d %s=%lld%s\n", reclen, keyword,
+		tmplen = snprintf(NULL, 0, "%d %s=%lld%s\n", reclen, keyword,
 		    (long long)value->tv_sec, frac);
 	} while (tmplen >= 0 && tmplen != reclen);
 	if (tmplen < 0)
 		return -1;
 
 	rec = calloc(1, sizeof(*rec));
-	if (rec == nullptr)
+	if (rec == NULL)
 		return -1;
 	rec->reclen = reclen;
 	if (asprintf(&s, "%d %s=%lld%s\n", reclen, keyword,
@@ -1188,36 +1188,36 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 		goto out;
 
 	if (global) {
-		const char *fmt = override_name != nullptr ?
+		const char *fmt = override_name != NULL ?
 		    override_name :
 		    pax_option_globexthdr_name();
-		if (fmt != nullptr) {
+		if (fmt != NULL) {
 			if (pax_format_xhdr_name(buf, sizeof(buf), fmt,
 				fname ? fname : "", seq) == -1)
 				goto out;
 		} else {
 			const char *tmpdir = getenv("TMPDIR");
-			if (tmpdir == nullptr || *tmpdir == '\0')
+			if (tmpdir == NULL || *tmpdir == '\0')
 				tmpdir = "/tmp";
 			(void)snprintf(buf, sizeof(buf), "%s/GlobalHead.%ld.%u",
 			    tmpdir, (long)getpid(), seq);
 		}
 	} else {
-		const char *fmt = override_name != nullptr ?
+		const char *fmt = override_name != NULL ?
 		    override_name :
 		    pax_option_exthdr_name();
-		if (fmt != nullptr) {
+		if (fmt != NULL) {
 			if (pax_format_xhdr_name(buf, sizeof(buf), fmt,
 				fname ? fname : "", 0) == -1)
 				goto out;
-		} else if (fname != nullptr) {
-			char	   *opath = nullptr, *odirbuf = nullptr;
+		} else if (fname != NULL) {
+			char	   *opath = NULL, *odirbuf = NULL;
 			const char *obase = fname;
 			const char *odir = ".";
 
-			if ((opath = strdup(fname)) != nullptr)
+			if ((opath = strdup(fname)) != NULL)
 				obase = basename(opath);
-			if ((odirbuf = strdup(fname)) != nullptr)
+			if ((odirbuf = strdup(fname)) != NULL)
 				odir = dirname(odirbuf);
 			(void)snprintf(buf, sizeof(buf), "%s/PaxHeaders.%ld/%s",
 			    odir ? odir : ".", (long)getpid(), obase);
@@ -1229,7 +1229,7 @@ wr_xheader(const char *fname, HD_USTAR *fhd, struct xheader *xhdr, int global,
 	}
 	fieldcpy(hd->name, sizeof(hd->name), buf, sizeof(buf));
 
-	if (fhd != nullptr) {
+	if (fhd != NULL) {
 		memcpy(hd->mode, fhd->mode, sizeof(hd->mode));
 		memcpy(hd->mtime, fhd->mtime, sizeof(hd->mtime));
 		memcpy(hd->uid, fhd->uid, sizeof(hd->uid));
@@ -1270,17 +1270,17 @@ pax_store_kv(PAXKEY **head, const char *keyword, const char *value)
 	PAXKEY **curp, *kv;
 	char	*dup;
 
-	if (head == nullptr || keyword == nullptr || value == nullptr)
+	if (head == NULL || keyword == NULL || value == NULL)
 		return -1;
 
-	for (curp = head; (kv = *curp) != nullptr; curp = &kv->next) {
+	for (curp = head; (kv = *curp) != NULL; curp = &kv->next) {
 		if (strcmp(kv->name, keyword) == 0)
 			break;
 	}
 
 	/* An empty value removes the keyword from the selected attribute set. */
 	if (value[0] == '\0') {
-		if (kv != nullptr) {
+		if (kv != NULL) {
 			*curp = kv->next;
 			free(kv->name);
 			free(kv->value);
@@ -1289,14 +1289,14 @@ pax_store_kv(PAXKEY **head, const char *keyword, const char *value)
 		return 0;
 	}
 
-	if (kv == nullptr) {
-		if ((kv = calloc(1, sizeof(*kv))) == nullptr)
+	if (kv == NULL) {
+		if ((kv = calloc(1, sizeof(*kv))) == NULL)
 			return -1;
-		if ((kv->name = strdup(keyword)) == nullptr) {
+		if ((kv->name = strdup(keyword)) == NULL) {
 			free(kv);
 			return -1;
 		}
-		if ((kv->value = strdup(value)) == nullptr) {
+		if ((kv->value = strdup(value)) == NULL) {
 			free(kv->name);
 			free(kv);
 			return -1;
@@ -1307,7 +1307,7 @@ pax_store_kv(PAXKEY **head, const char *keyword, const char *value)
 	}
 
 	dup = strdup(value);
-	if (dup == nullptr)
+	if (dup == NULL)
 		return -1;
 	free(kv->value);
 	kv->value = dup;
@@ -1317,7 +1317,7 @@ pax_store_kv(PAXKEY **head, const char *keyword, const char *value)
 static void
 pax_apply_global(ARCHD *arcn)
 {
-	if (arcn != nullptr)
+	if (arcn != NULL)
 		arcn->gattr = pax_global_xattr;
 }
 
@@ -1334,19 +1334,19 @@ pax_component_too_long(const char *path)
 	const char *start, *slash;
 	size_t	    len;
 
-	if (path == nullptr || *path == '\0')
+	if (path == NULL || *path == '\0')
 		return 0;
 
 	start = path;
 	do {
 		slash = strchr(start, '/');
-		if (slash != nullptr)
+		if (slash != NULL)
 			len = slash - start;
 		else
 			len = strlen(start);
 		if (len > NAME_MAX)
 			return 1;
-		if (slash == nullptr)
+		if (slash == NULL)
 			break;
 		start = slash + 1;
 	} while (*start != '\0');
@@ -1359,7 +1359,7 @@ pax_keyword_deleted(const char *keyword)
 {
 	const PAXDEL *del;
 
-	for (del = pax_option_delete(); del != nullptr; del = del->next)
+	for (del = pax_option_delete(); del != NULL; del = del->next)
 		if (fnmatch(del->pattern, keyword, 0) == 0)
 			return 1;
 	return 0;
@@ -1372,7 +1372,7 @@ pax_prepare_user_keywords(void)
 
 	if (pax_keywords_prepared)
 		return;
-	for (kv = pax_option_keywords(OPT_ASSIGN_EQ); kv != nullptr;
+	for (kv = pax_option_keywords(OPT_ASSIGN_EQ); kv != NULL;
 	    kv = kv->next) {
 		if (pax_keyword_deleted(kv->name))
 			continue;
@@ -1388,7 +1388,7 @@ pax_apply_local_option_keywords(ARCHD *arcn)
 {
 	const PAXOPKV *kv;
 
-	for (kv = pax_option_keywords(OPT_ASSIGN_COLON); kv != nullptr;
+	for (kv = pax_option_keywords(OPT_ASSIGN_COLON); kv != NULL;
 	    kv = kv->next) {
 		if (pax_keyword_deleted(kv->name))
 			continue;
@@ -1405,9 +1405,9 @@ pax_option_apply_local_xhdr(struct xheader *xhdr)
 {
 	const PAXOPKV *kv;
 
-	if (xhdr == nullptr)
+	if (xhdr == NULL)
 		return;
-	for (kv = pax_option_keywords(OPT_ASSIGN_COLON); kv != nullptr;
+	for (kv = pax_option_keywords(OPT_ASSIGN_COLON); kv != NULL;
 	    kv = kv->next) {
 		if (pax_keyword_deleted(kv->name))
 			continue;
@@ -1430,7 +1430,7 @@ pax_write_global_header(void)
 	if (pax_global_written)
 		return 0;
 	memset(&dummy, 0, sizeof(dummy));
-	for (kv = pax_option_keywords(OPT_ASSIGN_EQ); kv != nullptr;
+	for (kv = pax_option_keywords(OPT_ASSIGN_EQ); kv != NULL;
 	    kv = kv->next) {
 		if (pax_keyword_deleted(kv->name))
 			continue;
@@ -1445,7 +1445,7 @@ pax_write_global_header(void)
 		pax_global_written = 1;
 		return 0;
 	}
-	ret = wr_xheader(nullptr, &dummy, &xhdr, 1, nullptr, pax_global_seq++);
+	ret = wr_xheader(NULL, &dummy, &xhdr, 1, NULL, pax_global_seq++);
 	xheader_free(&xhdr);
 	if (ret < 0)
 		return -1;
@@ -1471,7 +1471,7 @@ pax_option_set_times(int enable)
 int
 pax_option_set_invalid(const char *value)
 {
-	if (value == nullptr)
+	if (value == NULL)
 		return -1;
 	if (strcasecmp(value, "bypass") == 0)
 		pax_opt_invalid = PAX_INVALID_BYPASS;
@@ -1493,10 +1493,10 @@ pax_option_store_string(char **dst, const char *value)
 {
 	char *dup;
 
-	if (value == nullptr)
+	if (value == NULL)
 		return -1;
 	dup = strdup(value);
-	if (dup == nullptr)
+	if (dup == NULL)
 		return -1;
 	free(*dst);
 	*dst = dup;
@@ -1520,20 +1520,20 @@ pax_option_add_delete(const char *pattern)
 {
 	PAXDEL *node, *cur;
 
-	if (pattern == nullptr)
+	if (pattern == NULL)
 		return -1;
-	if ((node = malloc(sizeof(*node))) == nullptr)
+	if ((node = malloc(sizeof(*node))) == NULL)
 		return -1;
-	if ((node->pattern = strdup(pattern)) == nullptr) {
+	if ((node->pattern = strdup(pattern)) == NULL) {
 		free(node);
 		return -1;
 	}
-	node->next = nullptr;
-	if (pax_opt_delete_list == nullptr)
+	node->next = NULL;
+	if (pax_opt_delete_list == NULL)
 		pax_opt_delete_list = node;
 	else {
 		cur = pax_opt_delete_list;
-		while (cur->next != nullptr)
+		while (cur->next != NULL)
 			cur = cur->next;
 		cur->next = node;
 	}
@@ -1546,24 +1546,24 @@ pax_option_add_keyword_internal(
 {
 	PAXOPKV *node, *cur;
 
-	if ((node = malloc(sizeof(*node))) == nullptr)
+	if ((node = malloc(sizeof(*node))) == NULL)
 		return -1;
-	if ((node->name = strdup(name)) == nullptr) {
+	if ((node->name = strdup(name)) == NULL) {
 		free(node);
 		return -1;
 	}
-	if ((node->value = strdup(value)) == nullptr) {
+	if ((node->value = strdup(value)) == NULL) {
 		free(node->name);
 		free(node);
 		return -1;
 	}
 	node->assign = assign;
-	node->next = nullptr;
-	if (*head == nullptr)
+	node->next = NULL;
+	if (*head == NULL)
 		*head = node;
 	else {
 		cur = *head;
-		while (cur->next != nullptr)
+		while (cur->next != NULL)
 			cur = cur->next;
 		cur->next = node;
 	}
@@ -1573,7 +1573,7 @@ pax_option_add_keyword_internal(
 int
 pax_option_add_keyword(const char *name, const char *value, int assign)
 {
-	if (name == nullptr || value == nullptr)
+	if (name == NULL || value == NULL)
 		return -1;
 	if (assign == OPT_ASSIGN_COLON)
 		return pax_option_add_keyword_internal(
@@ -1641,19 +1641,19 @@ static int
 pax_format_xhdr_name(char *buf, size_t bufsz, const char *fmt, const char *path,
     unsigned int seq)
 {
-	char	   *path_copy = nullptr, *dir_copy = nullptr;
+	char	   *path_copy = NULL, *dir_copy = NULL;
 	const char *dir = ".";
 	const char *file = path;
 	char	   *bp;
 	size_t	    remaining = bufsz;
 
-	if (fmt == nullptr || buf == nullptr || bufsz == 0)
+	if (fmt == NULL || buf == NULL || bufsz == 0)
 		return -1;
 
-	if (path != nullptr && *path != '\0') {
-		if ((path_copy = strdup(path)) != nullptr)
+	if (path != NULL && *path != '\0') {
+		if ((path_copy = strdup(path)) != NULL)
 			file = basename(path_copy);
-		if ((dir_copy = strdup(path)) != nullptr)
+		if ((dir_copy = strdup(path)) != NULL)
 			dir = dirname(dir_copy);
 	}
 
@@ -1672,7 +1672,7 @@ pax_format_xhdr_name(char *buf, size_t bufsz, const char *fmt, const char *path,
 		if (to_insert == '\0')
 			break;
 		fmt++;
-		const char *ins = nullptr;
+		const char *ins = NULL;
 		char	    tmp[32];
 		size_t	    inslen = 0;
 		switch (to_insert) {
@@ -1701,7 +1701,7 @@ pax_format_xhdr_name(char *buf, size_t bufsz, const char *fmt, const char *path,
 			ins = tmp;
 			break;
 		}
-		if (ins == nullptr)
+		if (ins == NULL)
 			ins = "";
 		inslen = strlen(ins);
 		if (inslen >= remaining)
@@ -1777,7 +1777,7 @@ pax_handle_invalid_link(ARCHD *arcn, const char *keyword, const char *value)
 void
 pax_mark_skip(ARCHD *arcn)
 {
-	if (arcn != nullptr)
+	if (arcn != NULL)
 		arcn->invalid = PAX_ENTRY_SKIP;
 }
 
@@ -1839,7 +1839,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	 * split the path name into prefix and name fields (if needed). if
 	 * pt != arcn->name, the name has to be split
 	 */
-	if ((pt = name_split(arcn->name, arcn->nlen)) == nullptr) {
+	if ((pt = name_split(arcn->name, arcn->nlen)) == NULL) {
 		if (ustar) {
 			paxwarn(
 			    1, "File name too long for ustar %s", arcn->name);
@@ -2049,9 +2049,9 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	if (ul_oct(arcn->sb.st_mode, hd->mode, sizeof(hd->mode), 3))
 		goto out;
 	if (!Nflag) {
-		if ((name = user_from_uid(arcn->sb.st_uid, 1)) != nullptr)
+		if ((name = user_from_uid(arcn->sb.st_uid, 1)) != NULL)
 			strncpy(hd->uname, name, sizeof(hd->uname));
-		if ((name = group_from_gid(arcn->sb.st_gid, 1)) != nullptr)
+		if ((name = group_from_gid(arcn->sb.st_gid, 1)) != NULL)
 			strncpy(hd->gname, name, sizeof(hd->gname));
 	}
 
@@ -2070,7 +2070,7 @@ wr_ustar_or_pax(ARCHD *arcn, int ustar)
 	if (!SLIST_EMPTY(&xhdr)) {
 		int ret;
 
-		ret = wr_xheader(arcn->name, hd, &xhdr, 0, nullptr, 0);
+		ret = wr_xheader(arcn->name, hd, &xhdr, 0, NULL, 0);
 		xheader_free(&xhdr);
 		if (ret)
 			return (ret);
@@ -2193,7 +2193,7 @@ pax_opt(void)
 {
 	OPLIST *opt;
 
-	while ((opt = opt_next()) != nullptr) {
+	while ((opt = opt_next()) != NULL) {
 		if (strcmp(opt->name, "delete") == 0) {
 			if (pax_option_add_delete(opt->value) < 0) {
 				paxwarn(1, "Unable to record delete pattern %s",
@@ -2269,7 +2269,7 @@ pax_opt(void)
  * Return
  *	character pointer to split point (always the / that is to be removed
  *	if the split is not needed, the points is set to the start of the file
- *	name (it would violate the spec to split there). A nullptr is returned
+ *	name (it would violate the spec to split there). A NULL is returned
  * if the file name is too long
  */
 
@@ -2287,7 +2287,7 @@ name_split(char *name, int len)
 	if (len <= TNMSZ)
 		return (name);
 	if (len > (TPFSZ + TNMSZ + 1))
-		return (nullptr);
+		return (NULL);
 
 	/*
 	 * we start looking at the biggest sized piece that fits in the name
@@ -2315,14 +2315,14 @@ name_split(char *name, int len)
 	 * cannot store this file.
 	 */
 	if (*start == '\0')
-		return (nullptr);
+		return (NULL);
 
 	/*
 	 * the split point isn't valid if it results in a prefix
 	 * longer than TPFSZ
 	 */
 	if ((start - name) > TPFSZ)
-		return (nullptr);
+		return (NULL);
 
 	/*
 	 * ok have a split point, return it to the caller
@@ -2341,7 +2341,7 @@ expandname(
 		if ((nlen = strlcpy(buf, *gnu_name, len)) >= len)
 			nlen = len - 1;
 		free(*gnu_name);
-		*gnu_name = nullptr;
+		*gnu_name = NULL;
 	} else
 		nlen = fieldcpy(buf, len, name, limit);
 	return (nlen);
@@ -2354,18 +2354,18 @@ rd_time(struct timespec *ts, const char *keyword, char *p)
 	char	   *q;
 	int	    multiplier;
 
-	if ((q = strchr(p, '.')) != nullptr)
+	if ((q = strchr(p, '.')) != NULL)
 		*q = '\0';
 
 	ts->tv_sec = strtonum(p, 0, MAX_TIME_T, &errstr);
-	if (errstr != nullptr) {
+	if (errstr != NULL) {
 		paxwarn(1, "%s is %s: %s", keyword, errstr, p);
 		return -1;
 	}
 
 	ts->tv_nsec = 0;
 
-	if (q == nullptr)
+	if (q == NULL)
 		return 0;
 
 	multiplier = 100000000;
@@ -2388,7 +2388,7 @@ rd_size(off_t *size, const char *keyword, char *p)
 
 	/* Assume off_t is a long long. */
 	*size = strtonum(p, 0, LLONG_MAX, &errstr);
-	if (errstr != nullptr) {
+	if (errstr != NULL) {
 		paxwarn(1, "%s is %s: %s", keyword, errstr, p);
 		return -1;
 	}
@@ -2441,7 +2441,7 @@ rd_xheader(ARCHD *arcn, int global, off_t size)
 		}
 
 		/* [p, end) is good */
-		if (memchr(p, ' ', end - p) == nullptr ||
+		if (memchr(p, ' ', end - p) == NULL ||
 		    !isdigit((unsigned char)*p)) {
 			paxwarn(1, "Invalid extended header record");
 			ret = -1;

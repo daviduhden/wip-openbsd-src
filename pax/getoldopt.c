@@ -30,9 +30,9 @@ getoldopt(int argc, char **argv, const char *optstring)
 	char	     c;
 	char	    *place;
 
-	optarg = nullptr;
+	optarg = NULL;
 
-	if (key == nullptr) { /* First time */
+	if (key == NULL) { /* First time */
 		if (argc < 2)
 			return (-1);
 		key = argv[1];
@@ -52,7 +52,7 @@ getoldopt(int argc, char **argv, const char *optstring)
 	}
 	place = strchr(optstring, c);
 
-	if (place == nullptr || c == ':') {
+	if (place == NULL || c == ':') {
 		fprintf(stderr, "%s: unknown option %c\n", argv[0], c);
 		return ('?');
 	}

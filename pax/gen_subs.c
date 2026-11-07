@@ -91,7 +91,7 @@ static void listopt_output(ARCHD *, FILE *);
 static void
 listopt_ctx_init(struct listopt_ctx *ctx)
 {
-	ctx->allocated = nullptr;
+	ctx->allocated = NULL;
 	ctx->count = ctx->cap = 0;
 }
 
@@ -100,12 +100,12 @@ listopt_ctx_free(struct listopt_ctx *ctx)
 {
 	size_t i;
 
-	if (ctx == nullptr)
+	if (ctx == NULL)
 		return;
 	for (i = 0; i < ctx->count; i++)
 		free(ctx->allocated[i]);
 	free(ctx->allocated);
-	ctx->allocated = nullptr;
+	ctx->allocated = NULL;
 	ctx->count = ctx->cap = 0;
 }
 
@@ -115,15 +115,15 @@ listopt_store(struct listopt_ctx *ctx, const char *str)
 	char  *dup;
 	char **tmp;
 
-	if (str == nullptr)
+	if (str == NULL)
 		str = "";
 	dup = strdup(str);
-	if (dup == nullptr)
+	if (dup == NULL)
 		return "";
 	if (ctx->count == ctx->cap) {
 		size_t newcap = ctx->cap ? ctx->cap * 2 : 8;
 		tmp = reallocarray(ctx->allocated, newcap, sizeof(*tmp));
-		if (tmp == nullptr) {
+		if (tmp == NULL) {
 			free(dup);
 			return "";
 		}
@@ -171,7 +171,7 @@ listopt_parse_spec(
 		}
 		switch (state) {
 		case PARSE_FLAGS:
-			if (strchr("-+ #0'", *p) != nullptr) {
+			if (strchr("-+ #0'", *p) != NULL) {
 				size_t fl = strlen(spec->flags);
 				if (fl + 1 < sizeof(spec->flags)) {
 					spec->flags[fl] = *p;
@@ -217,7 +217,7 @@ listopt_parse_spec(
 			state = PARSE_LENGTH;
 			continue;
 		case PARSE_LENGTH:
-			if (strchr("hljzt", *p) != nullptr) {
+			if (strchr("hljzt", *p) != NULL) {
 				size_t ll = strlen(spec->length);
 				if (ll + 1 < sizeof(spec->length)) {
 					spec->length[ll] = *p;
@@ -249,7 +249,7 @@ done:
 		return -1;
 	if (spec->keyword[0] != '\0' && spec->conv == 'T') {
 		char *eq = strchr(spec->keyword, '=');
-		if (eq != nullptr) {
+		if (eq != NULL) {
 			strlcpy(spec->subfmt, eq + 1, sizeof(spec->subfmt));
 			*eq = '\0';
 		}
@@ -266,7 +266,7 @@ listopt_keyword_string(
 	const char *val;
 	char	   *dup;
 
-	if (keyword == nullptr || *keyword == '\0' ||
+	if (keyword == NULL || *keyword == '\0' ||
 	    strcmp(keyword, "path") == 0)
 		return arcn->name;
 	if (strcmp(keyword, "linkpath") == 0)
@@ -280,14 +280,14 @@ listopt_keyword_string(
 		return val ? val : "";
 	}
 	if (strcmp(keyword, "name") == 0) {
-		if ((dup = strdup(arcn->name)) == nullptr)
+		if ((dup = strdup(arcn->name)) == NULL)
 			return "";
 		val = listopt_store(ctx, basename(dup));
 		free(dup);
 		return val;
 	}
 	if (strcmp(keyword, "dirname") == 0) {
-		if ((dup = strdup(arcn->name)) == nullptr)
+		if ((dup = strdup(arcn->name)) == NULL)
 			return "";
 		val = listopt_store(ctx, dirname(dup));
 		free(dup);
@@ -306,7 +306,7 @@ listopt_keyword_time(struct listopt_ctx *ctx, ARCHD *arcn, const char *keyword,
 	const char *val;
 	char	   *end;
 
-	if (keyword == nullptr || *keyword == '\0' ||
+	if (keyword == NULL || *keyword == '\0' ||
 	    strcmp(keyword, "mtime") == 0) {
 		*ts = arcn->sb.st_mtim;
 		return 0;
@@ -320,7 +320,7 @@ listopt_keyword_time(struct listopt_ctx *ctx, ARCHD *arcn, const char *keyword,
 		return 0;
 	}
 	val = pax_kv_lookup(arcn, keyword);
-	if (val == nullptr || *val == '\0')
+	if (val == NULL || *val == '\0')
 		return -1;
 	ts->tv_sec = strtoll(val, &end, 10);
 	ts->tv_nsec = 0;
@@ -346,7 +346,7 @@ listopt_keyword_sll(ARCHD *arcn, const char *keyword, long long *out)
 	const char *val;
 	char	   *end;
 
-	if (keyword == nullptr)
+	if (keyword == NULL)
 		return -1;
 	if (strcmp(keyword, "uid") == 0) {
 		*out = arcn->sb.st_uid;
@@ -365,7 +365,7 @@ listopt_keyword_sll(ARCHD *arcn, const char *keyword, long long *out)
 		return 0;
 	}
 	val = pax_kv_lookup(arcn, keyword);
-	if (val == nullptr)
+	if (val == NULL)
 		return -1;
 	*out = strtoll(val, &end, 10);
 	if (end == val)
@@ -380,7 +380,7 @@ listopt_keyword_ull(ARCHD *arcn, const char *keyword, unsigned long long *out)
 	const char *val;
 	char	   *end;
 
-	if (keyword == nullptr)
+	if (keyword == NULL)
 		return -1;
 	if (strcmp(keyword, "size") == 0) {
 		*out = arcn->sb.st_size;
@@ -395,7 +395,7 @@ listopt_keyword_ull(ARCHD *arcn, const char *keyword, unsigned long long *out)
 		return 0;
 	}
 	val = pax_kv_lookup(arcn, keyword);
-	if (val == nullptr)
+	if (val == NULL)
 		return -1;
 	*out = strtoull(val, &end, 10);
 	if (end == val)
@@ -406,13 +406,13 @@ listopt_keyword_ull(ARCHD *arcn, const char *keyword, unsigned long long *out)
 /*
  * constants used by ls_list() when printing out archive members
  */
-constexpr int MODELEN = 20;
-constexpr int DATELEN = 64;
+#define MODELEN 20
+#define DATELEN 64
 #define SECSPERDAY (24 * 60 * 60)
 #define SIXMONTHS (SECSPERDAY * 365 / 2)
 #define CURFRMT "%b %e %H:%M"
 #define OLDFRMT "%b %e  %Y"
-constexpr int NAME_WIDTH = 8;
+#define NAME_WIDTH 8
 #define TIMEFMT(t, now)                                                        \
 	(((t) + SIXMONTHS <= (now) || (t) > (now)) ? OLDFRMT : CURFRMT)
 
@@ -432,7 +432,7 @@ ls_list(ARCHD *arcn, time_t now, FILE *fp)
 
 	term = zeroflag ? '\0' : '\n'; /* path termination character */
 
-	if (vflag && listopt_get() != nullptr) {
+	if (vflag && listopt_get() != NULL) {
 		listopt_output(arcn, fp);
 		(void)fputc(term, fp);
 		(void)fflush(fp);
@@ -461,7 +461,7 @@ ls_list(ARCHD *arcn, time_t now, FILE *fp)
 	/*
 	 * print file mode, link count, uid, gid and time
 	 */
-	if ((tm = localtime(&(sbp->st_mtime))) == nullptr)
+	if ((tm = localtime(&(sbp->st_mtime))) == NULL)
 		f_date[0] = '\0';
 	else if (strftime(f_date, sizeof(f_date), TIMEFMT(sbp->st_mtime, now),
 		     tm) == 0)
@@ -509,12 +509,12 @@ ls_tty(ARCHD *arcn)
 	struct tm *tm;
 	char	   f_date[DATELEN];
 	char	   f_mode[MODELEN];
-	time_t	   now = time(nullptr);
+	time_t	   now = time(NULL);
 
 	/*
 	 * convert time to string, and print
 	 */
-	if ((tm = localtime(&(arcn->sb.st_mtime))) == nullptr)
+	if ((tm = localtime(&(arcn->sb.st_mtime))) == NULL)
 		f_date[0] = '\0';
 	else if (strftime(
 		     f_date, DATELEN, TIMEFMT(arcn->sb.st_mtime, now), tm) == 0)
@@ -549,7 +549,7 @@ listopt_append(const char *chunk)
 	char  *tmp;
 	size_t add;
 
-	if (chunk == nullptr)
+	if (chunk == NULL)
 		return 0;
 	add = strlen(chunk);
 	if (add == 0)
@@ -557,7 +557,7 @@ listopt_append(const char *chunk)
 	if (SIZE_MAX - listopt_len <= add)
 		return -1;
 	tmp = realloc(listopt_format, listopt_len + add + 1);
-	if (tmp == nullptr)
+	if (tmp == NULL)
 		return -1;
 	listopt_format = tmp;
 	memcpy(listopt_format + listopt_len, chunk, add);
@@ -577,7 +577,7 @@ void
 listopt_reset(void)
 {
 	free(listopt_format);
-	listopt_format = nullptr;
+	listopt_format = NULL;
 	listopt_len = 0;
 }
 
@@ -592,7 +592,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 	char		    fmtbuf[64];
 	char		    outbuf[PATH_MAX * 2];
 
-	if (fmt == nullptr || *fmt == '\0')
+	if (fmt == NULL || *fmt == '\0')
 		return;
 	listopt_ctx_init(&ctx);
 	while (*fmt != '\0') {
@@ -614,7 +614,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 		case 's': {
 			const char *str = listopt_keyword_string(&ctx, arcn,
 			    spec.keyword[0] ? spec.keyword : "path");
-			if (str == nullptr)
+			if (str == NULL)
 				str = "";
 			snprintf(fmtbuf, sizeof(fmtbuf), "%%%s%s%s%s",
 			    spec.flags, spec.width, spec.precision, "s");
@@ -664,7 +664,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 			const char *tfmt =
 			    spec.subfmt[0] ? spec.subfmt : "%b %e %H:%M %Y";
 			if (listopt_keyword_time(&ctx, arcn, key, &ts) == 0 &&
-			    localtime_r(&ts.tv_sec, &tm) != nullptr &&
+			    localtime_r(&ts.tv_sec, &tm) != NULL &&
 			    strftime(outbuf, sizeof(outbuf), tfmt, &tm) > 0) {
 				snprintf(fmtbuf, sizeof(fmtbuf), "%%%s%s%s%s",
 				    spec.flags, spec.width, spec.precision,
@@ -682,7 +682,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 			break;
 		}
 		case 'D': {
-			const char *use = nullptr;
+			const char *use = NULL;
 			if (S_ISCHR(arcn->sb.st_mode) ||
 			    S_ISBLK(arcn->sb.st_mode)) {
 				snprintf(outbuf, sizeof(outbuf), "%lu,%lu",
@@ -698,7 +698,7 @@ listopt_output(ARCHD *arcn, FILE *fp)
 					use = outbuf;
 				}
 			}
-			if (use == nullptr)
+			if (use == NULL)
 				use = "";
 			snprintf(fmtbuf, sizeof(fmtbuf), "%%%s%s%s%s",
 			    spec.flags, spec.width, spec.precision, "s");
@@ -706,18 +706,18 @@ listopt_output(ARCHD *arcn, FILE *fp)
 			break;
 		}
 		case 'F': {
-			const char *out = nullptr;
+			const char *out = NULL;
 			if (!spec.keyword[0])
 				out = arcn->name;
 			else {
 				char *tmp = strdup(spec.keyword);
 				char *save = tmp;
 				outbuf[0] = '\0';
-				if (tmp != nullptr) {
+				if (tmp != NULL) {
 					char *token;
 					int   first = 1;
 					while ((token = strsep(&tmp, ",")) !=
-					    nullptr) {
+					    NULL) {
 						const char *part =
 						    listopt_keyword_string(
 							&ctx, arcn, token);
@@ -761,9 +761,9 @@ pax_kv_free(PAXKEY **head)
 {
 	PAXKEY *cur;
 
-	if (head == nullptr)
+	if (head == NULL)
 		return;
-	while ((cur = *head) != nullptr) {
+	while ((cur = *head) != NULL) {
 		*head = cur->next;
 		free(cur->name);
 		free(cur->value);
@@ -776,15 +776,15 @@ pax_kv_lookup(const ARCHD *arcn, const char *key)
 {
 	const PAXKEY *kv;
 
-	if (arcn == nullptr || key == nullptr)
-		return nullptr;
-	for (kv = arcn->xattr; kv != nullptr; kv = kv->next)
+	if (arcn == NULL || key == NULL)
+		return (NULL);
+	for (kv = arcn->xattr; kv != NULL; kv = kv->next)
 		if (strcmp(kv->name, key) == 0)
 			return kv->value;
-	for (kv = arcn->gattr; kv != nullptr; kv = kv->next)
+	for (kv = arcn->gattr; kv != NULL; kv = kv->next)
 		if (strcmp(kv->name, key) == 0)
 			return kv->value;
-	return nullptr;
+	return (NULL);
 }
 
 /*
