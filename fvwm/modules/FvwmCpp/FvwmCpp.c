@@ -104,17 +104,6 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	/* Open the X display */
-	if (!(dpy = XOpenDisplay(display_name))) {
-		fprintf(stderr, "%s: can't open display %s", MyName,
-		    XDisplayName(display_name));
-		exit(1);
-	}
-
-	Mscreen = DefaultScreen(dpy);
-	ScreenHeight = DisplayHeight(dpy, Mscreen);
-	ScreenWidth = DisplayWidth(dpy, Mscreen);
-
 	/* We should exit if our fvwm pipes die */
 	signal(SIGPIPE, DeadPipe);
 
@@ -125,11 +114,26 @@ main(int argc, char **argv)
 		/* leaving this in just in case-- any option starting with '-'
 		     will get passed on to cpp anyway */
 		if (strcasecmp(argv[i], "-cppopt") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			strlcat(cpp_options, argv[++i], sizeof(cpp_options));
 			strlcat(cpp_options, " ", sizeof(cpp_options));
 		} else if (strcasecmp(argv[i], "-cppprog") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			cpp_prog = argv[++i];
 		} else if (strcasecmp(argv[i], "-outfile") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			strlcpy(cpp_outfile, argv[++i], sizeof(cpp_outfile));
 		} else if (strcasecmp(argv[i], "-debug") == 0) {
 			cpp_debug = 1;
@@ -149,16 +153,24 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	for (i = 0; i < (int)strlen(filename); i++)
-		if ((filename[i] == '\n') || (filename[i] == '\r')) {
-			filename[i] = 0;
-		}
-
-	if (filename == NULL) {
-		fprintf(
-		    stderr, "%s: no configuration file specified\n", MyName);
+	if (filename != NULL)
+		filename[strcspn(filename, "\r\n")] = '\0';
+	if (filename == NULL || *filename == '\0') {
+		fprintf(stderr, "%s: no configuration file specified\n",
+		    MyName);
 		exit(1);
 	}
+
+	/* Open the X display */
+	if (!(dpy = XOpenDisplay(display_name))) {
+		fprintf(stderr, "%s: can't open display %s", MyName,
+		    XDisplayName(display_name));
+		exit(1);
+	}
+
+	Mscreen = DefaultScreen(dpy);
+	ScreenHeight = DisplayHeight(dpy, Mscreen);
+	ScreenWidth = DisplayWidth(dpy, Mscreen);
 
 	unveil_tempdir("FvwmCpp");
 	unveil_home_read("FvwmCpp");

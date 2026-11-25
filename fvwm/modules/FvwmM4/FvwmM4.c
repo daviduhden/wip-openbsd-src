@@ -112,17 +112,6 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	/* Open the X display */
-	if (!(dpy = XOpenDisplay(display_name))) {
-		fprintf(stderr, "%s: can't open display %s", MyName,
-		    XDisplayName(display_name));
-		exit(1);
-	}
-
-	Mscreen = DefaultScreen(dpy);
-	ScreenHeight = DisplayHeight(dpy, Mscreen);
-	ScreenWidth = DisplayWidth(dpy, Mscreen);
-
 	/* We should exit if our fvwm pipes die */
 	signal(SIGPIPE, DeadPipe);
 
@@ -133,19 +122,44 @@ main(int argc, char **argv)
 		if (strcasecmp(argv[i], "-m4-prefix") == 0) {
 			m4_prefix = TRUE;
 		} else if (strcasecmp(argv[i], "-m4opt") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			/* leaving this in just in case-- any option starting
 			   with '-' will get passed on to m4 anyway */
 			strlcat(m4_options, argv[++i], sizeof(m4_options));
 			strlcat(m4_options, " ", sizeof(m4_options));
 		} else if (strcasecmp(argv[i], "-m4-squote") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			m4_startquote = argv[++i];
 			m4_default_quotes = 0;
 		} else if (strcasecmp(argv[i], "-m4-equote") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			m4_endquote = argv[++i];
 			m4_default_quotes = 0;
 		} else if (strcasecmp(argv[i], "-m4prog") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			m4_prog = argv[++i];
 		} else if (strcasecmp(argv[i], "-outfile") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "%s: %s requires an argument\n",
+				    MyName, argv[i]);
+				exit(1);
+			}
 			strlcpy(m4_outfile, argv[++i], sizeof(m4_outfile));
 		} else if (strcasecmp(argv[i], "-debug") == 0) {
 			m4_debug = 1;
@@ -158,18 +172,24 @@ main(int argc, char **argv)
 			filename = argv[i];
 	}
 
-	if (filename != NULL) {
-		for (i = 0; filename[i] != '\0'; i++)
-			if ((filename[i] == '\n') || (filename[i] == '\r')) {
-				filename[i] = 0;
-			}
+	if (filename != NULL)
+		filename[strcspn(filename, "\r\n")] = '\0';
+	if (filename == NULL || *filename == '\0') {
+		fprintf(stderr, "%s: no configuration file specified\n",
+		    MyName);
+		exit(1);
 	}
 
+	/* Open the X display */
 	if (!(dpy = XOpenDisplay(display_name))) {
-		fprintf(stderr, "FvwmM4: can't open display %s",
+		fprintf(stderr, "%s: can't open display %s", MyName,
 		    XDisplayName(display_name));
 		exit(1);
 	}
+
+	Mscreen = DefaultScreen(dpy);
+	ScreenHeight = DisplayHeight(dpy, Mscreen);
+	ScreenWidth = DisplayWidth(dpy, Mscreen);
 
 	unveil_tempdir("FvwmM4");
 	unveil_home_read("FvwmM4");
@@ -257,6 +277,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 		fprintf(stderr,
 		    "FvwmM4: unsafe character in temporary path: %s\n",
 		    tmp_name);
+		(void)unlink(tmp_name);
 		exit(0377);
 	}
 
@@ -275,6 +296,7 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 	tmpf = popen(options, "w");
 	if (tmpf == NULL) {
 		perror("Cannot open pipe to m4");
+		(void)unlink(tmp_name);
 		exit(0377);
 	}
 
@@ -404,7 +426,11 @@ m4_defs(Display *display, const char *host, char *m4_options, char *config_file)
 	fprintf(tmpf, "%sinclude(%s%s%s)\n", (m4_prefix) ? "m4_" : "",
 	    m4_startquote, config_file, m4_endquote);
 
-	pclose(tmpf);
+	if (pclose(tmpf) != 0) {
+		(void)unlink(tmp_name);
+		fprintf(stderr, "%s: m4 failed\n", MyName);
+		exit(1);
+	}
 	return (tmp_name);
 }
 
