@@ -150,6 +150,14 @@ truncate -s 100 /tmp/a.tar
 - POSIX.1-2024 pax specification
 - `openbsd-source-security`, `openbsd-source-regress`
 
+## Pathname substitution
+
+Global `-s` searches the remaining pathname after each replacement. After
+a zero-width match, it copies the next byte unchanged before searching
+again. Include both empty and nonempty replacements in progress tests.
+Run `sh tests/pax-subst-tests.sh ./pax/pax` from the repository root on a
+native build, with a timeout when comparing against an older binary.
+
 ## Compressor and scratch-file cleanup
 
 Keep the compressor PID associated with its archive volume. Close the pipe

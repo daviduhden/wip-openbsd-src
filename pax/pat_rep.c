@@ -946,7 +946,7 @@ rep_name(char *name, size_t nsize, int *nlen, int prnt)
 	 * try each replacement string in order
 	 */
 	while (pt != NULL) {
-		do {
+		for (;;) {
 			char *oinpt = inpt;
 			/*
 			 * check for a successful substitution, if not go to
@@ -985,26 +985,19 @@ rep_name(char *name, size_t nsize, int *nlen, int prnt)
 			}
 			outpt += res;
 
-			/*
-			 * we set up to look again starting at the first
-			 * character in the tail (of the input string right
-			 * after the last character matched by the regular
-			 * expression (inpt always points at the first char in
-			 * the string to process). If we are not doing a global
-			 * substitution, we will use inpt to copy the tail to
-			 * the final result. Make sure we do not overrun the
-			 * output buffer
-			 */
 			inpt += pm[0].rm_eo - pm[0].rm_so;
-
-			if ((outpt == endpt) || (*inpt == '\0'))
+			if (!(pt->flgs & GLOB) || outpt == endpt ||
+			    *inpt == '\0')
 				break;
 
 			/*
-			 * if the user wants global we keep trying to
-			 * substitute until it fails, then we are done.
+			 * A zero-width match leaves the next byte in the
+			 * suffix. Copy it before trying again so the search
+			 * progresses even if the replacement was also empty.
 			 */
-		} while (pt->flgs & GLOB);
+			if (pm[0].rm_so == pm[0].rm_eo)
+				*outpt++ = *inpt++;
+		}
 
 		if (found)
 			break;

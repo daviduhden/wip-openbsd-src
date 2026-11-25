@@ -35,7 +35,7 @@
 .\"
 .\"	@(#)pax.1	8.4 (Berkeley) 4/18/94
 .\"
-.Dd October 24, 2026
+.Dd November 25, 2026
 .Dt PAX 1
 .Os
 .Sh NAME
@@ -696,6 +696,8 @@ The optional trailing
 continues to apply the substitution expression to the pathname substring,
 which starts with the first character following the end of the last successful
 substitution.
+After a zero-width match, the next byte, if any, is copied unchanged
+before continuing with the remainder of the pathname.
 The first unsuccessful substitution stops the operation of the
 .Cm g
 option.
