@@ -330,8 +330,8 @@ main(int argc, char **argv)
 	if (act == COPY && dirptr != NULL)
 		(void)unveil(dirptr, "rwc");
 
-	/* Unveil the temporary file directory. */
-	{
+	/* Only the update tables need scratch space. */
+	if ((act == APPND || act == ARCHIVE) && uflag) {
 		char *tmpcopy = strdup(tempfile);
 		char *slash;
 

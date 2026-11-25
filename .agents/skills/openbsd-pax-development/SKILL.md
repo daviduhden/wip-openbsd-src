@@ -150,6 +150,15 @@ truncate -s 100 /tmp/a.tar
 - POSIX.1-2024 pax specification
 - `openbsd-source-security`, `openbsd-source-regress`
 
+## Compressor and scratch-file cleanup
+
+Keep the compressor PID associated with its archive volume. Close the pipe
+before waiting, retry interrupted waits, and interpret the child status
+only after a successful wait. Distinguish expected early cancellation
+from a compressor failure. Only append and archive with `-u` need the
+temporary update table. Check native sandbox permissions with both absolute
+and relative temporary paths.
+
 ## Maintenance & Continuous Learning
 
 Whenever this skill is used to change the repository, review this skill after
