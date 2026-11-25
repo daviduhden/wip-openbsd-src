@@ -80,12 +80,6 @@ static struct piperead_slot piperead_slots[PIPEREAD_SLOTS];
 static pid_t  exec_children[MAX_EXEC_CHILDREN];
 static int    exec_children_count;
 
-/* PipeRead children whose pipe closed before they exited; reaped
- * once SIGCHLD shows they are gone. */
-#define MAX_PENDING_REAPS PIPEREAD_SLOTS
-static pid_t pending_reaps[MAX_PENDING_REAPS];
-static int   pending_reaps_count;
-
 __attribute__((__noreturn__)) static void
 usage(void)
 {
@@ -220,58 +214,52 @@ decode_piperead_msg(struct imsg *imsg)
 /*
  * reap_children -- collect exited detached children and report them
  * to fvwm; also record exit statuses of PipeRead children so the
- * EOF message can carry them.
+ * EOF message can carry them. Reap every child regardless of whether
+ * its reporting slot or output pipe is still active.
  */
 static void
 reap_children(struct imsgbuf *ibuf)
 {
 	pid_t pid;
-	int   status;
-	int   i;
+	int status, i;
 
 	got_sigchld = 0;
-	for (i = 0; i < PIPEREAD_SLOTS; i++) {
-		struct piperead_slot *slot = &piperead_slots[i];
-
-		if (!slot->active || slot->pid <= 0 || slot->status_known)
+	for (;;) {
+		pid = waitpid(-1, &status, WNOHANG);
+		if (pid == -1 && errno == EINTR)
 			continue;
-		pid = waitpid(slot->pid, &status, WNOHANG);
-		if (pid == slot->pid) {
+		if (pid <= 0)
+			break;
+
+		for (i = 0; i < PIPEREAD_SLOTS; i++) {
+			struct piperead_slot *slot = &piperead_slots[i];
+
+			if (!slot->active || slot->pid != pid)
+				continue;
 			slot->status = status;
 			slot->status_known = 1;
-		} else if (pid == -1 && errno != EINTR) {
-			/* Reaped elsewhere: report success. */
-			slot->status = 0;
-			slot->status_known = 1;
+			slot->pid = 0;
+			break;
 		}
-	}
-
-	/* Drain PipeRead children whose pipe closed before exit. */
-	for (i = 0; i < pending_reaps_count; i++) {
-		pid = waitpid(pending_reaps[i], &status, WNOHANG);
-		if (pid <= 0)
+		if (i != PIPEREAD_SLOTS)
 			continue;
-		pending_reaps[i] = pending_reaps[pending_reaps_count - 1];
-		pending_reaps_count--;
-		i--;
-	}
 
-	for (i = 0; i < exec_children_count; i++) {
-		struct {
-			pid_t pid;
-			int   status;
-		} msg;
+		/* Untracked children still get reaped; only reports are bounded. */
+		for (i = 0; i < exec_children_count; i++) {
+			struct {
+				pid_t pid;
+				int   status;
+			} msg;
 
-		pid = waitpid(exec_children[i], &status, WNOHANG);
-		if (pid <= 0)
-			continue;
-		msg.pid = pid;
-		msg.status = status;
-		imsg_compose(ibuf, IMSG_EXEC_EXIT, 0, 0, -1, &msg, sizeof(msg));
-		/* Remove from the table. */
-		exec_children[i] = exec_children[exec_children_count - 1];
-		exec_children_count--;
-		i--;
+			if (exec_children[i] != pid)
+				continue;
+			msg.pid = pid;
+			msg.status = status;
+			imsg_compose(ibuf, IMSG_EXEC_EXIT, 0, 0, -1, &msg,
+			    sizeof(msg));
+			exec_children[i] = exec_children[--exec_children_count];
+			break;
+		}
 	}
 	imsgbuf_flush(ibuf);
 }
@@ -298,14 +286,6 @@ piperead_finish(struct imsgbuf *ibuf, struct piperead_slot *slot, int errnum)
 		if (waitpid(slot->pid, &status, WNOHANG) == slot->pid) {
 			slot->status = status;
 			slot->status_known = 1;
-		} else if (pending_reaps_count < MAX_PENDING_REAPS) {
-			/*
-			 * The child closed its stdout but has not
-			 * exited (a background grandchild can keep
-			 * the shell alive).  Never block the helper
-			 * on it: reap it once SIGCHLD arrives.
-			 */
-			pending_reaps[pending_reaps_count++] = slot->pid;
 		}
 	}
 	if (errnum != 0) {
@@ -429,10 +409,9 @@ piperead_kill(struct imsgbuf *ibuf, u_int32_t id)
 	for (i = 0; i < PIPEREAD_SLOTS; i++) {
 		struct piperead_slot *slot = &piperead_slots[i];
 
-		if (!slot->active || slot->id != id)
+		if (!slot->active || slot->id != id || slot->pid <= 0)
 			continue;
-		if (slot->pid > 0 && kill(slot->pid, SIGTERM) == -1 &&
-		    errno == ESRCH) {
+		if (kill(slot->pid, SIGTERM) == -1 && errno == ESRCH) {
 			/* Already gone; drain and report EOF. */
 			continue;
 		}
@@ -566,14 +545,17 @@ main(int argc, char **argv)
 				if (imsgbuf_flush(&ibuf) == -1)
 					err(1, "imsgbuf_flush PipeRead data");
 			} else if (nr == 0) {
-				/* All write ends closed: command done. */
+				/* All write ends closed, even if the child is alive. */
 				piperead_finish(&ibuf, slot, 0);
 			}
 			/* EAGAIN: nothing to forward after all. */
 		}
 
-		if (ready > 0 && !(pfd[0].revents & POLLIN))
+		if (!(pfd[0].revents & POLLIN)) {
+			if (pfd[0].revents & (POLLHUP | POLLERR | POLLNVAL))
+				break;
 			continue;
+		}
 
 		if ((n = imsgbuf_read(&ibuf)) == -1) {
 			if (errno == EINTR && got_sigchld) {
