@@ -1,16 +1,16 @@
-#!/bin/sh 
+#!/bin/sh
 
 # Some time ago, Martin Kraemer <Martin.Kraemer@mch.sni.de> posted an
 # incomplete script to convert fvwm-1 'rc' files to fvwm-2. I've just
 # recently fixed and enhanced that script; it's complete (or nearly
 # so) now. This should help if you choose to convert.
-# 
+#
 # I've also made a couple of other minor changes to make life easier
 # for our users here: I changed the default initialization from "Read
 # .fvwmrc" to "Read .fvwm2rc" (in fvwm/fvwmc), and I installed fvwm 2
 # as "fvwm2". With these changes, users can easily convert at their
 # leisure.
-# 
+#
 # Herewith the script. It's using GNU awk (gawk), but will run with
 # any "new" awk (nawk on Suns (SunOS 4, Solaris), awk on most other
 # systems). If you do not use gawk, it will be case-sensitive (the
@@ -40,53 +40,57 @@
 echo "fvwmrc-to-fvwm2rc" >&2
 
 # gawk has IGNORECASE, so we use it if possible.
-if command -v gawk >/dev/null 2>&1
-then
+if command -v gawk >/dev/null 2>&1; then
 	AWK=$(command -v gawk)
-elif [ -x /usr/bin/gawk ]
-then
-   AWK=/usr/bin/gawk
-elif command -v awk >/dev/null 2>&1
-then
+elif [ -x /usr/bin/gawk ]; then
+	AWK=/usr/bin/gawk
+elif command -v awk >/dev/null 2>&1; then
 	AWK=$(command -v awk)
-elif [ -x /usr/bin/awk ]
-then
-   AWK=/usr/bin/awk
+elif [ -x /usr/bin/awk ]; then
+	AWK=/usr/bin/awk
 fi
 
 if [ -z "$AWK" ] || [ ! -x "$AWK" ]; then
-   echo "Can't find any awk, cannot run!" >&2
-   exit 1
+	echo "Can't find any awk, cannot run!" >&2
+	exit 1
 fi
 
 source=${1:-$HOME/.fvwmrc}
-if [ ! -r $source ] ; then
+if [ ! -r "$source" ]; then
 	echo "Can't find source file $source, giving up" >&2
 	exit 1
 fi
 
 dest=${2:-$HOME/.fvwm2rc}
-if [ "$dest" != "-" ] ;then
+if [ "$dest" != "-" ]; then
 	echo "Output to $dest" >&2
-	if [ -f $dest ] ; then
-	  echo "Saving existing $dest as $dest.bak" >&2
-	  cp -p $dest $dest.bak || { echo "Couldn't save; aborting" >&2; exit 1; }
+	if [ -f "$dest" ]; then
+		echo "Saving existing $dest as $dest.bak" >&2
+		cp -p -- "$dest" "$dest.bak" || {
+			echo "Couldn't save; aborting" >&2
+			exit 1
+		}
 	else
-	  cp -p $source $dest 2>/dev/null  # try to preserve permissions
+		cp -p -- "$source" "$dest" 2>/dev/null # try to preserve permissions
 	fi
-	exec >$dest || { echo "Couldn't write to $dest, aborting" >&2; exit 1; }
-	TTY=`tty`
-	if [ ! -w "$TTY" ] ;then
-	  TTY=/dev/stderr
+	exec >"$dest" || {
+		echo "Couldn't write to $dest, aborting" >&2
+		exit 1
+	}
+	TTY=$(tty)
+	if [ ! -w "$TTY" ]; then
+		TTY=/dev/stderr
 	fi
 else
 	TTY=/dev/stderr
 fi
-if [ ! -w "$TTY" ] ;then
+if [ ! -w "$TTY" ]; then
 	TTY=/dev/null
 fi
 
-cat "$source" | "$AWK" '
+# The quoted program uses awk field references.
+# shellcheck disable=SC2016
+"$AWK" -v diagnostic="$TTY" '
 BEGIN   {
         printf ("# Trying to compile an old .fvwrc to the new fvwm-2.xx Format\n");
 	TRUE=1; FALSE=0;
@@ -188,14 +192,14 @@ BEGIN   {
 /^[ \t]*ButtonStyle[ \t]*/	{
         if ($2 == ":") {  # new style already
            if (NF != $4+4)
-	       print "ERROR: ButtonStyle command incorrect\n" NR ": " $0 >"'$TTY'";
+	       print "ERROR: ButtonStyle command incorrect\n" NR ": " $0 >diagnostic;
 	   printf ("%s %d %d", $1, $3, $4);
 	   for (i=5; i<=NF; ++i)
 	       printf (" %s", $i);
 	   printf ("\n");
 	} else {
            print "Note: Conversion of old ButtonStyle; values rounded" \
-			>"'$TTY'"
+			>diagnostic
 	   printf ("#!         Old line was: %s\n", $0);
 	   p=index ($3,"x");
 	   x=substr($3,1,p-1)/2;
@@ -320,7 +324,7 @@ BEGIN   {
 # /^[ \t]*Mouse[ \t]*/		{
 # 		 if (sub("[ \t]Pop[uU]p[ \t]", " Menu ")) {
 # 			  if (!warn["Mouse"]) {
-# 			 print "Note: Setting mouse bindings to sticky menus">"'$TTY'";
+# 			 print "Note: Setting mouse bindings to sticky menus">diagnostic;
 # 			 warn["Mouse"] = TRUE;
 # 			  }
 # 			  sub("$", " Nop");
@@ -346,13 +350,13 @@ BEGIN   {
 	print $0;
 	if (length($0) > 199)
 	{
-	    print "Warning: line" NR "too long" >"'$TTY'";
-	    print ">> " $0 >"'$TTY'";
+	    print "Warning: line" NR "too long" >diagnostic;
+	    print ">> " $0 >diagnostic;
 	}
 	if (!warn["GoodStuff"])
 	{
-	    print "Note: GoodStuff renamed to FvwmButtons" >"'$TTY'";
-	    print "Note: FvwmButtons syntax may now be wrong; please check!" >"'$TTY'";
+	    print "Note: GoodStuff renamed to FvwmButtons" >diagnostic;
+	    print "Note: FvwmButtons syntax may now be wrong; please check!" >diagnostic;
 	    warn["GoodStuff"]=TRUE;
 	}
 	next;
@@ -371,10 +375,10 @@ BEGIN   {
 # hack: function declarations cannot have leading whitespace
 /^Function[ \t]*/		{
 	if (inpopup)
-	   print "ERROR: EndPopup missing\n" NR ": " $0 >"'$TTY'";
+	   print "ERROR: EndPopup missing\n" NR ": " $0 >diagnostic;
 	inpopup=FALSE;
 	if (infunction)
-	   print "ERROR: EndFunction missing\n" NR ": " $0 >"'$TTY'";
+	   print "ERROR: EndFunction missing\n" NR ": " $0 >diagnostic;
 	infunction=TRUE;
 	prefix="AddToFunc " $2;
 	next;
@@ -382,7 +386,7 @@ BEGIN   {
 
 /^[ \t]*EndFunction[ \t]*/	{
         if (!infunction)
-           print "ERROR: EndFunction outside of function" >"'$TTY'";
+           print "ERROR: EndFunction outside of function" >diagnostic;
 	infunction=FALSE;
 	prefix="";
 	next;
@@ -391,9 +395,9 @@ BEGIN   {
 # hack: popup declarations cannot have leading whitespace
 /^Popup/                        {
         if (inpopup) 
-	   print "ERROR: EndPopup missing\n" NR ": " $0 >"'$TTY'";
+	   print "ERROR: EndPopup missing\n" NR ": " $0 >diagnostic;
         if (infunction)
-	   print "ERROR: EndFunction missing\n" NR ": " $0 >"'$TTY'";
+	   print "ERROR: EndFunction missing\n" NR ": " $0 >diagnostic;
         infunction=FALSE;
 	inpopup=TRUE;
 
@@ -416,7 +420,7 @@ BEGIN   {
 
 /^[ \t]*EndPopup[ \t]*/		{
         if (!inpopup)
-	   print "ERROR: EndPopup outside of popup\n" NR ": " $0 >"'$TTY'";
+	   print "ERROR: EndPopup outside of popup\n" NR ": " $0 >diagnostic;
         inpopup=FALSE;
 	prefix="";
 	next;
@@ -435,7 +439,7 @@ BEGIN   {
 /^[ \t]*Cursor[ \t]*/		{ 
 	print "#! " $0 " [deleted]";
 	if (warned[$1]==FALSE) {
-	   print "Warning: " $1 " not in Fvwm2, command dropped" >"'$TTY'";
+	   print "Warning: " $1 " not in Fvwm2, command dropped" >diagnostic;
 	   warned[$1] = TRUE;
 	}
 	next;
@@ -454,7 +458,7 @@ BEGIN   {
 	print "# #! Now start pager";
 	print "# Module FvwmPager 0 0";
 	if (warned[$1]==FALSE) {
-           print "Warning: " $1 " omitted, internal pager is obsolete (use FvwmPager)" >"'$TTY'";
+           print "Warning: " $1 " omitted, internal pager is obsolete (use FvwmPager)" >diagnostic;
 	   warned[$1] = TRUE;
 	}
 	next;
@@ -463,7 +467,7 @@ BEGIN   {
 /^[ \t]*PagingDefault[ \t]*/	||
 /^[ \t]*TogglePage[ \t]*/	{
         print "#! " $0 " (use EdgeScroll 0 0)"; next;
-	print "Warning: " $1 " not in Fvwm2, use EdgeScroll">"'$TTY'";
+	print "Warning: " $1 " not in Fvwm2, use EdgeScroll">diagnostic;
 }
 
 ########## Old Internal Pager Colors ###########
@@ -471,7 +475,7 @@ BEGIN   {
 /^[ \t]*PagerBackColor[ \t]*/	{
 	printf ("#!%s (new command=Style FvwmPager Color fore_color/back_color)\n", $0);
 	if (warned[$1]==FALSE) {
-           print "Warning: " $1 " omitted, internal pager is obsolete (use FvwmPager)" >"'$TTY'";
+           print "Warning: " $1 " omitted, internal pager is obsolete (use FvwmPager)" >diagnostic;
 	   warned[$1] = TRUE;
 	}
 	next;
@@ -481,8 +485,8 @@ BEGIN   {
 /^[ \t]*StickyForeColor[ \t]*/	{
 	printf ("#!%s (no sticky foreground color in fvwm2)\n", $0);
 	if (warned[$1]==FALSE) {
-	   print "Warning: StickyForeColor not in fvwm2, omitted" > "'$TTY'"
-           print "         Use the Style command to assign each sticky window the same ForeColor" > "'$TTY'"
+	   print "Warning: StickyForeColor not in fvwm2, omitted" > diagnostic
+           print "         Use the Style command to assign each sticky window the same ForeColor" > diagnostic
         }
 	next;
 }
@@ -490,8 +494,8 @@ BEGIN   {
 /^[ \t]*StickyBackColor[ \t]*/	{
 	printf ("#!%s (no sticky background color in fvwm2)\n", $0);
 	if (warned[$1]==FALSE) {
-	   print "Warning: StickyBackColor not in fvwm2, omitted" >"'$TTY'"
-           print "         Use the Style command to assign each sticky window the same BackColor" > "'$TTY'"
+	   print "Warning: StickyBackColor not in fvwm2, omitted" >diagnostic
+           print "         Use the Style command to assign each sticky window the same BackColor" > diagnostic
         }
 	next;
 }
@@ -537,7 +541,7 @@ BEGIN   {
     if (warned[$1]==FALSE) {
 	printf ("#!Warning: Keyword \"%s\" not handled yet\n", $1);
 	warned[$1]=TRUE;
-	print "Warning: Unknown keyword "$1" passed through">"'$TTY'";
+	print "Warning: Unknown keyword "$1" passed through">diagnostic;
     }
     print $0;
     next;
@@ -553,6 +557,5 @@ END {
         printf "Style \"*\" %s\n", dflt["placement"];
     }
 }
-'
+' <"$source"
 exit
-
