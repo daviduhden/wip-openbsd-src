@@ -4561,10 +4561,10 @@ Index: regress/lib/libc/stdckdint/stdckdint.c
 + * Regression test for <stdckdint.h> (ISO C23 7.20).
 + *
 + * The boundary section checks both the overflow indication and the value
-+ * stored in the destination for every standard integer type and for mixed
-+ * signed/unsigned and wide/narrow combinations.  Where the architecture has
-+ * __int128 the same cases are then replayed over a boundary grid and compared
-+ * against an independent arbitrary-precision oracle built on that type.
++ * stored in the destination for several integer types and for mixed
++ * signed/unsigned and wide/narrow combinations. With __int128, a grid
++ * additionally checks the result bits and overflow flag against an
++ * independent reference calculation for operands up to 64 bits.
 + */
 +
 +#include <limits.h>
@@ -4622,7 +4622,7 @@ Index: regress/lib/libc/stdckdint/stdckdint.c
 +	typedef char ckd_result_is_bool[__builtin_types_compatible_p(
 +	    __typeof__(ckd_add(&z, (size_t)1, (size_t)2)), _Bool) ? 1 : -1];
 +
-+	/* int: saturation at both ends, stored value on overflow. */
++	/* int: check the wrapped result at both signed limits. */
 +	i = 0;
 +	CHECK(ckd_add(&i, INT_MAX, 1) && i == INT_MIN, "int MAX+1");
 +	CHECK(ckd_sub(&i, INT_MIN, 1) && i == INT_MAX, "int MIN-1");

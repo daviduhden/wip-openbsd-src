@@ -119,8 +119,10 @@ OpenBSD base system's preferred permissive license.
 * single evaluation of each operand and of the result pointer;
 * the C23 feature-test macro and the `bool` type of the macro result.
 
-On architectures with `__int128` the full boundary grid is additionally
-replayed against an independent arbitrary-precision oracle.
+On architectures with `__int128`, the boundary grid uses an independent
+reference calculation for operands up to 64 bits. Addition and subtraction
+fit in signed 128-bit arithmetic. Multiplication uses an unsigned 128-bit
+magnitude and a separate sign so that the largest unsigned products fit.
 
 ## C99 consumers
 

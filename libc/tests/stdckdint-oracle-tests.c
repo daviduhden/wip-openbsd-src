@@ -2,11 +2,10 @@
 
 /*
  * Host-side property test for the C23 <stdckdint.h> macros, checked against
- * an independent oracle: the exact result is computed in 128-bit arithmetic
- * and compared with both the overflow indication and the stored (wrapped)
- * value.  The operands are drawn from a deterministic generator biased
- * towards the boundary values of each type.  Not part of the OpenBSD build
- * graph; see libc/tests/Makefile.
+ * an independent oracle using 128-bit arithmetic to check both overflow
+ * and the wrapped result for operands of at most 64 bits. The deterministic
+ * generator mixes sampled values with explicitly chosen type boundaries.
+ * This test runs in the host harness under libc/tests/Makefile.
  */
 
 #include <limits.h>
