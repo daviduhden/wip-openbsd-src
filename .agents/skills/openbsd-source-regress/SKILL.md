@@ -130,6 +130,12 @@ an argument vector through `chroot`. A shell test with a stub can verify
 argument boundaries before running the native resolver regression.
 Keep changes to this driver in the complete `libc/patch`.
 
+Check `libc/regress/lib/libc/db/run.test` directly as well. The runner
+dispatches its test functions by name and forwards arguments individually.
+When changing its shell loops, compare the command streams sent to
+`dbtest` for the same dictionary and file inputs. Keep the delivery
+section synchronized in `libc/patch`.
+
 ## Difference between evidence levels
 
 - **Static analysis:** reading code, compiler diagnostics without execution.
