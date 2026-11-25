@@ -3,7 +3,7 @@
 #
 # Standalone components built from this directory:
 #   pax   -- pax(1) with tar(1)/cpio(1) multicall links
-#   fvwm  -- FVWM 2.2.5 with privilege separation and hardening
+#   fvwm  -- FVWM 2.2.5 with a separate execution helper
 #
 # Targets (via bsd.subdir.mk):
 #   make            build everything (default)

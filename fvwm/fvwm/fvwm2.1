@@ -301,7 +301,7 @@ Module protocol compatibility has been preserved through static
 inspection of message layouts but has not been empirically verified.
 .Sh SECURITY CONSIDERATIONS
 .Nm
-runs with privilege separation:
+uses separate processes under the same user ID:
 .Bl -dash
 .It
 The main window manager process owns the X11 connection and

@@ -18,7 +18,7 @@ ISO C99.
 
 ### fvwm
 
-FVWM 2.2.5 window manager with privilege separation.  Both Exec
+FVWM 2.2.5 window manager with a same-user execution helper. Both Exec
 and PipeRead commands run in the fvwm_exec helper (imsg(3)
 protocol over a socketpair), which is started before the main
 process locks its filesystem view and deliberately applies no
