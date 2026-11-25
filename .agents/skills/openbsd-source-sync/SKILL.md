@@ -29,25 +29,23 @@ added and removed paths.
 - A clean understanding of the difference between:
   - `--list`: read-only;
   - `--copy-only TREE [component...]`: replaces one component, keeps a backup;
-  - default and `--no-provision`: wipe tree, full CVS checkout, host setup.
-- A backup or snapshot of any local changes in the target tree.
+  - default and `--no-provision`: stage a fresh CVS checkout and replace
+    the selected tree after confirmation, retaining the previous tree.
 
-## How `fetch-src.ksh` actually behaves
+## Modes
 
-| Invocation | Root | Writes | Effect |
-|---|---|---|---|
-| `./fetch-src.ksh --list` | no | nothing | prints `src/bin/pax` and `xenocara/app/fvwm` |
-| `./fetch-src.ksh --copy-only TREE` | no | yes | copies all components belonging to the detected tree |
-| `./fetch-src.ksh --copy-only TREE COMPONENT` | no | yes | replaces exactly that component |
-| `doas ./fetch-src.ksh --no-provision` | yes | yes | clears the selected tree and checks it out; skips user/doas setup |
-| `doas ./fetch-src.ksh` | yes | yes | wipe, checkout, optional copy, creates `user`, rewrites/updates `/etc/doas.conf` |
+| Invocation | Writes | Scope |
+|---|---|---|
+| `./fetch-src.ksh --list` | No | List the two local components |
+| `./fetch-src.ksh --copy-only TREE [component ...]` | Yes | Replaces matching components and retains backups |
+| `doas ./fetch-src.ksh` | Yes | Checks out and replaces `src`, `xenocara`, or `www` |
+| `doas ./fetch-src.ksh --no-provision` | Yes | Alias for the interactive checkout |
 
-Checkout selection accepts `src`, `xenocara` and `www`; from `/usr`, it
-runs `cvs checkout -P` for the selected module. The `www` destination is
-`/usr/www`, with a symlink check before clearing it. There is no local
-website component, so `www` skips the local-copy question. Do not add it
-to `--list`, `--copy-only`, component resolution or tree-shape detection.
-`--no-provision` still clears the selected tree and updates `~/.profile`.
+The checkout uses a sibling staging directory under `/usr`. Existing trees
+require confirmation. On success the previous tree is saved at the printed
+backup location. On failure before replacement the existing tree remains
+available. Shell profile edits, accounts, and doas configuration belong
+outside this workflow. The website tree has no local replacement component.
 
 Mapping:
 
@@ -80,9 +78,9 @@ rejected.
    Short names (`pax`, `fvwm`) are equivalent.
 5. **Read the change lists.**
    ```sh
-   cat /usr/src/.wip-changes/pax.created.txt
-   cat /usr/src/.wip-changes/pax.deleted.txt
-   cat /usr/src/.wip-changes/pax.created-dirs.txt
+   cat /usr/src/.wip-changes/pax/created.txt
+   cat /usr/src/.wip-changes/pax/deleted.txt
+   cat /usr/src/.wip-changes/pax/created-dirs.txt
    ```
    They contain component-relative paths, CVS metadata excluded. Symlinks are
    now listed alongside regular files.
@@ -107,11 +105,9 @@ rejected.
 # Replaces one component; recoverable backup
 doas ./fetch-src.ksh --copy-only /usr/src pax
 
-# Destructive: clears /usr/src, /usr/xenocara or /usr/www and checks it out
+# Replaces the selected checkout and retains a backup
 doas ./fetch-src.ksh --no-provision
 
-# Destructive: also creates a user and updates doas.conf
-doas ./fetch-src.ksh
 ```
 
 Never run the destructive modes "just to see". They remove the contents of the
@@ -136,13 +132,13 @@ upstream revision used for any comparison.
 ## Validation and acceptance
 
 - `--list` prints the expected two mappings and writes nothing.
-- `www` checkout uses `/usr/www`, fails on a symlinked destination and on
+- `www` checkout uses `/usr/www`, rejects symlinked or mounted destinations and preserves the old tree on
   CVS failure, and never prompts to copy local components. Validate these
   branches statically when execution or system writes are prohibited; do
   not run a destructive checkout as a test.
 - The target component exists before and after the copy.
 - `TREE/.wip-backups/NAME.*/component` contains the previous version.
-- `TREE/.wip-changes/NAME.created.txt`, `deleted.txt`, and `created-dirs.txt`
+- `TREE/.wip-changes/NAME/created.txt`, `deleted.txt`, and `created-dirs.txt`
   exist when the target component existed before.
 - Nested `CVS/` directories are still present under the target.
 - No sibling component or parent `Makefile` was removed.
@@ -183,3 +179,9 @@ is read-only and is required even when a task restricts execution of project
 scripts; this does not authorize running installers or changing the host.
 Report checks actually performed. A structural pass does not prove semantic
 relevance, and a task is incomplete until synchronization is validated.
+
+For component copies, the Git working copy supplies tracked and unignored
+paths. Stage intended deletions before copying. Use the manifest directory
+for the installed component generation, with the previous set held with the
+backup. Inspect locks and backups after any interrupted operation before
+manual cleanup.

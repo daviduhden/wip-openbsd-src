@@ -6,16 +6,15 @@ CVS HEAD and the destinations `/usr/src`, `/usr/xenocara` and `/usr/www`.
 component; selecting it skips the local-copy question. It is not a
 `--copy-only` target and does not add an entry to `--list`.
 
-To fetch `www` without creating the bootstrap account or configuring doas:
+Run `doas ./fetch-src.ksh` and select the tree. Existing destinations
+require confirmation. The script checks out into a sibling directory,
+checks for CVS metadata, and then replaces the destination. The previous
+tree remains at the backup path printed by the script. Symlinked or
+mounted trees are rejected. `CVSROOT` can override the default server
+without any profile edits. `--no-provision` remains accepted as an alias.
+Manage accounts and doas rules separately with OpenBSD tools.
 
-```sh
-doas ./fetch-src.ksh --no-provision
-# Select www in the repository menu.
-```
-
-This still clears the selected tree and updates `~/.profile`; back up any
-existing `/usr/www` work first. A symlinked `/usr/www` is rejected. To update
-an existing checkout while retaining local edits, use CVS instead:
+To update an existing checkout while retaining local edits, use CVS:
 
 ```sh
 cd /usr/www && cvs -q up -Pd -A
@@ -48,7 +47,7 @@ as `sys/conf/files`, `sys/kern/vfs_init.c` and `sys/sys/mount.h`.  Copy
 the new directories into the checkout and apply the patch from the `src`
 root; the copy helper does not handle this component.
 
-Use an existing CVS or Git checkout without host provisioning:
+Copy from the local Git working tree into an existing CVS or Git checkout. Component copies require Git and base pax:
 
 ```sh
 ./fetch-src.ksh --list
@@ -61,31 +60,23 @@ only components belonging to the detected target tree are copied.
 The helper rejects the wrong tree, unknown components and symlinked roots.
 It does not replace parent directories or neighboring utilities. Old component
 directories are recoverable under TREE/.wip-backups/NAME.XXXXXXXX/component;
-nested CVS metadata is retained. Before the swap, the files and symlinks that
-are about to be removed and added are recorded in
-TREE/.wip-changes/NAME.created.txt and TREE/.wip-changes/NAME.deleted.txt
-(one path per line, relative to the component root, CVS metadata excluded).
-New directories are recorded separately in NAME.created-dirs.txt so that
-`cvs add` can register a directory before its files; `cvs remove` and a later
-`cvs diff` can then be driven from the lists. Sources are made readable to
-build users.
+nested CVS metadata is retained. Sources come from the Git working tree,
+including tracked files and unignored additions. Stage intended removals
+in Git before copying, so missing tracked paths do not make the copy fail.
+
+The latest manifest set lives in `TREE/.wip-changes/NAME/` as
+`created.txt`, `deleted.txt`, and `created-dirs.txt`. Each list contains
+one relative path per line and excludes CVS metadata. Update consumers
+of the former flat `NAME.*.txt` manifests to use this directory. The previous manifest set,
+when present, is saved under `changes/` beside the component backup.
+The lock serializes operations by checkout. If an interruption leaves a
+lock or backup behind, inspect the target, backup and manifests before
+removing the lock or restoring files.
 
 The repository's Makefiles remain the standalone fork's Makefiles. Copying
 files is not validation of a full OpenBSD src/xenocara release build, and
 installation prefixes/build integration still need native review.
 
-Without options, the existing interactive bootstrap workflow clears the
-selected tree, checks out a fresh one, and configures the host. It is
-destructive: it removes the contents of `/usr/src`, `/usr/xenocara` or
-`/usr/www`, writes `~/.profile`, and creates the `user` account and a `doas` rule. Do not use
-that mode merely to copy sources into an existing checkout. `--no-provision`
-keeps the wipe/checkout workflow but skips creating the `user` account and
-configuring doas:
-
-```sh
-doas ./fetch-src.ksh --no-provision
-```
-
-Review the selected tree and take a backup before running either destructive
-mode. `--list` is read-only and prints the component mapping; `--copy-only`
-replaces only the named component directory and keeps a recoverable backup.
+`--list` is read-only and prints the component mapping. For the interactive
+checkout, review the selected destination and confirm only if the old tree
+can be moved to the sibling backup.

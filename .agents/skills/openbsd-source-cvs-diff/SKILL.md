@@ -65,8 +65,8 @@ including new files and removals, that applies cleanly to the official tree.
 7. **Check completeness.** Every path from `fetch-src.ksh`'s created/deleted
    lists must be represented:
    ```sh
-   cat /usr/src/.wip-changes/pax.created.txt
-   cat /usr/src/.wip-changes/pax.deleted.txt
+   cat /usr/src/.wip-changes/pax/created.txt
+   cat /usr/src/.wip-changes/pax/deleted.txt
    ```
 8. **Check application.** In a clean copy of the same revision:
    ```sh
