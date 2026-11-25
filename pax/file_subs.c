@@ -1118,7 +1118,14 @@ set_crc(ARCHD *arcn, int fd)
 	 * is trying to archive an active file, forget this file.
 	 */
 	for (;;) {
-		if ((res = read(fd, tbuf, size)) <= 0)
+		res = read(fd, tbuf, size);
+		if (res < 0) {
+			if (errno == EINTR)
+				continue;
+			syswarn(1, errno, "Cannot checksum %s", arcn->org_name);
+			return (-1);
+		}
+		if (res == 0)
 			break;
 		cpcnt += res;
 		for (i = 0; i < res; ++i)
