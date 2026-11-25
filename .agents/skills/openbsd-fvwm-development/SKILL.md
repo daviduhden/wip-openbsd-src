@@ -159,8 +159,11 @@ Do not claim a live-session test that was not performed.
 
 Account for the libutil message header and the PipeRead command identifier
 when checking payloads against the default `MAX_IMSGSIZE`. The controller
-socket is nonblocking. On backpressure, keep the queue pending and service
-its write readiness in both the X event loop and the nested PipeRead loop.
+socket is nonblocking. Make one `imsgbuf_write()` call per attempt and
+check `imsgbuf_queuelen()` to schedule any remaining output in both the X
+event loop and the nested PipeRead loop. Libutil can report success with
+no progress on backpressure. `imsgbuf_flush()` loops until the queue is
+empty and is suitable for the blocking helper endpoint.
 The decoder shim covers payload parsing. A native test using real libutil
 must confirm delivery across chunk boundaries and under backpressure.
 

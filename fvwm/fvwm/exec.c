@@ -240,17 +240,17 @@ exec_helper_pending(void)
 	return exec_ibuf != NULL && imsgbuf_queuelen(exec_ibuf) != 0;
 }
 
+/*
+ * Attempt one nonblocking write. Unsent bytes remain queued for the
+ * X event loop or PipeRead to service when the socket is writable again.
+ */
 int
-exec_helper_flush(void)
+exec_helper_write(void)
 {
 	if (exec_ibuf == NULL)
 		return -1;
-	while (imsgbuf_flush(exec_ibuf) == -1) {
-		if (errno == EINTR)
-			continue;
-		if (errno == EAGAIN)
-			return 0;
-		warn("imsgbuf_flush");
+	if (imsgbuf_write(exec_ibuf) == -1) {
+		warn("imsgbuf_write");
 		exec_helper_stop();
 		return -1;
 	}
@@ -286,7 +286,7 @@ exec_helper_piperead_start(u_int32_t id, const char *command)
 	if (imsg_add(buf, command, clen) == -1)
 		return -1;
 	imsg_close(exec_ibuf, buf);
-	return exec_helper_flush();
+	return exec_helper_write();
 }
 
 /*
@@ -306,7 +306,7 @@ exec_helper_piperead_kill(u_int32_t id)
 	if (imsg_add(buf, &id, sizeof(id)) == -1)
 		return -1;
 	imsg_close(exec_ibuf, buf);
-	return exec_helper_flush();
+	return exec_helper_write();
 }
 
 /*
@@ -367,5 +367,5 @@ exec_helper_launch(int argc, char **argv, char **envp)
 		}
 	}
 	imsg_close(exec_ibuf, buf);
-	return exec_helper_flush();
+	return exec_helper_write();
 }

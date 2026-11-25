@@ -341,7 +341,7 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		}
 
 		if (helper_fd >= 0 && FD_ISSET(helper_fd, &writefds) &&
-		    exec_helper_flush() == -1) {
+		    exec_helper_write() == -1) {
 			frame.error = 1;
 			break;
 		}

@@ -1524,7 +1524,7 @@ My_XNextEvent(Display *dpy, XEvent *event)
 		}
 		if (exec_helper_fd() >= 0 &&
 		    FD_ISSET(exec_helper_fd(), &out_fdset))
-			(void)exec_helper_flush();
+			(void)exec_helper_write();
 		/* Check for module input. */
 		for (i = 0; i < npipes; i++) {
 			if (readPipes[i] >= 0) {

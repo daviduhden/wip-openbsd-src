@@ -474,7 +474,7 @@ void exec_helper_handle(void);
 int  exec_helper_fd(void);
 int  exec_helper_running(void);
 int  exec_helper_pending(void);
-int  exec_helper_flush(void);
+int  exec_helper_write(void);
 int  exec_helper_launch(int, char **, char **);
 int  exec_helper_dispatch(struct imsg *, void *);
 int  exec_helper_drain(int (*)(struct imsg *, void *), void *);
