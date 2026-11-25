@@ -319,6 +319,17 @@ a4388570740e1e531d8efc2a8d44d9ec7cc73524e9f97bfbda248a40dad0517d  patch
 bbd1a64e03cf5e8e60aa394586d6af607a74e92affb37e831bb50db2c3c3264a  iso-c.patch
 ```
 
+The subsequent shell lint corrections update the complete patch with
+regression-driver portability fixes and update the ISO-only patch with
+the native header-matrix script. The changed sections were applied to
+pristine inputs at the same upstream revision with zero fuzz and compared
+to the local sources. This check covers the edited sections.
+
+```text
+37668007fbcff77d1c7bf3aa64ee0db2d564aac16f51b7348a45de9d80fd578e  patch
+fcc40e1ce78f6193c9d721d3387001d30d5d59731726d662ec8c25ed229f7ade  iso-c.patch
+```
+
 The unstaged git diff --check passed before new files were indexed. The
 staged check additionally reports ten inherited whitespace findings in
 newly imported librthread sources: namespace.h:43, rthread.c:413,
@@ -331,15 +342,4 @@ host drivers and native header matrix. No merge markers were found in the
 modified header, atomic, thread or matrix directories. Temporary source
 snapshots, downloaded Git metadata and patch-application workspaces were
 removed after recording these results; actual regression sources remain.
-The subsequent shell lint corrections update the complete patch with
-regression-driver portability fixes and update the ISO-only patch with
-the native header-matrix script. The changed sections were applied to
-pristine inputs at the same upstream revision with zero fuzz and compared
-to the local sources. This check covers the edited sections.
-
-```text
-37668007fbcff77d1c7bf3aa64ee0db2d564aac16f51b7348a45de9d80fd578e  patch
-fcc40e1ce78f6193c9d721d3387001d30d5d59731726d662ec8c25ed229f7ade  iso-c.patch
-```
-
 No compiler, linker or project runtime test was invoked.
