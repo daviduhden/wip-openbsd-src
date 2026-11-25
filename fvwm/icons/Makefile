@@ -56,13 +56,13 @@ install:
 		echo "${INSTALL_DATA} $$f \
 		${DESTDIR}${INCSDIR}/X11/bitmaps" ; \
 		${INSTALL_DATA} ${.CURDIR}/$$f \
-		${DESTDIR}${INCSDIR}/X11/bitmaps ; \
+		${DESTDIR}${INCSDIR}/X11/bitmaps || exit $$?; \
 	done
 	@for f in ${PIXMAPS}; do \
 		echo "${INSTALL_DATA} $$f \
 		${DESTDIR}${INCSDIR}/X11/pixmaps" ; \
 		${INSTALL_DATA} ${.CURDIR}/$$f \
-		${DESTDIR}${INCSDIR}/X11/pixmaps ; \
+		${DESTDIR}${INCSDIR}/X11/pixmaps || exit $$?; \
 	done
 
 clean:

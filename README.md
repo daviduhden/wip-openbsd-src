@@ -158,12 +158,18 @@ $ doas make install-pax       # install only pax
 $ doas make install-fvwm      # install only fvwm
 ```
 
-DESTDIR staging is supported everywhere:
+Prepare the install hierarchy before staging in an empty directory:
+```sh
+stage=/tmp/stage
+mkdir -p "$stage/bin" "$stage/usr/share/man/man1" \
+    "$stage/usr/X11R6/bin" "$stage/usr/X11R6/lib/X11/fvwm" \
+    "$stage/usr/X11R6/include/X11/bitmaps" \
+    "$stage/usr/X11R6/include/X11/pixmaps" "$stage/usr/X11R6/man/man1"
+make DESTDIR="$stage" install
 
 ```
-$ make DESTDIR=/tmp/stage install
-$ DESTDIR=/tmp/stage ./build.ksh all install
-```
+
+Use the equivalent paths when overriding installation directories.
 
 Install destinations:
 
