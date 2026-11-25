@@ -6,6 +6,7 @@ obj/
 .depend
 
 pax/pax
+pax/pax_debug
 
 # Host-side test binaries (see tests/Makefile)
 tests/*-tests
@@ -18,8 +19,43 @@ libc/tests/.shim
 
 fvwm/libs/libfvwm.a
 fvwm/fvwm/fvwm
+fvwm/fvwm/fvwm_debug
 fvwm/fvwm/fvwm_exec
 fvwm/fvwm/fvwm.1
 fvwm/utils/xpmroot
-fvwm/modules/*/Fvwm*
+fvwm/utils/xpmroot_debug
+fvwm/modules/FvwmAuto/FvwmAuto
+fvwm/modules/FvwmAuto/FvwmAuto_debug
+fvwm/modules/FvwmBacker/FvwmBacker
+fvwm/modules/FvwmBacker/FvwmBacker_debug
+fvwm/modules/FvwmBanner/FvwmBanner
+fvwm/modules/FvwmBanner/FvwmBanner_debug
+fvwm/modules/FvwmButtons/FvwmButtons
+fvwm/modules/FvwmButtons/FvwmButtons_debug
+fvwm/modules/FvwmCpp/FvwmCpp
+fvwm/modules/FvwmCpp/FvwmCpp_debug
+fvwm/modules/FvwmForm/FvwmForm
+fvwm/modules/FvwmForm/FvwmForm_debug
+fvwm/modules/FvwmIconBox/FvwmIconBox
+fvwm/modules/FvwmIconBox/FvwmIconBox_debug
+fvwm/modules/FvwmIconMan/FvwmIconMan
+fvwm/modules/FvwmIconMan/FvwmIconMan_debug
+fvwm/modules/FvwmIdent/FvwmIdent
+fvwm/modules/FvwmIdent/FvwmIdent_debug
+fvwm/modules/FvwmM4/FvwmM4
+fvwm/modules/FvwmM4/FvwmM4_debug
+fvwm/modules/FvwmPager/FvwmPager
+fvwm/modules/FvwmPager/FvwmPager_debug
+fvwm/modules/FvwmRearrange/FvwmRearrange
+fvwm/modules/FvwmRearrange/FvwmRearrange_debug
+fvwm/modules/FvwmSave/FvwmSave
+fvwm/modules/FvwmSave/FvwmSave_debug
+fvwm/modules/FvwmSaveDesk/FvwmSaveDesk
+fvwm/modules/FvwmSaveDesk/FvwmSaveDesk_debug
+fvwm/modules/FvwmScroll/FvwmScroll
+fvwm/modules/FvwmScroll/FvwmScroll_debug
+fvwm/modules/FvwmTalk/FvwmTalk
+fvwm/modules/FvwmTalk/FvwmTalk_debug
+fvwm/modules/FvwmWinList/FvwmWinList
+fvwm/modules/FvwmWinList/FvwmWinList_debug
 fvwm/sample.fvwmrc/.fvwmrc
