@@ -64,6 +64,10 @@ upstream compatibility, and that can be reviewed as a standalone diff.
    build metadata inspection; `-fsyntax-only` still invokes the compiler and
    is not an exception. Report static evidence separately from earlier tests.
 
+   For a formatter that recursively rewrites its input, stage the C files
+   under review outside the worktree and retain only formatting changes at
+   the edited code. Verify that generated or exported copies still match.
+
 5. **Handle allocation and overflow.** Use `reallocarray(3)` or
    `recallocarray(3)`; use `<stdckdint.h>` where the file already does; check
    every multiplication used as a size.

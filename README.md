@@ -2,7 +2,7 @@
 
 Standalone fork of selected OpenBSD userland utilities, compiled
 independently of the CVS source tree.  Targets OpenBSD 7.9 and
-OpenBSD 8.0-beta.  Produces binaries intended to replace the
+OpenBSD 8.0.  Produces binaries intended to replace the
 system-provided versions.
 
 ## Components
@@ -101,7 +101,7 @@ conformance audit, compatibility limits and validation status.
 
 pax:
 
-* OpenBSD 7.9 or 8.0-beta base system with the compiler set:
+* OpenBSD 7.9 or 8.0 base system with the compiler set:
   make(1), /usr/share/mk, and a C compiler.
 
 fvwm:
@@ -114,10 +114,9 @@ ext4fs:
 * a complete matching OpenBSD source checkout and a source build
   environment.  It is not built from this repository.
 
-Compatibility with OpenBSD 7.9 and 8.0-beta is validated
-statically against the OpenBSD make(1) source and the installed
-7.9 /usr/share/mk; an actual build on OpenBSD has not been
-performed from this tree.
+OpenBSD 7.9 and 8.0 are targets. The existing static build review
+used OpenBSD make(1) source and the 7.9 mk files. Native build and
+runtime results must be recorded for each revision tested.
 
 ### Building
 
@@ -159,6 +158,7 @@ $ doas make install-fvwm      # install only fvwm
 ```
 
 Prepare the install hierarchy before staging in an empty directory:
+
 ```sh
 stage=/tmp/stage
 mkdir -p "$stage/bin" "$stage/usr/share/man/man1" \
@@ -166,7 +166,6 @@ mkdir -p "$stage/bin" "$stage/usr/share/man/man1" \
     "$stage/usr/X11R6/include/X11/bitmaps" \
     "$stage/usr/X11R6/include/X11/pixmaps" "$stage/usr/X11R6/man/man1"
 make DESTDIR="$stage" install
-
 ```
 
 Use the equivalent paths when overriding installation directories.
@@ -213,10 +212,10 @@ authoritative mk files:
 ```
 $ OBSD_MK=/path/to/openbsd-7.9/usr/share/mk ./validate-make.sh check
 ```
+
 The Makefile checker evaluates makefiles and can execute parse-time
 commands even in a dry run. Run it against trusted trees. The manual
 GitHub workflow can also validate a committed range and run the host suites.
-
 
 ## Tests
 
@@ -246,9 +245,6 @@ library:
 $ bmake -C libc/tests CC=clang run    # make(1) on OpenBSD
 ```
 
-## Security
-
-Processes that no longer execute programs use staged pledge(2).
 ### Native acceptance
 
 Use a disposable OpenBSD VM and stage installation in a separate directory.
@@ -261,6 +257,9 @@ reporting and complete PipeRead delivery across message boundaries. See
 [ext4fs/README.md](ext4fs/README.md) and
 [libc/ISO-C-STATUS.md](libc/ISO-C-STATUS.md) for the kernel and libc matrices.
 
+## Security
+
+Processes that no longer execute programs use staged pledge(2).
 Launchers retain unveil where useful for their own pathname operations,
 but stay unpledged to allow execution without the removed promise.
 Unveil is cleared on execve without execpromises; it is not an inherited

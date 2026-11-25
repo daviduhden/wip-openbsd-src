@@ -16,7 +16,7 @@
 # PERFORMANCE OF THIS SOFTWARE.
 
 # Build script for wip-openbsd-src -- a fork of OpenBSD userland
-# utilities that compiles standalone on OpenBSD 7.9 or 8.0-beta and
+# utilities that compiles standalone on OpenBSD 7.9 or 8.0 and
 # produces binaries intended to replace the system versions.
 #
 # This is a thin wrapper around make(1).  The Makefiles are the single
@@ -68,7 +68,7 @@ check_openbsd() {
 	case "$OSREL" in
 	7.9 | 7.9-beta | 8.0 | 8.0-beta) ;;
 	*)
-		warn "Untested OpenBSD version: $OSREL. Expected 7.9 or 8.0-beta."
+		warn "Untested OpenBSD version: $OSREL. Expected 7.9 or 8.0."
 		;;
 	esac
 }

@@ -21,7 +21,7 @@ keeping sources and objects separate, and report honestly what was built.
 
 ## Prerequisites
 
-- OpenBSD 7.9 or 8.0-beta with `make(1)` and `/usr/share/mk`.
+- OpenBSD 7.9 or 8.0 with `make(1)` and `/usr/share/mk`.
 - A C compiler (`clang` on OpenBSD).
 - For `fvwm`: Xenocara/X11 headers and libraries under `/usr/X11R6`.
 - For `ext4fs`: a complete matching `src` checkout; it is not built here.

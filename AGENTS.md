@@ -40,7 +40,7 @@ at `/usr/www`, without copying local components; see `FETCHING.md` and the
 
 ### OpenBSD-current
 
-Targets are OpenBSD 7.9 and 8.0-beta, with OpenBSD-current conventions. The
+Targets are OpenBSD 7.9 and 8.0, with OpenBSD-current conventions. The
 imported libc records its exact upstream revision in `libc/UPSTREAM`. Do not
 assume that an upstream change seen on the web already exists locally, or that
 a local change exists upstream. Check both sides before claiming either.

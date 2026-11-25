@@ -1,5 +1,5 @@
 # wip-openbsd-src -- standalone fork of OpenBSD userland utilities
-# Targets OpenBSD 7.9 / 8.0-beta.  Binaries replace system versions.
+# Targets OpenBSD 7.9 / 8.0.  Binaries replace system versions.
 #
 # Standalone components built from this directory:
 #   pax   -- pax(1) with tar(1)/cpio(1) multicall links
