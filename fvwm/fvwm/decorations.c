@@ -167,7 +167,9 @@ GetOlHints(FvwmWindow *t)
 	if (XGetWindowProperty(dpy, t->w, _XA_OL_WIN_ATTR, 0L, 20L, False,
 		_XA_OL_WIN_ATTR, &actual_type, &actual_format, &nitems,
 		&bytesafter, (unsigned char **)&hints) == Success) {
-		if (actual_format == 32 && nitems > 0) {
+		if (actual_type == _XA_OL_WIN_ATTR && actual_format == 32 &&
+		    hints != NULL && bytesafter == 0 &&
+		    (nitems == 3 || nitems == 5)) {
 			if (nitems == 3)
 				win_type = hints[0];
 			else
