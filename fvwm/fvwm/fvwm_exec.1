@@ -1,5 +1,5 @@
 .\" $OpenBSD$
-.Dd October 24, 2026
+.Dd November 25, 2026
 .Dt FVWM_EXEC 1
 .Os
 .Sh NAME
@@ -33,7 +33,8 @@ Launch a program detached from
 .It Ic PipeRead
 Run a command with its standard output streamed back to
 .Xr fvwm 1 ,
-which feeds it to its configuration parser.
+which feeds it to its configuration parser, including a final line
+without a newline.
 .El
 .Pp
 Every request payload is validated against the message length;

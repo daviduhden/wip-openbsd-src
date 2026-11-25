@@ -257,7 +257,8 @@ piperead_process_lines(struct piperead_frame *frame, XEvent *eventp,
 	char  *line;
 	size_t len;
 
-	if (!pipebuf_next_line(&frame->buf, &line, &len, MAX_PIPEREAD_LINE))
+	if (!pipebuf_next_line(
+	    &frame->buf, &line, &len, MAX_PIPEREAD_LINE, frame->eof))
 		return 0;
 	piperead_execute_line(
 	    frame, line, len, eventp, tmp_win, context, Module);
@@ -352,11 +353,7 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 		}
 	}
 
-	/*
-	 * A partially assembled final line (EOF without newline) is
-	 * executed, matching the historical behaviour.  On timeout or
-	 * error the partial command is dropped.
-	 */
+	/* Drain the final line, then flush any remaining continuation. */
 	if (frame.eof && !frame.error && !frame.timed_out) {
 		while (piperead_process_lines(
 		    &frame, eventp, tmp_win, context, Module))

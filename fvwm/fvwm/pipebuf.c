@@ -109,7 +109,7 @@ pipebuf_trim(struct pipebuf *pb, size_t limit)
 
 int
 pipebuf_next_line(
-    struct pipebuf *pb, char **linep, size_t *linelen, size_t maxline)
+    struct pipebuf *pb, char **linep, size_t *linelen, size_t maxline, int eof)
 {
 	size_t i, start;
 
@@ -167,5 +167,10 @@ pipebuf_next_line(
 		}
 	}
 
-	return 0; /* need more data */
+	if (!eof)
+		return 0;
+	*linep = pb->data + start;
+	*linelen = pb->len - start;
+	pb->off = pb->len;
+	return 1;
 }

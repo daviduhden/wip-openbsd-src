@@ -31,7 +31,7 @@ static int failures;
 static int
 next(struct pipebuf *pb, char **linep, size_t *lenp, size_t maxline)
 {
-	return pipebuf_next_line(pb, linep, lenp, maxline);
+	return pipebuf_next_line(pb, linep, lenp, maxline, 0);
 }
 
 static void
@@ -56,9 +56,12 @@ test_split_lines(void)
 	CHECK(len == 6 && memcmp(line, "three\n", 6) == 0, "third line bytes");
 	CHECK(next(&pb, &line, &len, 64) == 0, "buffer drained");
 
-	/* EOF without final newline is flushed by the caller. */
+	/* An unterminated tail is ready only at EOF. */
 	pipebuf_append(&pb, "tail", 4);
 	CHECK(next(&pb, &line, &len, 64) == 0, "no newline waits");
+	CHECK(pipebuf_next_line(&pb, &line, &len, 64, 1) == 1, "EOF tail ready");
+	CHECK(len == 4 && memcmp(line, "tail", 4) == 0, "EOF tail bytes");
+	CHECK(pipebuf_next_line(&pb, &line, &len, 64, 1) == 0, "EOF tail drained");
 	pipebuf_free(&pb);
 }
 

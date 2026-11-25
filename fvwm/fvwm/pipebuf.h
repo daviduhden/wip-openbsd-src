@@ -5,14 +5,14 @@
  * PipeRead output arrives in arbitrary-sized chunks (it is a pipe
  * stream): a read may return part of a line, several lines, or
  * several lines plus part of one.  This module accumulates bytes
- * and hands complete lines back to the caller, enforcing a bounded
- * maximum line length so hostile command output can never grow
- * memory without limit.
+ * and hands lines or bounded fragments back to the caller.
+ * The caller controls how much unread output accumulates between
+ * extractions and can trim output for a suspended reader.
  *
  * Embedded NUL bytes end the effective command at that point (fvwm
  * commands are C strings): the NUL and the rest of the physical
- * line up to and including the next newline are discarded, which
- * matches the historical fgets()/strlen() behaviour exactly.
+ * line up to and including the next newline are discarded during
+ * extraction, even when the newline arrives in a later append.
  *
  * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  *
@@ -53,19 +53,21 @@ void pipebuf_append(struct pipebuf *, const void *, size_t);
  *
  * On success stores a pointer to the line (including the trailing
  * newline when present) in *linep, sets *linelen, removes it from
- * the buffer, and returns 1.  A line longer than maxline bytes
- * (newline not seen within the bound) is returned split at maxline.
- * Returns 0 when no complete line is available yet.  The returned
- * pointer is only valid until the next pipebuf_append() call.
+ * the unread region, and returns 1.  If no terminator occurs
+ * in the first maxline bytes, those bytes form a fragment.
+ * At EOF, also return a final unterminated line if one remains.
+ * Returns 0 when no line or fragment is ready.  The result is a
+ * borrowed byte span, which may lack a NUL terminator.  Appending
+ * or freeing the buffer invalidates it.
  */
 int pipebuf_next_line(
-    struct pipebuf *, char **linep, size_t *linelen, size_t maxline);
+    struct pipebuf *, char **linep, size_t *linelen, size_t maxline, int eof);
 
 /*
  * Drop the oldest buffered complete lines until at most limit bytes
- * remain.  Used to bound memory when a nested PipeRead command
- * cannot consume an outer frame's output for a while; incomplete
- * trailing data is preserved.
+ * remain.  Drop an incomplete tail if it alone exceeds the
+ * limit.  Trimming also clears any pending NUL discard state
+ * and retains the allocation for reuse.
  */
 void pipebuf_trim(struct pipebuf *, size_t limit);
 

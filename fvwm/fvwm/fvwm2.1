@@ -1,5 +1,5 @@
 .\" $OpenBSD$
-.Dd October 24, 2026
+.Dd November 25, 2026
 .Dt FVWM2 1
 .Os
 .Sh NAME
@@ -394,6 +394,7 @@ commands, nested
 .Ic PipeRead
 up to the configured depth) with bounded line lengths, and is
 treated as untrusted configuration input.
+A final line without a newline is also parsed.
 .Pp
 .Nm
 modules are separate processes launched by the main process; each
