@@ -98,20 +98,21 @@ index c43cb5a..b8bae7c 100644
  SUBDIR+= telldir time timingsafe
 diff --git a/regress/lib/libc/stdckdint/Makefile b/regress/lib/libc/stdckdint/Makefile
 new file mode 100644
-index 0000000..bd49b30
 --- /dev/null
 +++ b/regress/lib/libc/stdckdint/Makefile
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,7 @@
 +#	$OpenBSD$
 +
 +PROG=	stdckdint
++# Select the source-tree header before any compiler resource header.
++CPPFLAGS+= -include ${.CURDIR}/../../../../include/stdckdint.h
 +
 +.include <bsd.regress.mk>
 diff --git a/regress/lib/libc/stdckdint/stdckdint.c b/regress/lib/libc/stdckdint/stdckdint.c
 new file mode 100644
 --- /dev/null
 +++ b/regress/lib/libc/stdckdint/stdckdint.c
-@@ -0,0 +1,368 @@
+@@ -0,0 +1,370 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -142,12 +143,14 @@ new file mode 100644
 +
 +#include <limits.h>
 +#include <stdbool.h>
-+#include <stdckdint.h>
 +#include <stddef.h>
 +#include <stdint.h>
 +#include <stdio.h>
 +#include <string.h>
 +
++#ifndef _STDCKDINT_H_
++#error "Makefile must force-include the source-tree stdckdint.h"
++#endif
 +#ifndef __STDC_VERSION_STDCKDINT_H__
 +#error "stdckdint.h did not define __STDC_VERSION_STDCKDINT_H__"
 +#endif

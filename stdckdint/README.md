@@ -46,6 +46,15 @@ $ patch -p1 < /path/to/stdckdint/stdckdint.patch
 $ cd regress/lib/libc/stdckdint && make && ./stdckdint
 ```
 
+The regression force-includes this checkout’s `include/stdckdint.h`, so
+compiler resource headers cannot silently substitute their implementation.
+Use `stdckdint.patch` for the standalone candidate or `libc/patch` for the
+full ISO C import. Both provide the header and regression at the same
+upstream paths. The standalone patch applies to OpenBSD src revision
+`711709eb319e1b619533c82fb9931392e43061cd` with matching preimage blobs.
+That verification covered patch application and the three exported files.
+Native regression remains pending.
+
 ## Compiler compatibility and header precedence
 
 Both base compilers already ship a resource header named `<stdckdint.h>`:

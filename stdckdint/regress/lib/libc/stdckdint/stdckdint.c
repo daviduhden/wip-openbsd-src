@@ -28,12 +28,14 @@
 
 #include <limits.h>
 #include <stdbool.h>
-#include <stdckdint.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
+#ifndef _STDCKDINT_H_
+#error "Makefile must force-include the source-tree stdckdint.h"
+#endif
 #ifndef __STDC_VERSION_STDCKDINT_H__
 #error "stdckdint.h did not define __STDC_VERSION_STDCKDINT_H__"
 #endif
