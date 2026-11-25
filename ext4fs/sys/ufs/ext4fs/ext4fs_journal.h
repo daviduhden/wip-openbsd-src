@@ -49,9 +49,8 @@
 #define JBD2_FEATURE_INCOMPAT_FAST_COMMIT 0x40
 
 /*
- * Incompat features this replay implementation understands.  A journal
- * with any other bit set is rejected at mount time rather than being
- * replayed incorrectly.
+ * Initial incompatibility mask for replay. jbd2_feature_check() also
+ * rejects async commit and inconsistent checksum combinations.
  */
 #define JBD2_FEATURE_INCOMPAT_SUPPORTED                                        \
 	(JBD2_FEATURE_INCOMPAT_REVOKE | JBD2_FEATURE_INCOMPAT_64BIT |          \
@@ -120,9 +119,9 @@ struct jbd2_block_tag3 {
 /*
  * Descriptor block tag v2 (no CSUM_V3).
  *
- * The on-disk tag never matches sizeof() of this struct.  The size
- * must be computed with jbd2_tag_bytes() from the journal feature
- * flags:
+ * This struct describes the field offsets used by the decoder, not a
+ * fixed record stride. jbd2_tag_bytes() computes the stride from the
+ * journal feature flags:
  *
  *   plain jbd2:         blocknr(4) flags(4) [high(4)]         =  8/12
  *   CSUM_V2:            blocknr(4) csum(2) flags(2) pad(2)
@@ -163,8 +162,8 @@ struct jbd2_revoke_header {
 
 /*
  * The journal structures are an on-disk ABI shared with Linux jbd2.
- * The packed attribute fixes the layout; these assertions make any
- * change to a field type, size or order a compile-time error.
+ * The packed attribute suppresses padding. These assertions check the
+ * total sizes; individual field offsets remain part of the disk ABI.
  */
 typedef char ext4fs_journal_header_size[
     (sizeof(struct jbd2_header) == (size_t)12) ? 1 : -1];

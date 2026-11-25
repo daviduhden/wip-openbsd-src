@@ -126,22 +126,19 @@ struct ext4fs_dinode {
 #define i_extent_idx data.extent.entries.indices
 
 /*
- * Fixed size of the ext4 inode core, matching the Linux struct
- * ext4_inode.  The on-disk inode may be larger: the region between
- * offset 128 and i_extra_isize holds extended fields, and everything
- * after it up to the superblock's s_inode_size is padding.  The
- * trailing bytes are not part of this struct; in-memory inodes are
- * allocated with the full filesystem s_inode_size and this struct
- * only overlays the fixed prefix.
+ * This structure describes the known inode fields. The serialized slot
+ * size comes from the superblock and may differ from sizeof this struct.
+ * Extended fields start at offset 128 and occupy i_extra_isize bytes.
+ * Allocate the full slot for writeback and checksums, and check field
+ * bounds before accessing any optional field.
  */
 #define EXT4FS_DINODE_SIZE sizeof(struct ext4fs_dinode)
 #define EXT4FS_GOOD_OLD_INODE_SIZE 128
 
 /*
- * These structures are an on-disk ABI.  The packed attribute fixes the
- * layout (no padding), and the assertions below pin the sizes and the
- * inline extent area so a field edit cannot silently change what is
- * read from or written to disk.
+ * These structures overlay the on-disk ABI without compiler padding.
+ * The assertions pin their sizes. Preserve the individual field offsets
+ * when changing the declarations.
  */
 typedef char ext4fs_dinode_extent_header_size[
     (sizeof(struct ext4fs_extent_header) == (size_t)12) ? 1 : -1];
@@ -159,11 +156,9 @@ typedef char ext4fs_dinode_old_inode_size[
 struct ext4fs_dinode_large {
 	struct ext4fs_dinode dinode;
 	/*
-	 * Variable-length tail: i_extra_isize region (when the inode
-	 * size exceeds 128 bytes) plus padding, in total
-	 * fs->m_inode_size - EXT4FS_DINODE_SIZE bytes.  Never index
-	 * this region with a fixed structure; use byte offsets and
-	 * the ext4fs_inode_fits()/ext4fs_din_fits() guards.
+	 * This view is backed by an allocation of fs->m_inode_size
+	 * bytes, even for a slot shorter than the structure. Use
+	 * ext4fs_din_fits() before accessing optional fields.
 	 */
 };
 

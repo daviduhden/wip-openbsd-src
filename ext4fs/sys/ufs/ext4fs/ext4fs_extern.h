@@ -21,6 +21,7 @@
 #ifndef _EXT4FS_EXTERN_H_
 #define _EXT4FS_EXTERN_H_
 
+/* Dispatch and vnode identity shared with the UFS integration patch. */
 extern const struct vops ext4fs_vops;
 
 #define IS_EXT4_VNODE(vp) ((vp)->v_tag == VT_EXT4FS)

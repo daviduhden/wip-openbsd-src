@@ -4,6 +4,7 @@ PROG = mount_ext4fs
 SRCS = mount_ext4fs.c getmntopts.c
 MAN = mount_ext4fs.8
 
+# Reuse the base mount utility's option parser in the full source tree.
 MOUNT = ${.CURDIR}/../mount
 CFLAGS += -I${MOUNT}
 .PATH:	${MOUNT}

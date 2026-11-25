@@ -76,13 +76,10 @@ static const u_int32_t crc32c_table[256] = {0x00000000, 0xF26B8303, 0xE13B70F7,
     0xAD7D5351};
 
 /*
- * Compute CRC32C of a buffer.
- *
- * crc: initial CRC value (use ~0 to start fresh, or previous CRC to continue)
- * buf: pointer to data buffer
- * len: length of data in bytes
- *
- * Returns the updated CRC32C value.
+ * Update the complemented CRC32C state. Pass 0 to start with an
+ * all-ones accumulator, or pass the result of a previous call to
+ * continue the checksum. Callers using a raw on-disk seed complement
+ * it before passing it here.
  */
 u_int32_t
 ext4fs_crc32c(u_int32_t crc, const void *buf, size_t len)
@@ -97,17 +94,9 @@ ext4fs_crc32c(u_int32_t crc, const void *buf, size_t len)
 }
 
 /*
- * Compute CRC32C in the style used by ext4.
- *
- * ext4 computes CRC32C starting with ~0 (or a seed), then inverts the
- * final result before storing it.
- *
- * crc: seed value (use ~0 for standard ext4 checksum, or sb_checksum_seed)
- * buf: pointer to data buffer
- * len: length of data in bytes
- *
- * Returns the final CRC32C value (NOT inverted - caller should invert
- * if comparing against stored checksum, or pass result to next call).
+ * The _le entry point uses the same reflected polynomial and
+ * complemented state as ext4fs_crc32c(). Both consume bytes in their
+ * serialized order.
  */
 u_int32_t
 ext4fs_crc32c_le(u_int32_t crc, const void *buf, size_t len)
@@ -134,9 +123,8 @@ ext4fs_csum_seed(struct m_ext4fs *fs)
 /*
  * Compute the CRC32C checksum of an ext4 superblock.
  *
- * The checksum covers the entire superblock except for the checksum
- * field itself (last 4 bytes). The checksum field is treated as zero
- * during computation.
+ * The checksum covers all serialized bytes preceding sb_checksum.
+ * It excludes the checksum field entirely.
  */
 u_int32_t
 ext4fs_sb_csum(struct ext4fs *sb)
@@ -222,20 +210,15 @@ ext4fs_bgd_csum_verify(struct m_ext4fs	 *fs,
 /*
  * Compute the CRC32C checksum of an inode.
  *
- * Follows the ext4 metadata checksum definition exactly (Linux
- * ext4_inode_csum()):
+ * Chain the little-endian inode number and generation into the
+ * filesystem seed, then process the full serialized inode slot.
+ * Feed zeros for i_checksum_lo and for i_checksum_hi when the latter
+ * fits within the extended field area. Otherwise the bytes at the high
+ * checksum offset are included unchanged.
  *
- *   seed  = crc32c(~0, uuid) or sb_checksum_seed (CSUM_SEED)
- *   crc   = seed, then le32(inode number), then the raw 4 bytes of
- *           i_generation, then the serialized inode bytes in the
- *           regions [0, 0x7C), [0x7E, 0x80), [0x80, 0x82) and
- *           [0x84, inode_size), with the i_checksum_lo and
- *           i_checksum_hi fields replaced by zeros (skipped).
- *
- * The result is the raw (non-inverted) crc32c value that ext4
- * stores.  inode_size is taken from the filesystem superblock; the
- * inode's i_extra_isize selects where the checksum_hi exclusion
- * falls.
+ * Return the raw CRC32C value for storage, or zero when metadata
+ * checksums are disabled. The caller supplies a full m_inode_size
+ * byte slot.
  */
 u_int32_t
 ext4fs_inode_csum(

@@ -19,9 +19,12 @@
  * JBD2 journal replay for ext4fs.
  *
  * Implements the standard three-pass replay algorithm:
- *   1. SCAN   - walk the journal to find valid transactions
- *   2. REVOKE - collect revoked blocks
- *   3. REPLAY - write surviving data blocks to the filesystem
+ *   1. SCAN   - find the last complete transaction.
+ *   2. REVOKE - collect revocations from the committed range.
+ *   3. REPLAY - write surviving data blocks in transaction order.
+ *
+ * The separate revoke pass lets a later transaction suppress writes from
+ * an earlier one. The scan excludes an uncommitted tail from both passes.
  *
  * All JBD2 on-disk fields are big-endian.
  */
@@ -46,9 +49,10 @@
 /*
  * Build the journal block map from sb_jnl_blocks[0..14].
  *
- * sb_jnl_blocks[0..14] is a copy of inode 8's i_block[0..14], which
- * contains an extent tree in the same format as regular file inodes.
- * The values are little-endian (copied from the inode).
+ * These little-endian words back up the internal journal inode's i_block.
+ * Replay uses the backup to locate the journal before ordinary vnode
+ * lookup is available. The map supports inline extents or a root index
+ * pointing directly to leaf blocks.
  *
  * sb_jnl_blocks[15] = i_size_lo, sb_jnl_blocks[16] = i_size_hi.
  */
@@ -664,8 +668,9 @@ jbd2_count_tags(struct jbd2_replay_ctx *ctx, struct buf *bp, u_int32_t *count)
 /*
  * Pass 1: SCAN
  *
- * Walk from s_start/s_sequence. A transaction may span several descriptor and revoke blocks before its commit.
- * Only a verified commit advances the recovery endpoint.
+ * Walk from s_start/s_sequence. A transaction may span several descriptor
+ * and revoke blocks before its commit. Only a validated commit advances
+ * rc_end_sequence, the exclusive end of the range for the later passes.
  */
 static int
 jbd2_pass_scan(struct jbd2_replay_ctx *ctx)
@@ -1154,10 +1159,11 @@ jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
  * Main entry point: replay the ext4 journal.
  *
  * Called during mount when the RECOVER incompat flag is set.
- * Reads the journal superblock backup from sb_jnl_blocks,
- * runs the three-pass replay, then clears the journal and its recovery flag.
- * Replay writes committed, non-revoked journal blocks to the filesystem;
- * mount code temporarily opens a read-only device read-write when needed.
+ * Use the journal inode backup in the ext4 superblock to locate the JBD2
+ * superblock. The caller supplies a device opened for writes, even for a
+ * requested read-only mount. After replay, mark the journal clean before
+ * clearing the filesystem recovery flag. The caller reloads filesystem
+ * metadata from disk on success.
  */
 int
 ext4fs_journal_replay(struct vnode *devvp, struct m_ext4fs *fs)
@@ -1173,16 +1179,9 @@ ext4fs_journal_replay(struct vnode *devvp, struct m_ext4fs *fs)
 	ctx.rc_fs = fs;
 
 	/*
-	 * Locate journal block 0 from the block map.
-	 * We need to build the map first.
+	 * Bootstrap the map using the byte size in the inode backup. Only
+	 * after reading journal block zero can we know the JBD2 ring length.
 	 */
-
-	/* Read journal superblock: first build the blockmap,
-	 * then read journal block 0 */
-
-	/* Temporarily set rc_maxlen from sb_jnl_blocks.
-	 * Journal size = sb_jnl_blocks[15] | sb_jnl_blocks[16] << 32,
-	 * in bytes. Divide by blocksize for blocks. */
 	{
 		u_int64_t jsize;
 		jsize = letoh32(fs->m_sble.sb_jnl_blocks[15]) |
@@ -1345,7 +1344,9 @@ ext4fs_journal_replay(struct vnode *devvp, struct m_ext4fs *fs)
 
 clear:
 	/*
-	 * Mark journal clean: set s_start=0 in journal superblock.
+	 * Publish a clean journal first. If the filesystem superblock write
+	 * then fails, a subsequent mount can see s_start == 0 and retry
+	 * clearing RECOVER without replaying the log again.
 	 */
 	error = bread(
 	    devvp, (daddr_t)EXT4FS_FSBTODB(fs, jblock0), fs->m_block_size, &bp);

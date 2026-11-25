@@ -1074,9 +1074,9 @@ ext4fs_extent_insert(
 }
 
 /*
- * Allocate a buffer for a logical block.
- * If the block is already mapped, just read it.
- * Otherwise, allocate a new physical block and insert extent.
+ * Return a buffer for a mapped logical block, allocating a block and
+ * inserting an extent if needed. The caller owns the returned buffer on
+ * success. Release a newly allocated block if extent insertion fails.
  */
 static int
 ext4fs_buf_alloc(struct inode *ip, u_int64_t lbn, int size, struct ucred *cred,
@@ -3368,6 +3368,12 @@ ext4fs_symlink(void *v)
 	return (error);
 }
 
+/*
+ * Convert ext4 directory records to native dirent records. The resume
+ * position is an offset in the on-disk directory, independent of the
+ * number of bytes emitted to the caller. A record that does not fit is
+ * left for the next call.
+ */
 int
 ext4fs_readdir(void *v)
 {

@@ -226,9 +226,10 @@ success:
 /*
  * Common mount path for mount and mountroot. The device is opened and
  * the superblock and group descriptors are validated before mnt_data is
- * published. If recovery is required, journal replay may write the device
- * even for a requested read-only mount; that mount is restored to read-only
- * access before normal operation begins.
+ * assigned. A requested read-only mount temporarily opens the device for
+ * writes if recovery is required. Success retains the device reference
+ * from the caller; on failure this function closes any open device and
+ * leaves releasing that reference to the caller.
  */
 int
 ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
@@ -1310,6 +1311,10 @@ ext4fs_unmount(struct mount *mp, int mntflags, struct proc *p)
 	ump = VFSTOUFS(mp);
 	mfs = ump->um_e4fs;
 
+	/*
+	 * Commit the clean state before dropping the mount's device reference.
+	 * Restore the cached state on write failure so unmount can be retried.
+	 */
 	if (!mfs->m_read_only && mfs->m_fs_was_modified) {
 		u_int16_t state = mfs->m_state;
 

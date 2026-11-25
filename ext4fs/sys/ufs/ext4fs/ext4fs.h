@@ -345,6 +345,10 @@ struct ext4fs {
 	u_int32_t sb_checksum;
 } __attribute__((packed));
 
+/*
+ * Per-mount state. Keep the on-disk superblock image for checksums and
+ * writeback, alongside decoded values used by the filesystem operations.
+ */
 struct m_ext4fs {
 	/* little-endian super-block */
 	struct ext4fs m_sble;
