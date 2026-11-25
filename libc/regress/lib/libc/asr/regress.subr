@@ -1,11 +1,14 @@
 #!/bin/sh
 #	$OpenBSD: regress.subr,v 1.5 2026/05/08 04:02:59 tb Exp $
 
+# OpenBSD sh supports local variables in functions.
+# shellcheck disable=SC3043
+
 set -e
 
 fail()
 {
-	echo "*** ERROR: $@"
+	printf '*** ERROR: %s\n' "$*"
 	exit 1
 }
 
@@ -17,39 +20,41 @@ regress()
 	local out="${OUTDIR}/test-${COUNT}.out"
 	local out0="${OUTDIR}/test-${COUNT}${A}.out"
 	local out1="${OUTDIR}/test-${COUNT}${B}.out"
-	local err0="${OUTDIR}/test-${COUNT}${A}.err"
-	local err1="${OUTDIR}/test-${COUNT}${B}.err"
 	local outdiff="${OUTDIR}/test-${COUNT}${A}${B}.diff"
 	shift
 
 	test -x "${ROOTDIR}${bin0}" || fail "${ROOTDIR}${bin0}" not executable
 	test -x "${ROOTDIR}${bin1}" || fail "${ROOTDIR}${bin1}" not executable
 
-	echo -n "${cmd} $@ ."
+	printf '%s %s .' "$cmd" "$*"
 
 	set +e
-	chroot -u bin "${ROOTDIR}" ${bin0} $@ > ${out0}
-	echo -n .
-	chroot -u bin "${ROOTDIR}" ${bin1} $@ > ${out1}
-	echo -n "."
+	chroot -u bin "${ROOTDIR}" "$bin0" "$@" > "$out0"
+	printf '.'
+	chroot -u bin "${ROOTDIR}" "$bin1" "$@" > "$out1"
+	printf '.'
 
-	diff -u ${out0} ${out1} > ${outdiff}
+	diff -u "$out0" "$out1" > "$outdiff"
 	set -e
-	if test -s ${outdiff}; then
+	if test -s "$outdiff"; then
 		FAIL=$((FAIL+1))
 		echo fail
-		echo "### FAIL [#${COUNT} env=${REGRESSENV}] ${cmd} $@" >> $ERR
-		cat ${outdiff} >> $ERR
-		echo >> $ERR
+		{
+			printf '### FAIL [#%s env=%s] %s %s\n' "$COUNT" "$REGRESSENV" "$cmd" "$*"
+			cat "$outdiff"
+			echo
+		} >> "$ERR"
 	else
-		rm ${outdiff}
-		rm ${out1}
-		mv ${out0} ${out}
+		rm "$outdiff"
+		rm "$out1"
+		mv "$out0" "$out"
 		OK=$((OK+1))
 		echo ok
-		echo "### OK [#${COUNT} env=$REGRESSENV] ${cmd} $@" >> $OUT
-		cat ${out} >> $OUT
-		echo >> $OUT
+		{
+			printf '### OK [#%s env=%s] %s %s\n' "$COUNT" "$REGRESSENV" "$cmd" "$*"
+			cat "$out"
+			echo
+		} >> "$OUT"
 	fi
 
 	COUNT=$((COUNT+1))
@@ -82,7 +87,7 @@ regress_setenv()
 		echo "lookup bind" >> "${ROOTDIR}/etc/resolv.conf"
 		;;
 	*)
-		fail unknown env $_name
+		fail unknown env "$_name"
 		;;
 	esac
 	REGRESSENV=$_name
@@ -91,7 +96,7 @@ regress_setenv()
 regress_digest()
 {
 	echo "===> done"
- 	test -f $ERR && (echo; cat $ERR; echo "===> errfile=$ERR")
+	test -f "$ERR" && (echo; cat "$ERR"; echo "===> errfile=$ERR")
 	echo "===> logfile=$OUT"
 	echo "===> run=$COUNT ok=$OK fail=$FAIL error=$ERROR"
 
@@ -103,8 +108,8 @@ test "$(id -u)" -ne 0 && fail need root privileges to run this script
 # we really really want to avoid erasing /etc later
 test "${RUNDIR}" || fail RUNDIR is not set
 
-ROOTDIR=$(readlink -fn ${RUNDIR})
-test "${ROOTDIR}" == "/" && fail RUNDIR is root dir: ${RUNDIR}
+ROOTDIR=$(readlink -fn "$RUNDIR")
+test "$ROOTDIR" = "/" && fail RUNDIR is root dir: "$RUNDIR"
 
 COUNT=0
 OK=0
@@ -113,8 +118,8 @@ ERROR=0
 A=${A:=.a}
 B=${B:=.b}
 
-OUTDIR=$(mktemp -d -p $ROOTDIR)
-chmod a+rx ${OUTDIR}
+OUTDIR=$(mktemp -d -p "$ROOTDIR")
+chmod a+rx "$OUTDIR"
 echo "===> ${OUTDIR}"
 
 OUT=$OUTDIR/regress.log

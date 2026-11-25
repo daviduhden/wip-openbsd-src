@@ -114,6 +114,15 @@ cc -fsanitize=address,undefined -g -o test test.c && ./test
 | Test passes only as root | Privilege-dependent behavior; split or skip explicitly |
 | Flaky ordering | Sort output, use `LC_ALL=C`, avoid directory iteration order |
 
+## Shell drivers
+
+Check scripts sourced by a regression directly when their suffix falls
+outside the shell validator's inventory. For the ASR driver, check
+`libc/regress/lib/libc/asr/regress.subr` explicitly. Its resolver cases pass
+an argument vector through `chroot`. A shell test with a stub can verify
+argument boundaries before running the native resolver regression.
+Keep changes to this driver in the complete `libc/patch`.
+
 ## Difference between evidence levels
 
 - **Static analysis:** reading code, compiler diagnostics without execution.
