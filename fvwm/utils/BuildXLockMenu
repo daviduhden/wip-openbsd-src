@@ -7,33 +7,32 @@
 #   menu definition of all of xlock's modes.
 #
 
-$start = 0;
+use strict;
+use warnings;
 
-open(XL,"xlock -h 2>&1 |") || die "couldn't run xlock";
+my $start = 0;
+
+# xlock can write its help to stderr.
+open my $xlock, '-|', '/bin/sh', '-c', 'exec xlock -h 2>&1'
+  or die "couldn't run xlock: $!";
 
 print "DestroyMenu XLockMenu\n";
 print "AddToMenu XLockMenu \"XLock Modes\" Title\n";
 
-while (<XL>)
-{
-  chomp;
-  
-  /where mode is one of:/ && do
-  {
-    $start = 1;
-    next;
-  };
-  if ($start && $_)
-  {
-    @foo = split;
-    $mode = $foo[0];
-    $_ = $mode;
-    /^-.*/ && next;
-    shift @foo;
-    printf "+ \"%-10s %-35s Exec xlock -mode $mode\n",$mode,"(@foo)\"";
-  }
+while (<$xlock>) {
+    chomp;
+
+    if (/where mode is one of:/) {
+        $start = 1;
+        next;
+    }
+    if ( $start && $_ ) {
+        my ( $mode, @description ) = split;
+        next if defined $mode && $mode =~ /^-/;
+        $mode //= '';
+        printf "+ \"%-10s %-35s Exec xlock -mode %s\n", $mode,
+          "(@description)\"", $mode;
+    }
 }
 
-close XL;
-
-#print "Beep\n";
+close $xlock;

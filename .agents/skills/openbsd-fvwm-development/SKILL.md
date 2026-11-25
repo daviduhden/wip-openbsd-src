@@ -155,6 +155,15 @@ Do not claim a live-session test that was not performed.
 - `pledge(2)`, `unveil(2)`, `imsg_init(3)`, `closefrom(3)`
 - `openbsd-source-security`, `openbsd-source-build`
 
+## Script validation
+
+Run ShellCheck on `utils/fvwmrc_convert`, `utils/quantize_pixmaps` and
+`modules/FvwmSaveDesk/example/xinitrc` explicitly. Run Perl::Critic on
+`utils/BuildXLockMenu` explicitly. The repository-wide validators discover
+scripts by extension, which omits these executable files. Exercise the
+converter with a source and destination containing spaces and test the
+menu builder with an `xlock` stub that writes its help to stderr.
+
 ## Execution helper transport
 
 Account for the libutil message header and the PipeRead command identifier
