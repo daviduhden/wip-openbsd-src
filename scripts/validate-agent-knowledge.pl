@@ -1109,6 +1109,8 @@ sub deduplicate_changes {
     return map { $by_path{$_} } sort keys %by_path;
 }
 
+# Worktree scope compares the working files to HEAD and includes untracked
+# files. Range scope measures the head since its common ancestor with base.
 sub discover_changes {
     my ( $root, $scope, $base, $head ) = @_;
     if ( $scope eq 'worktree' ) {
@@ -1165,6 +1167,8 @@ sub changed_content {
         }
     }
 
+    # git diff has no patch for an untracked file. Count its contents as
+    # additions only when change discovery included the path.
     if ( $scope eq 'worktree' && $diff eq '' ) {
         my %changed = map { $_->{path} => 1 }
           discover_changes( $root, $scope, $base, $head );
@@ -1210,6 +1214,8 @@ sub normalize_knowledge_line {
     return $content;
 }
 
+# Cancel matching normalized lines one occurrence at a time. Moving a
+# paragraph alone contributes nothing to the substantive-update threshold.
 sub update_metrics {
     my ( $added, $removed ) = @_;
     my @remaining_added = @{$added};

@@ -48,6 +48,8 @@ description: Guidance for the example subsystem.
 Keep the procedure current.
 SKILL
 
+# Read both pipes before waiting, so a child blocked writing stderr can
+# still finish and return its exit status to the test harness.
 sub capture_command {
     my (@command) = @_;
     my $stderr_handle = gensym;
