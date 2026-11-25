@@ -654,22 +654,14 @@ wr_rdfile(ARCHD *arcn, int ifd, off_t *left)
 
 /*
  * rd_wrfile()
- *	extract the contents of a file from the archive. If we are unable to
- *	extract the entire file (due to failure to write the file) we return
- *	the numbers of bytes we did NOT process. This way the caller knows how
- *	many bytes to skip past to find the next archive header. If the failure
- *	was due to an archive read, we will catch that when we try to skip. If
- *	the format supplies a file data crc value, we calculate the actual crc
- *	so that it can be compared to the value stored in the header
- * NOTE:
- *	We call a special function to write the file. This function attempts to
- *	restore file holes (blocks of zeros) into the file. When files are
- *	sparse this saves space, and is a LOT faster. For non sparse files
- *	the performance hit is small. As of this writing, no archive supports
- *	information on where the file holes are.
- * Return:
- *	0 ok, -1 if archive read failure. if we cannot write the entire file,
- *	we return a 0 but "left" is set to be the amount unwritten
+ * Extract one payload. On an output failure, return 0 with *left set to
+ * the unread byte count, so the caller can skip to the next header.
+ * Return -1 on an archive read failure so the caller can resynchronize
+ * without relying on the remaining byte count.
+ *
+ * Zero runs in the output are candidates for sparse writes. This layer
+ * sees a byte stream and infers holes from those runs. The checksum is
+ * over the archived bytes, before any requested output byte swapping.
  */
 
 int

@@ -505,8 +505,8 @@ trng_match(ARCHD *arcn)
 		switch (pt->flgs & CMPBOTH) {
 		case CMPBOTH:
 			/*
-			 * user wants both mtime and ctime checked for this
-			 * time range
+			 * Test each bound against both timestamps. A different
+			 * timestamp may satisfy each end of the range.
 			 */
 			if (((pt->flgs & HASLOW) &&
 				(arcn->sb.st_mtime < pt->low_time) &&

@@ -144,6 +144,13 @@ enum pax_entry_action {
 	PAX_ENTRY_RENAME
 };
 
+/*
+ * A member as seen by the traversal, format and filesystem layers. The
+ * pathname buffers may change during selection and renaming; org_name
+ * identifies the source path when the member came from filesystem traversal.
+ * On read, skip and pad are byte counts still to consume after the decoder,
+ * which may already have read extra headers or a link target.
+ */
 typedef struct {
 	int	    nlen;		     /* file name length */
 	char	    name[PAXPATHLEN + 1];    /* file name */
@@ -189,7 +196,7 @@ typedef struct {
  * form the archive. Only those routines which deal directly with the archive
  * are tailored to the oddities of the specific format. All other routines are
  * independent of the archive format. Data flow in and out of the format
- * dependent routines pass pointers to ARCHD structure (described below).
+ * dependent routines pass pointers to the ARCHD member record above.
  */
 typedef struct {
 	char *name;	       /* name of format, this is the name the user */
@@ -201,7 +208,7 @@ typedef struct {
 	int hsz;	       /* Header size in bytes. this is the size of */
 			       /* the smallest header this format supports. */
 			       /* Headers are assumed to fit in a BLKMULT. */
-			       /* If they are bigger, get_head() and */
+			       /* If they are bigger, next_head() and */
 			       /* get_arc() must be adjusted */
 	int udev;	       /* does append require unique dev/ino? some */
 			       /* formats use the device and inode fields */
@@ -258,9 +265,8 @@ typedef struct {
 			       /* of 1 indicates that the block passed to */
 			       /* it can never contain a valid header (skip */
 			       /* this block, no point in looking at it)  */
-			       /* CAUTION: parameters to this function are */
-			       /* different for trailers inside or outside */
-			       /* of headers. See get_head() for details */
+			       /* next_head() supplies either the decoded */
+			       /* member or raw header bytes, as appropriate. */
 	int (*options)(void);  /* process format specific options (-o) */
 } FSUB;
 

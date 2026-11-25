@@ -168,12 +168,10 @@ static int xz_id(char *_blk, int _size);
 #define BZIP2_CMD "bzip2"	/* command to run as bzip2 */
 
 /*
- *	Format specific routine table
- *	(see pax.h for description of each function)
- *
- *	name, blksz, hdsz, udev, hlk, blkagn, inhead, id, st_read,
- *	read, end_read, st_write, write, end_write, trail,
- *	rd_data, wr_data, options
+ * See FSUB in pax.h for the format callback contracts. The default
+ * indices and probe order below refer to table positions, including
+ * slots left empty in reduced builds. Compression probes identify
+ * wrappers rather than archive formats and have no member callbacks.
  */
 
 FSUB fsub[] = {

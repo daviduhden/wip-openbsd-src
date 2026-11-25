@@ -404,9 +404,9 @@ extract(void)
 	}
 
 	/*
-	 * all done, restore directory modes and times as required; make sure
-	 * all patterns supplied by the user were matched; block off signals
-	 * to avoid chance for multiple entry into the cleanup code.
+	 * Block cleanup signals before draining the shared tables. Install
+	 * deferred symlinks before restoring directory permissions and times:
+	 * replacing placeholders can still modify those directories.
 	 */
 	(void)(*frmt->end_rd)();
 	(void)sigprocmask(SIG_BLOCK, &s_mask, NULL);

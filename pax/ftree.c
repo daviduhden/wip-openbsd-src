@@ -460,8 +460,8 @@ next_file(ARCHD *arcn)
 		 * we may read when the -t flag is specified. files are reset
 		 * when we close them after copying. we reset the directories
 		 * when we are done with their file tree (we also clean up at
-		 * end in case we cut short a file tree traversal). However
-		 * there is no way to reset access times on symlinks.
+		 * end in case we cut short a file tree traversal). This
+		 * traversal has no corresponding time reset for symlinks.
 		 */
 		switch (S_IFMT & arcn->sb.st_mode) {
 		case S_IFDIR:
@@ -522,7 +522,8 @@ next_file(ARCHD *arcn)
 	}
 
 	/*
-	 * copy file name, set file name length
+	 * Keep the borrowed FTS path for source I/O before renaming the copy
+	 * in arcn->name. Consume the borrowed path before advancing fts.
 	 */
 	arcn->nlen = strlcpy(arcn->name, ftent->fts_path, sizeof(arcn->name));
 	if ((size_t)arcn->nlen >= sizeof(arcn->name))

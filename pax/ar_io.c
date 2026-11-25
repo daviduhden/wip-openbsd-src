@@ -85,6 +85,11 @@ static int	get_phys(void);
 extern sigset_t s_mask;
 static void	ar_start_gzip(int, const char *, int);
 
+/*
+ * Reap the child for the current volume after closing the parent's pipe end.
+ * An early stop can leave the decoder blocked on output. Cancel it before
+ * waiting, and ignore its exit status only when cancellation was requested.
+ */
 static void
 ar_wait_compressor(int cancel)
 {
@@ -1262,8 +1267,9 @@ ar_next(void)
 
 /*
  * ar_start_gzip()
- * starts the gzip compression/decompression process as a child, using magic
- * to keep the fd the same in the calling function (parent).
+ * Start a compressor or decompressor with the real archive on one side and
+ * the pipe on the other. Replace the parent's archive descriptor with its
+ * pipe end so buffered I/O continues to use the same descriptor number.
  */
 static void
 ar_start_gzip(int fd, const char *path, int wr)

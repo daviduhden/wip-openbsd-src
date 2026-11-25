@@ -638,10 +638,10 @@ mod_name(ARCHD *arcn)
 {
 	int res = 0;
 
-	/* Apply archive path policy before user-requested name changes. */
 	/*
-	 * Strip off leading '/' if appropriate.
-	 * Currently, this option is only set for the tar format.
+	 * Apply the selected path policy to the archive names before -s or
+	 * interactive renaming. rmleadslash also tracks whether the leading
+	 * slash warning has already been issued.
 	 */
 	while (rmleadslash && arcn->name[0] == '/') {
 		if (arcn->name[1] == '\0') {
@@ -674,6 +674,11 @@ mod_name(ARCHD *arcn)
 			    "names in the archive");
 		}
 	}
+	/*
+	 * Discard the member name's entire prefix through its last ".."
+	 * component. Removing only ".." would retain directories that the
+	 * original path crossed on its way to the final component.
+	 */
 	if (rmleadslash) {
 		const char *last = NULL;
 		const char *p = arcn->name;
@@ -701,23 +706,10 @@ mod_name(ARCHD *arcn)
 	}
 
 	/*
-	 * IMPORTANT: We have a problem. what do we do with symlinks?
-	 * Modifying a hard link name makes sense, as we know the file it
-	 * points at should have been seen already in the archive (and if it
-	 * wasn't seen because of a read error or a bad archive, we lose
-	 * anyway). But there are no such requirements for symlinks. On one
-	 * hand the symlink that refers to a file in the archive will have to
-	 * be modified to so it will still work at its new location in the
-	 * file system. On the other hand a symlink that points elsewhere (and
-	 * should continue to do so) should not be modified. There is clearly
-	 * no perfect solution here. So we handle them like hardlinks. Clearly
-	 * a replacement made by the interactive rename mapping is very likely
-	 * to be correct since it applies to a single file and is an exact
-	 * match. The regular expression replacements are a little harder to
-	 * justify though. We claim that the symlink name is only likely
-	 * to be replaced when it points within the file tree being moved and
-	 * in that case it should be modified. what we really need to do is to
-	 * call an oracle here. :)
+	 * Apply substitutions to link targets as well as member names so
+	 * links can follow renamed archive members. This is a heuristic for
+	 * symlinks, whose targets may instead lie outside the archived tree.
+	 * The interactive rename table applies only to exact target matches.
 	 */
 	if (rephead != NULL) {
 		/*

@@ -753,10 +753,10 @@ ustar_id(char *blk, int size)
 
 /*
  * ustar_rd()
- *	extract the values out of block already determined to be a ustar header.
- *	store the values in the ARCHD parameter.
- * Return:
- *	0
+ * Decode one member, consuming any preceding pax headers here. Global
+ * keywords belong to the archive session; per-file keywords belong to
+ * ARCHD and are released when its contents are replaced.
+ * Return 0 on success or -1 on invalid headers or failed reads.
  */
 
 int

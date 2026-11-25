@@ -1084,11 +1084,10 @@ rdfile_close(ARCHD *arcn, int *fd)
 
 /*
  * set_crc()
- *	read a file to calculate its crc. This is a real drag. Archive formats
- *	that have this, end up reading the file twice (we have to write the
- *	header WITH the crc before writing the file contents. Oh well...
- * Return:
- *	0 if was able to calculate the crc, -1 otherwise
+ * Compute the cpio byte-sum checksum before writing the header that
+ * carries it. The data copy is a separate read, so rewind fd on success
+ * and reject size or modification-time changes seen during this pass.
+ * The caller owns fd, including on error.
  */
 
 int

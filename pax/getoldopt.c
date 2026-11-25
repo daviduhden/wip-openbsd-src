@@ -22,6 +22,10 @@
 #include "pax.h"
 // clang-format on
 
+/*
+ * The legacy form takes option letters from argv[1] and their arguments
+ * from subsequent words. This cursor belongs to one command-line parse.
+ */
 int
 getoldopt(int argc, char **argv, const char *optstring)
 {

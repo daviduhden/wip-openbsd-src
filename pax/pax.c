@@ -136,12 +136,14 @@ char *tempbase;		      /* basename of tempfile to use for mkstemp(3) */
  * 1.4	Sparse files (lseek holes) stored on the archive (but stored with blocks
  *	of all zeros will be restored with holes appropriate for the target
  *	filesystem
- * 1.5	The user is notified whenever something is found during archive
- *	read operations which violates spec (but the read will continue).
+ * 1.5	Recovery is format and operation dependent. The reader can search
+ *	for the next header, while append refuses to write after a read
+ *	problem that sets the exit status.
  * 1.6	Multiple archive volumes can be read and may span over different
  *	archive devices
- * 1.7	Rigidly restores all file attributes exactly as they are stored on the
- *	archive.
+ * 1.7	Extraction restores attributes subject to the preservation flags and
+ *	the caller's permissions. Directory times and temporarily widened
+ *	modes can be restored after extracting descendants.
  * 1.8	Modification change time ranges can be specified via multiple -T
  *	options. These allow a user to select files whose modification time
  *	lies within a specific time range.
@@ -153,8 +155,9 @@ char *tempbase;		      /* basename of tempfile to use for mkstemp(3) */
  *	name modification (-Z)
  *
  * 2	WRITE ENHANCEMENTS
- * 2.1	Write operation will stop instead of allowing a user to create a flawed
- *	flawed archive (due to any problem).
+ * 2.1	Format writers may skip entries they cannot represent. If a source
+ *	file becomes shorter after its header has been written, padding
+ *	keeps the next header at the offset implied by the recorded size.
  * 2.2	Archives written by pax are forced to strictly conform to both the
  *	archive and pax the specific format specifications.
  * 2.3	Blocking size and format is rigidly enforced on writes.
@@ -284,9 +287,8 @@ main(int argc, char **argv)
 	 * Unveil the filesystem to restrict access to known paths.
 	 * We know the archive file path from option parsing, the
 	 * working directory, the temp file directory, and the
-	 * compressor paths.  Non-existent paths (e.g. default tape
-	 * device) are silently ignored since unveil on them would
-	 * fail without being a real problem.
+	 * compressor paths. Archive and compressor unveil calls are
+	 * best effort. The working-directory calls below are checked.
 	 */
 
 	/* Unveil the archive file if explicitly specified. */

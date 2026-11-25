@@ -204,8 +204,9 @@ rd_nm(ARCHD *arcn, int nsz)
 
 /*
  * rd_ln_nm()
- *	read in the link name for a file with links. The link name is stored
- *	like file data (and is NOT \0 terminated!)
+ * Read a symbolic link target from the member's data area. Unlike the
+ * member name, the target has no serialized terminator; leave one byte
+ * in ln_name for the terminator added here. The caller handles padding.
  * Return:
  *	0 if ok, -1 otherwise
  */

@@ -758,7 +758,8 @@ set_value:
  *	A hardlink was created; if it looks like a placeholder, handle the
  *	tracking.
  * Return:
- *	0 if things are ok, -1 if something went wrong
+ *	0 if tracked, 1 if the inode is not a tracked placeholder, or -1
+ *	on allocation or canonicalization failure.
  */
 
 int
@@ -814,9 +815,9 @@ sltab_process_one(
 	int	    err;
 
 	/*
-	 * is it the expected placeholder?  This can fail legimately
-	 * if the archive overwrote the link with another, later entry,
-	 * so don't warn.
+	 * Check the identity and type of the placeholder before replacing it.
+	 * A later archive member may legitimately have replaced it, so treat
+	 * a mismatch as a reason to leave that path alone.
 	 */
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode) || sb.st_size != 0 ||
 	    sb.st_ino != s->sli_ino || sb.st_dev != s->sli_dev)
