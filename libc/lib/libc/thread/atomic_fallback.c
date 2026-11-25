@@ -25,16 +25,15 @@
  * atomic runtime (libatomic), which the base system does not provide.
  *
  * Each function holds one of a small, fixed number of spinlocks selected by
- * the address of the object.  The lock is taken with sequential-consistency
- * ordering, which is stronger than any memory order the standard asks for,
- * so the requested order is always satisfied and the order argument is
- * ignored.  The lock itself is implemented with the compiler's atomic
- * byte test-and-set/clear builtins, which are lock-free on every supported
- * architecture, so no unbounded spinning on a non-atomic value occurs.
+ * the address of the object. All fallback accesses to one object use the
+ * same lock. The lock uses sequentially consistent byte test-and-set and
+ * clear, regardless of the order passed by the caller. The lock operations
+ * themselves are lock-free. The object operations may spin while another
+ * thread holds the lock.
  *
  * The arithmetic behind atomic_fetch_add and atomic_fetch_sub is performed
- * on the operand's own bytes, propagating carry or borrow in the machine's
- * byte order; the bitwise operations are byte-wise and order-independent.
+ * on the value's bytes in machine byte order. The bitwise operations work
+ * on corresponding bytes and are independent of byte order.
  */
 
 #include <sys/cdefs.h>
@@ -156,6 +155,7 @@ __atomic_fallback_compare_exchange(size_t size, volatile void *obj,
 	unsigned char *l = fallback_lock(obj);
 	int	       ret;
 
+	/* Compare object representations. Weak mode uses the same check. */
 	(void)weak;
 	(void)success;
 	(void)failure;
@@ -171,7 +171,10 @@ __atomic_fallback_compare_exchange(size_t size, volatile void *obj,
 	return ret;
 }
 
-/* a = a + b, or a = a - b when sub is non-zero, byte by byte. */
+/*
+ * Add from least to most significant byte and discard the final carry.
+ * Subtraction adds the complement of b with an initial carry of one.
+ */
 static void
 fallback_add(volatile unsigned char *a, const unsigned char *b, size_t size,
     int sub)

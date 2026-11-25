@@ -86,7 +86,7 @@ Index: include/stdatomic.h
 ===================================================================
 --- /dev/null
 +++ include/stdatomic.h
-@@ -0,0 +1,569 @@
+@@ -0,0 +1,568 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -130,10 +130,9 @@ Index: include/stdatomic.h
 + * every operation first tests __atomic_always_lock_free() (a compile-time
 + * constant) and, when it is false, calls a small lock-based fallback in
 + * libc (__atomic_fallback_*); the constant test is folded away so the
-+ * macros do not reference the compiler's runtime. The fallback acquires a
-+ * per-address spinlock with sequential-consistency ordering, which is
-+ * stronger than any memory order the standard asks for, so the requested
-+ * order is always satisfied. This applies to operations through these
++ * macros do not reference the compiler's runtime. The fallback uses an
++ * address-selected spinlock with sequentially consistent lock operations
++ * for all requested memory orders. The lock covers accesses through these
 + * macros. Compiler-generated direct atomic expressions use a separate
 + * lowering/ABI; they must not be mixed with this fallback and may need an
 + * unavailable external runtime. Full language-level support is not claimed.
@@ -508,10 +507,10 @@ Index: include/stdatomic.h
 + *
 + * __atomic_fetch_add/sub on a pointer object: GCC's builtin adds the operand
 + * as a raw value ("as an integer of the width of the pointer"), while ISO C
-+ * requires element scaling.  Pointer objects (always lock-free) use the
-+ * same builtin with a pointer-width unsigned byte displacement.  This
-+ * avoids ordinary C pointer arithmetic, including its out-of-array UB.
-+ * Integer objects keep the unscaled builtin.
++ * requires element scaling. Pass a pointer-width unsigned byte
++ * displacement for a pointer object. This avoids ordinary C pointer
++ * arithmetic and its array bounds restrictions. Integer objects keep
++ * the unscaled operand.
 + */
 +#define atomic_store_explicit(object, desired, order)                          \
 +	__extension__({                                                        \
@@ -1649,7 +1648,7 @@ Index: lib/libc/gen/stdatomic.3
 ===================================================================
 --- /dev/null
 +++ lib/libc/gen/stdatomic.3
-@@ -0,0 +1,144 @@
+@@ -0,0 +1,152 @@
 +.\"	$OpenBSD$
 +.\"
 +.\" Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
@@ -1666,7 +1665,7 @@ Index: lib/libc/gen/stdatomic.3
 +.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 +.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +.\"
-+.Dd November 7, 2026
++.Dd November 25, 2026
 +.Dt STDATOMIC 3
 +.Os
 +.Sh NAME
@@ -1706,7 +1705,9 @@ Index: lib/libc/gen/stdatomic.3
 +.It Fn atomic_fetch_and object operand
 +.El
 +.Pp
-+Each has an
++All of these operations except
++.Fn atomic_init
++have an
 +.Dq _explicit
 +form that takes a
 +.Vt memory_order
@@ -1737,22 +1738,26 @@ Index: lib/libc/gen/stdatomic.3
 +.Fn atomic_signal_fence
 +issue memory fences.
 +.Fn atomic_is_lock_free
-+reports whether an object is lock-free and is a compile-time constant.
++evaluates its argument once and reports a lock-free property computed at
++compile time from the size of the corresponding non-atomic value and the
++compiler's typical alignment for that access.
 +The
 +.Dv ATOMIC_*_LOCK_FREE
 +macros describe the standard atomic types; the values are 0, 1 or 2 as
 +specified by ISO C.
 +.Pp
-+The implementation is built on the compiler's atomic builtins, which
-+lower to the atomic instructions of the machine and never call an
-+external support library.
++The type-generic macros use compiler builtins for lock-free operations
++and libc helpers for other sizes.
 +.Sh RETURN VALUES
 +.Fn atomic_load ,
 +.Fn atomic_exchange ,
 +.Fn atomic_fetch_add
 +and the other read-modify-write operations return the value that was
-+contained in the object; the compare-and-exchange operations return a
-+non-zero value if the exchange happened.
++contained in the object before the operation.
++The compare-and-exchange operations return true on success.
++On failure they store the observed value through
++.Fa expected
++and return false.
 +.Fn atomic_store
 +and the flag clear operations return no value.
 +.Sh NOTES
@@ -1766,9 +1771,11 @@ Index: lib/libc/gen/stdatomic.3
 +The macros handle values whose size is not lock-free with a lock-based
 +fallback in libc, preserving volatile accesses.
 +These macro operations do not require an external atomic runtime.
-+.Fn atomic_is_lock_free
-+reports the same value-size and alignment policy used by the macros.
-+Atomic storage can be larger than the corresponding non-atomic value.
++The helpers choose a spinlock by object address and use sequentially
++consistent lock operations for all requested memory orders.
++Atomic storage can be larger than the value copied under the lock.
++The lock-based compare-and-exchange variants compare value bytes and
++use the same comparison in both the strong and weak forms.
 +.Pp
 +Direct compiler-generated accesses and compound operations on an atomic
 +object do not use this fallback ABI.
@@ -2563,7 +2570,7 @@ Index: lib/libc/thread/atomic_fallback.c
 ===================================================================
 --- /dev/null
 +++ lib/libc/thread/atomic_fallback.c
-@@ -0,0 +1,271 @@
+@@ -0,0 +1,274 @@
 +/*	$OpenBSD$	*/
 +
 +/*-
@@ -2591,16 +2598,15 @@ Index: lib/libc/thread/atomic_fallback.c
 + * atomic runtime (libatomic), which the base system does not provide.
 + *
 + * Each function holds one of a small, fixed number of spinlocks selected by
-+ * the address of the object.  The lock is taken with sequential-consistency
-+ * ordering, which is stronger than any memory order the standard asks for,
-+ * so the requested order is always satisfied and the order argument is
-+ * ignored.  The lock itself is implemented with the compiler's atomic
-+ * byte test-and-set/clear builtins, which are lock-free on every supported
-+ * architecture, so no unbounded spinning on a non-atomic value occurs.
++ * the address of the object. All fallback accesses to one object use the
++ * same lock. The lock uses sequentially consistent byte test-and-set and
++ * clear, regardless of the order passed by the caller. The lock operations
++ * themselves are lock-free. The object operations may spin while another
++ * thread holds the lock.
 + *
 + * The arithmetic behind atomic_fetch_add and atomic_fetch_sub is performed
-+ * on the operand's own bytes, propagating carry or borrow in the machine's
-+ * byte order; the bitwise operations are byte-wise and order-independent.
++ * on the value's bytes in machine byte order. The bitwise operations work
++ * on corresponding bytes and are independent of byte order.
 + */
 +
 +#include <sys/cdefs.h>
@@ -2722,6 +2728,7 @@ Index: lib/libc/thread/atomic_fallback.c
 +	unsigned char *l = fallback_lock(obj);
 +	int	       ret;
 +
++	/* Compare object representations. Weak mode uses the same check. */
 +	(void)weak;
 +	(void)success;
 +	(void)failure;
@@ -2737,7 +2744,10 @@ Index: lib/libc/thread/atomic_fallback.c
 +	return ret;
 +}
 +
-+/* a = a + b, or a = a - b when sub is non-zero, byte by byte. */
++/*
++ * Add from least to most significant byte and discard the final carry.
++ * Subtraction adds the complement of b with an initial carry of one.
++ */
 +static void
 +fallback_add(volatile unsigned char *a, const unsigned char *b, size_t size,
 +    int sub)

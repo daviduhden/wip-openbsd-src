@@ -132,9 +132,9 @@ and `ATOMIC_VAR_INIT` for C17 and earlier.
   and must not be mixed with macro accesses routed through it. They may
   require an unavailable external runtime, including where atomic storage
   differs from payload size. Full language-level atomic support is partial.
-  The fallback uses a per-address spinlock with
-  sequential-consistency ordering, which is stronger than any order the
-  standard requests.
+  The fallback selects a spinlock by object address and uses sequentially
+  consistent lock operations for all requested memory orders. Addresses
+  that hash to the same lock serialize their fallback operations.
 * `atomic_char8_t` and `ATOMIC_CHAR8_T_LOCK_FREE` are provided in C23;
   `ATOMIC_VAR_INIT` is removed in C23.
 * `atomic_thread_fence`, `atomic_signal_fence`,

@@ -41,10 +41,9 @@
  * every operation first tests __atomic_always_lock_free() (a compile-time
  * constant) and, when it is false, calls a small lock-based fallback in
  * libc (__atomic_fallback_*); the constant test is folded away so the
- * macros do not reference the compiler's runtime. The fallback acquires a
- * per-address spinlock with sequential-consistency ordering, which is
- * stronger than any memory order the standard asks for, so the requested
- * order is always satisfied. This applies to operations through these
+ * macros do not reference the compiler's runtime. The fallback uses an
+ * address-selected spinlock with sequentially consistent lock operations
+ * for all requested memory orders. The lock covers accesses through these
  * macros. Compiler-generated direct atomic expressions use a separate
  * lowering/ABI; they must not be mixed with this fallback and may need an
  * unavailable external runtime. Full language-level support is not claimed.
@@ -419,10 +418,10 @@ __END_DECLS
  *
  * __atomic_fetch_add/sub on a pointer object: GCC's builtin adds the operand
  * as a raw value ("as an integer of the width of the pointer"), while ISO C
- * requires element scaling.  Pointer objects (always lock-free) use the
- * same builtin with a pointer-width unsigned byte displacement.  This
- * avoids ordinary C pointer arithmetic, including its out-of-array UB.
- * Integer objects keep the unscaled builtin.
+ * requires element scaling. Pass a pointer-width unsigned byte
+ * displacement for a pointer object. This avoids ordinary C pointer
+ * arithmetic and its array bounds restrictions. Integer objects keep
+ * the unscaled operand.
  */
 #define atomic_store_explicit(object, desired, order)                          \
 	__extension__({                                                        \

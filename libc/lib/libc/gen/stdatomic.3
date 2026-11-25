@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 7, 2026
+.Dd November 25, 2026
 .Dt STDATOMIC 3
 .Os
 .Sh NAME
@@ -54,7 +54,9 @@ to an atomic object:
 .It Fn atomic_fetch_and object operand
 .El
 .Pp
-Each has an
+All of these operations except
+.Fn atomic_init
+have an
 .Dq _explicit
 form that takes a
 .Vt memory_order
@@ -85,22 +87,26 @@ and
 .Fn atomic_signal_fence
 issue memory fences.
 .Fn atomic_is_lock_free
-reports whether an object is lock-free and is a compile-time constant.
+evaluates its argument once and reports a lock-free property computed at
+compile time from the size of the corresponding non-atomic value and the
+compiler's typical alignment for that access.
 The
 .Dv ATOMIC_*_LOCK_FREE
 macros describe the standard atomic types; the values are 0, 1 or 2 as
 specified by ISO C.
 .Pp
-The implementation is built on the compiler's atomic builtins, which
-lower to the atomic instructions of the machine and never call an
-external support library.
+The type-generic macros use compiler builtins for lock-free operations
+and libc helpers for other sizes.
 .Sh RETURN VALUES
 .Fn atomic_load ,
 .Fn atomic_exchange ,
 .Fn atomic_fetch_add
 and the other read-modify-write operations return the value that was
-contained in the object; the compare-and-exchange operations return a
-non-zero value if the exchange happened.
+contained in the object before the operation.
+The compare-and-exchange operations return true on success.
+On failure they store the observed value through
+.Fa expected
+and return false.
 .Fn atomic_store
 and the flag clear operations return no value.
 .Sh NOTES
@@ -114,9 +120,11 @@ requires.
 The macros handle values whose size is not lock-free with a lock-based
 fallback in libc, preserving volatile accesses.
 These macro operations do not require an external atomic runtime.
-.Fn atomic_is_lock_free
-reports the same value-size and alignment policy used by the macros.
-Atomic storage can be larger than the corresponding non-atomic value.
+The helpers choose a spinlock by object address and use sequentially
+consistent lock operations for all requested memory orders.
+Atomic storage can be larger than the value copied under the lock.
+The lock-based compare-and-exchange variants compare value bytes and
+use the same comparison in both the strong and weak forms.
 .Pp
 Direct compiler-generated accesses and compound operations on an atomic
 object do not use this fallback ABI.
