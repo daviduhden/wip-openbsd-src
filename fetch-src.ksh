@@ -74,6 +74,8 @@ lock_path() {
 	esac
 }
 
+# Fetch into a sibling directory while the old checkout is still in place.
+# The exit trap restores the old tree if publication leaves the target absent.
 checkout_selected_repository() (
 	typeset target lock stage="" backup="" answer mounts
 	case "$SELECTED_REPO" in
@@ -362,7 +364,9 @@ validate_selection() {
 	fi
 }
 
-# Write a complete set of manifests in staging. CVS metadata is excluded.
+# Compare component-relative paths in staging for later CVS bookkeeping.
+# Exclude CVS metadata and use the same collation order for sort and comm.
+# The manifests track path additions and removals. CVS detects file edits.
 write_change_lists() {
 	typeset old=$1 new=$2 stage=$3 kind side tree
 	for side in old new; do
@@ -394,7 +398,9 @@ write_change_lists() {
 			>"$stage/changes/created-dirs.txt"
 }
 
-# Replace a component and publish its manifests as a directory.
+# Stage the component and manifests before moving either live directory.
+# Each rename stays on the target filesystem. Until the staged manifest
+# directory is published, the exit trap attempts to restore both backups.
 copy_directory() (
 	typeset target parent stage="" backup="" lock cvs reports previous=""
 	typeset publishing=0 parent_dev path path_dev source_root
@@ -453,6 +459,8 @@ copy_directory() (
 	find "$stage/component" -type f -exec chmod a+r,go-w {} + || return 1
 	find "$stage/component" -type f -perm -0100 -exec chmod a+x {} + || return 1
 
+	# Carry CVS metadata over even for directories absent from the new source,
+	# so files removed from the component can still be registered with CVS.
 	if [ -d "$target" ]; then
 		(cd "$target" && find . -type d -name CVS -prune) >"$stage/cvs" ||
 			return 1

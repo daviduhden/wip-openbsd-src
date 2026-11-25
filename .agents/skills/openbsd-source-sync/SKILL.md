@@ -110,10 +110,11 @@ doas ./fetch-src.ksh --no-provision
 
 ```
 
-Never run the destructive modes "just to see". They remove the contents of the
-selected tree, and a failed `cvs checkout` can leave it empty. They also write
-`~/.profile` and, in the default mode, create an account and change
-`/etc/doas.conf`.
+Use read-only listing or static review for validation that does not require
+replacing a checkout. The checkout stages CVS contents before moving the live
+tree. Component copies stage both the source and its manifests before moving
+the live directories. After an interrupted publication, inspect the live
+paths and the printed backup location together before restoring either.
 
 ## Updating from OpenBSD-current
 
