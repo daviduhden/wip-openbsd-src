@@ -85,6 +85,25 @@ static int	get_phys(void);
 extern sigset_t s_mask;
 static void	ar_start_gzip(int, const char *, int);
 
+static void
+ar_wait_compressor(int cancel)
+{
+	pid_t pid;
+	int status;
+
+	if (zpid <= 0)
+		return;
+	if (cancel)
+		(void)kill(zpid, SIGKILL);
+	do {
+		pid = waitpid(zpid, &status, 0);
+	} while (pid == -1 && errno == EINTR);
+	zpid = -1;
+	if (pid == -1 || (!cancel && (!WIFEXITED(status) ||
+				      WEXITSTATUS(status) != 0)))
+		exit_val = 1;
+}
+
 /*
  * ar_open()
  *	Opens the next archive volume. Determines the type of the device and
@@ -155,6 +174,7 @@ ar_open(const char *name)
 			syswarn(1, errno, "Failed chdir to %s", chdname);
 			(void)close(arfd);
 			arfd = -1;
+			ar_wait_compressor(1);
 			can_unlnk = 0;
 			return (-1);
 		}
@@ -165,6 +185,7 @@ ar_open(const char *name)
 		syswarn(1, errno, "Failed stat on %s", arcname);
 		(void)close(arfd);
 		arfd = -1;
+		ar_wait_compressor(1);
 		can_unlnk = 0;
 		return (-1);
 	}
@@ -173,6 +194,7 @@ ar_open(const char *name)
 		    arcname);
 		(void)close(arfd);
 		arfd = -1;
+		ar_wait_compressor(1);
 		can_unlnk = 0;
 		return (-1);
 	}
@@ -303,9 +325,8 @@ ar_open(const char *name)
 void
 ar_close(int in_sig)
 {
-	int status;
-
 	if (arfd < 0) {
+		ar_wait_compressor(1);
 		did_io = io_ok = flcnt = 0;
 		return;
 	}
@@ -334,29 +355,15 @@ ar_close(int in_sig)
 		can_unlnk = 0;
 	}
 
-	/*
-	 * for a quick extract/list, pax frequently exits before the child
-	 * process is done
-	 */
-	if ((act == LIST || act == EXTRACT) && nflag && zpid > 0) {
-		kill(zpid, SIGINT);
-		zpid = -1;
-	}
-
 	(void)close(arfd);
-
-	/* Do not exit before child to ensure data integrity */
-	if (zpid > 0) {
-		waitpid(zpid, &status, 0);
-		if (!WIFEXITED(status) || WEXITSTATUS(status))
-			exit_val = 1;
-	}
+	arfd = -1;
+	ar_wait_compressor(in_sig ||
+			   ((act == LIST || act == EXTRACT) && nflag));
 
 	if (vflag && (artyp == ISTAPE)) {
 		(void)write(listfd, "done.\n", sizeof("done.\n") - 1);
 		vfpart = 0;
 	}
-	arfd = -1;
 
 	if (!io_ok && !did_io) {
 		flcnt = 0;
