@@ -5,13 +5,10 @@
 # on a development machine (Linux/macOS), with the host C library standing
 # in for the parts that only OpenBSD provides.
 #
-# The headers under test are exposed through a shim directory that contains
-# nothing but the header being tested, so that <limits.h>, <stdbool.h>,
-# <pthread.h> and friends come from the host C library while <stdbit.h>,
-# <stdatomic.h>, <threads.h>, ... come from the OpenBSD tree.  Each test
-# also asserts that the tree's include guard is in effect, proving that the
-# header selected is the one under libc/include and not a compiler or host
-# copy.
+# The shim exposes the six local ISO headers and a wrapper for <stdlib.h>.
+# Other headers such as <limits.h> and <pthread.h> come from the host.
+# The host tests and header matrix check the local include guards to catch
+# accidental selection of compiler resource headers or host copies.
 #
 # This Makefile uses BSD make syntax.  Run it with OpenBSD make(1) or,
 # on other hosts, bmake; GNU make is not supported.

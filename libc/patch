@@ -3741,8 +3741,8 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 +#
 +# Compile each of the six headers on its own, and all of them together in
-+# both include orders, under C11, C17 and C23, with strict warnings.  The
-+# A regular source include directory precedes compiler resources. Guard
++# both include orders, under C11, C17 and C23, with strict warnings.
++# Search the source include directory before compiler resources. Guard
 +# checks reject compiler substitutes even if the search configuration changes.
 +
 +set -u
@@ -3784,7 +3784,7 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +	done
 +done
 +
-+# Each header alone, but translated: the macros must survive a use.
++# Expand representative macros as well as checking standalone inclusion.
 +try c11 "#include <stdalign.h>
 +#ifndef _STDALIGN_H_
 +#error wrong stdalign.h
