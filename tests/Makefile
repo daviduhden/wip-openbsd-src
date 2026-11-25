@@ -54,13 +54,16 @@ stdckdint-tests: stdckdint-tests.c ../fvwm/compat/stdckdint.h ../fvwm/fvwm/xallo
 	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../fvwm/compat -I../fvwm/fvwm \
 	    stdckdint-tests.c -o $@$(SUFFIX)
 
-fvwm-parse-tests: fvwm-parse-tests.c ../fvwm/libs/Parse.c ../fvwm/libs/Strings.c ../fvwm/libs/System.c openbsd-shims.c
+FVWMSRC =	../fvwm
+FVWM_PARSE_HEADERS =	${FVWMSRC}/config.h ${FVWMSRC}/libs/fvwmlib.h
+fvwm-parse-tests: fvwm-parse-tests.c ../fvwm/libs/Parse.c ../fvwm/libs/Strings.c ../fvwm/libs/System.c openbsd-shims.c ${FVWM_PARSE_HEADERS}
 	$(CC) $(CFLAGS) $(SANITIZE) $(X11INCS) -isystem ../fvwm/compat -I../fvwm \
 	    -I../fvwm/libs -I../fvwm/fvwm -I. fvwm-parse-tests.c \
 	    ../fvwm/libs/Strings.c ../fvwm/libs/System.c \
 	    openbsd-shims.c -o $@$(SUFFIX)
 
-fvwm-exec-tests: fvwm-exec-tests.c ../fvwm/fvwm/fvwm_exec.c
+fvwm-exec-tests: fvwm-exec-tests.c ../fvwm/fvwm/fvwm_exec.c \
+    ../fvwm/fvwm/exec_imsg.h ${FVWMSRC}/config.h imsg.h
 	$(CC) $(CFLAGS) $(SANITIZE) -isystem ../fvwm/compat -I. -I../fvwm \
 	    -I../fvwm/fvwm fvwm-exec-tests.c -o $@$(SUFFIX)
 
@@ -71,12 +74,21 @@ fvwm-pipebuf-tests: fvwm-pipebuf-tests.c ../fvwm/fvwm/pipebuf.c ../fvwm/fvwm/pip
 # translation units under the tests/openbsd stub include tree, so
 # the exact production parsing/checksum code is exercised.
 EXT4SRC =	../ext4fs/sys/ufs/ext4fs
+EXT4_SHIMS =	openbsd/sys/buf.h openbsd/sys/malloc.h openbsd/sys/mount.h \
+	openbsd/sys/param.h openbsd/sys/proc.h openbsd/sys/systm.h \
+	openbsd/sys/ucred.h openbsd/sys/vnode.h openbsd/ufs/ufs/dinode.h \
+	openbsd/ufs/ufs/inode.h openbsd/ufs/ufs/quota.h \
+	openbsd/ufs/ufs/ufs_extern.h openbsd/ufs/ufs/ufsmount.h
+EXT4_HEADERS =	$(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h \
+	$(EXT4SRC)/ext4fs_crc32c.h $(EXT4_SHIMS)
 
-ext4fs-jbd2-tests: ext4fs-jbd2-tests.c $(EXT4SRC)/ext4fs_journal.c $(EXT4SRC)/ext4fs_crc32c.c $(EXT4SRC)/ext4fs_journal.h $(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h
+ext4fs-jbd2-tests: ext4fs-jbd2-tests.c $(EXT4SRC)/ext4fs_journal.c \
+    $(EXT4SRC)/ext4fs_journal.h $(EXT4SRC)/ext4fs_crc32c.c $(EXT4_HEADERS)
 	$(CC) $(CFLAGS) $(SANITIZE) -I. -Iopenbsd -I../ext4fs/sys \
 	    ext4fs-jbd2-tests.c -o $@$(SUFFIX)
 
-ext4fs-inode-tests: ext4fs-inode-tests.c $(EXT4SRC)/ext4fs_crc32c.c $(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h
+ext4fs-inode-tests: ext4fs-inode-tests.c $(EXT4SRC)/ext4fs_crc32c.c \
+    $(EXT4_HEADERS)
 	$(CC) $(CFLAGS) $(SANITIZE) -I. -Iopenbsd -I../ext4fs/sys \
 	    ext4fs-inode-tests.c -o $@$(SUFFIX)
 
