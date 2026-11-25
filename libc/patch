@@ -3706,7 +3706,7 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/iso-c-headers/matrix.sh
-@@ -0,0 +1,192 @@
+@@ -0,0 +1,193 @@
 +#!/bin/sh
 +#	$OpenBSD$
 +#
@@ -3741,11 +3741,12 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +trap 'exit 1' HUP INT TERM
 +status=0
 +
-+try()
-+{
++try() {
 +	# $1 = standard, $2 = source text
-+	printf '%s\n' "$2" | $CC -std=$1 -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
-+	    2>"$tmp/c.err" || {
++	# WARN is a list of compiler switches.
++	# shellcheck disable=SC2086
++	printf '%s\n' "$2" | "$CC" -std="$1" -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
++		2>"$tmp/c.err" || {
 +		echo "FAIL: -std=$1: $2" >&2
 +		sed 's/^/    /' "$tmp/c.err" >&2
 +		status=1
@@ -3891,9 +3892,9 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +	unsigned int z = stdc_leading_zeros(1u);
 +	int r = 0;
 +	bool o = ckd_add(&r, 1, 1);
-+	return (int)z + (int)o + r; }" | \
-+	    "$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
-+	    -fsyntax-only -x c++ - || status=1
++	return (int)z + (int)o + r; }" |
++		"$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
++			-fsyntax-only -x c++ - || status=1
 +else
 +	printf 'SKIP: C++ compiler %s is unavailable\n' "$CXX" >&2
 +fi
@@ -5404,3 +5405,264 @@ Index: regress/lib/libc/time/time_conversion/timetest.c
  	time_t converted;
  	if (gmtime_r(&test->time, &gmt) == NULL) {
  		memset(&gmt, 0, sizeof(gmt));
+Index: regress/lib/libc/asr/regress.sh
+===================================================================
+--- regress/lib/libc/asr/regress.sh
++++ regress/lib/libc/asr/regress.sh
+@@ -1,90 +1,85 @@
++#!/bin/sh
+ #	$OpenBSD: regress.sh,v 1.8 2026/05/08 04:13:44 tb Exp $
+ 
+-. ${PWD}/regress.subr
++# shellcheck source-path=SCRIPTDIR
++# shellcheck source=regress.subr
++. "${PWD}/regress.subr"
+ 
+-test_res_mkquery()
+-{
+-	for i in $@; do
+-		regress res_mkquery $i
++test_res_mkquery() {
++	for i in "$@"; do
++		regress res_mkquery "$i"
+ 	done
+ }
+ 
+-test_res_query()
+-{
+-	for i in $@; do
+-		regress res_query $i
+-		regress res_query -q $i
++test_res_query() {
++	for i in "$@"; do
++		regress res_query "$i"
++		regress res_query -q "$i"
+ 	done
+ }
+ 
+-test_getrrsetbyname()
+-{
+-	for i in $@; do
+-		regress getrrsetbyname $i
+-		regress getrrsetbyname -t MX $i
+-		regress getrrsetbyname -t AAAA $i
++test_getrrsetbyname() {
++	for i in "$@"; do
++		regress getrrsetbyname "$i"
++		regress getrrsetbyname -t MX "$i"
++		regress getrrsetbyname -t AAAA "$i"
+ 	done
+ }
+ 
+-test_gethostbyname()
+-{
+-	for i in $@; do
+-		regress gethostnamadr $i
+-		regress gethostnamadr -4 $i
+-		regress gethostnamadr -6 $i
++test_gethostbyname() {
++	for i in "$@"; do
++		regress gethostnamadr "$i"
++		regress gethostnamadr -4 "$i"
++		regress gethostnamadr -6 "$i"
+ 	done
+ }
+ 
+-test_gethostbyaddr()
+-{
+-	for i in $@; do
+-		regress gethostnamadr -a $i
++test_gethostbyaddr() {
++	for i in "$@"; do
++		regress gethostnamadr -a "$i"
+ 	done
+ }
+ 
+-test_getaddrinfo()
+-{
+-	for i in $@; do
+-		regress getaddrinfo $i
+-		regress getaddrinfo -C $i
+-		regress getaddrinfo -F $i
+-		regress getaddrinfo -CF $i
+-		regress getaddrinfo -P $i
+-		regress getaddrinfo -PF $i
+-		regress getaddrinfo -PC $i
+-		regress getaddrinfo -H $i
+-		regress getaddrinfo -p tcp $i
+-		regress getaddrinfo -p udp $i
+-		regress getaddrinfo -s www $i
+-		regress getaddrinfo -s bad $i
+-		regress getaddrinfo -S -s 8081 $i
+-		regress getaddrinfo -S -s bad $i
+-		regress getaddrinfo -P -s syslog $i
+-		regress getaddrinfo -P -s syslog -p tcp $i
+-		regress getaddrinfo -P -s syslog -p udp $i
++test_getaddrinfo() {
++	for i in "$@"; do
++		regress getaddrinfo "$i"
++		regress getaddrinfo -C "$i"
++		regress getaddrinfo -F "$i"
++		regress getaddrinfo -CF "$i"
++		regress getaddrinfo -P "$i"
++		regress getaddrinfo -PF "$i"
++		regress getaddrinfo -PC "$i"
++		regress getaddrinfo -H "$i"
++		regress getaddrinfo -p tcp "$i"
++		regress getaddrinfo -p udp "$i"
++		regress getaddrinfo -s www "$i"
++		regress getaddrinfo -s bad "$i"
++		regress getaddrinfo -S -s 8081 "$i"
++		regress getaddrinfo -S -s bad "$i"
++		regress getaddrinfo -P -s syslog "$i"
++		regress getaddrinfo -P -s syslog -p tcp "$i"
++		regress getaddrinfo -P -s syslog -p udp "$i"
+ 	done
+ }
+ 
+-test_getaddrinfo2()
+-{
+-	for i in $@; do
+-		regress getaddrinfo -f inet6 -t raw -p icmpv6 $i
++test_getaddrinfo2() {
++	for i in "$@"; do
++		regress getaddrinfo -f inet6 -t raw -p icmpv6 "$i"
+ 	done
+ }
+ 
+-test_getnameinfo()
+-{
+-	for i in $@; do
+-		regress getnameinfo $i
+-		regress getnameinfo -D $i
+-		regress getnameinfo -F $i
+-		regress getnameinfo -H $i
+-		regress getnameinfo -N $i
+-		regress getnameinfo -S $i
+-		regress getnameinfo -p 80 $i
+-		regress getnameinfo -p 514 $i
+-		regress getnameinfo -p 514 -D $i
+-		regress getnameinfo -p 5566 $i
++test_getnameinfo() {
++	for i in "$@"; do
++		regress getnameinfo "$i"
++		regress getnameinfo -D "$i"
++		regress getnameinfo -F "$i"
++		regress getnameinfo -H "$i"
++		regress getnameinfo -N "$i"
++		regress getnameinfo -S "$i"
++		regress getnameinfo -p 80 "$i"
++		regress getnameinfo -p 514 "$i"
++		regress getnameinfo -p 514 -D "$i"
++		regress getnameinfo -p 5566 "$i"
+ 	done
+ }
+ 
+@@ -94,8 +89,10 @@ EXTRA="undeadly.org www.openbsd.org cvs.
+ 
+ ADDRS="0.0.0.0 :: 127.0.0.1 ::1 212.227.193.194"
+ 
++# The fixed hostname and address groups are separated by spaces.
++# shellcheck disable=SC2086
+ for e in file bind local; do
+-	regress_setenv $e
++	regress_setenv "$e"
+ 
+ 	test_res_mkquery $WEIRD $BASIC
+ 	test_res_query $WEIRD $BASIC $EXTRA
+@@ -105,7 +102,7 @@ for e in file bind local; do
+ 	test_getaddrinfo NULL $WEIRD $BASIC $EXTRA
+ 	test_getaddrinfo2 undeadly.org www.kame.net
+ 	test_getnameinfo $ADDRS
+- 	test_gethostbyname $ADDRS
++	test_gethostbyname $ADDRS
+ done
+ 
+ regress_digest
+Index: regress/lib/libc/getaddrinfo/testsuite.sh
+===================================================================
+--- regress/lib/libc/getaddrinfo/testsuite.sh
++++ regress/lib/libc/getaddrinfo/testsuite.sh
+@@ -1,3 +1,4 @@
++#!/bin/sh
+ #	$OpenBSD: testsuite.sh,v 1.1 2002/07/05 15:54:30 itojun Exp $
+ #	$NetBSD: testsuite.sh,v 1.3 2002/07/05 15:49:11 itojun Exp $
+ 
+Index: regress/lib/libc/getexecpath/Makefile
+===================================================================
+--- regress/lib/libc/getexecpath/Makefile
++++ regress/lib/libc/getexecpath/Makefile
+@@ -6,11 +6,12 @@ CLEANFILES+=wrap.sh
+ 
+ run-regress-${PROG}:	${PROG}
+ 	./${PROG} `cd ${.OBJDIR} && pwd -P`/${PROG}
+-	cp ${.CURDIR}/wrap.sh ${.OBJDIR}
++	cp ${.CURDIR}/wrap.in ${.OBJDIR}/wrap.sh
++	chmod +x ${.OBJDIR}/wrap.sh
+ 	./wrap.sh `cd ${.OBJDIR} && pwd -P`/${PROG}
+-	sed 's!./${PROG}!///${.OBJDIR}/${PROG}!' ${.CURDIR}/wrap.sh > ${.OBJDIR}/wrap.sh
++	sed 's!./${PROG}!///${.OBJDIR}/${PROG}!' ${.CURDIR}/wrap.in > ${.OBJDIR}/wrap.sh
+ 	./wrap.sh `cd ${.OBJDIR} && pwd -P`/${PROG}
+-	sed 's!./${PROG}!/usr/bin/env ./${PROG}!' ${.CURDIR}/wrap.sh > ${.OBJDIR}/wrap.sh
++	sed 's!./${PROG}!/usr/bin/env ./${PROG}!' ${.CURDIR}/wrap.in > ${.OBJDIR}/wrap.sh
+ 	./wrap.sh `cd ${.OBJDIR} && pwd -P`/${PROG}
+ 
+ .include <bsd.regress.mk>
+Index: regress/lib/libc/getexecpath/wrap.in
+===================================================================
+--- /dev/null
++++ regress/lib/libc/getexecpath/wrap.in
+@@ -0,0 +1 @@
++#!./getexecpath
+Index: regress/lib/libc/getexecpath/wrap.sh
+===================================================================
+--- regress/lib/libc/getexecpath/wrap.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-#!./getexecpath
+Index: regress/lib/libc/getopt/getopt.sh
+===================================================================
+--- regress/lib/libc/getopt/getopt.sh
++++ regress/lib/libc/getopt/getopt.sh
+@@ -21,10 +21,14 @@
+ # 1. optstring argument for getopt(3)
+ # 2. space-separated command line arguments
+ # 3. expected output from ./getopt-test
+-test1_getopt()
+-{
+-	result=$(OPTS=$1 ./getopt-test $2)
+-	test "$result" == "$3" && return
++test1_getopt() {
++	# The second argument supplies a space-separated argument vector.
++	result=$(
++		set -f
++		# shellcheck disable=SC2086
++		OPTS=$1 ./getopt-test $2
++	)
++	test "$result" = "$3" && return
+ 	echo "OPTS=$1 ./getopt-test $2"
+ 	echo "expected: $3"
+ 	echo "result:   $result"
+@@ -33,8 +37,7 @@ test1_getopt()
+ 
+ # Test both without and with the optstring modifier "+",
+ # verifying that it makes no difference.
+-test2_getopt()
+-{
++test2_getopt() {
+ 	test1_getopt "$1" "$2" "$3"
+ 	test1_getopt "+$1" "$2" "$3"
+ }
+@@ -45,10 +48,9 @@ test2_getopt()
+ # a) options follow non-option arguments that terminate option processing
+ # b) or any arguments follow explicit "--".
+ # In these cases, use test2_getopt() plus a separate test1_getopt(-...).
+-test3_getopt()
+-{
++test3_getopt() {
+ 	test2_getopt "$1" "$2" "$3"
+-	test1_getopt "-$1" "$2" $(echo $3 | sed s/ARG/NONE/g)
++	test1_getopt "-$1" "$2" "$(printf '%s\n' "$3" | sed s/ARG/NONE/g)"
+ }
+ 
+ irc=0

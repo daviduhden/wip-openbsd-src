@@ -3624,7 +3624,7 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 ===================================================================
 --- /dev/null
 +++ regress/lib/libc/iso-c-headers/matrix.sh
-@@ -0,0 +1,192 @@
+@@ -0,0 +1,193 @@
 +#!/bin/sh
 +#	$OpenBSD$
 +#
@@ -3659,11 +3659,12 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +trap 'exit 1' HUP INT TERM
 +status=0
 +
-+try()
-+{
++try() {
 +	# $1 = standard, $2 = source text
-+	printf '%s\n' "$2" | $CC -std=$1 -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
-+	    2>"$tmp/c.err" || {
++	# WARN is a list of compiler switches.
++	# shellcheck disable=SC2086
++	printf '%s\n' "$2" | "$CC" -std="$1" -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
++		2>"$tmp/c.err" || {
 +		echo "FAIL: -std=$1: $2" >&2
 +		sed 's/^/    /' "$tmp/c.err" >&2
 +		status=1
@@ -3809,9 +3810,9 @@ Index: regress/lib/libc/iso-c-headers/matrix.sh
 +	unsigned int z = stdc_leading_zeros(1u);
 +	int r = 0;
 +	bool o = ckd_add(&r, 1, 1);
-+	return (int)z + (int)o + r; }" | \
-+	    "$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
-+	    -fsyntax-only -x c++ - || status=1
++	return (int)z + (int)o + r; }" |
++		"$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
++			-fsyntax-only -x c++ - || status=1
 +else
 +	printf 'SKIP: C++ compiler %s is unavailable\n' "$CXX" >&2
 +fi

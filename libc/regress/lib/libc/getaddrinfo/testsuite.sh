@@ -1,3 +1,4 @@
+#!/bin/sh
 #	$OpenBSD: testsuite.sh,v 1.1 2002/07/05 15:54:30 itojun Exp $
 #	$NetBSD: testsuite.sh,v 1.3 2002/07/05 15:49:11 itojun Exp $
 

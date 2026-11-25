@@ -21,10 +21,14 @@
 # 1. optstring argument for getopt(3)
 # 2. space-separated command line arguments
 # 3. expected output from ./getopt-test
-test1_getopt()
-{
-	result=$(OPTS=$1 ./getopt-test $2)
-	test "$result" == "$3" && return
+test1_getopt() {
+	# The second argument supplies a space-separated argument vector.
+	result=$(
+		set -f
+		# shellcheck disable=SC2086
+		OPTS=$1 ./getopt-test $2
+	)
+	test "$result" = "$3" && return
 	echo "OPTS=$1 ./getopt-test $2"
 	echo "expected: $3"
 	echo "result:   $result"
@@ -33,8 +37,7 @@ test1_getopt()
 
 # Test both without and with the optstring modifier "+",
 # verifying that it makes no difference.
-test2_getopt()
-{
+test2_getopt() {
 	test1_getopt "$1" "$2" "$3"
 	test1_getopt "+$1" "$2" "$3"
 }
@@ -45,10 +48,9 @@ test2_getopt()
 # a) options follow non-option arguments that terminate option processing
 # b) or any arguments follow explicit "--".
 # In these cases, use test2_getopt() plus a separate test1_getopt(-...).
-test3_getopt()
-{
+test3_getopt() {
 	test2_getopt "$1" "$2" "$3"
-	test1_getopt "-$1" "$2" $(echo $3 | sed s/ARG/NONE/g)
+	test1_getopt "-$1" "$2" "$(printf '%s\n' "$3" | sed s/ARG/NONE/g)"
 }
 
 irc=0

@@ -300,7 +300,7 @@ the respective intended trees.
 | patch | 35 | 18 | 0 | 3239 |
 | iso-c.patch | 33 | 14 | 0 | 3237 |
 
-SHA-256:
+SHA-256 at the synchronization recorded above:
 
 ```text
 a4388570740e1e531d8efc2a8d44d9ec7cc73524e9f97bfbda248a40dad0517d  patch
@@ -319,4 +319,15 @@ host drivers and native header matrix. No merge markers were found in the
 modified header, atomic, thread or matrix directories. Temporary source
 snapshots, downloaded Git metadata and patch-application workspaces were
 removed after recording these results; actual regression sources remain.
+The subsequent shell lint corrections update the complete patch with
+regression-driver portability fixes and update the ISO-only patch with
+the native header-matrix script. The changed sections were applied to
+pristine inputs at the same upstream revision with zero fuzz and compared
+to the local sources. This check covers the edited sections.
+
+```text
+37668007fbcff77d1c7bf3aa64ee0db2d564aac16f51b7348a45de9d80fd578e  patch
+fcc40e1ce78f6193c9d721d3387001d30d5d59731726d662ec8c25ed229f7ade  iso-c.patch
+```
+
 No compiler, linker or project runtime test was invoked.

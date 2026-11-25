@@ -89,6 +89,14 @@ Run the read-only knowledge validator and inspect git diff --check and the
 final status. Preserve unrelated pre-existing changes and compare against
 the initial worktree, not against a falsely assumed clean repository.
 
+Run `validate-shell --check` for edited regression drivers. Keep
+non-shell interpreter fixtures in files with a template suffix and
+generate executable wrappers in the object directory. If a shell driver
+belongs to the imported source manifest, apply the changed patch sections
+to their pristine upstream files and compare the reconstructed contents.
+Keep host-only drivers out of the source patch and retain the ISO-only
+scope of the supplemental patch.
+
 ## Evidence and restrictions
 
 Use a native OpenBSD build and regress environment when available and

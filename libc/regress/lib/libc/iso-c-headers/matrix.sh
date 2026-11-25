@@ -32,11 +32,12 @@ trap 'rm -rf "$tmp"' 0
 trap 'exit 1' HUP INT TERM
 status=0
 
-try()
-{
+try() {
 	# $1 = standard, $2 = source text
-	printf '%s\n' "$2" | $CC -std=$1 -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
-	    2>"$tmp/c.err" || {
+	# WARN is a list of compiler switches.
+	# shellcheck disable=SC2086
+	printf '%s\n' "$2" | "$CC" -std="$1" -I"$PUBLIC_INCDIR" $WARN -fsyntax-only -x c - \
+		2>"$tmp/c.err" || {
 		echo "FAIL: -std=$1: $2" >&2
 		sed 's/^/    /' "$tmp/c.err" >&2
 		status=1
@@ -182,9 +183,9 @@ int main() {
 	unsigned int z = stdc_leading_zeros(1u);
 	int r = 0;
 	bool o = ckd_add(&r, 1, 1);
-	return (int)z + (int)o + r; }" | \
-	    "$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
-	    -fsyntax-only -x c++ - || status=1
+	return (int)z + (int)o + r; }" |
+		"$CXX" -std=c++17 -I"$PUBLIC_INCDIR" -Wall -Wextra \
+			-fsyntax-only -x c++ - || status=1
 else
 	printf 'SKIP: C++ compiler %s is unavailable\n' "$CXX" >&2
 fi

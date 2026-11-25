@@ -22,11 +22,12 @@ trap 'rm -rf "$tmp"' 0
 trap 'exit 1' HUP INT TERM
 status=0
 
-try()
-{
+try() {
 	# $1 = standard, $2 = source text
-	printf '%s\n' "$2" | $CC -std=$1 $CFLAGS -I"$SHIM" -fsyntax-only -x c - \
-	    2>"$tmp/c.err" || {
+	# CFLAGS is a list of compiler switches.
+	# shellcheck disable=SC2086
+	printf '%s\n' "$2" | "$CC" -std="$1" $CFLAGS -I"$SHIM" -fsyntax-only -x c - \
+		2>"$tmp/c.err" || {
 		echo "FAIL: -std=$1: $2" >&2
 		sed 's/^/    /' "$tmp/c.err" >&2
 		status=1
@@ -129,6 +130,8 @@ done
 CXX=${CXX:-c++}
 if command -v "$CXX" >/dev/null 2>&1; then
 	for std in c++17 c++23; do
+		# CFLAGS is a list of compiler switches.
+		# shellcheck disable=SC2086
 		printf '%s\n' "#include <stdalign.h>
 #include <stdatomic.h>
 #include <stdbit.h>
@@ -142,9 +145,9 @@ int main() {
 	bool h = stdc_has_single_bit(8u);
 	int r = 0;
 	bool o = ckd_add(&r, 20, 22);
-	return (int)z + (int)f + (int)h + (int)o + r; }" | \
-		    $CXX -std=$std $CFLAGS -I"$SHIM" \
-		    -fsyntax-only -x c++ - 2>"$tmp/cxx.err" || {
+	return (int)z + (int)f + (int)h + (int)o + r; }" |
+			"$CXX" -std="$std" $CFLAGS -I"$SHIM" \
+				-fsyntax-only -x c++ - 2>"$tmp/cxx.err" || {
 			echo "FAIL: $CXX -std=$std (C++)" >&2
 			sed 's/^/    /' "$tmp/cxx.err" >&2
 			status=1
