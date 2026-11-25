@@ -117,7 +117,9 @@ cc -fsanitize=address,undefined -g -o test test.c && ./test
 ## Multi-result regressions
 
 For atomic exchange, check the returned previous value before loading the
-object again. Check the stored replacement separately.
+object again. Check the stored replacement separately. Tests that take an
+expected result as their last argument should also cover the missing-argument
+case. An interpreter wrapper may supply additional positional arguments.
 
 ## Shell drivers
 

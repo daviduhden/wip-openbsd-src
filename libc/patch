@@ -5750,6 +5750,19 @@ Index: regress/lib/libc/getexecpath/Makefile
  	./wrap.sh `cd ${.OBJDIR} && pwd -P`/${PROG}
  
  .include <bsd.regress.mk>
+Index: regress/lib/libc/getexecpath/getexecpath.c
+===================================================================
+--- regress/lib/libc/getexecpath/getexecpath.c
++++ regress/lib/libc/getexecpath/getexecpath.c
+@@ -12,7 +12,7 @@ main(int argc, char *argv[])
+ {
+ 	char path[PATH_MAX];
+ 
+-	if (argc < 1)
++	if (argc < 2)
+ 		errx(1, "usage: getexecpath [...] expected-path");
+ 
+ 	if (getexecpath(path, sizeof path) == -1)
 Index: regress/lib/libc/getexecpath/wrap.in
 ===================================================================
 --- /dev/null

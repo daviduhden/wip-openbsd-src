@@ -12,7 +12,7 @@ main(int argc, char *argv[])
 {
 	char path[PATH_MAX];
 
-	if (argc < 1)
+	if (argc < 2)
 		errx(1, "usage: getexecpath [...] expected-path");
 
 	if (getexecpath(path, sizeof path) == -1)
