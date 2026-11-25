@@ -18,6 +18,8 @@
 #ifndef _EXT4FS_JOURNAL_H_
 #define _EXT4FS_JOURNAL_H_
 
+#include <sys/tree.h>
+
 /*
  * JBD2 journal on-disk structures.
  * All JBD2 fields are big-endian.
@@ -178,18 +180,17 @@ typedef char ext4fs_journal_tail_size[
 typedef char ext4fs_journal_revoke_header_size[
     (sizeof(struct jbd2_revoke_header) == (size_t)16) ? 1 : -1];
 
-/* Revocation table entry */
-struct jbd2_revoke_entry {
-	u_int64_t re_block;
-	u_int32_t re_sequence;
-};
-
 /* Block map entry: journal block -> filesystem block */
 struct jbd2_blockmap_entry {
 	u_int64_t jb_fsblock; /* filesystem block number */
 };
 
-/* In-memory replay context */
+RB_HEAD(jbd2_revoke_tree, jbd2_revoke_entry);
+
+/*
+ * Lifetime is one recovery attempt. Device and mount state are borrowed
+ * from the caller; the map and the revocation table are owned here.
+ */
 struct jbd2_replay_ctx {
 	struct vnode	*rc_devvp;
 	struct m_ext4fs *rc_fs;
@@ -214,10 +215,9 @@ struct jbd2_replay_ctx {
 	struct jbd2_blockmap_entry *rc_blockmap;
 	u_int32_t		    rc_blockmap_count;
 
-	/* Revocation table */
-	struct jbd2_revoke_entry *rc_revoke;
-	u_int32_t		  rc_revoke_count;
-	u_int32_t		  rc_revoke_alloc;
+	/* Root of the revocation tree. */
+	struct jbd2_revoke_tree	rc_revoke;
+	size_t			rc_revoke_count;
 
 	/* Scan result */
 	u_int32_t rc_end_sequence;

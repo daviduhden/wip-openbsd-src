@@ -632,6 +632,40 @@ test_transaction_scan(void)
 	CHECK(jbd2_pass_revoke(&ctx) == 0, "revoke pass follows scan endpoint");
 }
 
+static void
+test_revocation_tree(void)
+{
+	struct jbd2_replay_ctx ctx = { 0 };
+	uint64_t block;
+	unsigned int i;
+
+	ctx.rc_sequence = UINT32_MAX - 1;
+	CHECK(!jbd2_revoke_check(&ctx, 0, UINT32_MAX), "empty tree");
+	for (i = 0; i < 4096; i++) {
+		block = (uint64_t)i << 32;
+		CHECK(jbd2_revoke_add(&ctx, block, UINT32_MAX) == 0,
+		    "insert ordered 64-bit block numbers");
+	}
+	block = UINT64_C(1024) << 32;
+	CHECK(jbd2_revoke_add(&ctx, block, 0) == 0, "update across wrap");
+	CHECK(jbd2_revoke_add(&ctx, block, UINT32_MAX - 1) == 0,
+	    "ignore older duplicate");
+	CHECK(ctx.rc_revoke_count == 4096, "count distinct blocks");
+	for (i = 0; i < 4096; i++) {
+		uint64_t key = (uint64_t)i << 32;
+
+		CHECK(jbd2_revoke_check(&ctx, key, UINT32_MAX),
+		    "find inserted block");
+		CHECK(jbd2_revoke_check(&ctx, key, 0) == (key == block),
+		    "only updated block survives sequence wrap");
+	}
+	CHECK(!jbd2_revoke_check(&ctx, UINT64_MAX, UINT32_MAX),
+	    "missing block");
+	jbd2_revoke_clear(&ctx);
+	CHECK(ctx.rc_revoke_count == 0 &&
+	    !jbd2_revoke_check(&ctx, block, UINT32_MAX), "clear the tree");
+}
+
 int
 main(void)
 {
@@ -647,6 +681,7 @@ main(void)
 	test_feature_check();
 	test_commit_checksums();
 	test_transaction_scan();
+	test_revocation_tree();
 
 	if (failures != 0) {
 		fprintf(stderr, "ext4fs-jbd2-tests: %d failure(s)\n", failures);

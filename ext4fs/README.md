@@ -41,8 +41,9 @@ patch was written against, and do not apply it twice.
 ## Testing
 
 The host-side tests in `tests/ext4fs-*.c` exercise journal descriptor
-parsing, checksum verification and inode checksums against the
-production sources.  They are not part of the OpenBSD build graph.  A
+parsing, revocation lookup across sequence wrap, and inode and journal
+checksums against the production sources.  They are not part of the
+OpenBSD build graph.  A
 real kernel build and mount test requires an OpenBSD source tree and a
 test image. A read-only mount that needs recovery must also meet the
 feature requirements for writing to the filesystem.
@@ -53,9 +54,12 @@ journals with multiple descriptors, revocations, different checksum
 profiles, and the sequence boundary. After recovery, compare file contents
 and filesystem metadata with a Linux recovery of the reference copy and
 check the filesystem using e2fsprogs. Verify retry behavior when journal
-or filesystem superblock writes fail. Record filesystem features, journal
-size, elapsed mount time and kernel memory usage before changing the block
-map or revocation representation.
+or filesystem superblock writes fail. An inode table read failure or
+synchronous inode write failure must also leave the inode eligible for
+retry. Record filesystem features, journal size, elapsed mount time and
+kernel memory usage when comparing recovery performance. The revocation
+tree keeps one node per distinct block and provides logarithmic lookup
+during revoke collection and replay.
 
 ## C language compatibility
 

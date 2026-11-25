@@ -501,54 +501,50 @@ jbd2_parse_tag(struct jbd2_replay_ctx *ctx, const char *buf, u_int32_t bufsize,
 	return (0);
 }
 
+struct jbd2_revoke_entry {
+	RB_ENTRY(jbd2_revoke_entry) re_node;
+	u_int64_t re_block;
+	u_int32_t re_sequence;
+};
+
+static int
+jbd2_revoke_cmp(struct jbd2_revoke_entry *a, struct jbd2_revoke_entry *b)
+{
+	if (a->re_block < b->re_block)
+		return (-1);
+	if (a->re_block > b->re_block)
+		return (1);
+	return (0);
+}
+
+RB_GENERATE_STATIC(jbd2_revoke_tree, jbd2_revoke_entry, re_node,
+    jbd2_revoke_cmp)
+
 /*
- * Add a block to the revocation table, retaining its newest revoke
- * sequence. Compare distances from the start of this replay so that
- * sequence wraparound preserves the recovery order.
+ * Keep one entry per block. Compare sequence distances from the start of
+ * recovery so the newest revocation survives across sequence wraparound.
  */
 static int
 jbd2_revoke_add(
     struct jbd2_replay_ctx *ctx, u_int64_t block, u_int32_t sequence)
 {
-	u_int32_t i;
+	struct jbd2_revoke_entry key = { .re_block = block };
+	struct jbd2_revoke_entry *entry;
 
-	/* Update existing entry if present */
-	for (i = 0; i < ctx->rc_revoke_count; i++) {
-		if (ctx->rc_revoke[i].re_block == block) {
-			if (sequence - ctx->rc_sequence >
-			    ctx->rc_revoke[i].re_sequence - ctx->rc_sequence)
-				ctx->rc_revoke[i].re_sequence = sequence;
-			return (0);
-		}
+	entry = RB_FIND(jbd2_revoke_tree, &ctx->rc_revoke, &key);
+	if (entry != NULL) {
+		if (sequence - ctx->rc_sequence >
+		    entry->re_sequence - ctx->rc_sequence)
+			entry->re_sequence = sequence;
+		return (0);
 	}
 
-	/* Grow table if needed */
-	if (ctx->rc_revoke_count >= ctx->rc_revoke_alloc) {
-		struct jbd2_revoke_entry *newrev;
-		u_int32_t		  newalloc;
-
-		if (ctx->rc_revoke_alloc > UINT32_MAX / 2)
-			return (ENOMEM);
-		newalloc = ctx->rc_revoke_alloc != 0
-			   ? ctx->rc_revoke_alloc * 2 : 64;
-		newrev = mallocarray(newalloc, sizeof(struct jbd2_revoke_entry),
-			 M_TEMP, M_WAITOK | M_CANFAIL | M_ZERO);
-		if (newrev == NULL)
-			return (ENOMEM);
-		if (ctx->rc_revoke_count > 0)
-			memcpy(newrev, ctx->rc_revoke,
-			    ctx->rc_revoke_count *
-				sizeof(struct jbd2_revoke_entry));
-		if (ctx->rc_revoke != NULL)
-			free(ctx->rc_revoke, M_TEMP,
-			    ctx->rc_revoke_alloc *
-				sizeof(struct jbd2_revoke_entry));
-		ctx->rc_revoke = newrev;
-		ctx->rc_revoke_alloc = newalloc;
-	}
-
-	ctx->rc_revoke[ctx->rc_revoke_count].re_block = block;
-	ctx->rc_revoke[ctx->rc_revoke_count].re_sequence = sequence;
+	entry = mallocarray(1, sizeof(*entry), M_TEMP, M_WAITOK | M_CANFAIL);
+	if (entry == NULL)
+		return (ENOMEM);
+	entry->re_block = block;
+	entry->re_sequence = sequence;
+	RB_INSERT(jbd2_revoke_tree, &ctx->rc_revoke, entry);
 	ctx->rc_revoke_count++;
 	return (0);
 }
@@ -560,15 +556,24 @@ static int
 jbd2_revoke_check(
     struct jbd2_replay_ctx *ctx, u_int64_t block, u_int32_t sequence)
 {
-	u_int32_t i;
+	struct jbd2_revoke_entry key = { .re_block = block };
+	struct jbd2_revoke_entry *entry;
 
-	for (i = 0; i < ctx->rc_revoke_count; i++) {
-		if (ctx->rc_revoke[i].re_block == block &&
-		    ctx->rc_revoke[i].re_sequence - ctx->rc_sequence >=
-		    sequence - ctx->rc_sequence)
-			return (1);
+	entry = RB_FIND(jbd2_revoke_tree, &ctx->rc_revoke, &key);
+	return (entry != NULL &&
+	    entry->re_sequence - ctx->rc_sequence >= sequence - ctx->rc_sequence);
+}
+
+static void
+jbd2_revoke_clear(struct jbd2_replay_ctx *ctx)
+{
+	struct jbd2_revoke_entry *entry;
+
+	while ((entry = RB_ROOT(&ctx->rc_revoke)) != NULL) {
+		RB_REMOVE(jbd2_revoke_tree, &ctx->rc_revoke, entry);
+		free(entry, M_TEMP, sizeof(*entry));
 	}
-	return (0);
+	ctx->rc_revoke_count = 0;
 }
 
 /* CRC32C is stored complemented relative to ext4fs_crc32c(). */
@@ -942,7 +947,7 @@ jbd2_pass_revoke(struct jbd2_replay_ctx *ctx)
 	}
 
 	if (ctx->rc_revoke_count > 0)
-		printf("ext4fs: journal revoke: %u blocks revoked\n",
+		printf("ext4fs: journal revoke: %zu blocks revoked\n",
 		    ctx->rc_revoke_count);
 
 	return (seq == ctx->rc_end_sequence ? 0 : EIO);
@@ -951,8 +956,9 @@ jbd2_pass_revoke(struct jbd2_replay_ctx *ctx)
 /*
  * Pass 3: REPLAY
  *
- * Walk the journal a third time, writing data blocks to the filesystem
- * that have not been revoked.
+ * Walk the committed range a third time. Verify each surviving data block
+ * as required by the checksum profile, then write it to its filesystem
+ * destination. An error may leave earlier block writes on disk.
  */
 static int
 jbd2_pass_replay(struct jbd2_replay_ctx *ctx)
@@ -1397,9 +1403,7 @@ out:
 	if (ctx.rc_blockmap != NULL)
 		free(ctx.rc_blockmap, M_TEMP,
 		    ctx.rc_blockmap_count * sizeof(struct jbd2_blockmap_entry));
-	if (ctx.rc_revoke != NULL)
-		free(ctx.rc_revoke, M_TEMP,
-		    ctx.rc_revoke_alloc * sizeof(struct jbd2_revoke_entry));
+	jbd2_revoke_clear(&ctx);
 
 	return (error);
 }

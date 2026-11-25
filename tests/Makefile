@@ -81,7 +81,8 @@ EXT4_HEADERS =	$(EXT4SRC)/ext4fs.h $(EXT4SRC)/ext4fs_dinode.h \
 	$(EXT4SRC)/ext4fs_crc32c.h $(EXT4_SHIMS)
 
 ext4fs-jbd2-tests: ext4fs-jbd2-tests.c $(EXT4SRC)/ext4fs_journal.c \
-    $(EXT4SRC)/ext4fs_journal.h $(EXT4SRC)/ext4fs_crc32c.c $(EXT4_HEADERS)
+    $(EXT4SRC)/ext4fs_journal.h $(EXT4SRC)/ext4fs_crc32c.c $(EXT4_HEADERS) \
+    openbsd/sys/tree.h openbsd/sys/_null.h ../libc/sys/sys/tree.h
 	$(CC) $(CFLAGS) $(SANITIZE) -I. -Iopenbsd -I../ext4fs/sys \
 	    ext4fs-jbd2-tests.c -o $@$(SUFFIX)
 
