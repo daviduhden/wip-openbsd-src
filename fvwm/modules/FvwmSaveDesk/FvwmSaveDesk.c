@@ -408,8 +408,8 @@ do_save_command(
 /***********************************************************************
  *
  *  Procedure:
- *	checks to see if we are supposed to take some action now,
- *      finds time for next action to be performed.
+ *	Write the startup commands for recreating the saved windows.
+ *	Emit the current desk last so it is visible after restoration.
  *
  ***********************************************************************/
 void

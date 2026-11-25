@@ -248,6 +248,8 @@ Loop(int *fd)
 						Text[--pos] = 0;
 				} else if ((keysym == XK_Return) ||
 				    (keysym == XK_KP_Enter)) {
+					/* Execute in fvwm; replies arrive
+					 * separately on the read pipe. */
 					SendText(fd, Text, 0);
 					last_error[0] = 0;
 					strncpy(previous_line, Text, 255);

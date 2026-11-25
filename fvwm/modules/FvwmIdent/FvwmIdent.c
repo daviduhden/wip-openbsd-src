@@ -225,6 +225,7 @@ process_message(unsigned long type, unsigned long *body)
 		list_res_name(body);
 		break;
 	case M_END_WINDOWLIST:
+		/* Names, class and geometry arrive in separate packets. */
 		list_end();
 		break;
 	default:

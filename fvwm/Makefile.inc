@@ -21,7 +21,8 @@ LDADD +=	-L${X11BASE}/lib
 
 FVWMLIBDIR =	${X11BASE}/lib/X11/fvwm
 
-# Standalone builds are in-place; never create objdirs.
+# Recursive builds link directly against the in-tree libs/libfvwm.a.
+# Keep the per-directory objects and archives alongside their Makefiles.
 NOOBJ =		Yes
 
 # Fallbacks used by the data-only subdirectories when the Xenocara

@@ -765,6 +765,10 @@ change_icon_name(char *str)
 	XFree(name.value);
 }
 
+/*
+ * Put the target inside the clipping window so scrolling can move
+ * it without resizing it.  Loop() reparents it to the root on quit.
+ */
 void
 GrabWindow(Window target)
 {

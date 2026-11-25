@@ -31,7 +31,7 @@ and `xpmroot`. Binary icons and pixmaps are assets, not source files.
   update managed-window state and issue the corresponding X requests. The
   event loop also services module pipes and helper IPC while waiting for X
   activity.
-- `fvwm/fvwm/add_window.c`, `windows.c`, `misc.c`, and `tables.c` participate
+- `fvwm/fvwm/add_window.c`, `windows.c`, and `misc.c` participate
   in client registration, state changes, and cleanup. `FvwmWindow` keeps a
   null-terminated management list separate from the circular stacking ring
   rooted at `Scr.FvwmRoot`.

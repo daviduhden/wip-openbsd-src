@@ -11,12 +11,10 @@
  * Its now in "modconf.c".
  *
  * PipeRead execution architecture (2026):
- * PipeRead commands are run by the privilege-separated fvwm_exec
- * helper, not forked here.  The helper was started before this
- * process locked its unveil(2) filesystem view, so PipeRead commands
- * can read and write files outside fvwm's own sandbox; the output is
- * streamed back over imsg(3) and processed with the same line
- * semantics as before.  See exec.c and fvwm_exec.c.
+ * The same-user fvwm_exec helper runs PipeRead commands with the
+ * user's filesystem access and streams stdout over imsg(3).
+ * The controller interprets that output as configuration commands
+ * under its own unveil(2) view.  See exec.c and fvwm_exec.c.
  * *************************************************************************
  */
 // clang-format off
@@ -61,21 +59,18 @@ typedef char piperead_nesting_fits[
     MAX_NESTING_DEPTH <= PIPEREAD_SLOTS ? 1 : -1];
 
 /*
- * Bound for one assembled PipeRead command line.  The historical
- * implementation split lines at the 1023-byte fgets() buffer; the
- * limit here is far more generous while still bounding memory, so
- * every historical configuration behaves identically.
+ * Split physical lines at this size and dispatch an assembled
+ * command when a continuation reaches the threshold.  Joining the
+ * last fragment can put the assembled command over the threshold.
  */
 #define MAX_PIPEREAD_LINE (64 * 1024)
 
 /*
  * Bound on output buffered for an individual (possibly nested)
- * PipeRead frame whose output cannot be consumed right now.  When
- * it is reached the oldest complete lines are dropped, keeping
- * memory bounded while nested commands finish; the historical
- * direct-pipe implementation exerted backpressure instead, which
- * cannot be replicated across the imsg link without deadlocking
- * nested commands.
+ * suspended PipeRead frame.  Trim its unread output to allow
+ * the controller to keep draining the shared imsg connection.
+ * Blocking on an outer frame could prevent delivery of output
+ * needed by the currently executing inner frame.
  */
 #define PIPEREAD_BUF_MAX (256 * 1024)
 
@@ -139,11 +134,10 @@ piperead_msg(struct imsg *imsg, void *arg)
 				 * An outer frame whose output cannot
 				 * be consumed right now (a nested
 				 * PipeRead is running) must not grow
-				 * without bound: keep the newest
-				 * PIPEREAD_BUF_MAX bytes and drop
-				 * the oldest complete lines.  The
-				 * innermost frame consumes promptly
-				 * and never hits this.
+				 * without bound.  Trim at line
+				 * boundaries where possible.  The
+				 * innermost frame consumes lines
+				 * between reads.
 				 */
 				if (frame != active_frames)
 					pipebuf_trim(

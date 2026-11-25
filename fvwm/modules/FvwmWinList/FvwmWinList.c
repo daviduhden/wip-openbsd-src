@@ -395,6 +395,8 @@ ProcessMessage(unsigned long type, unsigned long *body)
 		redraw = 1;
 		break;
 	case M_END_WINDOWLIST:
+		/* Defer initial window creation until the snapshot has
+		 * supplied the labels and initial desk information. */
 		if (!WindowIsUp)
 			MakeMeWindow();
 		redraw = 1;

@@ -23,7 +23,8 @@ XLIB =		-lX11 -lxcb -lXau -lXdmcp
 FVWMLIBDIR =	${X11BASE}/lib/X11/fvwm
 MANDIR =	${X11BASE}/man/man
 
-# Standalone builds are in-place; never create objdirs.
+# Modules link against the same in-tree archive as the controller.
+# The extra directory level changes the relative include and link paths.
 NOOBJ =		Yes
 
 LDADD +=	-L${.CURDIR}/../../libs -lfvwm

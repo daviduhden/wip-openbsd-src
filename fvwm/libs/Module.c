@@ -68,10 +68,10 @@ write_full(int fd, const void *buf, size_t len)
  * ReadFvwmPacket(fd[1],header, &body);
  *
  * Returns:
- *   > 0 everything is OK.
- *   = 0 invalid packet.
- *   < 0 pipe is dead. (Should never occur)
- *   body is a malloc'ed space which needs to be freed
+ *   > 0 header bytes read.  The caller owns *body and frees it.
+ *   = 0 invalid start flag, if DeadPipe() returns.
+ *   < 0 invalid word count or I/O failure, if DeadPipe() returns.
+ *   *body is NULL on failure.
  *
  **************************************************************************/
 int
@@ -120,7 +120,9 @@ ReadFvwmPacket(int fd, unsigned long *header, unsigned long **body)
 
 /************************************************************************
  *
- * SendText - Sends arbitrary text/command back to fvwm
+ * Send a module command frame: native window ID, byte count,
+ * command bytes without a NUL, and a continuation flag of 1.
+ * The controller interprets the command in the window's context.
  *
  ***********************************************************************/
 void

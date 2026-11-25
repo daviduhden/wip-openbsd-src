@@ -14,8 +14,8 @@
 #include <string.h>
 // clang-format on
 
-/* strtonum lives in glibc (>= 2.38) but its declaration needs
- * _GNU_SOURCE; declare it here for the include below. */
+/* Declare the local strtonum stub before including Parse.c, which
+ * also defines helpers outside the paths exercised by these tests. */
 long long strtonum(const char *, long long, long long, const char **);
 
 // clang-format off

@@ -108,6 +108,11 @@ count_nonsticky_in_hashtab(void *arg)
 	return 0;
 }
 
+/*
+ * A page transition generates a batch of geometry updates.  Defer
+ * redraws while applying the expected configure packets for complete,
+ * non-sticky clients assigned to this manager.
+ */
 static void
 set_draw_mode(WinManager *man, int flag)
 {

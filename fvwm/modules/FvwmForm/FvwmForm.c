@@ -1976,7 +1976,10 @@ ReadXServer(void)
 	} /* while loop */
 }
 
-/* main event loop */
+/*
+ * Handle controller messages and X input on the same thread so that
+ * either can update the form without concurrent access to its fields.
+ */
 static void
 MainLoop(void)
 {

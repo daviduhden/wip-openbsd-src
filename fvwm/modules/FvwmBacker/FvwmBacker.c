@@ -203,6 +203,7 @@ ProcessMessage(unsigned long type, unsigned long *body,
     unsigned long body_words)
 {
 	if (type == M_NEW_DESK) {
+		/* Unconfigured desks leave the existing background alone. */
 		if (body == NULL || body_words < 1 || commands == NULL ||
 		    DeskCount <= 0 || body[0] >= (unsigned long)DeskCount ||
 		    commands[body[0]].type == -1) {

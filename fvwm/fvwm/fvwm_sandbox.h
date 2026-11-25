@@ -5,7 +5,8 @@
  * Each module calls only the helpers it needs; there is no "one size fits
  * all" policy.
  *
- * All pledge/unveil calls check return values and fail with diagnostics.
+ * The setup helpers check pledge/unveil results.  The path helpers
+ * below tolerate EPERM, which can occur after the view is locked.
  *
  * The controller retains a locked unveil view but stays unpledged so it
  * can execute modules and restart. Without execpromises, execve clears the

@@ -129,6 +129,8 @@ main(int argc, char **argv)
 			delay->tv_sec = sec;
 			delay->tv_usec = usec;
 		}
+		/* With a delay, act after focus settles for one interval.
+		 * Each new notification restarts the timer. */
 		select(fd_width, &in_fdset, 0, 0,
 		    (focus_win == last_win) ? NULL : delay);
 #ifdef DEBUG

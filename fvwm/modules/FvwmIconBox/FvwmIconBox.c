@@ -2219,6 +2219,8 @@ process_message(unsigned long type, unsigned long *body)
 		}
 		break;
 	case M_END_WINDOWLIST:
+		/* Lay out the complete snapshot before displaying icons.
+		 * Subsequent packets update the live layout once ready. */
 		GetIconwinSize(&diffx, &diffy);
 		tmp = Head;
 		while (tmp != NULL) {

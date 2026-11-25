@@ -5,6 +5,8 @@
 
 #define FVWM_ICONDIR "/usr/X11R6/lib/X11/fvwm/icons"
 
+/* Compile-time features for the controller and modules.  Shared
+ * switches keep declarations and their consumers in agreement. */
 #define XPM 1
 #define SHAPE 1
 #define ACTIVEDOWN_BTNS 1

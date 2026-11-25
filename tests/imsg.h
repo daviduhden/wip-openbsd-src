@@ -1,10 +1,10 @@
 /*
- * stub-imsg.h -- minimal test-support declarations for the libutil
- * imsg(3) API used by the fvwm_exec decoder tests.
+ * imsg.h -- test declarations for the imsg(3) fields used by the
+ * fvwm_exec decoder. The test constructs messages in memory.
  *
- * NOT part of the production build.  On OpenBSD the real
- * /usr/include/imsg.h is used; this header exists only so the
- * pure decoding logic can be exercised on non-OpenBSD hosts.
+ * The host test include path selects this header on every platform.
+ * The production build uses the OpenBSD libutil header and transport.
+ * The shim makes no general ABI compatibility guarantee.
  */
 #ifndef STUB_IMSG_H
 #define STUB_IMSG_H

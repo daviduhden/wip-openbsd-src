@@ -151,9 +151,8 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		return;
 	}
 
-	/* I want one-ended pipes, so I open two two-ended pipes,
-	 * and close one end of each. I need one ended pipes so that
-	 * I can detect when the module crashes/malfunctions */
+	/* Each direction has its own pipe.  Parent and child
+	 * close their unused ends so a peer exit delivers EOF. */
 	if (pipe(fvwm_to_app) != 0) {
 		fvwm_msg(ERR, "executeModule", "Failed to open pipe");
 		free(arg1);
@@ -195,9 +194,9 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 		nargs--;
 	args[nargs] = 0;
 
-	/* Try vfork instead of fork. The man page says that vfork is better! */
-	/* Also, had to change exit to _exit() */
-	/* Not everyone has vfork! */
+	/* The child keeps only the module's ends of these
+	 * pipes and uses _exit() if replacing its image fails.
+	 */
 	val = fork();
 	if (val > 0) {
 		/* This fork remains running fvwm */
@@ -251,7 +250,9 @@ executeModule(XEvent *eventp, Window w, FvwmWindow *tmp_win,
 	return;
 }
 
-/* Changed to return 66, Locking code AS dje */
+/* Read the rest of a module command after the caller reads its window ID.
+ * Return 66 to release a synchronous M_LOCKONSEND wait on UNLOCK
+ * (historical locking protocol noted by AS and dje). */
 int
 HandleModuleInput(Window w, int channel)
 {
@@ -259,8 +260,8 @@ HandleModuleInput(Window w, int channel)
 	int  size;
 	int  cont, n;
 
-	/* Already read a (possibly NULL) window id from the pipe,
-	 * Now read an fvwm bultin command line */
+	/* The length excludes the NUL terminator.  A short or
+	 * invalid frame closes the channel to preserve framing. */
 	n = read(readPipes[channel], &size, sizeof(size));
 	if (n < (int)sizeof(size)) {
 		KillModule(channel, 1);
@@ -601,10 +602,10 @@ SendStrToModule(XEvent *eventp, Window junk, FvwmWindow *tmp_win,
 	free(str);
 }
 
-/* This used to be marked "fvwm_inline".  I removed this
-   when I added the lockonsend logic.  The routine seems to big to
-   want to inline.  dje 9/4/98 */
 extern int myxgrabcount; /* defined in libs/Grab.c */
+/* Subscribers normally receive a queued copy.  M_LOCKONSEND also
+ * waits for the module to acknowledge the event.  This function
+ * stopped being inline when locking was added (dje, 9/4/98). */
 int
 PositiveWrite(int module, unsigned long *ptr, int size)
 {
@@ -706,12 +707,8 @@ FlushQueue(int module)
 			    d->size - d->done);
 			if (a >= 0)
 				d->done += a;
-			/* the write returns EWOULDBLOCK or EAGAIN if the pipe
-			 * is full. (This is non-blocking I/O). SunOS returns
-			 * EWOULDBLOCK, OSF/1 returns EAGAIN under these
-			 * conditions. Hopefully other OSes return one of these
-			 * values too. Solaris 2 doesn't seem to have a man page
-			 * for write(2) (!) */
+			/* Resume at d->done on the next writable wakeup
+			 * to keep the packet stream in order. */
 			else if ((errno == EWOULDBLOCK) || (errno == EAGAIN) ||
 			    (errno == EINTR)) {
 				return;

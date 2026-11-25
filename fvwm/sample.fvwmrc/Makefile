@@ -8,6 +8,7 @@ RM ?= rm
 
 depend:
 
+# Stage the default configuration under the basename used by Read.
 all:
 	@cat ${.CURDIR}/system.fvwmrc > .fvwmrc
 

@@ -196,7 +196,9 @@ TerminateHandler(int sig)
 
 /**
 *** DeadPipeCleanup()
-*** Remove all the windows from the Button-Bar, and close them as necessary
+*** Release clients embedded by Swallow.  NoClose reparents the client
+*** to the root and restores its geometry.  Otherwise request a close,
+*** or disconnect the client immediately when Kill was configured.
 **/
 static void
 DeadPipeCleanup(void)

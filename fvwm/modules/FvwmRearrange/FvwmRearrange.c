@@ -837,6 +837,8 @@ main(int argc, char *argv[])
 		}
 	}
 
+	/* Choose the layout from the full eligible-client snapshot.
+	 * Apply changes through the controller's window commands. */
 	SendInfo(state->pipe_fd, "Send_WindowList", 0);
 
 	sandbox_x11_config("FvwmRearrange");

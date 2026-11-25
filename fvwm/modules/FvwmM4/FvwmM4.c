@@ -203,8 +203,8 @@ main(int argc, char **argv)
 	snprintf(read_string, sizeof(read_string), "read %s\n", tmp_file);
 	SendInfo(fd, read_string, 0);
 
-	/* For a debugging version, we may wish to omit this part. */
-	/* I'll let some m4 advocates clean this up */
+	/* The controller reads the generated file before processing
+	 * the cleanup request.  Debug mode leaves the file in place. */
 	if (!m4_debug) {
 		snprintf(delete_string, sizeof(delete_string), "exec rm %s\n",
 		    tmp_file);

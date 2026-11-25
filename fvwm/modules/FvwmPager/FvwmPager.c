@@ -250,9 +250,8 @@ main(int argc, char **argv)
 	fprintf(stderr, "[main]: back from init pager, getting window list\n");
 #endif
 
-	/* Create a list of all windows */
-	/* Request a list of all windows,
-	 * wait for ConfigureWindow packets */
+	/* Seed the pager's client list from the controller.  The
+	 * end marker triggers a separate pass to mirror stacking. */
 	SendInfo(fd, "Send_WindowList", 0);
 #ifdef DEBUG
 	fprintf(stderr, "[main]: back from getting window list, looping\n");
@@ -833,7 +832,9 @@ list_mini_icon(unsigned long *body)
 /***********************************************************************
  *
  *  Procedure:
- *	list_end - displays packet contents to stderr
+ *	list_end - mirror the root's stacking order in both pager views.
+ * XQueryTree returns children from bottom to top, so raising the
+ * corresponding views in that order preserves their relative order.
  *
  ***********************************************************************/
 void

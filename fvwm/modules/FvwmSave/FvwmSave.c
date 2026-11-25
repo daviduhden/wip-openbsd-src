@@ -142,6 +142,7 @@ process_message(unsigned long type, unsigned long *body)
 		list_new_page(body);
 		break;
 	case M_END_WINDOWLIST:
+		/* Serialize after receiving the window and page snapshot. */
 		do_save();
 		break;
 	default:

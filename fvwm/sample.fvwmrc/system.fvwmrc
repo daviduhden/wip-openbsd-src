@@ -320,6 +320,7 @@ Key F8		A	M	CirculateDown
 #Key Prior	A       C       Scroll -100000 0
 #Key Prior	R       N       Scroll -100000 0
 
+# Lines starting with * are stored for modules to read at startup.
 ################## FvwmButtons button-bar ################################
 *FvwmButtonsBack #cdb79e
 *FvwmButtons(Frame 2 Padding 2 2 Container(Rows 2 Frame 1 Padding 10 0 \

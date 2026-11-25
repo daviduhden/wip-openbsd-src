@@ -181,7 +181,8 @@ main(int argc, char **argv)
 	XMapWindow(dpy, win);
 	XSync(dpy, 0);
 	XSelectInput(dpy, win, ButtonReleaseMask);
-	/* Display the window */
+	/* Image loading and window setup are complete.  From here
+	 * the module only waits for the timeout or an X dismissal. */
 	value.tv_usec = timeout % 1000000;
 	value.tv_sec = timeout / 1000000;
 	sandbox_x11_only("FvwmBanner");

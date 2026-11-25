@@ -439,6 +439,8 @@ cpp_process(Display *display, const char *host, char *cpp_opts,
 		}
 	}
 
+	/* Commands are sent as cpp emits them.  A later read or exit
+	 * failure cannot roll back commands the controller has run. */
 	if (ferror(cpp_out))
 		perror("cpp output read");
 

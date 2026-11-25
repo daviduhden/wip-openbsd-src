@@ -61,11 +61,9 @@ extern void StartupStuff(void);
 /*
  * ModuleConfig handles commands starting with "*".
  *
- * Each command is added to a list from which modules  request playback
- * thru "sendconfig".
- *
- * Some modules request that module config commands be sent to them
- * as the commands are entered.  Send to modules that want it.
+ * Retain the commands in arrival order for Send_ConfigInfo.
+ * M_SENDCONFIG subscribers also receive each new command as
+ * M_CONFIG_INFO, without requesting another snapshot.
  */
 void
 ModuleConfig(XEvent *eventp, Window w, FvwmWindow *tmp_win,
