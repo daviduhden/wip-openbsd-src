@@ -158,6 +158,18 @@ Implementation code remains project-authored; compiler intrinsics are used
 as primitives, not as imported header implementations.
 
 
+## Native validation record
+
+Use an isolated OpenBSD checkout at the revision in `UPSTREAM`. First
+verify the regenerated tree against that revision, including file modes,
+headers, and both library symbol maps. Build and run the existing ISO
+regress groups against the patched includes, libc, and libpthread.
+Capture OS and compiler identity, architecture, source revision, selected
+header paths, and static and shared link results. Start with amd64, then use
+an ILP32 target and a supported big-endian target. Record which attributions
+come from the build or linker and which come from executed programs.
+The matrix below remains pending until native results are recorded.
+
 ## Planned compiler matrix (not executed)
 
 With the required host toolchains and permission to compile, run the host

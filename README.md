@@ -92,8 +92,8 @@ patch-style contribution, not a standalone build component: the headers,
 the libc sources, the regress tests and the manual pages are stored at
 OpenBSD-source-relative paths inside `libc/`.  See
 [libc/README.md](libc/README.md) for the implementation and
-[libc/REPORT.md](libc/REPORT.md) for the conformance audit, the
-architecture matrix and the test results.
+[libc/ISO-C-STATUS.md](libc/ISO-C-STATUS.md) for the current
+conformance audit, compatibility limits and validation status.
 
 ## Build
 
@@ -245,6 +245,18 @@ $ bmake -C libc/tests CC=clang run    # make(1) on OpenBSD
 ## Security
 
 Processes that no longer execute programs use staged pledge(2).
+### Native acceptance
+
+Use a disposable OpenBSD VM and stage installation in a separate directory.
+Record the OS, architecture, compiler version and Git revisions for the
+project, src and Xenocara. Verify that pax, tar and cpio are hard links to
+one executable and exercise create, list, extract, append and early
+selection with compressed archives where supported. In a disposable X11
+session, verify FVWM startup, modules, Open Look hints, preprocessor error
+reporting and complete PipeRead delivery across message boundaries. See
+[ext4fs/README.md](ext4fs/README.md) and
+[libc/ISO-C-STATUS.md](libc/ISO-C-STATUS.md) for the kernel and libc matrices.
+
 Launchers retain unveil where useful for their own pathname operations,
 but stay unpledged to allow execution without the removed promise.
 Unveil is cleared on execve without execpromises; it is not an inherited
