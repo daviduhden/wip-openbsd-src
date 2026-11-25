@@ -34,6 +34,11 @@ Exit codes are consistent across repositories: `0` means no policy errors,
 `1` means a policy violation, and `2` means invalid arguments, configuration,
 Git state, or execution. Warnings do not change a successful exit code.
 
+For committed-range checks, use a clean checkout at the selected head.
+The Git comparison uses the supplied revisions, while configuration and
+instructions come from the checked-out files. The manual workflow accepts a
+base revision and uses the clean checkout’s HEAD.
+
 ## Rules
 
 | ID | Meaning |

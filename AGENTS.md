@@ -273,7 +273,11 @@ After each change:
 4. Run `perl scripts/validate-agent-knowledge.pl --scope worktree` and the
    applicable project checks. For branch review, compare the base and head
    revisions with `--scope range --base BASE_SHA --head HEAD_SHA`; the GitHub
-   workflow runs only on manual `workflow_dispatch` with `--scope worktree`.
+   workflow runs only on manual `workflow_dispatch`. A run always checks
+   the worktree and can take a base revision to check the selected committed
+   range before building host tests. For range comparisons, use a clean
+   checkout whose HEAD is the selected head revision. The validator reads
+   instruction contents and configuration from that checkout.
 5. Review the validator output and final diff, then report the synchronization
    result. Warnings require human review; a structural pass does not establish
    semantic relevance.

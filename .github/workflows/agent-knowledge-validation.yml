@@ -2,6 +2,16 @@ name: Agent Knowledge Validation
 
 on:
   workflow_dispatch:
+    inputs:
+      base:
+        description: Base revision for optional committed-range validation
+        required: false
+        type: string
+      host_tests:
+        description: Run the sanitised host C suites
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -24,3 +34,23 @@ jobs:
         run: prove tests/agent_knowledge_validator/test_validator.pl
       - name: Run canonical worktree validation
         run: perl scripts/validate-agent-knowledge.pl --scope worktree
+      - name: Validate the selected committed range
+        if: inputs.base != ''
+        env:
+          REVIEW_BASE: ${{ inputs.base }}
+        run: |
+          git rev-parse --verify --end-of-options "${REVIEW_BASE}^{commit}" >/dev/null
+          test -z "$(git status --porcelain)"
+          perl scripts/validate-agent-knowledge.pl --scope range --base "$REVIEW_BASE" --head HEAD
+      - name: Install host test tools
+        if: inputs.host_tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bmake clang libx11-dev libxext-dev libxpm-dev
+      - name: Run host suites
+        if: inputs.host_tests
+        run: |
+          uname -srmo
+          clang --version
+          bmake -C tests CC=clang run
+          bmake -C libc/tests CC=clang run

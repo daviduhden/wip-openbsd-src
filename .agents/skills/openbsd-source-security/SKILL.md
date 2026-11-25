@@ -126,8 +126,6 @@ release in a trailing comment. Current verified pins (2026-11-07):
 | Action | Release | Commit SHA |
 | --- | --- | --- |
 | `actions/checkout` | `v7.0.1` | `3d3c42e5aac5ba805825da76410c181273ba90b1` |
-| `actions/upload-artifact` | `v7.0.2` | `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
-| `actions/cache` | `v6.1.0` | `55cc8345863c7cc4c66a329aec7e433d2d1c52a9` |
 
 Review a pin update as a supply-chain change: confirm the stable release and
 its immutable commit, replace the SHA and version comment together, and do
