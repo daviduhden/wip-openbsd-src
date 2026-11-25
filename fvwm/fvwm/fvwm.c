@@ -405,6 +405,9 @@ main(int argc, char **argv)
 	DBUG("main", "Setting up rc file defaults...");
 	SetRCDefaults();
 
+	/* Configuration can run Exec and PipeRead before unveil is locked. */
+	exec_helper_start();
+
 	DBUG("main", "Running config_commands...");
 	if (num_config_commands > 0) {
 		int i;
@@ -485,13 +488,6 @@ main(int argc, char **argv)
 		Scr.ClickTime = -Scr.ClickTime;
 	fFvwmInStartup = False;
 	DBUG("main", "Entering HandleEvents loop...");
-
-	/*
-	 * The execution helper must start before unveil locks the
-	 * filesystem: it, and everything it launches, need the
-	 * unrestricted view.
-	 */
-	exec_helper_start();
 
 	/*
 	 * Filesystem view of the controller. Executed modules start afresh

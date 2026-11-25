@@ -15,8 +15,9 @@ is the execution helper of the
 window manager.
 It is started by
 .Xr fvwm 1
-at session startup, before the window manager locks its filesystem
-view, and communicates with it over an
+before the window manager runs its startup configuration and locks its
+filesystem view.
+It communicates with the window manager over an
 .Xr imsg 3
 channel (a
 .Xr socketpair 2
@@ -35,6 +36,9 @@ Run a command with its standard output streamed back to
 .Xr fvwm 1 ,
 which feeds it to its configuration parser, including a final line
 without a newline.
+The command receives the environment of
+.Xr fvwm 1
+at the time of the request.
 .El
 .Pp
 Every request payload is validated against the message length;

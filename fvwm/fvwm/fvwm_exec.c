@@ -9,18 +9,15 @@
  *   IMSG_PIPEREAD_RUN  run a command with stdout streamed back to
  *                      fvwm (PipeRead)
  *
- * The helper isolates exec-request handling from the X11-connected
- * main process and strips the X connection before the target program
- * starts.  Because the helper is started before the main process
- * locks its unveil(2) state, commands launched here are NOT
- * restricted by the main process's filesystem sandbox -- this is
- * the whole point of the architecture.
+ * The controller starts the helper before limiting its own
+ * filesystem view with unveil(2).  This lets configured commands
+ * use the invoking user's filesystem access while the X11 event
+ * loop runs under the controller's restricted view.
  *
- * NOTE: this process deliberately applies no pledge(2) or unveil(2):
- * it must execute arbitrary programs without a syscall ceiling.
- * Without execpromises, execve clears inherited unveil rules. The helper's
- * protection comes from its separate address space, strict message
- * parsing, bounded buffering, and closefrom(3) fd hygiene.
+ * The helper runs under the same UID as the controller, with no
+ * pledge(2) or unveil(2) policy of its own.  It bounds individual
+ * messages and closes inherited descriptors before running commands.
+ * The controller trusts it to execute commands with the user's access.
  *
  * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  *
@@ -118,9 +115,9 @@ exec_child(char **argv, char **envp)
 
 /*
  * decode_exec_msg -- validate an IMSG_EXEC_RUN payload and build
- * argv/envp arrays pointing into it.  Every string walk is bounded
- * by the message length so a malformed payload can never cause an
- * out-of-bounds read.
+ * argv/envp arrays pointing into it.  The caller owns both arrays
+ * on success and must keep the message alive while using the strings.
+ * A zero environment count produces an empty vector.
  */
 static int
 decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
@@ -188,27 +185,92 @@ decode_exec_msg(struct imsg *imsg, char ***argvp, char ***envpp)
 }
 
 /*
- * decode_piperead_msg -- validate an IMSG_PIPEREAD_RUN payload and
- * return a NUL-terminated copy of the command.  Returns NULL on
- * malformed input (the caller reports and drops the request).
+ * Environment staging for the next PipeRead request. A prepare/command
+ * sequence is queued in order by the single-threaded controller.
  */
-static char *
-decode_piperead_msg(struct imsg *imsg)
+struct piperead_env {
+	char *data;
+	size_t len;
+	size_t cap;
+	size_t limit;
+	int error;
+	int staged;
+};
+
+static void
+piperead_env_append(struct piperead_env *env, const void *data, size_t len)
 {
-	char  *cmd;
+	char *next;
+	size_t cap;
+
+	if (len == 0) {
+		env->len = 0;
+		env->error = 0;
+		env->staged = 1;
+		return;
+	}
+	if (!env->staged || env->error != 0)
+		return;
+	if (len > env->limit - env->len) {
+		env->error = E2BIG;
+		return;
+	}
+	if (env->len + len > env->cap) {
+		cap = env->cap > env->limit / 2 ? env->limit : env->cap * 2;
+		if (cap < env->len + len)
+			cap = env->len + len;
+		next = realloc(env->data, cap);
+		if (next == NULL) {
+			env->error = errno;
+			return;
+		}
+		env->data = next;
+		env->cap = cap;
+	}
+	memcpy(env->data + env->len, data, len);
+	env->len += len;
+}
+
+static char **
+piperead_env_vector(struct piperead_env *env)
+{
+	char **vec;
+	size_t i, n = 0;
+
+	if (env->error != 0) {
+		errno = env->error;
+		return NULL;
+	}
+	if (env->len != 0 && env->data[env->len - 1] != '\0') {
+		errno = EINVAL;
+		return NULL;
+	}
+	for (i = 0; i < env->len; i++)
+		n += env->data[i] == '\0';
+	vec = calloc(n + 1, sizeof(*vec));
+	if (vec == NULL)
+		return NULL;
+	n = 0;
+	for (i = 0; i < env->len; i += strlen(env->data + i) + 1)
+		vec[n++] = env->data + i;
+	return vec;
+}
+
+/* Borrow the validated command string until the caller frees the imsg. */
+static char *
+decode_piperead_msg(struct imsg *imsg, u_int32_t *id)
+{
+	char *command;
 	size_t len;
 
-	if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(u_int32_t) + 1)
+	if (imsg->hdr.len < IMSG_HEADER_SIZE + sizeof(*id) + 1)
 		return NULL;
-
-	len = imsg->hdr.len - IMSG_HEADER_SIZE - sizeof(u_int32_t);
-	if (strnlen((char *)imsg->data + sizeof(u_int32_t), len) == len)
-		return NULL; /* no terminating NUL */
-
-	cmd = strdup((char *)imsg->data + sizeof(u_int32_t));
-	if (cmd == NULL)
-		err(1, "strdup");
-	return cmd;
+	memcpy(id, imsg->data, sizeof(*id));
+	command = (char *)imsg->data + sizeof(*id);
+	len = imsg->hdr.len - IMSG_HEADER_SIZE - sizeof(*id);
+	if (strnlen(command, len) == len)
+		return NULL;
+	return command;
 }
 
 /*
@@ -315,7 +377,8 @@ piperead_finish(struct imsgbuf *ibuf, struct piperead_slot *slot, int errnum)
  * unveil was ever applied to the helper).
  */
 static int
-piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
+piperead_start(struct imsgbuf *ibuf, u_int32_t id, char *command,
+    char **envp)
 {
 	struct piperead_slot *slot;
 	int		      pipe_fd[2];
@@ -373,12 +436,14 @@ piperead_start(struct imsgbuf *ibuf, u_int32_t id, const char *command)
 	}
 
 	if (pid == 0) {
+		char *argv[] = {"sh", "-c", command, NULL};
+
 		close(pipe_fd[0]);
 		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
 			_exit(127);
 		close(pipe_fd[1]);
 		closefrom(3);
-		execl("/bin/sh", "sh", "-c", command, (char *)NULL);
+		execve("/bin/sh", argv, envp);
 		_exit(127);
 	}
 
@@ -424,13 +489,18 @@ piperead_kill(struct imsgbuf *ibuf, u_int32_t id)
 int
 main(int argc, char **argv)
 {
+	extern char **environ;
 	struct imsgbuf ibuf;
 	struct imsg    imsg;
+	struct piperead_env env = {0};
+	long	       arg_max;
 	const char    *errstr = NULL;
 	ssize_t	       n;
 	int	       s;
 
 	(void)argv;
+	arg_max = sysconf(_SC_ARG_MAX);
+	env.limit = arg_max > 0 ? (size_t)arg_max : MAX_EXEC_PAYLOAD;
 	if (argc != 1)
 		usage();
 
@@ -462,9 +532,9 @@ main(int argc, char **argv)
 		err(1, "imsgbuf_init");
 
 	/*
-	 * The helper inherits fvwm's descriptors at fork time,
-	 * including the X connection.  It never uses them; drop
-	 * everything above the imsg socket.
+	 * Keep the imsg socket and close higher-numbered
+	 * descriptors here.  Children close all descriptors
+	 * above stderr immediately before exec.
 	 */
 	closefrom(s + 1);
 
@@ -614,28 +684,38 @@ main(int argc, char **argv)
 				imsgbuf_flush(&ibuf);
 				break;
 			}
+			case IMSG_PIPEREAD_ENV:
+				piperead_env_append(&env, imsg.data,
+				    imsg.hdr.len - IMSG_HEADER_SIZE);
+				break;
 			case IMSG_PIPEREAD_RUN: {
 				u_int32_t id;
-				char	 *command;
+				char *command, **envp;
 
 				if (imsg.hdr.len >
-				    IMSG_HEADER_SIZE + MAX_PIPEREAD_COMMAND) {
-					warnx("oversized IMSG_PIPEREAD_RUN");
-					break;
-				}
-				if (imsg.hdr.len <
-				    IMSG_HEADER_SIZE + sizeof(id) + 1) {
-					warnx("short IMSG_PIPEREAD_RUN");
-					break;
-				}
-				memcpy(&id, imsg.data, sizeof(id));
-				if ((command = decode_piperead_msg(&imsg)) ==
+				    IMSG_HEADER_SIZE + MAX_EXEC_PAYLOAD ||
+				    (command = decode_piperead_msg(&imsg, &id)) ==
 				    NULL) {
 					warnx("malformed IMSG_PIPEREAD_RUN");
+					env.staged = 0;
 					break;
 				}
-				piperead_start(&ibuf, id, command);
-				free(command);
+				envp = env.staged ? piperead_env_vector(&env) : environ;
+				if (envp == NULL) {
+					struct {
+						u_int32_t id;
+						int errnum;
+					} msg = {id, errno};
+
+					imsg_compose(&ibuf, IMSG_PIPEREAD_ERROR,
+					    0, 0, -1, &msg, sizeof(msg));
+					imsgbuf_flush(&ibuf);
+				} else {
+					piperead_start(&ibuf, id, command, envp);
+					if (env.staged)
+						free(envp);
+				}
+				env.staged = 0;
 				break;
 			}
 			case IMSG_PIPEREAD_KILL: {
@@ -659,6 +739,7 @@ main(int argc, char **argv)
 			reap_children(&ibuf);
 	}
 
+	free(env.data);
 	imsgbuf_clear(&ibuf);
 	close(s);
 	return 0;

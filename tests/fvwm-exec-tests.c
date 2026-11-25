@@ -12,8 +12,8 @@
 #include <string.h>
 // clang-format on
 
-/* strtonum lives in glibc (>= 2.38) but its declaration needs
- * _GNU_SOURCE; declare it here for the include below. */
+/* Declare the local strtonum stub before including the helper, whose
+ * entry point refers to it even though these tests call the decoder. */
 long long strtonum(const char *, long long, long long, const char **);
 
 /* fvwm_exec.c internals under test; its main() is renamed. */
@@ -201,60 +201,126 @@ test_exact_boundary(void)
 }
 
 static void
-run_piperead_decode(
-    const char *payload, size_t len, int want_rc, const char *want_cmd)
+test_piperead_decode(void)
 {
-	struct imsg imsg;
-	char	   *cmd;
+	char payload[256], *command;
+	const char expected[] = "xterm -e /bin/sh";
+	struct imsg imsg = {0};
+	u_int32_t id = 0x11223344, decoded_id;
 
-	memset(&imsg, 0, sizeof(imsg));
-	imsg.data = (char *)payload;
-	imsg.hdr.len = IMSG_HEADER_SIZE + len;
-
-	cmd = decode_piperead_msg(&imsg);
-	if (want_rc == -1) {
-		CHECK(cmd == NULL, "piperead decode rejects payload");
-	} else {
-		CHECK(cmd != NULL, "piperead decode accepts payload");
-		if (cmd != NULL) {
-			CHECK(strcmp(cmd, want_cmd) == 0,
-			    "piperead decode command matches");
-			free(cmd);
-		}
-	}
+	memcpy(payload, &id, sizeof(id));
+	memcpy(payload + sizeof(id), expected, sizeof(expected));
+	imsg.data = payload;
+	imsg.hdr.len = IMSG_HEADER_SIZE + sizeof(id) + sizeof(expected);
+	command = decode_piperead_msg(&imsg, &decoded_id);
+	CHECK(command != NULL && strcmp(command, expected) == 0,
+	    "PipeRead decode accepts command");
+	CHECK(decoded_id == id, "PipeRead frame ID");
+	imsg.hdr.len--;
+	CHECK(decode_piperead_msg(&imsg, &decoded_id) == NULL,
+	    "PipeRead rejects unterminated command");
+	imsg.hdr.len = IMSG_HEADER_SIZE + sizeof(id) - 1;
+	CHECK(decode_piperead_msg(&imsg, &decoded_id) == NULL,
+	    "PipeRead rejects truncated ID");
 }
 
 static void
-test_piperead_decode(void)
+test_piperead_environment(void)
 {
-	char	    payload[256];
-	u_int32_t   id = 0x11223344;
-	const char *cmd = "xterm -e /bin/sh";
+	const char var[] = "B=two";
+	struct piperead_env env = {0};
+	char **envp, *entry;
+	size_t len = MAX_EXEC_PAYLOAD + 16;
 
-	memcpy(payload, &id, 4);
-	memcpy(payload + 4, cmd, strlen(cmd) + 1);
-	run_piperead_decode(payload, 4 + strlen(cmd) + 1, 0, cmd);
+	env.limit = len + sizeof(var);
+	entry = malloc(len);
+	if (entry == NULL)
+		err(1, "malloc");
+	memset(entry, 'x', len);
+	memcpy(entry, "A=", 2);
+	entry[len - 1] = '\0';
 
-	/* Truncated id. */
-	run_piperead_decode(payload, 3, -1, NULL);
+	piperead_env_append(&env, NULL, 0);
+	piperead_env_append(&env, entry, MAX_EXEC_PAYLOAD);
+	CHECK(piperead_env_vector(&env) == NULL,
+	    "PipeRead rejects incomplete environment");
+	piperead_env_append(&env, entry + MAX_EXEC_PAYLOAD,
+	    len - MAX_EXEC_PAYLOAD);
+	piperead_env_append(&env, var, sizeof(var));
+	envp = piperead_env_vector(&env);
+	CHECK(envp != NULL, "PipeRead accepts environment over one frame");
+	if (envp != NULL) {
+		CHECK(strcmp(envp[0], entry) == 0 && strcmp(envp[1], var) == 0 &&
+		    envp[2] == NULL, "PipeRead joins split environment strings");
+		free(envp);
+	}
+	piperead_env_append(&env, var, sizeof(var));
+	CHECK(piperead_env_vector(&env) == NULL,
+	    "PipeRead rejects aggregate environment over the limit");
+	piperead_env_append(&env, NULL, 0);
+	envp = piperead_env_vector(&env);
+	CHECK(envp != NULL && envp[0] == NULL,
+	    "PipeRead resets failed staging before the next request");
+	free(envp);
+	free(env.data);
+	free(entry);
+}
 
-	/* Exactly the id and nothing else. */
-	run_piperead_decode(payload, 4, -1, NULL);
+static void
+test_piperead_child(void)
+{
+	struct imsgbuf ibuf = {0};
+	struct piperead_slot *slot = &piperead_slots[0];
+	char *envp[] = {"FVWM_TEST_VAR=value", NULL};
+	char command[] = "printf '%s' \"$FVWM_TEST_VAR\"; exit 3";
+	char output[sizeof("value")];
+	sigset_t set, oldset;
+	struct sigaction sa = {0}, oldsa;
+	pid_t pid;
+	ssize_t len;
+	int signo;
 
-	/* Id plus no NUL terminator for the command. */
-	payload[4] = 'A';
-	run_piperead_decode(payload, 5, -1, NULL);
+	sa.sa_handler = sigchld_handler;
+	sigemptyset(&sa.sa_mask);
+	if (sigaction(SIGCHLD, &sa, &oldsa) == -1)
+		err(1, "sigaction");
+	sigemptyset(&set);
+	sigaddset(&set, SIGCHLD);
+	if (sigprocmask(SIG_BLOCK, &set, &oldset) == -1)
+		err(1, "sigprocmask");
 
-	/* Empty command is valid. */
-	payload[4] = '\0';
-	run_piperead_decode(payload, 5, 0, "");
+	alarm(10);
+	if (piperead_start(&ibuf, 1, command, envp) == -1)
+		errx(1, "piperead_start");
+	pid = slot->pid;
+	if (sigwait(&set, &signo) != 0)
+		errx(1, "sigwait");
+	reap_children(&ibuf);
+	len = read(slot->fd, output, sizeof(output));
+	CHECK(len == 5 && memcmp(output, "value", 5) == 0,
+	    "PipeRead child received environment");
+	CHECK(slot->pid == 0 && slot->status_known &&
+	    WIFEXITED(slot->status) && WEXITSTATUS(slot->status) == 3,
+	    "active PipeRead retained wait status");
+	CHECK(waitpid(pid, NULL, WNOHANG) == -1 && errno == ECHILD,
+	    "active PipeRead child reaped");
+	piperead_finish(&ibuf, slot, 0);
 
-	/* Oversized command is caught by the caller-side length check
-	 * in exec_helper_piperead_start(), not the decoder; the
-	 * decoder itself must still reject non-terminated data at
-	 * any length. */
-	memset(payload + 4, 'B', sizeof(payload) - 4);
-	run_piperead_decode(payload, sizeof(payload), -1, NULL);
+	pid = fork();
+	if (pid == -1)
+		err(1, "fork");
+	if (pid == 0)
+		_exit(0);
+	if (sigwait(&set, &signo) != 0)
+		errx(1, "sigwait");
+	reap_children(&ibuf);
+	CHECK(waitpid(pid, NULL, WNOHANG) == -1 && errno == ECHILD,
+	    "child without reporting slot reaped");
+	alarm(0);
+	if (sigprocmask(SIG_SETMASK, &oldset, NULL) == -1)
+		err(1, "sigprocmask");
+	if (sigaction(SIGCHLD, &oldsa, NULL) == -1)
+		err(1, "sigaction");
 }
 
 int
@@ -269,16 +335,18 @@ main(void)
 	test_zero_argc();
 	test_exact_boundary();
 	test_piperead_decode();
+	test_piperead_environment();
+	test_piperead_child();
 
 	if (failures != 0) {
 		fprintf(stderr, "%d failure(s)\n", failures);
 		return 1;
 	}
-	printf("fvwm_exec decode tests: OK\n");
+	printf("fvwm_exec tests: OK\n");
 	return 0;
 }
 
-/* Link stubs for the libutil imsg API (not exercised by the tests). */
+/* Link stubs for the helper entry point. The tests bypass transport. */
 long long
 strtonum(const char *n, long long lo, long long hi, const char **es)
 {

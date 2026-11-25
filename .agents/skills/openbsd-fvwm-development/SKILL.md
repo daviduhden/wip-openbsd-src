@@ -173,6 +173,13 @@ check `imsgbuf_queuelen()` to schedule any remaining output in both the X
 event loop and the nested PipeRead loop. Libutil can report success with
 no progress on backpressure. `imsgbuf_flush()` loops until the queue is
 empty and is suitable for the blocking helper endpoint.
+Start the helper before running startup configuration and keep the
+controller socket close-on-exec. Test helper-backed PipeRead during startup
+and after SetEnv. Environment frames are queued before each command and
+their total size is bounded by the system argument limit. An empty frame
+clears staging before each request, including on retry. At EOF the line
+assembler returns the final unterminated command. The helper reaps every
+child even after its pipe or reporting slot is gone.
 The decoder shim covers payload parsing. A native test using real libutil
 must confirm delivery across chunk boundaries and under backpressure.
 

@@ -2,9 +2,10 @@
  * exec_imsg.h -- shared imsg protocol between fvwm(1) and its
  * same-user execution helper fvwm_exec.
  *
- * Both sides include this header so the message types and payload
- * layouts cannot drift apart.  Every payload is validated by the
- * receiver against the message length before use.
+ * The channel is local to the controller and helper.  Payloads use
+ * native sizes and byte order; the receiver checks the length of
+ * fields it consumes.  PipeRead IDs route output to the requesting
+ * frame when commands are nested.
  *
  * Copyright (c) 2026 David Uhden Collado <david@uhden.dev>
  *
@@ -45,8 +46,8 @@ enum imsg_exec_type {
 	/* helper -> fvwm: chunk of command output.
 	 * Payload: u_int32_t id, bytes. */
 	IMSG_PIPEREAD_DATA,
-	/* helper -> fvwm: command finished.
-	 * Payload: u_int32_t id, int status. */
+	/* helper -> fvwm: stdout closed.
+	 * Payload: u_int32_t id, int wait status (zero if still unknown). */
 	IMSG_PIPEREAD_EOF,
 	/* helper -> fvwm: command could not be started.
 	 * Payload: u_int32_t id, int errno. */
@@ -54,6 +55,9 @@ enum imsg_exec_type {
 	/* fvwm -> helper: abort a running PipeRead command.
 	 * Payload: u_int32_t id. */
 	IMSG_PIPEREAD_KILL,
+	/* fvwm -> helper: stage NUL-separated environment strings for the
+	 * next PipeRead. A zero-length payload clears the staging buffer. */
+	IMSG_PIPEREAD_ENV,
 };
 
 /* Keep messages within the default libutil limit, including headers. */
@@ -63,7 +67,7 @@ enum imsg_exec_type {
 
 /* Maximum number of concurrent PipeRead commands the helper tracks;
  * fvwm caps command nesting at MAX_NESTING_DEPTH, which must stay
- * below this. */
+ * at or below this. */
 #define PIPEREAD_SLOTS 128
 
 #endif /* FVWM_EXEC_IMSG_H */

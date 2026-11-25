@@ -91,6 +91,8 @@ exec_helper_start(void)
 
 	close(sv[1]);
 	exec_fd = sv[0];
+	if (fcntl(exec_fd, F_SETFD, FD_CLOEXEC) == -1)
+		err(1, "fcntl FD_CLOEXEC");
 	/*
 	 * Nonblocking so the PipeRead pump (and the event loop) never
 	 * stall on a partial imsg; incomplete messages stay buffered
@@ -187,8 +189,10 @@ exec_helper_dispatch(struct imsg *imsg, void *arg)
 /*
  * exec_helper_drain -- read whatever imsg data is currently
  * available from the helper and invoke cb() for each complete
- * message.  Returns 1 when messages were processed, 0 when the
- * socket would block, and -1 when the helper disconnected.
+ * message.  Each callback borrows its message until it returns.
+ * Returns 1 if a callback ran, 0 if no complete message was
+ * dispatched, and -1 if the transport is absent or read fails
+ * or reaches EOF.
  */
 int
 exec_helper_drain(int (*cb)(struct imsg *, void *), void *arg)
@@ -258,15 +262,18 @@ exec_helper_write(void)
 }
 
 /*
- * exec_helper_piperead_start -- request a PipeRead command from the
- * helper.  id is fvwm-chosen and echoed back in every response so
- * nested PipeRead invocations can be told apart.
+ * Send a separate stream for the current environment. Its aggregate
+ * size is independent of the imsg size limit for any single command.
  */
 int
 exec_helper_piperead_start(u_int32_t id, const char *command)
 {
+	extern char **environ;
 	struct ibuf *buf;
-	size_t	     clen;
+	char chunk[MAX_EXEC_PAYLOAD];
+	char **entry;
+	const char *str;
+	size_t clen, used = 0, left, n;
 
 	if (exec_ibuf == NULL)
 		return -1;
@@ -277,13 +284,35 @@ exec_helper_piperead_start(u_int32_t id, const char *command)
 		return -1;
 	}
 
-	buf =
-	    imsg_create(exec_ibuf, IMSG_PIPEREAD_RUN, 0, 0, sizeof(id) + clen);
+	/* An empty message resets any environment staged by a failed send. */
+	if (imsg_compose(exec_ibuf, IMSG_PIPEREAD_ENV, 0, 0, -1, chunk, 0) == -1)
+		return -1;
+	for (entry = environ; entry != NULL && *entry != NULL; entry++) {
+		str = *entry;
+		for (left = strlen(str) + 1; left != 0; left -= n) {
+			n = sizeof(chunk) - used;
+			if (n > left)
+				n = left;
+			memcpy(chunk + used, str, n);
+			used += n;
+			str += n;
+			if (used == sizeof(chunk)) {
+				if (imsg_compose(exec_ibuf, IMSG_PIPEREAD_ENV, 0,
+				    0, -1, chunk, used) == -1)
+					return -1;
+				used = 0;
+			}
+		}
+	}
+	if (used != 0 && imsg_compose(exec_ibuf, IMSG_PIPEREAD_ENV, 0, 0, -1,
+	    chunk, used) == -1)
+		return -1;
+
+	buf = imsg_create(exec_ibuf, IMSG_PIPEREAD_RUN, 0, 0, sizeof(id) + clen);
 	if (buf == NULL)
 		return -1;
-	if (imsg_add(buf, &id, sizeof(id)) == -1)
-		return -1;
-	if (imsg_add(buf, command, clen) == -1)
+	if (imsg_add(buf, &id, sizeof(id)) == -1 ||
+	    imsg_add(buf, command, clen) == -1)
 		return -1;
 	imsg_close(exec_ibuf, buf);
 	return exec_helper_write();
@@ -312,8 +341,8 @@ exec_helper_piperead_kill(u_int32_t id)
 /*
  * exec_helper_launch -- request the helper to execute a command.
  * argv is the full argument vector (argv[0] is the program);
- * envp may be NULL to inherit the helper's environment (which is
- * fvwm's environment).  Returns 0 on success, -1 on failure.
+ * A NULL envp encodes an empty environment. A successful send may
+ * leave bytes queued on the nonblocking socket.
  */
 int
 exec_helper_launch(int argc, char **argv, char **envp)

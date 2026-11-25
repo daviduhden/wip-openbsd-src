@@ -24,8 +24,9 @@ and `xpmroot`. Binary icons and pixmaps are assets, not source files.
 ## Architecture
 
 - `fvwm/fvwm/fvwm.c` initializes the display and per-screen state, selects
-  events on each root window, reads configuration, starts the execution
-  helper, locks the controller's `unveil(2)` view, and enters `HandleEvents()`.
+  events on each root window. It starts the execution helper before running
+  the startup configuration commands, then locks the controller's
+  `unveil(2)` view and enters `HandleEvents()`.
 - `fvwm/fvwm/events.c` maps selected X event types to handlers. The handlers
   update managed-window state and issue the corresponding X requests. The
   event loop also services module pipes and helper IPC while waiting for X

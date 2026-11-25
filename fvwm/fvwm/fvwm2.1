@@ -395,6 +395,9 @@ commands, nested
 up to the configured depth) with bounded line lengths, and is
 treated as untrusted configuration input.
 A final line without a newline is also parsed.
+The command receives the current environment,
+including updates made by
+.Ic SetEnv .
 .Pp
 .Nm
 modules are separate processes launched by the main process; each
