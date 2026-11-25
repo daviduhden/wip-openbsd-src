@@ -2,9 +2,9 @@
 
 /*
  * Host-side test for the lock-based fallback that <stdatomic.h> uses for
- * atomic objects that are not lock-free (16-byte and other aggregates), so
- * that the compiler's atomic runtime (libatomic) is never needed.
- * Not part of the OpenBSD build graph; see libc/tests/Makefile.
+ * aggregate atomic values whose sizes the compiler cannot handle lock-free.
+ * The test executable links the local helpers without libatomic.
+ * It runs in the host harness under libc/tests/Makefile.
  */
 
 #include <pthread.h>
@@ -57,8 +57,10 @@ test_agg(void)
 	OK(atomic_compare_exchange_strong(&a16, &e16, v16)); /* succeeds */
 	w16 = atomic_load(&a16);
 	OK(memcmp(&w16, &v16, sizeof(v16)) == 0);
+	e16 = v16;
 	memset(&v16, 0x11, sizeof(v16));
 	w16 = atomic_exchange(&a16, v16);
+	OK(memcmp(&w16, &e16, sizeof(w16)) == 0);
 	w16 = atomic_load(&a16);
 	OK(memcmp(&w16, &v16, sizeof(v16)) == 0);
 

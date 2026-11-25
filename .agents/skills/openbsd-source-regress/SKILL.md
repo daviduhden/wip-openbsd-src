@@ -114,6 +114,11 @@ cc -fsanitize=address,undefined -g -o test test.c && ./test
 | Test passes only as root | Privilege-dependent behavior; split or skip explicitly |
 | Flaky ordering | Sort output, use `LC_ALL=C`, avoid directory iteration order |
 
+## Multi-result regressions
+
+For atomic exchange, check the returned previous value before loading the
+object again. Check the stored replacement separately.
+
 ## Shell drivers
 
 Check scripts sourced by a regression directly when their suffix falls
