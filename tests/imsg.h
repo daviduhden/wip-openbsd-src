@@ -23,6 +23,7 @@ struct imsghdr {
 	uint32_t pid;
 };
 
+#define MAX_IMSGSIZE 16384
 #define IMSG_HEADER_SIZE 16
 
 struct imsg {

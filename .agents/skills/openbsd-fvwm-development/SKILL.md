@@ -155,6 +155,15 @@ Do not claim a live-session test that was not performed.
 - `pledge(2)`, `unveil(2)`, `imsg_init(3)`, `closefrom(3)`
 - `openbsd-source-security`, `openbsd-source-build`
 
+## Execution helper transport
+
+Account for the libutil message header and the PipeRead command identifier
+when checking payloads against the default `MAX_IMSGSIZE`. The controller
+socket is nonblocking. On backpressure, keep the queue pending and service
+its write readiness in both the X event loop and the nested PipeRead loop.
+The decoder shim covers payload parsing. A native test using real libutil
+must confirm delivery across chunk boundaries and under backpressure.
+
 ## Maintenance & Continuous Learning
 
 Whenever this skill is used to change the repository, review this skill after

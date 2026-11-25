@@ -293,9 +293,9 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 	}
 
 	while (!frame.eof && !frame.error && !frame.timed_out) {
-		fd_set	       readfds;
-		struct timeval tv;
-		int	       ready;
+		fd_set		readfds, writefds;
+		struct timeval	tv;
+		int		ready;
 
 		/* Process whatever is already buffered. */
 		while (piperead_process_lines(
@@ -306,13 +306,17 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 
 		helper_fd = exec_helper_fd();
 		FD_ZERO(&readfds);
-		if (helper_fd >= 0)
+		FD_ZERO(&writefds);
+		if (helper_fd >= 0) {
 			FD_SET(helper_fd, &readfds);
+			if (exec_helper_pending())
+				FD_SET(helper_fd, &writefds);
+		}
 		tv.tv_sec = PIPE_READ_INTERVAL_SEC;
 		tv.tv_usec = 0;
 
 		ready = select((helper_fd >= 0 ? helper_fd : 0) + 1, &readfds,
-		    NULL, NULL, &tv);
+			&writefds, NULL, &tv);
 		if (ready < 0) {
 			if (errno == EINTR)
 				continue;
@@ -334,6 +338,12 @@ piperead_run(const char *command, XEvent *eventp, FvwmWindow *tmp_win,
 				frame.error = 1;
 				break;
 			}
+		}
+
+		if (helper_fd >= 0 && FD_ISSET(helper_fd, &writefds) &&
+		    exec_helper_flush() == -1) {
+			frame.error = 1;
+			break;
 		}
 
 		if (frame.got_data) {

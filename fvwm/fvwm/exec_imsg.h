@@ -1,6 +1,6 @@
 /*
  * exec_imsg.h -- shared imsg protocol between fvwm(1) and its
- * privilege-separated execution helper fvwm_exec.
+ * same-user execution helper fvwm_exec.
  *
  * Both sides include this header so the message types and payload
  * layouts cannot drift apart.  Every payload is validated by the
@@ -56,22 +56,10 @@ enum imsg_exec_type {
 	IMSG_PIPEREAD_KILL,
 };
 
-/*
- * Maximum payload for IMSG_EXEC_RUN: two ints (argc/envc) plus the
- * argv and envp strings.  Fits the 16-bit imsg length field with
- * room to spare and covers any realistic command line plus a full
- * environment.
- */
-#define MAX_EXEC_PAYLOAD (60 * 1024)
-
-/*
- * Single PipeRead command accepted by the helper; bounded so one
- * malicious/hostile fvwm message cannot consume unbounded memory.
- */
-#define MAX_PIPEREAD_COMMAND (60 * 1024)
-
-/* Max bytes of PipeRead output forwarded per IMSG_PIPEREAD_DATA. */
-#define PIPEREAD_CHUNK (32 * 1024)
+/* Keep messages within the default libutil limit, including headers. */
+#define MAX_EXEC_PAYLOAD (MAX_IMSGSIZE - IMSG_HEADER_SIZE)
+#define MAX_PIPEREAD_COMMAND (MAX_EXEC_PAYLOAD - sizeof(u_int32_t))
+#define PIPEREAD_CHUNK (MAX_EXEC_PAYLOAD - sizeof(u_int32_t))
 
 /* Maximum number of concurrent PipeRead commands the helper tracks;
  * fvwm caps command nesting at MAX_NESTING_DEPTH, which must stay

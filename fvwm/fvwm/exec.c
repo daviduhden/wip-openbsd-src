@@ -1,5 +1,5 @@
 /*
- * exec.c -- interface to the privilege-separated execution helper.
+ * exec.c -- interface to the same-user execution helper.
  *
  * The main fvwm process communicates with fvwm_exec via imsg(3)
  * over a socketpair(2).  The helper executes external commands
@@ -234,6 +234,29 @@ exec_helper_handle(void)
 	exec_helper_drain(exec_helper_dispatch, NULL);
 }
 
+int
+exec_helper_pending(void)
+{
+	return exec_ibuf != NULL && imsgbuf_queuelen(exec_ibuf) != 0;
+}
+
+int
+exec_helper_flush(void)
+{
+	if (exec_ibuf == NULL)
+		return -1;
+	while (imsgbuf_flush(exec_ibuf) == -1) {
+		if (errno == EINTR)
+			continue;
+		if (errno == EAGAIN)
+			return 0;
+		warn("imsgbuf_flush");
+		exec_helper_stop();
+		return -1;
+	}
+	return 0;
+}
+
 /*
  * exec_helper_piperead_start -- request a PipeRead command from the
  * helper.  id is fvwm-chosen and echoed back in every response so
@@ -263,9 +286,7 @@ exec_helper_piperead_start(u_int32_t id, const char *command)
 	if (imsg_add(buf, command, clen) == -1)
 		return -1;
 	imsg_close(exec_ibuf, buf);
-	imsgbuf_flush(exec_ibuf);
-
-	return 0;
+	return exec_helper_flush();
 }
 
 /*
@@ -285,9 +306,7 @@ exec_helper_piperead_kill(u_int32_t id)
 	if (imsg_add(buf, &id, sizeof(id)) == -1)
 		return -1;
 	imsg_close(exec_ibuf, buf);
-	imsgbuf_flush(exec_ibuf);
-
-	return 0;
+	return exec_helper_flush();
 }
 
 /*
@@ -348,7 +367,5 @@ exec_helper_launch(int argc, char **argv, char **envp)
 		}
 	}
 	imsg_close(exec_ibuf, buf);
-	imsgbuf_flush(exec_ibuf);
-
-	return 0;
+	return exec_helper_flush();
 }

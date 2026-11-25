@@ -1,5 +1,5 @@
 /*
- * fvwm_exec.c -- privilege-separated execution helper for fvwm(1)
+ * fvwm_exec.c -- same-user execution helper for fvwm(1)
  *
  * Runs as a separate process that receives execution requests via
  * imsg(3) from the main fvwm process, executes them, and reports
@@ -558,10 +558,13 @@ main(int argc, char **argv)
 					err(1, "malloc");
 				chunk->id = slot->id;
 				memcpy(chunk->data, chunk_data, (size_t)nr);
-				imsg_compose(&ibuf, IMSG_PIPEREAD_DATA, 0, 0,
-				    -1, chunk, sizeof(u_int32_t) + (size_t)nr);
+				if (imsg_compose(&ibuf, IMSG_PIPEREAD_DATA, 0,
+				    0, -1, chunk,
+				    sizeof(u_int32_t) + (size_t)nr) == -1)
+					err(1, "imsg_compose PipeRead data");
 				free(chunk);
-				imsgbuf_flush(&ibuf);
+				if (imsgbuf_flush(&ibuf) == -1)
+					err(1, "imsgbuf_flush PipeRead data");
 			} else if (nr == 0) {
 				/* All write ends closed: command done. */
 				piperead_finish(&ibuf, slot, 0);

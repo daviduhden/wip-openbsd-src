@@ -26,13 +26,13 @@ MAN = fvwm.1 fvwm_exec.1
 
 CLEANFILES += fvwm.1 fvwm_exec
 
-# fvwm_exec is the privilege-separated execution helper, built by
+# fvwm_exec is the same-user execution helper, built by
 # hand because bsd.prog.mk supports only a single BINDIR per dir.
 all: fvwm_exec
 
 .PHONY: all
 
-fvwm_exec: ${.CURDIR}/fvwm_exec.c ${.CURDIR}/../config.h
+fvwm_exec: ${.CURDIR}/fvwm_exec.c ${.CURDIR}/exec_imsg.h ${.CURDIR}/../config.h
 	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} -o ${.TARGET} \
 	    ${.CURDIR}/fvwm_exec.c -lutil
 
