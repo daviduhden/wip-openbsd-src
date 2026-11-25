@@ -10,7 +10,7 @@
 # reporting failures.
 #
 # Modes:
-#   check    (default) validate without modifying anything
+#   check    (default) validate a trusted tree without rewriting its files
 #   format   report mbake's advisory opinion only; never rewrites and
 #            never emits a diff -- the Makefiles are OpenBSD-native and
 #            mbake is a GNU-style formatter that would change the dialect
@@ -66,7 +66,10 @@ FAILS=0
 WARNS=0
 SKIPS=0
 CHECKED=0
-LOG_FILE=$(mktemp -d "${TMPDIR:-/tmp}/validate-make.XXXXXX")
+LOG_FILE=$(mktemp -d "${TMPDIR:-/tmp}/validate-make.XXXXXX") || {
+	log "[ERROR] Could not create validation scratch directory"
+	exit 2
+}
 trap 'rm -rf "$LOG_FILE"' EXIT
 
 fail() {
@@ -404,10 +407,10 @@ semantic_check() {
 		skip "$relf: semantic dry-run: OBSD_MK not set (set it to an OpenBSD /usr/share/mk to enable)"
 		return
 	}
-	mkdir -p "$LOG_FILE/obsdmk"
-	cp "$OBSD_MK"/* "$LOG_FILE/obsdmk/" 2>/dev/null
-	chmod -R u+w "$LOG_FILE/obsdmk"
-	: >"$LOG_FILE/obsdmk/bsd.dep.mk"
+	[ -f "$LOG_FILE/obsdmk/bsd.prog.mk" ] || {
+		fail "$relf: OpenBSD mk staging unavailable"
+		return
+	}
 	case "$relf" in
 	*Makefile.inc | *.mk)
 		skip "$relf: semantic dry-run: Makefile fragment (no default target)"
@@ -453,6 +456,16 @@ log "[INFO] mode: $MODE"
 log "[INFO] root: $ROOT"
 if command -v bmake >/dev/null 2>&1; then
 	build_stubdir
+	if [ "$MODE" = check ] && [ -n "${OBSD_MK:-}" ] &&
+		[ -f "$OBSD_MK/bsd.prog.mk" ]; then
+		if ! mkdir "$LOG_FILE/obsdmk" ||
+			! cp "$OBSD_MK"/* "$LOG_FILE/obsdmk/" ||
+			! chmod -R u+w "$LOG_FILE/obsdmk" ||
+			! : >"$LOG_FILE/obsdmk/bsd.dep.mk"; then
+			log "[ERROR] Could not stage OpenBSD mk files"
+			exit 2
+		fi
+	fi
 fi
 
 printf '%s\n' "$FILES" >"$LOG_FILE/files"

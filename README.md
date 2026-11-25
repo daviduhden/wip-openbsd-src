@@ -213,6 +213,10 @@ authoritative mk files:
 ```
 $ OBSD_MK=/path/to/openbsd-7.9/usr/share/mk ./validate-make.sh check
 ```
+The Makefile checker evaluates makefiles and can execute parse-time
+commands even in a dry run. Run it against trusted trees. The manual
+GitHub workflow can also validate a committed range and run the host suites.
+
 
 ## Tests
 
