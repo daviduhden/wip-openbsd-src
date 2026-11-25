@@ -30,6 +30,10 @@ cp -Rp ext4fs/sbin/mount_ext4fs /usr/src/sbin/
 cd /usr/src && patch -p1 < /path/to/ext4fs/sys-patches.diff
 ```
 
+Build the mount helper with `make -C sbin/mount_ext4fs` from the patched
+source root. The integration patch leaves selection of this experimental
+helper to the component build.
+
 Review the patch before applying it: it edits shared kernel headers and
 filesystem dispatch tables.  Keep the source checkout at the revision the
 patch was written against, and do not apply it twice.
@@ -40,7 +44,18 @@ The host-side tests in `tests/ext4fs-*.c` exercise journal descriptor
 parsing, checksum verification and inode checksums against the
 production sources.  They are not part of the OpenBSD build graph.  A
 real kernel build and mount test requires an OpenBSD source tree and a
-test image; nothing in this repository performs that.
+test image. A read-only mount that needs recovery must also meet the
+feature requirements for writing to the filesystem.
+
+For a native recovery check, use a disposable VM and separate reference
+copies of valid Linux-created filesystems. Include clean and recoverable
+journals with multiple descriptors, revocations, different checksum
+profiles, and the sequence boundary. After recovery, compare file contents
+and filesystem metadata with a Linux recovery of the reference copy and
+check the filesystem using e2fsprogs. Verify retry behavior when journal
+or filesystem superblock writes fail. Record filesystem features, journal
+size, elapsed mount time and kernel memory usage before changing the block
+map or revocation representation.
 
 ## C language compatibility
 

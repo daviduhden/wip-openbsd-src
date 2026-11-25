@@ -29,7 +29,7 @@
 .\" SUCH DAMAGE.
 .\"
 .\"
-.Dd $Mdocdate: September 8 2026 $
+.Dd November 24, 2026
 .Dt MOUNT_EXT4FS 8
 .Os
 .Sh NAME
@@ -64,6 +64,10 @@ device must correspond to a partition registered in the
 This command is normally executed by
 .Xr mount 8
 at boot time.
+.Pp
+A read-only mount can still write to the underlying device when journal
+recovery is required.
+To change the write mode, unmount and mount the filesystem again.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds

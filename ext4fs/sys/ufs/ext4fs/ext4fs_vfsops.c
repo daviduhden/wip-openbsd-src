@@ -196,6 +196,10 @@ ext4fs_mount(struct mount *mp, const char *path, void *data,
 		ump = VFSTOUFS(mp);
 		if (devvp != ump->um_devvp)
 			error = EINVAL; /* XXX needs translation */
+		else if ((mp->mnt_flag & MNT_WANTRDWR) ||
+			 ((mp->mnt_flag & MNT_RDONLY) != 0) !=
+			 ump->um_e4fs->m_read_only)
+			error = EOPNOTSUPP;
 		else
 			vrele(devvp);
 	}
@@ -234,7 +238,7 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	struct ext4fs	*sble;
 	struct m_ext4fs *mfs;
 	dev_t		 dev;
-	int		 error, ronly;
+	int		 error, mode, ronly;
 	struct ucred	*cred;
 
 	dev = devvp->v_rdev;
@@ -256,7 +260,8 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 		return (error);
 
 	ronly = (mp->mnt_flag & MNT_RDONLY) != 0;
-	error = VOP_OPEN(devvp, ronly ? FREAD : FREAD | FWRITE, FSCRED, p);
+	mode = ronly ? FREAD : FREAD | FWRITE;
+	error = VOP_OPEN(devvp, mode, FSCRED, p);
 	if (error)
 		return (error);
 
@@ -286,6 +291,13 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	ext4fs_sbload(sble, mfs);
 	if ((error = ext4fs_sbfill(devvp, mfs)) != 0)
 		goto out;
+	/*
+	 * Replay writes whole filesystem blocks. Drop the 1 KB superblock
+	 * buffer before it can overlap a replay write on a larger block.
+	 */
+	if (mfs->m_block_size > EXT4FS_SUPER_BLOCK_SIZE &&
+	    (mfs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_RECOVER))
+		bp->b_flags |= B_INVAL;
 	brelse(bp);
 	bp = NULL;
 	sble = &mfs->m_sble;
@@ -296,46 +308,44 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	 */
 	if ((mfs->m_feature_compat & EXT4FS_FEATURE_COMPAT_HAS_JOURNAL) &&
 	    (mfs->m_feature_incompat & EXT4FS_FEATURE_INCOMPAT_RECOVER)) {
-		int reopen_ro = 0;
-
 		if (ronly) {
-			/* Reopen device r/w for replay */
+			/* Journal replay writes even on a read-only mount. */
+			error = ext4fs_sbcheck(sble, 0);
+			if (error)
+				goto out;
+			/* Reopen device r/w for replay. */
 			vn_lock(devvp, LK_EXCLUSIVE | LK_RETRY);
 			VOP_CLOSE(devvp, FREAD, cred, p);
 			VOP_UNLOCK(devvp);
+			mode = 0;
 			error = VOP_OPEN(devvp, FREAD | FWRITE, FSCRED, p);
 			if (error) {
 				printf("ext4fs: can't reopen device r/w "
 				       "for journal replay\n");
 				goto out;
 			}
-			reopen_ro = 1;
+			mode = FREAD | FWRITE;
 		}
 
 		error = ext4fs_journal_replay(devvp, mfs);
 		if (error) {
 			printf("ext4fs: journal replay failed: %d\n", error);
 			printf("ext4fs: use Linux e2fsck to repair\n");
-			/* Leave RECOVER set, fail the mount */
-			if (reopen_ro) {
-				vn_lock(devvp, LK_EXCLUSIVE | LK_RETRY);
-				VOP_CLOSE(devvp, FREAD | FWRITE, cred, p);
-				VOP_UNLOCK(devvp);
-				VOP_OPEN(devvp, FREAD, FSCRED, p);
-			}
 			goto out;
 		}
 
 		/* Reopen device r/o if it was a r/o mount */
-		if (reopen_ro) {
+		if (ronly) {
 			vn_lock(devvp, LK_EXCLUSIVE | LK_RETRY);
 			VOP_CLOSE(devvp, FREAD | FWRITE, cred, p);
 			VOP_UNLOCK(devvp);
+			mode = 0;
 			error = VOP_OPEN(devvp, FREAD, FSCRED, p);
 			if (error) {
 				printf("ext4fs: can't reopen device r/o\n");
 				goto out;
 			}
+			mode = FREAD;
 		}
 
 		/*
@@ -352,6 +362,9 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 		error = bread(devvp,
 		    (daddr_t)(EXT4FS_SUPER_BLOCK_OFFSET / DEV_BSIZE),
 		    EXT4FS_SUPER_BLOCK_SIZE, &bp);
+		if (error)
+			goto out;
+		error = ext4fs_sbcheck((struct ext4fs *)bp->b_data, ronly);
 		if (error)
 			goto out;
 		ext4fs_sbload((struct ext4fs *)bp->b_data, mfs);
@@ -379,7 +392,6 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	mp->mnt_stat.f_fsid.val[0] = (long)dev;
 	mp->mnt_stat.f_fsid.val[1] = mp->mnt_vfc->vfc_typenum;
 	mp->mnt_stat.f_namemax = MAXNAMLEN;
-	mp->mnt_flag |= MNT_LOCAL;
 	ump->um_mountp = mp;
 
 	ump->um_dev = dev;
@@ -388,10 +400,10 @@ ext4fs_mountfs(struct vnode *devvp, struct mount *mp, struct proc *p)
 	ump->um_bptrtodb = mfs->m_fs_block_to_disk_block;
 	ump->um_seqinc = 1; /* no frags */
 	ump->um_maxsymlinklen = EXT4FS_SYMLINK_LEN_MAX;
+	if (!ronly && (error = ext4fs_sbwrite(mp)) != 0)
+		goto out;
 	devvp->v_specmountpoint = mp;
-
-	if (ronly == 0)
-		ext4fs_sbwrite(mp);
+	mp->mnt_flag |= MNT_LOCAL;
 
 	return (0);
 out:
@@ -399,9 +411,11 @@ out:
 		devvp->v_specmountpoint = NULL;
 	if (bp)
 		brelse(bp);
-	vn_lock(devvp, LK_EXCLUSIVE | LK_RETRY);
-	(void)VOP_CLOSE(devvp, ronly ? FREAD : FREAD | FWRITE, cred, p);
-	VOP_UNLOCK(devvp);
+	if (mode != 0) {
+		vn_lock(devvp, LK_EXCLUSIVE | LK_RETRY);
+		(void)VOP_CLOSE(devvp, mode, cred, p);
+		VOP_UNLOCK(devvp);
+	}
 	if (ump) {
 		if (mfs && mfs->m_gd != NULL) {
 			size_t gd_size = mfs->m_block_group_count *
@@ -1297,8 +1311,17 @@ ext4fs_unmount(struct mount *mp, int mntflags, struct proc *p)
 	mfs = ump->um_e4fs;
 
 	if (!mfs->m_read_only && mfs->m_fs_was_modified) {
+		u_int16_t state = mfs->m_state;
+
 		mfs->m_state = EXT4FS_STATE_VALID;
-		ext4fs_sbwrite(mp);
+		error = ext4fs_sbwrite(mp);
+		if (error) {
+			mfs->m_state = state;
+			mfs->m_sble.sb_state = htole16(state);
+			mfs->m_sble.sb_checksum =
+			    htole32(ext4fs_sb_csum(&mfs->m_sble));
+			return (error);
+		}
 	}
 
 	if (ump->um_devvp->v_type != VBAD)

@@ -89,13 +89,6 @@ main(int argc, char *argv[])
 		case EMFILE:
 			errcause = "mount table full";
 			break;
-		case EINVAL:
-			errcause =
-			    "specified device does not match mounted device";
-			break;
-		case EOPNOTSUPP:
-			errcause = "filesystem not supported by kernel";
-			break;
 		default:
 			errcause = strerror(errno);
 			break;
