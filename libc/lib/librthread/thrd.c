@@ -21,11 +21,11 @@
  *
  * Thin wrappers over the OpenBSD pthread implementation in libpthread.
  * pthread_* returns the error number directly, so the return codes are
- * mapped without inspecting errno.  The only substantive work is the
- * trampoline for thrd_create(): a C11 thread start routine returns int,
- * whereas a pthread start routine returns void *, so the start routine and
- * its argument are passed through a small heap block that carries the
- * integer result back as an intptr_t.
+ * mapped without inspecting errno.
+ *
+ * The start block carries the callback and its argument to the new thread.
+ * The callback result travels separately through pthread's void * result
+ * slot via intptr_t. thrd_join() reverses that conversion.
  */
 
 #include <errno.h>
@@ -46,6 +46,7 @@ _thrd_trampoline(void *p)
 	void		   *arg = start->ts_arg;
 	int		    result;
 
+	/* Drop the start block before the callback can call thrd_exit(). */
 	free(start);
 	result = func(arg);
 	return (void *)(intptr_t)result;
@@ -73,6 +74,10 @@ thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
 		return thrd_nomem;
 	start->ts_func = func;
 	start->ts_arg = arg;
+	/*
+	 * On success the new thread owns start and can free it before
+	 * pthread_create() returns. On failure it remains ours.
+	 */
 	error = pthread_create(&thread, NULL, _thrd_trampoline, start);
 	if (error != 0) {
 		free(start);
@@ -149,6 +154,7 @@ mtx_init(mtx_t *mtx, int type)
 	error = pthread_mutexattr_settype(&attr, ptype);
 	if (error == 0)
 		error = pthread_mutex_init(mtx, &attr);
+	/* The attributes are temporary even when mutex creation succeeds. */
 	pthread_mutexattr_destroy(&attr);
 	return (_thrd_map_alloc(error));
 }
