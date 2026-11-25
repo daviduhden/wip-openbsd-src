@@ -104,9 +104,17 @@ state precisely what was verified statically versus at runtime on OpenBSD.
   `BLOCK_UNINIT` bitmap that omits reserved blocks.
 - Derive block-group counts in a wide type and reject values that cannot fit
   the in-memory count and allocation size before narrowing or allocating.
-- The revoke table keeps the newest sequence for a repeated block; its
-  wraparound comparison handles a low sequence after a stored value near
-  `UINT32_MAX`. Preserve coverage for both ordinary ordering and that boundary.
+- Count descriptor data blocks against a single traversal of the ring in
+  each recovery pass. Move to the next sequence only at a commit, and
+  compare revoke sequences by their unsigned distance from the first
+  sequence. Keep coverage for transactions spanning descriptors and
+  crossing the sequence and physical ring boundaries.
+- In checksum modes v2/v3, verify commit and journal superblock CRC32C and
+  update the latter when clearing the journal. In checksum v1 mode,
+  accumulate CRC32 over descriptors and data until the commit. If the
+  journal is already clean, complete the pending filesystem superblock
+  update while preserving
+  metadata written by replay.
 - Widen shifts through `u_int64_t` where the on-disk field is unsigned.
 
 ### GitHub Actions supply chain

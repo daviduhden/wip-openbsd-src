@@ -52,8 +52,9 @@ for modified tree files, for copying into an OpenBSD checkout
 Journal recovery verifies every descriptor tag before replay:
 per-tag checksums are supported for jbd2 checksum v2 (16-bit,
 truncated crc32c) and checksum v3 (full 32-bit crc32c), plus the
-4-byte descriptor/revoke block tail checksums; plain jbd2 journals
-without per-tag checksums are handled without verification.
+4-byte descriptor/revoke block tail checksums and commit and journal
+superblock checksums. In checksum v1 mode, the scan checks the
+transaction CRC32 when present. Plain JBD2 journals have no checksum.
 Journals using async commits or fast commits are rejected at mount
 time, as are unknown incompat feature bits.  The checksum input is
 crc32c(seed = crc32c(~0, journal UUID), be32 sequence, journaled

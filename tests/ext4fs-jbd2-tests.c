@@ -4,8 +4,8 @@
  * ext4fs/sys/ufs/ext4fs/ext4fs_journal.c.
  *
  * Includes the kernel source directly under a stub include tree so
- * the exact production code is exercised; only the pure parsing and
- * checksum functions are called (no kernel I/O).
+ * the exact production code is exercised. The journal walker reads
+ * an in-memory ring through the buffer shim.
  */
 // clang-format off
 #include <assert.h>
@@ -40,16 +40,22 @@ ref_crc32c(uint32_t init, const void *data, size_t len)
 // clang-format on
 #undef main
 
-/* Link stubs for the kernel buffer interface; the tests only reach
- * the pure parsing/checksum paths, never the I/O wrappers. */
+#define TEST_RING_BLOCKS 12
+#define TEST_BLOCK_SIZE 1024
+
+static uint32_t ring_data[TEST_RING_BLOCKS][TEST_BLOCK_SIZE / sizeof(uint32_t)];
+static struct buf ring_buf[TEST_RING_BLOCKS];
+
+/* Read-only in-memory block device for the journal scan and revoke pass. */
 int
 bread(struct vnode *vp, int64_t blkno, size_t size, struct buf **bpp)
 {
 	(void)vp;
-	(void)blkno;
-	(void)size;
-	(void)bpp;
-	return EIO;
+	*bpp = NULL;
+	if (blkno < 1 || blkno >= TEST_RING_BLOCKS || size != TEST_BLOCK_SIZE)
+		return EIO;
+	*bpp = &ring_buf[blkno];
+	return 0;
 }
 
 void
@@ -543,6 +549,89 @@ test_feature_check(void)
 	CHECK(ctx.rc_csum_mode == JBD2_CSUM_V2, "csum2 mode selected");
 }
 
+static void
+test_commit_checksums(void)
+{
+	struct jbd2_replay_ctx ctx;
+	struct jbd2_commit_prefix commit = {0};
+	uint32_t crc;
+	uint32_t data[TEST_BLOCK_SIZE / sizeof(uint32_t)] = {0};
+
+	crc = jbd2_v1_crc(UINT32_MAX, "123456789", 9);
+	CHECK(crc == 0x0376e6e7, "v1 CRC32 check value");
+	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
+	ctx.rc_features_compat = JBD2_FEATURE_COMPAT_CHECKSUM;
+	commit.h_chksum_type = JBD2_CRC32_CHKSUM;
+	commit.h_chksum_size = sizeof(commit.h_chksum);
+	commit.h_chksum = htobe32(0x0376e6e7);
+	CHECK(jbd2_commit_valid(&ctx, &commit, crc), "v1 commit checksum");
+
+	setup_ctx(&ctx, JBD2_CSUM_V3, 0);
+	ctx.rc_blocksize = sizeof(data);
+	memset(&commit, 0, sizeof(commit));
+	commit.h_header.h_magic = htobe32(JBD2_MAGIC);
+	commit.h_header.h_blocktype = htobe32(JBD2_COMMIT_BLOCK);
+	memcpy(data, &commit, sizeof(commit));
+	crc = ref_crc32c(UINT32_MAX, test_uuid, sizeof(test_uuid));
+	commit.h_chksum = htobe32(ref_crc32c(crc, data, sizeof(data)));
+	memcpy(data, &commit, sizeof(commit));
+	CHECK(jbd2_commit_valid(&ctx, data, 0), "v3 commit checksum");
+}
+
+static void
+test_transaction_scan(void)
+{
+	struct jbd2_replay_ctx ctx;
+	struct jbd2_blockmap_entry map[TEST_RING_BLOCKS] = {{0}};
+	struct m_ext4fs fs = {0};
+	struct jbd2_header hdr = {0};
+	struct jbd2_revoke_header revoke = {0};
+	uint32_t seq = UINT32_MAX;
+	unsigned int i;
+
+	setup_ctx(&ctx, JBD2_CSUM_NONE, 0);
+	fs.m_block_size = TEST_BLOCK_SIZE;
+	fs.m_blocks_count = TEST_RING_BLOCKS;
+	ctx.rc_fs = &fs;
+	ctx.rc_blocksize = TEST_BLOCK_SIZE;
+	ctx.rc_blockmap = map;
+	ctx.rc_blockmap_count = TEST_RING_BLOCKS;
+	ctx.rc_maxlen = TEST_RING_BLOCKS;
+	ctx.rc_start = TEST_RING_BLOCKS - 3;
+	ctx.rc_sequence = seq;
+
+	memset(ring_data, 0, sizeof(ring_data));
+	for (i = 1; i < TEST_RING_BLOCKS; i++) {
+		ring_buf[i].b_data = ring_data[i];
+		ring_buf[i].b_bufsize = TEST_BLOCK_SIZE;
+		map[i].jb_fsblock = i;
+	}
+
+	hdr.h_magic = htobe32(JBD2_MAGIC);
+	hdr.h_sequence = htobe32(seq);
+	hdr.h_blocktype = htobe32(JBD2_DESCRIPTOR_BLOCK);
+	memcpy(ring_data[ctx.rc_start], &hdr, sizeof(hdr));
+	mk_tag_plain((char *)ring_data[ctx.rc_start] + sizeof(hdr), 30,
+	    JBD2_FLAG_SAME_UUID | JBD2_FLAG_LAST_TAG);
+
+	memcpy(ring_data[TEST_RING_BLOCKS - 1], &hdr, sizeof(hdr));
+	mk_tag_plain((char *)ring_data[TEST_RING_BLOCKS - 1] + sizeof(hdr),
+	    31, JBD2_FLAG_SAME_UUID | JBD2_FLAG_LAST_TAG);
+	revoke.r_header = hdr;
+	revoke.r_header.h_blocktype = htobe32(JBD2_REVOKE_BLOCK);
+	revoke.r_count = htobe32(sizeof(revoke));
+	memcpy(ring_data[2], &revoke, sizeof(revoke));
+
+	hdr.h_blocktype = htobe32(JBD2_COMMIT_BLOCK);
+	memcpy(ring_data[3], &hdr, sizeof(hdr));
+	hdr.h_sequence = 0;
+	memcpy(ring_data[4], &hdr, sizeof(hdr));
+
+	CHECK(jbd2_pass_scan(&ctx) == 0, "scan across journal ring boundary");
+	CHECK(ctx.rc_end_sequence == 1, "find both committed transactions");
+	CHECK(jbd2_pass_revoke(&ctx) == 0, "revoke pass follows scan endpoint");
+}
+
 int
 main(void)
 {
@@ -556,6 +645,8 @@ main(void)
 	test_descriptor_tail();
 	test_descriptor_stream();
 	test_feature_check();
+	test_commit_checksums();
+	test_transaction_scan();
 
 	if (failures != 0) {
 		fprintf(stderr, "ext4fs-jbd2-tests: %d failure(s)\n", failures);

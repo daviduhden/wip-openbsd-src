@@ -65,6 +65,15 @@ struct jbd2_header {
 	u_int32_t h_sequence;
 } __attribute__((packed));
 
+/* Initial fields of a commit block, common to all checksum modes. */
+struct jbd2_commit_prefix {
+	struct jbd2_header h_header;
+	u_int8_t h_chksum_type;
+	u_int8_t h_chksum_size;
+	u_int8_t h_padding[2];
+	u_int32_t h_chksum;
+} __attribute__((packed));
+
 /* Journal superblock */
 struct jbd2_superblock {
 	struct jbd2_header s_header;
@@ -139,6 +148,9 @@ struct jbd2_journal_block_tail {
  * journals as well as checksum-v1 (compat CHECKSUM) journals, which
  * carry no per-tag checksums.
  */
+#define JBD2_CRC32_CHKSUM 1
+#define JBD2_CRC32C_CHKSUM 4
+
 #define JBD2_CSUM_NONE 0
 #define JBD2_CSUM_V2 2
 #define JBD2_CSUM_V3 3

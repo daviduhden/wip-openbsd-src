@@ -11,6 +11,7 @@
 #define M_TEMP 0
 #define M_WAITOK 0x0000
 #define M_ZERO 0x0020
+#define M_CANFAIL 0x0040
 
 /* Map the three-argument kernel allocation API onto libc. */
 #define mallocarray(nmemb, size, type, flags) calloc((nmemb), (size))
