@@ -244,8 +244,8 @@ test_piperead_environment(void)
 	piperead_env_append(&env, entry, MAX_EXEC_PAYLOAD);
 	CHECK(piperead_env_vector(&env) == NULL,
 	    "PipeRead rejects incomplete environment");
-	piperead_env_append(&env, entry + MAX_EXEC_PAYLOAD,
-	    len - MAX_EXEC_PAYLOAD);
+	piperead_env_append(
+	    &env, entry + MAX_EXEC_PAYLOAD, len - MAX_EXEC_PAYLOAD);
 	piperead_env_append(&env, var, sizeof(var));
 	envp = piperead_env_vector(&env);
 	CHECK(envp != NULL, "PipeRead accepts environment over one frame");
