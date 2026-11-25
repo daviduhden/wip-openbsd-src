@@ -109,10 +109,11 @@ fi
 # ----------------------------------------------------------------------
 # Context classification
 # ----------------------------------------------------------------------
-# Each Makefile is one of:
+# Classify by checkout context for dry-run diagnostics.
 #   standalone      top-level or pax: builds directly from this repo
 #   openbsd-native  fvwm hierarchy: OpenBSD make + /usr/share/mk
-#   source-tree     ext4fs: belongs in an OpenBSD source checkout
+#   source-tree     ext4fs: uses OpenBSD checkout siblings and headers
+#   unknown         other trees: no component-specific dry-run exceptions
 rel() {
 	printf '%s' "${1#"$ROOT"/}"
 }
@@ -454,6 +455,8 @@ semantic_check() {
 # ----------------------------------------------------------------------
 log "[INFO] mode: $MODE"
 log "[INFO] root: $ROOT"
+# Both scratch include trees are shared by all Makefile checks in this run.
+# The semantic check can stub bsd.dep.mk without altering OBSD_MK.
 if command -v bmake >/dev/null 2>&1; then
 	build_stubdir
 	if [ "$MODE" = check ] && [ -n "${OBSD_MK:-}" ] &&

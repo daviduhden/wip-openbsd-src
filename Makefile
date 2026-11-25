@@ -21,8 +21,8 @@
 # Requires OpenBSD make(1) and /usr/share/mk.  fvwm additionally
 # requires Xenocara/X11 development files.
 #
-# The ext4fs component is not built here; it stores files at
-# OpenBSD source-tree-relative paths for copying into a checkout.
+# ext4fs, libc and stdckdint use source-tree-relative paths. Their
+# build and regress targets belong to a matching OpenBSD checkout.
 
 # Toolchain: clang compiles, lldb debugs.
 CC =		clang

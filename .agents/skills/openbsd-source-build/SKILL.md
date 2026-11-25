@@ -130,6 +130,15 @@ make -C fvwm manlint
 - `DESTDIR` was used for any install rehearsal.
 - If the build was not run, the report says so.
 
+## Checking comment-only changes
+
+Compare effective lines in Makefiles and scripts, and C tokens along with
+preprocessor directive boundaries. Test comments can move line-number
+diagnostics. Use the same scratch build path and flags for clean baseline
+and edited host builds when comparing executable bytes. For patch-style
+components, verify that each changed delivery hunk reconstructs the
+corresponding source.
+
 ## Common problems and diagnosis
 
 | Symptom | Check |

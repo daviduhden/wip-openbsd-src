@@ -56,7 +56,7 @@ SCRIPT_DIR=$(
 	cd -- "$(dirname -- "$0")" 2>/dev/null && pwd -P
 )
 
-# The active make implementation; overridable via the environment.
+# Use one make executable for dependency checks and every component action.
 MAKE=${MAKE:-make}
 
 check_openbsd() {

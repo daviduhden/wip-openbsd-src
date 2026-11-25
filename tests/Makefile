@@ -1,12 +1,10 @@
 # tests/Makefile -- host-side developer tests for wip-openbsd-src.
 #
-# These tests exercise the pure parsing/decoding logic that has no
-# runtime X11 or kernel dependency.  They are NOT part of the
-# OpenBSD build graph and are not covered by the production
-# Makefile policies; they exist so the code can be exercised from
-# Linux/macOS development machines with a C compiler and the X11
-# headers installed (X11 headers are needed for type definitions
-# only).
+# These tests exercise arithmetic, parsing, helper I/O and filesystem
+# data handling on a development host. The FVWM tests use X11 declarations
+# without an X server. The filesystem tests use the local kernel shims
+# without mounting a filesystem. This suite has its own build rules and
+# runs separately from the OpenBSD source-tree regress targets.
 #
 # These Makefiles use BSD make syntax.  Run them with OpenBSD make(1)
 # or, on other hosts, bmake; GNU make is not supported.

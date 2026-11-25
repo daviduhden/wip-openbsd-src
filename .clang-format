@@ -48,7 +48,8 @@ AlignTrailingComments: true
 SpacesBeforeTrailingComments: 1
 AlignEscapedNewlines: Right    # Right-justify backslashes in multi-line macros.
 
-# Includes: order by categories (blank lines between groups)
+# Include grouping applies outside clang-format off/on blocks. Keep those
+# blocks around include sequences with component-specific ordering.
 SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
