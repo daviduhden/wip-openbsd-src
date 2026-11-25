@@ -257,8 +257,6 @@ ext4fs_update(struct inode *ip, int waitfor)
 		return (0);
 	}
 
-	ip->i_flag &= ~IN_MODIFIED;
-
 	/* Locate inode on disk */
 	inode_group = (ip->i_number - 1) / fs->m_inodes_per_group;
 	inode_index = (ip->i_number - 1) % fs->m_inodes_per_group;
@@ -316,8 +314,12 @@ ext4fs_update(struct inode *ip, int waitfor)
 	memcpy((char *)bp->b_data + offset_in_block, ip->i_e4din,
 	    fs->m_inode_size);
 
+	/* Leave the inode dirty until its image has reached the buffer. */
+	ip->i_flag &= ~IN_MODIFIED;
 	if (waitfor) {
 		error = bwrite(bp);
+		if (error)
+			ip->i_flag |= IN_MODIFIED;
 		return (error);
 	}
 
