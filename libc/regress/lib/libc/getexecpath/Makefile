@@ -4,6 +4,10 @@ WARNINGS=yes
 
 CLEANFILES+=wrap.sh
 
+# Compare the physical executable path for direct execution and for
+# shebangs using a relative path, redundant slashes, or env. wrap.in
+# is a template for the kernel interpreter test. Generate each variant
+# as an executable in the object directory.
 run-regress-${PROG}:	${PROG}
 	./${PROG} `cd ${.OBJDIR} && pwd -P`/${PROG}
 	cp ${.CURDIR}/wrap.in ${.OBJDIR}/wrap.sh
